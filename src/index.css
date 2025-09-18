@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #fff;
-  --color-bg: #0057b7;
-  --color-text: #000000;
+  --color-primary: #2383e2;
 }
 
 .dark {

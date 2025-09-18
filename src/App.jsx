@@ -1,7 +1,9 @@
 import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+
+import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
 
 import { userRoutes, authRoutes } from "./routes/allRoutes";
-import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
           <Route path={route.path} element={route.element} key={idx} exact />
         ))}
       </Routes>
+      <ToastContainer />
     </div>
   );
 }
