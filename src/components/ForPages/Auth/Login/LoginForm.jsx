@@ -13,7 +13,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [inputErrors, setInputErrors] = useState({});
   const recaptchaRef = useRef();
   const [captchaToken, setCaptchaToken] = useState("0");
   const [showRecaptch, setShowRecaptch] = useState(false);
@@ -30,11 +30,16 @@ function LoginForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!userName || !password) {
-      setError("Please fill in all fields");
+
+    const errors = {};
+    if (!userName) errors.userName = true;
+    if (!password) errors.password = true;
+
+    setInputErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
-    setError("");
     setIsLoading(true);
     try {
       const res = await Login({ userName, password });
@@ -48,7 +53,6 @@ function LoginForm() {
     // setShowRecaptch(true);
     // recaptchaRef.current?.reset();
   }
-
   return (
     <div className="dir-ltr">
       {isLoading && <Loader />}
@@ -58,24 +62,50 @@ function LoginForm() {
       >
         <h1 className="text-2xl font-semibold">{t("Sign In")}</h1>
         <input
-          type="username"
+          type="text"
           value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) => {
+            setUserName(e.target.value);
+            if (inputErrors.userName && e.target.value) {
+              setInputErrors((prev) => {
+                const { userName, ...rest } = prev;
+                return rest;
+              });
+            }
+          }}
           placeholder={t("Username")}
-          required
-          className="outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black text-sm"
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black text-sm ${
+            inputErrors.userName ? "border border-red-500" : ""
+          }`}
         />
+        {inputErrors.userName && (
+          <div className="text-xs text-red-500 mt-1">
+            {t("Username is required")}
+          </div>
+        )}
 
         <input
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (inputErrors.password && e.target.value) {
+              setInputErrors((prev) => {
+                const { password, ...rest } = prev;
+                return rest;
+              });
+            }
+          }}
           placeholder={t("Password")}
-          className="outline-none rounded-lg bg-gray-100 p-3 w-full mt-4  placeholder:text-black text-sm"
-          required
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4  placeholder:text-black text-sm ${
+            inputErrors.password ? "border border-red-500" : ""
+          }`}
         />
-
-        {error && <div style={{ color: "red", fontSize: 14 }}>{error}</div>}
+        {inputErrors.password && (
+          <div className="text-xs text-red-500 mt-1">
+            {t("Password is required")}
+          </div>
+        )}
 
         <button
           type="submit"
@@ -87,7 +117,7 @@ function LoginForm() {
         {/* Start Remember Me && Need Help */}
         <div className="flex items-center justify-between mt-8">
           <div>
-            <input type="checkbox" id="rememberMe" className="mr-2" required />
+            <input type="checkbox" id="rememberMe" className="mr-2" />
             <label htmlFor="rememberMe" className="text-sm text-gray-400">
               {t("Remember Me")}
             </label>

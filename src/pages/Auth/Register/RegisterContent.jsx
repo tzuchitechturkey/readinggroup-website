@@ -1,5 +1,3 @@
-import React from "react";
-
 import RegisterForm from "@/components/ForPages/Auth/Register/RegisterForm";
 import Footer from "@/components/Global/Footer/Footer";
 
@@ -8,7 +6,7 @@ function RegisterContent() {
     <div
       className="w-full flex flex-col  pt-16 relative border-0 outline-none"
       style={{
-        backgroundImage: "url(../../../../../public/authback.jpg)",
+        backgroundImage: "url(../../../../src/assets/authback.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -17,7 +15,7 @@ function RegisterContent() {
       <div className=" relative z-10">
         <RegisterForm />
       </div>
-      <div className="flex flex-col justify-end h-full z-10 mt-10">
+      <div className="flex flex-col justify-end h-full z-10 mt-12">
         <Footer />
       </div>
     </div>

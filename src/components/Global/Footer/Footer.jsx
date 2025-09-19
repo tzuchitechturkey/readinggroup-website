@@ -46,7 +46,7 @@ function Footer() {
         {/* Start Icon  */}
         <div className="w-10">
           <img
-            src="../../../../../public/icons/emailIcon.png"
+            src="../../../../src/assets/icons/emailIcon.png"
             alt="email"
             className="w-7 h-7 mr-3"
           />
@@ -55,7 +55,7 @@ function Footer() {
       </div>
       {/* End Input  */}
 
-      <div className=" py-6 border-t-[1px] mt-10 border-[#999EAD] flex items-center justify-between">
+      <div className=" py-6 border-t-[1px] mt-5 border-[#999EAD] flex items-center justify-between">
         <ul className="flex items-enter gap-6">
           {linkList.map((link, index) => (
             <li key={index}>
@@ -79,7 +79,7 @@ function Footer() {
               className="text-[#999EAD] hover:text-[#FFFFFF]"
             >
               <img
-                src={`../../../../../public/icons/${link.icon}`}
+                src={`../../../../src/assets/icons/${link.icon}`}
                 alt={link.name}
                 className="w-5 h-5"
               />

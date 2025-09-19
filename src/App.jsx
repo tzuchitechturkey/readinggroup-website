@@ -7,7 +7,7 @@ import { userRoutes, authRoutes } from "./routes/allRoutes";
 
 function App() {
   return (
-    <div className=" border" style={{ minHeight: "100vh" }}>
+    <div className="min-h-[100vh]">
       <Routes>
         {authRoutes.map((route, idx) => (
           <Route

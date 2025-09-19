@@ -6,7 +6,7 @@ function LoginContent() {
     <div
       className="w-full flex flex-col  pt-16 relative border-0 outline-none"
       style={{
-        backgroundImage: "url(../../../../../public/authback.jpg)",
+        backgroundImage: "url(../../../../src/assets/authback.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
