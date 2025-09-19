@@ -30,38 +30,38 @@ function Footer() {
     },
   ];
   return (
-    <div className="px-10">
-      <p className="text-[#989898]">
+    <div className="px-4 sm:px-8 md:px-10 lg:px-20">
+      <p className="text-[#989898] text-sm sm:text-base md:text-lg lg:text-lg text-center lg:text-left">
         {t(
           "Join us today! Enter your email to access weekly updated content, available in multiple languages, with the latest news and interactive programs."
         )}
       </p>
 
       {/* Start Input  */}
-      <div className="bg-[#7c7c7c9f] border-[1px] mt-4 border-[#999EAD] w-fit rounded-lg flex items-center justify-between ">
+      <div className="bg-[#7c7c7c9f] border mt-4 border-[#999EAD] w-fit rounded-lg flex md:flex-row  items-center justify-between p-2 gap-7">
         <input
-          className="w-80  placeholder:text-[#999EAD] border-[px] border-gray-200 bg-transparent rounded-lg outline-none p-2"
+          className="w-60 text-[#999ead] placeholder:text-[#999EAD] border-none bg-transparent rounded-lg outline-none p-2 text-xs sm:text-sm"
           placeholder={t("Enter your email")}
         />
         {/* Start Icon  */}
-        <div className="w-10">
+        <div className="w-10 flex justify-center items-center">
           <img
             src="../../../../src/assets/icons/emailIcon.png"
             alt="email"
-            className="w-7 h-7 mr-3"
+            className="w-7 h-7  "
           />
         </div>
         {/* End Icon  */}
       </div>
       {/* End Input  */}
 
-      <div className=" py-6 border-t-[1px] mt-5 border-[#999EAD] flex items-center justify-between">
-        <ul className="flex items-enter gap-6">
+      <div className="py-6 border-t mt-5 border-[#999EAD] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0">
+        <ul className="md:flex md:flex-wrap md:items-center gap-4 sm:gap-6 mb-4 md:mb-0 w-full md:w-auto">
           {linkList.map((link, index) => (
             <li key={index}>
               <a
                 href={link.href}
-                className="text-[#999EAD] hover:text-[#FFFFFF]"
+                className="text-[#999EAD] hover:text-[#FFFFFF] text-xs sm:text-sm"
               >
                 {link.name}
               </a>
@@ -69,9 +69,7 @@ function Footer() {
           ))}
         </ul>
         {/* Start Social Links */}
-
-        {/* End Social Links */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           {socialLinks.map((link, index) => (
             <a
               key={index}
@@ -86,6 +84,7 @@ function Footer() {
             </a>
           ))}
         </div>
+        {/* End Social Links */}
       </div>
     </div>
   );
