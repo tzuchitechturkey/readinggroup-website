@@ -35,7 +35,7 @@ function Usernavbar() {
                 to={link.href}
                 className={({ isActive }) =>
                   `hover:text-gray-600 pb-1 transition-all duration-200 ${
-                    isActive ? "border-b-2 border-black" : ""
+                    isActive ? "border-b-2 border-text" : ""
                   }`
                 }
               >

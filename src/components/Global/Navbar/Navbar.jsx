@@ -7,7 +7,7 @@ import AdminNavbar from "../AdminNavbar/AdminNavbar";
 function Navbar() {
   return (
     <div>
-      {/* <Usernavbar /> */}
+      <Usernavbar />
       <AdminNavbar />
     </div>
   );

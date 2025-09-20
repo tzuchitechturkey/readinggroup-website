@@ -2,11 +2,14 @@ import { FiSearch } from "react-icons/fi";
 
 import { Input } from "@/components/ui/input";
 
-export function SearchInput() {
+export function SearchInput({ theme }) {
   return (
-    <div className="relative w-64">
-      <Input placeholder="Search..." className="pr-10" />
-      <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+    <div className="relative w-64 ">
+      <Input
+        placeholder="Search..."
+        className={`pr-10 bg-[#EDEDED]  dark:bg-[#202020]  text-foreground placeholder:text-muted-foreground`}
+      />
+      <FiSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
     </div>
   );
 }
