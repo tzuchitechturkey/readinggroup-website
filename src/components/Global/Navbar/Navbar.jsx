@@ -1,9 +1,16 @@
-import React from 'react'
+import React from "react";
+
+import Usernavbar from "@/components/Global/Usernavbar/Usernavbar";
+
+import AdminNavbar from "../AdminNavbar/AdminNavbar";
 
 function Navbar() {
   return (
-    <div>Navbar</div>
-  )
+    <div>
+      {/* <Usernavbar /> */}
+      <AdminNavbar />
+    </div>
+  );
 }
 
-export default Navbar
+export default Navbar;

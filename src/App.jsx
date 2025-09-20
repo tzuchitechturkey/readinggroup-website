@@ -1,11 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 
-import { userRoutes, authRoutes } from "./routes/allRoutes";
 import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
+import Navbar from "@/components/Global/Navbar/Navbar";
+
+import { userRoutes, authRoutes } from "./routes/allRoutes";
 
 function App() {
   return (
     <div className=" border" style={{ minHeight: "100vh" }}>
+      <Navbar />
       <Routes>
         {authRoutes.map((route, idx) => (
           <Route
