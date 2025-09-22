@@ -9,7 +9,7 @@ import { userRoutes, authRoutes } from "./routes/allRoutes";
 function App() {
   return (
     <div className="min-h-[100vh]">
-      <Navbar />
+      {/* <Navbar /> */}
       <Routes>
         {authRoutes.map((route, idx) => (
           <Route

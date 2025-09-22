@@ -2,7 +2,7 @@ import { FiSearch } from "react-icons/fi";
 
 import { Input } from "@/components/ui/input";
 
-export function SearchInput({ theme }) {
+export function SearchInput() {
   return (
     <div className="relative w-64 ">
       <Input

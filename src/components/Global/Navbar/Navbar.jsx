@@ -2,7 +2,7 @@ import React from "react";
 
 import Usernavbar from "@/components/Global/Usernavbar/Usernavbar";
 
-import AdminNavbar from "../AdminNavbar/AdminNavbar";
+// import AdminNavbar from "@/components/Global/AdminNavbar/AdminNavbar";
 
 function Navbar() {
   return (
