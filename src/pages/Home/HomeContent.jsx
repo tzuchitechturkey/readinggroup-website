@@ -6,7 +6,7 @@ function HomeContent() {
   return (
     <div>
       <button className="border-2 border-blue-500 p-2 rounded m-10">
-        <Link to="/auth/login">Go to Login Page</Link>
+        <Link to="/dashboard">Go to Login dashboard</Link>
       </button>
     </div>
   );
