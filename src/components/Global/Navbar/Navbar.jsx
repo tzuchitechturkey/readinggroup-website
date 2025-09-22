@@ -8,7 +8,7 @@ function Navbar() {
   return (
     <div>
       <Usernavbar />
-      <AdminNavbar />
+      {/* <AdminNavbar /> */}
     </div>
   );
 }
