@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/sidebar";
 import AdminNavbar from "@/components/Global/AdminNavbar/AdminNavbar";
 
+import NexaDashboard from "./NexaDashboard";
+
 export default function Page() {
   return (
     <SidebarProvider>
@@ -47,6 +49,7 @@ export default function Page() {
             </div>
           </div>
         </header>
+        <NexaDashboard />
       </SidebarInset>
     </SidebarProvider>
   );

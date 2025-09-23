@@ -4,14 +4,14 @@ import Footer from "@/components/Global/Footer/Footer";
 function LoginContent() {
   return (
     <div
-      className="w-full flex flex-col  pt-16 relative border-0 outline-none"
+      className="w-full flex flex-col pt-16 relative border-0 outline-none min-h-screen"
       style={{
         backgroundImage: "url(../../../../src/assets/authback.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <div className="absolute inset-0 bg-cover bg-center w-full h-full opacity-30 z-0 bg-black" />
+      <div className="absolute inset-0 bg-cover bg-center w-full min-h-screen opacity-30 z-0 bg-black" />
       <div className=" relative z-10">
         <LoginForm />
       </div>

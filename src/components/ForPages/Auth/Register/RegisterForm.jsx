@@ -56,7 +56,7 @@ function RegisterForm() {
         onSubmit={handleSubmit}
         className="max-w-80 bg-white mx-auto flex-col gap-4 py-6 px-10  rounded-lg shadow-md"
       >
-        <h1 className="text-2xl font-semibold">{t("Sign Up")}</h1>
+        <h1 className="text-2xl ">{t("Sign Up")}</h1>
 
         <input
           type="text"

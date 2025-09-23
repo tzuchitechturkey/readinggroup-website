@@ -38,7 +38,7 @@ function Footer() {
       </p>
 
       {/* Start Input  */}
-      <div className="bg-[#7c7c7c9f] border mt-4 border-[#999EAD] w-fit rounded-lg flex md:flex-row  items-center justify-between p-2 gap-7">
+      <div className="bg-[#7c7c7c9f] border mt-4 border-[#999EAD] w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1  gap-7">
         <input
           className="w-60 text-[#999ead] placeholder:text-[#999EAD] border-none bg-transparent rounded-lg outline-none p-2 text-xs sm:text-sm"
           placeholder={t("Enter your email")}
@@ -48,7 +48,7 @@ function Footer() {
           <img
             src="../../../../src/assets/icons/emailIcon.png"
             alt="email"
-            className="w-7 h-7  "
+            className="w-7 h-7"
           />
         </div>
         {/* End Icon  */}
