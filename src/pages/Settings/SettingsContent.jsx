@@ -4,14 +4,13 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Profile from "@/components/ForPages/Profile/Profile";
-import Archives from "@/components/ForPages//Profile/Archives/Archives";
-import Interactions from "@/components/ForPages//Profile/Interactions/Interactions";
+import EditProfile from "@/components/ForPages/Settings/EditProfile/EditProfile";
+import ChangePassword from "@/components/ForPages/Settings/ChangePassword/ChangePassword";
 
-function ProfileContent() {
+function SettingsContent() {
   const { t } = useTranslation();
   const [isLoading, setisLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("editProfile");
 
   const handleChangePassword = async () => {
     // setisLoading(true);
@@ -50,48 +49,34 @@ function ProfileContent() {
         >
           <TabsList className="bg-white shadow-none">
             <TabsTrigger
-              value="profile"
-              className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
+              value="editProfile"
+              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
                 src="../../../../../src/assets/icons/bothColorUser.png"
                 alt="user"
                 className="w-3 h-3"
               />
-              <span className="text-sm">{t("Profile")}</span>
+              <span className="text-sm">{t("Edit Profile")}</span>
             </TabsTrigger>
             <TabsTrigger
-              value="archives"
-              className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
+              value="changePassword"
+              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/Union.png"
+                src="../../../../../src/assets/icons/security-safe.png"
                 alt="user"
                 className="w-3 h-3"
               />
-              <span className="text-sm">{t("Archives")}</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="interactions"
-              className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
-            >
-              <img
-                src="../../../../../src/assets/icons/Interactions.png"
-                alt="user"
-                className="w-3 h-3"
-              />
-              <span className="text-sm">{t("Interactions")}</span>
+              <span className="text-sm">{t("Change Password")}</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
-            <Profile />
+          <TabsContent value="editProfile">
+            <EditProfile />
           </TabsContent>
-          <TabsContent value="archives">
-            <Archives />
-          </TabsContent>
-          <TabsContent value="interactions">
-            <Interactions />
+          <TabsContent value="changePassword">
+            <ChangePassword />
           </TabsContent>
         </Tabs>
         {/* End Tabs */}
@@ -107,10 +92,10 @@ function ProfileContent() {
         }}
         className="block m-5 ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7"
       >
-        {activeTab === "profile" ? t("Update Profile") : t("Update Profile")}
+        {activeTab === "editProfile" ? t("Save") : t("Save Password")}
       </button>
     </div>
   );
 }
 
-export default ProfileContent;
+export default SettingsContent;

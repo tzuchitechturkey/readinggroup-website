@@ -15,7 +15,7 @@ import Avatar from "../../../../src/assets/Beared Guy02-min 1.png";
 import DashboardIcon from "../../../../src/assets/icons/Home-simple-door.png";
 import Posts from "../../../../src/assets/icons/Union.png";
 import Chat from "../../../../src/assets/icons/fluent_chat-32-regular.png";
-import Help from "../../../../src/assets/icons/Help-circle.png";
+import Help from "../../../../src/assets/icons/Help.png";
 import LogOut from "../../../../src/assets/icons/Log-out.png";
 import Reading from "../../../../src/assets/icons/Page.png";
 import Settings from "../../../../src/assets/icons/Settings.png";

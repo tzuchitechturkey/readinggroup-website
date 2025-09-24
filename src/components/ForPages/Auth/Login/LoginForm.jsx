@@ -42,7 +42,7 @@ function LoginForm() {
     }
     setIsLoading(true);
     try {
-      const res = await Login({ userName, password });
+      const res = await Login({ email:userName, password });
       toast.success(t("Login successful"));
       console.log(res?.data);
     } catch (err) {
