@@ -15,8 +15,8 @@ function LoginContent() {
       <div className=" relative z-10">
         <LoginForm />
       </div>
-      <div className="flex flex-col justify-end h-full z-10 mt-20">
-        <Footer />
+      <div className="flex  items-end  h-full z-10 mt-20 flex-1">
+        <Footer authPages={true} />
       </div>
     </div>
   );

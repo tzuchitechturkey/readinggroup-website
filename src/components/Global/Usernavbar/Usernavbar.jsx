@@ -9,16 +9,16 @@ function Usernavbar() {
   const { t } = useTranslation();
   const linkList = [
     { name: t("Home"), href: "/" },
-    { name: t("Guided Reading"), href: "/guided-reading" },
+    { name: t("Guided Reading"), href: "/guiding-reading" },
     { name: t("Videos"), href: "/videos" },
     { name: t("Cards & Photos"), href: "/cards-photos" },
     { name: t("Connect"), href: "/connect" },
     { name: t("About Us"), href: "/about/history" },
   ];
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[37%_50%_20%] items-center shadow-md">
+    <div className="grid grid-cols-1 md:grid-cols-[30%_57%_12%]  items-center ">
       {/* Start Logo */}
-      <div className="p-4">
+      <div className="py-4">
         <img
           src={`../../../../src/assets/logo.png`}
           alt="logo"

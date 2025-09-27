@@ -7,11 +7,11 @@ import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 
 function UserIcons() {
   return (
-    <div className="flex items-center gap-5 p-4">
-      <div className="border-l-2 border-black h-5 w-[1px]" />
-      <CiSearch className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 " />
+    <div className="flex items-center gap-4">
+      <div className="border-l border-gray-300 h-6 w-[1px]" />
+      <CiSearch className="cursor-pointer text-lg hover:text-blue-600 transition-all duration-200" />
       <LanguageDropdown />
-      <CgProfile className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 " />
+      <CgProfile className="text-xl cursor-pointer   hover:text-blue-600 transition-all duration-200" />
     </div>
   );
 }

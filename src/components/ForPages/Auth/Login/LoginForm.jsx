@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
 
@@ -10,6 +10,7 @@ import { Login } from "@/api/auth";
 
 function LoginForm() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -40,16 +41,19 @@ function LoginForm() {
     if (Object.keys(errors).length > 0) {
       return;
     }
-    setIsLoading(true);
-    try {
-      const res = await Login({ email:userName, password });
-      toast.success(t("Login successful"));
-      console.log(res?.data);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || t("Login failed"));
-    } finally {
-      setIsLoading(false);
-    }
+    toast.success(t("Login successful"));
+
+    navigate("/");
+    // setIsLoading(true);
+    // try {
+    //   const res = await Login({ email: userName, password });
+    //   toast.success(t("Login successful"));
+    //   console.log(res?.data);
+    // } catch (err) {
+    //   toast.error(err?.response?.data?.message || t("Login failed"));
+    // } finally {
+    //   setIsLoading(false);
+    // }
     // setShowRecaptch(true);
     // recaptchaRef.current?.reset();
   }
@@ -74,7 +78,7 @@ function LoginForm() {
             }
           }}
           placeholder={t("Username")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black text-sm ${
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
             inputErrors.userName ? "border border-red-500" : ""
           }`}
         />
@@ -97,7 +101,7 @@ function LoginForm() {
             }
           }}
           placeholder={t("Password")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4  placeholder:text-black text-sm ${
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4  placeholder:text-black/50 text-sm ${
             inputErrors.password ? "border border-red-500" : ""
           }`}
         />

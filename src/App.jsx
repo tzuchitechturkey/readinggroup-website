@@ -5,23 +5,34 @@ import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayou
 import Navbar from "@/components/Global/Navbar/Navbar";
 
 import { userRoutes, authRoutes } from "./routes/allRoutes";
+import Footer from "./components/Global/Footer/Footer";
 
 function App() {
   return (
     <div className="min-h-[100vh]">
-      {/* <Navbar /> */}
       <Routes>
         {authRoutes.map((route, idx) => (
           <Route
             path={route.path}
             element={<NonAuthLayout>{route.element}</NonAuthLayout>}
             key={idx}
-            exact
           />
         ))}
 
         {userRoutes?.map((route, idx) => (
-          <Route path={route.path} element={route.element} key={idx} exact />
+          <Route
+            path={route.path}
+            element={
+              <>
+                <Navbar />
+                {route.element}
+                <div className="mt-24">
+                  <Footer />
+                </div>
+              </>
+            }
+            key={idx}
+          />
         ))}
       </Routes>
       <ToastContainer />

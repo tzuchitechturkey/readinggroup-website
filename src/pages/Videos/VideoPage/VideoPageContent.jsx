@@ -1,9 +1,43 @@
-import React from 'react'
+import React from "react";
+
+import { useTranslation } from "react-i18next";
+
+import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/CustomyoutubeVideo/CustomyoutubeVideo";
+import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import { allVideos } from "@/mock/Viedeos";
+import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
 
 function VideoPageContent() {
+  const { t } = useTranslation();
+
   return (
-    <div>VideoPageContent</div>
-  )
+    <div className="bg-white">
+      {/* Start Show Video */}
+      <CustomyoutubeVideo />
+      {/* End Show Video */}
+
+      {/* Start Content of a similar type */}
+      <div className="bg-white">
+        <DynamicSection
+          title="Content of a similar type"
+          titleClassName=""
+          data={allVideos}
+          isSlider={false}
+          cardName={VideoCard}
+          viewMore={true}
+          viewMoreUrl="/videos"
+        />
+      </div>
+      {/* End Content of a similar type */}
+
+      {/* Start Comments Section */}
+      <div>
+        <CommentsSection />
+      </div>
+      {/* End Comments Section */}
+    </div>
+  );
 }
 
-export default VideoPageContent
+export default VideoPageContent;

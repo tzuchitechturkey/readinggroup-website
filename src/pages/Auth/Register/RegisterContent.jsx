@@ -16,7 +16,7 @@ function RegisterContent() {
         <RegisterForm />
       </div>
       <div className="flex flex-col justify-end h-full z-10 mt-12">
-        <Footer />
+        <Footer authPages={true} />
       </div>
     </div>
   );

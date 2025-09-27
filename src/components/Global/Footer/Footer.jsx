@@ -2,7 +2,7 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-function Footer() {
+function Footer({ authPages }) {
   const { t } = useTranslation();
   const linkList = [
     { name: t("Guided Reading"), href: "/guided-reading" },
@@ -11,36 +11,48 @@ function Footer() {
     { name: t("Health News"), href: "/health-news" },
     { name: t("DA AI TV"), href: "/da-ai-tv" },
   ];
-
+  // dashboard Color : 999EAD
   const socialLinks = [
     {
       name: "Facebook",
       href: "https://www.facebook.com",
-      icon: "facebookIcon.png",
+      icon: authPages ? "facebookIcon.png" : "black-facebook.png",
     },
     {
       name: "Twitter",
       href: "https://www.twitter.com",
-      icon: "twitterIcon.png",
+      icon: authPages ? "twitterIcon.png" : "black-x.png",
     },
     {
       name: "Instagram",
       href: "https://www.instagram.com",
-      icon: "instagramIcon.png",
+      icon: authPages ? "instagramIcon.png" : "black-instegram.png",
     },
   ];
   return (
     <div className="px-4 sm:px-8 md:px-10 lg:px-20">
-      <p className="text-[#989898] text-sm sm:text-base md:text-lg lg:text-lg text-center lg:text-left">
+      <p
+        className={`${
+          authPages ? "text-[#999EAD] " : "text-[#141414]"
+        }  text-sm sm:text-base md:text-lg lg:text-base font-medium text-center lg:text-left`}
+      >
         {t(
           "Join us today! Enter your email to access weekly updated content, available in multiple languages, with the latest news and interactive programs."
         )}
       </p>
 
       {/* Start Input  */}
-      <div className="bg-[#7c7c7c9f] border mt-4 border-[#999EAD] w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1  gap-7">
+      <div
+        className={`bg-[#fff] border mt-4  ${
+          authPages ? "border-[#999EAD] " : "border-[#141414]"
+        }   w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1  gap-7 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5  `}
+      >
         <input
-          className="w-60 text-[#999ead] placeholder:text-[#999EAD] border-none bg-transparent rounded-lg outline-none p-2 text-xs sm:text-sm"
+          className={`w-60 ${
+            authPages
+              ? " placeholder:text-[#999EAD] text-[#999EAD] "
+              : " placeholder:text-[#141414] text-[#141414]"
+          }   border-none bg-transparent rounded-lg outline-0 p-2 text-xs sm:text-sm transition-colors duration-300`}
           placeholder={t("Enter your email")}
         />
         {/* Start Icon  */}
@@ -61,9 +73,15 @@ function Footer() {
             <li key={index}>
               <a
                 href={link.href}
-                className="text-[#999EAD] hover:text-[#FFFFFF] text-xs sm:text-sm"
+                className={`${
+                  authPages ? "text-[#999EAD] " : "text-[#141414]"
+                }  relative inline-block group hover:text-[#999EAD] text-xs sm:text-sm transition-colors duration-300 ease-out`}
               >
                 {link.name}
+                <span
+                  aria-hidden
+                  className="absolute left-0 -bottom-0.5 h-0.5 w-0 bg-current transition-all duration-300 ease-out group-hover:w-full"
+                />
               </a>
             </li>
           ))}
@@ -74,12 +92,14 @@ function Footer() {
             <a
               key={index}
               href={link.href}
-              className="text-[#999EAD] hover:text-[#FFFFFF]"
+              className={`${
+                authPages ? "text-[#999EAD]" : "text-[#141414]"
+              }  hover:text-[#FFFFFF] group`}
             >
               <img
                 src={`../../../../src/assets/icons/${link.icon}`}
                 alt={link.name}
-                className="w-5 h-5"
+                className="w-5 h-5 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5"
               />
             </a>
           ))}
