@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
@@ -9,6 +9,8 @@ import { Register } from "@/api/auth";
 
 function RegisterForm() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,6 +21,9 @@ function RegisterForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    toast.success(t("Registration successful"));
+
+    navigate("/");
     // const errors = {};
     // if (!userName) errors.userName = true;
     // if (!email) errors.email = true;

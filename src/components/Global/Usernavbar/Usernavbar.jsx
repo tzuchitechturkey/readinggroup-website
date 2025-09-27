@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import UserIcons from "../UserIcons/UserIcons";
 
@@ -18,13 +18,13 @@ function Usernavbar() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-[30%_57%_12%]  items-center ">
       {/* Start Logo */}
-      <div className="py-4">
+      <Link to={"/"} className="py-4">
         <img
           src={`../../../../src/assets/logo.png`}
           alt="logo"
           className="w-32 h-12 object-contain"
         />
-      </div>
+      </Link>
       {/* End Logo */}
       {/* Start Links */}
       <div>
