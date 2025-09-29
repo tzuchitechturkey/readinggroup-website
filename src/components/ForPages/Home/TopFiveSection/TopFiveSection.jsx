@@ -1,7 +1,7 @@
 import React from "react";
 
 import TopFiveSectionCard from "@/components/Global/TopFiveSectionCard/TopFiveSectionCard";
-import { topFiveVideos } from "@/mock/Viedeos";
+import { mockVideos } from "@/mock/Viedeos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 
 const TopFiveSection = () => {
@@ -9,7 +9,7 @@ const TopFiveSection = () => {
     <div className="mt-12">
       <DynamicSection
         title="VIDEO Top 5 Listesi"
-        data={topFiveVideos}
+        data={mockVideos}
         isSlider={false}
         cardName={TopFiveSectionCard}
       />

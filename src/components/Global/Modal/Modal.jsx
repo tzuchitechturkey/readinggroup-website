@@ -59,6 +59,8 @@ const Modal = ({ isOpen, onClose, title, children, width }) => {
               maxWidth: width || "400px",
               width: "100%",
               boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
+              maxHeight: "90vh", // 👈 مهم
+              overflowY: "auto", // 👈 مهم
             }}
           >
             {title && (

@@ -6,7 +6,7 @@ import ChartCards from "@/components/ForPages/Dashboard/ChartCards/ChartCards";
 
 export default function DashboardSections() {
   return (
-    <div className="w-full min-h-screen bg-[#F5F7FB] p-3 relative text-[#1E1E1E] flex flex-col">
+    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
       <div className="flex-1">
         {/* Start Chart Cards */}
         <ChartCards />

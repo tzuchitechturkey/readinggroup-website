@@ -6,7 +6,7 @@ import VideosHeader from "@/components/ForPages/Videos/VideosHeader/VideosHeader
 import FilterSections from "@/components/ForPages/Videos/FilterSections/FilterSections";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import { allVideos } from "@/mock/Viedeos";
+import { mockVideos } from "@/mock/Viedeos";
 
 function VideosPageContent() {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ function VideosPageContent() {
         <DynamicSection
           title="Top 5 in your like"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -38,7 +38,7 @@ function VideosPageContent() {
         <DynamicSection
           title="My LIST"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -51,7 +51,7 @@ function VideosPageContent() {
         <DynamicSection
           title="Full Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -64,7 +64,7 @@ function VideosPageContent() {
         <DynamicSection
           title="Unit  Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}

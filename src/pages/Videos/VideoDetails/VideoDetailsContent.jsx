@@ -12,7 +12,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
-import { allVideos, topCast } from "@/mock/Viedeos";
+import { mockVideos, topCast } from "@/mock/Viedeos";
 
 function VideoDetailsContent() {
   const { t } = useTranslation();
@@ -177,7 +177,7 @@ function VideoDetailsContent() {
         <DynamicSection
           title="Top 5 in your like"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -190,7 +190,7 @@ function VideoDetailsContent() {
         <DynamicSection
           title="My LIST"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -203,7 +203,7 @@ function VideoDetailsContent() {
         <DynamicSection
           title="Full Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -216,7 +216,7 @@ function VideoDetailsContent() {
         <DynamicSection
           title="Unit  Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={allVideos}
+          data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}

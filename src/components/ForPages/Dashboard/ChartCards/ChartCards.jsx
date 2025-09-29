@@ -1,14 +1,30 @@
 import React, { useState } from "react";
 
-import iconArrowborsa from "@/assets/icons/icon-wrapper-16px.png";
-import SubMenu from "@/components/Global/SubMenu/SubMenu";
-import blueChartIcon from "@/assets/blueChaty.png";
-import redChartIcon from "@/assets/icons/redchart.png";
-import secoundryChartIcon from "@/assets/icons/secoundrychart.png";
 import arrowDown from "@/assets/icons/arrow-down.png";
 import calendarIcon from "@/assets/icons/calendar.png";
 import documentIcon from "@/assets/icons/document-text.png";
+import iconArrowborsa from "@/assets/icons/icon-wrapper-16px.png";
 import walletIcon from "@/assets/icons/wallet-2.png";
+import SubMenu from "@/components/Global/SubMenu/SubMenu";
+
+import MiniChart from "./MiniChart";
+
+//  Mock data
+const generateChartData = (trend = "up") => {
+  const baseData = [];
+  for (let i = 0; i < 12; i++) {
+    let value;
+    if (trend === "up") {
+      value = 20 + i * 3 + Math.random() * 10;
+    } else if (trend === "down") {
+      value = 50 - i * 2 + Math.random() * 8;
+    } else {
+      value = 30 + Math.sin(i) * 15 + Math.random() * 5;
+    }
+    baseData.push({ name: i, value: Math.max(5, value) });
+  }
+  return baseData;
+};
 
 const kpis = [
   {
@@ -17,7 +33,9 @@ const kpis = [
     delta: "+30.6%",
     color: "text-[#4680FF]",
     bg: "bg-[#EDF3FF]",
-    chartIcon: blueChartIcon,
+    chartType: "bar",
+    chartColor: "blue",
+    chartData: generateChartData("up"),
     icon: walletIcon,
   },
   {
@@ -26,8 +44,10 @@ const kpis = [
     delta: "+30.6%",
     color: "text-[#E58A00]",
     bg: "bg-[#FFF5E5]",
+    chartType: "bar",
+    chartColor: "orange",
+    chartData: generateChartData("mixed"),
     icon: documentIcon,
-    chartIcon: secoundryChartIcon,
   },
   {
     title: "News",
@@ -35,7 +55,9 @@ const kpis = [
     delta: "+30.6%",
     color: "text-[#4CB592]",
     bg: "bg-[#EBFAF5]",
-    chartIcon: redChartIcon,
+    chartType: "bar",
+    chartColor: "green",
+    chartData: generateChartData("up"),
     icon: calendarIcon,
     items: [
       {
@@ -50,7 +72,9 @@ const kpis = [
     delta: "+30.6%",
     color: "text-[#DC2626]",
     bg: "bg-[#FFFAFA]",
-    chartIcon: redChartIcon,
+    chartType: "bar",
+    chartColor: "red",
+    chartData: generateChartData("mixed"),
     icon: arrowDown,
     items: [
       {
@@ -60,12 +84,14 @@ const kpis = [
     ],
   },
   {
-    title: "Posts",
+    title: "Incentive",
     value: "$30200",
     delta: "+30.6%",
     color: "text-[#DC2626]",
     bg: "bg-[#FFFAFA]",
-    chartIcon: redChartIcon,
+    chartType: "bar",
+    chartColor: "red",
+    chartData: generateChartData("down"),
     icon: arrowDown,
     items: [
       {
@@ -75,13 +101,15 @@ const kpis = [
     ],
   },
   {
-    title: "Posts",
+    title: "Incentive",
     value: "$30200",
     delta: "+30.6%",
     color: "text-[#DC2626]",
     bg: "bg-[#FFFAFA]",
+    chartType: "bar",
+    chartColor: "red",
+    chartData: generateChartData("up"),
     items: [{}],
-    chartIcon: redChartIcon,
     icon: arrowDown,
   },
 ];
@@ -89,7 +117,7 @@ const kpis = [
 function ChartCards() {
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   return (
-    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+    <div className="  grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
       {kpis.map((k, i) => (
         <div key={i} className="bg-white rounded-lg border border-gray-200 p-4">
           {/* Start Top Section */}
@@ -118,8 +146,12 @@ function ChartCards() {
           {/* Ens Top Section */}
           {/* Start Bottom Section */}
           <div className="mt-5 flex p-[12px] rounded-lg bg-[#F8F9FA] justify-between gap-5 items-center">
-            <div>
-              <img src={k.chartIcon} alt="chart icon " className="w-14 h-10" />
+            <div className="w-14 h-10">
+              <MiniChart
+                type={k.chartType}
+                data={k.chartData}
+                color={k.chartColor}
+              />
             </div>
             <div className="flex flex-col items-end">
               <p className="text-sm font-semibold text-[#1D2630]">{k.value}</p>

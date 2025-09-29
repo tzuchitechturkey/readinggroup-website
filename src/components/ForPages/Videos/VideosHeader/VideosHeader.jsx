@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
-import { weeklyVideos } from "@/mock/Viedeos";
+import { mockVideos } from "@/mock/Viedeos";
 
 function VideosHeader() {
   const { t } = useTranslation();
@@ -60,7 +60,7 @@ function VideosHeader() {
         {/* Start Weekly Videos Carousel */}
         <div className="mt-12 w-full -mb-2  pr-2 ">
           <BrokenCarousel
-            data={weeklyVideos}
+            data={mockVideos}
             title={t("This Week's Videos")}
             showCount={4}
           />

@@ -1,14 +1,21 @@
 import React from "react";
 
+import { useLocation } from "react-router-dom";
+
 import Usernavbar from "@/components/Global/Usernavbar/Usernavbar";
 
-// import AdminNavbar from "@/components/Global/AdminNavbar/AdminNavbar";
 
 function Navbar() {
+  const location = useLocation();
+  
+  // إخفاء الـ Navbar في صفحات الـ dashboard
+  if (location.pathname.startsWith('/dashboard')) {
+    return null;
+  }
+  
   return (
     <div>
       <Usernavbar />
-      {/* <AdminNavbar /> */}
     </div>
   );
 }

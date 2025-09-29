@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
@@ -8,6 +8,8 @@ import { userRoutes, authRoutes } from "./routes/allRoutes";
 import Footer from "./components/Global/Footer/Footer";
 
 function App() {
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith("/dashboard");
   return (
     <div className="min-h-[100vh]">
       <Routes>
@@ -24,11 +26,13 @@ function App() {
             path={route.path}
             element={
               <>
-                <Navbar />
+                {!isDashboard && <Navbar />}
                 {route.element}
-                <div className="mt-24">
-                  <Footer />
-                </div>
+                {!isDashboard && (
+                  <div className="mt-24">
+                    <Footer />
+                  </div>
+                )}
               </>
             }
             key={idx}
