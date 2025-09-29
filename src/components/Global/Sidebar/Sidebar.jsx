@@ -1,5 +1,19 @@
 import * as React from "react";
 
+import PropTypes from "prop-types";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  FaHome,
+  FaBookOpen,
+  FaRegNewspaper,
+  FaVideo,
+  FaQuestionCircle,
+  FaSignOutAlt,
+  FaCog,
+  FaUser,
+} from "react-icons/fa";
+
 import { DynamicNav } from "@/components/Global/Sidebar/DynamicNav";
 import { NavFooter } from "@/components/Global/Sidebar/NavFooter";
 import { UserSwitcher } from "@/components/Global/Sidebar/UserSwitcher";
@@ -12,123 +26,83 @@ import {
 } from "@/components/ui/sidebar";
 
 import Avatar from "../../../../src/assets/Beared Guy02-min 1.png";
-import DashboardIcon from "../../../../src/assets/icons/Home-simple-door.png";
-import Posts from "../../../../src/assets/icons/Union.png";
-import Video from "../../../../src/assets/icons/video-icon.png";
-import Help from "../../../../src/assets/icons/Help.png";
-import LogOut from "../../../../src/assets/icons/Log-out.png";
-import Reading from "../../../../src/assets/icons/Page.png";
-import Settings from "../../../../src/assets/icons/Settings.png";
-import User from "../../../../src/assets/icons/User 1.png";
-import VaadinHealth from "../../../../src/assets/icons/vaadin_health-card.png";
-// This is sample data.
-const data = {
-  footer: [
-    {
-      title: "Help",
-      icon: Help,
-    },
-    {
-      title: "Logout Account",
-      icon: LogOut,
-    },
-  ],
-  userInfo: {
-    name: "MUSA AL AHMED",
-    avatar: Avatar,
-    plan: "web-developer",
-  },
 
-  navMain: [
-    {
-      title: "Home",
-      url: "/ ",
-      icon: DashboardIcon,
-    },
-    {
-      title: "Read",
-      url: "/about/history",
-      icon: Reading,
-      items: [
-        {
-          title: "team",
-          url: "/about/team",
-        },
-        {
-          title: "Refunds",
-          url: "#",
-        },
-        {
-          title: "Declines",
-          url: "#",
-        },
-        {
-          title: "Payouts",
-          url: "#",
-        },
-      ],
-    },
-
-    {
-      title: "Posts",
-      url: "/posts",
-      icon: Posts,
-      items: [
-        {
-          title: "All Posts",
-          url: "/#",
-        },
-        {
-          title: "Add New Post",
-          url: "/dashboard/posts/add",
-        },
-      ],
-    },
-
-    {
-      title: "Videos",
-      url: "/video",
-      icon: Video,
-      items: [
-        {
-          title: "All Videos",
-          url: "/#",
-        },
-        {
-          title: "Add New Video",
-          url: "/dashboard/videos/add",
-        },
-      ],
-    },
-  ],
-
-  settings: [
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings,
-      items: [
-        {
-          title: "Settings",
-          url: "/Settings",
-        },
-        {
-          title: "Profile",
-          url: "/Profile",
-        },
-      ],
-    },
-  ],
-};
-
-export default function AppSidebar({
+function AppSidebar({
   onSectionChange,
   activeSection,
   activeParent,
   ...props
 }) {
+  const { t } = useTranslation();
+
+  const data = useMemo(
+    () => ({
+      footer: [
+        { title: t("Help"), icon: <FaQuestionCircle /> },
+        { title: t("Logout"), icon: <FaSignOutAlt /> },
+      ],
+      userInfo: {
+        plan: "web-developer",
+        name: "MUSA AL AHMED",
+        avatar: Avatar,
+      },
+      navMain: [
+        {
+          title: t("Home"),
+          url: "/",
+          icon: <FaHome className="w-5 h-5" />,
+        },
+        {
+          title: t("Read"),
+          url: "/about/history",
+          icon: <FaBookOpen className="w-5 h-5" />,
+          items: [
+            { title: t("Team"), url: "/about/team" },
+            { title: t("Refunds"), url: "#" },
+            { title: t("Declines"), url: "#" },
+            { title: t("Payouts"), url: "#" },
+          ],
+        },
+        {
+          title: t("Posts"),
+          url: "/posts",
+          icon: <FaRegNewspaper className="w-5 h-5" />,
+          items: [
+            { title: t("All Posts"), url: "/#" },
+            { title: t("Add Post"), url: "/dashboard/posts/add" },
+          ],
+        },
+        {
+          title: t("Videos"),
+          url: "/video",
+          icon: <FaVideo className="w-5 h-5" />,
+          items: [
+            { title: t("All Videos"), url: "/#" },
+            { title: t("Add Video"), url: "/dashboard/videos/add" },
+          ],
+        },
+      ],
+      settings: [
+        {
+          title: t("Settings"),
+          url: "/settings",
+          icon: <FaCog className="w-5 h-5" />,
+          items: [
+            { title: t("Settings"), url: "/settings" },
+            {
+              title: t("Profile"),
+              url: "/profile",
+              icon: <FaUser className="w-5 h-5" />,
+            },
+          ],
+        },
+      ],
+    }),
+    [t]
+  );
+
   return (
-    <Sidebar collapsible="icon" className="" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <UserSwitcher data={data.userInfo} />
       </SidebarHeader>
@@ -149,10 +123,20 @@ export default function AppSidebar({
           activeParent={activeParent}
         />
       </SidebarContent>
+
       <SidebarFooter>
         <NavFooter data={data.footer} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
 }
+
+AppSidebar.propTypes = {
+  onSectionChange: PropTypes.func.isRequired,
+  activeSection: PropTypes.string.isRequired,
+  activeParent: PropTypes.string,
+};
+
+export default AppSidebar;

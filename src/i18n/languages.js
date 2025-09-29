@@ -23,7 +23,7 @@ const languages = {
   ch: {
     label: "中文",
     shortLabel: "CN",
-    code: "cn",
+    code: "ch",
   },
 
   ua: {

@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import Notification from "../Notifications/Notifications";
+import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
 export default function AdminIcons() {
@@ -10,16 +11,17 @@ export default function AdminIcons() {
     <div>
       <div className="flex justify-end items-center gap-4">
         {/* Start Toggle Theme */}
-        <div className="">
+        {/* <div className="">
           <ThemeToggle />
-        </div>
+        </div> */}
         {/* End Toggle Theme */}
+           {/* Start Notification */}
 
-        {/* Start Notification */}
-        <div className=" ">
           <Notification />
-        </div>
+        <div className=" ">
         {/* End Notification */}
+        </div>
+
         {/* Start Messages */}
         <div className="  mr-1">
           <img
@@ -29,21 +31,11 @@ export default function AdminIcons() {
           />
         </div>
         {/* End Messages */}
-        {/* Start User Info */}
-        <div className="flex items-center gap-4 ">
-          <Link to="/admin/profile" className="hidden md:block">
-            <img
-              src="../../../../src/assets/Beared Guy02-min 1.png"
-              alt="user"
-              className="w-8 h-8 rounded-full inline  "
-            />
-          </Link>
-          <div className="">
-            <p className="text-sm font-semibold">John Doe</p>
-            <p className="text-xs text-gray-500">Admin</p>
-          </div>
+        {/* Start Language Dropdown */}
+        <div className="">
+            <LanguageDropdown iconColor="#999EAD" />
         </div>
-        {/* End User Info */}
+        {/* End Language Dropdown */}
       </div>
     </div>
   );

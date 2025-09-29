@@ -2,7 +2,13 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
+import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
+
 function Footer({ authPages }) {
+  // تحديد إذا كانت اللغة الحالية RTL
+  const rtlLanguages = ["ar", "fa", "he", "ur"];
+  const currentLang = localStorage.getItem("I18N_LANGUAGE") || "en";
+  const isRTL = rtlLanguages.includes(currentLang);
   const { t } = useTranslation();
   const linkList = [
     { name: t("Guided Reading"), href: "/guided-reading" },
@@ -16,36 +22,43 @@ function Footer({ authPages }) {
     {
       name: "Facebook",
       href: "https://www.facebook.com",
-      icon: authPages ? "facebookIcon.png" : "black-facebook.png",
+      icon: "fa-brands fa-facebook-f",
     },
     {
       name: "Twitter",
       href: "https://www.twitter.com",
-      icon: authPages ? "twitterIcon.png" : "black-x.png",
+      icon: "fa-brands fa-x-twitter",
     },
     {
       name: "Instagram",
       href: "https://www.instagram.com",
-      icon: authPages ? "instagramIcon.png" : "black-instegram.png",
+      icon: "fa-brands fa-instagram",
     },
   ];
   return (
-    <div className="px-4 sm:px-8 md:px-10 lg:px-20">
-      <p
-        className={`${
-          authPages ? "text-[#999EAD] " : "text-[#141414]"
-        }  text-sm sm:text-base md:text-lg lg:text-base font-medium text-center lg:text-left`}
-      >
-        {t(
-          "Join us today! Enter your email to access weekly updated content, available in multiple languages, with the latest news and interactive programs."
-        )}
-      </p>
-
+    <div
+      className={`px-4 sm:px-8 md:px-10 lg:px-20 ${authPages ? "w-full" : ""}`}
+      style={
+        authPages
+          ? {
+              position: "absolute",
+              left: 0,
+              bottom: 0,
+              width: "100%",
+              minHeight: "180px",
+              maxHeight: "220px",
+              background: "rgba(255,255,255,0.01)",
+              zIndex: 10,
+            }
+          : {}
+      }
+      dir={isRTL ? "rtl" : "ltr"}
+    >
       {/* Start Input  */}
       <div
         className={`bg-[#fff] border mt-4  ${
           authPages ? "border-[#999EAD] " : "border-[#141414]"
-        }   w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1  gap-7 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/10 hover:-translate-y-0.5  `}
+        }   w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1 gap-10 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5  `}
       >
         <input
           className={`w-60 ${
@@ -57,24 +70,35 @@ function Footer({ authPages }) {
         />
         {/* Start Icon  */}
         <div className="w-10 flex justify-center items-center">
-          <img
-            src="../../../../src/assets/icons/emailIcon.png"
-            alt="email"
-            className="w-7 h-7"
+          <i
+            className="fa-solid fa-envelope w-5 h-5 text-lg"
+            style={{ color: "#999EAD" }}
+            aria-label="email"
           />
         </div>
         {/* End Icon  */}
       </div>
       {/* End Input  */}
+      <div className="mt-4">
+        <p
+          className={`${
+            authPages ? "text-[#ffffff] " : "text-[#141414]"
+          }  text-sm sm:text-base md:text-lg lg:text-base font-medium text-center lg:text-left`}
+        >
+          {t(
+            "Join us today! Enter your email to access weekly updated content, available in multiple languages, with the latest news and interactive programs."
+          )}
+        </p>
+      </div>
 
-      <div className="py-6 border-t mt-5 border-[#999EAD] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0">
+      <div className="py-6 border-t mt-5 border-[#ececec] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0">
         <ul className="md:flex md:flex-wrap md:items-center gap-4 sm:gap-6 mb-4 md:mb-0 w-full md:w-auto">
           {linkList.map((link, index) => (
             <li key={index}>
               <a
                 href={link.href}
                 className={`${
-                  authPages ? "text-[#999EAD] " : "text-[#141414]"
+                  authPages ? "text-[#ffffff] " : "text-[#141414]"
                 }  relative inline-block group hover:text-[#999EAD] text-xs sm:text-sm transition-colors duration-300 ease-out`}
               >
                 {link.name}
@@ -86,23 +110,23 @@ function Footer({ authPages }) {
             </li>
           ))}
         </ul>
-        {/* Start Social Links */}
+        {/* Start Social Links and Language Dropdown */}
         <div className="flex items-center gap-3 sm:gap-4">
           {socialLinks.map((link, index) => (
             <a
               key={index}
               href={link.href}
-              className={`${
-                authPages ? "text-[#999EAD]" : "text-[#141414]"
-              }  hover:text-[#FFFFFF] group`}
+              className={`text-white group`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <img
-                src={`../../../../src/assets/icons/${link.icon}`}
-                alt={link.name}
-                className="w-5 h-5 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5"
+              <i
+                className={`${link.icon} w-5 h-5 text-xl text-white transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
+                aria-label={link.name}
               />
             </a>
           ))}
+          <LanguageDropdown iconColor="#fff" />
         </div>
         {/* End Social Links */}
       </div>
