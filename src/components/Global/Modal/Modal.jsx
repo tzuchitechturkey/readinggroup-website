@@ -42,7 +42,7 @@ const Modal = ({ isOpen, onClose, title, children, width }) => {
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1050,
+            zIndex: 45,
           }}
         >
           <motion.div
@@ -59,8 +59,8 @@ const Modal = ({ isOpen, onClose, title, children, width }) => {
               maxWidth: width || "400px",
               width: "100%",
               boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
-              maxHeight: "90vh", // 👈 مهم
-              overflowY: "auto", // 👈 مهم
+              maxHeight: "90vh",
+              overflowY: "auto",
             }}
           >
             {title && (

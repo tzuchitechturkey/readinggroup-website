@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   useSidebar,
@@ -24,11 +25,12 @@ export function DynamicNav({
   activeSection,
   activeParent,
 }) {
+  const { t } = useTranslation();
   const { state } = useSidebar(); // 'expanded' | 'collapsed'
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>MAIN</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("MAIN")}</SidebarGroupLabel>
       <SidebarMenu>
         {data.map((item) => {
           const sectionKey = getSectionKey(item.title);

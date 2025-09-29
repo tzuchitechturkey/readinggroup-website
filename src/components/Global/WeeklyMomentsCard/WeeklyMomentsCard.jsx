@@ -28,7 +28,7 @@ function WeeklyMomentsCard({ item }) {
         <div className="text-xs flex items-center gap-1">
           <span className="text-primary">SEPT 02</span>
           <span className="  text-xs">
-            STARTING AT {item.startTime}
+            {t("STARTING AT")} {item.startTime}
           </span>
         </div>
         {/* End Date */}
@@ -50,9 +50,7 @@ function WeeklyMomentsCard({ item }) {
             <div className="text-text">{item.source}</div>
           </div>
           <div>
-            <div className="text-primary font-semibold mb-[6px]">
-              Language
-            </div>
+            <div className="text-primary font-semibold mb-[6px]">Language</div>
             <div className="text-text">{item.language}</div>
           </div>
         </div>

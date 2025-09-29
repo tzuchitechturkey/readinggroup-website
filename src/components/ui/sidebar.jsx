@@ -546,12 +546,14 @@ const SidebarMenuButton = React.forwardRef(
           {tooltipChild?.length > 0
             ? tooltipChild.map((child, idx) => (
                 <div key={idx} className="mt-2 flex flex-col gap-1 rounded-sm">
-                  <a
-                    href={child.url || "#"}
+                  <button
+                    onClick={() => {
+                      console.log(props, " child");
+                    }}
                     className="block px-2 py-1 text-[#989898] hover:text-sidebarTextHover text-center rounded hover:bg-sidebarTextBgHover  text-sm"
                   >
                     {child.title}
-                  </a>
+                  </button>
                 </div>
               ))
             : tooltip.children}

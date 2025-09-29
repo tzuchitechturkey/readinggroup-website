@@ -39,7 +39,7 @@ function FilterDatePickerModal({
             {/* Start Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date
+                {t("Start Date")}
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -76,8 +76,8 @@ function FilterDatePickerModal({
                 </PopoverContent>
               </Popover>
             </div>
-
-            {/* End Date */}
+            {/* End Start Date */}
+            {/* Start End Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 End Date
@@ -120,6 +120,7 @@ function FilterDatePickerModal({
                 </PopoverContent>
               </Popover>
             </div>
+            {/* End End Date */}
 
             {/* Quick Select Options */}
             <div>

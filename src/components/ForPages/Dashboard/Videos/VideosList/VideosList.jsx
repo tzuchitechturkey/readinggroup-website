@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import {
   Table,
@@ -14,21 +15,20 @@ import {
 } from "@/components/ui/table";
 import { mockVideos } from "@/mock/Viedeos";
 import Modal from "@/components/Global/Modal/Modal";
+import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import ShowVideoDetails from "../ShowVideoDetails/ShowVideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
-import DeleteConfirmation from "../DeleteConfirmation/DeleteConfirmation";
 
 function VideosList({ onSectionChange }) {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCreateEditModal, setShowCreateEditModal] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
-  const [showDeleteVideoModal, setShowDeleteVideoModal] = useState(false);
-  const [videoToDelete, setVideoToDelete] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -141,55 +141,41 @@ function VideosList({ onSectionChange }) {
     setShowDetailsModal(true);
   };
 
-  // فتح نموذج تأكيد الحذف
-  const handleDelete = (videoId) => {
-    const video = apiData.results.find((v) => v.id === videoId);
-    setVideoToDelete(video);
-    setShowDeleteVideoModal(true);
-  };
-
   // تأكيد حذف الفيديو
   const handleConfirmDelete = async () => {
-    if (!videoToDelete) return;
+    if (!selectedVideo.id) return;
 
-    setDeleteLoading(true);
+    setIsLoading(true);
     try {
       // هنا يتم إرسال طلب الحذف للسيرفر
-      // await deleteVideoAPI(videoToDelete.id);
 
       // إغلاق النموذج
-      setShowDeleteVideoModal(false);
-      setVideoToDelete(null);
+      setShowDeleteModal(false);
+      setSelectedVideo(null);
 
       // عرض رسالة نجاح
-      alert(t("Video deleted successfully"));
+      toast.success(t("Video deleted successfully"));
 
       // إعادة جلب البيانات
       await fetchVideos(currentPage, limit, sortConfig.key ? sortConfig : null);
     } catch (error) {
       console.error("Error deleting video:", error);
-      alert(t("An error occurred while deleting the video"));
+      toast.error(t("An error occurred while deleting the video"));
     } finally {
-      setDeleteLoading(false);
+      setIsLoading(false);
     }
   };
 
   // إلغاء حذف الفيديو
   const handleCancelDelete = () => {
-    setShowDeleteVideoModal(false);
-    setVideoToDelete(null);
+    setShowDeleteModal(false);
+    setSelectedVideo(null);
   };
 
   // تعديل الفيديو
   const handleEdit = (videoId) => {
     const video = apiData.results.find((v) => v.id === videoId);
     setEditingVideo(video);
-    setShowCreateEditModal(true);
-  };
-
-  // إنشاء فيديو جديد
-  const handleCreateNew = () => {
-    setEditingVideo(null);
     setShowCreateEditModal(true);
   };
 
@@ -376,14 +362,20 @@ function VideosList({ onSectionChange }) {
                   </button>
                   <button
                     title={t("Edit")}
-                    onClick={() => onSectionChange("createOrEditVideo")}
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setShowCreateEditModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
                     title={t("Delete")}
-                    onClick={() => handleDelete(video.id)}
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setShowDeleteModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -515,7 +507,7 @@ function VideosList({ onSectionChange }) {
         width="900px"
       >
         <CreateOrEditVideo
-          video={editingVideo}
+          video={selectedVideo}
           onClose={() => {
             setShowCreateEditModal(false);
             setEditingVideo(null);
@@ -527,21 +519,20 @@ function VideosList({ onSectionChange }) {
 
       {/* Start Delete Video Modal */}
       <Modal
-        isOpen={showDeleteVideoModal}
+        isOpen={showDeleteModal}
         onClose={handleCancelDelete}
         title={t("Confirm Deletion")}
         width="500px"
       >
         <DeleteConfirmation
-          isOpen={showDeleteVideoModal}
+          isOpen={showDeleteModal}
           onClose={handleCancelDelete}
           onConfirm={handleConfirmDelete}
           title={t("Delete Video")}
           message={t(
             "Are you sure you want to delete this video? This action cannot be undone."
           )}
-          itemName={videoToDelete?.title}
-          loading={deleteLoading}
+          itemName={selectedVideo?.title}
         />
       </Modal>
       {/* End Delete Video Modal */}
