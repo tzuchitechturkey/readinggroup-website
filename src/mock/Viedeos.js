@@ -79,38 +79,6 @@ export const mockVideos = [
     number: "5",
     videoUrl: "https://www.youtube.com/watch?v=example5",
   },
-  {
-    id: 6,
-    title: "Digital Workshop",
-    duration: "1h 5min",
-    category: "Workshop",
-    type: "Unit Video",
-    subject: "Technology",
-    language: "Chinese",
-    image: "/src/assets/1-top5.jpg",
-    views: "9,567",
-    timeAgo: "4 days ago",
-    featured: true,
-    isNew: true,
-    number: "6",
-    videoUrl: "https://www.youtube.com/watch?v=example6",
-  },
-  {
-    id: 7,
-    title: "Cultural Discussion",
-    duration: "2h 10min",
-    category: "Discussion",
-    type: "Full Videos",
-    subject: "Culture",
-    language: "Arabic",
-    image: "/src/assets/authback.jpg",
-    views: "18,234",
-    timeAgo: "1 month ago",
-    featured: false,
-    isNew: false,
-    number: "7",
-    videoUrl: "https://www.youtube.com/watch?v=example7",
-  },
 ];
 
 export const topCast = [
@@ -137,16 +105,6 @@ export const topCast = [
   {
     id: 5,
     name: "AYMEN KALIL",
-    image: "/src/assets/Beared Guy02-min 1.png",
-  },
-  {
-    id: 6,
-    name: "BASIL KALIL",
-    image: "/src/assets/Beared Guy02-min 1.png",
-  },
-  {
-    id: 7,
-    name: "Murray Bartlett",
     image: "/src/assets/Beared Guy02-min 1.png",
   },
 ];

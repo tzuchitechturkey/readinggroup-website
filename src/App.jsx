@@ -3,6 +3,7 @@ import { ToastContainer } from "react-toastify";
 
 import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
 import Navbar from "@/components/Global/Navbar/Navbar";
+import ScrollToTop from "@/components/Global/ScrollToTop/ScrollToTop";
 
 import { userRoutes, authRoutes } from "./routes/allRoutes";
 import Footer from "./components/Global/Footer/Footer";
@@ -39,6 +40,8 @@ function App() {
           />
         ))}
       </Routes>
+
+      <ScrollToTop />
       <ToastContainer />
     </div>
   );
