@@ -35,20 +35,20 @@ export default function CarouselDemo() {
     },
   ];
   return (
-    <div className="w-full pt-8 ">
+    <div className="w-full pt-8  ">
       <Carousel
-        className="w-full "
+        className="w-full  "
         opts={{
           align: "center",
           loop: true,
           skipSnaps: false,
         }}
       >
-        <CarouselContent className="-ml-2 md:-ml-4">
+        <CarouselContent className="  md:-ml-4 px-2">
           {slides.map((slide) => (
             <CarouselItem
               key={slide.id}
-              className="pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"
+              className=" md:pl-4  border-[red] md:basis-4/5 lg:basis-11/12"
             >
               <div className="relative w-full h-96 md:h-[500px] overflow-hidden rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-3xl group cursor-pointer">
                 {/* Start Background image */}

@@ -98,20 +98,20 @@ function CustomyoutubeVideo({ videoData }) {
 
   const youTube = isYouTubeUrl(video.videoUrl);
   return (
-    <div className="bg-gray-100">
-      <div className="">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden  mx-auto">
+    <div className="bg-gray-100 px-4 sm:px-0  ">
+      <div className="  ">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div
             className="relative bg-black"
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(true)}
           >
             {/* Start video player */}
-            <div className="w-full  relative">
+            <div className="w-full relative aspect-video">
               {video.videoUrl ? (
                 youTube ? (
                   <iframe
-                    className="w-full h-[620px]"
+                    className="w-full h-full"
                     src={getYouTubeEmbedUrl(video.videoUrl)}
                     title={video.title || "YouTube video"}
                     frameBorder="0"
@@ -122,7 +122,7 @@ function CustomyoutubeVideo({ videoData }) {
                 ) : (
                   <video
                     ref={videoRef}
-                    className="w-full h-[700px] object-cover cursor-pointer"
+                    className="w-full h-full object-cover cursor-pointer"
                     poster={video.thumbnail}
                     controls={false}
                     onTimeUpdate={handleTimeUpdate}
@@ -141,9 +141,13 @@ function CustomyoutubeVideo({ videoData }) {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white bg-black/50 p-6 rounded-lg">
-                      <div className="text-4xl mb-3">▶</div>
-                      <p className="text-sm opacity-80">Video Link</p>
+                    <div className="text-center text-white bg-black/50 p-4 sm:p-6 rounded-lg">
+                      <div className="text-2xl sm:text-3xl md:text-4xl mb-2 sm:mb-3">
+                        ▶
+                      </div>
+                      <p className="text-xs sm:text-sm opacity-80">
+                        Video Link
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -152,14 +156,14 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* End video player */}
 
-            {/* Blur backgound*/}
-            <div className="pointer-events-none absolute -bottom-8 left-0 right-0 h-8 bg-gradient-to-b from-black/60 via-black/25 to-transparent" />
+            {/* Blur background*/}
+            <div className="pointer-events-none absolute -bottom-6 sm:-bottom-8 left-0 right-0 h-6 sm:h-8 bg-gradient-to-b from-black/60 via-black/25 to-transparent" />
 
             {!youTube && showControls && (
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="px-4 pb-4 pt-8">
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-6 sm:pt-8">
                   {/* Start progressbar */}
-                  <div className="mb-4">
+                  <div className="mb-3 sm:mb-4">
                     <div
                       className="w-full bg-white/30 rounded-full h-1 cursor-pointer"
                       onClick={handleProgressClick}
@@ -178,14 +182,14 @@ function CustomyoutubeVideo({ videoData }) {
 
                   {/* Start Controls */}
                   <div className="flex items-center justify-between text-white">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                       <button
                         onClick={handlePlayPause}
-                        className="hover:text-gray-300"
+                        className="hover:text-gray-300 text-sm sm:text-base"
                       >
-                        {isPlaying ? t("peuse") : t("play")}
+                        {isPlaying ? t("pause") : t("play")}
                       </button>
-                      <span className="text-xs">
+                      <span className="text-xs sm:text-sm">
                         {formatTime(currentTime)} / {formatTime(duration)}
                       </span>
                     </div>
@@ -196,30 +200,28 @@ function CustomyoutubeVideo({ videoData }) {
             )}
           </div>
 
-          {/* Start Viedo Info */}
-          <div className="relative py-5 px-6 md:px-10 z-50 ">
+          {/* Start Video Info */}
+          <div className="relative py-4 sm:py-5 md:py-6 px-4 sm:px-6 md:px-8 lg:px-10 z-50">
             {/* Blur Background*/}
-            <div className="pointer-events-none absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
+            <div className="pointer-events-none absolute -top-3 sm:-top-4 left-0 right-0 h-3 sm:h-4 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
 
             {/* Start Tags && Watch on YouTube Button */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
               {/* Start Tags */}
               {Array.isArray(video.tags) && video.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2  ">
+                <div className="flex flex-wrap gap-2">
                   {video.tags.map((t, i) => (
                     <span
                       key={`${t}-${i}`}
-                      className={`px-3 py-1 bg-transparent  ${
+                      className={`px-2 sm:px-3 py-1 bg-transparent ${
                         i === 0 ? "border-[1px] border-text" : ""
-                      } text-sm rounded-full`}
+                      } text-xs sm:text-sm rounded-full`}
                     >
                       {t}
                     </span>
                   ))}
                   {video.durationText && (
-                    <span
-                      className={`px-3 py-1 bg-transparent   text-sm rounded-full`}
-                    >
+                    <span className="px-2 sm:px-3 py-1 bg-transparent text-xs sm:text-sm rounded-full">
                       {video.durationText}
                     </span>
                   )}
@@ -227,12 +229,12 @@ function CustomyoutubeVideo({ videoData }) {
               )}
               {/* End Tags */}
               {/* Start Watch on YouTube Button */}
-              <button className=" flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-4 py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] ">
-                <span className=" font-medium">{t("Watch on YouTube")}</span>
+              <button className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap">
+                <span className="font-medium">{t("Watch on YouTube")}</span>
                 <img
                   src="../../../src/assets/icons/youtube-icon.png"
                   alt="YouTube"
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                 />
               </button>
               {/* End Watch on YouTube Button */}
@@ -241,7 +243,7 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* Start Title */}
             {video.title && (
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 my-7">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 my-4 sm:my-5 md:my-6 lg:my-7 leading-tight">
                 {video.title}
               </h2>
             )}
@@ -249,7 +251,7 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* Start Views */}
             {(video.views || video.timeAgo) && (
-              <div className="flex items-center gap-3 text-gray-600">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
                 {video.views && <span>{video.views}</span>}
                 {video.views && video.timeAgo && <span>•</span>}
                 {video.timeAgo && <span>{video.timeAgo}</span>}
@@ -259,8 +261,8 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* Start Description */}
             {video.description && (
-              <div className="  pt-8 max-w-5xl">
-                <p className="text-gray-700 leading-relaxed">
+              <div className="pt-4 sm:pt-6 md:pt-8 max-w-5xl">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   <ShowHideText text={video.description} t={t} count={210} />
                 </p>
               </div>
@@ -268,29 +270,35 @@ function CustomyoutubeVideo({ videoData }) {
             {/* End Description */}
 
             {/* Start social Actions */}
-            <div className="flex items-center gap-6 text-gray-700 my-8">
-              <button className="flex items-center gap-2 hover:text-black">
-                <ThumbsUp />
-                <span className="text-xl font-semibold">21K</span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700 my-4 sm:my-6 md:my-8">
+              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
+                <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
+                  21K
+                </span>
               </button>
 
-              <button className="flex items-center gap-2 hover:text-black">
+              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
                 <img
                   src="../../../src/assets/icons/share_icon.png"
                   alt="share"
-                  className="size-8"
+                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
                 />
-                <span className="text-xl font-semibold">{t("Share")}</span>
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
+                  {t("Share")}
+                </span>
               </button>
 
-              <button className="flex items-center gap-2 hover:text-black">
-                <ListPlus />
-                <span className="text-xl font-semibold">{t("Save")}</span>
+              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
+                <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
+                  {t("Save")}
+                </span>
               </button>
 
-              <button className="flex items-center gap-2 hover:text-black">
+              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -304,31 +312,31 @@ function CustomyoutubeVideo({ videoData }) {
             </div>
             {/* End social Actions */}
             {/* Start channel info */}
-            <div className="mt-6 flex items-center gap-10">
+            <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Start Image && Name && Subscribers */}
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                 <img
                   src={video.channelAvatar}
                   alt={video.channelName}
-                  className="w-14 h-14 rounded-full object-cover"
+                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover"
                 />
                 <div>
-                  {/* Start  Name&&  Verify Icon */}
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-2xl text-gray-900">
+                  {/* Start Name && Verify Icon */}
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
                       {video.channelName}
                     </span>
                     {video.channelVerified && (
                       <img
                         src="../../../src/assets/icons/verifyAcoount.png"
                         alt="Verified"
-                        className="w-5 h-5"
+                        className="w-4 h-4 sm:w-5 sm:h-5"
                       />
                     )}
                   </div>
-                  {/* Start Name && Verify Icon */}
+                  {/* End Name && Verify Icon */}
                   {/* Start Subscribers */}
-                  <div className="mt-1 text-gray-500">
+                  <div className="mt-1 text-gray-500 text-xs sm:text-sm md:text-base">
                     {video.channelSubscribers}
                   </div>
                   {/* End Subscribers */}
@@ -336,7 +344,7 @@ function CustomyoutubeVideo({ videoData }) {
               </div>
               {/* End Image && Name && Subscribers */}
               {/* Start Followers Buttons */}
-              <button className="px-4 py-1.5 rounded-full border border-primary text-gray-900 hover:bg-primary hover:text-white transition-all duration-200">
+              <button className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary text-gray-900 hover:bg-primary hover:text-white transition-all duration-200 text-sm sm:text-base whitespace-nowrap">
                 {t("Followers")}
               </button>
               {/* End Followers Buttons */}

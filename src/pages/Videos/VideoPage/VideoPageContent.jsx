@@ -20,8 +20,8 @@ function VideoPageContent() {
       {/* Start Content of a similar type */}
       <div className="bg-white">
         <DynamicSection
-          title="Content of a similar type"
-          titleClassName=""
+          title="Similar Content"
+          titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium  "
           data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
