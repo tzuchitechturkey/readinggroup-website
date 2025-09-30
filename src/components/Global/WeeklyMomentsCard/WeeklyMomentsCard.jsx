@@ -1,6 +1,9 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 function WeeklyMomentsCard({ item }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-[#fff]   p-4 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  ">
       {/* Start Image */}

@@ -537,26 +537,63 @@ const SidebarMenuButton = React.forwardRef(
         <TooltipTrigger asChild>{button}</TooltipTrigger>
         <TooltipContent
           side="right"
-          align="center"
-          className=" bg-sidebarTextBg  text-[#989898] hover:text-sidebarTextHover shadow-lg"
+          align="start"
+          className="bg-sidebarTextBg border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg p-3 min-w-[180px] max-w-[250px] animate-in fade-in-0 zoom-in-95 slide-in-from-left-2 duration-200"
           hidden={state !== "collapsed" || isMobile}
+          sideOffset={8}
           {...tooltip}
         >
           {/* Show child items if present and valid */}
-          {tooltipChild?.length > 0
-            ? tooltipChild.map((child, idx) => (
-                <div key={idx} className="mt-2 flex flex-col gap-1 rounded-sm">
+          {tooltipChild?.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              {/* العناصر الفرعية */}
+              {tooltipChild.map((child, idx) => {
+                // تحقق من حالة النشاط للعنصر الفرعي
+                const isChildActive =
+                  props.activeSection &&
+                  (props.activeSection === child.title?.toLowerCase() ||
+                    props.activeSection ===
+                      child.title?.replace(/\s+/g, "").toLowerCase());
+
+                return (
                   <button
-                    onClick={() => {
-                      console.log(props, " child");
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (
+                        child.onClick &&
+                        typeof child.onClick === "function"
+                      ) {
+                        child.onClick();
+                      } else if (props.onChildClick) {
+                        props.onChildClick(child.title);
+                      }
                     }}
-                    className="block px-2 py-1 text-[#989898] hover:text-sidebarTextHover text-center rounded hover:bg-sidebarTextBgHover  text-sm"
+                    className={`flex items-center gap-2 px-3 py-2 text-start rounded-md text-sm transition-all duration-200 w-full group cursor-pointer ${
+                      isChildActive
+                        ? "text-primary border-[1px] border-primary font-medium"
+                        : "text-sidebarText hover:text-sidebarTextHover hover:bg-sidebarTextBgHover"
+                    }`}
                   >
-                    {child.title}
+                    <span>{child.title}</span>
                   </button>
-                </div>
-              ))
-            : tooltip.children}
+                );
+              })}
+            </div>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // منع انتشار الحدث
+                // عند الضغط على عنصر أب لا يحتوي على أبناء، انتقل لصفحته
+                if (props.onParentClick) {
+                  props.onParentClick(tooltip.children);
+                }
+              }}
+              className="flex items-center gap-2 px-1 py-1 text-sidebarText hover:text-sidebarTextHover text-start rounded-md hover:bg-sidebarTextBgHover text-sm transition-all duration-200 w-full cursor-pointer"
+            >
+              <span>{tooltip.children}</span>
+            </button>
+          )}
         </TooltipContent>
       </Tooltip>
     );

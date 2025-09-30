@@ -52,7 +52,7 @@ function LoginForm() {
     }
     toast.success(t("Login successful"));
     setShowFirstLoginModal(true);
-    // navigate("/");
+    // navigate("/dashboard");
     // setIsLoading(true);
     // try {
     //   const res = await Login({ email: userName, password });

@@ -1,9 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useTranslation } from "react-i18next";
-
-
 import {
   useSidebar,
   SidebarGroup,
@@ -28,67 +25,103 @@ export function DynamicNav({
   activeSection,
   activeParent,
 }) {
-  const { t } = useTranslation();
   const { state } = useSidebar(); // 'expanded' | 'collapsed'
   const { t } = useTranslation();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{t("MAIN")}</SidebarGroupLabel>
       <SidebarMenu>
-        {data.map((item) => (
-          <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem className="">
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  className={`text-sidebarText hover:text-sidebarTextHover py-5  gap-3 hover:bg-sidebarTextBgHover ${
-                    state === "collapsed" ? "my-[2px]" : ""
-                  }`}
-                  tooltip={item.title}
-                  tooltipChild={
-                    item.items && item.items.length > 0 ? item.items : []
-                  }
-                >
-                  {typeof item.icon === "string" ? (
-                    <img
-                      src={item.icon}
-                      alt={item.title}
-                      className="w-5 h-5 object-contain max-w-max"
-                    />
-                  ) : (
-                    <span className="w-5 h-5 flex items-center justify-center">
-                      {item.icon}
-                    </span>
-                  )}
-                  <span>{item.title}</span>
-                  {item.items && item.items.length > 0 && (
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a
-                          href={subItem.url}
-                          className="  hover:text-sidebarTextHover ml-3 py-5"
-                        >
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        ))}
+        {data.map((item) => {
+          // تحديد ما إذا كان يجب فتح العنصر تلقائياً
+          const shouldOpen = item.isActive || activeParent === item.title;
+
+          return (
+            <Collapsible
+              key={item.title}
+              asChild
+              defaultOpen={shouldOpen}
+              className="group/collapsible"
+            >
+              <SidebarMenuItem className="">
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      if (!item.items || item.items.length === 0) {
+                        const key = getSectionKey(item.title);
+                        onSectionChange(key);
+                      }
+                    }}
+                    onChildClick={(childTitle) => {
+                      const key = getSectionKey(childTitle);
+                      onSectionChange(key);
+                    }}
+                    onParentClick={(parentTitle) => {
+                      const key = getSectionKey(parentTitle);
+                      onSectionChange(key);
+                    }}
+                    activeSection={activeSection}
+                    className={`py-5 gap-3 ${
+                      state === "collapsed" ? "my-[2px]" : ""
+                    } ${
+                      activeParent === item.title ||
+                      (!item.items &&
+                        activeSection === getSectionKey(item.title))
+                        ? "text-primary bg-sidebarTextBgHover "
+                        : "text-sidebarText hover:text-sidebarTextHover hover:bg-sidebarTextBgHover"
+                    }`}
+                    tooltip={item.title}
+                    tooltipChild={
+                      item.items && item.items.length > 0 ? item.items : []
+                    }
+                  >
+                    {typeof item.icon === "string" ? (
+                      <img
+                        src={item.icon}
+                        alt={item.title}
+                        className="w-5 h-5 object-contain max-w-max"
+                      />
+                    ) : (
+                      <span className="w-5 h-5 flex items-center justify-center">
+                        {item.icon}
+                      </span>
+                    )}
+                    <span>{item.title}</span>
+                    {item.items && item.items.length > 0 && (
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    )}
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {item.items?.map((subItem) => {
+                      const key = getSectionKey(subItem.title);
+                      const isActive = activeSection === key;
+
+                      return (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <button
+                              onClick={() => {
+                                onSectionChange(key);
+                              }}
+                              className={`ml-3 py-5 ${
+                                isActive
+                                  ? " bg-sidebarTextBgHover !text-primary "
+                                  : "text-sidebarText hover:text-primary"
+                              }`}
+                            >
+                              <span>{subItem.title}</span>
+                            </button>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      );
+                    })}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );

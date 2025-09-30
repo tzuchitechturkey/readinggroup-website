@@ -43,7 +43,28 @@ export default function Page() {
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, parent = null) => {
     setActiveSection(section);
-    setActiveParent(parent);
+    
+    // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
+    let autoParent = parent;
+    if (!autoParent) {
+      // خريطة لتحديد العنصر الأب للعناصر الفرعية
+      const parentMap = {
+        "refunds": "Read",
+        "declines": "Read", 
+        "payouts": "Read",
+        "cards": "Cards Or Photos",
+        "photos": "Cards Or Photos",
+        "posts": "Posts",
+        "createOrEditPost": "Posts",
+        "videos": "Videos",
+        "createOrEditVideo": "Videos",
+        "team": "About Us",
+        // يمكن إضافة المزيد حسب الحاجة
+      };
+      autoParent = parentMap[section] || null;
+    }
+    
+    setActiveParent(autoParent);
   };
 
   const renderContent = () => {
