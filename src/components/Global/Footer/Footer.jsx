@@ -2,10 +2,13 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 
 function Footer({ authPages }) {
   // تحديد إذا كانت اللغة الحالية RTL
+  const isMobile = useIsMobile(1224);
+
   const rtlLanguages = ["ar", "fa", "he", "ur"];
   const currentLang = localStorage.getItem("I18N_LANGUAGE") || "en";
   const isRTL = rtlLanguages.includes(currentLang);
@@ -38,20 +41,6 @@ function Footer({ authPages }) {
   return (
     <div
       className={`px-4 sm:px-8 md:px-10 lg:px-20 ${authPages ? "w-full" : ""}`}
-      style={
-        authPages
-          ? {
-              position: "absolute",
-              left: 0,
-              bottom: 0,
-              width: "100%",
-              minHeight: "180px",
-              maxHeight: "220px",
-              background: "rgba(255,255,255,0.01)",
-              zIndex: 10,
-            }
-          : {}
-      }
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Start Input  */}
@@ -91,15 +80,21 @@ function Footer({ authPages }) {
         </p>
       </div>
 
-      <div className="py-6 border-t mt-5 border-[#ececec] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0">
-        <ul className="md:flex md:flex-wrap md:items-center gap-4 sm:gap-6 mb-4 md:mb-0 w-full md:w-auto">
+      <div
+        className={`mt-4 py-6 border-t  lg:mt-5 border-[#ececec] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0`}
+      >
+        <ul
+          className={`${
+            authPages ? "hidden" : "md:flex md:flex-wrap "
+          } md:items-center gap-4 sm:gap-6 mb-4 md:mb-0 w-full md:w-auto`}
+        >
           {linkList.map((link, index) => (
             <li key={index}>
               <a
                 href={link.href}
                 className={`${
                   authPages ? "text-[#ffffff] " : "text-[#141414]"
-                }  relative inline-block group hover:text-[#999EAD] text-xs sm:text-sm transition-colors duration-300 ease-out`}
+                }  relative inline-block group hover:text-[#999EAD] my-1 md:my-0 text-base lg:text-sm transition-colors duration-300 ease-out`}
               >
                 {link.name}
                 <span
@@ -111,22 +106,22 @@ function Footer({ authPages }) {
           ))}
         </ul>
         {/* Start Social Links and Language Dropdown */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4  ">
           {socialLinks.map((link, index) => (
             <a
               key={index}
               href={link.href}
-              className={`text-white group`}
+              className={`text-black lg:text-white group`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <i
-                className={`${link.icon} w-5 h-5 text-xl text-white transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
+                className={`${link.icon} w-5 h-5 text-xl text-black lg:text-white transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
                 aria-label={link.name}
               />
             </a>
           ))}
-          <LanguageDropdown iconColor="#fff" />
+          <LanguageDropdown iconColor={isMobile ? "#000" : "#fff"} />
         </div>
         {/* End Social Links */}
       </div>

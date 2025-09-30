@@ -29,7 +29,7 @@ function App() {
                 {!isDashboard && <Navbar />}
                 {route.element}
                 {!isDashboard && (
-                  <div className="mt-24">
+                  <div className="md:12 lg:mt-24">
                     <Footer />
                   </div>
                 )}

@@ -58,7 +58,10 @@ export default function Page() {
         "createOrEditPost": "Posts",
         "videos": "Videos",
         "createOrEditVideo": "Videos",
+        "history": "About Us",
         "team": "About Us",
+        "settings": "Settings",
+        "profile": "Settings",
         // يمكن إضافة المزيد حسب الحاجة
       };
       autoParent = parentMap[section] || null;

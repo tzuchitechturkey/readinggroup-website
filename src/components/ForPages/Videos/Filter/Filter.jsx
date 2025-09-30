@@ -2,7 +2,6 @@ import React from "react";
 
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,34 +10,33 @@ function Filter({
   selectedDateRange,
   setSelectedDateRange,
 }) {
-  const { t } = useTranslation();
   return (
-    <div className="w-80 flex-shrink-0">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="w-full lg:w-80 flex-shrink-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
         {/* Side Filtration */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text">Side filtration</h3>
+        <div className="mb-4 sm:mb-5 lg:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-text">Side filtration</h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
           {/* Content Type Filter */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">All content</span>
+              <span className="text-xs sm:text-sm text-gray-700">All content</span>
               <span className="text-xs bg-gray-100 px-2 py-1 rounded">169</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="full-videos"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
               <label
                 htmlFor="full-videos"
-                className="text-sm text-gray-700 flex-1"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
               >
                 Full Videos
               </label>
@@ -47,16 +45,16 @@ function Filter({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="unit-video"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
               <label
                 htmlFor="unit-video"
-                className="text-sm text-gray-700 flex-1"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
               >
                 Unit Video
               </label>
@@ -68,23 +66,23 @@ function Filter({
         </div>
 
         {/* Index Subject */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-medium text-gray-900">
+        <div className="mb-4 sm:mb-5 lg:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900">
               Index Subject
             </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="health"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
-              <label htmlFor="health" className="text-sm text-gray-700 flex-1">
+              <label htmlFor="health" className="text-xs sm:text-sm text-gray-700 flex-1">
                 Health
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -92,16 +90,16 @@ function Filter({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="environment"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
               <label
                 htmlFor="environment"
-                className="text-sm text-gray-700 flex-1"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
               >
                 Environment
               </label>
@@ -110,15 +108,15 @@ function Filter({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="education"
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
               <label
                 htmlFor="education"
-                className="text-sm text-gray-700 flex-1"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
               >
                 Education
               </label>
@@ -128,21 +126,21 @@ function Filter({
         </div>
 
         {/* Language Filter */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-medium text-gray-900">Language</h3>
+        <div className="mb-4 sm:mb-5 lg:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900">Language</h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="arabic"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
-              <label htmlFor="arabic" className="text-sm text-gray-700 flex-1">
+              <label htmlFor="arabic" className="text-xs sm:text-sm text-gray-700 flex-1">
                 Arabic
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -150,14 +148,14 @@ function Filter({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="chinese"
                 defaultChecked
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
-              <label htmlFor="chinese" className="text-sm text-gray-700 flex-1">
+              <label htmlFor="chinese" className="text-xs sm:text-sm text-gray-700 flex-1">
                 Chinese
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -165,15 +163,15 @@ function Filter({
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="japanese"
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4"
               />
               <label
                 htmlFor="japanese"
-                className="text-sm text-gray-700 flex-1"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
               >
                 Japanese
               </label>
@@ -184,10 +182,10 @@ function Filter({
 
         {/* Date Filter */}
         <div className="">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
             <button
               onClick={() => setIsDateModalOpen(true)}
-              className="flex items-center gap-2 text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 text-sm sm:text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
             >
               <Calendar className="w-4 h-4" />
               Date
@@ -197,9 +195,9 @@ function Filter({
 
           {/* Selected Date Display */}
           {(selectedDateRange.startDate || selectedDateRange.endDate) && (
-            <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-blue-800">
+            <div className="mb-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start sm:items-center justify-between gap-2">
+                <div className="text-xs sm:text-sm text-blue-800 flex-1 min-w-0 break-words">
                   {selectedDateRange.startDate && selectedDateRange.endDate
                     ? `${format(
                         selectedDateRange.startDate,
@@ -224,11 +222,11 @@ function Filter({
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
             <Button
               variant="outline"
               size="sm"
-              className="text-gray-600"
+              className="text-gray-600 text-xs sm:text-sm px-3 py-2"
               onClick={() =>
                 setSelectedDateRange({ startDate: null, endDate: null })
               }
@@ -237,7 +235,7 @@ function Filter({
             </Button>
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
               onClick={() => setIsDateModalOpen(true)}
             >
               Apply
