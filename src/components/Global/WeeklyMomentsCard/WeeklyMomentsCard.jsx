@@ -1,6 +1,9 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 function WeeklyMomentsCard({ item }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-[#fff]   p-4 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  ">
       {/* Start Image */}
@@ -28,7 +31,7 @@ function WeeklyMomentsCard({ item }) {
         <div className="text-xs flex items-center gap-1">
           <span className="text-primary">SEPT 02</span>
           <span className="  text-xs">
-            STARTING AT {item.startTime}
+            {t("STARTING AT")} {item.startTime}
           </span>
         </div>
         {/* End Date */}
@@ -50,9 +53,7 @@ function WeeklyMomentsCard({ item }) {
             <div className="text-text">{item.source}</div>
           </div>
           <div>
-            <div className="text-primary font-semibold mb-[6px]">
-              Language
-            </div>
+            <div className="text-primary font-semibold mb-[6px]">Language</div>
             <div className="text-text">{item.language}</div>
           </div>
         </div>

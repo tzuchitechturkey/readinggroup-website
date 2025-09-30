@@ -8,7 +8,10 @@ import Loader from "@/components/Global/Loader/Loader";
 import { Register } from "@/api/auth";
 
 function RegisterForm() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const rtlLanguages = ["ar", "fa", "he", "ur"];
+  const currentLang = i18n.language || "en";
+  const isRTL = rtlLanguages.includes(currentLang);
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +58,7 @@ function RegisterForm() {
   }
 
   return (
-    <div className="dir-ltr">
+    <div dir={isRTL ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}

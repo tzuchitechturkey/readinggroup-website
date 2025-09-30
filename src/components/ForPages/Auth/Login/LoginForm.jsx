@@ -8,8 +8,17 @@ import { toast } from "react-toastify";
 import Loader from "@/components/Global/Loader/Loader";
 import { Login } from "@/api/auth";
 
+import ResetPasswordModal from "../ResetPassword/ResetPasswordModal";
+import FirstLoginResetPasswordModal from "./FirstLoginResetPasswordModal";
+
 function LoginForm() {
+  // تحديد إذا كانت اللغة الحالية RTL
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
   const { t, i18n } = useTranslation();
+  const rtlLanguages = ["ar", "fa", "he", "ur"];
+  const currentLang = i18n.language || "en";
+  const isRTL = rtlLanguages.includes(currentLang);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState("");
@@ -24,7 +33,7 @@ function LoginForm() {
     ar: "ar",
     tr: "tr",
     sp: "es",
-    ch: "zh-CN",
+    ch: "ch",
     ua: "uk",
   };
   const recaptchaLang = recaptchaLangMap[i18n.language] || "en";
@@ -42,8 +51,8 @@ function LoginForm() {
       return;
     }
     toast.success(t("Login successful"));
-
-    navigate("/");
+    setShowFirstLoginModal(true);
+    // navigate("/dashboard");
     // setIsLoading(true);
     // try {
     //   const res = await Login({ email: userName, password });
@@ -58,7 +67,7 @@ function LoginForm() {
     // recaptchaRef.current?.reset();
   }
   return (
-    <div className="dir-ltr">
+    <div dir={isRTL ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
@@ -118,21 +127,37 @@ function LoginForm() {
           {t("Sign In")}
         </button>
 
-        {/* Start Remember Me && Need Help */}
+        {/* forgot password */}
         <div className="flex items-center justify-between mt-8">
-          <div>
-            <input type="checkbox" id="rememberMe" className="mr-2" />
-            <label htmlFor="rememberMe" className="text-sm text-gray-400">
-              {t("Remember Me")}
-            </label>
-          </div>
           <div className="">
-            <Link to="/help" className="text-sm text-gray-400">
-              {t("Need Help?")}
-            </Link>
+            <button
+              type="button"
+              className="text-sm text-primary focus:outline-none"
+              onClick={() => setShowResetModal(true)}
+            >
+              {t("forgot password ?")}
+            </button>
           </div>
         </div>
-        {/* End Remember Me && Need Help */}
+        {/* forgot password*/}
+        {/* Reset Password Modal */}
+        {showResetModal && (
+          <ResetPasswordModal
+            open={true}
+            onClose={() => setShowResetModal(false)}
+          />
+        )}
+        {/* First Login Reset Password Modal */}
+        {showFirstLoginModal && (
+          <FirstLoginResetPasswordModal
+            open={true}
+            onClose={() => setShowFirstLoginModal(false)}
+            onSubmit={() => {
+              setShowFirstLoginModal(false);
+              navigate("/");
+            }}
+          />
+        )}
         {/* Start Don't have an account? */}
         <div className="flex items-center justify-center mt-4">
           <span className="text-sm text-gray-400 mr-2">

@@ -8,8 +8,10 @@
   --color-text: #000000;
   --color-sidebarTextBg: #fff;
   --color-sidebarTextBgHover: #edf3ff;
+  --color-sidebarTextBgActive: #4680ff;
   --color-sidebarText: #292d32;
   --color-sidebarTextHover: #0088ff;
+  --color-sidebarTextActive: #ffffff;
   --color-sidebarSubArrow: #edf3ff;
 }
 
@@ -19,8 +21,10 @@
   --color-text: #ffffff;
   --color-sidebarTextBg: #000;
   --color-sidebarTextBgHover: #2d2f39;
+  --color-sidebarTextBgActive: #4680ff;
   --color-sidebarText: #ffffff80;
   --color-sidebarTextHover: #ffffffcc;
+  --color-sidebarTextActive: #ffffff;
   --color-sidebarSubArrow: #27272a;
 }
 
@@ -100,6 +104,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Increase base font size for better readability */
+    font-size: 16px; /* default browser base; makes text-sm/text-base larger relatively */
+    line-height: 1.6;
   }
 }
 /* custom scrollbar */

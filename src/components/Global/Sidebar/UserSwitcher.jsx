@@ -23,12 +23,12 @@ export function UserSwitcher({ data }) {
               </div>
               {/* End Avatar */}
               <div className="grid flex-1 text-left text-sm leading-tight">
-                {/* Start Position */}
-                <span className=" text-gray-500 text-xs">{data.plan}</span>
-                {/* End Position */}
                 {/* Start Name */}
                 <span className="truncate font-semibold mt-1">{data.name}</span>
                 {/* End Name */}
+                  {/* Start Position */}
+                <span className=" text-gray-500 text-xs">{data.plan}</span>
+                {/* End Position */}
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>

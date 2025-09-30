@@ -49,7 +49,7 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
-
+  console.log(post);
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -243,12 +243,6 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
         <h2 className="text-xl font-semibold text-[#1D2630]">
           {post ? t("Edit Post") : t("Create New Post")}
         </h2>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-full"
-        >
-          <X className="h-5 w-5 text-gray-500" />
-        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

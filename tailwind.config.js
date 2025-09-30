@@ -14,8 +14,10 @@ export default {
         text: "var(--color-text)",
         sidebarTextBg: "var(--color-sidebarTextBg)",
         sidebarTextBgHover: "var(--color-sidebarTextBgHover)",
+        sidebarTextBgActive: "var(--color-sidebarTextBgActive)",
         sidebarText: "var(--color-sidebarText)",
         sidebarTextHover: "var(--color-sidebarTextHover)",
+        sidebarTextActive: "var(--color-sidebarTextActive)",
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",

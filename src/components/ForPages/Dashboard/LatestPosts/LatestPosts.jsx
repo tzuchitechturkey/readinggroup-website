@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+
+import { useTranslation } from "react-i18next";
+
 import SubMenu from "@/components/Global/SubMenu/SubMenu";
-import edgeArrowIcon from "@/assets/icons/edgeArrow.png";
 import userAvatar from "@/assets/Beared Guy02-min 1.png";
 
 const posts = [
@@ -72,7 +76,8 @@ const posts = [
 ];
 
 function LatestPosts() {
-  const [data, setData] = useState(posts);
+  const { t } = useTranslation();
+  const [data] = useState(posts);
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   //   const getData = async () => {
   //     try {
@@ -86,9 +91,11 @@ function LatestPosts() {
   //     getData();
   //   }, []);
   return (
-    <aside className="bg-white rounded-lg border mr-6 border-gray-200">
+    <aside className="bg-white rounded-lg border mr-6 border-gray-200 w-80 md:w-96">
       <div className="px-4 sm:px-6 py-4 border-b">
-        <h3 className="text-sm font-medium text-[#1D2630]">Latest Posts</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-[#1D2630]">
+          {t("Latest Posts")}
+        </h3>
       </div>
       <div className="divide-y">
         {data.map((p, i) => (
@@ -102,26 +109,31 @@ function LatestPosts() {
               }`}
             >
               {/* Start User Avatar */}
-              <div className="flex-shrink-0 -mt-1 size-5 rounded-full ">
-                <img src={userAvatar} alt="icon" className="w-5 h-5 m-1.5" />
+              <div className="flex-shrink-0 -mt-1 rounded-full">
+                <img
+                  src={userAvatar}
+                  alt="icon"
+                  className="w-8 h-8 rounded-full"
+                />
               </div>
               {/* End User Avatar */}
 
               <div>
                 <div className="flex items-center gap-1">
                   {/* Start Edge Arrow */}
-                  <div className="p-1 w-5 h-5 flex items-center bg-[#E4E4E4] rounded-md">
-                    <img
-                      src={edgeArrowIcon}
-                      alt="icon"
-                      className="w-5 h-5 object-contain "
+                  <div className="p-1 w-5 h-5 flex items-center justify-center bg-[#E4E4E4] rounded-md">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3 text-[#333]"
                     />
                   </div>
                   {/* End Edge Arrow */}
 
                   <div>
-                    <p className="text-xs text-[#0057B7]">{p.title}</p>
-                    <p className="text-[8px] text-[#060606]">{p.subtitle}</p>
+                    <p className="text-sm font-medium text-[#0057B7]">
+                      {t(p.title)}
+                    </p>
+                    <p className="text-sm text-[#060606]">{t(p.subtitle)}</p>
                   </div>
                   <div className="ml-auto">
                     <SubMenu
@@ -132,7 +144,7 @@ function LatestPosts() {
                     />
                   </div>
                 </div>
-                <p className="mt-3 text-xs text-[#0057B7]">{p.excerpt}</p>
+                <p className="mt-3 text-sm text-[#0057B7]">{p.excerpt}</p>
               </div>
             </div>
           </div>

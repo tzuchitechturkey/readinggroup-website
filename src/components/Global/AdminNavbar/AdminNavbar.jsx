@@ -5,14 +5,21 @@ import AdminIcons from "../AdminIcons/AdminIcons";
 
 function AdminNavbar() {
   return (
-    <div className="grid grid-cols-[35%_65%] items-center shadow-md p-4 px-16 bg-bg ">
+    // Use a two-column layout where the left column sizes to content so the
+    <div className="grid grid-cols-[auto_1fr] items-center shadow-md p-4 px-16 bg-bg relative">
       {/* Start Search  */}
-      <div className="flex items-center justify-center">
-        <SearchInput />
+      <div className="flex items-center justify-start">
+        <div className="relative -ml-6 z-20">
+          <SearchInput />
+        </div>
       </div>
       {/* End Search  */}
       {/* Start User Icons */}
-      <AdminIcons />
+      <div className="flex justify-end">
+        <div className="flex items-center gap-4">
+          <AdminIcons />
+        </div>
+      </div>
       {/* End User Icons */}
     </div>
   );

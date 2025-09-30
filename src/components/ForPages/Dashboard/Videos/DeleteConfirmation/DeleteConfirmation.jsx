@@ -12,7 +12,6 @@ function DeleteConfirmation({
   title,
   message,
   itemName,
-  loading = false,
 }) {
   const { t } = useTranslation();
 
@@ -71,7 +70,6 @@ function DeleteConfirmation({
           type="button"
           variant="outline"
           onClick={onClose}
-          disabled={loading}
           className="px-4 py-2"
         >
           {t("Cancel")}
@@ -80,17 +78,9 @@ function DeleteConfirmation({
         <Button
           type="button"
           onClick={onConfirm}
-          disabled={loading}
           className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700"
         >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              {t("Deleting...")}
-            </span>
-          ) : (
-            t("Delete")
-          )}
+          {t("Delete")}
         </Button>
       </div>
     </div>

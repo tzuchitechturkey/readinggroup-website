@@ -1,4 +1,4 @@
-export default function StatusPill({ status }) {
+export default function StatusPill({ status, label }) {
   const cfg = {
     Delivered: {
       bg: "bg-[#CDF3E1]",
@@ -22,7 +22,7 @@ export default function StatusPill({ status }) {
       className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium ${cfg.bg} ${cfg.text}`}
     >
       <span className={`size-1.5 rounded-full ${cfg.dot}`} />
-      {status}
+      {label || status}
     </span>
   );
 }

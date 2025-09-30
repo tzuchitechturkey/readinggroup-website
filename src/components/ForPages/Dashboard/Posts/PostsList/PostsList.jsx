@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import {
   Table,
@@ -21,17 +22,21 @@ import {
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import { mockPosts } from "@/mock/Posts";
+import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import ShowPostDetails from "../ShowPostDetails/ShowPostDetails";
+import CreateOrEditPost from "../CreateOrEditPost/CreateOrEditPost";
 
 function PostsList({ onSectionChange }) {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [selectedPost, setSelectedPost] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showCreateEditModal, setShowCreateEditModal] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -92,18 +97,6 @@ function PostsList({ onSectionChange }) {
     }
   };
 
-  // جلب البيانات عند تحميل المكون أو تغيير الصفحة
-  useEffect(() => {
-    fetchPosts(currentPage, limit, sortConfig.key ? sortConfig : null);
-  }, [currentPage, limit]);
-
-  // جلب البيانات عند تغيير الترتيب
-  useEffect(() => {
-    if (sortConfig.key) {
-      fetchPosts(currentPage, limit, sortConfig);
-    }
-  }, [sortConfig]);
-
   // دالة ترتيب البيانات
   const sortData = (key) => {
     let direction = "asc";
@@ -143,57 +136,66 @@ function PostsList({ onSectionChange }) {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
-  // عرض تفاصيل المنشور
-  const handleViewDetails = (post) => {
-    setSelectedPost(post);
-    setShowDetailsModal(true);
-  };
-
   // تعديل المنشور
-  const handleEdit = (postId) => {
-    // هنا يتم فتح صفحة التعديل أو modal التعديل
-    alert(`${t("Edit post")}: ${postId}`);
-  };
-
-  // فتح نموذج تأكيد الحذف
-  const handleDelete = (postId) => {
-    const post = apiData.results.find((p) => p.id === postId);
-    setPostToDelete(post);
-    setShowDeleteModal(true);
-  };
+  const handleEdit = (post) => {};
 
   // تأكيد حذف المنشور
   const handleConfirmDelete = async () => {
-    if (!postToDelete) return;
-
-    setDeleteLoading(true);
-    try {
-      // هنا يتم إرسال طلب الحذف للسيرفر
-      // await deletePostAPI(postToDelete.id);
-
-      setShowDeleteModal(false);
-      setPostToDelete(null);
-
-      alert(t("Post deleted successfully"));
-
-      await fetchPosts(currentPage, limit, sortConfig.key ? sortConfig : null);
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      alert(t("An error occurred while deleting the post"));
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  // إلغاء حذف المنشور
-  const handleCancelDelete = () => {
+    toast.success(t("Post deleted successfully"));
     setShowDeleteModal(false);
-    setPostToDelete(null);
+    // apiData.results.find((p) => p.id === selectedPost?.id);
+
+    // if (!postToDelete) return;
+
+    // setIsLoading(true);
+    // try {
+    //   // هنا يتم إرسال طلب الحذف للسيرفر
+    //   // await deletePostAPI(postToDelete.id);
+
+    //   setShowDeleteModal(false);
+    //   setPostToDelete(null);
+
+    //   toast.success(t("Post deleted successfully"));
+
+    //   await fetchPosts(currentPage, limit, sortConfig.key ? sortConfig : null);
+    // } catch (error) {
+    //   console.error("Error deleting post:", error);
+    //   toast.error(t("An error occurred while deleting the post"));
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
+
+  const handleSavePost = async (postData) => {
+    toast.success(t("Post saved successfully"));
+    // setIsLoading(true);
+    // try {
+    //   // هنا يتم إرسال طلب الحفظ للسيرفر
+    // toast.success(t("Post saved successfully"));
+
+    // } catch (error) {
+    //   console.error("Error saving post:", error);
+    //   toast.error(t("An error occurred while saving the post"));
+    // } finally {
+    //   setIsLoading(false);
+    //   }
+  };
+
+  // جلب البيانات عند تحميل المكون أو تغيير الصفحة
+  useEffect(() => {
+    fetchPosts(currentPage, limit, sortConfig.key ? sortConfig : null);
+  }, [currentPage, limit]);
+
+  // جلب البيانات عند تغيير الترتيب
+  useEffect(() => {
+    if (sortConfig.key) {
+      fetchPosts(currentPage, limit, sortConfig);
+    }
+  }, [sortConfig]);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200">
-      {/* Header */}
+      {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">
           {t("Posts List")}
@@ -215,8 +217,9 @@ function PostsList({ onSectionChange }) {
           </button>
         </div>
       </div>
+      {/* End Header */}
 
-      {/* Table */}
+      {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14">
           <TableRow className="border-b">
@@ -334,21 +337,29 @@ function PostsList({ onSectionChange }) {
                 <div className="flex items-center gap-2 text-[#5B6B79]">
                   <button
                     title={t("View Details")}
-                    onClick={() => handleViewDetails(post)}
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowDetailsModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
                   >
                     <Eye className="h-4 w-4" />
                   </button>
                   <button
                     title={t("Edit")}
-                    onClick={() => handleEdit(post.id)}
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setShowCreateEditModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
                     title={t("Delete")}
-                    onClick={() => handleDelete(post.id)}
+                    onClick={() => {
+                      setShowDeleteModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -360,7 +371,7 @@ function PostsList({ onSectionChange }) {
         </TableBody>
       </Table>
 
-      {/* Pagination */}
+      {/* Start Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">
           <div className="text-sm text-gray-700">
@@ -381,13 +392,9 @@ function PostsList({ onSectionChange }) {
 
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = Math.max(
-                  1,
-                  Math.min(currentPage - 2 + i, totalPages - 4 + i)
-                );
-                if (pageNum < 1 || pageNum > totalPages) return null;
-
+                const pageNum = i + 1; // يبدأ من 1 ويزيد
                 const isActive = pageNum === currentPage;
+
                 return (
                   <button
                     key={pageNum}
@@ -402,7 +409,7 @@ function PostsList({ onSectionChange }) {
                     {pageNum}
                   </button>
                 );
-              }).filter(Boolean)}
+              })}
             </div>
 
             <button
@@ -416,6 +423,7 @@ function PostsList({ onSectionChange }) {
           </div>
         </div>
       )}
+      {/* End Pagination */}
 
       {/* Post Details Modal */}
       <Modal
@@ -427,59 +435,55 @@ function PostsList({ onSectionChange }) {
         <ShowPostDetails
           post={selectedPost}
           onClose={() => setShowDetailsModal(false)}
-          onEdit={handleEdit}
+          onEdit={() => {
+            setShowCreateEditModal(true);
+          }}
         />
       </Modal>
+      {/* Start Create/Edit Video Modal */}
+      <Modal
+        isOpen={showCreateEditModal}
+        onClose={() => {
+          setShowCreateEditModal(false);
+          setSelectedPost(null);
+        }}
+        title={selectedPost?.id ? t("Edit Video") : t("Create New Video")}
+        width="900px"
+      >
+        <CreateOrEditPost
+          post={selectedPost}
+          onClose={() => {
+            setShowCreateEditModal(false);
+            setSelectedPost(null);
+          }}
+          onSave={handleSavePost}
+        />
+      </Modal>
+      {/* End Create/Edit Video Modal */}
 
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={showDeleteModal}
-        onClose={handleCancelDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedPost(null);
+        }}
         title={t("Confirm Deletion")}
         width="500px"
       >
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-              <Trash2 className="h-6 w-6 text-red-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {t("Delete Post")}
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                {t(
-                  "Are you sure you want to delete this post? This action cannot be undone."
-                )}
-              </p>
-              {postToDelete && (
-                <div className="bg-gray-50 p-3 rounded-md border-l-4 border-red-400">
-                  <p className="font-medium text-gray-900">
-                    {t("Post to be deleted")}:
-                  </p>
-                  <p className="text-gray-700 mt-1">"{postToDelete.title}"</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t">
-            <button
-              onClick={handleCancelDelete}
-              disabled={deleteLoading}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md disabled:opacity-50"
-            >
-              {t("Cancel")}
-            </button>
-            <button
-              onClick={handleConfirmDelete}
-              disabled={deleteLoading}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50"
-            >
-              {deleteLoading ? t("Deleting...") : t("Delete")}
-            </button>
-          </div>
-        </div>
+        <DeleteConfirmation
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedPost(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title={t("Delete Post")}
+          message={t(
+            "Are you sure you want to delete this Post? This action cannot be undone."
+          )}
+          itemName={selectedPost?.title}
+        />
       </Modal>
     </div>
   );
