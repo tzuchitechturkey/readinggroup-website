@@ -12,7 +12,7 @@ function LoginContent() {
       }}
     >
       <div className="absolute inset-0 bg-cover bg-center w-full min-h-screen opacity-60 z-0 bg-black" />
-      <div className="relative z-1 mt-32">
+      <div className="relative z-1 mt-3">
         <LoginForm />
       </div>
       <div className="flex  items-end  h-full z-10 mt-20 flex-1">
