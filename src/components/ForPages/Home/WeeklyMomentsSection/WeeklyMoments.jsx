@@ -64,7 +64,7 @@ const WeeklyMoments = () => {
   ];
 
   return (
-    <div className="mt-12">
+    <div className="mt-6 md:mt-9 lg:mt-12">
       <DynamicSection
         title="This Weekly Moments"
         data={moments}

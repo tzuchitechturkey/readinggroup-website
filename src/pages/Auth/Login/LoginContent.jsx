@@ -12,10 +12,10 @@ function LoginContent() {
       }}
     >
       <div className="absolute inset-0 bg-cover bg-center w-full min-h-screen opacity-60 z-0 bg-black" />
-      <div className="relative z-1 mt-3">
+      <div className="relative z-1 mt-10 md:mt-16 lg:mt-32">
         <LoginForm />
       </div>
-      <div className="flex  items-end  h-full z-10 mt-20 flex-1">
+      <div className="flex items-end h-full z-10 mt-20 flex-1">
         <Footer authPages={true} />
       </div>
     </div>

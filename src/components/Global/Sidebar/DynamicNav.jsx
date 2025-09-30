@@ -67,7 +67,7 @@ export function DynamicNav({
                       (!item.items &&
                         activeSection === getSectionKey(item.title))
                         ? "text-primary bg-sidebarTextBgHover "
-                        : "text-sidebarText hover:text-sidebarTextHover hover:bg-sidebarTextBgHover"
+                        : "hover:!text-primary hover:bg-sidebarTextBgHover"
                     }`}
                     tooltip={item.title}
                     tooltipChild={
@@ -107,7 +107,7 @@ export function DynamicNav({
                               className={`ml-3 py-5 ${
                                 isActive
                                   ? " bg-sidebarTextBgHover !text-primary "
-                                  : "text-sidebarText hover:text-primary"
+                                  : "text-sidebarText hover:!text-primary"
                               }`}
                             >
                               <span>{subItem.title}</span>

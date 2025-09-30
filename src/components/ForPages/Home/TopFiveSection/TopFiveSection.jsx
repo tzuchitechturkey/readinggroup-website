@@ -3,10 +3,12 @@ import React from "react";
 import TopFiveSectionCard from "@/components/Global/TopFiveSectionCard/TopFiveSectionCard";
 import { mockVideos } from "@/mock/Viedeos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import { useTranslation } from "react-i18next";
 
 const TopFiveSection = () => {
+  const isMobile = useIsMobile(1224);
   const { t } = useTranslation();
 
   return (
@@ -18,7 +20,7 @@ const TopFiveSection = () => {
           </h3>
         }
         data={mockVideos}
-        isSlider={false}
+        isSlider={isMobile}
         cardName={TopFiveSectionCard}
       />
     </div>

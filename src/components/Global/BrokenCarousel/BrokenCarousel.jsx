@@ -13,11 +13,13 @@ function BrokenCarousel({ data, title, showArrows = false, showCount = 3 }) {
   return (
     <div>
       {title && (
-        <p className="text-3xl px-4 text-white font-bold mb-4">{title}</p>
+        <p className="text-2xl lg:text-3xl px-4 text-text font-bold mb-4">
+          {title}
+        </p>
       )}
       <Carousel className="w-full overflow-visible ">
         <CarouselContent className="px-1">
-          {data.map((item) => (
+          {data?.map((item) => (
             <CarouselItem
               key={item.id}
               className={` py-2 basis-full sm:basis-1/2 md:basis-[28.57%] lg:basis-[28.57%] ${

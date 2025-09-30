@@ -1,6 +1,10 @@
 import React from "react";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 function TopFiveSectionCard({ item }) {
+  const isMobile = useIsMobile();
+
   return (
     <div
       key={item.id}
@@ -15,13 +19,13 @@ function TopFiveSectionCard({ item }) {
               WebkitTextStroke: "3px white",
               WebkitTextFillColor: "transparent",
               fontFamily: "Arial Black, sans-serif",
-              marginLeft: "-1rem",
+              marginLeft: isMobile ? "0px" : "-1rem",
             }}
           >
             {item.number}
           </span>
           <span
-            className="absolute top-1 -left-4 text-8xl md:text-9xl font-black leading-none text-black/20 -z-10"
+            className="absolute top-1 -left-0 md:-left-4 text-8xl md:text-9xl font-black leading-none text-black/20 -z-10"
             style={{
               fontFamily: "Arial Black, sans-serif",
             }}
@@ -32,7 +36,7 @@ function TopFiveSectionCard({ item }) {
       </div>
       {/* End Number */}
       <div className="flex-1 relative z-10">
-        <div className="relative w-[210px] h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
+        <div className="relative w-full 2xl:w-[210px] h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
           <img
             src={item.image}
             alt={item.title}

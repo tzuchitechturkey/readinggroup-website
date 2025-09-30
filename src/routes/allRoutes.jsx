@@ -10,6 +10,7 @@ import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
+import ConnectContent from "@/pages/Connect/ConnectContent";
 // import Pages404 from "@/pages/Pages404";
 
 export const userRoutes = [
@@ -23,6 +24,7 @@ export const userRoutes = [
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
+  { path: "/connect", element: <ConnectContent /> },
 ];
 
 export const authRoutes = [
