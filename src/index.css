@@ -100,6 +100,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Increase base font size for better readability */
+    font-size: 16px; /* default browser base; makes text-sm/text-base larger relatively */
+    line-height: 1.6;
   }
 }
 /* custom scrollbar */

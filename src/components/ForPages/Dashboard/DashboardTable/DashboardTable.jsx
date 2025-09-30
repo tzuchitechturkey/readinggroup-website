@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
+import { useTranslation } from "react-i18next";
 
 import StatusPill from "@/components/ForPages/Dashboard/StatusPill/StatusPill";
 import {
@@ -64,8 +65,8 @@ const rows = [
   },
 ];
 function DashboardTable() {
-  // Track which KPI menu is open (index), null means none open
-  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const { t } = useTranslation();
+  // (removed unused menu state)
   // Sorting state
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -139,66 +140,68 @@ function DashboardTable() {
   return (
     <div className="xl:col-span-3 bg-white rounded-lg border border-gray-200">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-[13] font-medium text-[#1D2630]">Webites List</h2>
-        <button className="text-xs text-blue-600 hover:underline">
-          View All
+        <h3 className="text-lg sm:text-xl font-semibold text-[#1D2630]">
+          {t("websites List")}
+        </h3>
+        <button className="text-sm text-blue-600 hover:underline">
+          {t("view All")}
         </button>
       </div>
 
       <Table>
         <TableHeader className="bg-[#FAFAFA]  h-14">
           <TableRow className="border-b ">
-            <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+            <TableHead className="text-[#5B6B79] font-medium text-sm px-3">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("content")}
               >
-                Content
+                {t("content")}
                 {getSortIcon("content")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] font-medium text-sm">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("id")}
               >
-                ID
+                {t("id")}
                 {getSortIcon("id")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] font-medium text-sm">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("client")}
               >
-                Client
+                {t("client")}
                 {getSortIcon("client")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] font-medium text-sm">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("date")}
               >
-                Date/Time
+                {t("date/time")}
                 {getSortIcon("date")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] font-medium text-sm">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("status")}
               >
-                Status
+                {t("status")}
                 {getSortIcon("status")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
-              Action
+            <TableHead className="text-[#5B6B79] font-medium text-sm">
+              {t("action")}
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className=" text-[11px]" style={{ padding: "10px" }}>
+        <TableBody className=" text-sm" style={{ padding: "10px" }}>
           {sortedRows.map((r, idx) => {
             const m = r.date.match(
               /(\d{4}\/\d{2}\/\d{2})\s+(\d{1,2}:\d{2})(?:\s*(AM|PM))?/i
@@ -207,55 +210,55 @@ function DashboardTable() {
             const timeText = m ? (m[3] ? `${m[2]} ${m[3]}` : m[2]) : "";
             return (
               <TableRow key={idx} className="hover:bg-gray-50/60 border-b ">
-                <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-3">
+                <TableCell className="text-[#1E1E1E] font-bold text-base py-4 px-3">
                   {r.content}
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px]  py-4">
+                <TableCell className="text-[#1E1E1E] text-base  py-4">
                   {r.id}
                 </TableCell>
                 <TableCell className="py-4 ">
                   <div className="flex flex-col">
-                    <span className="text-[#0057B7] font-bold  text-[11px] ">
+                    <span className="text-[#0057B7] font-bold  text-base ">
                       {r.client}
                     </span>
                     <a
                       href={`mailto:${r.email}`}
-                      className="text-[10px] text-[#AEB9E1] hover:underline"
+                      className="text-sm text-[#6B7280] hover:underline"
                     >
                       {r.email}
                     </a>
                   </div>
                 </TableCell>
-                <TableCell className=" text-[11px]  py-4">
+                <TableCell className=" text-base  py-4">
                   <div className="flex flex-col">
-                    <span className="  text-[10px]">{datePart}</span>
-                    <span className="text-[#9FA2AA] font-medium text-[10px]">
+                    <span className="  text-sm">{datePart}</span>
+                    <span className="text-[#9FA2AA] font-medium text-sm">
                       {timeText}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="py-4">
-                  <StatusPill status={r.status} />
+                  <StatusPill status={r.status} label={t(r.status)} />
                 </TableCell>
                 <TableCell className="py-4">
-                  <div className="flex items-center gap-2 text-[#5B6B79]">
+                  <div className="flex items-center gap-3 text-[#5B6B79]">
                     <button
-                      title="view"
-                      className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
+                      title={t("view")}
+                      className="p-2 rounded hover:bg-gray-100 hover:text-blue-600"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     </button>
                     <button
-                      title="edit"
-                      className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
+                      title={t("edit")}
+                      className="p-2 rounded hover:bg-gray-100 hover:text-green-600"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-5 w-5" />
                     </button>
                     <button
-                      title="delete"
-                      className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
+                      title={t("delete")}
+                      className="p-2 rounded hover:bg-gray-100 hover:text-rose-600"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
                 </TableCell>

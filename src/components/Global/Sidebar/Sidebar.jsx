@@ -1,4 +1,18 @@
 import * as React from "react";
+import { useMemo } from "react";
+
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import {
+  FaHome,
+  FaBookOpen,
+  FaRegNewspaper,
+  FaVideo,
+  FaQuestionCircle,
+  FaSignOutAlt,
+  FaCog,
+  FaUser,
+} from "react-icons/fa";
 
 import { DynamicNav } from "@/components/Global/Sidebar/DynamicNav";
 import { NavFooter } from "@/components/Global/Sidebar/NavFooter";
@@ -165,7 +179,7 @@ export default function AppSidebar({
     ],
   };
   return (
-    <Sidebar collapsible="icon" className="" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <UserSwitcher data={data.userInfo} />
       </SidebarHeader>
@@ -186,10 +200,13 @@ export default function AppSidebar({
           activeParent={activeParent}
         />
       </SidebarContent>
+
       <SidebarFooter>
         <NavFooter data={data.footer} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
 }
+  

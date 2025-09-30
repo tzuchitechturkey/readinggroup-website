@@ -35,11 +35,17 @@ export function NavFooter({ data }) {
                     item.items && item.items.length > 0 ? item.items : []
                   }
                 >
-                  <img
-                    src={item.icon}
-                    alt={item.title}
-                    className="w-5 h-5 object-contain max-w-max"
-                  />
+                  {typeof item.icon === "string" ? (
+                    <img
+                      src={item.icon}
+                      alt={item.title}
+                      className="w-5 h-5 object-contain max-w-max"
+                    />
+                  ) : (
+                    <span className="w-5 h-5 flex items-center justify-center">
+                      {item.icon}
+                    </span>
+                  )}
                   <span>{item.title}</span>
                   {item.items && item.items.length > 0 && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-hover:text-[#0088FF]" />
