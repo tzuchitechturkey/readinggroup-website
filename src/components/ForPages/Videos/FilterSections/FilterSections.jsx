@@ -1,14 +1,130 @@
 import React, { useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Search, ArrowUp, Grid2x2, List } from "lucide-react";
+import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import Filter from "@/components/ForPages/Videos/Filter/Filter";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
-import { Input } from "@/components/ui/input";
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import { Button } from "@/components/ui/button";
+import authback from "@/assets/authback.jpg";
 
+import SearchSecion from "../SearchSecion/SearchSecion";
+
+const allVideos = [
+  {
+    id: 1,
+    title: "The Future of AI",
+    duration: "32:15",
+    category: "Technology",
+    type: "Full Videos",
+    subject: "Science",
+    language: "English",
+    image: authback,
+    featured: true,
+  },
+  {
+    id: 2,
+    title: "Secrets of the Deep Ocean",
+    duration: "45:10",
+    category: "Nature",
+    type: "Unit Video",
+    subject: "Environment",
+    language: "Spanish",
+    image: authback,
+    featured: false,
+  },
+  {
+    id: 3,
+    title: "Ancient Civilizations: Rome",
+    duration: "55:20",
+    category: "History",
+    type: "Full Videos",
+    subject: "Education",
+    language: "Italian",
+    image: authback,
+    featured: true,
+  },
+  {
+    id: 4,
+    title: "Mastering Python in 10 Steps",
+    duration: "28:45",
+    category: "Programming",
+    type: "Unit Video",
+    subject: "Technology",
+    language: "English",
+    image: authback,
+    featured: false,
+  },
+  {
+    id: 5,
+    title: "The Art of French Cuisine",
+    duration: "38:05",
+    category: "Cooking",
+    type: "Full Videos",
+    subject: "Lifestyle",
+    language: "French",
+    image: authback,
+    featured: true,
+  },
+  {
+    id: 6,
+    title: "Journey to the Stars",
+    duration: "50:00",
+    category: "Astronomy",
+    type: "Unit Video",
+    subject: "Science",
+    language: "German",
+    image: authback,
+    featured: false,
+  },
+  {
+    id: 7,
+    title: "Financial Freedom 101",
+    duration: "42:30",
+    category: "Finance",
+    type: "Full Videos",
+    subject: "Business",
+    language: "Japanese",
+    image: authback,
+    featured: true,
+  },
+  {
+    id: 8,
+    title: "The World of Digital Art",
+    duration: "33:50",
+    category: "Art",
+    type: "Unit Video",
+    subject: "Creativity",
+    language: "Chinese",
+    image: authback,
+    featured: false,
+  },
+  {
+    id: 9,
+    title: "Sustainable Living",
+    duration: "29:55",
+    category: "Lifestyle",
+    type: "Full Videos",
+    subject: "Environment",
+    language: "Russian",
+    image: authback,
+    featured: true,
+  },
+  {
+    id: 10,
+    title: "Beginner's Guide to Yoga",
+    duration: "22:00",
+    category: "Health",
+    type: "Unit Video",
+    subject: "Wellness",
+    language: "Arabic",
+    image: authback,
+    featured: false,
+  },
+];
 function FilterSections() {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState("grid");
@@ -18,64 +134,33 @@ function FilterSections() {
     startDate: null,
     endDate: null,
   });
+  const [contentType, setContentType] = useState(["full_video"]);
+  const [indexSubject, setIndexSubject] = useState(["health"]);
+  const [languageContent, setLanguageContent] = useState(["en"]);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchData, setSearchData] = useState({
+    count: 10,
+    results: allVideos,
+  });
+  const [displayedVideos, setDisplayedVideos] = useState(allVideos);
 
-  const allVideos = [
-    {
-      id: 1,
-      title: "Weekly Feature",
-      duration: "25:00",
-      category: "Health News",
-      type: "Unit Video",
-      subject: "Health",
-      language: "Arabic",
-      image: "/src/assets/authback.jpg",
-      featured: true,
-    },
-    {
-      id: 2,
-      title: "Weekly Feature",
-      duration: "25:00",
-      category: "Health News",
-      type: "Unit Video",
-      subject: "Health",
-      language: "Arabic",
-      image: "/src/assets/authback.jpg",
-      featured: false,
-    },
-    {
-      id: 3,
-      title: "Weekly Feature",
-      duration: "25:00",
-      category: "Health News",
-      type: "Full Videos",
-      subject: "Health",
-      language: "Arabic",
-      image: "/src/assets/authback.jpg",
-      featured: false,
-    },
-    {
-      id: 4,
-      title: "Environment Update",
-      duration: "18:30",
-      category: "Environment News",
-      type: "Unit Video",
-      subject: "Environment",
-      language: "Chinese",
-      image: "/src/assets/authback.jpg",
-      featured: true,
-    },
-    {
-      id: 5,
-      title: "Environment Update",
-      duration: "18:30",
-      category: "Environment News",
-      type: "Full Videos",
-      subject: "Environment",
-      language: "Chinese",
-      image: "/src/assets/authback.jpg",
-      featured: false,
-    },
-  ];
+  const handleSortData = () => {
+    if (searchValue?.length) {
+      setSearchData((prevData) => ({
+        ...prevData,
+        results: [...prevData.results].reverse(),
+      }));
+    } else {
+      // This part is tricky because allVideos is a constant.
+      // To make the view update, we need a state for the filtered videos.
+      // For now, let's assume we have a state for filtered videos, e.g., `filteredVideos`
+      // and a setter `setFilteredVideos`.
+      // Since that state doesn't exist, I'll reverse `allVideos` and put it in a new state.
+      // Let's create a new state for the videos displayed in the carousels.
+      setDisplayedVideos((prevVideos) => [...prevVideos].reverse());
+    }
+    toast.success(t("Data Sorted!"));
+  };
 
   const clearDateFilter = () => {
     setSelectedDateRange({ startDate: null, endDate: null });
@@ -88,179 +173,217 @@ function FilterSections() {
         endDate: dateSelection.selection.endDate,
       });
     }
+    setIsDateModalOpen(false);
   };
 
-  // Filter videos by type
-  const fullVideos = allVideos.filter((video) => video.type === "Full Videos");
-  const healthVideos = allVideos.filter((video) => video.subject === "Health");
-  const arabicVideos = allVideos.filter((video) => video.language === "Arabic");
+  const handleSearchPagination = (searchTerm) => {
+    console.log("searchTerm", searchTerm);
+    toast.success(t("Load More Clicked!"));
+  };
 
   return (
     <>
       {/* Start Search Header */}
-      <div className="p-4 sm:p-6 md:p-8 lg:p-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:grid lg:grid-cols-7 items-start lg:items-center gap-4 lg:gap-6">
-            {/* Start Search */}
-            <div className="w-full lg:col-span-5 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-              <Input
-                type="text"
-                placeholder="Search items, collections, and accounts"
-                className="pl-8 sm:pl-10 pr-4 py-3 sm:py-4 lg:py-5 w-full border border-primary rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-              />
-            </div>
-            {/* End Search */}
-
-            {/* Start Sort && View Options */}
-            <div className="w-full lg:col-span-2 flex  sm:flex-row lg:flex-row items-start sm:items-center lg:items-center gap-3 sm:gap-4 lg:gap-8">
-              {/* Start Filter Icon  */}
-              <button
-                onClick={() => {
-                  setOpenFilterModal(true);
-                }}
-                className="border-[1px] border-primary rounded-lg p-2 hover:bg-gray-50 transition-colors"
-              >
-                <i
-                  className="fa-solid fa-filter"
-                  style={{ color: "#4680ff" }}
-                />
-              </button>
-
-              {/* End Filter Icon  */}
-
-              <button className="outline-none flex items-center gap-2 px-3 sm:px-4 lg:px-5 py-2 sm:py-[6px] border border-primary rounded-lg sm:rounded-xl lg:rounded-2xl cursor-pointer hover:bg-gray-50 transition-colors">
-                <span className="text-sm sm:text-base lg:text-xl text-primary font-medium">
-                  {t("Sort by")}
-                </span>
-                <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              </button>
-
-              {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded transition-all duration-200 ${
-                    viewMode === "grid"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  <Grid2x2
-                    className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${
-                      viewMode === "grid" ? "text-white" : "text-primary"
-                    }`}
-                  />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded transition-all duration-200 ${
-                    viewMode === "list"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  <List
-                    className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${
-                      viewMode === "list" ? "text-white" : "text-primary"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-            {/* End Sort && View Options */}
-          </div>
-        </div>
+      <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
+        <SearchSecion
+          setOpenFilterModal={setOpenFilterModal}
+          setViewMode={setViewMode}
+          viewMode={viewMode}
+          setSearchValue={setSearchValue}
+          handleSortData={handleSortData}
+        />
       </div>
       {/* End Search Header */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8">
-          {/* Sidebar Filters */}
-          <div className="hidden lg:flex w-full lg:w-80 xl:w-96 flex-shrink-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-0   ">
+        <div className="flex flex-col lg:flex-row gap-4 ">
+          {/* Start Sidebar Filters */}
+          <div className="hidden lg:flex w-full lg:w-80 ">
+            <Filter
+              setIsDateModalOpen={setIsDateModalOpen}
+              selectedDateRange={selectedDateRange}
+              setSelectedDateRange={setSelectedDateRange}
+              setContentType={setContentType}
+              setIndexSubject={setIndexSubject}
+              setLanguageContent={setLanguageContent}
+            />
+          </div>
+          {/* End Sidebar Filters */}
+
+          {/* Start Show Data */}
+          <div>
+            {/* Start Search Result */}
+            {searchValue?.length ? (
+              <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
+                  {searchData?.results?.map((video) => (
+                    <VideoCard key={video.id} item={video} />
+                  ))}
+                </div>
+                {searchData.count > 9 && (
+                  <div className="text-center mt-8">
+                    <Button onClick={handleSearchPagination}>
+                      {t("Load More")}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* End Search Result */
+              /* Start Filter Result */
+
+              <div className="flex-1 min-w-0 ">
+                {/* Start This Full Videos . Unit Video Section */}
+                {contentType?.length > 0 ? (
+                  <div className="flex-1">
+                    <div>
+                      <div className="mb-2 flex items-center gap-1 ">
+                        <p className="font-bold text-2xl text-text">
+                          {t("This")}
+                        </p>
+                        <h2 className="text-2xl text-text ">
+                          {contentType.map((type, idx) => (
+                            <span key={type}>
+                              {type === "full_video"
+                                ? t("Full Videos")
+                                : type === "unit_video"
+                                ? t("Unit Video")
+                                : t(type)}
+                              {idx < contentType.length - 1 && " ، "}
+                            </span>
+                          ))}
+                        </h2>
+                      </div>
+                      <div className="">
+                        <BrokenCarousel
+                          data={displayedVideos}
+                          showArrows={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {/* End This Full Videos . Unit Video Section */}
+                {/* Start This Full Videos . Unit Video Section */}
+                {indexSubject?.length > 0 ? (
+                  <div className="flex-1">
+                    <div>
+                      <div className="my-2 flex items-center ">
+                        <p className="font-bold text-2xl text-text">
+                          {t("This Index Subject")}
+                        </p>
+                        <h2 className="text-2xl text-text ">
+                          {" "}
+                          :{" "}
+                          {indexSubject.map((subject, idx) => (
+                            <span key={subject}>
+                              {subject === "health"
+                                ? t("Health")
+                                : subject === "environment"
+                                ? t("Environment")
+                                : subject === "education"
+                                ? t("Education")
+                                : t(subject)}
+                              {idx < indexSubject.length - 1 && " ، "}
+                            </span>
+                          ))}
+                        </h2>
+                      </div>
+                      <div className="">
+                        <BrokenCarousel
+                          data={displayedVideos}
+                          showArrows={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {/* End This Full Videos . Unit Video Section */}
+                {/* Start This Full Videos . Unit Video Section */}
+                {languageContent?.length > 0 ? (
+                  <div className="flex-1">
+                    <div>
+                      <div className="my-2 flex items-center  ">
+                        <p className="font-bold text-2xl text-text">
+                          {t("Language")}
+                        </p>
+                        <h2 className="text-2xl text-text ">
+                          :{" "}
+                          {languageContent.map((lang, idx) => (
+                            <span key={lang}>
+                              {lang === "ar"
+                                ? t("Arabic")
+                                : lang === "ch"
+                                ? t("Chinese")
+                                : lang === "en"
+                                ? t("English")
+                                : lang === "jp"
+                                ? t("Japanese")
+                                : lang === "fr"
+                                ? t("French")
+                                : lang === "de"
+                                ? t("German")
+                                : lang === "ru"
+                                ? t("Russian")
+                                : lang === "es"
+                                ? t("Spanish")
+                                : t(lang)}
+                              {idx < languageContent.length - 1 && " ، "}
+                            </span>
+                          ))}
+                        </h2>
+                      </div>
+                      <div className="">
+                        <BrokenCarousel
+                          data={displayedVideos}
+                          showArrows={false}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
+                {/* End This Full Videos . Unit Video Section */}
+              </div>
+              /* End Filter Result */
+            )}
+          </div>
+          {/* End Show Data */}
+
+          {/* DatePicker Modal  */}
+          <Modal
+            isOpen={isDateModalOpen}
+            onClose={() => setIsDateModalOpen(false)}
+            title={t("Are you sure you want to send the data?")}
+          >
+            <FilterDatePickerModal
+              setIsDateModalOpen={setIsDateModalOpen}
+              selectedDateRange={selectedDateRange}
+              setSelectedDateRange={setSelectedDateRange}
+              clearDateFilter={clearDateFilter}
+              handleDateSelection={handleDateSelection}
+            />
+          </Modal>
+          {/* End DatePicker Modal  */}
+          {/* DatePicker Modal  */}
+          <Modal
+            isOpen={openFilterModal}
+            onClose={() => setOpenFilterModal(false)}
+            title={t("Filter")}
+          >
             <Filter
               setIsDateModalOpen={setIsDateModalOpen}
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
             />
-          </div>
-
-          {/* Video Grid */}
-          <div className="flex-1 min-w-0">
-            {/* Start This Full Videos . Unit Video Section */}
-            <div className="flex-1">
-              <div>
-                <div className="mb-4 flex items-center gap-1 ">
-                  <p className="font-bold text-2xl text-text">This</p>
-                  <h2 className="text-2xl text-text ">
-                    Full Videos . Unit Video
-                  </h2>
-                </div>
-                <div className="-mb-1">
-                  <BrokenCarousel data={allVideos} showArrows={false} />
-                </div>
-              </div>
-            </div>
-            {/* End This Full Videos . Unit Video Section */}
-            {/* Start This Full Videos . Unit Video Section */}
-            <div className="flex-1">
-              <div>
-                <div className="mb-4 flex items-center ">
-                  <p className="font-bold text-2xl text-text">
-                    This Index Subject{" "}
-                  </p>
-                  <h2 className="text-2xl text-text ">: Health</h2>
-                </div>
-                <div className="-mb-1">
-                  <BrokenCarousel data={allVideos} showArrows={false} />
-                </div>
-              </div>
-            </div>
-            {/* End This Full Videos . Unit Video Section */}
-            {/* Start This Full Videos . Unit Video Section */}
-            <div className="flex-1">
-              <div>
-                <div className="mb-4 flex items-center  ">
-                  <p className="font-bold text-2xl text-text">Language</p>
-                  <h2 className="text-2xl text-text ">: Arabic ، Chinese </h2>
-                </div>
-                <div className="-mb-1">
-                  <BrokenCarousel data={allVideos} showArrows={false} />
-                </div>
-              </div>
-            </div>
-            {/* End This Full Videos . Unit Video Section */}
-          </div>
+          </Modal>
+          {/* End DatePicker Modal  */}
         </div>
-
-        {/* DatePicker Modal  */}
-        <Modal
-          isOpen={isDateModalOpen}
-          onClose={() => setIsDateModalOpen(false)}
-          title={t("Are you sure you want to send the data?")}
-        >
-          <FilterDatePickerModal
-            setIsDateModalOpen={setIsDateModalOpen}
-            selectedDateRange={selectedDateRange}
-            setSelectedDateRange={setSelectedDateRange}
-            clearDateFilter={clearDateFilter}
-            handleDateSelection={handleDateSelection}
-          />
-        </Modal>
-        {/* End DatePicker Modal  */}
-        {/* DatePicker Modal  */}
-        <Modal
-          isOpen={openFilterModal}
-          onClose={() => setOpenFilterModal(false)}
-          title={t("Filter")}
-        >
-          <Filter
-            setIsDateModalOpen={setIsDateModalOpen}
-            selectedDateRange={selectedDateRange}
-            setSelectedDateRange={setSelectedDateRange}
-          />
-        </Modal>
-        {/* End DatePicker Modal  */}
       </div>
     </>
   );

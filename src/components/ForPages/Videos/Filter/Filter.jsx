@@ -2,6 +2,7 @@ import React from "react";
 
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -9,21 +10,29 @@ function Filter({
   setIsDateModalOpen,
   selectedDateRange,
   setSelectedDateRange,
+  setContentType,
+  setIndexSubject,
+  setLanguageContent,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="w-full lg:w-80 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
         {/* Side Filtration */}
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-semibold text-text">Side filtration</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-text">
+              {t("Side filtration")}
+            </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
           {/* Content Type Filter */}
           <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm text-gray-700">All content</span>
+              <span className="text-xs sm:text-sm text-gray-700">
+                {t("All content")}
+              </span>
               <span className="text-xs bg-gray-100 px-2 py-1 rounded">169</span>
             </div>
 
@@ -33,12 +42,21 @@ function Filter({
                 id="full-videos"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setContentType((prev) => [...prev, "full_video"]);
+                  } else {
+                    setContentType((prev) =>
+                      prev.filter((type) => type !== "full_video")
+                    );
+                  }
+                }}
               />
               <label
                 htmlFor="full-videos"
                 className="text-xs sm:text-sm text-gray-700 flex-1"
               >
-                Full Videos
+                {t("Full Videos")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 111
@@ -51,12 +69,21 @@ function Filter({
                 id="unit-video"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setContentType((prev) => [...prev, "unit_video"]);
+                  } else {
+                    setContentType((prev) =>
+                      prev.filter((type) => type !== "unit_video")
+                    );
+                  }
+                }}
               />
               <label
                 htmlFor="unit-video"
                 className="text-xs sm:text-sm text-gray-700 flex-1"
               >
-                Unit Video
+                {t("Unit Video")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 58
@@ -69,7 +96,7 @@ function Filter({
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
-              Index Subject
+              {t("Index Subject")}
             </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
@@ -81,9 +108,21 @@ function Filter({
                 id="health"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setIndexSubject((prev) => [...prev, "health"]);
+                  } else {
+                    setIndexSubject((prev) =>
+                      prev.filter((type) => type !== "health")
+                    );
+                  }
+                }}
               />
-              <label htmlFor="health" className="text-xs sm:text-sm text-gray-700 flex-1">
-                Health
+              <label
+                htmlFor="health"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
+              >
+                {t("Health")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 113
@@ -96,12 +135,21 @@ function Filter({
                 id="environment"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setIndexSubject((prev) => [...prev, "environment"]);
+                  } else {
+                    setIndexSubject((prev) =>
+                      prev.filter((type) => type !== "environment")
+                    );
+                  }
+                }}
               />
               <label
                 htmlFor="environment"
                 className="text-xs sm:text-sm text-gray-700 flex-1"
               >
-                Environment
+                {t("Environment")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 56
@@ -113,12 +161,21 @@ function Filter({
                 type="checkbox"
                 id="education"
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setIndexSubject((prev) => [...prev, "education"]);
+                  } else {
+                    setIndexSubject((prev) =>
+                      prev.filter((type) => type !== "education")
+                    );
+                  }
+                }}
               />
               <label
                 htmlFor="education"
                 className="text-xs sm:text-sm text-gray-700 flex-1"
               >
-                Education
+                {t("Education")}
               </label>
               <span className="text-xs bg-gray-100 px-2 py-1 rounded">45</span>
             </div>
@@ -128,7 +185,9 @@ function Filter({
         {/* Language Filter */}
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-sm sm:text-base font-medium text-gray-900">Language</h3>
+            <h3 className="text-sm sm:text-base font-medium text-gray-900">
+              {t("Language")}
+            </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
@@ -139,9 +198,21 @@ function Filter({
                 id="arabic"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setLanguageContent((prev) => [...prev, "ar"]);
+                  } else {
+                    setLanguageContent((prev) =>
+                      prev.filter((type) => type !== "ar")
+                    );
+                  }
+                }}
               />
-              <label htmlFor="arabic" className="text-xs sm:text-sm text-gray-700 flex-1">
-                Arabic
+              <label
+                htmlFor="arabic"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
+              >
+                {t("Arabic")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 113
@@ -154,9 +225,21 @@ function Filter({
                 id="chinese"
                 defaultChecked
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setLanguageContent((prev) => [...prev, "ch"]);
+                  } else {
+                    setLanguageContent((prev) =>
+                      prev.filter((type) => type !== "ch")
+                    );
+                  }
+                }}
               />
-              <label htmlFor="chinese" className="text-xs sm:text-sm text-gray-700 flex-1">
-                Chinese
+              <label
+                htmlFor="chinese"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
+              >
+                {t("Chinese")}
               </label>
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                 56
@@ -168,12 +251,21 @@ function Filter({
                 type="checkbox"
                 id="japanese"
                 className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setLanguageContent((prev) => [...prev, "jp"]);
+                  } else {
+                    setLanguageContent((prev) =>
+                      prev.filter((type) => type !== "jp")
+                    );
+                  }
+                }}
               />
               <label
                 htmlFor="japanese"
                 className="text-xs sm:text-sm text-gray-700 flex-1"
               >
-                Japanese
+                {t("Japanese")}
               </label>
               <span className="text-xs bg-gray-100 px-2 py-1 rounded">45</span>
             </div>
@@ -188,7 +280,7 @@ function Filter({
               className="flex items-center gap-2 text-sm sm:text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
             >
               <Calendar className="w-4 h-4" />
-              Date
+              {t("Date")}
             </button>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
@@ -231,14 +323,14 @@ function Filter({
                 setSelectedDateRange({ startDate: null, endDate: null })
               }
             >
-              Reset
+              {t("Reset")}
             </Button>
             <Button
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
               onClick={() => setIsDateModalOpen(true)}
             >
-              Apply
+              {t("Apply")}
             </Button>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React from "react";
 
 import { X, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -19,13 +20,14 @@ function FilterDatePickerModal({
   clearDateFilter,
   handleDateSelection,
 }) {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
-              Filter by Date
+              {t("Filter by Date")}
             </h3>
             <button
               onClick={() => setIsDateModalOpen(false)}
@@ -54,7 +56,7 @@ function FilterDatePickerModal({
                     {selectedDateRange.startDate ? (
                       format(selectedDateRange.startDate, "PPP")
                     ) : (
-                      <span>Pick start date</span>
+                      <span>{t("Pick start date")}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -80,7 +82,7 @@ function FilterDatePickerModal({
             {/* Start End Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
+                {t("End Date")}
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -95,7 +97,7 @@ function FilterDatePickerModal({
                     {selectedDateRange.endDate ? (
                       format(selectedDateRange.endDate, "PPP")
                     ) : (
-                      <span>Pick end date</span>
+                      <span>{t("Pick end date")}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -125,7 +127,7 @@ function FilterDatePickerModal({
             {/* Quick Select Options */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quick Select
+                {t("Quick Select")}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -140,7 +142,7 @@ function FilterDatePickerModal({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Last Week
+                  {t("Last Week")}
                 </button>
                 <button
                   onClick={() => {
@@ -154,7 +156,7 @@ function FilterDatePickerModal({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Last Month
+                  {t("Last Month")}
                 </button>
                 <button
                   onClick={() => {
@@ -168,13 +170,13 @@ function FilterDatePickerModal({
                   }}
                   className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
-                  Last Year
+                  {t("Last Year")}
                 </button>
                 <button
                   onClick={clearDateFilter}
                   className="px-3 py-2 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
                 >
-                  Clear All
+                  {t("Clear All")}
                 </button>
               </div>
             </div>
@@ -187,13 +189,13 @@ function FilterDatePickerModal({
               onClick={() => setIsDateModalOpen(false)}
               className="text-gray-600"
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               onClick={handleDateSelection}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              Apply Filter
+              {t("Apply Filter")}
             </Button>
           </div>
         </div>

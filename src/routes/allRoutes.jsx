@@ -11,6 +11,8 @@ import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
 import ConnectContent from "@/pages/Connect/ConnectContent";
+import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
+import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
 // import Pages404 from "@/pages/Pages404";
 
 export const userRoutes = [
@@ -25,6 +27,8 @@ export const userRoutes = [
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   { path: "/connect", element: <ConnectContent /> },
+  { path: "/profile", element: <UserProfileContent /> },
+  { path: "/settings", element: <UserSettingContent /> },
 ];
 
 export const authRoutes = [
