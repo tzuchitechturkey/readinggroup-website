@@ -117,6 +117,70 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
   ];
 
   const comments = incomingComments || defaultComments;
+  // keep a local, mutable copy so we can update likes UI without mutating props
+  const [localComments, setLocalComments] = useState(() =>
+    comments.map((c) => ({ ...c, liked: false, disliked: false }))
+  );
+
+  // sync when incomingComments changes
+  useEffect(() => {
+    setLocalComments(
+      comments.map((c) => ({ ...c, liked: false, disliked: false }))
+    );
+  }, [incomingComments]);
+
+  const handleLike = (id) => {
+    setLocalComments((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const nowLiked = !item.liked;
+        const currentLikes = Number(item.likes || 0);
+        const newLikes = nowLiked
+          ? currentLikes + 1
+          : Math.max(0, currentLikes - 1);
+        // If implementing mutual exclusivity with dislike later, handle here.
+        return { ...item, liked: nowLiked, likes: newLikes };
+      })
+    );
+  };
+
+  // reply UI state
+  const [replyOpenId, setReplyOpenId] = useState(null);
+  const [replyText, setReplyText] = useState("");
+
+  const toggleReply = (id) => {
+    if (replyOpenId === id) {
+      setReplyOpenId(null);
+      setReplyText("");
+    } else {
+      setReplyOpenId(id);
+      setReplyText("");
+    }
+  };
+
+  const handleReplySubmit = (id) => {
+    if (!replyText.trim()) return;
+    setLocalComments((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const newReply = {
+          id: `r-${Date.now()}`,
+          avatar: "https://i.pravatar.cc/50?img=12",
+          author: "You",
+          timeAgo: "Just now",
+          edited: false,
+          text: replyText.trim(),
+          likes: 0,
+        };
+        const replies = Array.isArray(item.replies)
+          ? [...item.replies, newReply]
+          : [newReply];
+        return { ...item, replies };
+      })
+    );
+    setReplyOpenId(null);
+    setReplyText("");
+  };
 
   return (
     <div className="bg-white">
@@ -126,13 +190,13 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
           <img
             src="../../../src/assets/Beared Guy02-min 1.png"
             alt="me"
-            className="w-9 h-9 rounded-full object-cover"
+            className="w-7 h-7 rounded-full object-cover"
           />
           <div className="flex-1">
             <input
               type="text"
               placeholder="Add a comment..."
-              className="w-full placeholder:text-xl border-b outline-none focus:border-blue-500 transition-colors py-2 text-xl text-text"
+              className="w-full placeholder:text-sm border-b outline-none focus:border-blue-500 transition-colors py-1 text-sm text-text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -144,7 +208,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                 onClick={() => setShowPicker(!showPicker)}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -166,11 +230,8 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
               {/* End Emojy Picker */}
 
               {/* Start Buttons */}
-              <div className="flex items-center gap-3 ml-auto">
-                <button className="text-sm text-gray-600 hover:text-gray-800">
-                  {t("Cacel")}
-                </button>
-                <button className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded">
+              <div className="flex items-center gap-2 ml-auto">
+                <button className="text-xs bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-2 py-1 rounded">
                   {t("Comment")}
                 </button>
               </div>
@@ -181,34 +242,34 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
       </div>
 
       {/* Start Comments List */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-        <ul className="space-y-10">
-          {comments.map((c) => (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <ul className="space-y-7">
+          {localComments.map((c) => (
             <li
               key={c.id}
               className={`relative ${
                 selectedId === c.id ? "ring-2 ring-sky-400 rounded" : ""
               }`}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-2">
                 <img
                   src={c.avatar}
                   alt={c.author}
-                  className="w-9 h-9 rounded-full object-cover"
+                  className="w-7 h-7 rounded-full object-cover"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 ">
                     {/* Start Writer Name */}
-                    <span className="font-semibold text-xl text-gray-900">
+                    <span className="font-semibold text-sm text-gray-900">
                       {c.author}
                     </span>
                     {/* End Writer Name */}
                     {/* Start Date */}
-                    <span className="text-gray-500">{c.timeAgo}</span>
+                    <span className="text-gray-400 text-xs">{c.timeAgo}</span>
                     {/* End Date */}
                     {/* Start Edited marker */}
                     {c.edited && (
-                      <span className="text-gray-400 text-xs">
+                      <span className="text-gray-400 text-2xs">
                         ({t("Edited")})
                       </span>
                     )}
@@ -216,23 +277,40 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                   </div>
 
                   {/* Start Comment Content */}
-                  <p className="mt-1 text-lg text-gray-800 leading-relaxed">
+                  <p className="mt-1 text-sm text-gray-800 leading-snug">
                     {c.text}
                   </p>
                   {/* End Comment Content */}
 
                   {/* Start Actions */}
-                  <div className="mt-3 flex items-center gap-6 text-gray-600">
-                    <button className="flex items-center gap-2 hover:text-black">
-                      <ThumbsUp className="size-5" />
-                      <span className="text-xs">{c.likes}</span>
+                  <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
+                    <button
+                      className={`flex items-center gap-1 ${
+                        c.liked
+                          ? "bg-primary text-white rounded px-2 py-0.5"
+                          : "hover:text-black"
+                      }`}
+                      onClick={() => handleLike(c.id)}
+                      aria-pressed={c.liked}
+                    >
+                      {/* show filled icon by setting fill=currentColor and stroke=none when liked */}
+                      <ThumbsUp
+                        className="w-4 h-4"
+                        {...(c.liked
+                          ? { fill: "currentColor", stroke: "none" }
+                          : {})}
+                      />
+                      <span
+                        className={`text-xs ${c.liked ? "text-white" : ""}`}
+                      >
+                        {c.likes}
+                      </span>
                     </button>
 
-                    <button className="flex items-center  gap-2 hover:text-black">
-                      <ThumbsDown className="size-5" />
-                      <span className="text-xs">{c.dislikes}</span>
-                    </button>
-                    <button className="text-xs hover:text-black">
+                    <button
+                      className="text-xs hover:text-black"
+                      onClick={() => toggleReply(c.id)}
+                    >
                       {t("Reply")}
                     </button>
                   </div>
@@ -241,6 +319,38 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                   {/* Start Replies */}
                   <VideoReplies data={c} />
                   {/* End Replies */}
+                  {/* Reply input area */}
+                  {replyOpenId === c.id && (
+                    <div className="mt-2 flex items-start gap-2">
+                      <img
+                        src="../../../src/assets/Beared Guy02-min 1.png"
+                        alt="me"
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <input
+                          value={replyText}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder={t("Write a reply...")}
+                          className="w-full placeholder:text-sm border-b outline-none focus:border-blue-500 transition-colors py-1 text-sm text-text"
+                        />
+                        <div className="mt-1 flex gap-2">
+                          <button
+                            className="text-xs bg-primary text-white px-2 py-0.5 rounded"
+                            onClick={() => handleReplySubmit(c.id)}
+                          >
+                            {t("Send")}
+                          </button>
+                          <button
+                            className="text-xs text-gray-500 px-2 py-0.5 rounded"
+                            onClick={() => toggleReply(c.id)}
+                          >
+                            {t("Cancel")}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </li>
