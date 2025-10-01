@@ -11,8 +11,10 @@ function SettingsContent() {
   const { t } = useTranslation();
   const [isLoading, setisLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("editProfile");
-
+  const [userType, setUserType] = useState("user");
   const handleChangePassword = async () => {
+    toast.success(t("Updated Profile Successfuly"));
+
     // setisLoading(true);
     // try {
     //   // const res = await EditUserInfo()
@@ -26,6 +28,8 @@ function SettingsContent() {
     // }
   };
   const handleEditUserInfo = async () => {
+    toast.success(t("Updated Profile Successfuly"));
+
     // setisLoading(true);
     // try {
     //   // const res = await EditUserInfo()
@@ -76,7 +80,7 @@ function SettingsContent() {
             <EditProfile />
           </TabsContent>
           <TabsContent value="changePassword">
-            <ChangePassword />
+            <ChangePassword userType={userType} />
           </TabsContent>
         </Tabs>
         {/* End Tabs */}
@@ -90,7 +94,9 @@ function SettingsContent() {
             handleChangePassword();
           }
         }}
-        className="block m-5 ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7"
+        className={`block ${
+          userType === "admin" && "m-5"
+        }  ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7`}
       >
         {activeTab === "editProfile" ? t("Save") : t("Save Password")}
       </button>

@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 const VideoCard = ({ item, showUnit = false, className = "" }) => {
   const { t } = useTranslation();
-
   return (
     <Link
       to={`/videos/details/${item.id}`}
@@ -38,10 +37,10 @@ const VideoCard = ({ item, showUnit = false, className = "" }) => {
           {/* Start Duration */}
           <div className="absolute top-5 left-5 flex items-center gap-3">
             <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-              {t("Weekly Feature")}
+              {t(item?.category)}
             </span>
             <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-              {item.duration}
+              {item.duration}s
             </span>
           </div>
 
