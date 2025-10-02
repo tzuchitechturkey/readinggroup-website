@@ -20,10 +20,8 @@ function History() {
   const { t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // حقل البحث
   const [searchTerm, setSearchTerm] = useState("");
 
-  // بيانات وهمية للتاريخ (يمكن استبدالها بـ API calls)
   const [historyItems, setHistoryItems] = useState([
     {
       id: 1,

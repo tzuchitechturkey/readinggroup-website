@@ -8,6 +8,7 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,8 +30,40 @@ const Labeled = ({ label, children }) => (
     <div className="text-sm text-[#1D2630]">{children}</div>
   </div>
 );
-
 function Profile() {
+  const { t } = useTranslation();
+
+  const handleEditUserInfo = async () => {
+    toast.success(t("Updated Profile Successfuly"));
+
+    // setisLoading(true);
+    // try {
+    //   // const res = await EditUserInfo()
+    //   // console.log(res?.data?.data)
+    //   toast.success(t("Updated Profile Successfuly"));
+    // } catch (err) {
+    //   console.log(err);
+    //   toast.error(t("Field Updated Profile"));
+    // } finally {
+    //   setisLoading(false);
+    // }
+  };
+
+  const handleChangePassword = async () => {
+    toast.success(t("Updated Profile Successfuly"));
+
+    // setisLoading(true);
+    // try {
+    //   // const res = await EditUserInfo()
+    //   // console.log(res?.data?.data)
+    //   toast.success(t("Updated Profile Successfuly"));
+    // } catch (err) {
+    //   console.log(err);
+    //   toast.error(t("Field Updated Profile"));
+    // } finally {
+    //   setisLoading(false);
+    // }
+  };
   return (
     <div className="space-y-6 my-5 p-1">
       <div className="grid grid-cols-12 gap-6">
@@ -59,7 +92,7 @@ function Profile() {
             <dl className="space-y-4 text-sm">
               <div className="flex items-start justify-between gap-4">
                 <dt className="flex items-center gap-2 text-[11px] text-[#5B6B79]">
-                  <Mail className="h-4 w-4" /> Email
+                  <Mail className="h-4 w-4" /> {t("Email")}
                 </dt>
                 <dd className="text-[11px] truncate text-[#1D2630] text-right">
                   demo@sample.com
@@ -67,7 +100,7 @@ function Profile() {
               </div>
               <div className="flex items-start justify-between gap-4">
                 <dt className="flex items-center gap-2 text-[#5B6B79]">
-                  <Phone className="h-4 w-4" /> Phone no
+                  <Phone className="h-4 w-4" /> {t("Phone no")}
                 </dt>
                 <dd className="text-[11px] text-[#1D2630] truncate text-right">
                   (+99) 9999 999 999
@@ -75,7 +108,7 @@ function Profile() {
               </div>
               <div className="flex items-start justify-between gap-4">
                 <dt className="flex items-center gap-2 text-[#5B6B79]">
-                  <MapPin className="h-4 w-4" /> Location
+                  <MapPin className="h-4 w-4" /> {t("Location")}
                 </dt>
                 <dd className="text-[11px] text-[#1D2630] truncate text-right">
                   Melbourne
@@ -99,7 +132,7 @@ function Profile() {
           {/* Personal details */}
           <div className="rounded-xl border bg-card">
             <div className="border-b px-6 py-4 text-sm font-semibold">
-              Personal Details
+              {t("Personal Details")}
             </div>
             <div className="px-6 py-5">
               <div className="grid grid-cols-12 gap-6">
@@ -125,6 +158,19 @@ function Profile() {
               </div>
             </div>
           </div>
+
+          <button
+            onClick={() => {
+              if (activeTab === "editProfile") {
+                handleEditUserInfo();
+              } else {
+                handleChangePassword();
+              }
+            }}
+            className="block m-5 ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7"
+          >
+            {t("Update Profile")}
+          </button>
         </section>
       </div>
     </div>

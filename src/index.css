@@ -224,3 +224,8 @@ ul .sub-item::before {
 .delay-400 {
   animation-delay: 0.4s;
 }
+
+
+input {
+  outline: none;
+}
