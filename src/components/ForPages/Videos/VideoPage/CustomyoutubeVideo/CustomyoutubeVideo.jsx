@@ -3,11 +3,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ThumbsUp, ListPlus } from "lucide-react";
 
+import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [liked, setLiked] = React.useState(false);
   const [currentTime, setCurrentTime] = React.useState(0);
   const [duration, setDuration] = React.useState(0);
   const [showControls, setShowControls] = React.useState(true);
@@ -97,6 +99,11 @@ function CustomyoutubeVideo({ videoData }) {
   };
 
   const youTube = isYouTubeUrl(video.videoUrl);
+  const [isShareOpen, setIsShareOpen] = React.useState(false);
+
+  const handleOpenShare = () => setIsShareOpen(true);
+  const handleCloseShare = () => setIsShareOpen(false);
+  const toggleLike = () => setLiked((s) => !s);
   return (
     <div className="bg-gray-100 px-4 sm:px-0  ">
       <div className="  ">
@@ -271,14 +278,35 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* Start social Actions */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700 my-4 sm:my-6 md:my-8">
-              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
-                <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
+              <button
+                onClick={toggleLike}
+                className={`flex items-center gap-1 sm:gap-2 transition-colors ${
+                  liked ? "text-blue-600" : "hover:text-black"
+                }`}
+                aria-pressed={liked}
+              >
+                {liked ? (
+                  // filled thumbs up (simple svg)
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M2 21h4V9H2v12zM23 10.5c0-.83-.67-1.5-1.5-1.5h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.22 8.95 7 9.45 7 10v9c0 1.1.9 2 2 2h7c.78 0 1.45-.45 1.79-1.11L23 10.5z" />
+                  </svg>
+                ) : (
+                  <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
                 <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
                   21K
                 </span>
               </button>
 
-              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
+              <button
+                onClick={handleOpenShare}
+                className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
+              >
                 <img
                   src="../../../src/assets/icons/share_icon.png"
                   alt="share"
@@ -295,22 +323,15 @@ function CustomyoutubeVideo({ videoData }) {
                   {t("Save")}
                 </span>
               </button>
-
-              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <circle cx="12" cy="12" r="1" />
-                  <circle cx="19" cy="12" r="1" />
-                  <circle cx="5" cy="12" r="1" />
-                </svg>
-              </button>
             </div>
             {/* End social Actions */}
+            {/* Render Share Modal */}
+            <ShareModal
+              isOpen={isShareOpen}
+              onClose={handleCloseShare}
+              url={video.videoUrl}
+              title={video.title}
+            />
             {/* Start channel info */}
             <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Start Image && Name && Subscribers */}

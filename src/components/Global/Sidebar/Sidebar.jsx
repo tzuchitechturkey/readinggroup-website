@@ -1,30 +1,16 @@
-import * as React from "react";
-import { useMemo } from "react";
 
-import PropTypes from "prop-types";
-import { useTranslation } from "react-i18next";
-import {
-  FaHome,
-  FaBookOpen,
-  FaRegNewspaper,
-  FaVideo,
-  FaQuestionCircle,
-  FaSignOutAlt,
-  FaCog,
-  FaUser,
-} from "react-icons/fa";
 
+import i18n from "@/i18n/i18n";
 import { DynamicNav } from "@/components/Global/Sidebar/DynamicNav";
-import { NavFooter } from "@/components/Global/Sidebar/NavFooter";
 import { UserSwitcher } from "@/components/Global/Sidebar/UserSwitcher";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
+// تأكد من صحة المسار (اسم الملف يحتوي مسافة)
 import Avatar from "../../../../src/assets/Beared Guy02-min 1.png";
 import DashboardIcon from "../../../../src/assets/icons/Home-simple-door.png";
 import Posts from "../../../../src/assets/icons/Union.png";
@@ -202,7 +188,56 @@ export default function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <NavFooter data={data.footer} />
+        <SidebarMenu>
+          {data.footer.map((item) => {
+            const isLanguage = item.type === "language";
+
+            if (!isLanguage) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <button type="button" className="w-full">
+                      {item.icon}
+                      <span className="truncate">{item.title}</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
+            // عنصر اللغة: Dropdown بنفس تنسيق أزرار القائمة
+            return (
+              <SidebarMenuItem key={item.title}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton asChild>
+                      <button type="button" className="w-full">
+                        {item.icon}
+                        <span className="truncate">{item.title}</span>
+                        {/* إظهار اللغة الحالية بمحاذاة اليمين بنفس سلوك العناصر */}
+                        <span className="ml-auto text-xs opacity-80">
+                          {getLanguageLabel(currentLang)}
+                        </span>
+                      </button>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent side="top" align="start" className="w-40">
+                    {LANGUAGES.map((lang) => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => handleLangChange(lang.code)}
+                        className={currentLang === lang.code ? "font-medium" : undefined}
+                      >
+                        {lang.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
       </SidebarFooter>
 
       <SidebarRail />
