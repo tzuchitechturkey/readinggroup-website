@@ -32,8 +32,10 @@ function VideoPageContent() {
       {/* End Content of a similar type */}
 
       {/* Start Comments Section */}
-      <div>
-        <CommentsSection />
+      <div className="w-full">
+        <div className="w-full lg:w-3/4 lg:pl-8">
+          <CommentsSection />
+        </div>
       </div>
       {/* End Comments Section */}
     </div>

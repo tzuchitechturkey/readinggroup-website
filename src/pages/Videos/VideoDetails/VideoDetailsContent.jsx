@@ -4,15 +4,7 @@ import { Play, Heart, Download, Share2, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
-import { mockVideos } from "@/mock/Viedeos";
 import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 
@@ -79,9 +71,6 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
     genres: ["Journey", "Documentary"],
     themes: ["Dark", "Suspenseful", "Exiting"],
   };
-
-  // Don't render at all if not open (better performance, prevents flickering)
-  if (!internalIsOpen && !externalIsOpen) return null;
 
   return (
     <Modal
@@ -172,14 +161,14 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                       e.stopPropagation();
                     }}
                   >
-                    <Play className="w-4 h-4 mr-2 transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5" />
-                    <span className="text-sm transition-all duration-300 group-hover:font-semibold">
+                    <Play className="w-4 h-4 mr-2 transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5 pointer-events-none" />
+                    <span className="text-sm transition-all duration-300 group-hover:font-semibold pointer-events-none">
                       {t("Play")}
                     </span>
                   </Link>
 
                   <button
-                    className={`p-2 rounded-full backdrop-blur-sm border-2 transition-all duration-200 group ${
+                    className={`p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
                       isFavorite
                         ? "bg-red-500/20 border-red-400/60 hover:bg-red-500/30 hover:border-red-400/80"
                         : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
@@ -191,9 +180,10 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                       e.stopPropagation();
                       setIsFavorite(!isFavorite);
                     }}
+                    style={{ touchAction: "manipulation" }}
                   >
                     <Heart
-                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 pointer-events-none ${
                         isFavorite
                           ? "text-red-500 fill-red-500 group-hover:text-red-400 group-hover:fill-red-400"
                           : "text-white group-hover:text-red-300"
@@ -202,7 +192,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                   </button>
 
                   <button
-                    className={`p-2 rounded-full backdrop-blur-sm border-2 transition-all duration-200 group ${
+                    className={`p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
                       isDownloadClicked
                         ? "bg-green-500/20 border-green-400/60 hover:bg-green-500/30 hover:border-green-400/80"
                         : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
@@ -212,9 +202,10 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                       e.stopPropagation();
                       setIsDownloadClicked(true);
                     }}
+                    style={{ touchAction: "manipulation" }}
                   >
                     <Download
-                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 pointer-events-none ${
                         isDownloadClicked
                           ? "text-green-500 group-hover:text-green-400"
                           : "text-white group-hover:text-white"
@@ -223,14 +214,15 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                   </button>
 
                   <button
-                    className="p-2 rounded-full bg-black/40 backdrop-blur-sm border-2 border-white/50 hover:bg-black/60 transition-all duration-200"
+                    className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border-2 border-white/50 hover:bg-black/60 transition-all duration-200 group cursor-pointer"
                     title="Share"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsShareModalOpen(true);
                     }}
+                    style={{ touchAction: "manipulation" }}
                   >
-                    <Share2 className="w-4 h-4 text-white" />
+                    <Share2 className="w-4 h-4 text-white pointer-events-none" />
                   </button>
                 </div>
               </div>
@@ -344,8 +336,6 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
           <TabsSection />
         </div>
         {/* End Episodes && User Reviews */}
-
-       
       </div>
 
       {/* Share Modal */}
