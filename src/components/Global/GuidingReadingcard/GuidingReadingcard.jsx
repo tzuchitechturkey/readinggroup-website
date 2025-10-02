@@ -1,12 +1,20 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
 import { BookOpen, Star, User } from "lucide-react";
 
 function GuidingReadingcard({ item }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/cards-photos/card/${item.id}`);
+  };
+
   return (
     <div
       key={item.id}
-      className="  rounded-xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-lg border border-gray-100 relative"
+      onClick={handleCardClick}
+      className="rounded-xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-lg border border-gray-100 relative"
     >
       {/* علامة "Incredible Card" */}
       <div className="absolute top-3 left-3">
