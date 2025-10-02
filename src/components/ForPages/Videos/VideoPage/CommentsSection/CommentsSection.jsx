@@ -185,7 +185,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
   return (
     <div className="bg-white">
       {/* Start Comment Editor */}
-      <div className="  mx-auto px-4 sm:px-6 lg:px-12 py-6">
+      <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
             src="../../../src/assets/Beared Guy02-min 1.png"
@@ -242,12 +242,12 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
       </div>
 
       {/* Start Comments List */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+      <div className="w-full px-4 sm:px-6 lg:px-12 pb-10">
         <ul className="space-y-7">
           {localComments.map((c) => (
             <li
               key={c.id}
-              className={`relative ${
+              className={`relative py-6 ${
                 selectedId === c.id ? "ring-2 ring-sky-400 rounded" : ""
               }`}
             >
@@ -255,7 +255,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                 <img
                   src={c.avatar}
                   alt={c.author}
-                  className="w-7 h-7 rounded-full object-cover"
+                  className="w-8 h-8 rounded-full object-cover"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 ">
@@ -325,7 +325,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                       <img
                         src="../../../src/assets/Beared Guy02-min 1.png"
                         alt="me"
-                        className="w-6 h-6 rounded-full object-cover"
+                        className="w-7 h-7 rounded-full object-cover"
                       />
                       <div className="flex-1">
                         <input
