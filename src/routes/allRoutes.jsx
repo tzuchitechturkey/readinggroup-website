@@ -9,6 +9,8 @@ import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
+import CardDetailsContent from "@/pages/GuidedReading/CardDetails/CardDetailsContent";
+import PhotoDetailsContent from "@/pages/Photos/PhotoDetails/PhotoDetailsContent";
 import ConnectContent from "@/pages/Connect/ConnectContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
@@ -23,7 +25,9 @@ export const userRoutes = [
   { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
+  { path: "//cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
+  { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   { path: "/connect", element: <ConnectContent /> },
   { path: "/profile", element: <UserProfileContent /> },
   { path: "/settings", element: <UserSettingContent /> },

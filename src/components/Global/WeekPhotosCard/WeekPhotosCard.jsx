@@ -1,11 +1,20 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
+
 function WeekPhotosCard({ item }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/cards-photos/photos/${item.id}`);
+  };
+
   return (
     <div className="mx-auto">
       <div
         key={item.id}
         className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
+        onClick={handleClick}
       >
         {/* البطاقة */}
         <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
