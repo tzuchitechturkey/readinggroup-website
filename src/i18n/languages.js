@@ -4,7 +4,7 @@ const languages = {
     shortLabel: "EN",
     code: "en",
   },
-   ch: {
+  ch: {
     label: "中文",
     shortLabel: "CN",
     code: "ch",
@@ -19,9 +19,6 @@ const languages = {
     shortLabel: "TR",
     code: "tr",
   },
- 
-
-  
 };
 
 export default languages;

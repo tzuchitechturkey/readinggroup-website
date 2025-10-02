@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 
-import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import { ChevronDown } from "lucide-react";
+
+import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
+
+import EpisodeCard from "./EpisodeCard";
 
 const TabsSection = () => {
   const [activeTab, setActiveTab] = useState("episodes");
+  const [showAllEpisodes, setShowAllEpisodes] = useState(false);
 
   const tabs = [
     { id: "episodes", label: "Episodes" },
@@ -13,8 +17,10 @@ const TabsSection = () => {
   const allVideos = [
     {
       id: 1,
-      title: "Weekly Feature",
-      duration: "25:00",
+      title: "The Offer",
+      description:
+        "While Haru Tawara develops a crush on a mysterious young woman at work, an unusual opportunity arises at his father's financially struggling brewery.",
+      duration: "55m",
       category: "Health News",
       type: "Unit Video",
       subject: "Health",
@@ -24,19 +30,23 @@ const TabsSection = () => {
     },
     {
       id: 2,
-      title: "Weekly Feature",
-      duration: "25:00",
+      title: "The Trail",
+      description:
+        "Haru accompanies Karen to investigate a whistleblower's apartment. Meanwhile, several other Tawaras are tempted to step out of their ordinary lives.",
+      duration: "52m",
       category: "Health News",
       type: "Unit Video",
       subject: "Health",
       language: "Arabic",
       image: "/src/assets/authback.jpg",
-      featured: false,
+      featured: true,
     },
     {
       id: 3,
-      title: "Weekly Feature",
-      duration: "25:00",
+      title: "The Trail",
+      description:
+        "Haru accompanies Karen to investigate a whistleblower's apartment. Meanwhile, several other Tawaras are tempted to step out of their ordinary lives.",
+      duration: "52m",
       category: "Health News",
       type: "Full Videos",
       subject: "Health",
@@ -46,8 +56,10 @@ const TabsSection = () => {
     },
     {
       id: 4,
-      title: "Weekly Feature",
-      duration: "25:00",
+      title: "The Trail",
+      description:
+        "Haru accompanies Karen to investigate a whistleblower's apartment. Meanwhile, several other Tawaras are tempted to step out of their ordinary lives.",
+      duration: "52m",
       category: "Health News",
       type: "Unit Video",
       subject: "Environment",
@@ -57,8 +69,10 @@ const TabsSection = () => {
     },
     {
       id: 5,
-      title: "Weekly Feature",
-      duration: "25:00",
+      title: "The Trail",
+      description:
+        "Haru accompanies Karen to investigate a whistleblower's apartment. Meanwhile, several other Tawaras are tempted to step out of their ordinary lives.",
+      duration: "52m",
       category: "Health News",
       type: "Full Videos",
       subject: "Environment",
@@ -67,6 +81,11 @@ const TabsSection = () => {
       featured: false,
     },
   ];
+
+  // عرض 3 فيديوهات فقط في البداية
+  const videosToShow = showAllEpisodes ? allVideos : allVideos.slice(0, 3);
+  const hasMoreVideos = allVideos.length > 3;
+
   return (
     <div className="w-full">
       {/* Tab Navigation */}
@@ -89,32 +108,40 @@ const TabsSection = () => {
       {/* Tab Content */}
       <div className="mb-8 sm:mb-12 md:mb-16">
         {activeTab === "episodes" && (
-          <div className="space-y-3 sm:space-y-4">
-            <DynamicSection
-              title="1-8 Episodes"
-              titleClassName="text-xl sm:text-2xl md:text-3xl font-medium mb-4 md:mb-4"
-              data={allVideos}
-              isSlider={false}
-              cardName={VideoCard}
-              viewMore={true}
-              viewMoreUrl="/videos"
-            />
-          </div>
+          <>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-4 sm:p-6">
+                <div className="space-y-2">
+                  {videosToShow.map((episode, index) => (
+                    <EpisodeCard
+                      key={episode.id}
+                      episode={episode}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* زر أظهر المزيد / أظهر أقل */}
+            {hasMoreVideos && (
+              <div className="flex justify-center -mt-6 relative z-10">
+                <button
+                  onClick={() => setShowAllEpisodes(!showAllEpisodes)}
+                  className="flex items-center justify-center w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  <ChevronDown
+                    className={`w-6 h-6 text-white transition-transform duration-300 ${
+                      showAllEpisodes ? "rotate-180" : "rotate-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+          </>
         )}
 
-        {activeTab === "reviews" && (
-          <div className="space-y-3 sm:space-y-4">
-            <DynamicSection
-              title="User Reviews"
-              titleClassName="text-xl sm:text-2xl md:text-3xl font-medium mb-2 sm:mb-3 md:mb-4"
-              data={allVideos}
-              isSlider={false}
-              cardName={VideoCard}
-              viewMore={true}
-              viewMoreUrl="/videos"
-            />
-          </div>
-        )}
+        {activeTab === "reviews" && <CommentsSection />}
       </div>
     </div>
   );

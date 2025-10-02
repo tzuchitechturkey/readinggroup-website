@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-import { Play, Heart, Download, Share2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Play, Heart, Download, Share2, X } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
@@ -12,223 +12,350 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
-import { mockVideos, topCast } from "@/mock/Viedeos";
+import { mockVideos } from "@/mock/Viedeos";
+import Modal from "@/components/Global/Modal/Modal";
+import ShareModal from "@/components/Global/ShareModal/ShareModal";
 
-function VideoDetailsContent() {
+function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Use internal state to control modal visibility
+  const [internalIsOpen, setInternalIsOpen] = useState(externalIsOpen);
+
+  // State to control showing all cast members
+  const [showAllCast, setShowAllCast] = useState(false);
+
+  // State to control favorite status
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // State to control share modal visibility
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // State to control download button clicked status
+  const [isDownloadClicked, setIsDownloadClicked] = useState(false);
+
+  // Sync with external isOpen prop when it changes
+  useEffect(() => {
+    setInternalIsOpen(externalIsOpen);
+  }, [externalIsOpen]);
+
+  // Keep modal open on route/location changes
+  useEffect(() => {
+    setInternalIsOpen(true);
+  }, [location.pathname, location.search]);
+
+  const handleClose = () => {
+    // Set internal state first
+    setInternalIsOpen(false);
+
+    // Use timeout to allow animation to complete before navigation
+    setTimeout(() => {
+      if (onClose && typeof onClose === "function") {
+        onClose();
+        return;
+      }
+      // If no onClose provided (rendered via route), go back
+      navigate(-1);
+    }, 300); // Match animation duration in Modal component
+  };
   const videoData = {
     title: "Tzu Chi Visits Syrian Lands",
-    tags: ["Journey", "Documentary", "Humanitarian"],
+    tags: ["Drama", "History", "War"],
     duration: "1h 28m",
+    seasons: 3,
+    year: 2024,
     description:
       "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
     backgroundImage: "/src/assets/authback.jpg",
+    cast: [
+      "Kento Kaku",
+      "Yosuke Eguchi",
+      "Tae Kimura",
+      "John Doe",
+      "Jane Smith",
+    ],
+    genres: ["Journey", "Documentary"],
+    themes: ["Dark", "Suspenseful", "Exiting"],
   };
 
+  // Don't render at all if not open (better performance, prevents flickering)
+  if (!internalIsOpen && !externalIsOpen) return null;
+
   return (
-    <div>
-      {/* Start Hero Section */}
-      <div className="bg-black text-white relative -z-10">
-        {/* Hero Section with Background */}
-        <div className="relative h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[85vh]">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <img
-              src={videoData.backgroundImage}
-              alt="Video background"
-              className="w-full h-[85%] object-cover"
-            />
-            {/* Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-          </div>
+    <Modal
+      isOpen={internalIsOpen}
+      onClose={handleClose}
+      width="1000px"
+      mountOnEnter={true}
+      unmountOnExit={false}
+    >
+      <div
+        className="relative w-full h-full overflow-auto p-0 custom-scrollbar rounded-none"
+        style={{
+          margin: "0",
+          padding: "0",
+          width: "101%",
+          maxHeight: "calc(85vh - 4rem)",
+          overflowX: "hidden",
+          borderRadius: "0",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {/* Close Button */}
+        <button
+          className="absolute top-2 right-3 text-white hover:text-gray-300 bg-black/80 backdrop-blur-sm rounded-full p-2 shadow-xl border border-white/20 transition-all duration-200"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClose();
+          }}
+          style={{
+            zIndex: 9999,
+          }}
+        >
+          <X size={20} strokeWidth={2} />
+        </button>
 
-          {/* Content */}
-          <div className="relative z-10 flex flex-col justify-end h-full px-4 sm:px-6 md:px-8 lg:px-12 pb-12 sm:pb-16 md:pb-20">
-            <div className="max-w-4xl">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 sm:mb-5 leading-tight font-bold">
-                {videoData.title}
-              </h1>
+        {/* Start Hero Section */}
+        <div className="bg-black text-white relative z-11 -m-6 rounded-none">
+          {/* Hero Section with Background */}
+          <div className="relative h-[60vh] sm:h-[45vh] md:h-[50vh] lg:h-[55vh] overflow-hidden rounded-none -m-1">
+            {/* Background Image */}
+            <div className="absolute inset-0 -m-1">
+              <img
+                src={`${window.location.origin}/src/assets/testCard.png`}
+                alt="Video background"
+                className="w-full h-full object-cover rounded-none -m-1"
+                onError={(e) => {
+                  console.error("Image failed to load:", e);
+                  e.target.src = `${window.location.origin}/src/assets/authback.jpg`;
+                }}
+                style={{
+                  display: "block",
+                  zIndex: 0,
+                  objectPosition: "center center",
+                  borderRadius: "0",
+                  margin: "0",
+                  padding: "0",
+                }}
+              />
+              {/* Gradient Overlays */}
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                style={{ zIndex: 1 }}
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent"
+                style={{ zIndex: 2 }}
+              />
+            </div>
 
-              <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
-                {videoData.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className={`px-2 py-1 sm:px-3 sm:py-2 md:px-4 text-[#D9D9D9CC] bg-black/30 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium ${
-                      index === 0 ? "border border-white/50" : ""
-                    }`}
+            {/* Content */}
+            <div
+              className="relative z-10 flex flex-col justify-end h-full px-4 sm:px-6 md:px-8 lg:px-10 pb-8 sm:pb-12"
+              style={{ zIndex: 10 }}
+            >
+              <div className="max-w-3xl">
+                <h1 className="text-2xl sm:text-3xl md:text-3xl lg:text-3xl mb-4 sm:mb-6 leading-tight font-bold text-white">
+                  {videoData.title}
+                </h1>
+
+                {/* Play Button and Controls Row */}
+                <div className="flex items-center gap-3 sm:gap-4 mb-6">
+                  <Link
+                    to={`/videos/${2}`}
+                    className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-4 py-2 font-medium text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
-                    {tag}
-                  </span>
-                ))}
-                <span className="px-2 py-1 sm:px-3 sm:py-2 md:px-4 text-[#D9D9D9CC] bg-black/30 backdrop-blur-sm rounded-full text-xs sm:text-sm font-medium">
-                  {videoData.duration}
-                </span>
+                    <Play className="w-4 h-4 mr-2 transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5" />
+                    <span className="text-sm transition-all duration-300 group-hover:font-semibold">
+                      {t("Play")}
+                    </span>
+                  </Link>
+
+                  <button
+                    className={`p-2 rounded-full backdrop-blur-sm border-2 transition-all duration-200 group ${
+                      isFavorite
+                        ? "bg-red-500/20 border-red-400/60 hover:bg-red-500/30 hover:border-red-400/80"
+                        : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
+                    }`}
+                    title={
+                      isFavorite ? "Remove from Favorites" : "Add to Favorites"
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFavorite(!isFavorite);
+                    }}
+                  >
+                    <Heart
+                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+                        isFavorite
+                          ? "text-red-500 fill-red-500 group-hover:text-red-400 group-hover:fill-red-400"
+                          : "text-white group-hover:text-red-300"
+                      }`}
+                    />
+                  </button>
+
+                  <button
+                    className={`p-2 rounded-full backdrop-blur-sm border-2 transition-all duration-200 group ${
+                      isDownloadClicked
+                        ? "bg-green-500/20 border-green-400/60 hover:bg-green-500/30 hover:border-green-400/80"
+                        : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
+                    }`}
+                    title="Download"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDownloadClicked(true);
+                    }}
+                  >
+                    <Download
+                      className={`w-4 h-4 transition-all duration-200 group-hover:scale-110 ${
+                        isDownloadClicked
+                          ? "text-green-500 group-hover:text-green-400"
+                          : "text-white group-hover:text-white"
+                      }`}
+                    />
+                  </button>
+
+                  <button
+                    className="p-2 rounded-full bg-black/40 backdrop-blur-sm border-2 border-white/50 hover:bg-black/60 transition-all duration-200"
+                    title="Share"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsShareModalOpen(true);
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 text-white" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        {/* Start Blur Background */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white via-white/50 to-transparent z-20" />
-        <div className="absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-white/70 to-transparent z-19" />
-      </div>
-      {/* Start End Section */}
-      {/* Start Buttons */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 -mt-12 sm:-mt-14 md:-mt-16 relative z-10 gap-4 sm:gap-0">
-        {/* Start Action  */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6 md:gap-8 w-full sm:w-auto mt-2 md:mt-0">
-          <Link
-            to={`/videos/${1}`}
-            className="flex items-center justify-center w-full sm:w-auto bg-black text-white rounded-full hover:scale-105 transition-all duration-200 px-4 sm:px-6 md:px-8 py-2 sm:py-3 text-sm sm:text-base md:text-lg shadow-xl"
-          >
-            <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 fill-white" />
-            <span>{t("Watch Now")}</span>
-          </Link>
 
-          <button
-            variant="outline"
-            size="lg"
-            className="bg-white flex items-center justify-center w-full sm:w-auto border-[1px] border-text rounded-full text-text hover:scale-105 duration-300 px-3 sm:px-4 md:px-6 py-2 sm:py-3 text-sm sm:text-base md:text-lg backdrop-blur-sm"
-          >
-            <img
-              src="../../../../src/assets/icons/wishlist-icon.png"
-              alt="wishlist"
-              className="w-[12px] h-[12px] sm:w-[14px] sm:h-[14px] object-contain mr-2"
-            />
-            {t("Add Watchlist")}
-          </button>
+          {/* Start Blur Background */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white via-white/50 to-transparent"
+            style={{ zIndex: 20 }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-white/70 to-transparent"
+            style={{ zIndex: 19 }}
+          />
         </div>
-        {/* End Action  */}
+        {/* End Hero Section */}
 
-        {/* Start Action Icons */}
-        <div className="flex items-center gap-3 sm:gap-4 md:gap-6 mt-4 sm:mt-0">
-          <button
-            className="p-2 sm:p-3 rounded-full bg-black hover:bg-opacity-80 hover:scale-110 transition-all duration-300"
-            title="Add to Favorites"
-          >
-            <Heart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white opacity-80" />
-          </button>
-          <button
-            className="p-2 sm:p-3 rounded-full bg-black hover:bg-opacity-80 hover:scale-110 transition-all duration-300"
-            title="Download"
-          >
-            <Download className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white opacity-80" />
-          </button>
-          <button
-            className="p-2 sm:p-3 rounded-full bg-black hover:bg-opacity-80 hover:scale-110 transition-all duration-300"
-            title="Share"
-          >
-            <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white opacity-80" />
-          </button>
-        </div>
-        {/* End Action Icons */}
-      </div>
-      {/* End Buttons */}
-      {/* Start Description && Top Cast */}
-      <div className="py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-8 lg:px-12">
-        {/* Start Description */}
-        <div className="mb-6 sm:mb-8">
-          <p className="text-sm sm:text-base md:text-lg text-text leading-relaxed max-w-4xl">
-            {videoData.description}
-          </p>
-        </div>
-        {/* End Description */}
-        {/* Start Top Cast Section */}
-        <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-medium mb-3 sm:mb-4 md:mb-6">
-            {t("Top Cast")}
-          </h2>
-          {/* Cast Carousel */}
-          <Carousel className="w-full overflow-visible">
-            <CarouselContent className="-ml-2 sm:-ml-4 overflow-visible">
-              {topCast.map((person) => (
-                <CarouselItem
-                  key={person.id}
-                  className="pl-2 sm:pl-4 py-2 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-[15%] overflow-visible"
-                >
-                  <div className="flex gap-2 sm:gap-3 items-center group cursor-pointer p-2 sm:p-3 rounded-lg transition-all duration-300">
-                    {/* Profile Image */}
-                    <div className="">
-                      <img
-                        src={person.image}
-                        alt={person.name}
-                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover group-hover:scale-110 transition-transform duration-300 border-2 border-transparent group-hover:border-white/30"
-                      />
-                    </div>
+        {/* Start Description && Top Cast */}
+        <div className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 md:px-8 lg:px-10 mt-4">
+          {/* Video Details and Info Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+            {/* Left Column - Description */}
+            <div className="lg:col-span-2">
+              {/* Seasons and Year on left side below description */}
+              <p className="text-gray-400 text-sm font-light">
+                {videoData.seasons} Seasons · {videoData.year}
+              </p>
+              <p className="text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-4">
+                {videoData.description}
+              </p>
+            </div>
 
-                    {/* Name */}
-                    <p className="font-semibold text-xs sm:text-sm md:text-base text-text transition-colors line-clamp-2">
-                      {person.name}
-                    </p>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+            {/* Right Column - Additional Info */}
+            <div className="lg:col-span-1">
+              <div className="space-y-3">
+                {/* Cast Info */}
+                <div>
+                  <p className="text-sm text-gray-600 leading-snug mb-2">
+                    <span className="font-medium text-gray-700">
+                      Top Cast:{" "}
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {showAllCast
+                        ? videoData.cast.join(", ")
+                        : videoData.cast.slice(0, 3).join(", ")}
+                      {!showAllCast && videoData.cast.length > 3 && ", "}
+                    </span>
+                  </p>
+                  {videoData.cast.length > 3 && (
+                    <button
+                      className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAllCast(!showAllCast);
+                      }}
+                    >
+                      <span>{showAllCast ? "View Less" : "View More"}</span>
+                      <svg
+                        className={`ml-1 w-3 h-3 transition-transform duration-200 ${
+                          showAllCast ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+
+                {/* Genres Info */}
+                <div>
+                  <p className="text-sm text-gray-600 leading-snug">
+                    <span className="font-medium text-gray-700">Genres: </span>
+                    <span className="font-bold text-gray-900">
+                      {videoData.genres.join(", ")}
+                    </span>
+                  </p>
+                </div>
+
+                {/* This show is */}
+                <div>
+                  <p className="text-sm text-gray-600 leading-snug">
+                    <span className="font-medium text-gray-700">
+                      This show is:
+                    </span>
+                    <span className="font-bold text-gray-900">
+                      {videoData.themes.join(", ")}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* End Description */}
+
+          {/* Top Cast Section removed as it's now in the right info column */}
         </div>
-        {/* End Top Cast Section */}
+
+        {/* End Description && Top Cast */}
+
+        {/* Start Episodes && User Reviews */}
+        <div className="px-1 sm:px-2 md:px-2 lg:px-5 py-2 sm:py-3 md:py-4">
+          <TabsSection />
+        </div>
+        {/* End Episodes && User Reviews */}
+
+       
       </div>
-      {/* End Description && Top Cast */}
-      {/* Start Episodes && User Reviews */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6 md:py-8">
-        <TabsSection />
-      </div>
-      {/* End Episodes && User Reviews */}
-      {/* Start Lists */}
-      {/* Start TOP 5 */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12  sm:py-6">
-        <DynamicSection
-          title="Top 5 in your like"
-          titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium mb-3 sm:mb-4 md:mb-6"
-          data={mockVideos}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMore={true}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End TOP 5 */}
-      {/* Start My LIST */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6">
-        <DynamicSection
-          title="My LIST"
-          titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium mb-3 sm:mb-4 md:mb-6"
-          data={mockVideos}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMore={true}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End My LIST */}
-      {/* Start Full Video */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6">
-        <DynamicSection
-          title="Full Video"
-          titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium mb-3 sm:mb-4 md:mb-6"
-          data={mockVideos}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMore={true}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End Full Video */}
-      {/* Start Unit Video */}
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-6">
-        <DynamicSection
-          title="Unit Video"
-          titleClassName="text-xl sm:text-2xl md:text-3xl font-medium mb-3 sm:mb-4 md:mb-6"
-          data={mockVideos}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMore={true}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End Unit  Video */}
-      {/* End Lits */}
-    </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        url={window.location.href}
+        title={videoData.title}
+      />
+    </Modal>
   );
 }
 
