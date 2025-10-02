@@ -13,7 +13,7 @@ function BrokenCarousel({ data, title, showArrows = false, showCount = 3 }) {
   return (
     <div>
       {title && (
-        <p className="text-2xl lg:text-3xl px-4 text-text font-bold mb-4">
+        <p className="text-2xl lg:text-3xl px-4 text-white font-bold mb-2">
           {title}
         </p>
       )}

@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
-import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import Filter from "@/components/ForPages/Videos/Filter/Filter";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -129,7 +128,6 @@ function FilterSections() {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState({
     startDate: null,
     endDate: null,
@@ -162,20 +160,6 @@ function FilterSections() {
     toast.success(t("Data Sorted!"));
   };
 
-  const clearDateFilter = () => {
-    setSelectedDateRange({ startDate: null, endDate: null });
-  };
-
-  const handleDateSelection = (dateSelection) => {
-    if (dateSelection.selection) {
-      setSelectedDateRange({
-        startDate: dateSelection.selection.startDate,
-        endDate: dateSelection.selection.endDate,
-      });
-    }
-    setIsDateModalOpen(false);
-  };
-
   const handleSearchPagination = (searchTerm) => {
     console.log("searchTerm", searchTerm);
     toast.success(t("Load More Clicked!"));
@@ -200,7 +184,6 @@ function FilterSections() {
           {/* Start Sidebar Filters */}
           <div className="hidden lg:flex w-full lg:w-80 ">
             <Filter
-              setIsDateModalOpen={setIsDateModalOpen}
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
               setContentType={setContentType}
@@ -357,29 +340,16 @@ function FilterSections() {
 
           {/* DatePicker Modal  */}
           <Modal
-            isOpen={isDateModalOpen}
-            onClose={() => setIsDateModalOpen(false)}
-            title={t("Are you sure you want to send the data?")}
-          >
-            <FilterDatePickerModal
-              setIsDateModalOpen={setIsDateModalOpen}
-              selectedDateRange={selectedDateRange}
-              setSelectedDateRange={setSelectedDateRange}
-              clearDateFilter={clearDateFilter}
-              handleDateSelection={handleDateSelection}
-            />
-          </Modal>
-          {/* End DatePicker Modal  */}
-          {/* DatePicker Modal  */}
-          <Modal
             isOpen={openFilterModal}
             onClose={() => setOpenFilterModal(false)}
             title={t("Filter")}
           >
             <Filter
-              setIsDateModalOpen={setIsDateModalOpen}
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
+              setContentType={setContentType}
+              setIndexSubject={setIndexSubject}
+              setLanguageContent={setLanguageContent}
             />
           </Modal>
           {/* End DatePicker Modal  */}
