@@ -2,12 +2,16 @@ import * as React from "react";
 
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Play, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
 import authbackImg from "@/assets/authback.jpg";
-
-import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function ArrowButton({ side, onClick, label }) {
   const isLeft = side === "left";
@@ -58,6 +62,7 @@ function HeroTitle({ h1Line1, h1Line2Prefix, h1Line2Under, description }) {
 
 export default function CarouselDemo() {
   const { t } = useTranslation();
+  const isMobile = useIsMobile(1024);
 
   const slides = [
     {
@@ -78,7 +83,9 @@ export default function CarouselDemo() {
       h1Line1: t("Explore Guided Reading"),
       h1Line2Prefix: "",
       h1Line2Under: t("— curated for you."),
-      description: t("Dive into inspiring readings and thoughtful insights every week."),
+      description: t(
+        "Dive into inspiring readings and thoughtful insights every week."
+      ),
       primaryTo: "/guiding-reading",
       secondaryTo: "/about/history",
     },
@@ -88,7 +95,9 @@ export default function CarouselDemo() {
       h1Line1: t("Browse Cards & Photos"),
       h1Line2Prefix: "",
       h1Line2Under: t("— captured weekly."),
-      description: t("Visual snapshots that highlight stories, people, and places."),
+      description: t(
+        "Visual snapshots that highlight stories, people, and places."
+      ),
       primaryTo: "/cards-photos",
       secondaryTo: "/connect",
     },
@@ -156,7 +165,7 @@ export default function CarouselDemo() {
 
                   <div className="absolute inset-0 flex items-center">
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
-                      <div className="pb-25 md:pb-32 lg:pb-30">
+                      <div className="pb-24 md:pb-32 lg:pb-36">
                         <HeroTitle
                           h1Line1={slide.h1Line1}
                           h1Line2Prefix={slide.h1Line2Prefix}
@@ -182,7 +191,10 @@ export default function CarouselDemo() {
                             className="inline-flex items-center gap-2 rounded-md bg-white/20 text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/30"
                             aria-label={t("More Info")}
                           >
-                            <Info className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
+                            <Info
+                              className="h-4 w-4 md:h-5 md:w-5"
+                              aria-hidden="true"
+                            />
                             {t("More Info")}
                           </Link>
                         </div>
@@ -190,7 +202,7 @@ export default function CarouselDemo() {
                     </div>
                   </div>
 
-                  <div className="pointer-events-auto absolute left-6 right-6 bottom-20 z-10">
+                  <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-20 z-10">
                     <TopFiveSection />
                   </div>
                 </div>
@@ -198,24 +210,28 @@ export default function CarouselDemo() {
             ))}
           </CarouselContent>
 
-          <ArrowButton
-            side="left"
-            label={t("Previous slide")}
-            onClick={() => {
-              stopAuto();
-              api?.scrollPrev();
-              startAuto();
-            }}
-          />
-          <ArrowButton
-            side="right"
-            label={t("Next slide")}
-            onClick={() => {
-              stopAuto();
-              api?.scrollNext();
-              startAuto();
-            }}
-          />
+          {!isMobile && (
+            <>
+              <ArrowButton
+                side="left"
+                label={t("Previous slide")}
+                onClick={() => {
+                  stopAuto();
+                  api?.scrollPrev();
+                  startAuto();
+                }}
+              />
+              <ArrowButton
+                side="right"
+                label={t("Next slide")}
+                onClick={() => {
+                  stopAuto();
+                  api?.scrollNext();
+                  startAuto();
+                }}
+              />
+            </>
+          )}
         </div>
       </Carousel>
     </div>

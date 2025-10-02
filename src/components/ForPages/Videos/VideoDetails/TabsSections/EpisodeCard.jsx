@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 
 const EpisodeCard = ({ episode, index }) => {
   return (
-    <div className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+    <div className="flex items-start gap-4 py-1 lg:p-4 hover:bg-gray-50 rounded-lg transition-colors duration-200">
       {/* Episode Number */}
-      <div className="flex-shrink-0 w-8 text-center">
+      <div className="flex-shrink-0 w-8 text-center b">
         <span className="text-lg font-medium text-gray-700">{index + 1}</span>
       </div>
 

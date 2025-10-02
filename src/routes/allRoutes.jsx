@@ -2,9 +2,8 @@ import Dashboard from "@/pages/Dashboard/DashbboardContnt";
 import Login from "@/pages/Auth/Login/LoginContent";
 import Register from "@/pages/Auth/Register/RegisterContent";
 import Home from "@/pages/Home/HomeContent";
-import AboutHistory from "@/pages/AboutUs/History/HistoryContent";
-import AboutTeam from "@/pages/AboutUs/Team/TeamContent";
-import AboutUser from "@/pages/AboutUs/User/UserContent";
+import AboutUs from "@/pages/AboutUs/AboutUsContent";
+import AboutMemberContent from "@/pages/AboutUs/Member/MemberContent";
 import VideosPageContent from "@/pages/Videos/VideosPage/VideosPageContent";
 import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
@@ -18,9 +17,8 @@ import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
 export const userRoutes = [
   { path: "/", element: <Home /> },
   { path: "/dashboard", element: <Dashboard /> },
-  { path: "/about/history", element: <AboutHistory /> },
-  { path: "/about/team", element: <AboutTeam /> },
-  { path: "/about/user", element: <AboutUser /> },
+  { path: "/about", element: <AboutUs /> },
+  { path: "/about/team/:id", element: <AboutMemberContent /> },
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },

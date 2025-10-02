@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { X, Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -21,6 +21,10 @@ function FilterDatePickerModal({
   handleDateSelection,
 }) {
   const { t } = useTranslation();
+  
+  // State للتحكم في فتح وإغلاق الـ Popover
+  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
+  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
   return (
     <div>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -43,7 +47,7 @@ function FilterDatePickerModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("Start Date")}
               </label>
-              <Popover>
+              <Popover open={isStartDateOpen} onOpenChange={setIsStartDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -64,12 +68,13 @@ function FilterDatePickerModal({
                   <CalendarComponent
                     mode="single"
                     selected={selectedDateRange.startDate}
-                    onSelect={(date) =>
+                    onSelect={(date) => {
                       setSelectedDateRange((prev) => ({
                         ...prev,
                         startDate: date,
-                      }))
-                    }
+                      }));
+                      setIsStartDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
+                    }}
                     disabled={(date) =>
                       date > new Date() || date < new Date("1900-01-01")
                     }
@@ -84,7 +89,7 @@ function FilterDatePickerModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("End Date")}
               </label>
-              <Popover>
+              <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -105,12 +110,13 @@ function FilterDatePickerModal({
                   <CalendarComponent
                     mode="single"
                     selected={selectedDateRange.endDate}
-                    onSelect={(date) =>
+                    onSelect={(date) => {
                       setSelectedDateRange((prev) => ({
                         ...prev,
                         endDate: date,
-                      }))
-                    }
+                      }));
+                      setIsEndDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
+                    }}
                     disabled={(date) =>
                       date > new Date() ||
                       date < new Date("1900-01-01") ||

@@ -1,11 +1,12 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import TopFiveSectionCard from "@/components/Global/TopFiveSectionCard/TopFiveSectionCard";
 import { mockVideos } from "@/mock/Viedeos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { useTranslation } from "react-i18next";
 
 const TopFiveSection = () => {
   const isMobile = useIsMobile(1224);

@@ -16,7 +16,7 @@ function Usernavbar() {
     { name: t("Videos"), href: "/videos" },
     { name: t("Cards & Photos"), href: "/cards-photos" },
     { name: t("Connect"), href: "/connect" },
-    { name: t("About Us"), href: "/about/history" },
+    { name: t("About Us"), href: "/about" },
   ];
 
   const toggleMenu = () => {

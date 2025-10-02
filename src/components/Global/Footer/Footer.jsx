@@ -43,13 +43,12 @@ function Footer({ authPages }) {
       className={`px-4 sm:px-8 md:px-10 lg:px-20 ${authPages ? "w-full" : ""}`}
       dir={isRTL ? "rtl" : "ltr"}
     >
-  
       <div
         className={`bg-[#fff] border mt-4  ${
           authPages ? "border-[#999EAD] " : "border-[#141414]"
-        }   w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1 gap-2 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5  `}
+        } w-full  md:w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1 gap-2 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5  `}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between w-full gap-2">
           <input
             aria-label={t("Enter your email")}
             className={`w-44 ${
@@ -65,11 +64,11 @@ function Footer({ authPages }) {
               /* subscription stub - implement real submit later */
               // console.log('subscribe clicked')
             }}
-            className={`px-3 py-2 rounded-md text-xs font-medium transition-colors duration-200 ${
+            className={` px-3 py-2 border rounded-md text-xs font-medium transition-colors duration-200 ${
               authPages
                 ? "bg-[#ffffff] text-[#141414] border border-[#ffffff]/20"
                 : "bg-[#141414] text-[#ffffff]"
-            } hover:opacity-90`}
+            } hover:opacity-90    `}
           >
             {t("Subscribe")}
           </button>
@@ -118,12 +117,12 @@ function Footer({ authPages }) {
               rel="noopener noreferrer"
             >
               <i
-                className={`${link.icon} w-5 h-5 text-xl text-white transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
+                className={`${link.icon} w-5 h-5 text-xl text-text transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
                 aria-label={link.name}
               />
             </a>
           ))}
-          <LanguageDropdown iconColor="#fff" />
+          <LanguageDropdown iconColor={authPages ? "#fff" : "#141414"} />
         </div>
         {/* End Social Links */}
       </div>

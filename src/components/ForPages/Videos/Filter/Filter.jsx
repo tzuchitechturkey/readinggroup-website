@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 
+import Modal from "@/components/Global/Modal/Modal";
+import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import { Button } from "@/components/ui/button";
 
 function Filter({
-  setIsDateModalOpen,
   selectedDateRange,
   setSelectedDateRange,
   setContentType,
@@ -15,6 +16,20 @@ function Filter({
   setLanguageContent,
 }) {
   const { t } = useTranslation();
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const clearDateFilter = () => {
+    setSelectedDateRange({ startDate: null, endDate: null });
+  };
+
+  const handleDateSelection = (dateSelection) => {
+    if (dateSelection.selection) {
+      setSelectedDateRange({
+        startDate: dateSelection.selection.startDate,
+        endDate: dateSelection.selection.endDate,
+      });
+    }
+    setIsDateModalOpen(false);
+  };
   return (
     <div className="w-full lg:w-80 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
@@ -335,6 +350,21 @@ function Filter({
           </div>
         </div>
       </div>
+      {/* DatePicker Modal  */}
+      <Modal
+        isOpen={isDateModalOpen}
+        onClose={() => setIsDateModalOpen(false)}
+        title={t("Are you sure you want to send the data?")}
+      >
+        <FilterDatePickerModal
+          setIsDateModalOpen={setIsDateModalOpen}
+          selectedDateRange={selectedDateRange}
+          setSelectedDateRange={setSelectedDateRange}
+          clearDateFilter={clearDateFilter}
+          handleDateSelection={handleDateSelection}
+        />
+      </Modal>
+      {/* End DatePicker Modal  */}
     </div>
   );
 }
