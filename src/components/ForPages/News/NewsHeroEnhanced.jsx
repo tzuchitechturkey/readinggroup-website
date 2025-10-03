@@ -159,7 +159,7 @@ const NewsHero = ({
               onDownloadImage={handleDownloadImage}
               onShareImage={() => setIsShareModalOpen(true)}
               isRTL={i18n.language === "ar"}
-              className="-bottom-2 !left-16 "
+              className="!-bottom-2 !left-16 "
             />
             {/* Start Icons */}
             {/* <div className="flex items-center gap-2">
