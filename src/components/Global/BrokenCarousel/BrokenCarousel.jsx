@@ -33,7 +33,7 @@ function BrokenCarousel({
     if (itemCount === 1) {
       return "basis-full sm:basis-full md:basis-full lg:basis-full xl:basis-[100%]";
     } else if (itemCount === 2) {
-      return "basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/3";
+      return "basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/2";
     } else if (itemCount === 3) {
       return "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4";
     }

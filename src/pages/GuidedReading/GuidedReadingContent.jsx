@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -8,19 +8,122 @@ import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/Vid
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import VideoSections from "@/components/ForPages/Home/VideoSections/VideoSections";
 import Modal from "@/components/Global/Modal/Modal";
+import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
+import { readings } from "@/mock/reading.js";
 
 function GuidedReadingContent() {
   const { t } = useTranslation();
+
+  // Filter states
   const [searchDate, setSearchDate] = useState("");
+  const [author, setAuthor] = useState("");
+  const [category, setCategory] = useState("");
   const [type, setType] = useState("");
-  const [theme, setTheme] = useState("");
+  const [language, setLanguage] = useState("");
+  const [source, setSource] = useState("");
+  const [titleQuery, setTitleQuery] = useState("");
+
+  // Results state
+  const [filteredReadings, setFilteredReadings] = useState([]);
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+
+  // Pagination state
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const limit = 10;
+
+  // Apply filters function - simulates API call
+  const applyFilters = (offset = 0, appendResults = false) => {
+    setIsLoading(true);
+
+    // Simulate API delay
+    setTimeout(() => {
+      // Filter all data first (this simulates backend filtering)
+      const allFiltered = readings.filter((reading) => {
+        // Title search
+        if (
+          titleQuery &&
+          !reading.title.toLowerCase().includes(titleQuery.toLowerCase())
+        ) {
+          return false;
+        }
+
+        // Author filter
+        if (
+          author &&
+          !reading.author.toLowerCase().includes(author.toLowerCase())
+        ) {
+          return false;
+        }
+
+        // Category filter
+        if (category && reading.category !== category) {
+          return false;
+        }
+
+        // Genre filter
+        if (type && reading.genre !== type) {
+          return false;
+        }
+
+        // Language filter
+        if (language && reading.language !== language) {
+          return false;
+        }
+
+        // Source filter
+        if (source && reading.source !== source) {
+          return false;
+        }
+
+        // Date filter (simplified - checking if publish date contains the search term)
+        if (searchDate && !reading.publishDate.includes(searchDate)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      // Simulate pagination (slice results based on offset and limit)
+      const paginatedResults = allFiltered.slice(offset, offset + limit);
+
+      // Update state based on whether we're appending or replacing
+      if (appendResults) {
+        setFilteredReadings((prev) => [...prev, ...paginatedResults]);
+      } else {
+        setFilteredReadings(paginatedResults);
+        setCurrentOffset(offset);
+      }
+
+      setTotalCount(allFiltered.length);
+      setHasMore(offset + limit < allFiltered.length);
+      setIsSearchPerformed(true);
+      setIsLoading(false);
+    }, 500); // Simulate 500ms API delay
+  };
+
+  // Load more function
+  const handleLoadMore = () => {
+    const newOffset = currentOffset + limit;
+    setCurrentOffset(newOffset);
+    applyFilters(newOffset, true);
+  };
+
+  // Auto-apply filters when any filter changes (reset pagination)
+  useEffect(() => {
+    setCurrentOffset(0);
+    applyFilters(0, false);
+  }, [author, category, type, language, source, titleQuery, searchDate]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Start Header */}
       <div
         className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
         style={{
-          backgroundImage: `url(../../../src/assets/guiding-reading.png)`,
+          backgroundImage: `url(../../../src/assets/book.gif)`,
         }}
       >
         {/* Start Texts */}
@@ -38,26 +141,41 @@ function GuidedReadingContent() {
       </div>
       {/* End Header */}
 
-      {/* Start FIlter */}
+      {/* Start Filter */}
       <LearnFilter
         t={t}
         searchDate={searchDate}
         setSearchDate={setSearchDate}
+        author={author}
+        setAuthor={setAuthor}
+        category={category}
+        setCategory={setCategory}
         type={type}
         setType={setType}
-        theme={theme}
-        setTheme={setTheme}
+        language={language}
+        setLanguage={setLanguage}
+        source={source}
+        setSource={setSource}
+        titleQuery={titleQuery}
+        setTitleQuery={setTitleQuery}
+        onSearch={() => applyFilters(0, false)}
       />
-      {/* End FIlter */}
+      {/* End Filter */}
 
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto">
-        {/* Start Filter Section */}
+        {/* Start Filtered Data */}
         <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-         
-          <FilterSections />
+          <FilteredResults
+            readings={filteredReadings}
+            isSearchPerformed={isSearchPerformed}
+            totalCount={totalCount}
+            hasMore={hasMore}
+            isLoading={isLoading}
+            onLoadMore={handleLoadMore}
+          />
         </section>
-        {/* End Filter Section */}
+        {/* End Filtered Data */}
 
         {/* Weekly Moments */}
         <section className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
@@ -74,7 +192,6 @@ function GuidedReadingContent() {
           <VideoSections />
         </section>
       </div>
-    
     </div>
   );
 }

@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import Modal from "@/components/Global/Modal/Modal";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import ExternalNewsCard from "@/components/Global/ExternalNewsCard/ExternalNewsCard";
-import { Button } from "@/components/ui/button";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import EventsFilter from "@/components/ForPages/Connect/EventsFilter/EventsFilter";
 import { EventsData } from "@/mock/events";
