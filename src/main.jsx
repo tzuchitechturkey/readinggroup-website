@@ -9,9 +9,13 @@ import "./index.css";
 import "../src/i18n/i18n.js";
 import App from "./App.jsx";
 
+// Use Vite's BASE_URL (derived from vite.config.js base) as router basename.
+// Trim trailing slash because React Router expects a clean path.
+const basename = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
   </StrictMode>
