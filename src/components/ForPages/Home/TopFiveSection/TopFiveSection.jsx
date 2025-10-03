@@ -7,7 +7,6 @@ import { mockVideos } from "@/mock/Viedeos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-
 const TopFiveSection = () => {
   const isMobile = useIsMobile(1224);
   const { t } = useTranslation();
@@ -23,6 +22,9 @@ const TopFiveSection = () => {
         data={mockVideos}
         isSlider={isMobile}
         cardName={TopFiveSectionCard}
+        showArrows={isMobile}
+        prevArrowClassname="-left-8"
+        nextArrowClassname="-right-8"
       />
     </div>
   );

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
-import FilterSections from "@/components/ForPages/Videos/FilterSections/FilterSections";
+import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import VideoSections from "@/components/ForPages/Home/VideoSections/VideoSections";
 import Modal from "@/components/Global/Modal/Modal";

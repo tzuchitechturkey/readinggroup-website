@@ -431,8 +431,12 @@ function LearnFilter({
         </div>
       </div>
 
-      {/* Date Filter Modal */}
-      {isDateModalOpen && (
+      {/* Start Date Filter Modal */}
+      <Modal
+        isOpen={isDateModalOpen}
+        onClose={() => setIsDateModalOpen(false)}
+        title={t("Select Date Range")}
+      >
         <FilterDatePickerModal
           setIsDateModalOpen={setIsDateModalOpen}
           selectedDateRange={selectedDateRange}
@@ -440,7 +444,8 @@ function LearnFilter({
           clearDateFilter={clearDateFilter}
           handleDateSelection={handleDateSelection}
         />
-      )}
+      </Modal>
+      {/* End Date Filter Modal */}
     </div>
   );
 }

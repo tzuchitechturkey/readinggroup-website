@@ -183,7 +183,7 @@ const NavigationButtons = ({ t, previousMember, nextMember, onNavigate }) => {
         <div className="flex flex-col items-start">
           <button
             onClick={() => onNavigate(previousMember.id)}
-            className="flex items-center  border border-text text-text px-3 pl-6 py-3 rounded hover:bg-white hover:text-text transition-colors duration-200 mb-3"
+            className="flex items-center  border border-primary text-primary px-3 pl-6 py-3 rounded hover:bg-primary  hover:text-white transition-colors duration-200 mb-3"
             style={{ fontFamily: "Lato, sans-serif" }}
           >
             <ArrowIcon direction="right" />
@@ -202,7 +202,7 @@ const NavigationButtons = ({ t, previousMember, nextMember, onNavigate }) => {
         <div className="flex flex-col items-end">
           <button
             onClick={() => onNavigate(nextMember.id)}
-            className="flex items-center gap-1 border border-text text-text px-3 pr-6 py-3 rounded hover:bg-black hover:text-text transition-colors duration-200 mb-3"
+            className="flex items-center gap-1 border border-primary text-primary px-3 pr-6 py-3 rounded hover:bg-primary hover:text-white transition-colors duration-200 mb-3"
             style={{ fontFamily: "Lato, sans-serif" }}
           >
             {t("Next")}

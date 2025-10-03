@@ -3,17 +3,19 @@ import React, { useState } from "react";
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import { Button } from "@/components/ui/button";
 
-function Filter({
+function VideoFilter({
   selectedDateRange,
   setSelectedDateRange,
   setContentType,
   setIndexSubject,
   setLanguageContent,
+  setOpenFilterModal,
 }) {
   const { t } = useTranslation();
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
@@ -37,7 +39,7 @@ function Filter({
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h3 className="text-base sm:text-lg font-semibold text-text">
-              {t("Side filtration")}
+              {t("Side Filtration")}
             </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
@@ -342,8 +344,11 @@ function Filter({
             </Button>
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
-              onClick={() => setIsDateModalOpen(true)}
+              className="bg-primary hover:bg-white text-white hover:text-primary text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
+              onClick={() => {
+                toast.success(t("Filters applied successfully"));
+                setOpenFilterModal(false);
+              }}
             >
               {t("Apply")}
             </Button>
@@ -369,4 +374,4 @@ function Filter({
   );
 }
 
-export default Filter;
+export default VideoFilter;

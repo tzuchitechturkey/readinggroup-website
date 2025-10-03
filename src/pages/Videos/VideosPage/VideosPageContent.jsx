@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import VideosHeader from "@/components/ForPages/Videos/VideosHeader/VideosHeader";
-import FilterSections from "@/components/ForPages/Videos/FilterSections/FilterSections";
+import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { mockVideos } from "@/mock/Viedeos";

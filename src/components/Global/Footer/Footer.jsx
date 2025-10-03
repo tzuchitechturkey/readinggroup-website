@@ -15,9 +15,9 @@ function Footer({ authPages }) {
   const { t } = useTranslation();
   const linkList = [
     { name: t("Guided Reading"), href: "/guided-reading" },
-    { name: t("Unit Videos"), href: "/unit-videos" },
-    { name: t("Full Videos"), href: "/full-videos" },
-    { name: t("Health News"), href: "/health-news" },
+    { name: t("Videos"), href: "/videos" },
+    { name: t("Cards & Photos"), href: "/cards-photos" },
+    { name: t("Events & Community"), href: "/events" },
     { name: t("DA AI TV"), href: "/da-ai-tv" },
   ];
   // dashboard Color : 999EAD

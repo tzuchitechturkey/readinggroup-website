@@ -21,6 +21,8 @@ const DynamicSection = ({
   viewMore = false,
   viewMoreUrl = "#",
   showArrows = false,
+  prevArrowClassname = "",
+  nextArrowClassname = "",
 }) => {
   const { t } = useTranslation();
   const Card = cardName;
@@ -101,8 +103,8 @@ const DynamicSection = ({
                 </CarouselContent>
                 {showArrows && (
                   <>
-                    <CarouselPrevious />
-                    <CarouselNext />
+                    <CarouselPrevious className={`${prevArrowClassname}`} />
+                    <CarouselNext className={`${nextArrowClassname}`} />
                   </>
                 )}
               </Carousel>
