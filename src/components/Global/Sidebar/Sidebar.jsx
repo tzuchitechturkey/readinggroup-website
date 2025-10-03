@@ -9,8 +9,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 
-// تأكد من صحة المسار (اسم الملف يحتوي مسافة)
 import Avatar from "../../../../src/assets/Beared Guy02-min 1.png";
 import DashboardIcon from "../../../../src/assets/icons/Home-simple-door.png";
 import Posts from "../../../../src/assets/icons/Union.png";
