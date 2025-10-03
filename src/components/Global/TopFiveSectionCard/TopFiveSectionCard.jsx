@@ -14,7 +14,7 @@ function TopFiveSectionCard({ item }) {
       <div className="relative z-20 flex-shrink-0 -mr-6">
         <div className="relative">
           <span
-            className=" text-8xl md:text-9xl font-black leading-none  "
+            className=" text-7xl md:text-9xl font-black leading-none  "
             style={{
               WebkitTextStroke: "3px white",
               WebkitTextFillColor: "transparent",
@@ -36,7 +36,7 @@ function TopFiveSectionCard({ item }) {
       </div>
       {/* End Number */}
       <div className="flex-1 relative z-10">
-        <div className="relative w-full 2xl:w-[210px] h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
+        <div className="relative w-full 2xl:w-[210px] h-40 lg:h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
           <img
             src={item.image}
             alt={item.title}

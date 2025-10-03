@@ -2,11 +2,11 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-import NewsCard from "@/components/ForPages/Connect/NewCard/NewsCard";
+import NewsCard from "@/components/ForPages/Connect/NewsCard/NewsCard";
 import RecommendationNewsCard from "@/components/ForPages/Connect/RecommendationNewsCard/RecommendationNewsCard";
 import CategoryTag from "@/components/ForPages/Connect/CategoryTag/CategoryTag";
 
-const ConnectNewsSection = () => {
+const EventstNewsSection = () => {
   const { t } = useTranslation();
   // Static data - يمكن استبدالها ببيانات ديناميكية
   const data = {
@@ -278,7 +278,7 @@ const ConnectNewsSection = () => {
             </section>
 
             {/* Tags Category */}
-            <section>
+            <section className="pt-3">
               <SectionHeader title="Tags Category" ornamentHeight="h-10" />
               <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 mt-5 justify-center lg:justify-start">
                 {data.categories.map((category, index) => (
@@ -297,4 +297,4 @@ const ConnectNewsSection = () => {
   );
 };
 
-export default ConnectNewsSection;
+export default EventstNewsSection;

@@ -105,7 +105,7 @@ const TimelineItem = ({ item }) => {
                 {hasButton && (
                   <div className="flex justify-end">
                     <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+                      className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
                       onClick={handleOpen}
                     >
                       {t("Learn more")}
@@ -148,7 +148,7 @@ const TimelineItem = ({ item }) => {
                 </p>
                 {hasButton && (
                   <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+                    className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
                     onClick={handleOpen}
                   >
                     {t("Learn more")}
@@ -201,7 +201,7 @@ const TimelineItem = ({ item }) => {
           {/* الزر */}
           {hasButton && (
             <button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+              className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
               onClick={handleOpen}
             >
               {t("Learn more")}
@@ -238,7 +238,7 @@ const TimelineItem = ({ item }) => {
   );
 };
 
-const SimpleTimeline = ({ data = timelineData, className = "" }) => {
+const Timeline = ({ data = timelineData, className = "" }) => {
   return (
     <div
       className={`relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 ${className}`}
@@ -268,4 +268,4 @@ const SimpleTimeline = ({ data = timelineData, className = "" }) => {
   );
 };
 
-export default SimpleTimeline;
+export default Timeline;

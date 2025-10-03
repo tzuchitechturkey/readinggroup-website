@@ -15,7 +15,7 @@ function Usernavbar() {
     { name: t("Guided Reading"), href: "/guiding-reading" },
     { name: t("Videos"), href: "/videos" },
     { name: t("Cards & Photos"), href: "/cards-photos" },
-    { name: t("Connect"), href: "/connect" },
+    { name: t("Events & Community"), href: "/events" },
     { name: t("About Us"), href: "/about" },
   ];
 

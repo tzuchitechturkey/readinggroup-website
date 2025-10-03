@@ -5,7 +5,7 @@ import { Download, Share2 } from "lucide-react";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 
-import NewsCard from "../Connect/NewCard/NewsCard";
+import NewsCard from "../Connect/NewsCard/NewsCard";
 
 const NewsHero = ({
   mainArticle = null,

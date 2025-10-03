@@ -1,9 +1,9 @@
 import React from "react";
 
 import NewsHeroEnhanced from "@/components/ForPages/News/NewsHeroEnhanced";
-import ConnectNewsSection from "@/components/ForPages/Connect/ConnectNewsSection/ConnectNewsSection";
+import ConnectNewsSection from "@/components/ForPages/Connect/EventstNewsSection/EventstNewsSection";
 
-function ConnectContent() {
+function NewsContent() {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Start Hero */}
@@ -16,4 +16,4 @@ function ConnectContent() {
   );
 }
 
-export default ConnectContent;
+export default NewsContent;

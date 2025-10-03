@@ -2,15 +2,15 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-import SimpleTimeline from "@/components/ForPages/AboutUs/History/Timeline/Timeline";
+import Timeline from "@/components/ForPages/AboutUs/History/Timeline/Timeline";
 // بيانات التاريخ المخصصة للتاريخ
 const historyTimelineData = [
   {
     id: 1,
     year: "2010",
-    title: "تأسيس المجموعة",
+    title: "Group Foundation",
     description:
-      "تم تأسيس مجموعة القراءة كمبادرة صغيرة لتشجيع حب القراءة في المجتمع. بدأنا بمجموعة صغيرة من المتطوعين الذين يؤمنون بقوة الكتاب في تغيير الحياة.",
+      "The Reading Group was founded as a small initiative to encourage the love of reading in the community. We started with a small group of volunteers who believed in the power of books to change lives.",
     image: "/src/assets/1-top5.jpg",
     hasButton: true,
     alignment: "right",
@@ -18,9 +18,9 @@ const historyTimelineData = [
   {
     id: 2,
     year: "2012",
-    title: "أول مكتبة مجتمعية",
+    title: "First Community Library",
     description:
-      "افتتحنا أول مكتبة مجتمعية مجانية، والتي أصبحت نقطة تجمع لعشاق القراءة. تضمنت المكتبة أكثر من 1000 كتاب في مختلف المجالات.",
+      "We opened the first free community library, which became a gathering point for reading enthusiasts. The library included more than 1,000 books in various fields.",
     image: null,
     hasButton: false,
     alignment: "left",
@@ -28,9 +28,9 @@ const historyTimelineData = [
   {
     id: 3,
     year: "2015",
-    title: "برنامج القراءة للأطفال",
+    title: "Children’s Reading Program",
     description:
-      "أطلقنا برنامجاً متخصصاً لتشجيع الأطفال على القراءة، والذي شمل ورش عمل تفاعلية وقصص مصورة. استفاد من البرنامج أكثر من 500 طفل في العام الأول.",
+      "We launched a specialized program to encourage children to read, which included interactive workshops and illustrated stories. More than 500 children benefited from the program in its first year.",
     image: null,
     hasButton: false,
     alignment: "right",
@@ -38,9 +38,9 @@ const historyTimelineData = [
   {
     id: 4,
     year: "2018",
-    title: "التوسع الرقمي",
+    title: "Digital Expansion",
     description:
-      "انتقلنا إلى العصر الرقمي بإطلاق منصتنا الإلكترونية التي تتيح للأعضاء الوصول إلى آلاف الكتب الرقمية ومشاركة تجاربهم القرائية.",
+      "We entered the digital era by launching our online platform, enabling members to access thousands of e-books and share their reading experiences.",
     image: "/src/assets/2-top5.jpg",
     hasButton: true,
     alignment: "left",
@@ -48,9 +48,9 @@ const historyTimelineData = [
   {
     id: 5,
     year: "2020",
-    title: "مواجهة التحديات",
+    title: "Facing Challenges",
     description:
-      "خلال جائحة كوفيد-19، نجحنا في الحفاظ على نشاطاتنا من خلال التحول الكامل إلى النشاطات الافتراضية، مما مكننا من الوصول لجمهور أوسع.",
+      "During the COVID-19 pandemic, we succeeded in maintaining our activities by fully shifting to virtual events, allowing us to reach a wider audience.",
     image: "/src/assets/3-top5.jpg",
     hasButton: false,
     alignment: "right",
@@ -58,9 +58,9 @@ const historyTimelineData = [
   {
     id: 6,
     year: "2023",
-    title: "المستقبل الآن",
+    title: "The Future is Now",
     description:
-      "اليوم، نفتخر بكوننا أكبر مجتمع للقراءة في المنطقة مع أكثر من 10,000 عضو نشط و 50 مكتبة مجتمعية منتشرة في مختلف المدن.",
+      "Today, we are proud to be the largest reading community in the region with more than 10,000 active members and 50 community libraries across different cities.",
     image: "/src/assets/4-top5.jpg",
     hasButton: true,
     alignment: "left",
@@ -78,7 +78,7 @@ const AboutHistoryContent = () => {
           </h2>
         </div>
 
-        <SimpleTimeline data={historyTimelineData} className="rtl" />
+        <Timeline data={historyTimelineData} className="rtl" />
       </div>
     </div>
   );

@@ -4,13 +4,12 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
-import Filter from "@/components/ForPages/Videos/Filter/Filter";
+import VideoFilter from "@/components/ForPages/Videos/VideoFilter/VideoFilter";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { Button } from "@/components/ui/button";
 import authback from "@/assets/authback.jpg";
-
-import SearchSecion from "../SearchSecion/SearchSecion";
+import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 
 const allVideos = [
   {
@@ -124,7 +123,7 @@ const allVideos = [
     featured: false,
   },
 ];
-function FilterSections() {
+function VideoFilterSections() {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -183,7 +182,7 @@ function FilterSections() {
         <div className="flex flex-col lg:flex-row gap-4 ">
           {/* Start Sidebar Filters */}
           <div className="hidden lg:flex w-full lg:w-80 ">
-            <Filter
+            <VideoFilter
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
               setContentType={setContentType}
@@ -240,7 +239,10 @@ function FilterSections() {
                       <div className="">
                         <BrokenCarousel
                           data={displayedVideos}
-                          showArrows={false}
+                          showArrows={displayedVideos?.length > 4}
+                          cardName={VideoCard}
+                          nextArrowClassname={"-right-5"}
+                          prevArrowClassname={"-left-5 "}
                         />
                       </div>
                     </div>
@@ -277,7 +279,10 @@ function FilterSections() {
                       <div className="">
                         <BrokenCarousel
                           data={displayedVideos}
-                          showArrows={false}
+                          showArrows={displayedVideos?.length > 4}
+                          cardName={VideoCard}
+                          nextArrowClassname={"-right-5"}
+                          prevArrowClassname={"-left-5 "}
                         />
                       </div>
                     </div>
@@ -323,7 +328,10 @@ function FilterSections() {
                       <div className="">
                         <BrokenCarousel
                           data={displayedVideos}
-                          showArrows={false}
+                          showArrows={displayedVideos?.length > 4}
+                          cardName={VideoCard}
+                          nextArrowClassname={"-right-5"}
+                          prevArrowClassname={"-left-5"}
                         />
                       </div>
                     </div>
@@ -344,12 +352,13 @@ function FilterSections() {
             onClose={() => setOpenFilterModal(false)}
             title={t("Filter")}
           >
-            <Filter
+            <VideoFilter
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
               setContentType={setContentType}
               setIndexSubject={setIndexSubject}
               setLanguageContent={setLanguageContent}
+              setOpenFilterModa={setOpenFilterModal}
             />
           </Modal>
           {/* End DatePicker Modal  */}
@@ -359,4 +368,4 @@ function FilterSections() {
   );
 }
 
-export default FilterSections;
+export default VideoFilterSections;

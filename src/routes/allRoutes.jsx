@@ -11,10 +11,11 @@ import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAn
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
 import CardDetailsContent from "@/pages/GuidedReading/CardDetails/CardDetailsContent";
 import PhotoDetailsContent from "@/pages/Photos/PhotoDetails/PhotoDetailsContent";
-import ConnectContent from "@/pages/Connect/ConnectContent";
+import EventsContent from "@/pages/Events/EventsContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
-// import Pages404 from "@/pages/Pages404";
+import NewsContent from "@/pages/Events/News/NewsContent";
+import Pages404 from "@/pages/NotFound/NotFound";
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -25,16 +26,19 @@ export const userRoutes = [
   { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
-  { path: "//cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
+  { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
-  { path: "/connect", element: <ConnectContent /> },
+  { path: "/events", element: <EventsContent /> },
+  { path: "/events/:id", element: <NewsContent /> },
   { path: "/profile", element: <UserProfileContent /> },
   { path: "/settings", element: <UserSettingContent /> },
+  // Catch-all route for 404 - يجب أن يكون في النهاية
+  { path: "*", element: <Pages404 /> },
 ];
 
 export const authRoutes = [
   { path: "/auth/login", element: <Login /> },
   { path: "/auth/register", element: <Register /> },
-  // { path: "/pages-404", element: <Pages404 /> },
+  { path: "/pages-404", element: <Pages404 /> },
 ];
