@@ -5,6 +5,11 @@ import { ThumbsUp, ListPlus } from "lucide-react";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const youtubeIcon = resolveAsset("icons/youtube-icon.png");
+const shareIcon = resolveAsset("icons/share_icon.png");
+const verifyIcon = resolveAsset("icons/verifyAcoount.png");
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
@@ -26,7 +31,7 @@ function CustomyoutubeVideo({ videoData }) {
     description:
       "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through resilience, and compassion that shine through ",
     channelName: "Musa AL AHMED",
-    channelAvatar: "../../../src/assets/Beared Guy02-min 1.png",
+    channelAvatar: resolveAsset("Beared Guy02-min 1.png"),
     channelVerified: true,
     channelSubscribers: "14.1M Subscriber",
   };
@@ -239,7 +244,7 @@ function CustomyoutubeVideo({ videoData }) {
               <button className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap">
                 <span className="font-medium">{t("Watch on YouTube")}</span>
                 <img
-                  src="../../../src/assets/icons/youtube-icon.png"
+                  src={youtubeIcon}
                   alt="YouTube"
                   className="w-4 h-4 sm:w-5 sm:h-5"
                 />
@@ -308,7 +313,7 @@ function CustomyoutubeVideo({ videoData }) {
                 className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
               >
                 <img
-                  src="../../../src/assets/icons/share_icon.png"
+                  src={shareIcon}
                   alt="share"
                   className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
                 />
@@ -350,7 +355,7 @@ function CustomyoutubeVideo({ videoData }) {
                     </span>
                     {video.channelVerified && (
                       <img
-                        src="../../../src/assets/icons/verifyAcoount.png"
+                        src={verifyIcon}
                         alt="Verified"
                         className="w-4 h-4 sm:w-5 sm:h-5"
                       />

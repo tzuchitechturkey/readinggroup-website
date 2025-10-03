@@ -3,8 +3,11 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
+import { resolveAsset } from "@/utils/assetResolver";
 
 import EpisodeCard from "./EpisodeCard";
+
+const videoPlaceholder = resolveAsset("authback.jpg");
 
 const TabsSection = () => {
   const [activeTab, setActiveTab] = useState("episodes");
@@ -25,7 +28,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Health",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       featured: true,
     },
     {
@@ -38,7 +41,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Health",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       featured: true,
     },
     {
@@ -51,7 +54,7 @@ const TabsSection = () => {
       type: "Full Videos",
       subject: "Health",
       language: "Chinese",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       featured: false,
     },
     {
@@ -64,7 +67,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Environment",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       featured: false,
     },
     {
@@ -77,7 +80,7 @@ const TabsSection = () => {
       type: "Full Videos",
       subject: "Environment",
       language: "Chinese",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       featured: false,
     },
   ];

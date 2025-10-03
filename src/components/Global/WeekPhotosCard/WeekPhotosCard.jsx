@@ -2,6 +2,10 @@ import React from "react";
 
 import { useNavigate } from "react-router-dom";
 
+import { resolveAsset } from "@/utils/assetResolver";
+
+const blurBackground = resolveAsset("blur-weekly-images.png");
+
 function WeekPhotosCard({ item }) {
   const navigate = useNavigate();
 
@@ -22,14 +26,14 @@ function WeekPhotosCard({ item }) {
           <div className="relative w-full h-[320px] md:h-[360px]">
             {/* Main photo sits on top and covers the container */}
             <img
-              src={item.image}
+              src={resolveAsset(item.image) || item.image}
               alt={item.title}
               className="absolute inset-0 w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300 z-20"
             />
 
             {/* Blur background behind the photo for style (lower z-index) */}
             <img
-              src="../../../src/assets/blur-weekly-images.png"
+              src={blurBackground}
               alt="blur"
               className="absolute inset-0 w-full h-full object-cover rounded-xl z-10"
             />

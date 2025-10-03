@@ -2,6 +2,9 @@ import React from "react";
 
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const weeklyImage = resolveAsset("weekly-images.jpg");
 
 const WeekPhotos = () => {
   const photos = [
@@ -9,7 +12,7 @@ const WeekPhotos = () => {
       id: 1,
       title: "Alexander Readig",
       subtitle: "Session Photo",
-      image: "/src/assets/weekly-images.jpg",
+      image: weeklyImage,
       views: 234,
       likes: 45,
     },
@@ -17,7 +20,7 @@ const WeekPhotos = () => {
       id: 2,
       title: "Alexander Reading",
       subtitle: "Group Activity",
-      image: "/src/assets/weekly-images.jpg",
+      image: weeklyImage,
       views: 189,
       likes: 32,
     },
@@ -25,7 +28,7 @@ const WeekPhotos = () => {
       id: 3,
       title: "Alexander Reading",
       subtitle: "Discussion Time",
-      image: "/src/assets/weekly-images.jpg",
+      image: weeklyImage,
       views: 156,
       likes: 28,
     },
@@ -33,7 +36,7 @@ const WeekPhotos = () => {
       id: 4,
       title: "Alexander Reading",
       subtitle: "Learning Moment",
-      image: "/src/assets/weekly-images.jpg",
+      image: weeklyImage,
       views: 298,
       likes: 67,
     },
@@ -41,7 +44,7 @@ const WeekPhotos = () => {
       id: 5,
       title: "Alexander Reading",
       subtitle: "Community Event",
-      image: "/src/assets/weekly-images.jpg",
+      image: weeklyImage,
       views: 122,
       likes: 19,
     },

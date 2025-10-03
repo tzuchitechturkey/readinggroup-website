@@ -1,12 +1,13 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
+import { resolveAsset } from "@/utils/assetResolver";
 // بيانات الأعضاء (يمكن استلامها من props أو API)
 const memberData = {
   id: 1,
   name: "Mousa Al-Ahmad",
   position: "Front-End Developer",
-  image: "/src/assets/azem.png",
+  image: resolveAsset("azem.png"),
   bio: "With over a decade of experience in front-end development, Mousa specializes in React and interactive applications. He holds multiple development certifications and is known for his motivational approach. Mousa designs user interfaces that are both challenging and achievable. His passion lies in helping teams build strong and user-friendly digital products through custom software solutions. Outside of work, Mousa is an avid runner and enjoys outdoor adventures.",
   description: [
     "Mousa Al-Ahmad is a professional front-end developer with extensive experience in modern web technologies. He began his programming journey over 8 years ago and specializes in building interactive applications using React and TypeScript.",

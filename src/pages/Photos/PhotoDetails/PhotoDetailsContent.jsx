@@ -13,6 +13,9 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const DEFAULT_AVATAR = resolveAsset("icons/User 1.png");
 
 function PhotoDetailsContent() {
   const { t, i18n } = useTranslation();
@@ -81,7 +84,7 @@ function PhotoDetailsContent() {
     views: 1240,
     rating: 4.7,
     reviews: "3.2",
-    image: "../../../src/assets/weekly-images.jpg",
+    image: resolveAsset("weekly-images.jpg"),
     description:
       "A beautiful collection of moments captured during our weekly community gathering. These photos showcase the spirit of unity, compassion, and shared purpose that defines our community. From heartfelt conversations to collaborative activities, each image tells a story of human connection and positive impact.",
     tags: ["Community", "Photography", "Humanitarian", "Social", "Cultural"],
@@ -95,7 +98,7 @@ function PhotoDetailsContent() {
     {
       id: "c1",
       author: "Ahmed Hassan",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR,
       timeAgo: "2 days ago",
       edited: false,
       text: "Beautiful capture of the community spirit! The lighting and composition are perfect.",
@@ -104,7 +107,7 @@ function PhotoDetailsContent() {
       replies: [
         {
           id: 1,
-          avatar: "../../../src/assets/icons/User 1.png",
+          avatar: DEFAULT_AVATAR,
           author: "Maya Al-Zahra",
           timeAgo: "1 day ago",
           edited: false,
@@ -113,7 +116,7 @@ function PhotoDetailsContent() {
         },
         {
           id: 2,
-          avatar: "../../../src/assets/icons/User 1.png",
+          avatar: DEFAULT_AVATAR,
           author: "Omar Khalil",
           timeAgo: "18h ago",
           edited: true,
@@ -125,7 +128,7 @@ function PhotoDetailsContent() {
     {
       id: "c2",
       author: "Layla Ibrahim",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR,
       timeAgo: "1 day ago",
       edited: false,
       text: "What an amazing collection! Each photo tells a unique story of hope and togetherness.",
@@ -135,7 +138,7 @@ function PhotoDetailsContent() {
     {
       id: "c3",
       author: "Khalid Mansour",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR,
       timeAgo: "1 day ago",
       edited: true,
       text: "The technical quality is outstanding. Love the depth of field and color grading.",
@@ -149,7 +152,7 @@ function PhotoDetailsContent() {
     {
       id: 1,
       title: "Morning Assembly",
-      image: "../../../src/assets/1-top5.jpg",
+      image: resolveAsset("1-top5.jpg"),
       photographer: "Alex Chen",
       views: 890,
       category: "Event Photography",
@@ -157,7 +160,7 @@ function PhotoDetailsContent() {
     {
       id: 2,
       title: "Volunteer Activities",
-      image: "../../../src/assets/2-top5.jpg",
+      image: resolveAsset("2-top5.jpg"),
       photographer: "Maria Garcia",
       views: 1150,
       category: "Documentary",
@@ -165,7 +168,7 @@ function PhotoDetailsContent() {
     {
       id: 3,
       title: "Cultural Exchange",
-      image: "../../../src/assets/3-top5.jpg",
+      image: resolveAsset("3-top5.jpg"),
       photographer: "David Kim",
       views: 967,
       category: "Cultural",
@@ -173,7 +176,7 @@ function PhotoDetailsContent() {
     {
       id: 4,
       title: "Youth Workshop",
-      image: "../../../src/assets/4-top5.jpg",
+      image: resolveAsset("4-top5.jpg"),
       photographer: "Emma Wilson",
       views: 1340,
       category: "Educational",
@@ -187,7 +190,7 @@ function PhotoDetailsContent() {
       id: index + 1,
       title: `Weekly Collection ${index + 1}`,
       subtitle: "Community Moments",
-      image: `../../../src/assets/${index + 1}-top5.jpg`,
+      image: resolveAsset(`${index + 1}-top5.jpg`),
       photographer: "Community Team",
       views: Math.floor(Math.random() * 1000) + 500,
       date: "Oct 2024",

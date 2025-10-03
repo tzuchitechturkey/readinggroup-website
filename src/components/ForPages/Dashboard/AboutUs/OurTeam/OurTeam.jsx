@@ -15,10 +15,12 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import MemberModal from "./MemberModal";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function OurTeam() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const defaultAvatar = resolveAsset("Beared Guy02-min 1.png");
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -31,7 +33,7 @@ function OurTeam() {
       description:
         "خبير في إدارة المشاريع والتخطيط الاستراتيجي مع أكثر من 10 سنوات من الخبرة",
       job: "مهندس برمجيات",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: defaultAvatar,
       social: [
         { name: "LinkedIn", url: "https://linkedin.com/in/ahmed" },
         { name: "Twitter", url: "https://twitter.com/ahmed" },
@@ -44,7 +46,7 @@ function OurTeam() {
       description:
         "متخصصة في تطوير واجهات المستخدم الحديثة باستخدام React و Vue.js",
       job: "مطورة ويب",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: defaultAvatar,
       social: [
         { name: "GitHub", url: "https://github.com/fatima" },
         { name: "Portfolio", url: "https://fatima-portfolio.com" },

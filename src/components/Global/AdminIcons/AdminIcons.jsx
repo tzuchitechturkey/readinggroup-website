@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import Notification from "../Notifications/Notifications";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const messageIcon = resolveAsset("Message.png");
 
 export default function AdminIcons() {
   return (
@@ -25,7 +28,7 @@ export default function AdminIcons() {
         {/* Start Messages */}
         <div className="  mr-1">
           <img
-            src="../../../../src/assets/Message.png"
+            src={messageIcon}
             alt="user"
             className="w-6 h-6 rounded-full"
           />

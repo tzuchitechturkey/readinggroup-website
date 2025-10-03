@@ -2,6 +2,9 @@ import React from "react";
 
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const videoPlaceholder = resolveAsset("authback.jpg");
 
 const VideoSections = () => {
   const fullVideos = [
@@ -10,7 +13,7 @@ const VideoSections = () => {
       title: "Complete Reading Session",
       duration: "1h 15min",
       views: "1.2K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       isNew: true,
     },
     {
@@ -18,7 +21,7 @@ const VideoSections = () => {
       title: "Literature Discussion",
       duration: "45min",
       views: "856",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       isNew: false,
     },
     {
@@ -26,7 +29,7 @@ const VideoSections = () => {
       title: "Book Review Session",
       duration: "35min",
       views: "643",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       isNew: false,
     },
     {
@@ -34,7 +37,7 @@ const VideoSections = () => {
       title: "Reading Workshop",
       duration: "1h 30min",
       views: "934",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       isNew: true,
     },
     {
@@ -42,7 +45,7 @@ const VideoSections = () => {
       title: "Story Analysis",
       duration: "50min",
       views: "712",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       isNew: false,
     },
   ];
@@ -53,7 +56,7 @@ const VideoSections = () => {
       title: "Unit 1: Introduction",
       duration: "25min",
       views: "2.1K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       unit: "Unit 1",
     },
     {
@@ -61,7 +64,7 @@ const VideoSections = () => {
       title: "Unit 2: Basics",
       duration: "30min",
       views: "1.8K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       unit: "Unit 2",
     },
     {
@@ -69,7 +72,7 @@ const VideoSections = () => {
       title: "Unit 3: Advanced",
       duration: "40min",
       views: "1.5K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       unit: "Unit 3",
     },
     {
@@ -77,7 +80,7 @@ const VideoSections = () => {
       title: "Unit 4: Practice",
       duration: "35min",
       views: "1.3K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       unit: "Unit 4",
     },
     {
@@ -85,7 +88,7 @@ const VideoSections = () => {
       title: "Unit 5: Review",
       duration: "28min",
       views: "1.1K",
-      image: "/src/assets/authback.jpg",
+      image: videoPlaceholder,
       unit: "Unit 5",
     },
   ];

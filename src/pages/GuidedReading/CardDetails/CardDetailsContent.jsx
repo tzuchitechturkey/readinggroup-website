@@ -13,6 +13,10 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const DEFAULT_CARD_ASSET = resolveAsset("azem.png");
+const DEFAULT_AVATAR_ASSET = resolveAsset("icons/User 1.png");
 
 function CardDetailsContent() {
   const { t, i18n } = useTranslation();
@@ -54,7 +58,7 @@ function CardDetailsContent() {
   // دالة تحميل الصورة
   const handleDownloadImage = () => {
     try {
-      const imageUrl = "../../../src/assets/azem.png";
+      const imageUrl = DEFAULT_CARD_ASSET;
       const link = document.createElement("a");
       link.href = imageUrl;
       link.download = `${cardData.title.replace(/\s+/g, "_")}.jpg`;
@@ -81,7 +85,7 @@ function CardDetailsContent() {
     reviews: "2.1",
     description:
       "Doctors accompanied and Kim examined patient's checkups include a visit to Universal College of Medical Sciences and Teaching Hospital (UCMS) to monitor the administration centre for Likelihood Checklist (UGCS) in Ramage, near Kathmandu. In case the family's transfer, Nurse Briana Shrestha explained the medical process and supported outreach health insurance Meanwhile, volunteers helped social discussions, answering Kiran and her father's questions about volunteering, making sure she remained healthy during her stay at UCMS, the only source of income, which had been damaged in an accident. After five hours of report of injury received, Tzu Chi staff who were staying she received support to survive their journey to support her family.",
-    video: "../../../src/assets/videos/sample-video.mp4",
+    video: resolveAsset("videos/sample-video.mp4"),
     tags: ["Medical", "Volunteer", "Support", "Community"],
   };
 
@@ -90,7 +94,7 @@ function CardDetailsContent() {
     {
       id: "c1",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR_ASSET,
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -99,7 +103,7 @@ function CardDetailsContent() {
       replies: [
         {
           id: 1,
-          avatar: "../../../src/assets/icons/User 1.png",
+          avatar: DEFAULT_AVATAR_ASSET,
           author: "Ali Ahmed",
           timeAgo: "2h ago",
           edited: false,
@@ -108,7 +112,7 @@ function CardDetailsContent() {
         },
         {
           id: 2,
-          avatar: "../../../src/assets/icons/User 1.png",
+          avatar: DEFAULT_AVATAR_ASSET,
           author: "Sara Mohamed",
           timeAgo: "30m ago",
           edited: true,
@@ -120,7 +124,7 @@ function CardDetailsContent() {
     {
       id: "c2",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR_ASSET,
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -130,7 +134,7 @@ function CardDetailsContent() {
     {
       id: "c3",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR_ASSET,
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -140,7 +144,7 @@ function CardDetailsContent() {
     {
       id: "c4",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/icons/User 1.png",
+      avatar: DEFAULT_AVATAR_ASSET,
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -176,7 +180,7 @@ function CardDetailsContent() {
                 <div className="aspect-video bg-black rounded-t-xl flex items-center justify-center">
                   <div className="relative w-full h-full">
                     <img
-                      src="../../../src/assets/azem.png"
+                      src={DEFAULT_CARD_ASSET}
                       alt="Video Thumbnail"
                       className="w-full h-full object-cover"
                     />
@@ -249,7 +253,7 @@ function CardDetailsContent() {
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: "../../../src/assets/azem.png",
+          image: DEFAULT_CARD_ASSET,
           title: cardData.title,
           subtitle: cardData.badge,
           author: cardData.author,

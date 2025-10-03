@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EditProfile from "@/components/ForPages/Settings/EditProfile/EditProfile";
 import ChangePassword from "@/components/ForPages/Settings/ChangePassword/ChangePassword";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function SettingsContent() {
   const { t } = useTranslation();
@@ -57,7 +58,7 @@ function SettingsContent() {
               className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/bothColorUser.png"
+                src={resolveAsset("icons/bothColorUser.png")}
                 alt="user"
                 className="w-3 h-3"
               />
@@ -68,7 +69,7 @@ function SettingsContent() {
               className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/security-safe.png"
+                src={resolveAsset("icons/security-safe.png")}
                 alt="user"
                 className="w-3 h-3"
               />

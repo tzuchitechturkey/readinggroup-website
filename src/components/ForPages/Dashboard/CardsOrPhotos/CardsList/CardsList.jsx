@@ -16,10 +16,13 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import CreateorEditCardorPhoto from "../CreateorEditCardorPhoto/CreateorEditCardorPhoto";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function CardsList() {
   const { t } = useTranslation();
   const [_isLoading, _setIsLoading] = useState(false);
+  const defaultAvatar = resolveAsset("Beared Guy02-min 1.png");
+  const defaultImage = resolveAsset("testCard.png");
 
   // State management
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
@@ -42,8 +45,8 @@ function CardsList() {
   const mockCards = [
     {
       id: 1,
-      image: "../../../../../../../src/assets/Beared Guy02-min 1.png",
-      cover: "../../../../../../../src/assets/testCard.png",
+      image: defaultAvatar,
+      cover: defaultImage,
       title: "بطاقة تعليمية رقم 1",
       description:
         "وصف تفصيلي للبطاقة التعليمية الأولى التي تحتوي على معلومات مفيدة ومحتوى تعليمي قيم.",
@@ -53,8 +56,8 @@ function CardsList() {
     },
     {
       id: 2,
-      image: "../../../src/assets/testCard.png",
-      cover: "../../../src/assets/testCard.png",
+      image: defaultImage,
+      cover: defaultImage,
       title: "بطاقة تعليمية رقم 2",
       description:
         "وصف تفصيلي للبطاقة التعليمية الثانية مع محتوى تعليمي متقدم ومفيد للطلاب.",
@@ -64,8 +67,8 @@ function CardsList() {
     },
     {
       id: 3,
-      image: "../../../src/assets/testCard.png",
-      cover: "../../../src/assets/testCard.png",
+      image: defaultImage,
+      cover: defaultImage,
       title: "بطاقة تعليمية رقم 3",
       description:
         "وصف شامل للبطاقة التعليمية الثالثة التي تغطي موضوعات متنوعة ومهمة.",
@@ -88,8 +91,8 @@ function CardsList() {
 
       return {
         id: i + 4,
-        image: "../../../src/assets/testCard.png",
-        cover: "../../../src/assets/testCard.png",
+        image: defaultImage,
+        cover: defaultImage,
         title: `بطاقة تعليمية رقم ${i + 4}`,
         description: `وصف تفصيلي للبطاقة التعليمية رقم ${
           i + 4

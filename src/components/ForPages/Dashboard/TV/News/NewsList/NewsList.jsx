@@ -22,9 +22,11 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import CreateOrEditNews from "../CreateOrEditNews/CreateOrEditNews";
+import { resolveAsset } from "@/utils/assetResolver";
 
 const TVList = () => {
   const { t } = useTranslation();
+  const defaultImage = resolveAsset("authback.jpg");
 
   // State management
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +53,7 @@ const TVList = () => {
       description:
         "برنامج تعليمي مخصص للأطفال لتعلم القراءة والكتابة بطريقة ممتعة وتفاعلية",
       date: "2024-01-15",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
       writer: "أحمد محمد",
       category: "تعليمي",
     },
@@ -61,7 +63,7 @@ const TVList = () => {
       description:
         "حلقة تناقش أهمية القراءة في تنمية مهارات التفكير النقدي والإبداعي",
       date: "2024-01-20",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
       writer: "فاطمة العلي",
       category: "ثقافي",
     },
@@ -71,7 +73,7 @@ const TVList = () => {
       description:
         "مقابلة حصرية مع كاتب مشهور حول تجربته في الكتابة ونصائحه للكتاب الجدد",
       date: "2024-01-25",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
       writer: "محمد صالح",
       category: "مقابلات",
     },
@@ -98,7 +100,7 @@ const TVList = () => {
         )
           .toString()
           .padStart(2, "0")}`,
-        image: "../../../src/assets/authback.jpg",
+        image: defaultImage,
         writer: writers[i % writers.length],
         category: categories[i % categories.length],
       };

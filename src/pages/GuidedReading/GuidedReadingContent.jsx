@@ -8,6 +8,7 @@ import FilterSections from "@/components/ForPages/Videos/FilterSections/FilterSe
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import VideoSections from "@/components/ForPages/Home/VideoSections/VideoSections";
 import Modal from "@/components/Global/Modal/Modal";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function GuidedReadingContent() {
   const { t } = useTranslation();
@@ -20,7 +21,7 @@ function GuidedReadingContent() {
       <div
         className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
         style={{
-          backgroundImage: `url(../../../src/assets/guiding-reading.png)`,
+          backgroundImage: `url(${resolveAsset("guiding-reading.png")})`,
         }}
       >
         {/* Start Texts */}

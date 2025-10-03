@@ -7,6 +7,10 @@ import { useTranslation } from "react-i18next";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
 import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const HERO_POSTER = resolveAsset("testCard.png");
+const HERO_FALLBACK = resolveAsset("authback.jpg");
 
 function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
   const { t } = useTranslation();
@@ -60,7 +64,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
     year: 2024,
     description:
       "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
-    backgroundImage: "/src/assets/authback.jpg",
+    backgroundImage: HERO_FALLBACK,
     cast: [
       "Kento Kaku",
       "Yosuke Eguchi",
@@ -116,12 +120,12 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
               <img
-                src={`${window.location.origin}/src/assets/testCard.png`}
+                src={HERO_POSTER}
                 alt="Video background"
                 className="w-full h-full object-cover rounded-none -m-1"
                 onError={(e) => {
                   console.error("Image failed to load:", e);
-                  e.target.src = `${window.location.origin}/src/assets/authback.jpg`;
+                  e.target.src = HERO_FALLBACK;
                 }}
                 style={{
                   display: "block",

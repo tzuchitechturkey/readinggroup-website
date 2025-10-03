@@ -9,6 +9,7 @@ import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/Weekl
 import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
 import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import heroImg from "@/assets/guiding-image.png";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function CardsAndPhotosContent() {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ function CardsAndPhotosContent() {
         {/* Start Image */}
         <div className="order-2 lg:order-1 mt-0 lg:mt-8">
           <img
-            src="../../../src/assets/authback.jpg"
+            src={resolveAsset("authback.jpg")}
             alt="Weekly featured image"
             className="w-full h-64 sm:h-80 md:h-96 lg:h-full object-cover rounded-xl shadow-lg"
           />

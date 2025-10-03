@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import { mockVideos } from "@/mock/Viedeos";
+import { resolveAsset } from "@/utils/assetResolver";
+
+const heroBackground = resolveAsset("authback.jpg");
+const heroOverlay = resolveAsset("videoPageblurBack.png");
 
 function VideosHeader() {
   const { t } = useTranslation();
@@ -16,11 +20,11 @@ function VideosHeader() {
       <div
         className="absolute inset-0 bg-cover bg-center  "
         style={{
-          backgroundImage: "url('../../../src/assets/authback.jpg')",
+          backgroundImage: `url(${heroBackground})`,
         }}
       />
       <img
-        src="../../../src/assets/videoPageblurBack.png"
+        src={heroOverlay}
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover  "
       />

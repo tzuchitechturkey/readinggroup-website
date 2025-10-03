@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Profile from "@/components/ForPages/Profile/Profile";
 import Archives from "@/components/ForPages//Profile/Archives/Archives";
 import Interactions from "@/components/ForPages//Profile/Interactions/Interactions";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function ProfileContent() {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ function ProfileContent() {
               className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/bothColorUser.png"
+                src={resolveAsset("icons/bothColorUser.png")}
                 alt="user"
                 className="w-3 h-3"
               />
@@ -39,7 +40,7 @@ function ProfileContent() {
               className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/Union.png"
+                src={resolveAsset("icons/Union.png")}
                 alt="user"
                 className="w-3 h-3"
               />
@@ -50,7 +51,7 @@ function ProfileContent() {
               className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/Interactions.png"
+                src={resolveAsset("icons/Interactions.png")}
                 alt="user"
                 className="w-3 h-3"
               />

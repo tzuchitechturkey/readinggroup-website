@@ -15,10 +15,12 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 
 import HistoryModal from "./HistoryModal";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function History() {
   const { t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const defaultImage = resolveAsset("authback.jpg");
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -30,7 +32,7 @@ function History() {
       title: "تأسيس الشركة",
       description:
         "تم تأسيس شركتنا في عام 2020 بمهمة إحداث ثورة في صناعة التكنولوجيا وتقديم حلول مبتكرة.",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
     },
     {
       id: 2,
@@ -39,7 +41,7 @@ function History() {
       title: "إطلاق المنتج الأول",
       description:
         "قمنا بإطلاق منتجنا الأول والذي حقق نجاحاً باهراً في السوق المحلي.",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
     },
     {
       id: 3,
@@ -48,7 +50,7 @@ function History() {
       title: "التوسع الإقليمي",
       description:
         "بدأنا في التوسع إقليمياً وافتتاح مكاتب جديدة في عدة دول عربية.",
-      image: "../../../src/assets/authback.jpg",
+      image: defaultImage,
     },
   ]);
 

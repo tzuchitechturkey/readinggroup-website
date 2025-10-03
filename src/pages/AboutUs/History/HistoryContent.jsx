@@ -3,6 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import SimpleTimeline from "@/components/ForPages/AboutUs/History/Timeline/Timeline";
+import { resolveAsset } from "@/utils/assetResolver";
 // بيانات التاريخ المخصصة للتاريخ
 const historyTimelineData = [
   {
@@ -11,7 +12,7 @@ const historyTimelineData = [
     title: "تأسيس المجموعة",
     description:
       "تم تأسيس مجموعة القراءة كمبادرة صغيرة لتشجيع حب القراءة في المجتمع. بدأنا بمجموعة صغيرة من المتطوعين الذين يؤمنون بقوة الكتاب في تغيير الحياة.",
-    image: "/src/assets/1-top5.jpg",
+    image: resolveAsset("1-top5.jpg"),
     hasButton: true,
     alignment: "right",
   },
@@ -41,7 +42,7 @@ const historyTimelineData = [
     title: "التوسع الرقمي",
     description:
       "انتقلنا إلى العصر الرقمي بإطلاق منصتنا الإلكترونية التي تتيح للأعضاء الوصول إلى آلاف الكتب الرقمية ومشاركة تجاربهم القرائية.",
-    image: "/src/assets/2-top5.jpg",
+    image: resolveAsset("2-top5.jpg"),
     hasButton: true,
     alignment: "left",
   },
@@ -51,7 +52,7 @@ const historyTimelineData = [
     title: "مواجهة التحديات",
     description:
       "خلال جائحة كوفيد-19، نجحنا في الحفاظ على نشاطاتنا من خلال التحول الكامل إلى النشاطات الافتراضية، مما مكننا من الوصول لجمهور أوسع.",
-    image: "/src/assets/3-top5.jpg",
+    image: resolveAsset("3-top5.jpg"),
     hasButton: false,
     alignment: "right",
   },
@@ -61,7 +62,7 @@ const historyTimelineData = [
     title: "المستقبل الآن",
     description:
       "اليوم، نفتخر بكوننا أكبر مجتمع للقراءة في المنطقة مع أكثر من 10,000 عضو نشط و 50 مكتبة مجتمعية منتشرة في مختلف المدن.",
-    image: "/src/assets/4-top5.jpg",
+    image: resolveAsset("4-top5.jpg"),
     hasButton: true,
     alignment: "left",
   },

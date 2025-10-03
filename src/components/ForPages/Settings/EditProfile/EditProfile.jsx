@@ -1,5 +1,7 @@
 import React from "react";
 
+import { resolveAsset } from "@/utils/assetResolver";
+
 // Reusable dynamic input component to use anywhere inside the form
 const FormInput = ({
   label,
@@ -45,7 +47,7 @@ function EditProfile() {
         {/* Start Avatar */}
         <div className="flex items-start md:justify-start justify-center">
           <img
-            src="../../../../../src/assets/Beared Guy02-min 1.png"
+            src={resolveAsset("Beared Guy02-min 1.png")}
             alt="editProfile"
             className="w-24 h-24 rounded-full object-contain shadow-sm"
           />

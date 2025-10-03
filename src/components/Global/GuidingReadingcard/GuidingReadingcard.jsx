@@ -3,6 +3,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Star, User } from "lucide-react";
 
+import { resolveAsset } from "@/utils/assetResolver";
+
+const fallbackImage = resolveAsset("azem.png");
+
 function GuidingReadingcard({ item }) {
   const navigate = useNavigate();
 
@@ -25,8 +29,8 @@ function GuidingReadingcard({ item }) {
 
       <div className="text-center relative">
         <img
-          src="../../../src/assets/azem.png"
-          alt="Chinese Text"
+          src={resolveAsset(item?.image) || fallbackImage}
+          alt={item.title || "Guided reading"}
           className="  w-full h-full rounded-lg"
         />
 

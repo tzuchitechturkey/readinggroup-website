@@ -1,3 +1,7 @@
+import { resolveAsset } from "@/utils/assetResolver";
+
+const defaultCardImage = resolveAsset("authback.jpg");
+
 export const readings = [
   {
     id: 1,
@@ -5,7 +9,7 @@ export const readings = [
     author: "Anna Diana",
     rating: 4.5,
     reviews: 1.2,
-    image: "/src/assets/authback.jpg",
+    image: defaultCardImage,
     badge: "Incredible Card",
   },
   {
@@ -14,7 +18,7 @@ export const readings = [
     author: "Anna Diana",
     rating: 4.5,
     reviews: 1.2,
-    image: "/src/assets/authback.jpg",
+    image: defaultCardImage,
     badge: "Incredible Card",
   },
   {
@@ -23,7 +27,7 @@ export const readings = [
     author: "Anna Diana",
     rating: 4.5,
     reviews: 1.2,
-    image: "/src/assets/authback.jpg",
+    image: defaultCardImage,
     badge: "Incredible Card",
   },
   {
@@ -32,7 +36,7 @@ export const readings = [
     author: "Anna Diana",
     rating: 4.5,
     reviews: 1.2,
-    image: "/src/assets/authback.jpg",
+    image: defaultCardImage,
     badge: "Incredible Card",
   },
   {
@@ -41,7 +45,7 @@ export const readings = [
     author: "Anna Diana",
     rating: 4.5,
     reviews: 1.2,
-    image: "/src/assets/authback.jpg",
+    image: defaultCardImage,
     badge: "Incredible Card",
   },
 ];

@@ -1,12 +1,13 @@
 import RegisterForm from "@/components/ForPages/Auth/Register/RegisterForm";
 import Footer from "@/components/Global/Footer/Footer";
+import { resolveAsset } from "@/utils/assetResolver";
 
 function RegisterContent() {
   return (
     <div
       className="w-full flex flex-col pt-200 relative border-0 outline-none min-h-screen"
       style={{
-        backgroundImage: "url(../../../../src/assets/authback.jpg)",
+        backgroundImage: `url(${resolveAsset("authback.jpg")})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

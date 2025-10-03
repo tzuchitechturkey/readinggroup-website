@@ -20,18 +20,18 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-import Avatar from "../../../../src/assets/Beared Guy02-min 1.png";
-import DashboardIcon from "../../../../src/assets/icons/Home-simple-door.png";
-import Posts from "../../../../src/assets/icons/Union.png";
-import Video from "../../../../src/assets/icons/video-icon.png";
-import Help from "../../../../src/assets/icons/Help.png";
-import LogOut from "../../../../src/assets/icons/Log-out.png";
-import Reading from "../../../../src/assets/icons/Page.png";
-import Settings from "../../../../src/assets/icons/Settings.png";
-import VaadinHealth from "../../../../src/assets/icons/vaadin_health-card.png";
-import CardsOrPhotos from "../../../../src/assets/icons/cardsOrphoto-icon.png";
-import WhoWeAre from "../../../../src/assets/icons/fluent_chat-32-regular.png";
-import TV from "../../../../src/assets/icons/tv.png";
+import Avatar from "@/assets/Beared Guy02-min 1.png";
+import DashboardIcon from "@/assets/icons/Home-simple-door.png";
+import Posts from "@/assets/icons/Union.png";
+import Video from "@/assets/icons/video-icon.png";
+import Help from "@/assets/icons/Help.png";
+import LogOut from "@/assets/icons/Log-out.png";
+import Reading from "@/assets/icons/Page.png";
+import Settings from "@/assets/icons/Settings.png";
+import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
+import CardsOrPhotos from "@/assets/icons/cardsOrphoto-icon.png";
+import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
+import TV from "@/assets/icons/tv.png";
 
 export default function AppSidebar({
   onSectionChange,
