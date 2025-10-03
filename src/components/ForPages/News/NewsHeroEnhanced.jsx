@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Download, Share2 } from "lucide-react";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
+import ImageControls from "@/components/Global/ImageControls/ImageControls";
 
 import NewsCard from "../Connect/NewsCard/NewsCard";
 
@@ -12,7 +13,10 @@ const NewsHero = ({
   sideArticles = [],
   className = "",
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [isLiked, setIsLiked] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
   // Default data if no props are provided
   const defaultMainArticle = {
     id: 1,
@@ -68,7 +72,37 @@ const NewsHero = ({
   const handleArticleClick = () => {
     // يمكن إضافة منطق التنقل هنا
   };
+  // دالة الإعجاب
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      toast.success(t("Added to favorites!"));
+    } else {
+      toast.info(t("Removed from favorites"));
+    }
+  };
+  // دالة فتح الصورة في عرض مكبر
+  const handleOpenImage = () => {
+    setIsImageModalOpen(true);
+  };
+  // دالة تحميل الصورة
+  const handleDownloadImage = () => {
+    try {
+      const imageUrl = "../../../src/assets/azem.png";
+      const link = document.createElement("a");
+      link.href = imageUrl;
+      link.download = `${cardData.title.replace(/\s+/g, "_")}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
+      // إظهار رسالة نجاح التحميل
+      toast.success(t("Image downloaded successfully!"));
+    } catch (error) {
+      console.error("خطأ في تحميل الصورة:", error);
+      toast.error(t("Failed to download image"));
+    }
+  };
   const article = mainArticle || defaultMainArticle;
   const articles = sideArticles.length > 0 ? sideArticles : defaultSideArticles;
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -108,14 +142,24 @@ const NewsHero = ({
           <span className="text-base md:text-lg">{article.date}</span>
           <div className="w-px h-6 bg-white opacity-50" />
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative w-80 mb-3 lg:mb-0  ">
             {/* Start Country */}
-            <span className="px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
+            <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
               {article.country}
             </span>
             {/* End Country */}
+
+            <ImageControls
+              isLiked={isLiked}
+              onLike={handleLike}
+              onExpandImage={handleOpenImage}
+              onDownloadImage={handleDownloadImage}
+              onShareImage={() => setIsShareModalOpen(true)}
+              isRTL={i18n.language === "ar"}
+              className="-bottom-2 !left-16 "
+            />
             {/* Start Icons */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsShareOpen(true)}
                 className="w-8 h-8 flex items-center justify-center text-text hover:bg-white/10 rounded transition-colors"
@@ -139,7 +183,7 @@ const NewsHero = ({
               >
                 <Download />
               </button>
-            </div>
+            </div> */}
             {/* End Icons */}
           </div>
         </div>
