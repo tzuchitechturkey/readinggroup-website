@@ -202,7 +202,7 @@ export default function CarouselDemo({ newsPage = false }) {
                   {/* Start Title && Actions */}
                   <div className="absolute inset-0 flex items-center">
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
-                      <div className="pb-24 md:pb-32 lg:pb-36">
+                      <div className="pb-24 md:pb-32 lg:pb-40">
                         <HeroTitle
                           h1Line1={slide.h1Line1}
                           h1Line2Prefix={newsPage ? "" : slide.h1Line2Prefix}
@@ -217,17 +217,31 @@ export default function CarouselDemo({ newsPage = false }) {
                             <div className=" flex items-center gap-3 mt-6">
                               <Link
                                 to={slide.primaryTo}
-                                className="inline-flex items-center gap-2 rounded-full  text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow hover:brightness-95"
+                                className="inline-flex items-center gap-2 rounded-full text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow transition-all duration-200"
                                 style={{
                                   background:
                                     "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)",
                                 }}
                                 aria-label={t("Play")}
+                                onMouseEnter={e => {
+                                  e.currentTarget.style.background = 'linear-gradient(90deg, #321AC5 0%, #6512CF 100%)';
+                                  e.currentTarget.style.transform = 'scale(1.06)';
+                                  e.currentTarget.style.boxShadow = '0 4px 24px 0 rgba(50,26,197,0.18)';
+                                }}
+                                onMouseLeave={e => {
+                                  e.currentTarget.style.background = 'linear-gradient(90deg, #6512CF 0%, #321AC5 100%)';
+                                  e.currentTarget.style.transform = 'scale(1)';
+                                  e.currentTarget.style.boxShadow = '';
+                                }}
                               >
                                 {t("WATCH NOW")}
                               </Link>
-                              <button className="border-[1px] border-white rounded-full px-3 py-1">
-                                <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 hover:text-white" />
+                              <button
+                                className="border-[1px] border-white rounded-full px-3 py-1 transition-all duration-200 bg-white/10 hover:bg-white/30 hover:scale-110 shadow hover:shadow-lg"
+                                style={{ backdropFilter: 'blur(2px)' }}
+                                aria-label={t('Add')}
+                              >
+                                <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 group-hover:text-white transition-colors duration-200" />
                               </button>
                             </div>
                           ) : (
@@ -264,7 +278,7 @@ export default function CarouselDemo({ newsPage = false }) {
                   </div>
                   {/* End Title && Actions */}
 
-                  <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-20 z-10">
+                  <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-10 z-10">
                     <TopFiveSection />
                   </div>
                 </div>

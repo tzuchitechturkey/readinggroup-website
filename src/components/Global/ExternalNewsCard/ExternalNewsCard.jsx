@@ -17,7 +17,7 @@ function ExternalNewsCard({ className = "", item, showUnit = false }) {
         if (item.report_type === "video") {
           setOpenDetailsVideoModal(true);
         } else {
-          navigate(`/connect/${item.id}`);
+          navigate(`/events/${item.id}`);
         }
       }}
       className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}

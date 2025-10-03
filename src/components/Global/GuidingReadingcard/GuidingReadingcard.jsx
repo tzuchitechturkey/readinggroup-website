@@ -42,7 +42,7 @@ function GuidingReadingcard({ item }) {
       {/* End Title */}
 
       {/* Start Rating && Author */}
-      <div className="flex items-center justify-between pb-3">
+      <div className="flex items-end justify-between pb-3">
         {/* Start Author */}
         <div className="flex items-center justify-center gap-1 text-xs text-teal-600">
           <User className="w-3 h-3" />
@@ -50,7 +50,7 @@ function GuidingReadingcard({ item }) {
         </div>
         {/* End Author */}
         {/* Start Rating  */}
-        <div className="flex items-center justify-center gap-2 ">
+        <div className="flex flex-col items-end justify-center gap-2 ">
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
               <Star
