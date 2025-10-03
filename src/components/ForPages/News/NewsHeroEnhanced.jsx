@@ -2,9 +2,11 @@ import React, { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Download, Share2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
+import ImageModal from "@/components/Global/ImageModal/ImageModal";
 
 import NewsCard from "../Connect/NewsCard/NewsCard";
 
@@ -16,6 +18,7 @@ const NewsHero = ({
   const { t, i18n } = useTranslation();
   const [isLiked, setIsLiked] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Default data if no props are provided
   const defaultMainArticle = {
@@ -91,7 +94,7 @@ const NewsHero = ({
       const imageUrl = "../../../src/assets/azem.png";
       const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `${cardData.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${defaultMainArticle.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -205,12 +208,27 @@ const NewsHero = ({
       {/* End Side Articles */}
       {/* Start Share Modal */}
       <ShareModal
-        isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
         url={article.title}
         title={article.title}
       />
-      {/* Start Share Modal */}
+      {/* End Share Modal */}
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageData={{
+          image: "../../../src/assets/azem.png",
+          title: defaultMainArticle.title,
+          subtitle: defaultMainArticle.badge,
+          author: defaultMainArticle.author,
+          details: `★ ${defaultMainArticle.rating} (${defaultMainArticle.reviews}k)`,
+        }}
+        onDownloadImage={handleDownloadImage}
+        isRTL={i18n.language === "ar"}
+      />
     </div>
   );
 };
