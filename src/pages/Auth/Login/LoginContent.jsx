@@ -1,12 +1,13 @@
 import LoginForm from "@/components/ForPages/Auth/Login/LoginForm";
 import Footer from "@/components/Global/Footer/Footer";
+import authback from "@/assets/authback.jpg";
 
 function LoginContent() {
   return (
     <div
       className="w-full flex flex-col pt-20 relative border-0 outline-none min-h-screen"
       style={{
-        backgroundImage: "url(../../../../src/assets/authback.jpg)",
+        backgroundImage: `url(${authback})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

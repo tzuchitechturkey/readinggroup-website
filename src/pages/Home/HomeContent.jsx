@@ -8,6 +8,9 @@ import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomen
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
+// Import assets so Vite bundles them and rewrites URLs correctly for GitHub Pages
+import authback from "@/assets/authback.jpg";
+import weeklyImages from "@/assets/weekly-images.jpg";
 
 function Band({ children, tone = "light" }) {
   const toneClass =
@@ -54,7 +57,7 @@ export default function HomeContent() {
   const direction = isRtl ? "rtl" : "ltr";
 
   const sampleMoment = {
-    image: "/src/assets/authback.jpg",
+    image: authback,
     title: t("Report: Community Gathering"),
     startTime: t("6:00 AM"),
     date: t("SEPT 02"),
@@ -65,7 +68,7 @@ export default function HomeContent() {
 
   const samplePhoto = {
     id: "photo-hero",
-    image: "/src/assets/weekly-images.jpg",
+    image: weeklyImages,
     title: t("Alexander Bastian"),
     subtitle: t("Session Photo"),
   };
@@ -81,7 +84,7 @@ export default function HomeContent() {
 
   const sampleFullVideo = {
     id: "vid-full",
-    image: "/src/assets/authback.jpg",
+    image: authback,
     title: t("This Week’s Full Highlight"),
     duration: t("1:20"),
     unit: t("Weekly Feature"),
@@ -89,7 +92,7 @@ export default function HomeContent() {
 
   const sampleUnitVideo = {
     id: "vid-unit",
-    image: "/src/assets/authback.jpg",
+    image: authback,
     title: t("Community Activity"),
     duration: t("25:00"),
     unit: t("Unit Video"),

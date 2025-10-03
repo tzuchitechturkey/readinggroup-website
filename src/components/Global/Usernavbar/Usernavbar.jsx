@@ -5,6 +5,7 @@ import { Link, NavLink } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 import UserIcons from "../UserIcons/UserIcons";
+import logo from "@/assets/logo.png";
 
 function Usernavbar() {
   const { t } = useTranslation();
@@ -79,7 +80,7 @@ function Usernavbar() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img
-                src={`../../../../src/assets/logo.png`}
+                src={logo}
                 alt="logo"
                 className="w-28 h-10 sm:w-32 sm:h-12 object-contain"
               />
@@ -162,7 +163,7 @@ function Usernavbar() {
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <Link to="/" onClick={closeMenu} className="flex items-center">
               <img
-                src={`../../../../src/assets/logo.png`}
+                src={logo}
                 alt="logo"
                 className="w-24 h-8 object-contain"
               />
