@@ -10,7 +10,6 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
-import authbackImg from "@/assets/authback.jpg";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 function ArrowButton({ side, onClick, label }) {
@@ -75,7 +74,7 @@ export default function CarouselDemo({ newsPage = false }) {
   const homePageSlider = [
     {
       id: 1,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Discover Weekly Moments, Photos"),
       h1Line2Prefix: "",
       h1Line2Under: t("— all in one place."),
@@ -87,7 +86,7 @@ export default function CarouselDemo({ newsPage = false }) {
     },
     {
       id: 2,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Explore Guided Reading"),
       h1Line2Prefix: "",
       h1Line2Under: t("— curated for you."),
@@ -99,7 +98,7 @@ export default function CarouselDemo({ newsPage = false }) {
     },
     {
       id: 3,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Browse Cards & Photos"),
       h1Line2Prefix: "",
       h1Line2Under: t("— captured weekly."),
@@ -113,7 +112,7 @@ export default function CarouselDemo({ newsPage = false }) {
   const newsPageSlider = [
     {
       id: 1,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Warm discussion"),
       description: t(
         "Stay connected with highlights, inspiring stories, and community updates every week."
@@ -123,14 +122,14 @@ export default function CarouselDemo({ newsPage = false }) {
     },
     {
       id: 2,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Drama"),
       primaryTo: "/guiding-reading",
       secondaryTo: "/about/history",
     },
     {
       id: 3,
-      image: authbackImg,
+      image: "/authback.jpg",
       h1Line1: t("Event Reports"),
       primaryTo: "/cards-photos",
       secondaryTo: "/connect",
@@ -223,23 +222,27 @@ export default function CarouselDemo({ newsPage = false }) {
                                     "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)",
                                 }}
                                 aria-label={t("Play")}
-                                onMouseEnter={e => {
-                                  e.currentTarget.style.background = 'linear-gradient(90deg, #321AC5 0%, #6512CF 100%)';
-                                  e.currentTarget.style.transform = 'scale(1.06)';
-                                  e.currentTarget.style.boxShadow = '0 4px 24px 0 rgba(50,26,197,0.18)';
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background =
+                                    "linear-gradient(90deg, #321AC5 0%, #6512CF 100%)";
+                                  e.currentTarget.style.transform =
+                                    "scale(1.06)";
+                                  e.currentTarget.style.boxShadow =
+                                    "0 4px 24px 0 rgba(50,26,197,0.18)";
                                 }}
-                                onMouseLeave={e => {
-                                  e.currentTarget.style.background = 'linear-gradient(90deg, #6512CF 0%, #321AC5 100%)';
-                                  e.currentTarget.style.transform = 'scale(1)';
-                                  e.currentTarget.style.boxShadow = '';
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background =
+                                    "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)";
+                                  e.currentTarget.style.transform = "scale(1)";
+                                  e.currentTarget.style.boxShadow = "";
                                 }}
                               >
                                 {t("WATCH NOW")}
                               </Link>
                               <button
                                 className="border-[1px] border-white rounded-full px-3 py-1 transition-all duration-200 bg-white/10 hover:bg-white/30 hover:scale-110 shadow hover:shadow-lg"
-                                style={{ backdropFilter: 'blur(2px)' }}
-                                aria-label={t('Add')}
+                                style={{ backdropFilter: "blur(2px)" }}
+                                aria-label={t("Add")}
                               >
                                 <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 group-hover:text-white transition-colors duration-200" />
                               </button>

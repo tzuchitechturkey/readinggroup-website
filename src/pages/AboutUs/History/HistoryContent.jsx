@@ -11,7 +11,7 @@ const historyTimelineData = [
     title: "Group Foundation",
     description:
       "The Reading Group was founded as a small initiative to encourage the love of reading in the community. We started with a small group of volunteers who believed in the power of books to change lives.",
-    image: "/src/assets/1-top5.jpg",
+    image: "/1-top5.jpg",
     hasButton: true,
     alignment: "right",
   },
@@ -41,7 +41,7 @@ const historyTimelineData = [
     title: "Digital Expansion",
     description:
       "We entered the digital era by launching our online platform, enabling members to access thousands of e-books and share their reading experiences.",
-    image: "/src/assets/2-top5.jpg",
+    image: "/2-top5.jpg",
     hasButton: true,
     alignment: "left",
   },
@@ -51,7 +51,7 @@ const historyTimelineData = [
     title: "Facing Challenges",
     description:
       "During the COVID-19 pandemic, we succeeded in maintaining our activities by fully shifting to virtual events, allowing us to reach a wider audience.",
-    image: "/src/assets/3-top5.jpg",
+    image: "/3-top5.jpg",
     hasButton: false,
     alignment: "right",
   },
@@ -61,7 +61,7 @@ const historyTimelineData = [
     title: "The Future is Now",
     description:
       "Today, we are proud to be the largest reading community in the region with more than 10,000 active members and 50 community libraries across different cities.",
-    image: "/src/assets/4-top5.jpg",
+    image: "/4-top5.jpg",
     hasButton: true,
     alignment: "left",
   },

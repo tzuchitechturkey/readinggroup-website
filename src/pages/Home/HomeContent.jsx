@@ -8,7 +8,6 @@ import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomen
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-// Import assets so Vite bundles them and rewrites URLs correctly for GitHub Pages
 import authback from "@/assets/authback.jpg";
 import weeklyImages from "@/assets/weekly-images.jpg";
 

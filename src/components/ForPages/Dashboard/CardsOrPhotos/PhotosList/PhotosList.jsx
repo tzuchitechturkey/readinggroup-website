@@ -42,24 +42,24 @@ function PhotosList() {
   const mockCards = [
     {
       id: 1,
-      image: "../../../../../../../src/assets/Beared Guy02-min 1.png",
-      cover: "../../../../../../../src/assets/testCard.png",
+      image: "/Beared Guy02-min 1.png",
+      cover: "/testCard.png",
       title: "بطاقة تعليمية رقم 1",
       description:
         "وصف تفصيلي للبطاقة التعليمية الأولى التي تحتوي على معلومات مفيدة ومحتوى تعليمي قيم.",
     },
     {
       id: 2,
-      image: "../../../src/assets/testCard.png",
-      cover: "../../../src/assets/testCard.png",
+      image: "/testCard.png",
+      cover: "/testCard.png",
       title: "بطاقة تعليمية رقم 2",
       description:
         "وصف تفصيلي للبطاقة التعليمية الثانية مع محتوى تعليمي متقدم ومفيد للطلاب.",
     },
     {
       id: 3,
-      image: "../../../src/assets/testCard.png",
-      cover: "../../../src/assets/testCard.png",
+      image: "/testCard.png",
+      cover: "/testCard.png",
       title: "بطاقة تعليمية رقم 3",
       description:
         "وصف شامل للبطاقة التعليمية الثالثة التي تغطي موضوعات متنوعة ومهمة.",
@@ -67,8 +67,8 @@ function PhotosList() {
     // Add more mock data to test pagination
     ...Array.from({ length: 27 }, (_, i) => ({
       id: i + 4,
-      image: "../../../src/assets/testCard.png",
-      cover: "../../../src/assets/testCard.png",
+      image: "/testCard.png",
+      cover: "/testCard.png",
       title: `بطاقة تعليمية رقم ${i + 4}`,
       description: `وصف تفصيلي للبطاقة التعليمية رقم ${
         i + 4

@@ -25,7 +25,7 @@ function GuidingReadingcard({ item }) {
 
       <div className="text-center relative">
         <img
-          src="../../../src/assets/azem.png"
+          src="/azem.png"
           alt="Chinese Text"
           className="  w-full h-full rounded-lg"
         />

@@ -3,7 +3,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import authbackImg from "@/assets/authback.jpg";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 
 const WeeklyMoments = () => {
@@ -13,7 +12,7 @@ const WeeklyMoments = () => {
       id: 1,
       title: "Report - Community Gathering",
       startTime: "6:00 AM",
-      image: authbackImg,
+      image: "/authback.jpg",
       statusLabel: "147",
       statusColor: "bg-purple-600",
       type: "News",
@@ -24,7 +23,7 @@ const WeeklyMoments = () => {
       id: 2,
       title: "Report - Community Gathering",
       startTime: "6:00 AM",
-      image: authbackImg,
+      image: "/",
       statusLabel: "SEPT 01",
       statusColor: "bg-green-600",
       type: "News",
@@ -35,7 +34,7 @@ const WeeklyMoments = () => {
       id: 3,
       title: "Report - Community Gathering",
       startTime: "6:00 AM",
-      image: authbackImg,
+      image: "/",
       statusLabel: "SEPT 01",
       statusColor: "bg-green-600",
       type: "News",
@@ -46,7 +45,7 @@ const WeeklyMoments = () => {
       id: 4,
       title: "Report - Community Gathering",
       startTime: "6:00 AM",
-      image: authbackImg,
+      image: "/",
       statusLabel: "SEPT 01",
       statusColor: "bg-green-600",
       type: "News",
@@ -57,7 +56,7 @@ const WeeklyMoments = () => {
       id: 5,
       title: "Report - Community Gathering",
       startTime: "6:00 AM",
-      image: authbackImg,
+      image: "/",
       statusLabel: "SEPT 01",
       statusColor: "bg-green-600",
       type: "News",

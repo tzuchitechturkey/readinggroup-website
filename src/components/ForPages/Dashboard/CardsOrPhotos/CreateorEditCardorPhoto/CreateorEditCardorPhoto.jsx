@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 // Theme options
 const THEME_OPTIONS = [
@@ -8,7 +9,7 @@ const THEME_OPTIONS = [
   { value: "light", label: "Light" },
   { value: "colorful", label: "Colorful" },
   { value: "minimal", label: "Minimal" },
-  { value: "classic", label: "Classic" }
+  { value: "classic", label: "Classic" },
 ];
 
 // Language options
@@ -17,7 +18,7 @@ const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
   { value: "tr", label: "Turkish" },
   { value: "fr", label: "French" },
-  { value: "de", label: "German" }
+  { value: "de", label: "German" },
 ];
 
 // Type options
@@ -27,7 +28,7 @@ const TYPE_OPTIONS = [
   { value: "gallery", label: "Gallery" },
   { value: "news", label: "News" },
   { value: "event", label: "Event" },
-  { value: "announcement", label: "Announcement" }
+  { value: "announcement", label: "Announcement" },
 ];
 
 const CreateorEditCardorPhoto = ({
@@ -55,46 +56,46 @@ const CreateorEditCardorPhoto = ({
   });
 
   // Reset form when modal opens/closes or card changes
-  useEffect(() => {
-    if (isOpen) {
-      if (card && isEditing) {
-        setFormData({
-          ...card,
-          image: null, // Reset file inputs
-          cover: null,
-          theme: card.theme || "",
-          language: card.language || "",
-          type: card.type || "",
-        });
-        // Set existing image previews for editing
-        setImagePreviews({
-          image: card.image || "",
-          cover: card.cover || "",
-        });
-      } else {
-        setFormData({
-          image: null,
-          cover: null,
-          title: "",
-          description: "",
-          theme: "",
-          language: "",
-          type: "",
-        });
-        setImagePreviews({
-          image: "",
-          cover: "",
-        });
-      }
-    } else {
-      // Clean up preview URLs when modal closes
-      Object.values(imagePreviews).forEach((url) => {
-        if (url && url.startsWith("blob:")) {
-          URL.revokeObjectURL(url);
-        }
-      });
-    }
-  }, [isOpen, card, isEditing, imagePreviews]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     if (card && isEditing) {
+  //       setFormData({
+  //         ...card,
+  //         image: null, // Reset file inputs
+  //         cover: null,
+  //         theme: card.theme || "",
+  //         language: card.language || "",
+  //         type: card.type || "",
+  //       });
+  //       // Set existing image previews for editing
+  //       setImagePreviews({
+  //         image: card.image || "",
+  //         cover: card.cover || "",
+  //       });
+  //     } else {
+  //       setFormData({
+  //         image: null,
+  //         cover: null,
+  //         title: "",
+  //         description: "",
+  //         theme: "",
+  //         language: "",
+  //         type: "",
+  //       });
+  //       setImagePreviews({
+  //         image: "",
+  //         cover: "",
+  //       });
+  //     }
+  //   } else {
+  //     // Clean up preview URLs when modal closes
+  //     Object.values(imagePreviews).forEach((url) => {
+  //       if (url && url.startsWith("blob:")) {
+  //         URL.revokeObjectURL(url);
+  //       }
+  //     });
+  //   }
+  // }, [isOpen, card, isEditing, imagePreviews]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -134,6 +135,7 @@ const CreateorEditCardorPhoto = ({
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -203,7 +205,7 @@ const CreateorEditCardorPhoto = ({
         submitData.append("existingCover", card.cover);
       }
     }
-
+    toast.success(t("Card saved successfully!"));
     onSave(submitData);
     resetForm();
     onClose();
@@ -244,7 +246,7 @@ const CreateorEditCardorPhoto = ({
           />
         </div>
         {/* End Description */}
-        
+
         {/* Start Theme */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -266,7 +268,7 @@ const CreateorEditCardorPhoto = ({
           </select>
         </div>
         {/* End Theme */}
-        
+
         {/* Start Language */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -288,7 +290,7 @@ const CreateorEditCardorPhoto = ({
           </select>
         </div>
         {/* End Language */}
-        
+
         {/* Start Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -310,7 +312,7 @@ const CreateorEditCardorPhoto = ({
           </select>
         </div>
         {/* End Type */}
-        
+
         {/* Start Main Image */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

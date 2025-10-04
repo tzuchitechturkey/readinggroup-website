@@ -93,7 +93,7 @@ function WeeklyMomentsDetailsContent() {
     views: 1842,
     rating: 4.8,
     reviews: "4.1",
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     statusLabel: "147",
     statusColor: "bg-purple-600",
     type: "News",
@@ -112,7 +112,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: "c1",
       author: "Ahmed Hassan",
-      avatar: "/src/assets/icons/User 1.png",
+      avatar: "/icons/User 1.png",
       timeAgo: "2 days ago",
       edited: false,
       text: "Such an inspiring weekly moment! The community spirit really shines through.",
@@ -121,7 +121,7 @@ function WeeklyMomentsDetailsContent() {
       replies: [
         {
           id: 1,
-          avatar: "/src/assets/icons/User 1.png",
+          avatar: "/icons/User 1.png",
           author: "Maya Al-Zahra",
           timeAgo: "1 day ago",
           edited: false,
@@ -130,7 +130,7 @@ function WeeklyMomentsDetailsContent() {
         },
         {
           id: 2,
-          avatar: "/src/assets/icons/User 1.png",
+          avatar: "/icons/User 1.png",
           author: "Omar Khalil",
           timeAgo: "18h ago",
           edited: true,
@@ -142,7 +142,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: "c2",
       author: "Layla Ibrahim",
-      avatar: "/src/assets/icons/User 1.png",
+      avatar: "/icons/User 1.png",
       timeAgo: "1 day ago",
       edited: false,
       text: "What a beautiful representation of our community values. Thank you for sharing!",
@@ -152,7 +152,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: "c3",
       author: "Khalid Mansour",
-      avatar: "/src/assets/icons/User 1.png",
+      avatar: "/icons/User 1.png",
       timeAgo: "1 day ago",
       edited: true,
       text: "The production quality keeps getting better each week. Great work team!",
@@ -166,7 +166,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: 1,
       title: "Charity Drive Report",
-      image: "/src/assets/1-top5.jpg",
+      image: "/1-top5.jpg",
       author: "Volunteer Team",
       views: 1156,
       category: "Community Service",
@@ -176,7 +176,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: 2,
       title: "Educational Workshop",
-      image: "/src/assets/2-top5.jpg",
+      image: "/2-top5.jpg",
       author: "Learning Team",
       views: 890,
       category: "Education",
@@ -186,7 +186,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: 3,
       title: "Cultural Exchange Event",
-      image: "/src/assets/3-top5.jpg",
+      image: "/3-top5.jpg",
       author: "Cultural Team",
       views: 1234,
       category: "Cultural",
@@ -196,7 +196,7 @@ function WeeklyMomentsDetailsContent() {
     {
       id: 4,
       title: "Youth Activity Day",
-      image: "/src/assets/4-top5.jpg",
+      image: "/4-top5.jpg",
       author: "Youth Team",
       views: 1567,
       category: "Youth",
@@ -212,7 +212,7 @@ function WeeklyMomentsDetailsContent() {
       id: index + 1,
       title: `Weekly Report ${index + 1}`,
       subtitle: "Community Highlights",
-      image: `/src/assets/${index + 1}-top5.jpg`,
+      image: `/${index + 1}-top5.jpg`,
       author: "Community Team",
       views: Math.floor(Math.random() * 1000) + 500,
       startTime: `${6 + index}:00 AM`,

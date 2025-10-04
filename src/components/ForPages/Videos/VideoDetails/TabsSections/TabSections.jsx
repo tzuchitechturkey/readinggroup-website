@@ -25,7 +25,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Health",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: "/authback.jpg",
       featured: true,
     },
     {
@@ -38,7 +38,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Health",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: "/authback.jpg",
       featured: true,
     },
     {
@@ -51,7 +51,7 @@ const TabsSection = () => {
       type: "Full Videos",
       subject: "Health",
       language: "Chinese",
-      image: "/src/assets/authback.jpg",
+      image: "/authback.jpg",
       featured: false,
     },
     {
@@ -64,7 +64,7 @@ const TabsSection = () => {
       type: "Unit Video",
       subject: "Environment",
       language: "Arabic",
-      image: "/src/assets/authback.jpg",
+      image: "/authback.jpg",
       featured: false,
     },
     {
@@ -77,7 +77,7 @@ const TabsSection = () => {
       type: "Full Videos",
       subject: "Environment",
       language: "Chinese",
-      image: "/src/assets/authback.jpg",
+      image: "/authback.jpg",
       featured: false,
     },
   ];

@@ -17,11 +17,11 @@ function VideosHeader() {
       <div
         className="absolute inset-0 bg-cover bg-center  "
         style={{
-          backgroundImage: "url('../../../src/assets/authback.jpg')",
+          backgroundImage: "url('/authback.jpg')",
         }}
       />
       <img
-        src="../../../src/assets/videoPageblurBack.png"
+        src="/videoPageblurBack.png"
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover  "
       />

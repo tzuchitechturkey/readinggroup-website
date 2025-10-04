@@ -57,7 +57,7 @@ function SettingsContent() {
               className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/bothColorUser.png"
+                src="/icons/bothColorUser.png"
                 alt="user"
                 className="w-3 h-3"
               />
@@ -68,7 +68,7 @@ function SettingsContent() {
               className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
               <img
-                src="../../../../../src/assets/icons/security-safe.png"
+                src="/icons/security-safe.png"
                 alt="user"
                 className="w-3 h-3"
               />

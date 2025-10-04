@@ -29,7 +29,7 @@ const NewsHero = ({
     author: "Ai Ping Teoh",
     date: "Jan 23, 2025",
     country: "Nepal",
-    image: "/src/assets/testCard.png",
+    image: "/testCard.png",
     category: "Health",
   };
 
@@ -39,35 +39,35 @@ const NewsHero = ({
       title: "AI Breakthrough: Machines Now Write Poetry?",
       author: "Alex Johnson",
       date: "Jan 13, 2025",
-      image: "/src/assets/1-top5.jpg",
+      image: "/1-top5.jpg",
     },
     {
       id: 3,
       title: "The Future of Remote Work in 2025",
       author: "Emily Carter",
       date: "Jan 10, 2025",
-      image: "/src/assets/2-top5.jpg",
+      image: "/2-top5.jpg",
     },
     {
       id: 4,
       title: "The Truth About Social Media Algorithms",
       author: "John Doe",
       date: "Jan 13, 2025",
-      image: "/src/assets/3-top5.jpg",
+      image: "/3-top5.jpg",
     },
     {
       id: 5,
       title: "The Truth About Social Media Algorithms",
       author: "John Doe",
       date: "Jan 13, 2025",
-      image: "/src/assets/4-top5.jpg",
+      image: "/4-top5.jpg",
     },
     {
       id: 6,
       title: "The Future of Work: Are Offices a Thing of the Past?",
       author: "Michael Torres",
       date: "Jan 13, 2025",
-      image: "/src/assets/testCard.png",
+      image: "/testCard.png",
     },
   ];
 
@@ -175,7 +175,7 @@ const NewsHero = ({
                 aria-label="Bookmark article"
               >
                 <img
-                  src="../../../src/assets/icons/verifyAcoount.png"
+                  src="../../../icons/verifyAcoount.png"
                   alt="Verified"
                   className="w-4 h-4 sm:w-5 sm:h-5"
                 />

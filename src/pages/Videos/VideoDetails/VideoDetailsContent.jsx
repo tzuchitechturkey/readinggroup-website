@@ -60,7 +60,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
     year: 2024,
     description:
       "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
-    backgroundImage: "/src/assets/authback.jpg",
+    backgroundImage: "/authback.jpg",
     cast: [
       "Kento Kaku",
       "Yosuke Eguchi",
@@ -116,7 +116,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
               <img
-                src={`${window.location.origin}/src/assets/testCard.png`}
+                src={`/testCard.png`}
                 alt="Video background"
                 className="w-full h-full object-cover rounded-none -m-1"
                 onError={(e) => {

@@ -117,7 +117,9 @@ function Footer({ authPages }) {
               rel="noopener noreferrer"
             >
               <i
-                className={`${link.icon} w-5 h-5 text-xl text-text transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
+                className={`${link.icon} w-5 h-5 text-xl ${
+                  authPages ? "#fff" : "text-text"
+                }  transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
                 aria-label={link.name}
               />
             </a>

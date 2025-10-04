@@ -29,7 +29,7 @@ function WeekPhotosCard({ item }) {
 
             {/* Blur background behind the photo for style (lower z-index) */}
             <img
-              src="../../../src/assets/blur-weekly-images.png"
+              src="/blur-weekly-images.png"
               alt="blur"
               className="absolute inset-0 w-full h-full object-cover rounded-xl z-10"
             />

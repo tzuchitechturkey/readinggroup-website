@@ -1,7 +1,6 @@
 import React from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import coverImg from "@/assets/authback.jpg";
 
 const categories = [
   "Guided Reading",
@@ -24,7 +23,7 @@ const titles = [
 const items = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
   title: titles[i % titles.length],
-  image: coverImg,
+  image: "/authback.jpg",
 }));
 
 function MediaCard({ title, image }) {
