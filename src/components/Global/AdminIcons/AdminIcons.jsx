@@ -21,9 +21,9 @@ export default function AdminIcons() {
         <div className=" ">{/* End Notification */}</div>
 
         {/* Start Messages */}
-        <div className="  mr-1">
+        {/* <div className="  mr-1">
           <img src="/Message.png" alt="user" className="w-6 h-6 rounded-full" />
-        </div>
+        </div> */}
         {/* End Messages */}
         {/* Start Language Dropdown */}
         <div className="">

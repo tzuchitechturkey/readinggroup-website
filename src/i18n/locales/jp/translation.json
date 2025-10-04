@@ -516,5 +516,13 @@
   "This Week's Suggested Cards": "今週のおすすめカード",
   "This Week's Incentive Cards": "今週のインセンティブカード",
   "This Week's Needlework Love": "今週の針線活之愛",
-  "This Week's Weekly Photos": "今週の毎週の写真"
+  "This Week's Weekly Photos": "今週の毎週の写真",
+  "Admin Sign In": "管理者ログイン",
+  "User Login": "ユーザーログイン",
+  "Admin Login": "管理者ログイン",
+  "Available username For Testing": "テスト用に利用可能なユーザー名",
+  "Available Password For Testing": "テスト用に利用可能なパスワード",
+  "Card saved successfully!": "カードが正常に保存されました！",
+  "Logout Account": "アカウントからログアウト",
+  "SETTINGS": "設定"
 }

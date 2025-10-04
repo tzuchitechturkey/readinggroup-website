@@ -585,8 +585,16 @@
   "Health Posts": "健康文章",
   "TV": "電視",
   "Add New Video": "添加新視頻",
-  "This Week's Suggested Cards": "",
-  "This Week's Incentive Cards": "",
-  "This Week's Needlework Love": "",
-  "This Week's Weekly Photos": ""
+  "This Week's Suggested Cards": "本週建議卡片",
+  "This Week's Incentive Cards": "本週激勵卡片",
+  "This Week's Needlework Love": "本週針線活之愛",
+  "This Week's Weekly Photos": "本週每週照片",
+  "Admin Sign In": "管理員登錄",
+  "User Login": "用戶登錄",
+  "Admin Login": "管理員登錄",
+  "Available username For Testing": "可用的測試用戶名",
+  "Available Password For Testing": "可用的測試密碼",
+  "Card saved successfully!": "卡片保存成功！",
+  "Logout Account": "登出帳戶",
+  "SETTINGS": "設置"
 }

@@ -247,7 +247,6 @@ export default function AppSidebar({
                           </span>
                         )}
                         <span className="truncate">{item.title}</span>
-                        {/* إظهار اللغة الحالية بمحاذاة اليمين بنفس سلوك العناصر */}
                         <span className="ml-auto text-xs opacity-80">
                           {getLanguageLabel(currentLang)}
                         </span>

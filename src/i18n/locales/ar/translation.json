@@ -641,5 +641,10 @@
   "This Week's Weekly Photos": "صور أسبوعية لهذا الأسبوع",
   "SETTINGS": "الإعدادات",
   "Available username For Testing": "اسم المستخدم المتاح للاختبار",
-  "Available Password For Testing": " كلمة المرور المتاحة للاختبار"
+  "Available Password For Testing": " كلمة المرور المتاحة للاختبار",
+  "Admin Sign In": "تسجيل دخول المسؤول",
+  "User Login": "تسجيل دخول المستخدم",
+  "Admin Login": "تسجيل دخول المسؤول",
+  "Logout Account": "تسجيل خروج الحساب",
+  "Card saved successfully!": "تم حفظ البطاقة بنجاح!"
 }
