@@ -55,7 +55,7 @@ function CardsAndPhotosContent() {
         {/* Start Image */}
         <div className="order-2 lg:order-1 mt-0 lg:mt-8">
           <img
-            src="../../../src/assets/authback.jpg"
+            src="/authback.jpg"
             alt="Weekly featured image"
             className="w-full h-64 sm:h-80 md:h-96 lg:h-full object-cover rounded-xl shadow-lg"
           />

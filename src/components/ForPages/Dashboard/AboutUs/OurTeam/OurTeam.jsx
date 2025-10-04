@@ -31,7 +31,7 @@ function OurTeam() {
       description:
         "خبير في إدارة المشاريع والتخطيط الاستراتيجي مع أكثر من 10 سنوات من الخبرة",
       job: "مهندس برمجيات",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: "/Beared Guy02-min 1.png",
       social: [
         { name: "LinkedIn", url: "https://linkedin.com/in/ahmed" },
         { name: "Twitter", url: "https://twitter.com/ahmed" },
@@ -44,7 +44,7 @@ function OurTeam() {
       description:
         "متخصصة في تطوير واجهات المستخدم الحديثة باستخدام React و Vue.js",
       job: "مطورة ويب",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: "/Beared Guy02-min 1.png",
       social: [
         { name: "GitHub", url: "https://github.com/fatima" },
         { name: "Portfolio", url: "https://fatima-portfolio.com" },

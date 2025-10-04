@@ -24,12 +24,13 @@ export function DynamicNav({
   onSectionChange,
   activeSection,
   activeParent,
+  title,
 }) {
   const { state } = useSidebar(); // 'expanded' | 'collapsed'
   const { t } = useTranslation();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{t("MAIN")}</SidebarGroupLabel>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {data.map((item) => {
           // تحديد ما إذا كان يجب فتح العنصر تلقائياً

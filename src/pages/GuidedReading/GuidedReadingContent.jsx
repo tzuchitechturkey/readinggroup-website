@@ -4,10 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
-import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
-import VideoSections from "@/components/ForPages/Home/VideoSections/VideoSections";
-import Modal from "@/components/Global/Modal/Modal";
 import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
 import { readings } from "@/mock/reading.js";
 
@@ -123,7 +120,7 @@ function GuidedReadingContent() {
       <div
         className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
         style={{
-          backgroundImage: `url(../../../src/assets/book.gif)`,
+          backgroundImage: `url(/book.gif)`,
         }}
       >
         {/* Start Texts */}
@@ -186,8 +183,6 @@ function GuidedReadingContent() {
         <section className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <GuidedReading />
         </section>
-
-       
       </div>
     </div>
   );

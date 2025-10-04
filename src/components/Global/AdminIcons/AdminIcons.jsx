@@ -15,25 +15,19 @@ export default function AdminIcons() {
           <ThemeToggle />
         </div> */}
         {/* End Toggle Theme */}
-           {/* Start Notification */}
+        {/* Start Notification */}
 
-          <Notification />
-        <div className=" ">
-        {/* End Notification */}
-        </div>
+        <Notification />
+        <div className=" ">{/* End Notification */}</div>
 
         {/* Start Messages */}
         <div className="  mr-1">
-          <img
-            src="../../../../src/assets/Message.png"
-            alt="user"
-            className="w-6 h-6 rounded-full"
-          />
+          <img src="/Message.png" alt="user" className="w-6 h-6 rounded-full" />
         </div>
         {/* End Messages */}
         {/* Start Language Dropdown */}
         <div className="">
-            <LanguageDropdown iconColor="#999EAD" />
+          <LanguageDropdown iconColor="#999EAD" />
         </div>
         {/* End Language Dropdown */}
       </div>

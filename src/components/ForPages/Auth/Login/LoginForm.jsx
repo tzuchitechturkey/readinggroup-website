@@ -38,7 +38,6 @@ function LoginForm() {
     ua: "uk",
   };
   const recaptchaLang = recaptchaLangMap[i18n.language] || "en";
-
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -48,33 +47,22 @@ function LoginForm() {
 
     setInputErrors(errors);
 
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
-    toast.success(t("Login successful"));
+    // تحقق من اسم المستخدم
+    if (userName === "test@test.test") {
+      toast.success("Login successful");
 
-    // Navigate based on login type
-    if (isAdminLogin) {
-      navigate("/dashboard");
+      if (isAdminLogin) {
+        navigate("/dashboard");
+      } else {
+        setShowFirstLoginModal(true);
+      }
     } else {
-      setShowFirstLoginModal(true);
+      toast.error("Invalid username or password");
     }
-
-    // navigate("/");
-    // setIsLoading(true);
-    // try {
-    //   const res = await Login({ email: userName, password });
-    //   toast.success(t("Login successful"));
-    //   console.log(res?.data);
-    // } catch (err) {
-    //   toast.error(err?.response?.data?.message || t("Login failed"));
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    // setShowRecaptch(true);
-    // recaptchaRef.current?.reset();
   }
+
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
@@ -136,6 +124,10 @@ function LoginForm() {
               {t("Username is required")}
             </div>
           )}
+          <div className="text-xs text-gray-400">
+            {t("Available username For Testing")} :{" "}
+            <span className="font-semibold text-primary">test@test.test</span>
+          </div>
         </div>
 
         {/* Password Input */}

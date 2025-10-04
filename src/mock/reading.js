@@ -10,7 +10,7 @@ export const readings = [
     source: "Harvard Review",
     rating: 4.5,
     reviews: 1200,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Editor's Choice",
   },
   {
@@ -24,7 +24,7 @@ export const readings = [
     source: "National Geographic",
     rating: 4.2,
     reviews: 980,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Top Rated",
   },
   {
@@ -38,7 +38,7 @@ export const readings = [
     source: "MIT Press",
     rating: 4.8,
     reviews: 1560,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Trending",
   },
   {
@@ -52,7 +52,7 @@ export const readings = [
     source: "Oxford Journal",
     rating: 4.6,
     reviews: 1120,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Must Read",
   },
   {
@@ -66,7 +66,7 @@ export const readings = [
     source: "Food & Culture Magazine",
     rating: 4.3,
     reviews: 860,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Popular",
   },
   {
@@ -80,7 +80,7 @@ export const readings = [
     source: "دار المعرفة",
     rating: 4.7,
     reviews: 1340,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Trending",
   },
   {
@@ -94,7 +94,7 @@ export const readings = [
     source: "Istanbul Press",
     rating: 4.4,
     reviews: 780,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "New Release",
   },
   {
@@ -108,7 +108,7 @@ export const readings = [
     source: "Academic Press",
     rating: 4.6,
     reviews: 920,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Editor's Choice",
   },
   {
@@ -122,7 +122,7 @@ export const readings = [
     source: "Éditions Santé",
     rating: 4.5,
     reviews: 1100,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Best Seller",
   },
   {
@@ -136,7 +136,7 @@ export const readings = [
     source: "Environmental Journal",
     rating: 4.8,
     reviews: 1650,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Must Read",
   },
   {
@@ -150,7 +150,7 @@ export const readings = [
     source: "Wellness Publications",
     rating: 4.2,
     reviews: 890,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Popular",
   },
   {
@@ -164,7 +164,7 @@ export const readings = [
     source: "دار الفكر العربي",
     rating: 4.9,
     reviews: 2100,
-    image: "/src/assets/authback.jpg",
+    image: "/authback.jpg",
     badge: "Classic",
   },
 ];

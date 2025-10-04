@@ -168,30 +168,32 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
     if (!validateForm()) {
       return;
     }
+    toast.success(
+      video ? t("Video updated successfully") : t("Video created successfully")
+    );
+    // setLoading(true);
 
-    setLoading(true);
+    // try {
+    //   // Simulate API call
+    //   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    //   const videoData = {
+    //     ...formData,
+    //     id: video ? video.id : Date.now(), // Generate ID for new video
+    //   };
 
-      const videoData = {
-        ...formData,
-        id: video ? video.id : Date.now(), // Generate ID for new video
-      };
-
-      onSave(videoData);
-      toast.success(
-        video
-          ? t("Video updated successfully")
-          : t("Video created successfully")
-      );
-      onClose();
-    } catch {
-      toast.error(t("An error occurred while saving the video"));
-    } finally {
-      setLoading(false);
-    }
+    //   onSave(videoData);
+    //   toast.success(
+    //     video
+    //       ? t("Video updated successfully")
+    //       : t("Video created successfully")
+    //   );
+    //   onClose();
+    // } catch {
+    //   toast.error(t("An error occurred while saving the video"));
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (

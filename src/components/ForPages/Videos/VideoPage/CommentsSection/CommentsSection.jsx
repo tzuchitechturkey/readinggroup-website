@@ -35,7 +35,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
     {
       id: "c1",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -71,7 +71,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
     {
       id: "c2",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -107,7 +107,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
     {
       id: "c3",
       author: "Jenny Wilson",
-      avatar: "../../../src/assets/Beared Guy02-min 1.png",
+      avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
       text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
@@ -188,7 +188,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
-            src="../../../src/assets/Beared Guy02-min 1.png"
+            src="/Beared Guy02-min 1.png"
             alt="me"
             className="w-7 h-7 rounded-full object-cover"
           />
@@ -323,7 +323,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
                   {replyOpenId === c.id && (
                     <div className="mt-2 flex items-start gap-2">
                       <img
-                        src="../../../src/assets/Beared Guy02-min 1.png"
+                        src="/Beared Guy02-min 1.png"
                         alt="me"
                         className="w-7 h-7 rounded-full object-cover"
                       />

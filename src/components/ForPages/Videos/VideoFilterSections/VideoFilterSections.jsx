@@ -8,7 +8,6 @@ import VideoFilter from "@/components/ForPages/Videos/VideoFilter/VideoFilter";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { Button } from "@/components/ui/button";
-import authback from "@/assets/authback.jpg";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 
 const allVideos = [
@@ -20,7 +19,7 @@ const allVideos = [
     type: "Full Videos",
     subject: "Science",
     language: "English",
-    image: authback,
+    image: "/authback.jpg",
     featured: true,
   },
   {
@@ -31,7 +30,7 @@ const allVideos = [
     type: "Unit Video",
     subject: "Environment",
     language: "Spanish",
-    image: authback,
+    image: "/authback.jpg",
     featured: false,
   },
   {
@@ -42,7 +41,7 @@ const allVideos = [
     type: "Full Videos",
     subject: "Education",
     language: "Italian",
-    image: authback,
+    image: "/authback.jpg",
     featured: true,
   },
   {
@@ -53,7 +52,7 @@ const allVideos = [
     type: "Unit Video",
     subject: "Technology",
     language: "English",
-    image: authback,
+    image: "/authback.jpg",
     featured: false,
   },
   {
@@ -64,7 +63,7 @@ const allVideos = [
     type: "Full Videos",
     subject: "Lifestyle",
     language: "French",
-    image: authback,
+    image: "/authback.jpg",
     featured: true,
   },
   {
@@ -75,7 +74,7 @@ const allVideos = [
     type: "Unit Video",
     subject: "Science",
     language: "German",
-    image: authback,
+    image: "/authback.jpg",
     featured: false,
   },
   {
@@ -86,7 +85,7 @@ const allVideos = [
     type: "Full Videos",
     subject: "Business",
     language: "Japanese",
-    image: authback,
+    image: "/authback.jpg",
     featured: true,
   },
   {
@@ -97,7 +96,7 @@ const allVideos = [
     type: "Unit Video",
     subject: "Creativity",
     language: "Chinese",
-    image: authback,
+    image: "/authback.jpg",
     featured: false,
   },
   {
@@ -108,7 +107,7 @@ const allVideos = [
     type: "Full Videos",
     subject: "Environment",
     language: "Russian",
-    image: authback,
+    image: "/authback.jpg",
     featured: true,
   },
   {
@@ -119,7 +118,7 @@ const allVideos = [
     type: "Unit Video",
     subject: "Wellness",
     language: "Arabic",
-    image: authback,
+    image: "/authback.jpg",
     featured: false,
   },
 ];

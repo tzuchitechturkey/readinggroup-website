@@ -6,7 +6,7 @@ function RegisterContent() {
     <div
       className="w-full flex flex-col pt-200 relative border-0 outline-none min-h-screen"
       style={{
-        backgroundImage: "url(../../../../src/assets/authback.jpg)",
+        backgroundImage: "url(/authback.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

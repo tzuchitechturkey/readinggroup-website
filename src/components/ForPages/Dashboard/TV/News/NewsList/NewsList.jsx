@@ -51,7 +51,7 @@ const TVList = () => {
       description:
         "برنامج تعليمي مخصص للأطفال لتعلم القراءة والكتابة بطريقة ممتعة وتفاعلية",
       date: "2024-01-15",
-      image: "../../../src/assets/authback.jpg",
+      image: "/authback.jpg",
       writer: "أحمد محمد",
       category: "تعليمي",
     },
@@ -61,7 +61,7 @@ const TVList = () => {
       description:
         "حلقة تناقش أهمية القراءة في تنمية مهارات التفكير النقدي والإبداعي",
       date: "2024-01-20",
-      image: "../../../src/assets/authback.jpg",
+      image: "/authback.jpg",
       writer: "فاطمة العلي",
       category: "ثقافي",
     },
@@ -71,7 +71,7 @@ const TVList = () => {
       description:
         "مقابلة حصرية مع كاتب مشهور حول تجربته في الكتابة ونصائحه للكتاب الجدد",
       date: "2024-01-25",
-      image: "../../../src/assets/authback.jpg",
+      image: "/authback.jpg",
       writer: "محمد صالح",
       category: "مقابلات",
     },
@@ -98,7 +98,7 @@ const TVList = () => {
         )
           .toString()
           .padStart(2, "0")}`,
-        image: "../../../src/assets/authback.jpg",
+        image: "/authback.jpg",
         writer: writers[i % writers.length],
         category: categories[i % categories.length],
       };
