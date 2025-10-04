@@ -187,10 +187,7 @@ function GuidedReadingContent() {
           <GuidedReading />
         </section>
 
-        {/* Video Sections */}
-        <section className="mt-8 sm:mt-12 md:mt-16 mb-8 sm:mb-12 md:mb-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-          <VideoSections />
-        </section>
+       
       </div>
     </div>
   );

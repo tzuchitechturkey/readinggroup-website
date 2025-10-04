@@ -1,11 +1,21 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 function WeeklyMomentsCard({ item }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/guiding-reading/weekly-moments/${item.id}`);
+  };
+
   return (
-    <div className="bg-[#fff]   p-4 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  ">
+    <div
+      onClick={handleCardClick}
+      className="bg-[#fff]   p-4 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  "
+    >
       {/* Start Image */}
       <div className="relative aspect-video overflow-hidden rounded-lg">
         <img

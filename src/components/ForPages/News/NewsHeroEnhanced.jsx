@@ -91,10 +91,10 @@ const NewsHero = ({
   // دالة تحميل الصورة
   const handleDownloadImage = () => {
     try {
-      const imageUrl = "../../../src/assets/azem.png";
+      const imageUrl = article.image;
       const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `${defaultMainArticle.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${article.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -137,20 +137,21 @@ const NewsHero = ({
         </p>
         {/* End description */}
         {/* Start Article Info */}
-        <div className="flex flex-wrap items-center gap-4 text-text">
-          <span className="text-base md:text-lg">
-            {t("By")} {article.author}
-          </span>
-          <div className="w-px h-6 bg-white opacity-50" />
-          <span className="text-base md:text-lg">{article.date}</span>
-          <div className="w-px h-6 bg-white opacity-50" />
+        <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
+          {/* left: author & date */}
+          <div className="flex items-center gap-4">
+            <span className="text-base md:text-lg">
+              {t("By")} {article.author}
+            </span>
+            <div className="w-px h-6 bg-white opacity-50" />
+            <span className="text-base md:text-lg">{article.date}</span>
+          </div>
 
-          <div className="flex items-center gap-3 relative w-80 mb-3 lg:mb-0  ">
-            {/* Start Country */}
+          {/* right: country pill + image controls */}
+          <div className="flex items-center gap-3">
             <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
               {article.country}
             </span>
-            {/* End Country */}
 
             <ImageControls
               isLiked={isLiked}
@@ -158,8 +159,7 @@ const NewsHero = ({
               onExpandImage={handleOpenImage}
               onDownloadImage={handleDownloadImage}
               onShareImage={() => setIsShareModalOpen(true)}
-              isRTL={i18n.language === "ar"}
-              className="!-bottom-2 !left-16 "
+              className="!relative !bottom-0 !left-0"
             />
             {/* Start Icons */}
             {/* <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ const NewsHero = ({
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
-        url={article.title}
+        url={window.location.href}
         title={article.title}
       />
       {/* End Share Modal */}
@@ -220,11 +220,11 @@ const NewsHero = ({
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: "../../../src/assets/azem.png",
-          title: defaultMainArticle.title,
-          subtitle: defaultMainArticle.badge,
-          author: defaultMainArticle.author,
-          details: `★ ${defaultMainArticle.rating} (${defaultMainArticle.reviews}k)`,
+          image: article.image,
+          title: article.title,
+          subtitle: article.category,
+          author: article.author,
+          details: `${article.date} • ${article.country}`,
         }}
         onDownloadImage={handleDownloadImage}
         isRTL={i18n.language === "ar"}

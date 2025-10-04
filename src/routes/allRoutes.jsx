@@ -10,9 +10,8 @@ import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
 import CardDetailsContent from "@/pages/GuidedReading/CardDetails/CardDetailsContent";
+import WeeklyMomentsDetailsContent from "@/pages/GuidedReading/WeeklyMomentsDetails/WeeklyMomentsDetailsContent";
 import PhotoDetailsContent from "@/pages/Photos/PhotoDetails/PhotoDetailsContent";
-import WeeklyMomentsDetails from "@/pages/Home/WeeklyMomentsDetails/WeeklyMomentsDetails";
-import ConnectContent from "@/pages/Connect/ConnectContent";
 import EventsContent from "@/pages/Events/EventsContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
@@ -32,8 +31,10 @@ export const userRoutes = [
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
-  { path: "/guiding-reading/weekly-moments/:id", element: <WeeklyMomentsDetails /> },
-  { path: "/connect", element: <ConnectContent /> },
+  {
+    path: "/guiding-reading/weekly-moments/:id",
+    element: <WeeklyMomentsDetailsContent />,
+  },
   { path: "/events", element: <EventsContent /> },
   { path: "/events/:id", element: <NewsContent /> },
   { path: "/profile", element: <UserProfileContent /> },

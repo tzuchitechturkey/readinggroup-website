@@ -16,15 +16,15 @@ function ImageControls({
 
   return (
     <div
-      className={`absolute bottom-4 ${
-        isRTL ? "right-4" : "left-4"
+      className={`absolute bottom-3 ${
+        isRTL ? "right-3" : "left-3"
       } flex items-center ${
         isRTL ? "space-x-reverse" : ""
-      } space-x-3 ${className}`}
+      } space-x-2 ${className}`}
     >
       <button
         onClick={onLike}
-        className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+        className={`w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
           isLiked
             ? "bg-red-500 text-white hover:bg-red-600"
             : "bg-black bg-opacity-70 text-white hover:bg-opacity-80"
@@ -32,7 +32,7 @@ function ImageControls({
         title={t(isLiked ? "Remove from favorites" : "Add to favorites")}
       >
         <Heart
-          className={`w-4 h-4 lg:w-5 lg:h-5 transition-all duration-300 ${
+          className={`w-3 h-3 lg:w-4 lg:h-4 transition-all duration-300 ${
             isLiked ? "fill-white" : ""
           }`}
         />
@@ -40,26 +40,26 @@ function ImageControls({
 
       <button
         onClick={onExpandImage}
-        className="w-10 h-10 lg:w-12 lg:h-12 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
+        className="w-8 h-8 lg:w-9 lg:h-9 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
         title={t("View full image")}
       >
-        <Expand className="w-4 h-4 lg:w-5 lg:h-5" />
+        <Expand className="w-3 h-3 lg:w-4 lg:h-4" />
       </button>
 
       <button
         onClick={onDownloadImage}
-        className="w-10 h-10 lg:w-12 lg:h-12 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
+        className="w-8 h-8 lg:w-9 lg:h-9 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
         title={t("Download image")}
       >
-        <Download className="w-4 h-4 lg:w-5 lg:h-5" />
+        <Download className="w-3 h-3 lg:w-4 lg:h-4" />
       </button>
 
       <button
         onClick={onShareImage}
-        className="w-10 h-10 lg:w-12 lg:h-12 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
+        className="w-8 h-8 lg:w-9 lg:h-9 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center hover:bg-opacity-80 transition-all"
         title={t("Share image")}
       >
-        <Share className="w-4 h-4 lg:w-5 lg:h-5" />
+        <Share className="w-3 h-3 lg:w-4 lg:h-4" />
       </button>
     </div>
   );

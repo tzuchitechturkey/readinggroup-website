@@ -16,7 +16,7 @@
 
 const SOURCE_GLOBS = ["src/**/*.{js,jsx,ts,tsx}"];
 const FILE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
-const SUPPORTED_LANGS = ["ar", "ch", "en", "tr"];
+const SUPPORTED_LANGS = ["ar", "ch", "en", "tr" , "jp"];
 
 module.exports = {
   input: SOURCE_GLOBS,

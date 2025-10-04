@@ -16,7 +16,6 @@ function AboutUsContent() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      
       {/* Start Tabs */}
       <div className="mb-8">
         <div className="flex flex-wrap border-b border-gray-200">
@@ -31,7 +30,7 @@ function AboutUsContent() {
               }`}
               style={{ fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              {tab.label}
+              {t(tab.label, { defaultValue: tab.label })}
             </button>
           ))}
         </div>

@@ -158,7 +158,7 @@ const NewsSection = () => {
     <div className="flex items-center gap-6 mb-12">
       <div className="w-4 h-12 bg-white" />
       <h2 className="text-3xl font-medium text-white tracking-tight">
-        {title}
+        {t(title)}
       </h2>
     </div>
   );
@@ -184,7 +184,9 @@ const NewsSection = () => {
           {article.title}
         </h3>
         <div className="flex items-center gap-6 text-white/80 text-lg">
-          <span>By {article.author}</span>
+          <span>
+            {t("By")} {article.author}
+          </span>
           <div className="w-px h-6 bg-white/50" />
           <span>{article.date}</span>
         </div>
@@ -198,16 +200,18 @@ const NewsSection = () => {
         {article.title}
       </h3>
       <div className="flex items-center gap-6 text-white/80 text-lg">
-        <span>By {article.author}</span>
+        <span>
+          {t("By")} {article.author}
+        </span>
         <div className="w-px h-6 bg-white/50" />
         <span>{article.date}</span>
       </div>
     </article>
   );
 
-  const CategoryButton = ({ category }) => (
+  const CategoryButton = ({ label }) => (
     <button className="bg-zinc-600 hover:bg-zinc-500 px-6 py-2 rounded text-gray-200 text-base transition-colors shadow-md">
-      {category}
+      {t(label)}
     </button>
   );
 
@@ -215,7 +219,7 @@ const NewsSection = () => {
     <div className="w-full max-w-7xl mx-auto p-6 space-y-16">
       {/* Recommendation News Section */}
       <section>
-        <SectionTitle title="Recommendation News" />
+        <SectionTitle title="news.recommendation" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {recommendationNews.map((article) => (
             <SimpleNewsCard key={article.id} article={article} />
@@ -228,7 +232,7 @@ const NewsSection = () => {
         {/* Left Column - Trending Now */}
         <div className="lg:col-span-2">
           <section className="mb-16">
-            <SectionTitle title="Trending Now" />
+            <SectionTitle title="news.trending" />
             <div className="space-y-8">
               {trendingNews.map((article) => (
                 <NewsCard key={article.id} article={article} showImage={true} />
@@ -238,7 +242,7 @@ const NewsSection = () => {
 
           {/* Breaking News */}
           <section>
-            <SectionTitle title="Breaking News" />
+            <SectionTitle title="news.breaking" />
             <div className="space-y-8">
               {breakingNews.map((article) => (
                 <NewsCard key={article.id} article={article} showImage={true} />
@@ -251,7 +255,7 @@ const NewsSection = () => {
         <div className="space-y-16">
           {/* Latest Updates */}
           <section>
-            <SectionTitle title="Latest Updates" />
+            <SectionTitle title="news.latest" />
             <div className="space-y-6">
               {latestUpdates.map((article) => (
                 <NewsCard
@@ -266,10 +270,10 @@ const NewsSection = () => {
 
           {/* Tags Category */}
           <section>
-            <SectionTitle title="Tags Category" />
+            <SectionTitle title="news.tags" />
             <div className="flex flex-wrap gap-4">
               {categories.map((category, index) => (
-                <CategoryButton key={index} category={category} />
+                <CategoryButton key={index} label={t(category)} />
               ))}
             </div>
           </section>

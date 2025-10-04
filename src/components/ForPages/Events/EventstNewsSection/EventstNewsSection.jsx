@@ -191,7 +191,7 @@ const EventstNewsSection = () => {
     <div className="flex items-center gap-6 mb-2">
       <div className={`w-4 ${ornamentHeight} bg-black`} />
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-medium text-text tracking-tight leading-tight">
-        {title}
+        {t(title)}
       </h2>
     </div>
   );
