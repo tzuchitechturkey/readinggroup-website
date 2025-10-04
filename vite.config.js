@@ -9,6 +9,7 @@ export default defineConfig({
       "@": path.resolve("./src"),
     },
   },
+  
   // Ensure correct asset paths when deployed to GitHub Pages project sites
   // Uses repo name as base when building in CI, defaults to "/" locally
   base: process.env.GITHUB_REPOSITORY
