@@ -49,8 +49,8 @@ function LoginForm() {
 
     if (Object.keys(errors).length > 0) return;
 
-    // تحقق من اسم المستخدم
-    if (userName === "test@test.test") {
+    // التحقق من اسم المستخدم وكلمة السر
+    if (userName === "test@test.test" && password === "test.test") {
       toast.success("Login successful");
 
       if (isAdminLogin) {
@@ -154,6 +154,10 @@ function LoginForm() {
               {t("Password is required")}
             </div>
           )}
+          <div className="text-xs text-gray-400">
+            {t("Available Password For Testing")} :{" "}
+            <span className="font-semibold text-primary">test.test</span>
+          </div>
         </div>
 
         {/* Submit Button */}
