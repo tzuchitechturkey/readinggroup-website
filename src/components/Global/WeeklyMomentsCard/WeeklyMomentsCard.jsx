@@ -14,7 +14,7 @@ function WeeklyMomentsCard({ item }) {
   return (
     <div
       onClick={handleCardClick}
-      className="bg-[#fff]   p-4 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  "
+      className="bg-[#fff]   p-3 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  "
     >
       {/* Start Image */}
       <div className="relative aspect-video overflow-hidden rounded-lg">

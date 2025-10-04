@@ -90,7 +90,7 @@ function LatestPosts() {
   //     getData();
   //   }, []);
   return (
-    <aside className="bg-white rounded-lg border mr-6 border-gray-200 w-80 md:w-96">
+    <aside className="bg-white rounded-lg border  border-gray-200 w-80 md:w-full">
       <div className="px-4 sm:px-6 py-4 border-b">
         <h3 className="text-base sm:text-lg font-semibold text-[#1D2630]">
           {t("Latest Posts")}

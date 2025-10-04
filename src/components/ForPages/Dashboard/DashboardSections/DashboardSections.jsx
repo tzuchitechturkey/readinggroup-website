@@ -12,13 +12,17 @@ export default function DashboardSections() {
         <ChartCards />
         {/* End Chart Cards */}
 
-        <div className="mt-4 grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <div className="mt-4 grid grid-cols-1 xl:grid-cols-7 gap-4">
           {/* Start Table */}
-          <DashboardTable />
+          <div className="xl:col-span-5">
+            <DashboardTable />
+          </div>
           {/* End Table */}
 
           {/* Start Latest Posts */}
-          <LatestPosts />
+          <div className="xl:col-span-2">
+            <LatestPosts />
+          </div>
           {/* End Latest Posts */}
         </div>
       </div>

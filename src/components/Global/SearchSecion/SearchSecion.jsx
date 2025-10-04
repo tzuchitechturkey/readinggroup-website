@@ -56,7 +56,7 @@ function SearchSecion({
           </button>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+          {/* <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded transition-all duration-200 ${
@@ -85,7 +85,7 @@ function SearchSecion({
                 }`}
               />
             </button>
-          </div>
+          </div> */}
         </div>
         {/* End Sort && View Options */}
       </div>
