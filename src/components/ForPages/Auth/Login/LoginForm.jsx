@@ -15,6 +15,7 @@ function LoginForm() {
   // تحديد إذا كانت اللغة الحالية RTL
   const [showResetModal, setShowResetModal] = useState(false);
   const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const { t, i18n } = useTranslation();
   const rtlLanguages = ["ar", "fa", "he", "ur"];
   const currentLang = i18n.language || "en";
@@ -50,8 +51,16 @@ function LoginForm() {
     if (Object.keys(errors).length > 0) {
       return;
     }
+
     toast.success(t("Login successful"));
-    setShowFirstLoginModal(true);
+
+    // Navigate based on login type
+    if (isAdminLogin) {
+      navigate("/dashboard");
+    } else {
+      setShowFirstLoginModal(true);
+    }
+
     // navigate("/");
     // setIsLoading(true);
     // try {
@@ -71,58 +80,94 @@ function LoginForm() {
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
-        className="max-w-80 bg-white mx-auto flex-col gap-4 py-6 px-10  rounded-lg shadow-md"
+        className="max-w-sm bg-white mx-auto flex flex-col gap-4 py-8 px-8 rounded-lg shadow-md"
       >
-        <h1 className="text-2xl ">{t("Sign In")}</h1>
-        <input
-          type="text"
-          value={userName}
-          onChange={(e) => {
-            setUserName(e.target.value);
-            if (inputErrors.userName && e.target.value) {
-              setInputErrors((prev) => {
-                const { userName, ...rest } = prev;
-                return rest;
-              });
-            }
-          }}
-          placeholder={t("Username")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
-            inputErrors.userName ? "border border-red-500" : ""
-          }`}
-        />
-        {inputErrors.userName && (
-          <div className="text-xs text-red-500 mt-1">
-            {t("Username is required")}
-          </div>
-        )}
+        {/* Form Title */}
+        <h1 className="text-2xl font-semibold text-center mb-2">
+          {isAdminLogin ? t("Admin Sign In") : t("Sign In")}
+        </h1>
 
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (inputErrors.password && e.target.value) {
-              setInputErrors((prev) => {
-                const { password, ...rest } = prev;
-                return rest;
-              });
-            }
-          }}
-          placeholder={t("Password")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4  placeholder:text-black/50 text-sm ${
-            inputErrors.password ? "border border-red-500" : ""
-          }`}
-        />
-        {inputErrors.password && (
-          <div className="text-xs text-red-500 mt-1">
-            {t("Password is required")}
-          </div>
-        )}
+        {/* Login Type Toggle */}
+        <div className="flex gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => setIsAdminLogin(false)}
+            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              !isAdminLogin
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {t("User Login")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsAdminLogin(true)}
+            className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+              isAdminLogin
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {t("Admin Login")}
+          </button>
+        </div>
+        {/* Username Input */}
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => {
+              setUserName(e.target.value);
+              if (inputErrors.userName && e.target.value) {
+                setInputErrors((prev) => {
+                  const { userName, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }}
+            placeholder={t("Username")}
+            className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
+              inputErrors.userName ? "border border-red-500" : ""
+            }`}
+          />
+          {inputErrors.userName && (
+            <div className="text-xs text-red-500">
+              {t("Username is required")}
+            </div>
+          )}
+        </div>
 
+        {/* Password Input */}
+        <div className="space-y-2">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (inputErrors.password && e.target.value) {
+                setInputErrors((prev) => {
+                  const { password, ...rest } = prev;
+                  return rest;
+                });
+              }
+            }}
+            placeholder={t("Password")}
+            className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
+              inputErrors.password ? "border border-red-500" : ""
+            }`}
+          />
+          {inputErrors.password && (
+            <div className="text-xs text-red-500">
+              {t("Password is required")}
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
-          className="bg-primary text-white w-full py-3 rounded-md mt-6 hover:opacity-90 transition-opacity"
+          className="bg-primary text-white w-full py-3 rounded-lg mt-4 hover:opacity-90 transition-opacity font-medium"
         >
           {t("Sign In")}
         </button>

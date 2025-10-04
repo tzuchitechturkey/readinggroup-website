@@ -1,8 +1,11 @@
+import { useState } from "react";
 
+import { useTranslation } from "react-i18next";
 
-import i18n from "@/i18n/i18n";
 import { DynamicNav } from "@/components/Global/Sidebar/DynamicNav";
 import { UserSwitcher } from "@/components/Global/Sidebar/UserSwitcher";
+import LogoutConfirmation from "@/components/Global/LogoutConfirmation/LogoutConfirmation";
+import Modal from "@/components/Global/Modal/Modal";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -39,16 +42,31 @@ export default function AppSidebar({
   activeParent,
   ...props
 }) {
+  const { t } = useTranslation();
+  const [openLogoutModal, setOpenLogoutModal] = useState(false);
+
+  const handleLogout = () => {
+    setOpenLogoutModal(true);
+  };
+
+  const handleHelp = () => {
+    // يمكن إضافة وظيفة المساعدة هنا
+    // eslint-disable-next-line no-console
+    console.log("Help clicked");
+  };
+
   // This is sample data.
   const data = {
     footer: [
       {
         title: "Help",
         icon: Help,
+        onClick: handleHelp,
       },
       {
         title: "Logout Account",
         icon: LogOut,
+        onClick: handleLogout,
       },
     ],
     userInfo: {
@@ -205,23 +223,46 @@ export default function AppSidebar({
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <button type="button" className="w-full">
-                      {item.icon}
-                      <span className="truncate">{item.title}</span>
+                    <button
+                      type="button"
+                      className="w-full"
+                      onClick={item.onClick}
+                    >
+                      {typeof item.icon === "string" ? (
+                        <img
+                          src={item.icon}
+                          alt={item.title}
+                          className="w-5 h-5 object-contain max-w-max"
+                        />
+                      ) : (
+                        <span className="w-5 h-5 flex items-center justify-center">
+                          {item.icon}
+                        </span>
+                      )}
+                      <span className="truncate">{t(item.title)}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );
             }
 
-            // عنصر اللغة: Dropdown بنفس تنسيق أزرار القائمة
             return (
               <SidebarMenuItem key={item.title}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton asChild>
                       <button type="button" className="w-full">
-                        {item.icon}
+                        {typeof item.icon === "string" ? (
+                          <img
+                            src={item.icon}
+                            alt={item.title}
+                            className="w-5 h-5 object-contain max-w-max"
+                          />
+                        ) : (
+                          <span className="w-5 h-5 flex items-center justify-center">
+                            {item.icon}
+                          </span>
+                        )}
                         <span className="truncate">{item.title}</span>
                         {/* إظهار اللغة الحالية بمحاذاة اليمين بنفس سلوك العناصر */}
                         <span className="ml-auto text-xs opacity-80">
@@ -231,12 +272,18 @@ export default function AppSidebar({
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent side="top" align="start" className="w-40">
+                  <DropdownMenuContent
+                    side="top"
+                    align="start"
+                    className="w-40"
+                  >
                     {LANGUAGES.map((lang) => (
                       <DropdownMenuItem
                         key={lang.code}
                         onClick={() => handleLangChange(lang.code)}
-                        className={currentLang === lang.code ? "font-medium" : undefined}
+                        className={
+                          currentLang === lang.code ? "font-medium" : undefined
+                        }
                       >
                         {lang.label}
                       </DropdownMenuItem>
@@ -250,6 +297,15 @@ export default function AppSidebar({
       </SidebarFooter>
 
       <SidebarRail />
+
+      {/* مودال تسجيل الخروج */}
+      <Modal
+        isOpen={openLogoutModal}
+        onClose={() => setOpenLogoutModal(false)}
+        title={t("Log Out")}
+      >
+        <LogoutConfirmation onCancel={() => setOpenLogoutModal(false)} />
+      </Modal>
     </Sidebar>
   );
 }

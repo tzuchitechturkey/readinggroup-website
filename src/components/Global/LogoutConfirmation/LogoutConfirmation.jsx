@@ -1,16 +1,27 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 
 function LogoutConfirmation({ onCancel }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const Logout = () => {
+    // مسح التوكن من localStorage
+    localStorage.removeItem("accessToken");
+
+    // إظهار رسالة نجاح
     toast.success(t("You have been logged out successfully."));
+
+    // إغلاق المودال
     onCancel();
+
+    // التوجه إلى صفحة تسجيل الدخول
+    navigate("/auth/login");
   };
   return (
     <div className="p-4 text-center">

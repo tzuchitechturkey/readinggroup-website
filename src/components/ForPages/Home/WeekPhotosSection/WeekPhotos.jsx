@@ -1,9 +1,12 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 
 const WeekPhotos = () => {
+  const { t } = useTranslation();
   const photos = [
     {
       id: 1,
@@ -50,7 +53,7 @@ const WeekPhotos = () => {
   return (
     <div className="mt-12">
       <DynamicSection
-        title="This Week's Photos"
+        title={t("This Week's Photos")}
         data={photos}
         isSlider={true}
         cardName={WeekPhotosCard}

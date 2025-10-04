@@ -1,10 +1,13 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import authbackImg from "@/assets/authback.jpg";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 
 const WeeklyMoments = () => {
+  const { t } = useTranslation();
   const moments = [
     {
       id: 1,
@@ -66,7 +69,7 @@ const WeeklyMoments = () => {
   return (
     <div className="mt-6 md:mt-9 lg:mt-12">
       <DynamicSection
-        title="This Weekly Moments"
+        title={t("This Weekly Moments")}
         data={moments}
         cardName={WeeklyMomentsCard}
         isSlider={true} // ✅ تأكيد أنه carousel وليس grid

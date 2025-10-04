@@ -85,7 +85,7 @@ export function DynamicNav({
                         {item.icon}
                       </span>
                     )}
-                    <span>{item.title}</span>
+                    <span>{t(item.title)}</span>
                     {item.items && item.items.length > 0 && (
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     )}
@@ -110,7 +110,7 @@ export function DynamicNav({
                                   : "text-sidebarText hover:!text-primary"
                               }`}
                             >
-                              <span>{subItem.title}</span>
+                              <span>{t(subItem.title)}</span>
                             </button>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

@@ -103,8 +103,12 @@ function FirstLoginResetPasswordModal({ open, onClose, onSubmit }) {
     setTimeout(() => {
       setLoading(false);
       toast.success(t("Password changed successfully!"));
-      onSubmit && onSubmit();
+      // Close modal first, then navigate
       onClose();
+      // Navigate to home page
+      if (onSubmit) {
+        onSubmit();
+      }
     }, 1200);
   }
 

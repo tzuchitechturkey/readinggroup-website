@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { readings } from "@/mock/reading";
@@ -8,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 function CardsAndPhotosTabs() {
   const isMobile = useIsMobile(1024);
+  const { t } = useTranslation();
 
   const tabs = [
     "Suggested for you",
@@ -35,7 +38,7 @@ function CardsAndPhotosTabs() {
                      data-[state=active]:shadow-none
                      whitespace-nowrap hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm font-medium">{c}</span>
+                    <span className="text-sm font-medium">{t(c)}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -52,7 +55,7 @@ function CardsAndPhotosTabs() {
                    data-[state=active]:border-b-[#4680FF] 
                    data-[state=active]:shadow-none"
                 >
-                  <span className="text-sm whitespace-nowrap">{c}</span>
+                  <span className="text-sm whitespace-nowrap">{t(c)}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -61,7 +64,7 @@ function CardsAndPhotosTabs() {
 
         <TabsContent value="Suggested for you">
           <DynamicSection
-            title="This Week's Suggested Cards"
+            title={t("This Week's Suggested Cards")}
             titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
             data={readings}
             isSlider={isMobile}
@@ -73,7 +76,7 @@ function CardsAndPhotosTabs() {
 
         <TabsContent value="Incentive Cards">
           <DynamicSection
-            title="This Week's Incentive Cards"
+            title={t("This Week's Incentive Cards")}
             titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
             data={readings}
             isSlider={isMobile}
@@ -85,7 +88,7 @@ function CardsAndPhotosTabs() {
 
         <TabsContent value="Good Effect Cards">
           <DynamicSection
-            title="This Week's Good Effect Cards"
+            title={t("This Week's Good Effect Cards")}
             titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
             data={readings}
             isSlider={isMobile}
@@ -97,7 +100,7 @@ function CardsAndPhotosTabs() {
 
         <TabsContent value="Needlework Love">
           <DynamicSection
-            title="This Week's Needlework Love"
+            title={t("This Week's Needlework Love")}
             titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
             data={readings}
             isSlider={isMobile}
@@ -109,7 +112,7 @@ function CardsAndPhotosTabs() {
 
         <TabsContent value="Weekly Photos">
           <DynamicSection
-            title="This Week's Weekly Photos"
+            title={t("This Week's Weekly Photos")}
             titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
             data={readings}
             isSlider={isMobile}
