@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
 import { Register } from "@/api/auth";
+import { setTokens } from "@/api/setToken";
 
 function RegisterForm() {
   const { t, i18n } = useTranslation();
@@ -24,37 +25,42 @@ function RegisterForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    toast.success(t("Registration successful"));
-
-    navigate("/");
-    // const errors = {};
-    // if (!userName) errors.userName = true;
-    // if (!email) errors.email = true;
-    // if (!password) errors.password = true;
-    // if (!confirmPassword) errors.confirmPassword = true;
-    // if (password && confirmPassword && password !== confirmPassword) {
-    //   errors.confirmPassword = true;
-    // }
-    // setInputErrors(errors);
-    // if (Object.keys(errors).length > 0) {
-    //   setError(
-    //     !userName || !email || !password || !confirmPassword
-    //       ? "Please fill in all fields"
-    //       : "Passwords do not match"
-    //   );
-    //   return;
-    // }
-    // setError("");
-    // setIsLoading(true);
-    // try {
-    //   const res = await Register({ userName, email, password });
-    //   toast.success(t("Registration successful"));
-    //   console.log(res?.data);
-    // } catch (err) {
-    //   toast.error(err?.response?.data?.message || t("Registration failed"));
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    const errors = {};
+    if (!userName) errors.userName = true;
+    if (!email) errors.email = true;
+    if (!password) errors.password = true;
+    if (!confirmPassword) errors.confirmPassword = true;
+    if (password && confirmPassword && password !== confirmPassword) {
+      errors.confirmPassword = true;
+    }
+    setInputErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setError(
+        !userName || !email || !password || !confirmPassword
+          ? t("Please fill in all fields")
+          : t("Passwords do not match")
+      );
+      return;
+    }
+    setError("");
+    setIsLoading(true);
+    try {
+      const payload = { username: userName || email, email, password };
+      const { data } = await Register(payload);
+      // data: { user, access, refresh }
+      setTokens({ access: data?.access, refresh: data?.refresh });
+      toast.success(t("Registration successful"));
+      navigate("/");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.non_field_errors?.[0] ||
+        err?.response?.data?.message ||
+        t("Registration failed");
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

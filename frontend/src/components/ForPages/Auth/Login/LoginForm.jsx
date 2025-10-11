@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
 import { Login } from "@/api/auth";
+import { setTokens } from "@/api/setToken";
 
 import ResetPasswordModal from "../ResetPassword/ResetPasswordModal";
 import FirstLoginResetPasswordModal from "./FirstLoginResetPasswordModal";
@@ -49,17 +50,35 @@ function LoginForm() {
 
     if (Object.keys(errors).length > 0) return;
 
-    // التحقق من اسم المستخدم وكلمة السر
-    if (userName === "test@test.test" && password === "test.test") {
+    // Real API login
+    setIsLoading(true);
+    try {
+      const { data } = await Login({ username: userName, password });
+      // data: { access, refresh, user }
+      setTokens({ access: data?.access, refresh: data?.refresh });
+
       toast.success("Login successful");
 
+      // If admin login requested, verify user.is_staff
       if (isAdminLogin) {
-        navigate("/dashboard");
+        if (data?.user?.is_staff) {
+          navigate("/dashboard");
+        } else {
+          toast.error("This account is not an admin");
+        }
       } else {
+        // Preserve existing UX: show first-login password modal
         setShowFirstLoginModal(true);
       }
-    } else {
-      toast.error("Invalid username or password");
+    } catch (error) {
+      const msg =
+        error?.response?.data?.detail ||
+        error?.response?.data?.non_field_errors?.[0] ||
+        error?.response?.data?.message ||
+        "Invalid username or password";
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
     }
   }
 

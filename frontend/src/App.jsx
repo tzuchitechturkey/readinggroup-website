@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { AxiosInterceptor } from "@/api/AxiosInterceptor";
 
 import NonAuthLayout from "@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout";
 import Navbar from "@/components/Global/Navbar/Navbar";
@@ -13,6 +14,7 @@ function App() {
   const isDashboard = location.pathname.startsWith("/dashboard");
   return (
     <div className="min-h-[100vh]">
+      <AxiosInterceptor />
       <Routes>
         {authRoutes.map((route, idx) => (
           <Route
