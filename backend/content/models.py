@@ -1,9 +1,13 @@
 from django.db import models
+from .enums import (
+     PostStatus,
+     EventSection,
+     MediaCardKind
+)
 
 
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -13,7 +17,6 @@ class TimestampedModel(models.Model):
 
 class Video(TimestampedModel):
     """Video content that powers the dashboard listings."""
-
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64)
     category = models.CharField(max_length=100)
@@ -38,13 +41,6 @@ class Video(TimestampedModel):
 
 class Post(TimestampedModel):
     """Landing posts that appear across the application."""
-
-    STATUS_CHOICES = [
-        ("draft", "Draft"),
-        ("published", "Published"),
-        ("archived", "Archived"),
-    ]
-
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255, blank=True)
     excerpt = models.TextField(blank=True)
@@ -52,7 +48,7 @@ class Post(TimestampedModel):
     writer = models.CharField(max_length=255)
     writer_avatar = models.URLField(blank=True)
     category = models.CharField(max_length=100)
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default="draft")
+    status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.DRAFT)
     is_active = models.BooleanField(default=True)
     views = models.PositiveIntegerField(default=0)
     read_time = models.CharField(max_length=32, blank=True)
@@ -68,7 +64,6 @@ class Post(TimestampedModel):
 
 class Reading(TimestampedModel):
     """Guided reading entries offered on the site."""
-
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     publish_date = models.DateField()
@@ -91,17 +86,6 @@ class Reading(TimestampedModel):
 
 class Event(TimestampedModel):
     """Represent events and news items grouped by section."""
-
-    SECTION_CHOICES = [
-        ("warm_discussion", "Warm Discussion"),
-        ("drama", "Drama"),
-        ("event_report", "Event Report"),
-        ("recommendation", "Recommendation"),
-        ("trending", "Trending"),
-        ("breaking", "Breaking News"),
-        ("latest", "Latest Updates"),
-    ]
-
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     date = models.DateField()
@@ -112,7 +96,7 @@ class Event(TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
-    section = models.CharField(max_length=32, choices=SECTION_CHOICES)
+    section = models.CharField(max_length=32, choices=EventSection.choices)
     summary = models.TextField(blank=True)
 
     class Meta:
@@ -124,18 +108,11 @@ class Event(TimestampedModel):
 
 class MediaCard(TimestampedModel):
     """Cards and photos displayed across the app."""
-
-    KIND_CHOICES = [
-        ("card", "Card"),
-        ("photo", "Photo"),
-        ("gallery", "Gallery"),
-    ]
-
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     theme = models.CharField(max_length=50, blank=True)
     language = models.CharField(max_length=50, blank=True)
-    kind = models.CharField(max_length=16, choices=KIND_CHOICES, default="card")
+    kind = models.CharField(max_length=16, choices=MediaCardKind.choices, default="card")
     card_type = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="cards/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
@@ -152,7 +129,6 @@ class MediaCard(TimestampedModel):
 
 class TvProgram(TimestampedModel):
     """Represents TV/news programs curated for the TV section."""
-
     title = models.CharField(max_length=255)
     description = models.TextField()
     air_date = models.DateField()
@@ -191,7 +167,6 @@ class WeeklyMoment(TimestampedModel):
 
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
-
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255, blank=True)
     job_title = models.CharField(max_length=255, blank=True)
@@ -209,7 +184,6 @@ class TeamMember(TimestampedModel):
 
 class HistoryEntry(TimestampedModel):
     """Timeline entries for the organisation history section."""
-
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     from_date = models.DateField()

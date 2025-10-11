@@ -34,6 +34,7 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
 
 
 class VideoSerializer(AbsoluteURLSerializer):
+    """Serializer for Video model with absolute URL handling for file fields."""
     class Meta:
         model = Video
         fields = (
@@ -60,6 +61,7 @@ class VideoSerializer(AbsoluteURLSerializer):
 
 
 class PostSerializer(AbsoluteURLSerializer):
+    """Serializer for Post model with absolute URL handling for file fields."""
     class Meta:
         model = Post
         fields = (
@@ -84,6 +86,7 @@ class PostSerializer(AbsoluteURLSerializer):
 
 
 class ReadingSerializer(AbsoluteURLSerializer):
+    """Serializer for Reading model with absolute URL handling for file fields."""
     class Meta:
         model = Reading
         fields = (
