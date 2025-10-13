@@ -8,16 +8,17 @@ import { toast } from "react-toastify";
 import Loader from "@/components/Global/Loader/Loader";
 import { Login } from "@/api/auth";
 import { setTokens } from "@/api/setToken";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Modal from "@/components/Global/Modal/Modal";
 
 import ResetPasswordModal from "../ResetPassword/ResetPasswordModal";
 import FirstLoginResetPasswordModal from "./FirstLoginResetPasswordModal";
 
 function LoginForm() {
-  // تحديد إذا كانت اللغة الحالية RTL
+  const { t, i18n } = useTranslation();
   const [showResetModal, setShowResetModal] = useState(false);
   const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
-  const { t, i18n } = useTranslation();
   const rtlLanguages = ["ar", "fa", "he", "ur"];
   const currentLang = i18n.language || "en";
   const isRTL = rtlLanguages.includes(currentLang);
@@ -29,6 +30,7 @@ function LoginForm() {
   const recaptchaRef = useRef();
   const [captchaToken, setCaptchaToken] = useState("0");
   const [showRecaptch, setShowRecaptch] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const recaptchaLangMap = {
     en: "en",
@@ -38,6 +40,7 @@ function LoginForm() {
     ch: "ch",
     ua: "uk",
   };
+
   const recaptchaLang = recaptchaLangMap[i18n.language] || "en";
   async function handleSubmit(e) {
     e.preventDefault();
@@ -71,12 +74,7 @@ function LoginForm() {
         setShowFirstLoginModal(true);
       }
     } catch (error) {
-      const msg =
-        error?.response?.data?.detail ||
-        error?.response?.data?.non_field_errors?.[0] ||
-        error?.response?.data?.message ||
-        "Invalid username or password";
-      toast.error(msg);
+      setErrorFn(error);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +118,7 @@ function LoginForm() {
           </button>
         </div>
         {/* Username Input */}
-        <div className="space-y-2">
+        <div className="space-y-2 mb-2">
           <input
             type="text"
             value={userName}
@@ -143,40 +141,74 @@ function LoginForm() {
               {t("Username is required")}
             </div>
           )}
-          <div className="text-xs text-gray-400">
-            {t("Available username For Testing")} :{" "}
-            <span className="font-semibold text-primary">test@test.test</span>
-          </div>
         </div>
 
         {/* Password Input */}
-        <div className="space-y-2">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (inputErrors.password && e.target.value) {
-                setInputErrors((prev) => {
-                  const { password, ...rest } = prev;
-                  return rest;
-                });
-              }
-            }}
-            placeholder={t("Password")}
-            className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
-              inputErrors.password ? "border border-red-500" : ""
-            }`}
-          />
+        <div className="  relative">
+          <div>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (inputErrors.password && e.target.value) {
+                  setInputErrors((prev) => {
+                    const { password, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              placeholder={t("Password")}
+              className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
+                inputErrors.password ? "border border-red-500" : ""
+              }`}
+            />
+            {/* Start Toggle show/hide password */}
+            <span
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+              tabIndex={0}
+              role="button"
+            >
+              {showPassword ? (
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+                  <path
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+              ) : (
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+                  <path
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    d="M3 3l18 18M1 12s4-7 11-7c2.5 0 4.7.7 6.5 1.9M23 12s-4 7-11 7c-2.5 0-4.7-.7-6.5-1.9"
+                  />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                </svg>
+              )}
+            </span>
+            {/* End Toggle show/hide password */}
+          </div>
           {inputErrors.password && (
             <div className="text-xs text-red-500">
               {t("Password is required")}
             </div>
           )}
-          <div className="text-xs text-gray-400">
-            {t("Available Password For Testing")} :{" "}
-            <span className="font-semibold text-primary">test.test</span>
-          </div>
         </div>
 
         {/* Submit Button */}
@@ -207,17 +239,7 @@ function LoginForm() {
             onClose={() => setShowResetModal(false)}
           />
         )}
-        {/* First Login Reset Password Modal */}
-        {showFirstLoginModal && (
-          <FirstLoginResetPasswordModal
-            open={true}
-            onClose={() => setShowFirstLoginModal(false)}
-            onSubmit={() => {
-              setShowFirstLoginModal(false);
-              navigate("/");
-            }}
-          />
-        )}
+
         {/* Start Don't have an account? */}
         <div className="flex items-center justify-center mt-4">
           <span className="text-sm text-gray-400 mr-2">
@@ -256,6 +278,18 @@ function LoginForm() {
         </div>
         {/* End Recaptch */}
       </form>
+      {/* Start First Login Reset Password Modal */}
+      <Modal
+        isOpen={showFirstLoginModal}
+        onClose={() => setShowFirstLoginModal(false)}
+        title={t("Change Password")}
+      >
+        <FirstLoginResetPasswordModal
+          open={true}
+          onClose={() => setShowFirstLoginModal(false)}
+        />
+      </Modal>
+      {/* End First Login Reset Password Modal */}
     </div>
   );
 }
