@@ -646,5 +646,6 @@
   "User Login": "تسجيل دخول المستخدم",
   "Admin Login": "تسجيل دخول المسؤول",
   "Logout Account": "تسجيل خروج الحساب",
-  "Card saved successfully!": "تم حفظ البطاقة بنجاح!"
+  "Card saved successfully!": "تم حفظ البطاقة بنجاح!",
+  "Search Historical Events": "البحث في الأحداث التاريخية..."
 }

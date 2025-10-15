@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
+import { set } from "date-fns";
 
 import Loader from "@/components/Global/Loader/Loader";
 import { Login } from "@/api/auth";
@@ -13,6 +14,7 @@ import Modal from "@/components/Global/Modal/Modal";
 
 import ResetPasswordModal from "../ResetPassword/ResetPasswordModal";
 import FirstLoginResetPasswordModal from "./FirstLoginResetPasswordModal";
+import TOTPModal from "./TOTPModal";
 
 function LoginForm() {
   const { t, i18n } = useTranslation();
@@ -31,6 +33,11 @@ function LoginForm() {
   const [captchaToken, setCaptchaToken] = useState("0");
   const [showRecaptch, setShowRecaptch] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showTOTPModal, setShowTOTPModal] = useState(false);
+  const [qr, setQr] = useState("");
+  const [totpError, setTotpError] = useState(null);
+  const [onOpenResendQr, setOnOpenResendQr] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
 
   const recaptchaLangMap = {
     en: "en",
@@ -57,21 +64,17 @@ function LoginForm() {
     setIsLoading(true);
     try {
       const { data } = await Login({ username: userName, password });
-      // data: { access, refresh, user }
       setTokens({ access: data?.access, refresh: data?.refresh });
-
       toast.success("Login successful");
-
-      // If admin login requested, verify user.is_staff
-      if (isAdminLogin) {
-        if (data?.user?.is_staff) {
-          navigate("/dashboard");
-        } else {
-          toast.error("This account is not an admin");
-        }
-      } else {
-        // Preserve existing UX: show first-login password modal
+      if (data?.user?.is_first_login) {
         setShowFirstLoginModal(true);
+      } else {
+        if (data?.requires_totp) {
+          setShowTOTPModal(true);
+          if (data?.show_qr) {
+            setQr(data?.data?.qr);
+          }
+        }
       }
     } catch (error) {
       setErrorFn(error);
@@ -79,6 +82,59 @@ function LoginForm() {
       setIsLoading(false);
     }
   }
+  const handleTotpVerify = async (code) => {
+    const verifyTOTP = async ({
+      totp,
+      user,
+      setIsLoading,
+      Login,
+      setTotpError,
+      setOtpCode,
+      setShowTOTPModal,
+      navigate,
+      t,
+    }) => {
+      if (!totp || totp.trim() === "" || !user?.username || !user?.password)
+        return;
+      const username = user?.username;
+      const password = user?.password;
+      setIsLoading(true);
+      try {
+        const res = await Login({ username, password, totp });
+        setTokens({ access: res.data?.access, refresh: res.data?.refresh });
+        setShowTOTPModal(false);
+        console.log(res, "ressss");
+        if (isAdminLogin) {
+          if (res?.data?.user?.groups[0] === "admin") {
+            // if (data?.user?.is_staff) {
+            navigate("/dashboard");
+          } else {
+            toast.error("This account is not an admin");
+          }
+        } else {
+          if (res?.data?.user?.groups[0] === "user") {
+            navigate("/");
+          }
+        }
+      } catch (err) {
+        setTotpError(t("TOTP verification failed"));
+        setOtpCode("");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    verifyTOTP({
+      totp: code,
+      user: { username: userName, password },
+      setIsLoading,
+      Login,
+      setTotpError,
+      setOtpCode,
+      setShowTOTPModal,
+      navigate,
+      t,
+    });
+  };
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
@@ -290,6 +346,26 @@ function LoginForm() {
         />
       </Modal>
       {/* End First Login Reset Password Modal */}
+
+      {/* Start TOTP Modal */}
+      <Modal
+        isOpen={showTOTPModal}
+        onClose={() => setShowTOTPModal(false)}
+        title={t("Two-Factor Authentication")}
+      >
+        <TOTPModal
+          onClose={() => setShowTOTPModal(false)}
+          qrUrl={qr}
+          error={totpError}
+          onVerify={(code) => handleTotpVerify(code)}
+          setOnOpenResendQr={setOnOpenResendQr}
+          onOpenResendQr={onOpenResendQr}
+          otpCode={otpCode}
+          setOtpCode={setOtpCode}
+        />
+      </Modal>
+
+      {/* End TOTP Modal */}
     </div>
   );
 }

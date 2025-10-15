@@ -12,8 +12,11 @@ export async function GetProfile() {
 }
 
 export async function ChangePassword(data) {
-  // data: { current_password, new_password }
   return await axios.post(`/user/change-password/`, data);
+}
+
+export async function ForgetPassword(email) {
+  return await axios.post(`/user/forget-password/`, email);
 }
 
 export async function SetPasswordFirst(data) {

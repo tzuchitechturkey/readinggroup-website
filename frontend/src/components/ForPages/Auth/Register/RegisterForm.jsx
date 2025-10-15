@@ -17,7 +17,6 @@ function RegisterForm() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showReTypePassword, setShowReTypePassword] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     username: "",
@@ -153,7 +152,7 @@ function RegisterForm() {
         />
         <div className=" relative mt-4">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             value={form.password}
             onChange={handleChange}
@@ -205,7 +204,7 @@ function RegisterForm() {
         </div>
         <div className=" relative mt-4">
           <input
-            type="password"
+            type={showReTypePassword ? "text" : "password"}
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}

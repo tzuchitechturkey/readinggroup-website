@@ -3,14 +3,33 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { ForgetPassword } from "@/api/auth";
+
 function ResetPasswordModal({ open, onClose }) {
   const { t } = useTranslation();
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const [resetError, setResetError] = useState("");
-
   if (!open) return null;
 
+  const SendEmail = async () => {
+    if (!resetEmail) {
+      setResetError(t("Email is required"));
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await ForgetPassword(resetEmail);
+      toast.success(t("Reset link sent to your email."));
+      onClose();
+      setResetEmail("");
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setResetLoading(false);
+    }
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
@@ -36,20 +55,7 @@ function ResetPasswordModal({ open, onClose }) {
         <button
           className="bg-primary text-white w-full py-2 rounded-md mt-2 hover:opacity-90 transition-opacity"
           disabled={resetLoading}
-          onClick={async () => {
-            if (!resetEmail) {
-              setResetError(t("Email is required"));
-              return;
-            }
-            setResetLoading(true);
-            // TODO: Call API to send reset email here
-            setTimeout(() => {
-              setResetLoading(false);
-              onClose();
-              toast.success(t("Reset link sent to your email."));
-              setResetEmail("");
-            }, 1200);
-          }}
+          onClick={SendEmail}
         >
           {resetLoading ? t("Sending...") : t("Send")}
         </button>

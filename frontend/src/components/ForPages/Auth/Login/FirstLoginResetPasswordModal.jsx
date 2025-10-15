@@ -66,8 +66,9 @@ function FirstLoginResetPasswordModal({ open, onClose }) {
     setLoading(true);
     try {
       await SetPasswordFirst({
-        current_password: currentPassword,
-        new_password: newPassword,
+        old_password: currentPassword,
+        new_password1: newPassword,
+        new_password2: retypePassword,
       });
       toast.success(t("Password changed successfully!"));
       onClose();
@@ -80,7 +81,7 @@ function FirstLoginResetPasswordModal({ open, onClose }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
+    <div className="bg-white rounded-lg shadow-lg p-6 pt-0 w-full max-w-sm relative">
       <form onSubmit={handleSubmit}>
         {/* Start Current Password */}
         <div className="mb-4">

@@ -11,8 +11,7 @@ const timelineData = [
     title: "Lorem ipsum",
     description:
       "Lorem ipsum dolor sit amet consectetur. Massa in maecenas sed viverra. Molestie elementum urna fermentum ac. Urna at convallis etiam commodo erat malesuada eleifend hendrerit platea. Vitae sed est dictumst lorem habitasse congue mattis porta.",
-    image: "/path/to/your/image1.jpg", // استبدل بمسار صورتك
-    hasButton: true,
+    image_url: "/path/to/your/image1.jpg", // استبدل بمسار صورتك
     alignment: "right", // النص على اليمين والصورة على اليسار
   },
   {
@@ -21,8 +20,7 @@ const timelineData = [
     title: "Lorem ipsum",
     description:
       "Lorem ipsum dolor sit amet consectetur. Massa in maecenas sed viverra. Molestie elementum urna fermentum ac. Urna at convallis etiam commodo erat malesuada eleifend hendrerit platea. Vitae sed est dictumst lorem habitasse congue mattis porta.",
-    image: null,
-    hasButton: false,
+    image_url: null,
     alignment: "left", // النص على اليسار فقط
   },
   {
@@ -31,8 +29,7 @@ const timelineData = [
     title: "Lorem ipsum",
     description:
       "Lorem ipsum dolor sit amet consectetur. Massa in maecenas sed viverra. Molestie elementum urna fermentum ac. Urna at convallis etiam commodo erat malesuada eleifend hendrerit platea. Vitae sed est dictumst lorem habitasse congue mattis porta.",
-    image: null,
-    hasButton: false,
+    image_url: null,
     alignment: "right", // النص على اليمين فقط
   },
   {
@@ -41,8 +38,7 @@ const timelineData = [
     title: "Lorem ipsum",
     description:
       "Lorem ipsum dolor sit amet consectetur. Massa in maecenas sed viverra. Molestie elementum urna fermentum ac. Urna at convallis etiam commodo erat malesuada eleifend hendrerit platea. Vitae sed est dictumst lorem habitasse congue mattis porta.",
-    image: null,
-    hasButton: true,
+    image_url: null,
     alignment: "left", // النص على اليسار مع زر
   },
   {
@@ -51,8 +47,7 @@ const timelineData = [
     title: "Lorem ipsum",
     description:
       "Lorem ipsum dolor sit amet consectetur. Massa in maecenas sed viverra. Molestie elementum urna fermentum ac. Urna at convallis etiam commodo erat malesuada eleifend hendrerit platea. Vitae sed est dictumst lorem habitasse congue mattis porta.",
-    image: "/path/to/your/image2.jpg", // استبدل بمسار صورتك
-    hasButton: false,
+    image_url: "/path/to/your/image2.jpg", // استبدل بمسار صورتك
     alignment: "right", // النص على اليمين والصورة على اليسار
   },
 ];
@@ -78,7 +73,7 @@ const ArrowIcon = () => (
 
 const TimelineItem = ({ item }) => {
   const { t } = useTranslation();
-  const { year, title, description, image, hasButton, alignment } = item;
+  const { year, title, description, image_url, alignment } = item;
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
@@ -116,10 +111,10 @@ const TimelineItem = ({ item }) => {
               </div>
             </div>
           )}
-          {alignment === "left" && image && (
+          {alignment === "left" && image_url && (
             <div className="max-w-md pr-4 lg:pr-8">
               <img
-                src={image}
+                src={image_url}
                 alt={title}
                 className="w-full h-48 lg:h-64 object-cover rounded-lg shadow-lg"
               />
@@ -146,22 +141,20 @@ const TimelineItem = ({ item }) => {
                 <p className="text-xs lg:text-sm text-gray-600 leading-relaxed mb-4">
                   {description}
                 </p>
-                {hasButton && (
-                  <button
-                    className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
-                    onClick={handleOpen}
-                  >
-                    {t("Learn more")}
-                    <ArrowIcon />
-                  </button>
-                )}
+                <button
+                  className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+                  onClick={handleOpen}
+                >
+                  {t("Learn more")}
+                  <ArrowIcon />
+                </button>
               </div>
             </div>
           )}
-          {alignment === "right" && image && (
+          {alignment === "right" && image_url && (
             <div className="max-w-md pl-4 lg:pl-8">
               <img
-                src={image}
+                src={image_url}
                 alt={title}
                 className="w-full h-48 lg:h-64 object-cover rounded-lg shadow-lg"
               />
@@ -182,10 +175,10 @@ const TimelineItem = ({ item }) => {
         </div>
 
         {/* الصورة (إذا وجدت) */}
-        {image && (
+        {image_url && (
           <div className="mb-4 mr-7">
             <img
-              src={image}
+              src={image_url}
               alt={title}
               className="w-full h-48 object-cover rounded-lg shadow-lg"
             />
@@ -221,9 +214,9 @@ const TimelineItem = ({ item }) => {
           <h3 className="text-lg sm:text-xl font-bold text-blue-600 mb-3">
             {year} - {title}
           </h3>
-          {image && (
+          {image_url && (
             <img
-              src={image}
+              src={image_url}
               alt={title}
               className="w-full h-40 sm:h-48 object-cover rounded mt-3 mb-4"
             />

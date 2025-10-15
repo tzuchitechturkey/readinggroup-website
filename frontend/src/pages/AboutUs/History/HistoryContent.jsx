@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useState , useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
+import { GetHistory } from "@/api/aboutUs";
 import Timeline from "@/components/ForPages/AboutUs/History/Timeline/Timeline";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
 // بيانات التاريخ المخصصة للتاريخ
 const historyTimelineData = [
   {
     id: 1,
-    year: "2010",
     title: "Group Foundation",
+    year: "2010",
     description:
       "The Reading Group was founded as a small initiative to encourage the love of reading in the community. We started with a small group of volunteers who believed in the power of books to change lives.",
     image: "/1-top5.jpg",
@@ -69,8 +72,34 @@ const historyTimelineData = [
 
 const AboutHistoryContent = () => {
   const { t } = useTranslation();
+  const [isLaoding, setIsLaoding] = useState(false);
+  const [historyData, setHistoryData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const getData = async (page) => {
+    setIsLaoding(true);
+    const offset = page * 10;
+    try {
+      const response = await GetHistory(limit, offset);
+      setHistoryData(response.data);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLaoding(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    getData(newPage - 1);
+  };
+
+  useEffect(() => {
+    getData(0);
+  }, []);
   return (
     <div className="bg-gray-50 py-16">
+      {isLaoding && <Loader />}
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">

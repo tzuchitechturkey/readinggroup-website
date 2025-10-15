@@ -7,7 +7,6 @@ export const getToken = () => {
 
     if (!token) return "";
     if (expiry && Date.now() > Number(expiry)) {
-      // expired
       clearTokens();
       return "";
     }
