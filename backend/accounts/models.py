@@ -8,9 +8,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     display_name = models.CharField(max_length=255, blank=True)
-    # Force the user to change their password on first login (or after admin reset)
-    must_change_password = models.BooleanField(default=True)
-    # Track the last time the user changed their password
+    is_first_login = models.BooleanField(default=True)
     last_password_change = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:  # pragma: no cover - trivial
@@ -24,5 +22,5 @@ class User(AbstractUser):
     def mark_password_changed(self):
         """Mark the password as changed now and clear the first-login flag."""
         self.last_password_change = timezone.now()
-        self.must_change_password = False
-        self.save(update_fields=["last_password_change", "must_change_password"])
+        self.is_first_login = False
+        self.save(update_fields=["last_password_change", "is_first_login"])

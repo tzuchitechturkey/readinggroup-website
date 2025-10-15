@@ -8,7 +8,7 @@ from .models import User
 class UserAdmin(DjangoUserAdmin):
     """Expose the custom user model in the admin site."""
 
-    fieldsets = DjangoUserAdmin.fieldsets + (("Profile", {"fields": ("display_name", "must_change_password", "last_password_change")}),)
+    fieldsets = DjangoUserAdmin.fieldsets + (("Profile", {"fields": ("display_name", "is_first_login", "last_password_change")}),)
     add_fieldsets = DjangoUserAdmin.add_fieldsets + (
         (None, {"classes": ("wide",), "fields": ("display_name",)}),
     )
