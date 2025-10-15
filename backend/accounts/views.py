@@ -11,6 +11,12 @@ from .serializers import (
     UserSerializer,
 )
 
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+from django.conf import settings
+from rest_framework import serializers
+
 
 class RegisterView(generics.CreateAPIView):
     """Register a new user and issue JWT tokens."""
@@ -75,3 +81,39 @@ class PasswordChangeView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Password updated successfully."})
+
+
+# Password Reset View
+class ForgotPasswordView(APIView):
+    """Handle password reset requests."""
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email")
+        if not email:
+            return Response({"detail": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        User = get_user_model()
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({"detail": "If the email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
+
+        # Generate a new random password
+        new_password = get_random_string(length=12)
+        user.set_password(new_password)
+        user.must_change_password = True
+        user.save()
+
+        # Send the new password via email
+        send_mail(
+            subject="Your Password Reset",
+            message=f"Your new password is: {new_password}\nPlease change it after logging in.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        return Response({"detail": "If the email exists, a reset link has been sent."}, status=status.HTTP_200_OK)
+ 
