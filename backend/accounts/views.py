@@ -12,7 +12,6 @@ from rest_framework.permissions import AllowAny
 
 
 from .serializers import (
-    LoginSerializer,
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
@@ -186,9 +185,6 @@ class LoginView(APIView):
             "force_password_change": getattr(user, "force_password_change", False),
         })
         
-            # If TOTP is enabled but not yet verified
-
-
 
 # Optional: endpoint to verify TOTP code (for setup/enable)
 class TOTPVerifyAPIView(APIView):

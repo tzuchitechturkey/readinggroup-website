@@ -9,6 +9,8 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     """Serialize the public profile of a user."""
 
+    groups = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
@@ -23,8 +25,12 @@ class UserSerializer(serializers.ModelSerializer):
             "is_first_login",
             "last_password_change",
             "date_joined",
+            "groups",
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
+
+    def get_groups(self, obj):
+        return list(obj.groups.values_list("name", flat=True))
 
 
 class RegisterSerializer(serializers.ModelSerializer):
