@@ -10,6 +10,14 @@ class User(AbstractUser):
     display_name = models.CharField(max_length=255, blank=True)
     is_first_login = models.BooleanField(default=True)
     last_password_change = models.DateTimeField(null=True, blank=True)
+    mobile_number = models.CharField(max_length=20, blank=True) 
+    about_me = models.TextField(blank=True)
+    profession_name = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    address_details = models.TextField(blank=True)
+    website_address = models.URLField(blank=True)
+    totp_secret = models.CharField(max_length=32, blank=True, null=True)
+
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         full_name = self.get_full_name()

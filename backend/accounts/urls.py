@@ -6,7 +6,9 @@ from .views import (
     RegisterView,
     ForgotPasswordView,
     ResetPasswordView,
-    PasswordChangeView
+    PasswordChangeView,
+    ResetTOTPAPIView,
+    TOTPSetupAPIView
 )
 
 app_name = "accounts"
@@ -18,4 +20,6 @@ urlpatterns = [
     path("forgot-password/", ForgotPasswordView.as_view(), name="forgot-password"),
     path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
     path("change-password/", PasswordChangeView.as_view(), name="change-password"),
+    path("reset-totp/", ResetTOTPAPIView.as_view(), name="reset-totp"),
+    path("setup-totp/", TOTPSetupAPIView.as_view(), name="setup-totp"),
     ]

@@ -42,6 +42,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "display_name",
             "first_name",
             "last_name",
+            "totp_secret",
         )
         extra_kwargs = {"username": {"required": False}}
 
@@ -115,9 +116,18 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "display_name",
+            "id",
+            "email",
+            "username", 
             "first_name",
             "last_name",
+            "about_me",
+            "profession_name",
+            "country",
+            "address_details",
+            "website_address",
+            "mobile_number",
+            "display_name",
         )
 
 
