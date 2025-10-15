@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -8,9 +7,8 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
     """Serialize the public profile of a user."""
-
     groups = serializers.SerializerMethodField()
-
+    profile_image_url = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = (
@@ -31,6 +29,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
+
+    def get_profile_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.profile_image and hasattr(obj.profile_image, 'url'):
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -63,8 +69,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        # For self-registered users, they have already chosen a password,
-        # so do NOT force a first-login password change.
         user.mark_password_changed()
         return user
 
@@ -84,22 +88,22 @@ class LoginSerializer(serializers.Serializer):
         request = self.context.get("request")
 
         if not identifier or not password:
-            raise serializers.ValidationError(_("Username and password are required."))
+            raise serializers.ValidationError(("Username and password are required."))
 
         user = authenticate(request=request, username=identifier, password=password)
         if user is None:
             try:
                 user_obj = User.objects.get(email__iexact=identifier)
             except User.DoesNotExist as exc:
-                raise serializers.ValidationError(_("Invalid credentials.")) from exc
+                raise serializers.ValidationError(("Invalid credentials.")) from exc
 
             user = authenticate(request=request, username=user_obj.username, password=password)
 
         if user is None:
-            raise serializers.ValidationError(_("Invalid credentials."))
+            raise serializers.ValidationError(("Invalid credentials."))
 
         if not user.is_active:
-            raise serializers.ValidationError(_("This account is disabled."))
+            raise serializers.ValidationError(("This account is disabled."))
 
         refresh = RefreshToken.for_user(user)
         attrs["access"] = str(refresh.access_token)
@@ -134,6 +138,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "website_address",
             "mobile_number",
             "display_name",
+            "profile_image",
         )
 
 
@@ -146,7 +151,7 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate(self, attrs):
         user: User = self.context["request"].user
         if not user.check_password(attrs["current_password"]):
-            raise serializers.ValidationError({"current_password": _("Incorrect password.")})
+            raise serializers.ValidationError({"current_password": ("Incorrect password.")})
         return attrs
 
     def save(self, **kwargs):

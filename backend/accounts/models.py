@@ -5,17 +5,22 @@ from django.utils import timezone
 
 class User(AbstractUser):
     """Custom user model that keeps usernames while enforcing unique emails."""
-
-    email = models.EmailField(unique=True)
-    display_name = models.CharField(max_length=255, blank=True)
-    is_first_login = models.BooleanField(default=True)
-    last_password_change = models.DateTimeField(null=True, blank=True)
-    mobile_number = models.CharField(max_length=20, blank=True) 
-    about_me = models.TextField(blank=True)
+    # Personal information
+    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
     profession_name = models.CharField(max_length=255, blank=True)
+    display_name = models.CharField(max_length=255, blank=True)
+    about_me = models.TextField(blank=True)
+    
+    # Contect information
     country = models.CharField(max_length=100, blank=True)
+    mobile_number = models.CharField(max_length=20, blank=True) 
     address_details = models.TextField(blank=True)
     website_address = models.URLField(blank=True)
+    email = models.EmailField(unique=True)
+
+    # Security information
+    is_first_login = models.BooleanField(default=True)
+    last_password_change = models.DateTimeField(null=True, blank=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
 
 
