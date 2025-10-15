@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
-            "must_change_password",
+            "is_first_login",
             "last_password_change",
             "date_joined",
         )
