@@ -111,6 +111,10 @@ class LoginView(APIView):
             totp = pyotp.TOTP(user.totp_secret)
             if not totp.verify(totp_code):
                 return Response({"detail": "Invalid TOTP code."}, status=status.HTTP_401_UNAUTHORIZED)
+        # Set is_first_login to False on second login
+        if user.is_first_login:
+            user.is_first_login = False
+            user.save(update_fields=["is_first_login"])
         refresh = RefreshToken.for_user(user)
         return Response(
             {
