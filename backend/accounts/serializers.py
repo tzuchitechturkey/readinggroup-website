@@ -24,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_password_change",
             "date_joined",
             "groups",
+            "profile_image_url",
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
@@ -123,24 +124,34 @@ class LoginSerializer(serializers.Serializer):
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     """Update limited user profile fields."""
 
+    profile_image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
             "id",
             "email",
-            "username", 
+            "username",
+            "display_name",
             "first_name",
             "last_name",
-            "about_me",
-            "profession_name",
-            "country",
-            "address_details",
-            "website_address",
-            "mobile_number",
-            "display_name",
-            "profile_image",
+            "is_staff",
+            "is_active",
+            "is_first_login",
+            "last_password_change",
+            "date_joined",
+            "groups",
+            "profile_image_url",
         )
+        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
+    def get_profile_image_url(self, obj):
+        request = self.context.get('request')
+        if hasattr(obj, 'profile_image') and obj.profile_image and hasattr(obj.profile_image, 'url'):
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
 class PasswordChangeSerializer(serializers.Serializer):
     """Simple serializer for password updates."""

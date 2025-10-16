@@ -219,33 +219,19 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    parser_classes = generics.RetrieveUpdateAPIView.parser_classes + [serializers.FileField]
-
     def get_object(self):
         return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(UserSerializer(request.user, context={"request": request}).data)
+        return Response(UserSerializer(request.user).data)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        data = request.data.copy()
-        # Handle profile_image upload
-        if "profile_image" in request.FILES:
-            data["profile_image"] = request.FILES["profile_image"]
-        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(UserSerializer(instance, context={"request": request}).data)
-
-    def delete(self, request, *args, **kwargs):
-        """Delete the user's profile image only."""
-        user = self.get_object()
-        if user.profile_image:
-            user.profile_image.delete(save=True)
-            return Response({"detail": "Profile image deleted."}, status=status.HTTP_200_OK)
-        return Response({"detail": "No profile image to delete."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(UserSerializer(instance).data)
 
 class ForgotPasswordView(APIView):
     """Allow users to reset their password via email."""

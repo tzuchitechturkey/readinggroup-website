@@ -1,3 +1,5 @@
+# Allow API URLs without trailing slash (prevents redirect errors for PUT/POST)
+APPEND_SLASH = False
 """Django settings for the readinggroup backend."""
 
 import os
