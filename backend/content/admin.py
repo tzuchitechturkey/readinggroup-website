@@ -70,6 +70,6 @@ class TeamMemberAdmin(admin.ModelAdmin):
 
 @admin.register(HistoryEntry)
 class HistoryEntryAdmin(admin.ModelAdmin):
-    list_display = ("title", "from_date", "to_date")
-    list_filter = ("from_date", "to_date")
+    list_display = ("title", "story_date")
+    list_filter = ("story_date",)
     search_fields = ("title", "description")

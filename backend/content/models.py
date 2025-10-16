@@ -186,13 +186,12 @@ class HistoryEntry(TimestampedModel):
     """Timeline entries for the organisation history section."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    from_date = models.DateField()
-    to_date = models.DateField(blank=True, null=True)
+    story_date = models.DateField()
     image = models.ImageField(upload_to="history/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
 
     class Meta:
-        ordering = ("from_date", "title")
+        ordering = ("story_date", "title")
 
     def __str__(self) -> str:  # pragma: no cover - trivial
-        return f"{self.title} ({self.from_date} - {self.to_date or 'present'})"
+        return f"{self.title} ({self.story_date} - present)"

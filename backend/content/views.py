@@ -119,4 +119,5 @@ class HistoryEntryViewSet(BaseContentViewSet):
     queryset = HistoryEntry.objects.all()
     serializer_class = HistoryEntrySerializer
     search_fields = ("title", "description")
-    ordering_fields = ("from_date", "created_at")
+    ordering_fields = ("story_date")
+    
