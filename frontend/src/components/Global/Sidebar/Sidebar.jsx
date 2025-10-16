@@ -107,7 +107,7 @@ export default function AppSidebar({
             onClick: () => onSectionChange("posts"),
           },
           {
-            title: "Add New Post",
+            title: "Add/Edit Post",
             onClick: () => onSectionChange("add-post"),
           },
         ],

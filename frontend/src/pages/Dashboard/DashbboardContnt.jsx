@@ -39,34 +39,45 @@ export default function Page() {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState("home");
   const [activeParent, setActiveParent] = useState(null); // للتحكم في العنصر الأساسي النشط
+  const [selectedPost, setSelectedPost] = useState(null); // لتخزين المقال المحدد للتعديل
+  const [selectedVideo, setSelectedVideo] = useState(null); // لتخزين الفيديو المحدد للتعديل
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
-  const handleSectionChange = (section, parent = null) => {
+  const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
-    
+
+    // إذا كان القسم createOrEditPost، احفظ بيانات المقال
+    if (section === "createOrEditPost") {
+      setSelectedPost(data);
+    } else if (section === "createOrEditVideo") {
+      setSelectedVideo(data);
+    } else {
+      setSelectedPost(null);
+    }
+
     // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
-    let autoParent = parent;
-    if (!autoParent) {
+    let autoParent = data;
+    if (typeof data === "object" || !autoParent) {
       // خريطة لتحديد العنصر الأب للعناصر الفرعية
       const parentMap = {
-        "refunds": "Read",
-        "declines": "Read", 
-        "payouts": "Read",
-        "cards": "Cards Or Photos",
-        "photos": "Cards Or Photos",
-        "posts": "Posts",
-        "createOrEditPost": "Posts",
-        "videos": "Videos",
-        "createOrEditVideo": "Videos",
-        "history": "About Us",
-        "team": "About Us",
-        "settings": "Settings",
-        "profile": "Settings",
+        refunds: "Read",
+        declines: "Read",
+        payouts: "Read",
+        cards: "Cards Or Photos",
+        photos: "Cards Or Photos",
+        posts: "Posts",
+        createOrEditPost: "Posts",
+        videos: "Videos",
+        createOrEditVideo: "Videos",
+        history: "About Us",
+        team: "About Us",
+        settings: "Settings",
+        profile: "Settings",
         // يمكن إضافة المزيد حسب الحاجة
       };
       autoParent = parentMap[section] || null;
     }
-    
+
     setActiveParent(autoParent);
   };
 
@@ -114,11 +125,21 @@ export default function Page() {
       case "videos":
         return <VideosList onSectionChange={handleSectionChange} />;
       case "createOrEditVideo":
-        return <CreateOrEditVideo />;
+        return (
+          <CreateOrEditVideo
+            onSectionChange={handleSectionChange}
+            video={selectedVideo}
+          />
+        );
       case "posts":
         return <PostsList onSectionChange={handleSectionChange} />;
       case "createOrEditPost":
-        return <CreateOrEditPost onSectionChange={handleSectionChange} />;
+        return (
+          <CreateOrEditPost
+            onSectionChange={handleSectionChange}
+            post={selectedPost}
+          />
+        );
       case "healthPosts":
         return <HealthPosts onSectionChange={handleSectionChange} />;
       case "tv":

@@ -106,6 +106,8 @@ function LoginForm() {
         console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         setShowTOTPModal(false);
+        localStorage.setItem("userType", res?.data.user?.groups[0]);
+
         if (isAdminLogin) {
           if (res?.data?.user?.groups[0] === "admin") {
             // if (data?.user?.is_staff) {

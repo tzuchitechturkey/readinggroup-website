@@ -6,25 +6,30 @@ import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CreateVideo, EditVideoById } from "@/api/videos";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function CreateOrEditVideo({ video = null, onClose, onSave }) {
+function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
     title: "",
+    duration: "",
     category: "",
-    type: "",
+    video_type: "",
     subject: "",
     language: "",
-    duration: "",
-    videoUrl: "",
-    image: null,
+    thumbnail: null,
+    thumbnail_url: "",
+    views: 0,
+    published_at: "",
     featured: false,
-    isNew: false,
-    number: "",
+    is_new: false,
+    reference_code: "",
+    video_url: "",
   });
 
   // Validation errors
@@ -71,21 +76,26 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
     if (video) {
       setFormData({
         title: video.title || "",
+        duration: video.duration || "",
         category: video.category || "",
-        type: video.type || "",
+        video_type: video.video_type || "",
         subject: video.subject || "",
         language: video.language || "",
-        duration: video.duration || "",
-        videoUrl: video.videoUrl || "",
-        image: null,
+        thumbnail: video?.thumbnail || null, // Reset file input
+        thumbnail_url: video.thumbnail_url || "",
+        views: video.views || 0,
+        published_at: video.published_at
+          ? new Date(video.published_at).toISOString().slice(0, 16)
+          : "",
         featured: video.featured || false,
-        isNew: video.isNew || false,
-        number: video.number || "",
+        is_new: video.is_new || false,
+        reference_code: video.reference_code || "",
+        video_url: video.video_url || "",
       });
-      setImagePreview(video.image);
+      // Set existing thumbnail preview
+      setImagePreview(video.thumbnail || video.thumbnail_url);
     }
   }, [video]);
-
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -101,6 +111,16 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
         [name]: "",
       }));
     }
+
+    // If thumbnail_url is provided, update preview
+    if (name === "thumbnail_url" && value) {
+      setImagePreview(value);
+      // Clear the file thumbnail if URL is provided
+      setFormData((prev) => ({
+        ...prev,
+        thumbnail: null,
+      }));
+    }
   };
 
   // Handle image upload
@@ -109,7 +129,8 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
     if (file) {
       setFormData((prev) => ({
         ...prev,
-        image: file,
+        thumbnail: file,
+        thumbnail_url: "", // Clear URL when file is uploaded
       }));
 
       // Create preview
@@ -133,18 +154,18 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
       newErrors.category = t("Category is required");
     }
 
-    if (!formData.type) {
-      newErrors.type = t("Type is required");
+    if (!formData.video_type) {
+      newErrors.video_type = t("Type is required");
     }
 
     if (!formData.language) {
       newErrors.language = t("Language is required");
     }
 
-    if (!formData.videoUrl.trim()) {
-      newErrors.videoUrl = t("Video URL is required");
-    } else if (!isValidYouTubeUrl(formData.videoUrl)) {
-      newErrors.videoUrl = t("Please enter a valid YouTube URL");
+    if (!formData.video_url.trim()) {
+      newErrors.video_url = t("Video URL is required");
+    } else if (!isValidYouTubeUrl(formData.video_url)) {
+      newErrors.video_url = t("Please enter a valid YouTube URL");
     }
 
     if (!formData.duration.trim()) {
@@ -168,40 +189,75 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
     if (!validateForm()) {
       return;
     }
-    toast.success(
-      video ? t("Video updated successfully") : t("Video created successfully")
-    );
-    // setLoading(true);
 
-    // try {
-    //   // Simulate API call
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsLoading(true);
+    try {
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
 
-    //   const videoData = {
-    //     ...formData,
-    //     id: video ? video.id : Date.now(), // Generate ID for new video
-    //   };
+      // Add all form fields to FormData
+      Object.keys(formData).forEach((key) => {
+        if (key === "thumbnail" && formData[key] instanceof File) {
+          // Add file if it's actually a file
+          formDataToSend.append(key, formData[key]);
+        } else if (key !== "thumbnail") {
+          // Add all other fields except empty thumbnail
+          if (
+            formData[key] !== null &&
+            formData[key] !== "" &&
+            formData[key] !== undefined
+          ) {
+            // Convert boolean values to string for FormData
+            if (typeof formData[key] === "boolean") {
+              formDataToSend.append(key, formData[key].toString());
+            } else if (key === "published_at") {
+              // If published_at is provided, format it; otherwise set to current time
+              if (formData[key]) {
+                const date = new Date(formData[key]);
+                formDataToSend.append(key, date.toISOString());
+              } else {
+                // Set current time as default
+                formDataToSend.append(key, new Date().toISOString());
+              }
+            } else {
+              formDataToSend.append(key, formData[key]);
+            }
+          }
+        }
+      });
 
-    //   onSave(videoData);
-    //   toast.success(
-    //     video
-    //       ? t("Video updated successfully")
-    //       : t("Video created successfully")
-    //   );
-    //   onClose();
-    // } catch {
-    //   toast.error(t("An error occurred while saving the video"));
-    // } finally {
-    //   setLoading(false);
-    // }
+      video?.id
+        ? await EditVideoById(video.id, formDataToSend)
+        : await CreateVideo(formDataToSend);
+
+      toast.success(
+        video?.id
+          ? t("Video updated successfully")
+          : t("Video created successfully")
+      );
+      onSectionChange("videos");
+    } catch (err) {
+      setErrorFn(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   return (
     <div className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-[#1D2630]">
-          {video ? t("Edit Video") : t("Create New Video")}
-        </h2>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onSectionChange("videos")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+          >
+            ← {t("Back to Videos List")}
+          </button>
+          <div className="h-4 w-px bg-gray-300" />
+          <h2 className="text-xl font-semibold text-[#1D2630]">
+            {video ? t("Edit Video") : t("Create New Video")}
+          </h2>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -244,6 +300,23 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
           </div>
         </div>
         {/* End Image Upload Section */}
+
+        {/* Start Thumbnail URL Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Thumbnail URL")} ({t("Alternative to file upload")})
+          </label>
+          <Input
+            name="thumbnail_url"
+            value={formData.thumbnail_url}
+            onChange={handleInputChange}
+            placeholder={t("Enter thumbnail URL as alternative to file upload")}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t("You can either upload a file above or provide a URL here")}
+          </p>
+        </div>
+        {/* End Thumbnail URL Section */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -298,11 +371,11 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
                 {t("Type")} *
               </label>
               <select
-                name="type"
-                value={formData.type}
+                name="video_type"
+                value={formData.video_type}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.type ? "border-red-500" : "border-gray-300"
+                  errors.video_type ? "border-red-500" : "border-gray-300"
                 }`}
               >
                 <option value="">{t("Select Type")}</option>
@@ -312,8 +385,8 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
                   </option>
                 ))}
               </select>
-              {errors.type && (
-                <p className="text-red-500 text-xs mt-1">{errors.type}</p>
+              {errors.video_type && (
+                <p className="text-red-500 text-xs mt-1">{errors.video_type}</p>
               )}
             </div>
             {/* End Type */}
@@ -339,19 +412,19 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
             </div>
             {/* End Subject */}
 
-            {/* Start Number */}
+            {/* Start Reference Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Video Number")}
+                {t("Reference Code")}
               </label>
               <Input
-                name="number"
-                value={formData.number}
+                name="reference_code"
+                value={formData.reference_code}
                 onChange={handleInputChange}
-                placeholder={t("Enter video number (optional)")}
+                placeholder={t("Enter reference code (optional)")}
               />
             </div>
-            {/* End Number */}
+            {/* End Reference Code */}
           </div>
 
           {/* Right Column */}
@@ -399,6 +472,24 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
               )}
             </div>
             {/* End Duration */}
+
+            {/* Start Published Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Published Date")}
+              </label>
+              <input
+                type="datetime-local"
+                name="published_at"
+                value={formData.published_at}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t("Leave empty to set automatically when publishing")}
+              </p>
+            </div>
+            {/* End Published Date */}
             {/* Start Video URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -406,16 +497,18 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
               </label>
               <div className="relative">
                 <Input
-                  name="videoUrl"
-                  value={formData.videoUrl}
+                  name="video_url"
+                  value={formData.video_url}
                   onChange={handleInputChange}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className={`pl-10 ${errors.videoUrl ? "border-red-500" : ""}`}
+                  className={`pl-10 ${
+                    errors.video_url ? "border-red-500" : ""
+                  }`}
                 />
                 <Youtube className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               </div>
-              {errors.videoUrl && (
-                <p className="text-red-500 text-xs mt-1">{errors.videoUrl}</p>
+              {errors.video_url && (
+                <p className="text-red-500 text-xs mt-1">{errors.video_url}</p>
               )}
             </div>
             {/* End Video URL */}
@@ -437,8 +530,8 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  name="isNew"
-                  checked={formData.isNew}
+                  name="is_new"
+                  checked={formData.is_new}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
@@ -456,18 +549,13 @@ function CreateOrEditVideo({ video = null, onClose, onSave }) {
           <Button
             type="button"
             variant="outline"
-            onClick={onClose}
-            disabled={loading}
+            onClick={() => onSectionChange("videos")}
           >
             {t("Cancel")}
           </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
+          <Button type="submit" className="flex items-center gap-2">
             <Save className="h-4 w-4" />
-            {loading
+            {isLoading
               ? t("Saving...")
               : video
               ? t("Update Video")

@@ -3,7 +3,7 @@ export const getSectionKey = (title) => {
     Home: "home",
     Read: "read",
     "All Posts": "posts",
-    "Add New Post": "createOrEditPost",
+    "Add/Edit Post": "createOrEditPost",
     "All Videos": "videos",
     "All Cards": "cards",
     "All Photos": "photos",

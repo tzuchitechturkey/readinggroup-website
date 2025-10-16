@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 
 import { Save, X, Upload, User, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import Loader from "@/components/Global/Loader/Loader";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { CreatePost, EditPostById, GetPostById } from "@/api/posts";
 // Mock data for writers selection
 const mockWriters = [
   {
@@ -45,25 +48,26 @@ const mockWriters = [
   },
 ];
 
-function CreateOrEditPost({ post = null, onClose, onSave }) {
+function CreateOrEditPost({ onSectionChange, post = null }) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
-  console.log(post);
   // Form state
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     excerpt: "",
+    body: "",
     writer: "",
     writer_avatar: "",
     category: "",
-    status: "Draft",
-    active: true,
+    status: "draft",
+    is_active: true,
+    read_time: "",
     tags: [],
+    published_at: "",
   });
 
-  // Tag input state
   const [tagInput, setTagInput] = useState("");
 
   // Validation errors
@@ -89,8 +93,8 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
 
   // Status options
   const statusOptions = [
-    { value: "Draft", label: "Draft" },
-    { value: "Published", label: "Published" },
+    { value: "draft", label: "Draft" },
+    { value: "published", label: "Published" },
   ];
 
   // Initialize form data when editing
@@ -100,12 +104,15 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
         title: post.title || "",
         subtitle: post.subtitle || "",
         excerpt: post.excerpt || "",
+        body: post.body || "",
         writer: post.writer || "",
         writer_avatar: post.writer_avatar || "",
         category: post.category || "",
-        status: post.status || "Draft",
-        active: post.active !== undefined ? post.active : true,
+        status: post.status || "draft",
+        is_active: post.is_active !== undefined ? post.is_active : true,
+        read_time: post.read_time || "",
         tags: post.tags || [],
+        published_at: post.published_at || "",
       });
     }
   }, [post]);
@@ -183,6 +190,10 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
       newErrors.excerpt = t("Excerpt is required");
     }
 
+    if (!formData.body.trim()) {
+      newErrors.body = t("Body content is required");
+    }
+
     if (!formData.writer.trim()) {
       newErrors.writer = t("Writer is required");
     }
@@ -203,46 +214,60 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
       return;
     }
 
-    setLoading(true);
+    const postData = {
+      ...formData,
+      id: post ? post.id : Date.now(),
+      created_at: post ? post.created_at : new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      views: post ? post.views : 0,
+      read_time: `${Math.ceil(
+        (formData.body.split(" ").length + formData.excerpt.split(" ").length) /
+          200
+      )} min read`,
+      // Set published_at automatically if not set and status is Published
+      published_at:
+        formData.published_at ||
+        (formData.status === "Published" ? new Date().toISOString() : null),
+    };
 
+    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      post?.id
+        ? await EditPostById(post.id, postData)
+        : await CreatePost(postData);
 
-      const postData = {
-        ...formData,
-        id: post ? post.id : Date.now(),
-        createdAt: post
-          ? post.createdAt
-          : new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
-        views: post ? post.views : 0,
-        readTime: `${Math.ceil(
-          formData.excerpt.split(" ").length / 200
-        )} min read`,
-      };
-
-      onSave(postData);
-      alert(
-        post ? t("Post updated successfully") : t("Post created successfully")
+      toast.success(
+        post?.id
+          ? t("Post updated successfully")
+          : t("Post created successfully")
       );
-      onClose();
-    } catch {
-      alert(t("An error occurred while saving the post"));
+      onSectionChange("posts");
+    } catch (error) {
+      setErrorFn(error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   // Get selected writer info
-  const selectedWriter = mockWriters.find((w) => w.name === formData.writer);
 
   return (
     <div className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto">
+      {isLoading && <Loader />}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-[#1D2630]">
-          {post ? t("Edit Post") : t("Create New Post")}
-        </h2>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onSectionChange("posts")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+          >
+            ← {t("Back to Posts List")}
+          </button>
+          <div className="h-4 w-px bg-gray-300" />
+          <h2 className="text-xl font-semibold text-[#1D2630]">
+            {post ? t("Edit Post") : t("Create New Post")}
+          </h2>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -331,8 +356,8 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                name="active"
-                checked={formData.active}
+                name="is_active"
+                checked={formData.is_active}
                 onChange={handleInputChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
@@ -357,19 +382,19 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
                     errors.writer ? "border-red-500" : "border-gray-300"
                   }`}
                 >
-                  {selectedWriter ? (
+                  {formData?.writer ? (
                     <>
                       <img
-                        src={selectedWriter.avatar}
-                        alt={selectedWriter.name}
+                        src={formData?.writer?.avatar}
+                        alt={formData?.writer?.name}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                       <div className="flex-1">
                         <div className="font-medium text-sm">
-                          {selectedWriter.name}
+                          {formData?.writer?.name}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {selectedWriter.role}
+                          {formData?.writer?.role}
                         </div>
                       </div>
                     </>
@@ -413,6 +438,23 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
               {errors.writer && (
                 <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
               )}
+            </div>
+
+            {/* Published Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Published Date")}
+              </label>
+              <input
+                type="datetime-local"
+                name="published_at"
+                value={formData.published_at}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {t("Leave empty to set automatically when publishing")}
+              </p>
             </div>
 
             {/* Tags */}
@@ -477,23 +519,43 @@ function CreateOrEditPost({ post = null, onClose, onSave }) {
           </p>
         </div>
 
+        {/* Body Content - Full Width */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Body Content")} *
+          </label>
+          <textarea
+            name="body"
+            value={formData.body}
+            onChange={handleInputChange}
+            rows={8}
+            placeholder={t("Enter the full content of the post")}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.body ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.body && (
+            <p className="text-red-500 text-xs mt-1">{errors.body}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            {t("This is the main content that will be displayed to readers")}
+          </p>
+        </div>
+
         {/* Form Actions */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t">
           <Button
             type="button"
             variant="outline"
-            onClick={onClose}
-            disabled={loading}
+            onClick={() => {
+              onSectionChange("posts");
+            }}
           >
             {t("Cancel")}
           </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex items-center gap-2"
-          >
+          <Button type="submit" className="flex items-center gap-2">
             <Save className="h-4 w-4" />
-            {loading
+            {isLoading
               ? t("Saving...")
               : post
               ? t("Update Post")
