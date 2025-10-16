@@ -2,41 +2,44 @@ import React, { useState, useEffect } from "react";
 
 import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
-const MemberModal = ({
-  isOpen,
-  onClose,
-  onSave,
-  member = null,
-  isEditing = false,
-}) => {
+import { CreateTeam, EditTeamById } from "@/api/aboutUs";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
+
+const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
-    userName: "",
+    name: "",
     position: "",
     description: "",
-    career: "",
+    job_title: "",
     avatar: "",
-    social: [{ name: "", url: "" }],
+    avatar_url: "",
+    social_links: [{ name: "", url: "" }],
   });
 
   // Reset form when modal opens/closes or member changes
   useEffect(() => {
     if (isOpen) {
-      if (member && isEditing) {
+      if (member?.id) {
         setFormData({ ...member });
       } else {
         setFormData({
-          userName: "",
+          name: "",
           position: "",
           description: "",
-          career: "",
+          job_title: "",
           avatar: "",
-          social: [{ name: "", url: "" }],
+          avatar_url: "",
+          social_links: [{ name: "", url: "" }],
         });
       }
     }
-  }, [isOpen, member, isEditing]);
+  }, [isOpen, member]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -46,57 +49,112 @@ const MemberModal = ({
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Store the file object for upload
+      setFormData((prev) => ({
+        ...prev,
+        avatar: file,
+        avatar_url: "", // Clear URL when file is selected
+      }));
+    }
+  };
+
   const handleSocialChange = (index, field, value) => {
-    const newSocial = [...formData.social];
+    const newSocial = [...formData.social_links];
     newSocial[index] = { ...newSocial[index], [field]: value };
     setFormData((prev) => ({
       ...prev,
-      social: newSocial,
+      social_links: newSocial,
     }));
   };
 
   const addSocialField = () => {
     setFormData((prev) => ({
       ...prev,
-      social: [...prev.social, { name: "", url: "" }],
+      social_links: [...prev.social_links, { name: "", url: "" }],
     }));
   };
 
   const removeSocialField = (index) => {
-    if (formData.social.length > 1) {
-      const newSocial = formData.social.filter((_, i) => i !== index);
+    if (formData.social_links.length > 1) {
+      const newSocial = formData.social_links.filter((_, i) => i !== index);
       setFormData((prev) => ({
         ...prev,
-        social: newSocial,
+        social_links: newSocial,
       }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Filter out empty social entries
-    const cleanedFormData = {
-      ...formData,
-      social: formData.social.filter((s) => s.name && s.url),
-    };
-    onSave(cleanedFormData);
-    onClose();
+    setIsLoading(true);
+
+    try {
+      // Prepare data for submission
+      const hasFileUpload = formData.avatar instanceof File;
+
+      if (hasFileUpload) {
+        // Use FormData for file upload
+        const submitData = new FormData();
+        submitData.append("name", formData.name);
+        submitData.append("position", formData.position);
+        submitData.append("description", formData.description);
+        submitData.append("job_title", formData.job_title);
+        submitData.append("avatar", formData.avatar);
+
+        // Add social media data
+        const cleanedSocial = formData.social_links.filter(
+          (s) => s.name && s.url
+        );
+        submitData.append("social_links", JSON.stringify(cleanedSocial));
+
+        member?.id
+          ? await EditTeamById(member.id, submitData)
+          : await CreateTeam(submitData);
+      } else {
+        // Use regular JSON for URL-based avatar
+        const cleanedFormData = {
+          ...formData,
+          social_links: formData.social_links.filter((s) => s.name && s.url),
+          avatar: "", // Clear avatar file field when using URL
+        };
+
+        member?.id
+          ? await EditTeamById(member.id, cleanedFormData)
+          : await CreateTeam(cleanedFormData);
+      }
+
+      toast.success(
+        member?.id
+          ? t("Member updated successfully")
+          : t("Member created successfully")
+      );
+      setUpdate((prev) => !prev);
+      onClose();
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="bg-white rounded-lg p-6 w-full   overflow-y-auto">
+      {isLoading && <Loader />}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Start UserName */}
+        {/* Start Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("User Name")}
+            {t("Name")} *
           </label>
           <input
             type="text"
-            name="userName"
-            value={formData.userName}
+            name="name"
+            value={formData.name}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
             required
@@ -133,43 +191,67 @@ const MemberModal = ({
           />
         </div>
 
-        {/* Start Job */}
+        {/* Start Job Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Job")}
+            {t("Job Title")}
           </label>
           <input
             type="text"
-            name="career"
-            value={formData.career}
+            name="job_title"
+            value={formData.job_title}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-            required
           />
         </div>
-        {/* End Job */}
-        {/* Start Avatar */}
+        {/* End Job Title */}
+        {/* Start Avatar Upload */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Avatar")} *
+          </label>
+          <input
+            type="file"
+            name="avatar"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+            required={!member?.id} // Required for new members, optional for editing
+          />
+          {formData.avatar && typeof formData.avatar === "string" && (
+            <div className="mt-2">
+              <img
+                src={formData.avatar}
+                alt="Avatar preview"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+        {/* End Avatar Upload */}
+
+        {/* Start Avatar URL (Alternative) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Avatar URL")}
           </label>
           <input
             type="url"
-            name="avatar"
-            value={formData.avatar}
+            name="avatar_url"
+            value={formData.avatar_url}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-            required
+            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+            placeholder={t("Enter image URL as alternative to file upload")}
           />
         </div>
-        {/* End Avatar */}
+        {/* End Avatar URL */}
         {/* Start Social Media */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Social Media")}
           </label>
 
-          {formData.social.map((social, index) => (
+          {formData.social_links.map((social, index) => (
             <div key={index} className="flex flex-col gap-2 mb-2 sm:flex-row">
               <input
                 type="text"
@@ -191,7 +273,7 @@ const MemberModal = ({
                 className="w-full p-2 border border-gray-300 rounded-lg  outline-none"
               />
 
-              {formData.social.length > 1 && (
+              {formData.social_links.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeSocialField(index)}
@@ -225,7 +307,7 @@ const MemberModal = ({
             type="submit"
             className="px-6 py-2 bg-primary text-white hover:text-primary border-[1px] border-primary transition-all duration-200 rounded-lg hover:bg-white"
           >
-            {isEditing ? t("Save Changes") : t("Add Member")}
+            {member?.id ? t("Save Changes") : t("Add Member")}
           </button>
         </div>
       </form>
@@ -233,4 +315,4 @@ const MemberModal = ({
   );
 };
 
-export default MemberModal;
+export default CreateOrEditMember;

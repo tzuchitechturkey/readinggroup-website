@@ -40,10 +40,12 @@ const CreateOrEditHistory = ({
   useEffect(() => {
     if (isOpen) {
       if (historyItem && historyItem.id) {
-        setFormData({ 
+        setFormData({
           ...historyItem,
           // تحويل التواريخ من string إلى Date objects للتعديل
-          from_date: historyItem.from_date ? new Date(historyItem.from_date) : "",
+          from_date: historyItem.from_date
+            ? new Date(historyItem.from_date)
+            : "",
           to_date: historyItem.to_date ? new Date(historyItem.to_date) : "",
         });
       } else {
@@ -73,46 +75,49 @@ const CreateOrEditHistory = ({
     try {
       // إنشاء FormData لإرسال الصورة بشكل صحيح
       const formDataToSend = new FormData();
-      
+
       // تحويل التواريخ إلى صيغة YYYY-MM-DD
       if (formData.from_date) {
         const fromDate = new Date(formData.from_date);
         // التأكد من صحة التاريخ
         if (!isNaN(fromDate.getTime())) {
-          formDataToSend.append('from_date', fromDate.toISOString().split('T')[0]);
+          formDataToSend.append(
+            "from_date",
+            fromDate.toISOString().split("T")[0]
+          );
         }
       }
-      
+
       if (formData.to_date) {
         const toDate = new Date(formData.to_date);
         // التأكد من صحة التاريخ
         if (!isNaN(toDate.getTime())) {
-          formDataToSend.append('to_date', toDate.toISOString().split('T')[0]);
+          formDataToSend.append("to_date", toDate.toISOString().split("T")[0]);
         }
       }
-      
+
       // إضافة باقي البيانات
-      formDataToSend.append('title', formData.title || '');
-      formDataToSend.append('description', formData.description || '');
-      
+      formDataToSend.append("title", formData.title || "");
+      formDataToSend.append("description", formData.description || "");
+
       // إضافة رابط الصورة إذا كان موجود
       if (formData.image_url && formData.image_url.trim()) {
-        formDataToSend.append('image_url', formData.image_url.trim());
+        formDataToSend.append("image_url", formData.image_url.trim());
       }
-      
+
       // إضافة الصورة المرفوعة إذا كانت موجودة
-      if (formData.image && typeof formData.image !== 'string') {
-        formDataToSend.append('image', formData.image);
+      if (formData.image && typeof formData.image !== "string") {
+        formDataToSend.append("image", formData.image);
       }
-      
+
       // طباعة البيانات للتصحيح
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('FormData being sent:');
+      if (process.env.NODE_ENV === "development") {
+        console.warn("FormData being sent:");
         for (const pair of formDataToSend.entries()) {
-          console.warn(pair[0] + ': ' + pair[1]);
+          console.warn(pair[0] + ": " + pair[1]);
         }
       }
-      
+
       if (historyItem?.id) {
         await EditHistoryById(historyItem.id, formDataToSend);
         toast.success(t("Event saved successfully"));
@@ -123,7 +128,7 @@ const CreateOrEditHistory = ({
       onClose();
       setUpdate((prev) => !prev);
     } catch (error) {
-      console.error('Submit error:', error);
+      console.error("Submit error:", error);
       setErrorFn(error);
     } finally {
       setIsLaoding(false);
@@ -164,7 +169,9 @@ const CreateOrEditHistory = ({
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={formData.from_date ? new Date(formData.from_date) : undefined}
+                selected={
+                  formData.from_date ? new Date(formData.from_date) : undefined
+                }
                 onSelect={(date) => {
                   setFormData((prev) => ({ ...prev, from_date: date }));
                   setOpenFrom(false);
@@ -204,7 +211,9 @@ const CreateOrEditHistory = ({
             <PopoverContent className="w-auto p-0 z-50" align="start">
               <CalendarComponent
                 mode="single"
-                selected={formData.to_date ? new Date(formData.to_date) : undefined}
+                selected={
+                  formData.to_date ? new Date(formData.to_date) : undefined
+                }
                 onSelect={(date) => {
                   setFormData((prev) => ({ ...prev, to_date: date }));
                   setOpenTo(false);
@@ -261,7 +270,7 @@ const CreateOrEditHistory = ({
           <input
             type="url"
             name="image_url"
-            value={formData.image_url || ''}
+            value={formData.image_url || ""}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />

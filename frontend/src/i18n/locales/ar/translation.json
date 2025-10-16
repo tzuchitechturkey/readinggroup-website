@@ -647,5 +647,6 @@
   "Admin Login": "تسجيل دخول المسؤول",
   "Logout Account": "تسجيل خروج الحساب",
   "Card saved successfully!": "تم حفظ البطاقة بنجاح!",
-  "Search Historical Events": "البحث في الأحداث التاريخية..."
+  "Search Historical Events": "البحث في الأحداث التاريخية...",
+  "Max size: 5MB. Supported formats: JPG, PNG, GIF, WebP": "الحجم الأقصى: 5 ميجابايت. الصيغ المدعومة: JPG، PNG، GIF، WebP"
 }

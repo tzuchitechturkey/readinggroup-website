@@ -14,12 +14,15 @@ import {
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
+import { GetMediaCards } from "@/api/cardPhoto";
 
 import CreateorEditCardorPhoto from "../CreateorEditCardorPhoto/CreateorEditCardorPhoto";
 
 function CardsList() {
   const { t } = useTranslation();
-  const [_isLoading, _setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // State management
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
@@ -28,141 +31,27 @@ function CardsList() {
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
+  const [cardData, setCardData] = useState();
+  const [update, setUpdate] = useState(false);
   // Pagination state
+  const limit = 10;
+  const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [apiData, setApiData] = useState({
-    results: [],
-    count: 0,
-  });
 
-  // Mock data - replace with actual API call
-  const mockCards = [
-    {
-      id: 1,
-      image: "/Beared Guy02-min 1.png",
-      cover: "/testCard.png",
-      title: "بطاقة تعليمية رقم 1",
-      description:
-        "وصف تفصيلي للبطاقة التعليمية الأولى التي تحتوي على معلومات مفيدة ومحتوى تعليمي قيم.",
-      theme: "dark",
-      language: "ar",
-      type: "article",
-    },
-    {
-      id: 2,
-      image: "/testCard.png",
-      cover: "/testCard.png",
-      title: "بطاقة تعليمية رقم 2",
-      description:
-        "وصف تفصيلي للبطاقة التعليمية الثانية مع محتوى تعليمي متقدم ومفيد للطلاب.",
-      theme: "light",
-      language: "en",
-      type: "photo",
-    },
-    {
-      id: 3,
-      image: "/testCard.png",
-      cover: "/testCard.png",
-      title: "بطاقة تعليمية رقم 3",
-      description:
-        "وصف شامل للبطاقة التعليمية الثالثة التي تغطي موضوعات متنوعة ومهمة.",
-      theme: "colorful",
-      language: "tr",
-      type: "gallery",
-    },
-    // Add more mock data to test pagination
-    ...Array.from({ length: 27 }, (_, i) => {
-      const themes = ["dark", "light", "colorful", "minimal", "classic"];
-      const languages = ["ar", "en", "tr", "fr", "de"];
-      const types = [
-        "article",
-        "photo",
-        "gallery",
-        "news",
-        "event",
-        "announcement",
-      ];
-
-      return {
-        id: i + 4,
-        image: "/testCard.png",
-        cover: "/testCard.png",
-        title: `بطاقة تعليمية رقم ${i + 4}`,
-        description: `وصف تفصيلي للبطاقة التعليمية رقم ${
-          i + 4
-        } مع محتوى تعليمي متميز.`,
-        theme: themes[i % themes.length],
-        language: languages[i % languages.length],
-        type: types[i % types.length],
-      };
-    }),
-  ];
-
-  // Simulate API call for fetching data with pagination
-  const fetchCards = async (page, limitPerPage, sort = null, search = "") => {
-    setLoading(true);
+  // Fetch Data
+  const getCardData = async (page) => {
+    setIsLoading(true);
+    const offset = page * 10;
     try {
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Apply search filter
-      let filteredData = [...mockCards];
-      if (search.trim()) {
-        filteredData = filteredData.filter(
-          (card) =>
-            card.title.toLowerCase().includes(search.toLowerCase()) ||
-            card.description.toLowerCase().includes(search.toLowerCase())
-        );
-      }
-
-      // Apply sorting
-      if (sort) {
-        filteredData = filteredData.sort((a, b) => {
-          const aValue = a[sort.key];
-          const bValue = b[sort.key];
-
-          if (sort.key === "id") {
-            return sort.direction === "asc" ? aValue - bValue : bValue - aValue;
-          }
-
-          const aString = String(aValue).toLowerCase();
-          const bString = String(bValue).toLowerCase();
-
-          if (aString < bString) {
-            return sort.direction === "asc" ? -1 : 1;
-          }
-          if (aString > bString) {
-            return sort.direction === "asc" ? 1 : -1;
-          }
-          return 0;
-        });
-      }
-
-      // Apply pagination
-      const offset = (page - 1) * limitPerPage;
-      const paginatedResults = filteredData.slice(
-        offset,
-        offset + limitPerPage
-      );
-
-      setApiData({
-        results: paginatedResults,
-        count: filteredData.length,
-      });
+      const res = await GetMediaCards(limit, offset, searchTerm);
+      console.log(res, "res");
+      setCardData(res?.data?.results || []);
     } catch (error) {
-      console.error("Error fetching cards:", error);
+      setErrorFn(error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-
-  // Initial load and refetch on dependencies change
-  useEffect(() => {
-    fetchCards(currentPage, limit, sortConfig, searchTerm);
-  }, [currentPage, limit, sortConfig, searchTerm]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -191,104 +80,20 @@ function CardsList() {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
-  // Pagination
-  const totalPages = Math.ceil(apiData.count / limit);
-
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages && !loading) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
 
-  // CRUD operations
-  const handleAddCard = () => {
-    setSelectedCard(null);
-    setIsEditing(false);
-    setShowCreateOrEditModal(true);
-  };
+  const totalPages = Math.ceil(totalRecords / limit);
 
-  const handleEditCard = (card) => {
-    setSelectedCard(card);
-    setIsEditing(true);
-    setShowCreateOrEditModal(true);
-  };
-  // حذف
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setSelectedCard(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    fetchCards(currentPage, limit, sortConfig, searchTerm);
-    setShowDeleteModal(false);
-  };
-  const handleSaveCard = async (formData) => {
-    try {
-      if (isEditing) {
-        // Update existing card
-        // In real app: await updateCard(selectedCard.id, formData)
-
-        // For demo purposes, extract data from FormData
-        const cardData = {
-          id: selectedCard.id,
-          title: formData.get("title"),
-          description: formData.get("description"),
-          theme: formData.get("theme"),
-          language: formData.get("language"),
-          type: formData.get("type"),
-          // Handle image files or existing URLs
-          image: formData.get("image")
-            ? "new-uploaded-image-url"
-            : formData.get("existingImage"),
-          cover: formData.get("cover")
-            ? "new-uploaded-cover-url"
-            : formData.get("existingCover"),
-        };
-
-        console.warn("Update card data:", cardData);
-      } else {
-        // Add new card
-        // In real app: await createCard(formData)
-
-        // For demo purposes, extract data from FormData
-        const cardData = {
-          title: formData.get("title"),
-          description: formData.get("description"),
-          theme: formData.get("theme"),
-          language: formData.get("language"),
-          type: formData.get("type"),
-          image: "new-uploaded-image-url", // This would be the actual uploaded image URL
-          cover: "new-uploaded-cover-url", // This would be the actual uploaded cover URL
-        };
-
-        console.warn("Create new card data:", cardData);
-      }
-
-      // Close modal
-      setShowCreateOrEditModal(false);
-      setSelectedCard(null);
-      setIsEditing(false);
-
-      // Refresh data
-      fetchCards(currentPage, limit, sortConfig, searchTerm);
-    } catch (error) {
-      console.error("Error saving card:", error);
-      alert("حدث خطأ أثناء حفظ البطاقة");
-    }
-  };
-
-  // Handle search with debounce
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when searching
-      fetchCards(1, limit, sortConfig, searchTerm);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
+    getCardData(0);
+  }, [update]);
   return (
     <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
+      {isLoading && <Loader />}
       <div className="flex-1">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
@@ -301,15 +106,14 @@ function CardsList() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {loading ? (
-              <span className="text-sm text-gray-500">{t("Loading")}...</span>
-            ) : (
-              <span className="text-sm text-gray-500">
-                {t("Total")}: {apiData.count} {t("cards")}
-              </span>
-            )}
+            <span className="text-sm text-gray-500">
+              {t("Total")}: {totalRecords} {t("cards")}
+            </span>
             <button
-              onClick={handleAddCard}
+              onClick={() => {
+                setSelectedCard(null);
+                setShowCreateOrEditModal(true);
+              }}
               className="flex items-center gap-2 text-sm bg-blue-600 border border-blue-600 hover:bg-blue-700 transition-all duration-200 text-white px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
@@ -385,7 +189,7 @@ function CardsList() {
               </TableRow>
             </TableHeader>
             <TableBody className="text-[11px]">
-              {apiData.results.map((card) => (
+              {cardData?.map((card) => (
                 <TableRow
                   key={card.id}
                   className="hover:bg-gray-50/60 border-b"
@@ -440,7 +244,10 @@ function CardsList() {
                     <div className="flex items-center gap-2 text-[#5B6B79]">
                       <button
                         title={t("Edit")}
-                        onClick={() => handleEditCard(card)}
+                        onClick={() => {
+                          setSelectedCard(card);
+                          setShowCreateOrEditModal(true);
+                        }}
                         className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
                       >
                         <Edit className="h-4 w-4" />
@@ -468,14 +275,14 @@ function CardsList() {
             <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">
               <div className="text-sm text-gray-700">
                 {t("Showing")} {(currentPage - 1) * limit + 1} {t("to")}{" "}
-                {Math.min(currentPage * limit, apiData.count)} {t("of")}{" "}
-                {apiData.count} {t("cards")}
+                {Math.min(currentPage * limit, totalRecords)} {t("of")}{" "}
+                {totalRecords} {t("cards")}
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || loading}
+                  disabled={currentPage === 1}
                   className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -496,7 +303,6 @@ function CardsList() {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        disabled={loading}
                         className={`px-3 py-2 text-sm font-medium rounded-md disabled:opacity-50 ${
                           isActive
                             ? "bg-blue-600 text-white border border-blue-600"
@@ -511,7 +317,7 @@ function CardsList() {
 
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages || loading}
+                  disabled={currentPage === totalPages}
                   className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {t("Next")}
@@ -527,14 +333,13 @@ function CardsList() {
         <Modal
           isOpen={showCreateOrEditModal}
           onClose={() => setShowCreateOrEditModal(false)}
-          title={isEditing ? t("Edit Card") : t("Add New Card")}
+          title={selectedCard?.id ? t("Edit Card") : t("Add New Card")}
         >
           <CreateorEditCardorPhoto
             isOpen={showCreateOrEditModal}
             onClose={() => setShowCreateOrEditModal(false)}
-            onSave={handleSaveCard}
+            setUpdate={setUpdate}
             card={selectedCard}
-            isEditing={isEditing}
           />
         </Modal>
         {/* End Craete Or Edit Modal */}
@@ -542,14 +347,22 @@ function CardsList() {
         {/* Start Delete Video Modal */}
         <Modal
           isOpen={showDeleteModal}
-          onClose={handleCancelDelete}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedCard(null);
+          }}
           title={t("Confirm Deletion")}
           width="500px"
         >
           <DeleteConfirmation
             isOpen={showDeleteModal}
-            onClose={handleCancelDelete}
-            onConfirm={handleConfirmDelete}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setSelectedCard(null);
+            }}
+            onConfirm={() => {
+              setShowDeleteModal(false);
+            }}
             title={t("Delete Member")}
             message={t(
               "Are you sure you want to delete this member? This action cannot be undone."
@@ -564,3 +377,15 @@ function CardsList() {
 }
 
 export default CardsList;
+
+//  {
+//       id: 2,
+//       image: "/testCard.png",
+//       cover: "/testCard.png",
+//       title: "بطاقة تعليمية رقم 2",
+//       description:
+//         "وصف تفصيلي للبطاقة التعليمية الثانية مع محتوى تعليمي متقدم ومفيد للطلاب.",
+//       theme: "light",
+//       language: "en",
+//       type: "photo",
+//     },

@@ -35,12 +35,12 @@ function History() {
   const [historyData, setHistoryData] = useState([]);
 
   // Get Data
-  const getData = async (page) => {
+  const getData = async (page, searchValue = searchTerm) => {
     setIsLaoding(true);
     const offset = page * 10;
     try {
-      const res = searchTerm
-        ? await GetHistory(limit, offset, searchTerm)
+      const res = searchValue
+        ? await GetHistory(limit, offset, searchValue)
         : await GetHistory(limit, offset);
       setTotalRecords(res.data?.count || 0);
       setHistoryData(res.data?.results);
@@ -59,7 +59,7 @@ function History() {
 
   // Handle Search
   const searchData = () => {
-    if (searchTerm.trim() === "") {
+    if (searchTerm.trim()) {
       getData(0);
     }
   };
@@ -80,10 +80,9 @@ function History() {
     }
   };
 
-  // تنسيق التاريخ للعرض
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ar-SA", {
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -134,8 +133,21 @@ function History() {
               placeholder={t("Search Historical Events")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
             />
+
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  getData(0, "");
+                }}
+                className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+
             <button
               onClick={searchData}
               className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
@@ -234,13 +246,17 @@ function History() {
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">من:</span>
+                          <span className="text-xs text-gray-500">
+                            {"From"}:
+                          </span>
                           <span className="text-sm font-medium">
                             {formatDate(item.from_date)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">إلى:</span>
+                          <span className="text-xs text-gray-500">
+                            {t("To")}:
+                          </span>
                           <span className="text-sm font-medium">
                             {formatDate(item.to_date)}
                           </span>
@@ -286,6 +302,7 @@ function History() {
                 ))}
               </TableBody>
             </Table>
+
             <TableButtons
               totalPages={totalPages}
               currentPage={currentPage}

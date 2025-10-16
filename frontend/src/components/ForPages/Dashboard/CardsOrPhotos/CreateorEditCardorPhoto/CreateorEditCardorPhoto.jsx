@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
+import { CreateMediaCard, EditMediaCardById } from "@/api/cardPhoto";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
+
 // Theme options
 const THEME_OPTIONS = [
   { value: "dark", label: "Dark" },
@@ -34,68 +38,95 @@ const TYPE_OPTIONS = [
 const CreateorEditCardorPhoto = ({
   isOpen,
   onClose,
-  onSave,
   card = null,
-  isEditing = false,
+  setUpdate,
 }) => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    image: null,
-    cover: null,
     title: "",
     description: "",
     theme: "",
     language: "",
-    type: "",
+    kind: "card",
+    card_type: "",
+    image: null,
+    image_url: "",
+    cover_image: null,
+    cover_image_url: "",
+    metadata: "",
   });
-
+  // {
+  //   "title": "string",
+  //   "description": "string",
+  //   "theme": "string",
+  //   "language": "string",
+  //   "kind": "card",
+  //   "card_type": "string",
+  //   "image": "string",
+  //   "image_url": "string",
+  //   "cover_image": "string",
+  //   "cover_image_url": "string",
+  //   "metadata": "string"
+  // }
   // State for image previews
   const [imagePreviews, setImagePreviews] = useState({
     image: "",
-    cover: "",
+    cover_image: "",
   });
 
   // Reset form when modal opens/closes or card changes
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     if (card && isEditing) {
-  //       setFormData({
-  //         ...card,
-  //         image: null, // Reset file inputs
-  //         cover: null,
-  //         theme: card.theme || "",
-  //         language: card.language || "",
-  //         type: card.type || "",
-  //       });
-  //       // Set existing image previews for editing
-  //       setImagePreviews({
-  //         image: card.image || "",
-  //         cover: card.cover || "",
-  //       });
-  //     } else {
-  //       setFormData({
-  //         image: null,
-  //         cover: null,
-  //         title: "",
-  //         description: "",
-  //         theme: "",
-  //         language: "",
-  //         type: "",
-  //       });
-  //       setImagePreviews({
-  //         image: "",
-  //         cover: "",
-  //       });
-  //     }
-  //   } else {
-  //     // Clean up preview URLs when modal closes
-  //     Object.values(imagePreviews).forEach((url) => {
-  //       if (url && url.startsWith("blob:")) {
-  //         URL.revokeObjectURL(url);
-  //       }
-  //     });
-  //   }
-  // }, [isOpen, card, isEditing, imagePreviews]);
+  useEffect(() => {
+    if (isOpen) {
+      if (card && card?.id) {
+        setFormData({
+          ...card,
+          image: null, // Reset file inputs
+          cover_image: null,
+          theme: card.theme || "",
+          language: card.language || "",
+          card_type: card.card_type || "",
+          kind: card.kind || "card",
+          image_url: card.image_url || "",
+          cover_image_url: card.cover_image_url || "",
+          metadata:
+            typeof card.metadata === "object"
+              ? JSON.stringify(card.metadata, null, 2)
+              : card.metadata || "",
+        });
+        // Set existing image previews for editing
+        setImagePreviews({
+          image: card.image || "",
+          cover_image: card.cover_image || "",
+        });
+      } else {
+        setFormData({
+          title: "",
+          description: "",
+          theme: "",
+          language: "",
+          kind: "card",
+          card_type: "",
+          image: null,
+          image_url: "",
+          cover_image: null,
+          cover_image_url: "",
+          metadata: "",
+        });
+        setImagePreviews({
+          image: "",
+          cover_image: "",
+        });
+      }
+    } else {
+      // Clean up preview URLs when modal closes
+      Object.values(imagePreviews).forEach((url) => {
+        if (url && url.startsWith("blob:")) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    }
+  }, [isOpen, card]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -111,13 +142,17 @@ const CreateorEditCardorPhoto = ({
   // Reset form function
   const resetForm = () => {
     setFormData({
-      image: null,
-      cover: null,
       title: "",
       description: "",
       theme: "",
       language: "",
-      type: "",
+      kind: "card",
+      card_type: "",
+      image: null,
+      image_url: "",
+      cover_image: null,
+      cover_image_url: "",
+      metadata: "",
     });
 
     // Clean up existing previews
@@ -129,13 +164,12 @@ const CreateorEditCardorPhoto = ({
 
     setImagePreviews({
       image: "",
-      cover: "",
+      cover_image: "",
     });
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -150,13 +184,13 @@ const CreateorEditCardorPhoto = ({
     if (file) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        alert("يرجى اختيار ملف صورة صحيح");
+        toast.error("Please select a valid image file.");
         return;
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert("حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت");
+        toast.error("File size is too large. Maximum allowed is 5MB.");
         return;
       }
 
@@ -175,7 +209,7 @@ const CreateorEditCardorPhoto = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Create FormData object to handle file uploads
@@ -186,35 +220,55 @@ const CreateorEditCardorPhoto = ({
     submitData.append("description", formData.description);
     submitData.append("theme", formData.theme);
     submitData.append("language", formData.language);
-    submitData.append("type", formData.type);
+    submitData.append("kind", formData.kind);
+    submitData.append("card_type", formData.card_type);
+    submitData.append("image_url", formData.image_url);
+    submitData.append("cover_image_url", formData.cover_image_url);
+
+    // Handle metadata - parse JSON if it's a string
+    try {
+      const metadataObj = formData.metadata
+        ? JSON.parse(formData.metadata)
+        : {};
+      submitData.append("metadata", JSON.stringify(metadataObj));
+    } catch {
+      // If JSON parsing fails, send as empty object
+      submitData.append("metadata", "{}");
+    }
 
     // Append files if they exist
     if (formData.image) {
       submitData.append("image", formData.image);
     }
-    if (formData.cover) {
-      submitData.append("cover", formData.cover);
+    if (formData.cover_image) {
+      submitData.append("cover_image", formData.cover_image);
     }
 
-    // For editing, include existing image URLs if no new files selected
-    if (isEditing && card) {
-      if (!formData.image && card.image) {
-        submitData.append("existingImage", card.image);
+    setIsLoading(true);
+    try {
+      if (card?.id) {
+        EditMediaCardById(card.id, submitData);
+        toast.success(t("Card updated successfully"));
+      } else {
+        await CreateMediaCard(submitData);
+        toast.success(t("Card created successfully"));
       }
-      if (!formData.cover && card.cover) {
-        submitData.append("existingCover", card.cover);
-      }
+
+      setUpdate((prev) => !prev);
+      resetForm();
+      onClose();
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
     }
-    toast.success(t("Card saved successfully!"));
-    onSave(submitData);
-    resetForm();
-    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="bg-white rounded-lg p-3 overflow-y-auto">
+      {isLoading && <Loader />}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Start Title */}
         <div>
@@ -297,8 +351,8 @@ const CreateorEditCardorPhoto = ({
             {t("Type")}
           </label>
           <select
-            name="type"
-            value={formData.type}
+            name="card_type"
+            value={formData.card_type}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
@@ -313,6 +367,42 @@ const CreateorEditCardorPhoto = ({
         </div>
         {/* End Type */}
 
+        {/* Start Kind */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Kind")}
+          </label>
+          <select
+            name="kind"
+            value={formData.kind}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          >
+            <option value="card">{t("Card")}</option>
+            <option value="photo">{t("Photo")}</option>
+          </select>
+        </div>
+        {/* End Kind */}
+
+        {/* Start Card Type  
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Card Type")}
+          </label>
+          <input
+            type="text"
+            name="card_type"
+            value={formData.card_type}
+            onChange={handleInputChange}
+            placeholder={t(
+              "Enter card type (e.g., featured, regular, special)"
+            )}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        End Card Type */}
+
         {/* Start Main Image */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -324,13 +414,29 @@ const CreateorEditCardorPhoto = ({
             accept="image/*"
             onChange={handleFileChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            required={!isEditing}
+            required={!card?.id}
           />
           <p className="text-xs text-gray-500 mt-1">
-            الحد الأقصى: 5 ميجابايت. الصيغ المدعومة: JPG, PNG, GIF, WebP
+            {t("Max size: 5MB. Supported formats: JPG, PNG, GIF, WebP")}
           </p>
         </div>
         {/* End Main Image */}
+
+        {/* Start Image URL (Alternative) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Main Image URL")} ({t("Alternative to file upload")})
+          </label>
+          <input
+            type="url"
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleInputChange}
+            placeholder={t("Enter image URL as alternative to file upload")}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        {/* End Image URL */}
 
         {/* Start Cover Image */}
         <div>
@@ -339,17 +445,54 @@ const CreateorEditCardorPhoto = ({
           </label>
           <input
             type="file"
-            name="cover"
+            name="cover_image"
             accept="image/*"
             onChange={handleFileChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            required={!isEditing}
+            required={!card?.id}
           />
           <p className="text-xs text-gray-500 mt-1">
-            الحد الأقصى: 5 ميجابايت. الصيغ المدعومة: JPG, PNG, GIF, WebP
+            {t("Max size: 5MB. Supported formats: JPG, PNG, GIF, WebP")}
           </p>
         </div>
         {/* End Cover Image */}
+
+        {/* Start Cover Image URL (Alternative) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Cover Image URL")} ({t("Alternative to file upload")})
+          </label>
+          <input
+            type="url"
+            name="cover_image_url"
+            value={formData.cover_image_url}
+            onChange={handleInputChange}
+            placeholder={t(
+              "Enter cover image URL as alternative to file upload"
+            )}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        {/* End Cover Image URL */}
+
+        {/* Start Metadata */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Metadata")} ({t("Optional")})
+          </label>
+          <textarea
+            name="metadata"
+            value={formData.metadata}
+            onChange={handleInputChange}
+            rows={3}
+            placeholder={t("Additional metadata in JSON format (optional)")}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t('Example: {"tags": ["featured", "popular"], "priority": 1}')}
+          </p>
+        </div>
+        {/* End Metadata */}
 
         {/* Start Image Previews */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -361,7 +504,7 @@ const CreateorEditCardorPhoto = ({
               <div className="relative">
                 <img
                   src={imagePreviews.image}
-                  alt="معاينة الصورة الرئيسية"
+                  alt="preview"
                   className="w-full h-32 object-cover rounded-lg border"
                 />
                 <button
@@ -378,22 +521,22 @@ const CreateorEditCardorPhoto = ({
             </div>
           )}
 
-          {imagePreviews.cover && (
+          {imagePreviews.cover_image && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("Cover Preview")}
               </label>
               <div className="relative">
                 <img
-                  src={imagePreviews.cover}
-                  alt="معاينة صورة الغلاف"
+                  src={imagePreviews.cover_image}
+                  alt="preview"
                   className="w-full h-32 object-cover rounded-lg border"
                 />
                 <button
                   type="button"
                   onClick={() => {
-                    setFormData((prev) => ({ ...prev, cover: null }));
-                    setImagePreviews((prev) => ({ ...prev, cover: "" }));
+                    setFormData((prev) => ({ ...prev, cover_image: null }));
+                    setImagePreviews((prev) => ({ ...prev, cover_image: "" }));
                   }}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                 >
@@ -421,7 +564,7 @@ const CreateorEditCardorPhoto = ({
             type="submit"
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
           >
-            {isEditing ? t("Save Changes") : t("Add Card")}
+            {card?.id ? t("Save Changes") : t("Add Card")}
           </button>
         </div>
         {/* End Actions */}

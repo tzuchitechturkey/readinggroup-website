@@ -11,18 +11,18 @@ export async function CreateHistory(data) {
 }
 
 export async function GetHistoryById(id) {
-  return await axios.get(`/history/${id}`);
+  return await axios.get(`/history/${id}/`);
 }
 
 export async function EditHistoryById(id, data) {
-  return await axios.put(`/history/${id}`, data);
+  return await axios.put(`/history/${id}/`, data);
 }
 
 export async function DeleteHistoryById(id) {
-  return await axios.delete(`/history/${id}`);
+  return await axios.delete(`/history/${id}/`);
 }
 
-export async function GetTeam(limit, offset, search) {
+export async function GetTeam(limit, offset, search = "") {
   return await axios.get(
     `/team/?limit=${limit}&offset=${offset}&search=${search}`
   );
@@ -33,7 +33,7 @@ export async function CreateTeam(data) {
 }
 
 export async function GetTeamById(id) {
-  return await axios.get(`/team/${id}`);
+  return await axios.get(`/team/${id}/`);
 }
 
 export async function EditTeamById(id, data) {
@@ -41,5 +41,5 @@ export async function EditTeamById(id, data) {
 }
 
 export async function DeleteTeamById(id) {
-  return await axios.delete(`/team/${id}`);
+  return await axios.delete(`/team/${id}/`);
 }

@@ -3,12 +3,17 @@ import axios from "./axios";
 export async function Login(data) {
   return await axios.post(`/user/login/`, data);
 }
+
 export async function Register(data) {
   return await axios.post(`/user/register/`, data);
 }
 
 export async function GetProfile() {
   return await axios.get(`/user/profile/`);
+}
+
+export async function UpdateProfile(data) {
+  return await axios.put(`/user/profile/`, data);
 }
 
 export async function ChangePassword(data) {
