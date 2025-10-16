@@ -157,10 +157,12 @@ AUTH_USER_MODEL = "accounts.User"
 EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", 587))
-EMAIL_HOST_USER = os.getenv("DJANGO_EMAIL_HOST_USER", "anasdaas210@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD", "your_password")
-EMAIL_USE_TLS = os.getenv("DJANGO_EMAIL_USE_TLS", "true").lower() == "true"
-DEFAULT_FROM_EMAIL = os.getenv("DJANGO_DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+
+# Set the email sender directly
+EMAIL_HOST_USER = "anasdaas210@gmail.com"
+EMAIL_HOST_PASSWORD = "utko uazs achz rdvx"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
 
 
 # Default primary key field type
