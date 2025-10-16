@@ -15,6 +15,7 @@ import Modal from "@/components/Global/Modal/Modal";
 import ResetPasswordModal from "../ResetPassword/ResetPasswordModal";
 import FirstLoginResetPasswordModal from "./FirstLoginResetPasswordModal";
 import TOTPModal from "./TOTPModal";
+import ResetQrModal from "./ResetQrModal";
 
 function LoginForm() {
   const { t, i18n } = useTranslation();
@@ -65,6 +66,7 @@ function LoginForm() {
     try {
       const { data } = await Login({ username: userName, password });
       setTokens({ access: data?.access, refresh: data?.refresh });
+      console.log(data);
       toast.success("Login successful");
       if (data?.user?.is_first_login) {
         setShowFirstLoginModal(true);
@@ -101,9 +103,9 @@ function LoginForm() {
       setIsLoading(true);
       try {
         const res = await Login({ username, password, totp });
+        console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         setShowTOTPModal(false);
-        console.log(res, "ressss");
         if (isAdminLogin) {
           if (res?.data?.user?.groups[0] === "admin") {
             // if (data?.user?.is_staff) {
@@ -114,6 +116,8 @@ function LoginForm() {
         } else {
           if (res?.data?.user?.groups[0] === "user") {
             navigate("/");
+          } else {
+            toast.error("This account is not a user");
           }
         }
       } catch (err) {
@@ -364,8 +368,25 @@ function LoginForm() {
           setOtpCode={setOtpCode}
         />
       </Modal>
-
       {/* End TOTP Modal */}
+
+      {/* Start Resend  */}
+      <Modal
+        isOpen={onOpenResendQr}
+        onClose={() => {
+          setOnOpenResendQr(false);
+          setShowTOTPModal(false);
+        }}
+        title={t("Resend Qr")}
+      >
+        <ResetQrModal
+          onClose={() => {
+            setOnOpenResendQr(false);
+            setShowTOTPModal(false);
+          }}
+        />
+      </Modal>
+      {/* End Resend  */}
     </div>
   );
 }

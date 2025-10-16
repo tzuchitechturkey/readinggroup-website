@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 import { Edit, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import {
   Table,
@@ -13,8 +14,12 @@ import {
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { GetTeam, DeleteTeamById } from "@/api/aboutUs";
+import Loader from "@/components/Global/Loader/Loader";
+import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
-import MemberModal from "./MemberModal";
+import CreateOrEditMember from "./CreateOrEditMember";
 
 function OurTeam() {
   const { t } = useTranslation();
@@ -52,11 +57,12 @@ function OurTeam() {
     },
   ]);
   const [showDeleteMemberModal, setShowDeleteMemberModal] = useState(false);
-
+  const limit = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-
+  const [update, setUpdate] = useState(false);
   // فلترة الأعضاء بناءً على البحث
   const filteredMembers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -72,53 +78,51 @@ function OurTeam() {
     );
   }, [members, searchTerm]);
 
-  // إضافة عضو جديد
-  const handleAddMember = () => {
-    setSelectedMember(null);
-    setIsEditing(false);
-    setShowCreateOrEditModal(true);
+  // Handle Pagination
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    getMemberData(newPage - 1);
   };
 
-  // تعديل عضو
-  const handleEditMember = (member) => {
-    setSelectedMember(member);
-    setIsEditing(true);
-    setShowCreateOrEditModal(true);
-  };
-
-  // حذف عضو
-  const handleCancelDelete = () => {
-    setShowDeleteMemberModal(false);
-    setSelectedMember(null);
-  };
-
-  const handleConfirmDelete = async () => {
-    setMembers((prev) =>
-      prev.filter((member) => member.id !== selectedMember.id)
-    );
-    setShowDeleteMemberModal(false);
-  };
-
-  // حفظ العضو (إضافة أو تعديل)
-  const handleSaveMember = (memberData) => {
-    if (isEditing) {
-      // تعديل عضو موجود
-      setMembers((prev) =>
-        prev.map((member) =>
-          member.id === selectedMember.id
-            ? { ...memberData, id: selectedMember.id }
-            : member
-        )
-      );
-    } else {
-      // إضافة عضو جديد
-      const newId = Math.max(...members.map((m) => m.id), 0) + 1;
-      setMembers((prev) => [...prev, { ...memberData, id: newId }]);
+  // Fetch Members from API
+  const getMemberData = async (page) => {
+    const offset = page * 10;
+    setIsLoading(true);
+    try {
+      const res = await GetTeam(limit, offset, searchTerm);
+      setTotalRecords(res.data.count);
+      setMembers(res.data.results);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Delete Member
+  const handleConfirmDelete = async () => {
+    setIsLoading(true);
+    try {
+      await DeleteTeamById(selectedMember?.id);
+      toast.success(t("Member deleted successfully"));
+      setShowDeleteMemberModal(false);
+      setUpdate(!update);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const totalPages = Math.ceil(totalRecords / limit);
+
+  useEffect(() => {
+    getMemberData();
+  }, [update]);
+
   return (
     <div className="min-h-screen bg-gray-50 pt-1">
+      {isLoading && <Loader />}
       {/* Start Header */}
       <div className="bg-white p-3 rounded-lg grid grid-cols-12 items-center gap-4">
         <div className="col-span-6">
@@ -157,7 +161,10 @@ function OurTeam() {
 
         <div className="col-span-3 flex justify-end">
           <button
-            onClick={handleAddMember}
+            onClick={() => {
+              setSelectedMember(null);
+              setShowCreateOrEditModal(true);
+            }}
             className="bg-primary hover:text-primary border border-primary hover:bg-white text-white px-2 py-2 rounded-lg flex items-center gap-2 transition-colors"
           >
             <span className="text-xl">+</span>
@@ -179,7 +186,10 @@ function OurTeam() {
             {t("Start by adding the first team member")}
           </p>
           <button
-            onClick={handleAddMember}
+            onClick={() => {
+              setSelectedMember(null);
+              setShowCreateOrEditModal(true);
+            }}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
             {t("Add First Member")}
@@ -299,14 +309,17 @@ function OurTeam() {
                     <TableCell className="py-4">
                       <div className="flex items-center gap-2 text-[#5B6B79]">
                         <button
-                          onClick={() => handleEditMember(member)}
+                          onClick={() => {
+                            setSelectedMember(member);
+                            setShowCreateOrEditModal(true);
+                          }}
                           className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedMember(member.id);
+                            setSelectedMember(member);
                             setShowDeleteMemberModal(true);
                           }}
                           className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
@@ -319,6 +332,12 @@ function OurTeam() {
                 ))}
               </TableBody>
             </Table>
+            <TableButtons
+              totalPages={totalPages}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              t={t}
+            />
           </div>
 
           {/* Start Mobile View */}
@@ -396,7 +415,10 @@ function OurTeam() {
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEditMember(member)}
+                          onClick={() => {
+                            setSelectedMember(member);
+                            setShowCreateOrEditModal(true);
+                          }}
                           className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg text-sm transition-colors"
                         >
                           {t("Edit")}
@@ -423,27 +445,32 @@ function OurTeam() {
       <Modal
         isOpen={showCreateOrEditModal}
         onClose={() => setShowCreateOrEditModal(false)}
-        title={isEditing ? t("Edit Member") : t("Create New Member")}
+        title={selectedMember?.id ? t("Edit Member") : t("Create New Member")}
       >
-        <MemberModal
+        <CreateOrEditMember
           isOpen={showCreateOrEditModal}
           onClose={() => setShowCreateOrEditModal(false)}
-          onSave={handleSaveMember}
           member={selectedMember}
-          isEditing={isEditing}
+          setUpdate={setUpdate}
         />
       </Modal>
       {/* ENd Create or Edit Modal */}
-      {/* Start Delete Video Modal */}
+      {/* Start Delete Member Modal */}
       <Modal
         isOpen={showDeleteMemberModal}
-        onClose={handleCancelDelete}
+        onClose={() => {
+          setShowDeleteMemberModal(false);
+          setSelectedMember(null);
+        }}
         title={t("Confirm Deletion")}
         width="500px"
       >
         <DeleteConfirmation
           isOpen={showDeleteMemberModal}
-          onClose={handleCancelDelete}
+          onClose={() => {
+            setShowDeleteMemberModal(false);
+            setSelectedMember(null);
+          }}
           onConfirm={handleConfirmDelete}
           title={t("Delete Member")}
           message={t(

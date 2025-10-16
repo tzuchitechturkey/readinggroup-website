@@ -14,7 +14,6 @@ function SettingsContent() {
   const [userType, setUserType] = useState("user");
   const handleChangePassword = async () => {
     toast.success(t("Updated Profile Successfuly"));
-
     // setisLoading(true);
     // try {
     //   // const res = await EditUserInfo()
@@ -27,9 +26,9 @@ function SettingsContent() {
     //   setisLoading(false);
     // }
   };
+
   const handleEditUserInfo = async () => {
     toast.success(t("Updated Profile Successfuly"));
-
     // setisLoading(true);
     // try {
     //   // const res = await EditUserInfo()
@@ -54,7 +53,7 @@ function SettingsContent() {
           <TabsList className="bg-white shadow-none">
             <TabsTrigger
               value="editProfile"
-              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
+              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none transition-colors duration-200 hover:text-[#2563eb]"
             >
               <img
                 src="/icons/bothColorUser.png"
@@ -65,7 +64,7 @@ function SettingsContent() {
             </TabsTrigger>
             <TabsTrigger
               value="changePassword"
-              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
+              className="gap-2 2 pb-3  rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none transition-colors duration-200 hover:text-[#2563eb]"
             >
               <img
                 src="/icons/security-safe.png"
@@ -85,7 +84,7 @@ function SettingsContent() {
         </Tabs>
         {/* End Tabs */}
       </div>
-
+      {/* 
       <button
         onClick={() => {
           if (activeTab === "editProfile") {
@@ -94,12 +93,12 @@ function SettingsContent() {
             handleChangePassword();
           }
         }}
-        className={`block ${
+        className={`block m-3 mx-10 ${
           userType === "admin" && "m-5"
-        }  ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7`}
+        }  ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7 transition-all duration-300 transform hover:bg-[#2563eb] hover:scale-105 shadow hover:shadow-lg`}
       >
         {activeTab === "editProfile" ? t("Save") : t("Save Password")}
-      </button>
+      </button> */}
     </div>
   );
 }

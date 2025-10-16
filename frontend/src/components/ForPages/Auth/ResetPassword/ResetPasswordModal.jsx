@@ -20,7 +20,7 @@ function ResetPasswordModal({ open, onClose }) {
     }
     setResetLoading(true);
     try {
-      await ForgetPassword(resetEmail);
+      await ForgetPassword({ email: resetEmail });
       toast.success(t("Reset link sent to your email."));
       onClose();
       setResetEmail("");

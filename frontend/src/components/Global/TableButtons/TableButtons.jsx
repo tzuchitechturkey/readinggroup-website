@@ -35,7 +35,7 @@ const TableButtons = ({ totalPages, currentPage, onPageChange, t }) => {
   }
 
   return (
-    <div className="flex flex-wrap justify-center gap-2 mt-4">
+    <div className="flex flex-wrap justify-center gap-2 mt-4  pb-3">
       {/* Previous */}
       <button
         onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
