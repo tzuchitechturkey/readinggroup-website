@@ -142,6 +142,13 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             "date_joined",
             "groups",
             "profile_image_url",
+            "profile_image",
+            "profession_name",
+            "about_me",
+            "country",
+            "mobile_number",
+            "address_details",
+            "website_address" 
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
