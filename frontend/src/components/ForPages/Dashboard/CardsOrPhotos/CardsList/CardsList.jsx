@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Edit, Trash2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import {
   Table,
@@ -16,7 +17,7 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetMediaCards } from "@/api/cardPhoto";
+import { DeleteMediaCardById, GetMediaCards } from "@/api/cardPhoto";
 
 import CreateorEditCardorPhoto from "../CreateorEditCardorPhoto/CreateorEditCardorPhoto";
 
@@ -82,6 +83,19 @@ function CardsList() {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
+    }
+  };
+
+  const handleDeleteCard = async () => {
+    setIsLoading(true);
+    try {
+      await DeleteMediaCardById(selectedCard.id);
+      setUpdate((prev) => !prev);
+      toast.success(t("Card deleted successfully"));
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -397,6 +411,7 @@ function CardsList() {
             }}
             onConfirm={() => {
               setShowDeleteModal(false);
+              handleDeleteCard();
             }}
             title={t("Delete Member")}
             message={t(
@@ -412,15 +427,3 @@ function CardsList() {
 }
 
 export default CardsList;
-
-//  {
-//       id: 2,
-//       image: "/testCard.png",
-//       cover: "/testCard.png",
-//       title: "بطاقة تعليمية رقم 2",
-//       description:
-//         "وصف تفصيلي للبطاقة التعليمية الثانية مع محتوى تعليمي متقدم ومفيد للطلاب.",
-//       theme: "light",
-//       language: "en",
-//       type: "photo",
-//     },

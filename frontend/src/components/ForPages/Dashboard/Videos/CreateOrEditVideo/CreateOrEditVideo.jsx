@@ -25,12 +25,15 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     thumbnail: null,
     thumbnail_url: "",
     views: 0,
-    published_at: "",
+
     featured: false,
     is_new: false,
     reference_code: "",
     video_url: "",
   });
+
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Validation errors
   const [errors, setErrors] = useState({});
@@ -74,28 +77,51 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   // Initialize form data when editing
   useEffect(() => {
     if (video) {
-      setFormData({
+      const initialData = {
         title: video.title || "",
         duration: video.duration || "",
         category: video.category || "",
         video_type: video.video_type || "",
         subject: video.subject || "",
         language: video.language || "",
-        thumbnail: video?.thumbnail || null, // Reset file input
+        thumbnail: null, // Reset file input
         thumbnail_url: video.thumbnail_url || "",
         views: video.views || 0,
-        published_at: video.published_at
-          ? new Date(video.published_at).toISOString().slice(0, 16)
-          : "",
+
         featured: video.featured || false,
         is_new: video.is_new || false,
         reference_code: video.reference_code || "",
         video_url: video.video_url || "",
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
+      setHasChanges(false);
       // Set existing thumbnail preview
       setImagePreview(video.thumbnail || video.thumbnail_url);
+    } else {
+      setInitialFormData(null);
+      setHasChanges(false);
     }
   }, [video]);
+
+  // Check for changes when formData changes
+  useEffect(() => {
+    if (video && initialFormData) {
+      // Compare all fields
+      const hasTextChanges = Object.keys(initialFormData).some((key) => {
+        // Skip thumbnail file field (check if new file was uploaded separately)
+        if (key === "thumbnail") {
+          return false;
+        }
+        return formData[key] !== initialFormData[key];
+      });
+
+      // Check if new thumbnail has been uploaded
+      const hasNewThumbnail = formData.thumbnail !== null;
+
+      setHasChanges(hasTextChanges || hasNewThumbnail);
+    }
+  }, [formData, video, initialFormData]);
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -210,15 +236,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             // Convert boolean values to string for FormData
             if (typeof formData[key] === "boolean") {
               formDataToSend.append(key, formData[key].toString());
-            } else if (key === "published_at") {
-              // If published_at is provided, format it; otherwise set to current time
-              if (formData[key]) {
-                const date = new Date(formData[key]);
-                formDataToSend.append(key, date.toISOString());
-              } else {
-                // Set current time as default
-                formDataToSend.append(key, new Date().toISOString());
-              }
             } else {
               formDataToSend.append(key, formData[key]);
             }
@@ -473,23 +490,8 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             </div>
             {/* End Duration */}
 
-            {/* Start Published Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Published Date")}
-              </label>
-              <input
-                type="datetime-local"
-                name="published_at"
-                value={formData.published_at}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {t("Leave empty to set automatically when publishing")}
-              </p>
-            </div>
-            {/* End Published Date */}
+         
+            
             {/* Start Video URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -553,7 +555,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           >
             {t("Cancel")}
           </Button>
-          <Button type="submit" className="flex items-center gap-2">
+          <Button
+            type="submit"
+            className="flex items-center gap-2"
+            disabled={video && !hasChanges}
+          >
             <Save className="h-4 w-4" />
             {isLoading
               ? t("Saving...")

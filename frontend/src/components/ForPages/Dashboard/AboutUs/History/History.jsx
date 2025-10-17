@@ -196,19 +196,22 @@ function History() {
             <Table>
               <TableHeader className="bg-[#FAFAFA] h-14">
                 <TableRow className="border-b">
-                  <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+                  <TableHead className="text-[#5B6B79] font-medium text-xs px-3 ">
                     {t("ID")}
                   </TableHead>
-                  <TableHead className="text-[#5B6B79] font-medium text-xs">
-                    {t("Image and Title")}
+                  <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
+                    {t("Image")}
                   </TableHead>
-                  <TableHead className="text-[#5B6B79] font-medium text-xs">
+                  <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
+                    {t("Title")}
+                  </TableHead>
+                  <TableHead className="text-[#5B6B79] font-medium text-xs text-center ">
                     {t("Time Period")}
                   </TableHead>
-                  <TableHead className="text-[#5B6B79] font-medium text-xs">
+                  <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                     {t("Description")}
                   </TableHead>
-                  <TableHead className="text-[#5B6B79] font-medium text-xs">
+                  <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
                     {t("Actions")}
                   </TableHead>
                 </TableRow>
@@ -223,7 +226,7 @@ function History() {
                       {item.id}
                     </TableCell>
                     <TableCell className="py-4">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center gap-3">
                         <img
                           src={item.image}
                           alt={item.title}
@@ -234,6 +237,10 @@ function History() {
                               item.title.charAt(0);
                           }}
                         />
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center justify-center gap-3">
                         <div className="flex flex-col">
                           <span className="text-[#1E1E1E] font-medium text-sm line-clamp-1">
                             {item.title}
@@ -241,29 +248,16 @@ function History() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#1E1E1E] text-[11px] py-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">
-                            {"From"}:
-                          </span>
-                          <span className="text-sm font-medium">
-                            {formatDate(item.from_date)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">
-                            {t("To")}:
-                          </span>
-                          <span className="text-sm font-medium">
-                            {formatDate(item.to_date)}
-                          </span>
-                        </div>
+                    <TableCell className="text-[#1E1E1E] text-[11px] py-4   ">
+                      <div className="flex justify-center gap-1">
+                        <span className="text-sm font-medium">
+                          {formatDate(item.story_date)}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-sm">
                       <p
-                        className="text-sm text-gray-900 line-clamp-2"
+                        className="text-sm text-gray-900 line-clamp-2 text-center"
                         title={item.description}
                       >
                         {item.description.length > 80

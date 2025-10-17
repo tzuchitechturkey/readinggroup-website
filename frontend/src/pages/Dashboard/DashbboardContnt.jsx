@@ -28,7 +28,8 @@ import History from "@/components/ForPages/Dashboard/AboutUs/History/History";
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
 import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
 import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList/PhotosList";
-import CreateorEditCardorPhoto from "@/components/ForPages/Dashboard/CardsOrPhotos/CreateorEditCardorPhoto/CreateorEditCardorPhoto";
+import GuidedReadingList from "@/components/ForPages/Dashboard/GuidingReading/GuidedReadingList";
+import CreateOrEditGuidedReading from "@/components/ForPages/Dashboard/GuidingReading/CreateOrEditGuidedReading/CreateOrEditGuidedReading";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
 import Tv from "@/components/ForPages/Dashboard/TV/TV";
 
@@ -41,6 +42,7 @@ export default function Page() {
   const [activeParent, setActiveParent] = useState(null); // للتحكم في العنصر الأساسي النشط
   const [selectedPost, setSelectedPost] = useState(null); // لتخزين المقال المحدد للتعديل
   const [selectedVideo, setSelectedVideo] = useState(null); // لتخزين الفيديو المحدد للتعديل
+  const [selectedGuidedReading, setSelectedGuidedReading] = useState(null); // لتخزين القراءة الموجهة المحددة للتعديل
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
@@ -51,8 +53,8 @@ export default function Page() {
       setSelectedPost(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
-    } else {
-      setSelectedPost(null);
+    } else if (section === "createOrEditGuidedReading") {
+      setSelectedGuidedReading(data);
     }
 
     // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
@@ -89,34 +91,7 @@ export default function Page() {
         return <SettingsContent />;
       case "profile":
         return <ProfileContent />;
-      case "refunds":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">المبالغ المستردة</h2>
-            <p>إدارة المبالغ المستردة</p>
-          </div>
-        );
-      case "declines":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">المرفوضات</h2>
-            <p>إدارة العمليات المرفوضة</p>
-          </div>
-        );
-      case "payouts":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">المدفوعات</h2>
-            <p>إدارة المدفوعات</p>
-          </div>
-        );
-      case "read":
-        return (
-          <div className="p-4">
-            <h2 className="text-2xl font-bold">قسم القراءة</h2>
-            <p>محتوى قسم القراءة هنا</p>
-          </div>
-        );
+
       case "cards":
         return <CardsList onSectionChange={handleSectionChange} />;
       case "photos":
@@ -138,6 +113,15 @@ export default function Page() {
           <CreateOrEditPost
             onSectionChange={handleSectionChange}
             post={selectedPost}
+          />
+        );
+      case "guided-readings":
+        return <GuidedReadingList onSectionChange={handleSectionChange} />;
+      case "createOrEditGuidedReading":
+        return (
+          <CreateOrEditGuidedReading
+            onSectionChange={handleSectionChange}
+            guidedReading={selectedGuidedReading}
           />
         );
       case "healthPosts":

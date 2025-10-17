@@ -4,6 +4,8 @@ export const getSectionKey = (title) => {
     Read: "read",
     "All Posts": "posts",
     "Add/Edit Post": "createOrEditPost",
+    "All Guided Readings": "guided-readings",
+    "Add/Edit Guided Reading": "createOrEditGuidedReading",
     "All Videos": "videos",
     "All Cards": "cards",
     "All Photos": "photos",

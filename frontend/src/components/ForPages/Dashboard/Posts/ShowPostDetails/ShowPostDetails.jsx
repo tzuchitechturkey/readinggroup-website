@@ -79,12 +79,7 @@ function PostDetails({ post, onClose, onEdit }) {
                   <span>{post.read_time}</span>
                 </div>
               )}
-              {post.published_at && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(post.published_at)}</span>
-                </div>
-              )}
+             
             </div>
           </div>
         </div>
@@ -240,12 +235,7 @@ function PostDetails({ post, onClose, onEdit }) {
                 {post.read_time || t("Not specified")}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">{t("Published Date")}:</span>
-              <span className="font-medium">
-                {formatDate(post.published_at)}
-              </span>
-            </div>
+          
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Content Length")}:</span>
               <span className="font-medium">

@@ -11,7 +11,7 @@ function LoginContent() {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userType"));
+    const user = localStorage.getItem("userType");
     if (user) {
       setUserType(user);
     }

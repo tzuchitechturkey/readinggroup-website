@@ -29,10 +29,10 @@ function EditProfile() {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: files ? files[0] : value, // إذا كان حقل ملف نحفظ أول ملف
     }));
   };
   const GetProfileData = async () => {
@@ -65,12 +65,19 @@ function EditProfile() {
     GetProfileData();
   }, []);
 
-  // Submit form data to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      await UpdateProfile(formData);
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          data.append(key, value);
+        }
+      });
+
+      await UpdateProfile(data);
       toast.success(t("Updated Profile Successfully"));
     } catch (error) {
       setErrorFn(error);

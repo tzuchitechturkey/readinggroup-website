@@ -74,7 +74,7 @@ function LoginForm() {
         if (data?.requires_totp) {
           setShowTOTPModal(true);
           if (data?.show_qr) {
-            setQr(data?.data?.qr);
+            setQr(data?.qr);
           }
         }
       }
@@ -108,20 +108,21 @@ function LoginForm() {
         setShowTOTPModal(false);
         localStorage.setItem("userType", res?.data.user?.groups[0]);
 
-        if (isAdminLogin) {
-          if (res?.data?.user?.groups[0] === "admin") {
-            // if (data?.user?.is_staff) {
-            navigate("/dashboard");
-          } else {
-            toast.error("This account is not an admin");
-          }
+        // if (isAdminLogin) {
+        //   if (res?.data?.user?.groups[0] === "admin") {
+        //     // if (data?.user?.is_staff) {
+        //     navigate("/dashboard");
+        //   } else {
+        //     toast.error("This account is not an admin");
+        //   }
+        // } else {
+        if (res?.data?.user?.groups[0] === "user") {
+          navigate("/");
         } else {
-          if (res?.data?.user?.groups[0] === "user") {
-            navigate("/");
-          } else {
-            toast.error("This account is not a user");
-          }
+          // toast.error("This account is not a user");
+          navigate("/dashboard");
         }
+        // }
       } catch (err) {
         setTotpError(t("TOTP verification failed"));
         setOtpCode("");
@@ -141,7 +142,7 @@ function LoginForm() {
       t,
     });
   };
-
+  console.log(qr);
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
@@ -155,8 +156,9 @@ function LoginForm() {
         </h1>
 
         {/* Login Type Toggle */}
+        {/*
         <div className="flex gap-2 mb-6">
-          <button
+           <button
             type="button"
             onClick={() => setIsAdminLogin(false)}
             className={`flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
@@ -179,6 +181,7 @@ function LoginForm() {
             {t("Admin Login")}
           </button>
         </div>
+           */}
         {/* Username Input */}
         <div className="space-y-2 mb-2">
           <input
@@ -193,7 +196,7 @@ function LoginForm() {
                 });
               }
             }}
-            placeholder={t("Username")}
+            placeholder={t("Email")}
             className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
               inputErrors.userName ? "border border-red-500" : ""
             }`}

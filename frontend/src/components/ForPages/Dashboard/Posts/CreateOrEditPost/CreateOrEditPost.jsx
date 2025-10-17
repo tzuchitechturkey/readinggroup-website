@@ -65,10 +65,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     is_active: true,
     read_time: "",
     tags: [],
-    published_at: "",
   });
 
   const [tagInput, setTagInput] = useState("");
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Validation errors
   const [errors, setErrors] = useState({});
@@ -100,7 +101,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   // Initialize form data when editing
   useEffect(() => {
     if (post) {
-      setFormData({
+      const initialData = {
         title: post.title || "",
         subtitle: post.subtitle || "",
         excerpt: post.excerpt || "",
@@ -112,10 +113,34 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         is_active: post.is_active !== undefined ? post.is_active : true,
         read_time: post.read_time || "",
         tags: post.tags || [],
-        published_at: post.published_at || "",
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
+      setHasChanges(false);
+    } else {
+      setInitialFormData(null);
+      setHasChanges(false);
     }
   }, [post]);
+
+  // Check for changes when formData changes
+  useEffect(() => {
+    if (post && initialFormData) {
+      // Compare all fields
+      const hasTextChanges = Object.keys(initialFormData).some((key) => {
+        // Special handling for tags array
+        if (key === "tags") {
+          return (
+            JSON.stringify(formData[key]) !==
+            JSON.stringify(initialFormData[key])
+          );
+        }
+        return formData[key] !== initialFormData[key];
+      });
+
+      setHasChanges(hasTextChanges);
+    }
+  }, [formData, post, initialFormData]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -224,10 +249,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         (formData.body.split(" ").length + formData.excerpt.split(" ").length) /
           200
       )} min read`,
-      // Set published_at automatically if not set and status is Published
-      published_at:
-        formData.published_at ||
-        (formData.status === "Published" ? new Date().toISOString() : null),
     };
 
     setIsLoading(true);
@@ -440,23 +461,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               )}
             </div>
 
-            {/* Published Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Published Date")}
-              </label>
-              <input
-                type="datetime-local"
-                name="published_at"
-                value={formData.published_at}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {t("Leave empty to set automatically when publishing")}
-              </p>
-            </div>
-
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -553,7 +557,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           >
             {t("Cancel")}
           </Button>
-          <Button type="submit" className="flex items-center gap-2">
+          <Button
+            type="submit"
+            className="flex items-center gap-2"
+            disabled={post && !hasChanges}
+          >
             <Save className="h-4 w-4" />
             {isLoading
               ? t("Saving...")

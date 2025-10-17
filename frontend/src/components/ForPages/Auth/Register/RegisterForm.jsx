@@ -8,6 +8,11 @@ import Loader from "@/components/Global/Loader/Loader";
 import { Register } from "@/api/auth";
 import { setTokens } from "@/api/setToken";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import {
+  getPasswordStrength,
+  strengthColors,
+  requirements,
+} from "@/Utility/Profile/getPasswordStrength";
 
 function RegisterForm() {
   const { t, i18n } = useTranslation();
@@ -18,13 +23,17 @@ function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showReTypePassword, setShowReTypePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
   const [form, setForm] = useState({
-    username: "",
+    first_name: "",
+    last_name: "",
     displayName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const passwordStrength = getPasswordStrength(form.password);
+
   const [error, setError] = useState("");
   const [inputErrors, setInputErrors] = useState({});
 
@@ -67,7 +76,8 @@ function RegisterForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     const errors = {};
-    if (!form.username) errors.username = true;
+    if (!form.first_name) errors.first_name = true;
+    if (!form.last_name) errors.last_name = true;
     if (!form.displayName) errors.displayName = true;
     if (!form.email) errors.email = true;
     if (!form.password) errors.password = true;
@@ -94,7 +104,8 @@ function RegisterForm() {
     setIsLoading(true);
     try {
       const payload = {
-        username: form.username || form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
         email: form.email,
         password: form.password,
       };
@@ -114,18 +125,29 @@ function RegisterForm() {
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
-        className="max-w-80 bg-white mx-auto flex-col gap-4 py-6 px-8  rounded-lg shadow-md"
+        className="max-w-96 bg-white mx-auto flex-col gap-4 py-6 px-8  rounded-lg shadow-md"
       >
         <h1 className="text-2xl ">{t("Sign Up")}</h1>
 
         <input
           type="text"
-          name="username"
-          value={form.username}
+          name="first_name"
+          value={form.first_name}
           onChange={handleChange}
-          placeholder={t("Username")}
+          placeholder={t("First Name")}
           className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
-            inputErrors.username ? "border border-red-500" : ""
+            inputErrors.first_name ? "border border-red-500" : ""
+          }`}
+        />
+
+        <input
+          type="text"
+          name="last_name"
+          value={form.last_name}
+          onChange={handleChange}
+          placeholder={t("Last Name")}
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
+            inputErrors.last_name ? "border border-red-500" : ""
           }`}
         />
 
@@ -157,9 +179,11 @@ function RegisterForm() {
             value={form.password}
             onChange={handleChange}
             placeholder={t("Password")}
-            className={`outline-none rounded-lg bg-gray-100 p-3 w-full  placeholder:text-black/50 text-sm ${
-              inputErrors.password ? "border border-red-500" : ""
-            }`}
+            className={`outline-none rounded-lg bg-gray-100 p-3 w-full  placeholder:text-black/50 text-sm  ${
+              form.confirmPassword === form?.password
+                ? "border border-green-700"
+                : ""
+            } ${inputErrors.password ? "border border-red-500" : ""}`}
           />
           {/* Start Toggle show/hide password */}
           <span
@@ -201,6 +225,25 @@ function RegisterForm() {
             )}
           </span>
           {/* End Toggle show/hide password */}
+          {form.password && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-gray-500">
+                {t("Security level")}
+              </span>
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className={`block w-6 h-2 rounded ${
+                      passwordStrength > i
+                        ? strengthColors[passwordStrength]
+                        : "bg-gray-200"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className=" relative mt-4">
           <input
@@ -210,8 +253,10 @@ function RegisterForm() {
             onChange={handleChange}
             placeholder={t("Confirm Password")}
             className={`outline-none rounded-lg bg-gray-100 p-3 w-full   placeholder:text-black/50 text-sm ${
-              inputErrors.confirmPassword ? "border border-red-500" : ""
-            }`}
+              form.confirmPassword === form?.password
+                ? "border border-green-700"
+                : ""
+            }  ${inputErrors.confirmPassword ? "border border-red-500" : ""}`}
           />
           {/* Start Toggle show/hide password */}
           <span
@@ -263,7 +308,45 @@ function RegisterForm() {
         >
           {t("Sign Up")}
         </button>
-
+        <div className="flex flex-wrap gap-2 mt-5 mb-2">
+          {requirements.map((req) => {
+            const passed = req.test.test(form.password);
+            return (
+              <div
+                key={req.key}
+                className={`flex items-center gap-1 px-5 py-1 rounded text-xs font-medium ${
+                  passed
+                    ? "bg-green-50 text-green-600"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                {passed ? (
+                  <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <circle cx="8" cy="8" r="8" fill="#22C55E" />
+                    <path
+                      d="M5 8.5l2 2 4-4"
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <circle cx="8" cy="8" r="8" fill="#D1D5DB" />
+                    <path
+                      d="M6 10l4-4M10 10L6 6"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+                <span>{t(req.label)}</span>
+              </div>
+            );
+          })}
+        </div>
         <div className="flex items-center justify-center mt-8">
           <span className="text-sm text-gray-400 mr-2">
             {t("Do you have an account?")}

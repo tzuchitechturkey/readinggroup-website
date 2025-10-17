@@ -56,6 +56,8 @@ const CreateorEditCardorPhoto = ({
     cover_image_url: "",
     metadata: "",
   });
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
   // {
   //   "title": "string",
   //   "description": "string",
@@ -79,7 +81,7 @@ const CreateorEditCardorPhoto = ({
   useEffect(() => {
     if (isOpen) {
       if (card && card?.id) {
-        setFormData({
+        const initialData = {
           ...card,
           image: null, // Reset file inputs
           cover_image: null,
@@ -93,14 +95,17 @@ const CreateorEditCardorPhoto = ({
             typeof card.metadata === "object"
               ? JSON.stringify(card.metadata, null, 2)
               : card.metadata || "",
-        });
+        };
+        setFormData(initialData);
+        setInitialFormData(initialData);
+        setHasChanges(false);
         // Set existing image previews for editing
         setImagePreviews({
           image: card.image || "",
           cover_image: card.cover_image || "",
         });
       } else {
-        setFormData({
+        const emptyData = {
           title: "",
           description: "",
           theme: "",
@@ -112,7 +117,10 @@ const CreateorEditCardorPhoto = ({
           cover_image: null,
           cover_image_url: "",
           metadata: "",
-        });
+        };
+        setFormData(emptyData);
+        setInitialFormData(null);
+        setHasChanges(false);
         setImagePreviews({
           image: "",
           cover_image: "",
@@ -127,6 +135,24 @@ const CreateorEditCardorPhoto = ({
       });
     }
   }, [isOpen, card]);
+
+  // Check for changes when formData or imagePreviews change
+  useEffect(() => {
+    if (card?.id && initialFormData) {
+      // Check if any field has changed
+      const hasTextChanges = Object.keys(initialFormData).some((key) => {
+        if (key === "image" || key === "cover_image") {
+          return false; // Skip file fields
+        }
+        return formData[key] !== initialFormData[key];
+      });
+
+      // Check if new images have been uploaded
+      const hasImageChanges = formData.image !== null || formData.cover_image !== null;
+
+      setHasChanges(hasTextChanges || hasImageChanges);
+    }
+  }, [formData, card?.id, initialFormData]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -562,7 +588,12 @@ const CreateorEditCardorPhoto = ({
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
+            disabled={card?.id && !hasChanges}
+            className={`px-6 py-2 bg-primary text-white rounded-lg border-[1px] border-primary transition-all duration-200 ${
+              card?.id && !hasChanges
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-white hover:text-primary"
+            }`}
           >
             {card?.id ? t("Save Changes") : t("Add Card")}
           </button>

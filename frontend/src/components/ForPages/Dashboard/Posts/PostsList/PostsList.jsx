@@ -393,12 +393,7 @@ function PostsList({ onSectionChange }) {
           )}
         </TableBody>
       </Table>
-      <TableButtons
-        totalPages={totalPages}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-        t={t}
-      />
+
       {/* Start Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">

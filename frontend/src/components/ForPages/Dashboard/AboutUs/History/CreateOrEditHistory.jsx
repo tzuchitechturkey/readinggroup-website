@@ -25,13 +25,11 @@ const CreateOrEditHistory = ({
 }) => {
   const { t } = useTranslation();
   const [isLaoding, setIsLaoding] = useState(false);
-  const [openFrom, setOpenFrom] = useState(false);
-  const [openTo, setOpenTo] = useState(false);
+  const [openStoryDate, setOpenStory] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    from_date: "",
-    to_date: "",
+    story_date: "",
     image: "",
     image_url: "",
   });
@@ -43,15 +41,13 @@ const CreateOrEditHistory = ({
         setFormData({
           ...historyItem,
           // تحويل التواريخ من string إلى Date objects للتعديل
-          from_date: historyItem.from_date
-            ? new Date(historyItem.from_date)
+          story_date: historyItem.story_date
+            ? new Date(historyItem.story_date)
             : "",
-          to_date: historyItem.to_date ? new Date(historyItem.to_date) : "",
         });
       } else {
         setFormData({
-          from_date: "",
-          to_date: "",
+          story_date: "",
           title: "",
           description: "",
           image: "",
@@ -77,13 +73,13 @@ const CreateOrEditHistory = ({
       const formDataToSend = new FormData();
 
       // تحويل التواريخ إلى صيغة YYYY-MM-DD
-      if (formData.from_date) {
-        const fromDate = new Date(formData.from_date);
+      if (formData.story_date) {
+        const story_date = new Date(formData.story_date);
         // التأكد من صحة التاريخ
-        if (!isNaN(fromDate.getTime())) {
+        if (!isNaN(story_date.getTime())) {
           formDataToSend.append(
-            "from_date",
-            fromDate.toISOString().split("T")[0]
+            "story_date",
+            story_date.toISOString().split("T")[0]
           );
         }
       }
@@ -145,11 +141,11 @@ const CreateOrEditHistory = ({
         {/* Start Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Start Date")}
+            {t("Story Date")}
           </label>
           <Popover
-            open={openFrom}
-            onOpenChange={setOpenFrom}
+            open={openStoryDate}
+            onOpenChange={setOpenStory}
             className="!z-[999999999999999]"
           >
             <PopoverTrigger asChild>
@@ -157,78 +153,33 @@ const CreateOrEditHistory = ({
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !formData.from_date && "text-muted-foreground"
+                  !formData.story_date && "text-muted-foreground"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {formData.from_date
-                  ? format(new Date(formData.from_date), "PPP")
-                  : t("Pick start date")}
+                {formData.story_date
+                  ? format(new Date(formData.story_date), "PPP")
+                  : t("Pick Story date")}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
                 selected={
-                  formData.from_date ? new Date(formData.from_date) : undefined
+                  formData.story_date
+                    ? new Date(formData.story_date)
+                    : undefined
                 }
                 onSelect={(date) => {
-                  setFormData((prev) => ({ ...prev, from_date: date }));
-                  setOpenFrom(false);
+                  setFormData((prev) => ({ ...prev, story_date: date }));
+                  setOpenStory(false);
                 }}
-                disabled={
-                  (date) =>
-                    date > new Date() || // لا يمكن اختيار المستقبل
-                    (formData.to_date && date > new Date(formData.to_date)) // لا يمكن أن تكون البداية بعد النهاية
-                }
                 initialFocus
               />
             </PopoverContent>
           </Popover>
         </div>
         {/* End Start Date */}
-
-        {/* Start End Date */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("End Date")}
-          </label>
-          <Popover open={openTo} onOpenChange={setOpenTo}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !formData.to_date && "text-muted-foreground"
-                )}
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                {formData.to_date
-                  ? format(new Date(formData.to_date), "PPP")
-                  : t("Pick end date")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-50" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={
-                  formData.to_date ? new Date(formData.to_date) : undefined
-                }
-                onSelect={(date) => {
-                  setFormData((prev) => ({ ...prev, to_date: date }));
-                  setOpenTo(false);
-                }}
-                disabled={
-                  (date) =>
-                    date > new Date() || // لا يمكن اختيار المستقبل
-                    (formData.from_date && date < new Date(formData.from_date)) // لا يمكن أن تكون النهاية قبل البداية
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        {/* End End Date */}
 
         {/* Start Title */}
         <div>
