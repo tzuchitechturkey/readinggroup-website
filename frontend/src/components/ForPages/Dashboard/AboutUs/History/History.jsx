@@ -57,13 +57,6 @@ function History() {
     getData(newPage - 1);
   };
 
-  // Handle Search
-  const searchData = () => {
-    if (searchTerm.trim()) {
-      getData(0);
-    }
-  };
-
   const handleConfirmDelete = async () => {
     setIsLaoding(true);
     try {
@@ -125,7 +118,7 @@ function History() {
           </div>
         </div>
 
-        {/* شريط البحث */}
+        {/* Start Search */}
         <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
           <div className="relative max-w-md flex">
             <input
@@ -149,13 +142,18 @@ function History() {
             )}
 
             <button
-              onClick={searchData}
+              onClick={() => {
+                if (searchTerm.trim()) {
+                  getData(0);
+                }
+              }}
               className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
             >
               {t("Search")}
             </button>
           </div>
         </div>
+        {/* End Search */}
 
         {/* Start Table */}
         {historyData.length === 0 ? (

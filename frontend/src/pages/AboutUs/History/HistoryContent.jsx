@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +15,7 @@ const historyTimelineData = [
     description:
       "The Reading Group was founded as a small initiative to encourage the love of reading in the community. We started with a small group of volunteers who believed in the power of books to change lives.",
     image: "/1-top5.jpg",
-    hasButton: true,
+
     alignment: "right",
   },
   {
@@ -25,7 +25,7 @@ const historyTimelineData = [
     description:
       "We opened the first free community library, which became a gathering point for reading enthusiasts. The library included more than 1,000 books in various fields.",
     image: null,
-    hasButton: false,
+
     alignment: "left",
   },
   {
@@ -35,7 +35,7 @@ const historyTimelineData = [
     description:
       "We launched a specialized program to encourage children to read, which included interactive workshops and illustrated stories. More than 500 children benefited from the program in its first year.",
     image: null,
-    hasButton: false,
+
     alignment: "right",
   },
   {
@@ -45,7 +45,7 @@ const historyTimelineData = [
     description:
       "We entered the digital era by launching our online platform, enabling members to access thousands of e-books and share their reading experiences.",
     image: "/2-top5.jpg",
-    hasButton: true,
+
     alignment: "left",
   },
   {
@@ -55,7 +55,7 @@ const historyTimelineData = [
     description:
       "During the COVID-19 pandemic, we succeeded in maintaining our activities by fully shifting to virtual events, allowing us to reach a wider audience.",
     image: "/3-top5.jpg",
-    hasButton: false,
+
     alignment: "right",
   },
   {
@@ -65,7 +65,7 @@ const historyTimelineData = [
     description:
       "Today, we are proud to be the largest reading community in the region with more than 10,000 active members and 50 community libraries across different cities.",
     image: "/4-top5.jpg",
-    hasButton: true,
+
     alignment: "left",
   },
 ];

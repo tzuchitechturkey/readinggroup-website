@@ -28,7 +28,6 @@ function CardsList() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [selectedCard, setSelectedCard] = useState(null);
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [cardData, setCardData] = useState();
@@ -39,11 +38,11 @@ function CardsList() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch Data
-  const getCardData = async (page) => {
+  const getCardData = async (page, searchVal = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetMediaCards(limit, offset, searchTerm);
+      const res = await GetMediaCards(limit, offset, searchVal);
       console.log(res, "res");
       setCardData(res?.data?.results || []);
     } catch (error) {
@@ -123,7 +122,43 @@ function CardsList() {
         </div>
 
         {/* Start Search */}
+        {/* Start Search */}
         <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+          <div className="relative max-w-md flex">
+            <input
+              type="text"
+              placeholder={t("Search Historical Events")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+            />
+
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  getCardData(0, "");
+                }}
+                className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                if (searchTerm.trim()) {
+                  getCardData(0);
+                }
+              }}
+              className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+            >
+              {t("Search")}
+            </button>
+          </div>
+        </div>
+        {/* End Search */}
+        {/* <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
           <div className="relative max-w-md">
             <input
               type="text"
@@ -148,7 +183,7 @@ function CardsList() {
               </svg>
             </div>
           </div>
-        </div>
+        </div> */}
         {/* End Search */}
 
         {/* Start Table */}
@@ -231,8 +266,8 @@ function CardsList() {
                   </TableCell>
                   <TableCell className="py-4">
                     <img
-                      src={card.cover}
-                      alt={`غلاف ${card.title}`}
+                      src={card.cover_image}
+                      alt={`cover`}
                       className="w-16 h-10 rounded object-cover border"
                       onError={(e) => {
                         e.target.src =

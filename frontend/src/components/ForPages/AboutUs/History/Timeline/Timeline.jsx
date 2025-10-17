@@ -97,17 +97,15 @@ const TimelineItem = ({ item }) => {
                 <p className="text-xs lg:text-sm text-gray-600 leading-relaxed mb-4 text-right">
                   {description}
                 </p>
-                {hasButton && (
-                  <div className="flex justify-end">
-                    <button
-                      className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
-                      onClick={handleOpen}
-                    >
-                      {t("Learn more")}
-                      <ArrowIcon />
-                    </button>
-                  </div>
-                )}
+                <div className="flex justify-end">
+                  <button
+                    className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+                    onClick={handleOpen}
+                  >
+                    {t("Learn more")}
+                    <ArrowIcon />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -192,15 +190,13 @@ const TimelineItem = ({ item }) => {
           </p>
 
           {/* الزر */}
-          {hasButton && (
-            <button
-              className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
-              onClick={handleOpen}
-            >
-              {t("Learn more")}
-              <ArrowIcon />
-            </button>
-          )}
+          <button
+            className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-4 lg:px-6 py-2 lg:py-3 rounded-full text-xs lg:text-sm font-bold flex items-center gap-2 transition-colors duration-200"
+            onClick={handleOpen}
+          >
+            {t("Learn more")}
+            <ArrowIcon />
+          </button>
         </div>
       </div>
       {/* Start Details Modal */}

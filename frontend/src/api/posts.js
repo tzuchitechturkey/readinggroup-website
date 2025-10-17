@@ -11,13 +11,13 @@ export async function CreatePost(data) {
 }
 
 export async function GetPostById(id) {
-  return await axios.get(`/posts/${id}`);
+  return await axios.get(`/posts/${id}/`);
 }
 
 export async function EditPostById(id, data) {
-  return await axios.put(`/posts/${id}`, data);
+  return await axios.put(`/posts/${id}/`, data);
 }
 
 export async function DeletePostById(id) {
-  return await axios.delete(`/posts/${id}`);
+  return await axios.delete(`/posts/${id}/`);
 }
