@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -70,6 +71,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        group = Group.objects.get_or_create(name="user")
+        user.groups.add(group)
+
         user.mark_password_changed()
         return user
 

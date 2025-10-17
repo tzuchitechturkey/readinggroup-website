@@ -11,9 +11,23 @@ function LoginContent() {
   const [userType, setUserType] = useState("");
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userType"));
-    if (user) {
-      setUserType(user);
+    const raw = localStorage.getItem("userType");
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      // If parsed is an object or array, try to extract a string value
+      if (typeof parsed === "string") {
+        setUserType(parsed);
+      } else if (parsed && typeof parsed === "object") {
+        // support shapes like { type: 'admin' }
+        setUserType(parsed.type || parsed.userType || "");
+      } else {
+        // fallback to raw
+        setUserType(String(parsed));
+      }
+    } catch (err) {
+      // raw isn't valid JSON (it's likely a plain string), use it directly
+      setUserType(raw);
     }
   }, []);
 
