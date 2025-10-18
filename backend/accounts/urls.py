@@ -8,7 +8,8 @@ from .views import (
     ResetPasswordView,
     PasswordChangeView,
     ResetTOTPAPIView,
-    TOTPSetupAPIView
+    TOTPSetupAPIView,
+    UserListView,
 )
 
 app_name = "accounts"
@@ -23,4 +24,5 @@ urlpatterns = [
     path("change-password/", PasswordChangeView.as_view(), name="change-password"),
     path("reset-totp/", ResetTOTPAPIView.as_view(), name="reset-totp"),
     path("setup-totp/", TOTPSetupAPIView.as_view(), name="setup-totp"),
+    path("users/", UserListView.as_view(), name="users-list"),
 ]
