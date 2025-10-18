@@ -1,13 +1,15 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
 from rest_framework import serializers
+from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serialize the public profile of a user."""
+    datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
     class Meta:
@@ -125,9 +127,9 @@ class LoginSerializer(serializers.Serializer):
         }
 
 
-class ProfileUpdateSerializer(serializers.ModelSerializer):
+class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Update limited user profile fields."""
-
+    datetime_fields = ("date_joined")
     profile_image_url = serializers.SerializerMethodField()
 
     class Meta:

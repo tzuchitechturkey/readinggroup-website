@@ -35,7 +35,7 @@ class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = User.objects.all()
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ("username", "email", "display_name")
+    search_fields = ("id","username", "email", "display_name")
     ordering_fields = ("date_joined", "id", "username")
 
 class RegisterView(generics.CreateAPIView):
