@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Calendar } from "lucide-react";
-import { format } from "date-fns";
+import { toast } from "react-toastify";
 
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { CreateTvProgram, EditTvProgramById } from "@/api/tvPrograms";
+import Loader from "@/components/Global/Loader/Loader";
 // Category options
 const CATEGORY_OPTIONS = [
   { value: "تعليمي", label: "Educational" },
@@ -26,18 +19,22 @@ const CATEGORY_OPTIONS = [
 const CreateOrEditNews = ({
   isOpen,
   onClose,
-  onSave,
   news = null,
-  isEditing = false,
+  setSelectedNews,
+  setUpdate,
 }) => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     image: null,
+    image_url: "",
     title: "",
     description: "",
-    date: "",
+    air_date: "",
     writer: "",
     category: "",
+    is_live: false,
   });
 
   // State for image preview
@@ -46,21 +43,29 @@ const CreateOrEditNews = ({
   // Reset form when modal opens/closes or TV changes
   useEffect(() => {
     if (isOpen) {
-      if (news && isEditing) {
+      if (news?.id) {
         setFormData({
-          ...news,
+          title: news.title || "",
+          description: news.description || "",
+          air_date: news.air_date || "",
+          writer: news.writer || "",
+          category: news.category || "",
           image: null, // Reset file input
+          image_url: news.image_url || "",
+          is_live: news.is_live || false,
         });
         // Set existing image preview for editing
-        setImagePreview(news.image || "");
+        setImagePreview(news.image || news.image_url || "");
       } else {
         setFormData({
           image: null,
+          image_url: "",
           title: "",
           description: "",
-          date: "",
+          air_date: "",
           writer: "",
           category: "",
+          is_live: false,
         });
         setImagePreview("");
       }
@@ -70,7 +75,7 @@ const CreateOrEditNews = ({
         URL.revokeObjectURL(imagePreview);
       }
     }
-  }, [isOpen, news, isEditing, imagePreview]);
+  }, [isOpen, news]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -85,11 +90,13 @@ const CreateOrEditNews = ({
   const resetForm = () => {
     setFormData({
       image: null,
+      image_url: "",
       title: "",
       description: "",
-      date: "",
+      air_date: "",
       writer: "",
       category: "",
+      is_live: false,
     });
 
     // Clean up existing preview
@@ -101,10 +108,10 @@ const CreateOrEditNews = ({
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -115,13 +122,7 @@ const CreateOrEditNews = ({
     if (file) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        alert("يرجى اختيار ملف صورة صحيح");
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert("حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت");
+        toast.error(t("Please select a valid image file"));
         return;
       }
 
@@ -137,7 +138,7 @@ const CreateOrEditNews = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Create FormData object to handle file uploads
@@ -146,33 +147,49 @@ const CreateOrEditNews = ({
     // Append text fields
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
-    submitData.append("date", formData.date);
+    submitData.append("air_date", formData.air_date);
     submitData.append("writer", formData.writer);
     submitData.append("category", formData.category);
+    submitData.append("image_url", formData.image_url);
+    submitData.append("is_live", formData.is_live);
 
     // Append file if it exists
     if (formData.image) {
       submitData.append("image", formData.image);
     }
 
-    // For editing, include existing image URL if no new file selected
-    if (isEditing && news) {
-      if (!formData.image && news.image) {
-        submitData.append("existingImage", news.image);
+    setIsLoading(true);
+    try {
+      if (news?.id) {
+        // Update existing TV program
+        await EditTvProgramById(news.id, submitData);
+        toast.success(t("TV Program updated successfully"));
+      } else {
+        // Add new TV program
+        await CreateTvProgram(submitData);
+        toast.success(t("TV Program created successfully"));
       }
-    }
 
-    onSave(submitData);
-    resetForm();
-    onClose();
+      // Close modal
+      setSelectedNews(null);
+      resetForm();
+      onClose();
+      // Refresh data
+      setUpdate((prev) => !prev);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="bg-white rounded-lg p-3  ">
+      {isLoading && <Loader />}
       <h2 className="text-xl font-bold text-gray-800 mb-6">
-        {isEditing ? t("Edit TV Program") : t("Add New TV Program")}
+        {news?.id ? t("Edit TV Program") : t("Add New TV Program")}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -212,42 +229,21 @@ const CreateOrEditNews = ({
 
         {/* Start Date and Writer Row */}
         <div className="space-y-4">
-          {/* Start Date */}
+          {/* Start Air Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Start Date")}
+              {t("Air Date")}
             </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.date && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {formData.date ? (
-                    format(formData.date, "PPP")
-                  ) : (
-                    <span>{t("Pick start date")}</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={formData.date}
-                  onSelect={handleInputChange}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <input
+              type="date"
+              name="air_date"
+              value={formData.air_date}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+              required
+            />
           </div>
-          {/* End Start Date */}
+          {/* End Air Date */}
 
           {/* Start Writer */}
           <div>
@@ -300,13 +296,48 @@ const CreateOrEditNews = ({
               accept="image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleFileChange}
               className="w-full p-3 border border-gray-300 rounded-lg outline-none file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              required={!isEditing}
+              required={!news?.id}
             />
             <p className="text-xs text-gray-500 mt-1">
-              الحد الأقصى: 5 ميجابايت. الصيغ المدعومة: JPG, PNG, WebP
+              {t("Max size: 5MB. Supported formats: JPG, PNG, WebP")}
             </p>
           </div>
           {/* End Image */}
+
+          {/* Start Image URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Image URL")} ({t("Alternative to file upload")})
+            </label>
+            <input
+              type="url"
+              name="image_url"
+              value={formData.image_url}
+              onChange={handleInputChange}
+              placeholder={t("Enter image URL as alternative")}
+              className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+            />
+          </div>
+          {/* End Image URL */}
+
+          {/* Start Is Live */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="is_live"
+              name="is_live"
+              checked={formData.is_live}
+              onChange={handleInputChange}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label
+              htmlFor="is_live"
+              className="text-sm font-medium text-gray-700"
+            >
+              {t("Live Program")}
+            </label>
+          </div>
+          {/* End Is Live */}
 
           {/* Start Image Preview */}
           {imagePreview && (
@@ -354,7 +385,7 @@ const CreateOrEditNews = ({
               type="submit"
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
             >
-              {isEditing ? t("Save Changes") : t("Add Program")}
+              {news?.id ? t("Save Changes") : t("Add Program")}
             </button>
           </div>
           {/* End Actions */}

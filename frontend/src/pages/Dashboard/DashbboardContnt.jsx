@@ -28,8 +28,6 @@ import History from "@/components/ForPages/Dashboard/AboutUs/History/History";
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
 import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
 import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList/PhotosList";
-import GuidedReadingList from "@/components/ForPages/Dashboard/GuidingReading/GuidedReadingList";
-import CreateOrEditGuidedReading from "@/components/ForPages/Dashboard/GuidingReading/CreateOrEditGuidedReading/CreateOrEditGuidedReading";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
 import Tv from "@/components/ForPages/Dashboard/TV/TV";
 
@@ -42,7 +40,6 @@ export default function Page() {
   const [activeParent, setActiveParent] = useState(null); // للتحكم في العنصر الأساسي النشط
   const [selectedPost, setSelectedPost] = useState(null); // لتخزين المقال المحدد للتعديل
   const [selectedVideo, setSelectedVideo] = useState(null); // لتخزين الفيديو المحدد للتعديل
-  const [selectedGuidedReading, setSelectedGuidedReading] = useState(null); // لتخزين القراءة الموجهة المحددة للتعديل
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
@@ -53,9 +50,7 @@ export default function Page() {
       setSelectedPost(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
-    } else if (section === "createOrEditGuidedReading") {
-      setSelectedGuidedReading(data);
-    }
+    }  
 
     // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
     let autoParent = data;
@@ -115,15 +110,7 @@ export default function Page() {
             post={selectedPost}
           />
         );
-      case "guided-readings":
-        return <GuidedReadingList onSectionChange={handleSectionChange} />;
-      case "createOrEditGuidedReading":
-        return (
-          <CreateOrEditGuidedReading
-            onSectionChange={handleSectionChange}
-            guidedReading={selectedGuidedReading}
-          />
-        );
+       
       case "healthPosts":
         return <HealthPosts onSectionChange={handleSectionChange} />;
       case "tv":

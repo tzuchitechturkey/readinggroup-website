@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
 import { Register } from "@/api/auth";
-import { setTokens } from "@/api/setToken";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
   getPasswordStrength,

@@ -112,21 +112,7 @@ export default function AppSidebar({
           },
         ],
       },
-      {
-        title: "Guided Readings",
-        onClick: "#",
-        icon: Posts,
-        items: [
-          {
-            title: "All Guided Readings",
-            onClick: () => onSectionChange("guided-readings"),
-          },
-          {
-            title: "Add/Edit Guided Reading",
-            onClick: () => onSectionChange("createOrEditGuidedReading"),
-          },
-        ],
-      },
+
       {
         title: "Health Posts",
         onClick: () => onSectionChange("healthPosts"),
