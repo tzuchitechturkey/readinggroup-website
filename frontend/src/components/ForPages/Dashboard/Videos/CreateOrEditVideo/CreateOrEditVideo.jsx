@@ -9,12 +9,45 @@ import { Input } from "@/components/ui/input";
 import { CreateVideo, EditVideoById } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
+// Categories and types options
+const categories = [
+  "Humanitarian",
+  "Environmental",
+  "Medical",
+  "Educational",
+  "Cultural",
+  "Disaster Relief",
+];
+
+const videoTypes = ["Full Videos", "Unit Clips"];
+
+const subjects = [
+  "Documentary",
+  "News Report",
+  "Educational Content",
+  "Interview",
+  "Event Coverage",
+  "Awareness Campaign",
+];
+
+const languages = [
+  "Arabic",
+  "English",
+  "Turkish",
+  "Chinese",
+  "Spanish",
+  "French",
+];
+
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-
-  // Form state
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [subjectList, setSubjectList] = useState([]);
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
@@ -25,54 +58,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     thumbnail: null,
     thumbnail_url: "",
     views: 0,
-
     featured: false,
     is_new: false,
     reference_code: "",
     video_url: "",
   });
-
-  const [initialFormData, setInitialFormData] = useState(null);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  // Validation errors
-  const [errors, setErrors] = useState({});
-
-  // Categories and types options
-  const categories = [
-    "Humanitarian",
-    "Environmental",
-    "Medical",
-    "Educational",
-    "Cultural",
-    "Disaster Relief",
-  ];
-
-  const videoTypes = [
-    "Full Videos",
-    "Short Clips",
-    "Documentaries",
-    "Interviews",
-    "Events",
-  ];
-
-  const subjects = [
-    "Documentary",
-    "News Report",
-    "Educational Content",
-    "Interview",
-    "Event Coverage",
-    "Awareness Campaign",
-  ];
-
-  const languages = [
-    "Arabic",
-    "English",
-    "Turkish",
-    "Chinese",
-    "Spanish",
-    "French",
-  ];
 
   // Initialize form data when editing
   useEffect(() => {
@@ -87,7 +77,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         thumbnail: null, // Reset file input
         thumbnail_url: video.thumbnail_url || "",
         views: video.views || 0,
-
         featured: video.featured || false,
         is_new: video.is_new || false,
         reference_code: video.reference_code || "",
@@ -104,24 +93,24 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     }
   }, [video]);
 
-  // Check for changes when formData changes
-  useEffect(() => {
-    if (video && initialFormData) {
-      // Compare all fields
-      const hasTextChanges = Object.keys(initialFormData).some((key) => {
-        // Skip thumbnail file field (check if new file was uploaded separately)
-        if (key === "thumbnail") {
-          return false;
-        }
-        return formData[key] !== initialFormData[key];
-      });
-
-      // Check if new thumbnail has been uploaded
-      const hasNewThumbnail = formData.thumbnail !== null;
-
-      setHasChanges(hasTextChanges || hasNewThumbnail);
+  const getCategoeries = async () => {
+    try {
+      const res = await getVideoCategories();
+      setCategoriesList(res.data.data);
+    } catch (err) {
+      setErrorFn(err);
     }
-  }, [formData, video, initialFormData]);
+  };
+
+  const getSubjects = async () => {
+    try {
+      const res = await getVideoSubjects();
+      setSubjectList(res.data.data);
+    } catch (err) {
+      setErrorFn(err);
+    }
+  };
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -259,6 +248,26 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setIsLoading(false);
     }
   };
+
+  // Check for changes when formData changes
+  useEffect(() => {
+    if (video && initialFormData) {
+      // Compare all fields
+      const hasTextChanges = Object.keys(initialFormData).some((key) => {
+        // Skip thumbnail file field (check if new file was uploaded separately)
+        if (key === "thumbnail") {
+          return false;
+        }
+        return formData[key] !== initialFormData[key];
+      });
+
+      // Check if new thumbnail has been uploaded
+      const hasNewThumbnail = formData.thumbnail !== null;
+
+      setHasChanges(hasTextChanges || hasNewThumbnail);
+    }
+  }, [formData, video, initialFormData]);
+
   return (
     <div className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
@@ -428,20 +437,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </select>
             </div>
             {/* End Subject */}
-
-            {/* Start Reference Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Reference Code")}
-              </label>
-              <Input
-                name="reference_code"
-                value={formData.reference_code}
-                onChange={handleInputChange}
-                placeholder={t("Enter reference code (optional)")}
-              />
-            </div>
-            {/* End Reference Code */}
+ 
           </div>
 
           {/* Right Column */}
@@ -490,8 +486,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             </div>
             {/* End Duration */}
 
-         
-            
             {/* Start Video URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

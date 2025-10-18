@@ -44,8 +44,8 @@ function CardsList() {
     const offset = page * 10;
     try {
       const res = await GetMediaCards(limit, offset, searchVal);
-      console.log(res, "res");
       setCardData(res?.data?.results || []);
+      setTotalRecords(res?.data?.count || 0);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -60,7 +60,42 @@ function CardsList() {
       direction = "desc";
     }
     setSortConfig({ key, direction });
-    setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  // فرز البيانات المعروضة
+  const getSortedData = () => {
+    if (!cardData || !sortConfig.key) return cardData || [];
+
+    const sortedData = [...cardData].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // Handle different data types
+      if (sortConfig.key === "id") {
+        // Numeric sort
+        return sortConfig.direction === "asc" 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+      
+      // String sort for title and other text fields
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+      
+      if (strA < strB) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (strA > strB) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sortedData;
   };
 
   // Get sort icon
@@ -238,7 +273,7 @@ function CardsList() {
               </TableRow>
             </TableHeader>
             <TableBody className="text-[11px]">
-              {cardData?.map((card) => (
+              {getSortedData().map((card) => (
                 <TableRow
                   key={card.id}
                   className="hover:bg-gray-50/60 border-b"

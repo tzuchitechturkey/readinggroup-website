@@ -24,9 +24,10 @@ function RegisterForm() {
   const [showReTypePassword, setShowReTypePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // first_name: "",
+  // last_name: "",
   const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
+    username: "",
     displayName: "",
     email: "",
     password: "",
@@ -76,8 +77,9 @@ function RegisterForm() {
   async function handleSubmit(e) {
     e.preventDefault();
     const errors = {};
-    if (!form.first_name) errors.first_name = true;
-    if (!form.last_name) errors.last_name = true;
+    // if (!form.first_name) errors.first_name = true;
+    // if (!form.last_name) errors.last_name = true;
+    if (!form.username) errors.username = true;
     if (!form.displayName) errors.displayName = true;
     if (!form.email) errors.email = true;
     if (!form.password) errors.password = true;
@@ -104,8 +106,9 @@ function RegisterForm() {
     setIsLoading(true);
     try {
       const payload = {
-        first_name: form.first_name,
-        last_name: form.last_name,
+        // first_name: form.first_name,
+        // last_name: form.last_name,
+        username: form.username,
         email: form.email,
         password: form.password,
       };
@@ -131,6 +134,16 @@ function RegisterForm() {
 
         <input
           type="text"
+          name="username"
+          value={form.username}
+          onChange={handleChange}
+          placeholder={t("Username")}
+          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
+            inputErrors.username ? "border border-red-500" : ""
+          }`}
+        />
+        {/* <input
+          type="text"
           name="first_name"
           value={form.first_name}
           onChange={handleChange}
@@ -149,7 +162,7 @@ function RegisterForm() {
           className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
             inputErrors.last_name ? "border border-red-500" : ""
           }`}
-        />
+        /> */}
 
         <input
           type="text"
@@ -172,6 +185,7 @@ function RegisterForm() {
             inputErrors.email ? "border border-red-500" : ""
           }`}
         />
+        {/* Start Password */}
         <div className=" relative mt-4">
           <input
             type={showPassword ? "text" : "password"}
@@ -180,7 +194,7 @@ function RegisterForm() {
             onChange={handleChange}
             placeholder={t("Password")}
             className={`outline-none rounded-lg bg-gray-100 p-3 w-full  placeholder:text-black/50 text-sm  ${
-              form.confirmPassword === form?.password
+              form.confirmPassword === form?.password && form.password
                 ? "border border-green-700"
                 : ""
             } ${inputErrors.password ? "border border-red-500" : ""}`}
@@ -245,6 +259,9 @@ function RegisterForm() {
             </div>
           )}
         </div>
+        {/* End Password */}
+
+        {/* Start Re-Type Password */}
         <div className=" relative mt-4">
           <input
             type={showReTypePassword ? "text" : "password"}
@@ -253,7 +270,7 @@ function RegisterForm() {
             onChange={handleChange}
             placeholder={t("Confirm Password")}
             className={`outline-none rounded-lg bg-gray-100 p-3 w-full   placeholder:text-black/50 text-sm ${
-              form.confirmPassword === form?.password
+              form.confirmPassword === form?.password && form.password
                 ? "border border-green-700"
                 : ""
             }  ${inputErrors.confirmPassword ? "border border-red-500" : ""}`}
@@ -299,6 +316,7 @@ function RegisterForm() {
           </span>
           {/* End Toggle show/hide password */}
         </div>
+        {/* End Re-Type Password */}
 
         {error && <div style={{ color: "red", fontSize: 14 }}>{error}</div>}
 

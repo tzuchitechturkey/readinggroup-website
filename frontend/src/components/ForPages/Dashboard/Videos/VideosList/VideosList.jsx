@@ -61,10 +61,51 @@ function VideosList({ onSectionChange }) {
       direction = "desc";
     }
     setSortConfig({ key, direction });
-    // إعادة تعيين الصفحة للصفحة الأولى عند الترتيب
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
+  };
+
+  // فرز البيانات المعروضة
+  const getSortedData = () => {
+    if (!sortConfig.key) return videoData;
+
+    const sortedData = [...videoData].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // Handle different data types
+      if (sortConfig.key === "views") {
+        // Numeric sort
+        return sortConfig.direction === "asc" 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+      
+      if (sortConfig.key === "published_at") {
+        // Date sort
+        const dateA = new Date(aValue);
+        const dateB = new Date(bValue);
+        return sortConfig.direction === "asc" 
+          ? dateA - dateB 
+          : dateB - dateA;
+      }
+      
+      // String sort
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+      
+      if (strA < strB) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (strA > strB) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sortedData;
   };
 
   // حساب عدد الصفحات
@@ -241,8 +282,9 @@ function VideosList({ onSectionChange }) {
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("reference_code")}
               >
-                {t("Reference Code")}
-                {getSortIcon("reference_code")}
+                ID
+                {/* {t("Reference Code")}
+                {getSortIcon("reference_code")} */}
               </div>
             </TableHead>
             <TableHead className="text-[#5B6B79] font-medium text-xs">
@@ -308,14 +350,11 @@ function VideosList({ onSectionChange }) {
           </TableRow>
         </TableHeader>
         <TableBody className="text-[11px] ">
-          {videoData.map((video) => (
-            <TableRow
-              key={video.reference_code || video.id}
-              className=" hover:bg-gray-50/60 border-b"
-            >
+          {getSortedData().map((video) => (
+            <TableRow key={video.id} className=" hover:bg-gray-50/60 border-b">
               <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                 <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
-                  {video.reference_code || "N/A"}
+                  {video.id}
                 </span>
               </TableCell>
               <TableCell className="py-4">
@@ -364,9 +403,11 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                 <div className="flex flex-col">
                   <span className="font-medium">
-                    {video.published_at
-                      ? new Date(video.published_at).toLocaleDateString()
-                      : "N/A"}
+                    {new Date(video.published_at).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
                     {video.published_at
