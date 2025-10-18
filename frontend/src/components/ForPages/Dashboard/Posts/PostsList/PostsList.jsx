@@ -77,6 +77,40 @@ function PostsList({ onSectionChange }) {
     }
   };
 
+  // فرز البيانات المعروضة محليا
+  const getSortedData = () => {
+    if (!postData || !sortConfig.key) return postData || [];
+
+    const sorted = [...postData].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // numeric fields
+      if (sortConfig.key === 'id' || sortConfig.key === 'views') {
+        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      // date-like fields
+      if (sortConfig.key === 'createdAt' || sortConfig.key === 'published_at') {
+        const dateA = new Date(aValue);
+        const dateB = new Date(bValue);
+        return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+
+      // string fallback
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+      if (strA < strB) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (strA > strB) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  };
+
   // أيقونة الترتيب
   const getSortIcon = (columnKey) => {
     if (sortConfig.key !== columnKey) {
@@ -298,7 +332,7 @@ function PostsList({ onSectionChange }) {
               </TableCell>
             </TableRow>
           ) : (
-            postData.map((post) => (
+            getSortedData().map((post) => (
               <TableRow key={post.id} className="hover:bg-gray-50/60 border-b">
                 <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                   {post.id}

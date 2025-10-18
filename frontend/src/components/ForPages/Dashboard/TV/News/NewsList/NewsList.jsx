@@ -20,161 +20,85 @@ import {
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import Loader from "@/components/Global/Loader/Loader";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { GetTvPrograms, DeleteTvProgramById } from "@/api/tvPrograms";
 
 import CreateOrEditNews from "../CreateOrEditNews/CreateOrEditNews";
 
 const TVList = () => {
   const { t } = useTranslation();
-
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
   const [selectedNews, setSelectedNews] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [update, setUpdate] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [apiData, setApiData] = useState({
-    results: [],
-    count: 0,
-  });
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [newsData, setNewsData] = useState([]);
 
-  // Mock data - replace with actual API call
-  const mockTVData = [
-    {
-      id: 1,
-      title: "برنامج قراءة الأطفال",
-      description:
-        "برنامج تعليمي مخصص للأطفال لتعلم القراءة والكتابة بطريقة ممتعة وتفاعلية",
-      date: "2024-01-15",
-      image: "/authback.jpg",
-      writer: "أحمد محمد",
-      category: "تعليمي",
-    },
-    {
-      id: 2,
-      title: "حلقة خاصة - القراءة والتفكير",
-      description:
-        "حلقة تناقش أهمية القراءة في تنمية مهارات التفكير النقدي والإبداعي",
-      date: "2024-01-20",
-      image: "/authback.jpg",
-      writer: "فاطمة العلي",
-      category: "ثقافي",
-    },
-    {
-      id: 3,
-      title: "مقابلة مع كاتب مشهور",
-      description:
-        "مقابلة حصرية مع كاتب مشهور حول تجربته في الكتابة ونصائحه للكتاب الجدد",
-      date: "2024-01-25",
-      image: "/authback.jpg",
-      writer: "محمد صالح",
-      category: "مقابلات",
-    },
-    // Add more mock data to test pagination
-    ...Array.from({ length: 27 }, (_, i) => {
-      const categories = ["تعليمي", "ثقافي", "مقابلات", "أخبار", "ترفيهي"];
-      const writers = [
-        "أحمد محمد",
-        "فاطمة العلي",
-        "محمد صالح",
-        "سارة أحمد",
-        "عمر حسن",
-      ];
-
-      return {
-        id: i + 4,
-        title: `برنامج تلفزيوني رقم ${i + 4}`,
-        description: `وصف تفصيلي للبرنامج التلفزيوني رقم ${
-          i + 4
-        } مع محتوى مفيد ومتميز`,
-        date: `2024-0${((i % 12) + 1).toString().padStart(2, "0")}-${(
-          (i % 28) +
-          1
-        )
-          .toString()
-          .padStart(2, "0")}`,
-        image: "/authback.jpg",
-        writer: writers[i % writers.length],
-        category: categories[i % categories.length],
-      };
-    }),
-  ];
-
-  // Simulate API call for fetching data with pagination
-  const fetchTVData = async (page, limitPerPage, sort = null, search = "") => {
-    setLoading(true);
+  // Fetch TV Programs from API
+  const getTVData = async (page = 0) => {
+    setIsLoading(true);
+    const offset = page * limit;
     try {
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const res = await GetTvPrograms(limit, offset, searchTerm);
 
-      // Apply search filter
-      let filteredData = [...mockTVData];
-      if (search.trim()) {
-        filteredData = filteredData.filter(
-          (item) =>
-            item.title.toLowerCase().includes(search.toLowerCase()) ||
-            item.description.toLowerCase().includes(search.toLowerCase()) ||
-            item.writer.toLowerCase().includes(search.toLowerCase()) ||
-            item.category.toLowerCase().includes(search.toLowerCase())
-        );
-      }
-
-      // Apply sorting
-      if (sort) {
-        filteredData = filteredData.sort((a, b) => {
-          const aValue = a[sort.key];
-          const bValue = b[sort.key];
-
-          if (sort.key === "id") {
-            return sort.direction === "asc" ? aValue - bValue : bValue - aValue;
-          }
-
-          if (sort.key === "date") {
-            const aDate = new Date(aValue);
-            const bDate = new Date(bValue);
-            return sort.direction === "asc" ? aDate - bDate : bDate - aDate;
-          }
-
-          const aString = String(aValue).toLowerCase();
-          const bString = String(bValue).toLowerCase();
-
-          if (aString < bString) {
-            return sort.direction === "asc" ? -1 : 1;
-          }
-          if (aString > bString) {
-            return sort.direction === "asc" ? 1 : -1;
-          }
-          return 0;
-        });
-      }
-
-      // Apply pagination
-      const offset = (page - 1) * limitPerPage;
-      const paginatedResults = filteredData.slice(
-        offset,
-        offset + limitPerPage
-      );
-
-      setApiData({
-        results: paginatedResults,
-        count: filteredData.length,
-      });
+      setTotalRecords(res?.data?.count || 0);
+      setNewsData(res?.data?.results || []);
     } catch (error) {
-      console.error("Error fetching TV data:", error);
+      setErrorFn(error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
+  };
+
+  // Local sorting for displayed data
+  const getSortedData = () => {
+    if (!newsData || !sortConfig.key) return newsData || [];
+
+    const sorted = [...newsData].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // numeric fields
+      if (sortConfig.key === "id") {
+        return sortConfig.direction === "asc"
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      // date fields
+      if (sortConfig.key === "air_date") {
+        const dateA = new Date(aValue);
+        const dateB = new Date(bValue);
+        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+      }
+
+      // string fallback
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
   };
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    fetchTVData(currentPage, limit, sortConfig, searchTerm);
-  }, [currentPage, limit, sortConfig, searchTerm]);
+    getTVData(currentPage - 1);
+  }, [currentPage, update]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -183,7 +107,6 @@ const TVList = () => {
       direction = "desc";
     }
     setSortConfig({ key, direction });
-    setCurrentPage(1); // Reset to first page when sorting
   };
 
   // Get sort icon
@@ -203,99 +126,31 @@ const TVList = () => {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
-  // Pagination
-  const totalPages = Math.ceil(apiData.count / limit);
-
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages && !loading) {
+    if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
     }
   };
 
-  // CRUD operations
-  const handleAddTV = () => {};
-
-  const handleEditTV = (tv) => {
-    setSelectedNews(tv);
-    setIsEditing(true);
-    setShowCreateOrEditModal(true);
-  };
-
-  const handleDeleteTV = (tv) => {
-    setSelectedNews(tv);
-    setShowDeleteModal(true);
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setSelectedNews(null);
-  };
-
   const handleConfirmDelete = async () => {
-    toast.success(t("News deleted successfully"));
-    setShowDeleteModal(false);
-  };
+    if (!selectedNews?.id) return;
 
-  const handleSaveTV = async (formData) => {
+    setIsLoading(true);
     try {
-      if (isEditing) {
-        // Update existing TV program
-        // In real app: await updateTV(selectedTV.id, formData)
-
-        // For demo purposes, extract data from FormData
-        const tvData = {
-          id: selectedNews.id,
-          title: formData.get("title"),
-          description: formData.get("description"),
-          date: formData.get("date"),
-          writer: formData.get("writer"),
-          category: formData.get("category"),
-          // Handle image files or existing URLs
-          image: formData.get("image")
-            ? "new-uploaded-image-url"
-            : formData.get("existingImage"),
-        };
-
-        console.warn("Update TV data:", tvData);
-      } else {
-        // Add new TV program
-        // In real app: await createTV(formData)
-
-        // For demo purposes, extract data from FormData
-        const tvData = {
-          title: formData.get("title"),
-          description: formData.get("description"),
-          date: formData.get("date"),
-          writer: formData.get("writer"),
-          category: formData.get("category"),
-          image: "new-uploaded-image-url", // This would be the actual uploaded image URL
-        };
-
-        console.warn("Create new TV data:", tvData);
-      }
-
-      // Close modal
-      setShowCreateOrEditModal(false);
+      await DeleteTvProgramById(selectedNews.id);
+      toast.success(t("News deleted successfully"));
+      setShowDeleteModal(false);
       setSelectedNews(null);
-      setIsEditing(false);
-
-      // Refresh data
-      fetchTVData(currentPage, limit, sortConfig, searchTerm);
+      setUpdate((prev) => !prev);
     } catch (error) {
-      console.error("Error saving TV program:", error);
-      alert("حدث خطأ أثناء حفظ البرنامج التلفزيوني");
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Handle search with debounce
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when searching
-      fetchTVData(1, limit, sortConfig, searchTerm);
-    }, 500);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchTerm, limit, sortConfig]);
+  // Pagination
+  const totalPages = Math.ceil(totalRecords / limit);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -305,6 +160,7 @@ const TVList = () => {
 
   return (
     <div className="p-4">
+      {isLoading && <Loader />}
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">{t("News")}</h1>
@@ -338,13 +194,13 @@ const TVList = () => {
 
       {/* Stats */}
       <div className="mb-4 text-sm text-gray-600">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
             {t("Loading...")}
           </div>
         ) : (
-          `${t("Total")}: ${apiData.count} ${t("programs")} | ${t(
+          `${t("Total")}: ${totalRecords} ${t("programs")} | ${t(
             "Page"
           )} ${currentPage} ${t("of")} ${totalPages}`
         )}
@@ -355,7 +211,7 @@ const TVList = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
+              <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
                 <button
                   onClick={() => sortData("id")}
                   className="flex items-center gap-1 font-medium"
@@ -372,6 +228,14 @@ const TVList = () => {
                   {getSortIcon("title")}
                 </button>
               </TableHead>
+              <TableHead>
+                <button
+                  onClick={() => sortData("title")}
+                  className="flex items-center gap-1 font-medium"
+                >
+                  {t("Image")}
+                </button>
+              </TableHead>
               <TableHead className="hidden md:table-cell">
                 <button
                   onClick={() => sortData("description")}
@@ -383,11 +247,11 @@ const TVList = () => {
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() => sortData("date")}
+                  onClick={() => sortData("air_date")}
                   className="flex items-center gap-1 font-medium"
                 >
                   {t("Date")}
-                  {getSortIcon("date")}
+                  {getSortIcon("air_date")}
                 </button>
               </TableHead>
               <TableHead className="hidden sm:table-cell">
@@ -412,7 +276,7 @@ const TVList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex items-center justify-center gap-2">
@@ -421,10 +285,22 @@ const TVList = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : apiData.results.length > 0 ? (
-              apiData.results.map((tv) => (
+            ) : getSortedData().length > 0 ? (
+              getSortedData().map((tv) => (
                 <TableRow key={tv.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">{tv.id}</TableCell>
+                  <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
+                    {tv.id}
+                  </TableCell>
+                  <TableCell>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">
+                        {tv.title}
+                      </p>
+                      <p className="text-sm text-gray-500 md:hidden truncate">
+                        {tv.description.substring(0, 50)}...
+                      </p>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img
@@ -435,14 +311,6 @@ const TVList = () => {
                           e.target.src = "/placeholder-image.png";
                         }}
                       />
-                      <div className="min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
-                          {tv.title}
-                        </p>
-                        <p className="text-sm text-gray-500 md:hidden truncate">
-                          {tv.description.substring(0, 50)}...
-                        </p>
-                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -454,7 +322,9 @@ const TVList = () => {
                     </p>
                   </TableCell>
                   <TableCell>
-                    <span className="text-gray-600">{formatDate(tv.date)}</span>
+                    <span className="text-gray-600">
+                      {formatDate(tv.air_date)}
+                    </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <span className="text-gray-600">{tv.writer}</span>
@@ -467,14 +337,20 @@ const TVList = () => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleEditTV(tv)}
+                        onClick={() => {
+                          setSelectedNews(tv);
+                          setShowCreateOrEditModal(true);
+                        }}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
                       >
                         <LuPencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteTV(tv)}
+                        onClick={() => {
+                          setSelectedNews(tv);
+                          setShowDeleteModal(true);
+                        }}
                         className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
                         title={t("Delete")}
                       >
@@ -505,14 +381,14 @@ const TVList = () => {
         <div className="flex items-center justify-between mt-6">
           <div className="text-sm text-gray-600">
             {t("Showing")} {(currentPage - 1) * limit + 1} {t("to")}{" "}
-            {Math.min(currentPage * limit, apiData.count)} {t("of")}{" "}
-            {apiData.count} {t("results")}
+            {Math.min(currentPage * limit, totalRecords)} {t("of")}{" "}
+            {totalRecords} {t("results")}
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1 || loading}
+              disabled={currentPage === 1 || isLoading}
               className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("Previous")}
@@ -528,7 +404,7 @@ const TVList = () => {
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    disabled={loading}
+                    disabled={isLoading}
                     className={`px-3 py-1 text-sm rounded ${
                       isActive
                         ? "bg-blue-600 text-white"
@@ -545,7 +421,7 @@ const TVList = () => {
                   <span className="px-2 text-gray-500">...</span>
                   <button
                     onClick={() => handlePageChange(totalPages)}
-                    disabled={currentPage === totalPages || loading}
+                    disabled={currentPage === totalPages || isLoading}
                     className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {totalPages}
@@ -556,7 +432,7 @@ const TVList = () => {
 
             <button
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages || loading}
+              disabled={currentPage === totalPages || isLoading}
               className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("Next")}
@@ -569,14 +445,14 @@ const TVList = () => {
       <Modal
         isOpen={showCreateOrEditModal}
         onClose={() => setShowCreateOrEditModal(false)}
-        title={isEditing ? t("Edit TV Program") : t("Add TV Program")}
+        title={selectedNews?.id ? t("Edit TV Program") : t("Add TV Program")}
       >
         <CreateOrEditNews
           isOpen={showCreateOrEditModal}
           onClose={() => setShowCreateOrEditModal(false)}
-          onSave={handleSaveTV}
           news={selectedNews}
-          isEditing={selectedNews?.id ? true : false}
+          setSelectedNews={setSelectedNews}
+          setUpdate={setUpdate}
         />
       </Modal>
 
@@ -584,7 +460,10 @@ const TVList = () => {
       <Modal
         title={t("Confirm Delete")}
         isOpen={showDeleteModal}
-        onClose={handleCancelDelete}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedNews(null);
+        }}
       >
         <DeleteConfirmation
           isOpen={showDeleteModal}
