@@ -10,6 +10,10 @@ from .models import (
     TvProgram,
     Video,
     WeeklyMoment,
+    VideoCategory,
+    PostCategory,
+    EventCategory,
+    TvProgramCategory,
 )
 
 
@@ -38,26 +42,8 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("published_at", "created_at", "updated_at")
     class Meta:
         model = Video
-        fields = (
-            "id",
-            "title",
-            "duration",
-            "category",
-            "video_type",
-            "subject",
-            "language",
-            "thumbnail",
-            "thumbnail_url",
-            "views",
-            "published_at",
-            "featured",
-            "is_new",
-            "reference_code",
-            "video_url",
-            "created_at",
-            "updated_at",
-        )
-        file_fields = ("thumbnail")
+        fields = "__all__"
+        file_fields = ("thumbnail",)
 
 
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -65,68 +51,20 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("published_at", "created_at", "updated_at")
     class Meta:
         model = Post
-        fields = (
-            "id",
-            "title",
-            "subtitle",
-            "excerpt",
-            "body",
-            "writer",
-            "writer_avatar",
-            "category",
-            "status",
-            "is_active",
-            "views",
-            "read_time",
-            "tags",
-            "published_at",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
 
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     class Meta:
         model = Event
-        fields = (
-            "id",
-            "title",
-            "author",
-            "date",
-            "image",
-            "image_url",
-            "category",
-            "report_type",
-            "country",
-            "language",
-            "duration_minutes",
-            "section",
-            "summary",
-            "created_at",
-            "updated_at",
-        )
-        image_fields = ("image")
+        fields = "__all__"
+        file_fields = ("image",)
 
 class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = MediaCard
-        fields = (
-            "id",
-            "title",
-            "description",
-            "theme",
-            "language",
-            "kind",
-            "card_type",
-            "image",
-            "image_url",
-            "cover_image",
-            "cover_image_url",
-            "metadata",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
         file_fields = ("image", "cover_image")
 
 
@@ -134,74 +72,52 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")
     class Meta:
         model = TvProgram
-        fields = (
-            "id",
-            "title",
-            "description",
-            "air_date",
-            "image",
-            "image_url",
-            "writer",
-            "category",
-            "is_live",
-            "created_at",
-            "updated_at",
-        )
-        file_fields = ("image")
+        fields = "__all__"
+        file_fields = ("image",)
 
 
 class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "created_at", "updated_at")
     class Meta:
         model = WeeklyMoment
-        fields = (
-            "id",
-            "title",
-            "start_time",
-            "status_label",
-            "status_color",
-            "content_type",
-            "source",
-            "language",
-            "image",
-            "image_url",
-            "created_at",
-            "updated_at",
-        )
-        file_fields = ("image")
+        fields = "__all__"
+        file_fields = ("image",)
 
 
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = TeamMember
-        fields = (
-            "id",
-            "name",
-            "position",
-            "job_title",
-            "description",
-            "avatar",
-            "avatar_url",
-            "social_links",
-            "created_at",
-            "updated_at",
-        )
-        file_fields = ("avatar")
+        fields = "__all__"
+        file_fields = ("avatar",)
 
 
 class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("story_date", "created_at", "updated_at")
     class Meta:
         model = HistoryEntry
-        fields = (
-            "id",
-            "title",
-            "description",
-            "story_date",
-            "image",
-            "image_url",
-            "created_at",
-            "updated_at",
-        )
-        file_fields = ("image")
+        fields = "__all__"
+        file_fields = ("image",)
+
+class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = VideoCategory
+        fields = "__all__"
+        
+class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PostCategory
+        fields = "__all__"
+                
+class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventCategory
+        fields = "__all__"
+class TvProgramCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = TvProgramCategory
+        fields = "__all__"

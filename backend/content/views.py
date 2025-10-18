@@ -10,6 +10,10 @@ from .models import (
     TvProgram,
     Video,
     WeeklyMoment,
+    PostCategory,
+    VideoCategory,
+    TvProgramCategory,
+    EventCategory,
 )
 from .serializers import (
     EventSerializer,
@@ -20,6 +24,10 @@ from .serializers import (
     TvProgramSerializer,
     VideoSerializer,
     WeeklyMomentSerializer,
+    PostCategorySerializer,
+    VideoCategorySerializer,
+    TvProgramCategorySerializer,
+    EventCategorySerializer,
 )
 
 
@@ -103,3 +111,30 @@ class HistoryEntryViewSet(BaseContentViewSet):
     search_fields = ("title", "description")
     ordering_fields = ("story_date")
     
+class VideoCategoryViewSet(BaseContentViewSet):
+    """ViewSet for managing VideoCategory content."""
+    queryset = VideoCategory.objects.all()
+    serializer_class = VideoCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+class PostCategoryViewSet(BaseContentViewSet):
+    """ViewSet for managing PostCategory content."""
+    queryset = PostCategory.objects.all()
+    serializer_class = PostCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+class EventCategoryViewSet(BaseContentViewSet):
+    """ViewSet for managing EventCategory content."""
+    queryset = EventCategory.objects.all()
+    serializer_class = EventCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+class TvProgramCategoryViewSet(BaseContentViewSet):
+    """ViewSet for managing TvProgramCategory content."""
+    queryset = TvProgramCategory.objects.all()
+    serializer_class = TvProgramCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)

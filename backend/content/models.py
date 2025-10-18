@@ -19,7 +19,7 @@ class Video(TimestampedModel):
     """Video content that powers the dashboard listings."""
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64)
-    category = models.CharField(max_length=100)
+    category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
     video_type = models.CharField(max_length=100)
     subject = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
@@ -48,7 +48,7 @@ class Post(TimestampedModel):
     body = models.TextField(blank=True)
     writer = models.CharField(max_length=255)
     writer_avatar = models.URLField(blank=True)
-    category = models.CharField(max_length=100)
+    category = models.ForeignKey('PostCategory', on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.DRAFT)
     is_active = models.BooleanField(default=True)
     views = models.PositiveIntegerField(default=0)
@@ -69,7 +69,7 @@ class Event(TimestampedModel):
     date = models.DateField()
     image = models.ImageField(upload_to="events/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
-    category = models.CharField(max_length=100)
+    category = models.ForeignKey('EventCategory', on_delete=models.SET_NULL, null=True, blank=True)
     report_type = models.CharField(max_length=50)
     country = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
@@ -113,7 +113,7 @@ class TvProgram(TimestampedModel):
     image = models.ImageField(upload_to="tv/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
     writer = models.CharField(max_length=255)
-    category = models.CharField(max_length=100)
+    category = models.ForeignKey('TvProgramCategory', on_delete=models.SET_NULL, null=True, blank=True)
     is_live = models.BooleanField(default=False)
 
     class Meta:
@@ -173,3 +173,52 @@ class HistoryEntry(TimestampedModel):
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return f"{self.title} ({self.story_date} - present)"
+    
+    
+#Category Fot Videos
+class VideoCategory(TimestampedModel):
+    """Categories for organizing videos."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name
+
+#Category for Posts
+class PostCategory(TimestampedModel):
+    """Categories for organizing posts."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name
+    
+#Category for Events
+class EventCategory(TimestampedModel):
+    """Categories for organizing events."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name
+    
+#Category for TvPrograms
+class TvProgramCategory(TimestampedModel):
+    """Categories for organizing TV programs."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name

@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from .models import (
     Event,
     HistoryEntry,
@@ -9,6 +8,10 @@ from .models import (
     TvProgram,
     Video,
     WeeklyMoment,
+    PostCategory,
+    VideoCategory,
+    EventCategory,
+    TvProgramCategory,
 )
 
 
@@ -64,3 +67,24 @@ class HistoryEntryAdmin(admin.ModelAdmin):
     list_display = ("title", "story_date")
     list_filter = ("story_date",)
     search_fields = ("title", "description")
+    
+    
+@admin.register(VideoCategory)
+class VideoCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+@admin.register(PostCategory)
+class PostCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    
+@admin.register(EventCategory)
+class EventCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    
+@admin.register(TvProgramCategory)
+class TvProgramCategoryAdmin(admin.ModelAdmin): 
+    list_display = ("name",)
+    search_fields = ("name",)
