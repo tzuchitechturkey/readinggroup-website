@@ -26,7 +26,8 @@ class Video(TimestampedModel):
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
-    published_at = models.DateTimeField()
+    # Make published_at optional so objects can be created without a publication date.
+    published_at = models.DateTimeField(blank=True, null=True)
     featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
@@ -60,29 +61,6 @@ class Post(TimestampedModel):
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return self.title
-
-
-class Reading(TimestampedModel):
-    """Guided reading entries offered on the site."""
-    title = models.CharField(max_length=255)
-    author = models.CharField(max_length=255)
-    publish_date = models.DateField()
-    category = models.CharField(max_length=100)
-    genre = models.CharField(max_length=100)
-    language = models.CharField(max_length=50)
-    source = models.CharField(max_length=255)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-    reviews = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to="readings/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
-    badge = models.CharField(max_length=100, blank=True)
-
-    class Meta:
-        ordering = ("-publish_date", "title")
-
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return self.title
-
 
 class Event(TimestampedModel):
     """Represent events and news items grouped by section."""

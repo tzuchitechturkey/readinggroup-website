@@ -4,7 +4,7 @@ from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
-from rest_framework import generics, permissions, status , serializers
+from rest_framework import generics, permissions, status , serializers, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -26,6 +26,17 @@ import base64
 
 
 User = get_user_model()
+
+class UserListView(generics.ListAPIView):
+    """List all users with search and ordering support.
+    Read-only access is allowed for anonymous users; write actions require authentication.
+    """
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    queryset = User.objects.all()
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ("id","username", "email", "display_name")
+    ordering_fields = ("date_joined", "id", "username")
 
 class RegisterView(generics.CreateAPIView):
     """Register a new user and return JWT tokens."""

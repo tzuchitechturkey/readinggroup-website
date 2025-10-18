@@ -5,7 +5,6 @@ from .models import (
     HistoryEntry,
     MediaCard,
     Post,
-    Reading,
     TeamMember,
     TvProgram,
     Video,
@@ -25,14 +24,6 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ("title", "writer", "category", "status", "is_active", "published_at")
     list_filter = ("status", "category", "is_active")
     search_fields = ("title", "writer", "category")
-
-
-@admin.register(Reading)
-class ReadingAdmin(admin.ModelAdmin):
-    list_display = ("title", "author", "category", "language", "publish_date", "rating")
-    list_filter = ("category", "language")
-    search_fields = ("title", "author", "category")
-
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

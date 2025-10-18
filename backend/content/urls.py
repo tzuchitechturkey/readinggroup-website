@@ -5,7 +5,6 @@ from .views import (
     HistoryEntryViewSet,
     MediaCardViewSet,
     PostViewSet,
-    ReadingViewSet,
     TeamMemberViewSet,
     TvProgramViewSet,
     VideoViewSet,
@@ -17,7 +16,6 @@ app_name = "content"
 router = DefaultRouter()
 router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"posts", PostViewSet, basename="post")
-router.register(r"readings", ReadingViewSet, basename="reading")
 router.register(r"events", EventViewSet, basename="event")
 router.register(r"media-cards", MediaCardViewSet, basename="media-card")
 router.register(r"tv-programs", TvProgramViewSet, basename="tv-program")

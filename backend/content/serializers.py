@@ -1,11 +1,11 @@
 from rest_framework import serializers
+from readinggroup_backend.helpers import DateTimeFormattingMixin
 
 from .models import (
     Event,
     HistoryEntry,
     MediaCard,
     Post,
-    Reading,
     TeamMember,
     TvProgram,
     Video,
@@ -33,8 +33,9 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
         return data
 
 
-class VideoSerializer(AbsoluteURLSerializer):
+class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
+    datetime_fields = ("published_at", "created_at", "updated_at")
     class Meta:
         model = Video
         fields = (
@@ -56,12 +57,12 @@ class VideoSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("thumbnail",)
+        file_fields = ("thumbnail")
 
 
-class PostSerializer(AbsoluteURLSerializer):
+class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
+    datetime_fields = ("published_at", "created_at", "updated_at")
     class Meta:
         model = Post
         fields = (
@@ -82,35 +83,9 @@ class PostSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
 
-
-class ReadingSerializer(AbsoluteURLSerializer):
-    """Serializer for Reading model with absolute URL handling for file fields."""
-    class Meta:
-        model = Reading
-        fields = (
-            "id",
-            "title",
-            "author",
-            "publish_date",
-            "category",
-            "genre",
-            "language",
-            "source",
-            "rating",
-            "reviews",
-            "image",
-            "image_url",
-            "badge",
-            "created_at",
-            "updated_at",
-        )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
-
-
-class EventSerializer(AbsoluteURLSerializer):
+class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     class Meta:
         model = Event
         fields = (
@@ -130,11 +105,10 @@ class EventSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
+        image_fields = ("image")
 
-
-class MediaCardSerializer(AbsoluteURLSerializer):
+class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = MediaCard
         fields = (
@@ -153,11 +127,11 @@ class MediaCardSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
         file_fields = ("image", "cover_image")
 
 
-class TvProgramSerializer(AbsoluteURLSerializer):
+class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("air_date", "created_at", "updated_at")
     class Meta:
         model = TvProgram
         fields = (
@@ -173,11 +147,11 @@ class TvProgramSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
+        file_fields = ("image")
 
 
-class WeeklyMomentSerializer(AbsoluteURLSerializer):
+class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("start_time", "created_at", "updated_at")
     class Meta:
         model = WeeklyMoment
         fields = (
@@ -194,11 +168,11 @@ class WeeklyMomentSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
+        file_fields = ("image")
 
 
-class TeamMemberSerializer(AbsoluteURLSerializer):
+class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = TeamMember
         fields = (
@@ -213,11 +187,11 @@ class TeamMemberSerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("avatar",)
+        file_fields = ("avatar")
 
 
-class HistoryEntrySerializer(AbsoluteURLSerializer):
+class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("story_date", "created_at", "updated_at")
     class Meta:
         model = HistoryEntry
         fields = (
@@ -230,5 +204,4 @@ class HistoryEntrySerializer(AbsoluteURLSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
+        file_fields = ("image")
