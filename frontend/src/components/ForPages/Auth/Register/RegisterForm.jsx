@@ -113,7 +113,7 @@ function RegisterForm() {
         password: form.password,
       };
       const { data } = await Register(payload);
-      setTokens({ access: data?.access, refresh: data?.refresh });
+      // setTokens({ access: data?.access, refresh: data?.refresh });
       toast.success(t("Registration successful"));
       navigate("/auth/login");
     } catch (err) {
