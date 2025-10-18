@@ -5,7 +5,6 @@ from .models import (
     HistoryEntry,
     MediaCard,
     Post,
-    Reading,
     TeamMember,
     TvProgram,
     Video,
@@ -83,32 +82,6 @@ class PostSerializer(AbsoluteURLSerializer):
             "updated_at",
         )
         read_only_fields = ("created_at", "updated_at")
-
-
-class ReadingSerializer(AbsoluteURLSerializer):
-    """Serializer for Reading model with absolute URL handling for file fields."""
-    class Meta:
-        model = Reading
-        fields = (
-            "id",
-            "title",
-            "author",
-            "publish_date",
-            "category",
-            "genre",
-            "language",
-            "source",
-            "rating",
-            "reviews",
-            "image",
-            "image_url",
-            "badge",
-            "created_at",
-            "updated_at",
-        )
-        read_only_fields = ("created_at", "updated_at")
-        file_fields = ("image",)
-
 
 class EventSerializer(AbsoluteURLSerializer):
     class Meta:

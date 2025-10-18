@@ -6,7 +6,6 @@ from .models import (
     HistoryEntry,
     MediaCard,
     Post,
-    Reading,
     TeamMember,
     TvProgram,
     Video,
@@ -17,7 +16,6 @@ from .serializers import (
     HistoryEntrySerializer,
     MediaCardSerializer,
     PostSerializer,
-    ReadingSerializer,
     TeamMemberSerializer,
     TvProgramSerializer,
     VideoSerializer,
@@ -55,22 +53,6 @@ class PostViewSet(BaseContentViewSet):
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category", "tags")
     ordering_fields = ("published_at", "views", "created_at")
-
-
-class ReadingViewSet(BaseContentViewSet):
-    """ViewSet for managing Reading content."""
-    queryset = Reading.objects.all()
-    serializer_class = ReadingSerializer
-    search_fields = (
-        "title",
-        "author",
-        "category",
-        "genre",
-        "language",
-        "source",
-    )
-    ordering_fields = ("publish_date", "rating", "created_at")
-
 
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
