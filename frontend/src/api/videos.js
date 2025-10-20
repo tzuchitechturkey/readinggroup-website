@@ -21,3 +21,27 @@ export async function EditVideoById(id, data) {
 export async function DeleteVideoById(id) {
   return await axios.delete(`/videos/${id}/`);
 }
+
+export async function GetAllVideoCategories() {
+  return await axios.get(`/video-categories/`);
+}
+
+export async function GetVideoCategories(limit, offset) {
+  return await axios.get(`/video-categories/?limit=${limit}&offset=${offset}`);
+}
+
+export async function AddVideoCategory(data) {
+  return await axios.post(`/video-categories/`, data);
+}
+
+export async function EditVideoCategoryById(id, data) {
+  return await axios.put(`/video-categories/${id}/`, data);
+}
+
+export async function GetVideoCategoryById(id) {
+  return await axios.get(`/video-categories/${id}/`);
+}
+
+export async function DeleteVideoCategory(id) {
+  return await axios.delete(`/video-categories/${id}/`);
+}

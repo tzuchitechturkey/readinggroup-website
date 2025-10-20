@@ -105,7 +105,11 @@ function LoginForm() {
         console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         setShowTOTPModal(false);
-        localStorage.setItem("userType", res?.data.user?.groups[0]);
+        if (res?.data.user?.groups.includes("admin")) {
+          localStorage.setItem("userType", "admin");
+        } else {
+          localStorage.setItem("userType", res?.data.user?.groups[0]);
+        }
 
         // if (isAdminLogin) {
         //   if (res?.data?.user?.groups[0] === "admin") {
@@ -115,11 +119,11 @@ function LoginForm() {
         //     toast.error("This account is not an admin");
         //   }
         // } else {
-        if (res?.data?.user?.groups[0] === "user") {
-          navigate("/");
-        } else {
-          // toast.error("This account is not a user");
+        if (res?.data?.user?.groups.includes("admin")) {
           navigate("/dashboard");
+        } else {
+          navigate("/");
+          // toast.error("This account is not a user");
         }
         // }
       } catch (err) {
@@ -141,7 +145,6 @@ function LoginForm() {
       t,
     });
   };
-  console.log(qr);
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
       {isLoading && <Loader />}

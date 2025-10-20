@@ -30,6 +30,9 @@ import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/C
 import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList/PhotosList";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
 import Tv from "@/components/ForPages/Dashboard/TV/TV";
+import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
+import TvCategoriesContent from "@/components/ForPages/Dashboard/TV/TvCategories/TvCategoriesContent";
+import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 
 import SettingsContent from "../Settings/SettingsContent";
 import ProfileContent from "../Profile/ProfileContent";
@@ -50,7 +53,7 @@ export default function Page() {
       setSelectedPost(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
-    }  
+    }
 
     // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
     let autoParent = data;
@@ -61,7 +64,7 @@ export default function Page() {
         declines: "Read",
         payouts: "Read",
         cards: "Cards Or Photos",
-        photos: "Cards Or Photos",
+        // photos: "Cards Or Photos",
         posts: "Posts",
         createOrEditPost: "Posts",
         videos: "Videos",
@@ -89,11 +92,15 @@ export default function Page() {
 
       case "cards":
         return <CardsList onSectionChange={handleSectionChange} />;
-      case "photos":
-        return <PhotosList onSectionChange={handleSectionChange} />;
+      // case "photos":
+      //   return <PhotosList onSectionChange={handleSectionChange} />;
 
       case "videos":
         return <VideosList onSectionChange={handleSectionChange} />;
+      case "videosCategories":
+        return (
+          <VideosCategoriesContent onSectionChange={handleSectionChange} />
+        );
       case "createOrEditVideo":
         return (
           <CreateOrEditVideo
@@ -110,11 +117,14 @@ export default function Page() {
             post={selectedPost}
           />
         );
-       
+      case "postsCategories":
+        return <PostsCategoriesContent onSectionChange={handleSectionChange} />;
       case "healthPosts":
         return <HealthPosts onSectionChange={handleSectionChange} />;
-      case "tv":
+      case "newsList":
         return <Tv onSectionChange={handleSectionChange} />;
+      case "tvCategories":
+        return <TvCategoriesContent onSectionChange={handleSectionChange} />;
       case "history":
         return <History onSectionChange={handleSectionChange} />;
       case "team":

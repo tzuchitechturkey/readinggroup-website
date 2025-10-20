@@ -8,51 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { CreatePost, EditPostById, GetPostById } from "@/api/posts";
-// Mock data for writers selection
-const mockWriters = [
-  {
-    id: 1,
-    name: "Ahmed Hassan",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
-    role: "Senior Writer",
-  },
-  {
-    id: 2,
-    name: "Sara Mohamed",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face",
-    role: "Environmental Journalist",
-  },
-  {
-    id: 3,
-    name: "Omar Ali",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face",
-    role: "Humanitarian Reporter",
-  },
-  {
-    id: 4,
-    name: "Dr. Fatima Zahra",
-    avatar:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=64&h=64&fit=crop&crop=face",
-    role: "Medical Writer",
-  },
-  {
-    id: 5,
-    name: "Khalid Ibrahim",
-    avatar:
-      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=64&h=64&fit=crop&crop=face",
-    role: "Education Specialist",
-  },
-];
+import {
+  CreatePost,
+  EditPostById,
+  GetAllUsers,
+  GetAllPostCategories,
+} from "@/api/posts";
 
 function CreateOrEditPost({ onSectionChange, post = null }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
-  // Form state
+  const [writers, setWriters] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([]);
+
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
@@ -66,31 +35,28 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     read_time: "",
     tags: [],
   });
-
   const [tagInput, setTagInput] = useState("");
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-
-  // Validation errors
   const [errors, setErrors] = useState({});
 
-  // Categories options
-  const categories = [
-    "Technology",
-    "Environment",
-    "Humanitarian",
-    "Medical",
-    "Education",
-    "Community",
-    "Youth",
-    "Emergency",
-    "Development",
-    "Health",
-    "Culture",
-    "Rights",
-    "Food",
-    "Water",
-  ];
+  const getWriters = async (searchVal) => {
+    try {
+      // const res = await GetAllUsers(limit, offset, searchVal);
+      const res = await GetAllUsers(searchVal);
+      setWriters(res?.data?.results);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getCategories = async () => {
+    try {
+      const res = await GetAllPostCategories();
+      setCategoriesList(res?.data?.results);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // Status options
   const statusOptions = [
@@ -270,7 +236,10 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     }
   };
 
-  // Get selected writer info
+  useEffect(() => {
+    getWriters();
+    getCategories();
+  }, []);
 
   return (
     <div className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto">
@@ -343,7 +312,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 }`}
               >
                 <option value="">{t("Select Category")}</option>
-                {categories.map((cat) => (
+                {categoriesList.map((cat) => (
                   <option key={cat} value={cat}>
                     {t(cat)}
                   </option>
@@ -431,7 +400,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
                 {showWriterDropdown && (
                   <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {mockWriters.map((writer) => (
+                    {writers.map((writer) => (
                       <button
                         key={writer.id}
                         type="button"

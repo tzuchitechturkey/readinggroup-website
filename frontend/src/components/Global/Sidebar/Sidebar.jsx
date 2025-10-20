@@ -90,10 +90,10 @@ export default function AppSidebar({
             title: "All Cards",
             onClick: () => onSectionChange("cards"),
           },
-          {
-            title: "All Photos",
-            onClick: () => onSectionChange("photos"),
-          },
+          // {
+          //   title: "All Photos",
+          //   onClick: () => onSectionChange("photos"),
+          // },
         ],
       },
 
@@ -110,6 +110,10 @@ export default function AppSidebar({
             title: "Add/Edit Post",
             onClick: () => onSectionChange("add-post"),
           },
+          {
+            title: "Posts Categories",
+            onClick: () => onSectionChange("postsCategories"),
+          },
         ],
       },
 
@@ -119,9 +123,19 @@ export default function AppSidebar({
         icon: VaadinHealth,
       },
       {
-        title: "TV",
-        onClick: () => onSectionChange("tv"),
+        title: "Tv",
+        onClick: "#",
         icon: TV,
+        items: [
+          {
+            title: "News List",
+            onClick: () => onSectionChange("newsList"),
+          },
+          {
+            title: "Tv Categories",
+            onClick: () => onSectionChange("tvCategories"),
+          },
+        ],
       },
       {
         title: "Videos",
@@ -135,6 +149,10 @@ export default function AppSidebar({
           {
             title: "Add New Video",
             onClick: () => onSectionChange("createOrEditVideo"),
+          },
+          {
+            title: "Videos Categories",
+            onClick: () => onSectionChange("videosCategories"),
           },
         ],
       },

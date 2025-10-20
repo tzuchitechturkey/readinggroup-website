@@ -21,3 +21,29 @@ export async function EditTvProgramById(id, data) {
 export async function DeleteTvProgramById(id) {
   return await axios.delete(`/tv-programs/${id}/`);
 }
+
+export async function GetAllTvCategories() {
+  return await axios.get(`/tvprogram-categories/`);
+}
+
+export async function GetTvCategories(limit, offset) {
+  return await axios.get(
+    `/tvprogram-categories/?limit=${limit}&offset=${offset}`
+  );
+}
+
+export async function AddTvCategory(data) {
+  return await axios.post(`/tvprogram-categories/`, data);
+}
+
+export async function EditTvCategoryById(id, data) {
+  return await axios.put(`/tvprogram-categories/${id}/`, data);
+}
+
+export async function GetTvCategoryById(id) {
+  return await axios.get(`/tvprogram-categories/${id}/`);
+}
+
+export async function DeleteTvCategory(id) {
+  return await axios.delete(`/tvprogram-categories/${id}/`);
+}
