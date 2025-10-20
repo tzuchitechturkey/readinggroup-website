@@ -24,38 +24,8 @@ import CreateOrEditMember from "./CreateOrEditMember";
 function OurTeam() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
-
-  // بيانات وهمية للأعضاء (يمكن استبدالها بـ API calls)
-  const [members, setMembers] = useState([
-    {
-      id: 1,
-      userName: "أحمد محمد",
-      position: "مدير المشروع",
-      description:
-        "خبير في إدارة المشاريع والتخطيط الاستراتيجي مع أكثر من 10 سنوات من الخبرة",
-      job: "مهندس برمجيات",
-      avatar: "/Beared Guy02-min 1.png",
-      social: [
-        { name: "LinkedIn", url: "https://linkedin.com/in/ahmed" },
-        { name: "Twitter", url: "https://twitter.com/ahmed" },
-      ],
-    },
-    {
-      id: 2,
-      userName: "فاطمة السعيد",
-      position: "مطورة واجهات أمامية",
-      description:
-        "متخصصة في تطوير واجهات المستخدم الحديثة باستخدام React و Vue.js",
-      job: "مطورة ويب",
-      avatar: "/Beared Guy02-min 1.png",
-      social: [
-        { name: "GitHub", url: "https://github.com/fatima" },
-        { name: "Portfolio", url: "https://fatima-portfolio.com" },
-      ],
-    },
-  ]);
+  const [members, setMembers] = useState([]);
   const [showDeleteMemberModal, setShowDeleteMemberModal] = useState(false);
   const limit = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,21 +33,6 @@ function OurTeam() {
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [update, setUpdate] = useState(false);
-
-  // فلترة الأعضاء بناءً على البحث
-  const filteredMembers = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return members;
-    }
-
-    return members.filter(
-      (member) =>
-        member.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.job.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [members, searchTerm]);
 
   // Handle Pagination
   const handlePageChange = (newPage) => {
@@ -138,7 +93,7 @@ function OurTeam() {
         <div className="relative col-span-3">
           <input
             type="text"
-            placeholder={t("Search members...")}
+            placeholder={t("Search members?...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full lg:w-80 px-4 py-2  border border-gray-300 rounded-lg outline-none"
@@ -177,7 +132,7 @@ function OurTeam() {
       {/* End Header */}
 
       {/* Start Table */}
-      {members.length === 0 ? (
+      {members?.length === 0 ? (
         <div className="bg-white rounded-lg p-12 text-center shadow-sm">
           <div className="text-6xl mb-4">👤</div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -196,7 +151,7 @@ function OurTeam() {
             {t("Add First Member")}
           </button>
         </div>
-      ) : filteredMembers.length === 0 ? (
+      ) : members?.length === 0 ? (
         <div className="bg-white rounded-lg p-12 text-center shadow-sm">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -220,6 +175,9 @@ function OurTeam() {
               <TableHeader className="bg-[#FAFAFA] h-14">
                 <TableRow className="border-b">
                   <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+                    {t("Name")}
+                  </TableHead>
+                  <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
                     {t("Member")}
                   </TableHead>
                   <TableHead className="text-[#5B6B79] font-medium text-xs">
@@ -240,11 +198,16 @@ function OurTeam() {
                 </TableRow>
               </TableHeader>
               <TableBody className="text-[11px]">
-                {filteredMembers.map((member) => (
+                {members?.map((member) => (
                   <TableRow
                     key={member.id}
                     className="hover:bg-gray-50/60 border-b"
                   >
+                    <TableCell className="py-4">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {member?.name}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                       <div className="flex items-center gap-2">
                         <img
@@ -266,11 +229,11 @@ function OurTeam() {
                     </TableCell>
                     <TableCell className="py-4">
                       <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {member.position}
+                        {member.position?.name}
                       </span>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4">
-                      {member.job}
+                      {member.job_title}
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-xs">
                       <p
@@ -284,25 +247,27 @@ function OurTeam() {
                     </TableCell>
                     <TableCell className="py-4">
                       <div className="flex flex-wrap gap-1">
-                        {member.social && member.social.length > 0 ? (
-                          member.social.slice(0, 2).map((social, index) => (
-                            <a
-                              key={index}
-                              href={social.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
-                              title={social.url}
-                            >
-                              {social.name}
-                            </a>
-                          ))
+                        {member?.social_links.length > 0 ? (
+                          member?.social_links
+                            .slice(0, 2)
+                            .map((social, index) => (
+                              <a
+                                key={index}
+                                href={social.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
+                                title={social.url}
+                              >
+                                {social.name}
+                              </a>
+                            ))
                         ) : (
                           <span className="text-xs text-gray-400">لا يوجد</span>
                         )}
-                        {member.social && member.social.length > 2 && (
+                        {member.social && member?.social_links.length > 2 && (
                           <span className="text-xs text-gray-500">
-                            +{member.social.length - 2}
+                            +{member?.social_links.length - 2}
                           </span>
                         )}
                       </div>
@@ -344,7 +309,7 @@ function OurTeam() {
           {/* Start Mobile View */}
           <div className="lg:hidden">
             <div className="divide-y divide-gray-200">
-              {filteredMembers.map((member) => (
+              {members?.map((member) => (
                 <div
                   key={member.id}
                   className="p-6 hover:bg-gray-50 transition-colors"
@@ -367,7 +332,7 @@ function OurTeam() {
                             {member.userName}
                           </h3>
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                            {member.position}
+                            {member.position?.name || member.position}
                           </span>
                         </div>
                       </div>
@@ -392,13 +357,13 @@ function OurTeam() {
                           </p>
                         </div>
 
-                        {member.social && member.social.length > 0 && (
+                        {member.social_links.length > 0 && (
                           <div>
                             <span className="text-sm font-medium text-gray-600 block mb-1">
                               {t("Social Media")}:{" "}
                             </span>
                             <div className="flex flex-wrap gap-1">
-                              {member.social.map((social, index) => (
+                              {member.social_links.map((social, index) => (
                                 <a
                                   key={index}
                                   href={social.url}

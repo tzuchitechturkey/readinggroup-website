@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { CreateTeam, EditTeamById, GetPositions } from "@/api/aboutUs";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import { socialPlatforms } from "@/constants/constants";
 
 const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
@@ -41,7 +42,15 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   useEffect(() => {
     if (isOpen) {
       if (member?.id) {
-        setFormData({ ...member });
+        setFormData({
+          name: member.name,
+          position: member.position,
+          description: member.description,
+          job_title: member.job_title,
+          avatar: member.avatar,
+          avatar_url: member.avatar,
+          social_links: member.social_links || [],
+        });
       } else {
         setFormData({
           name: "",
@@ -124,40 +133,24 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Prepare data for submission
+    const submitData = new FormData();
+    submitData.append("name", formData.name);
+    submitData.append("position", formData.position?.id || formData.position);
+    submitData.append("description", formData.description);
+    submitData.append("job_title", formData.job_title);
+
+    if (formData.avatar instanceof File) {
+      submitData.append("avatar", formData.avatar);
+    }
+
+    // Add social media data
+    const cleanedSocial = formData.social_links.filter((s) => s.name && s.url);
+    submitData.append("social_links", JSON.stringify(cleanedSocial));
     try {
-      // Prepare data for submission
-      const hasFileUpload = formData.avatar instanceof File;
-
-      if (hasFileUpload) {
-        // Use FormData for file upload
-        const submitData = new FormData();
-        submitData.append("name", formData.name);
-        submitData.append("position", formData.position);
-        submitData.append("description", formData.description);
-        submitData.append("job_title", formData.job_title);
-        submitData.append("avatar", formData.avatar);
-
-        // Add social media data
-        const cleanedSocial = formData.social_links.filter(
-          (s) => s.name && s.url
-        );
-        submitData.append("social_links", JSON.stringify(cleanedSocial));
-
-        member?.id
-          ? await EditTeamById(member.id, submitData)
-          : await CreateTeam(submitData);
-      } else {
-        // Use regular JSON for URL-based avatar
-        const cleanedFormData = {
-          ...formData,
-          social_links: formData.social_links.filter((s) => s.name && s.url),
-          avatar: "", // Clear avatar file field when using URL
-        };
-
-        member?.id
-          ? await EditTeamById(member.id, cleanedFormData)
-          : await CreateTeam(cleanedFormData);
-      }
+      member?.id
+        ? await EditTeamById(member.id, submitData)
+        : await CreateTeam(submitData);
 
       toast.success(
         member?.id
@@ -199,7 +192,6 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     };
   }, []);
   if (!isOpen) return null;
-
   return (
     <div className="bg-white rounded-lg p-6 w-full   overflow-y-auto">
       {isLoading && <Loader />}
@@ -237,8 +229,11 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
                   <Tag className="w-5 h-5 text-blue-600" />
                   <div className="flex-1">
                     <div className="font-medium text-sm">
-                      {positionsList.find((pos) => pos.id === formData.position)
-                        ?.name || t("Select Position")}
+                      {positionsList.find(
+                        (pos) =>
+                          pos.id ===
+                          (formData.position?.id || formData.position)
+                      )?.name || t("Select Position")}
                     </div>
                   </div>
                 </>
@@ -409,15 +404,20 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
 
           {formData.social_links.map((social, index) => (
             <div key={index} className="flex flex-col gap-2 mb-2 sm:flex-row">
-              <input
-                type="text"
-                placeholder={t("Social Network Name (e.g., Facebook)")}
-                value={social.name}
+              <select
+                value={social.name || ""}
                 onChange={(e) =>
                   handleSocialChange(index, "name", e.target.value)
                 }
-                className="w-1/2 p-2 border border-gray-300 rounded-lg  outline-none"
-              />
+                className="w-1/2 p-2 border border-gray-300 rounded-lg outline-none placeholder:text-sm"
+              >
+                <option value="">{t("platform")}</option>
+                {socialPlatforms.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
 
               <input
                 type="url"

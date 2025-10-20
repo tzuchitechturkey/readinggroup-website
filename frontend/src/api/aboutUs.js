@@ -37,7 +37,7 @@ export async function GetTeamById(id) {
 }
 
 export async function EditTeamById(id, data) {
-  return await axios.put(`/team/${id}`, data);
+  return await axios.put(`/team/${id}/`, data);
 }
 
 export async function DeleteTeamById(id) {

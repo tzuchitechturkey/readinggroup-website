@@ -78,24 +78,22 @@ function VideosList({ onSectionChange }) {
       // Handle different data types
       if (sortConfig.key === "views") {
         // Numeric sort
-        return sortConfig.direction === "asc" 
-          ? aValue - bValue 
+        return sortConfig.direction === "asc"
+          ? aValue - bValue
           : bValue - aValue;
       }
-      
+
       if (sortConfig.key === "published_at") {
         // Date sort
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
-        return sortConfig.direction === "asc" 
-          ? dateA - dateB 
-          : dateB - dateA;
+        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
-      
+
       // String sort
       const strA = String(aValue).toLowerCase();
       const strB = String(bValue).toLowerCase();
-      
+
       if (strA < strB) {
         return sortConfig.direction === "asc" ? -1 : 1;
       }
@@ -379,7 +377,7 @@ function VideosList({ onSectionChange }) {
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                  {video.category}
+                  {video.category?.name}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-[11px] py-4">

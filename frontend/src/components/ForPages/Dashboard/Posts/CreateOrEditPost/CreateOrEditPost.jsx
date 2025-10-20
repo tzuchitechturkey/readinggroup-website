@@ -45,7 +45,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
-
   const getWriters = async (searchVal = "") => {
     try {
       const res = await GetAllUsers(searchVal);
@@ -300,7 +299,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  console.log(formData);
   return (
     <div className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto">
       {isLoading && <Loader />}
@@ -550,8 +549,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                       <div className="flex-1">
                         <div className="font-medium text-sm">
                           {categoriesList.find(
-                            (cat) => cat.id === formData.category
-                          )?.name || t("Select Category")}
+                            (cat) =>
+                              cat.id ===
+                              (formData.category?.id || formData.category)
+                          )?.name || t("Select Category")}{" "}
+                          {formData.category?.id}
                         </div>
                       </div>
                     </>

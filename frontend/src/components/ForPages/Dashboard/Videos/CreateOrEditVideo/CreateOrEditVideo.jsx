@@ -254,9 +254,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setHasChanges(hasTextChanges || hasNewThumbnail);
     }
   }, [formData, video, initialFormData]);
+
   useEffect(() => {
     getCategories();
   }, []);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -279,6 +281,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   return (
     <div className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
@@ -377,7 +380,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* End Title */}
 
             {/* Start Category */}
-            {/* Start Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Category")} *
@@ -396,7 +398,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                       <div className="flex-1">
                         <div className="font-medium text-sm">
                           {categoriesList.find(
-                            (cat) => cat.id === formData.category
+                            (cat) =>
+                              cat.id ===
+                              (formData.category?.id || formData.category)
                           )?.name || t("Select Category")}
                         </div>
                       </div>

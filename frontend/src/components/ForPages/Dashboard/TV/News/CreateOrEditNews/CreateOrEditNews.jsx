@@ -466,7 +466,9 @@ const CreateOrEditNews = ({
                     <div className="flex-1">
                       <div className="font-medium text-sm">
                         {categoriesList.find(
-                          (cat) => cat.id === formData.category
+                          (cat) =>
+                            cat.id ===
+                            (formData.category?.id || formData.category)
                         )?.name || t("Select Category")}
                       </div>
                     </div>

@@ -358,8 +358,7 @@ function PostsList({ onSectionChange }) {
                 </TableCell>
                 <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {/* Safely show category name if object, or fallback to string */}
-                    {post.category && typeof post.category === 'object' ? post.category.name : post.category || t('No Category')}
+                    {post.category?.name}
                   </span>
                 </TableCell>
                 <TableCell className="text-[#1E1E1E] text-[11px] py-4">
