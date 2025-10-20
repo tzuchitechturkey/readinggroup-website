@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.utils import timezone
 
 from .models import User
 
@@ -72,11 +73,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
+        # Set is_first_login to True for new users
+        user.is_first_login = True
+        # Set last_password_change but keep is_first_login as True
+        user.last_password_change = timezone.now()
         user.save()
         group, _created = Group.objects.get_or_create(name="user")
         user.groups.add(group)
 
-        user.mark_password_changed()
         return user
 
     def to_representation(self, instance):
