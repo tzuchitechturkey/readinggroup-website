@@ -14,6 +14,7 @@ import {
   DeletePostCategory,
 } from "@/api/posts";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function PostsCategoriesContent() {
   const { t } = useTranslation();
@@ -30,14 +31,12 @@ function PostsCategoriesContent() {
   const getCategoriesData = async (page) => {
     setIsLoading(true);
     const offset = page * 10;
-
     try {
       const res = await GetPostCategories(limit, offset);
       setCategories(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
-      console.error(err);
-      toast.error(t("Failed to load categories"));
+      setErrorFn(err);
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +44,7 @@ function PostsCategoriesContent() {
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getData(newPage - 1);
+    getCategoriesData(newPage - 1);
   };
 
   const openAddModal = () => {
@@ -71,7 +70,7 @@ function PostsCategoriesContent() {
         toast.success(t("Category created"));
       }
       setShowModal(false);
-      getCategoriesData();
+      getCategoriesData(0);
     } catch (err) {
       console.error(err);
       toast.error(t("Operation failed"));

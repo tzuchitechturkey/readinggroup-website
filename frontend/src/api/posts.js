@@ -22,19 +22,14 @@ export async function DeletePostById(id) {
   return await axios.delete(`/posts/${id}/`);
 }
 
-export async function GetAllUsers(limit, offset, search) {
+export async function GetAllUsers(search) {
+  return await axios.get(`/user/users/?search=${search}`);
+}
+
+export async function GetPostCategories(limit, offset, search = "") {
   return await axios.get(
-    `/users/?search=${search}`
-    // `/users/?limit=${limit}&offset=${offset}&search=${search}`
+    `/post-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
-}
-
-export async function GetAllPostCategories() {
-  return await axios.get(`/post-categories/`);
-}
-
-export async function GetPostCategories(limit, offset) {
-  return await axios.get(`/post-categories/?limit=${limit}&offset=${offset}`);
 }
 
 export async function AddPostCategory(data) {

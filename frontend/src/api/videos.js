@@ -26,8 +26,10 @@ export async function GetAllVideoCategories() {
   return await axios.get(`/video-categories/`);
 }
 
-export async function GetVideoCategories(limit, offset) {
-  return await axios.get(`/video-categories/?limit=${limit}&offset=${offset}`);
+export async function GetVideoCategories(limit, offset, search = "") {
+  return await axios.get(
+    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`
+  );
 }
 
 export async function AddVideoCategory(data) {

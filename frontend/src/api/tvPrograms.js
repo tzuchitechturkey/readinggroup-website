@@ -26,9 +26,9 @@ export async function GetAllTvCategories() {
   return await axios.get(`/tvprogram-categories/`);
 }
 
-export async function GetTvCategories(limit, offset) {
+export async function GetTvCategories(limit, offset, search = "") {
   return await axios.get(
-    `/tvprogram-categories/?limit=${limit}&offset=${offset}`
+    `/tvprogram-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
 

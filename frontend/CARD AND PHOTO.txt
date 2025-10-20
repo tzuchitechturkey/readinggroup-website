@@ -6,7 +6,7 @@ CARD AND PHOTO
 
 theme 
 kind card photo 
-card_type
+card_type delete
 image_url
 cover_image
 cover_image_url
@@ -50,8 +50,6 @@ WEEKLY MOMENTS
 Will they be set from the back automatically or from the front using the CRUD system?  /// from dashboard
 
 
-
- 
 
 في التعديل إذا لم يغير شي من البيانات زر التعديل يجب أني كون معطل 
 disabeld

@@ -43,3 +43,24 @@ export async function EditTeamById(id, data) {
 export async function DeleteTeamById(id) {
   return await axios.delete(`/team/${id}/`);
 }
+
+export async function GetPositions(limit, offset, search = "") {
+  return await axios.get(
+    `/position-team-members/?limit=${limit}&offset=${offset}&search=${search}`
+  );
+}
+export async function CreatePosition(data) {
+  return await axios.post(`/position-team-members/`, data);
+}
+
+export async function GetPositionById(id) {
+  return await axios.get(`/position-team-members/${id}/`);
+}
+
+export async function EditPositionById(id, data) {
+  return await axios.put(`/position-team-members/${id}`, data);
+}
+
+export async function DeletePositionsById(id) {
+  return await axios.delete(`/position-team-members/${id}/`);
+}

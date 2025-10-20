@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-import { Save, X, Upload, User, Tag } from "lucide-react";
+import { Save, X, Upload, User, Tag, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -12,16 +12,21 @@ import {
   CreatePost,
   EditPostById,
   GetAllUsers,
-  GetAllPostCategories,
+  GetPostCategories,
 } from "@/api/posts";
 
 function CreateOrEditPost({ onSectionChange, post = null }) {
   const { t } = useTranslation();
+  const writerDropdownRef = useRef(null);
+  const categoryDropdownRef = useRef(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
-  const [writers, setWriters] = useState([]);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [writersList, setWritersList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
-
+  const [writerSearchValue, setWriterSearchValue] = useState("");
+  const [categorySearchValue, setCategorySearchValue] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
@@ -35,23 +40,23 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     read_time: "",
     tags: [],
   });
+
   const [tagInput, setTagInput] = useState("");
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const getWriters = async (searchVal) => {
+  const getWriters = async (searchVal = "") => {
     try {
-      // const res = await GetAllUsers(limit, offset, searchVal);
       const res = await GetAllUsers(searchVal);
-      setWriters(res?.data?.results);
+      setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
     }
   };
-  const getCategories = async () => {
+  const getCategories = async (searchVal = "") => {
     try {
-      const res = await GetAllPostCategories();
+      const res = await GetPostCategories(10, 0, searchVal);
       setCategoriesList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -129,16 +134,46 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   const handleWriterSelect = (writer) => {
     setFormData((prev) => ({
       ...prev,
-      writer: writer.name,
-      writer_avatar: writer.avatar,
+      writer: writer.username,
+      writer_avatar: writer.profile_image,
     }));
     setShowWriterDropdown(false);
+    setWriterSearchValue("");
 
     // Clear writer error if exists
     if (errors.writer) {
       setErrors((prev) => ({
         ...prev,
         writer: "",
+      }));
+    }
+  };
+
+  // Handle writer search
+  const handleWriterSearch = () => {
+    getWriters(writerSearchValue);
+  };
+
+  // Handle clear writer search
+  const handleClearWriterSearch = () => {
+    setWriterSearchValue("");
+    getWriters("");
+  };
+
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      category: category.id,
+    }));
+    setShowCategoryDropdown(false);
+    setCategorySearchValue("");
+
+    // Clear category error if exists
+    if (errors.category) {
+      setErrors((prev) => ({
+        ...prev,
+        category: "",
       }));
     }
   };
@@ -211,10 +246,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       created_at: post ? post.created_at : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       views: post ? post.views : 0,
-      read_time: `${Math.ceil(
-        (formData.body.split(" ").length + formData.excerpt.split(" ").length) /
-          200
-      )} min read`,
     };
 
     setIsLoading(true);
@@ -239,6 +270,35 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   useEffect(() => {
     getWriters();
     getCategories();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close writer dropdown if clicked outside
+      if (
+        writerDropdownRef.current &&
+        !writerDropdownRef.current.contains(event.target)
+      ) {
+        setShowWriterDropdown(false);
+      }
+
+      // Close category dropdown if clicked outside
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target)
+      ) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   return (
@@ -298,32 +358,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               )}
             </div>
 
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Category")} *
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.category ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option value="">{t("Select Category")}</option>
-                {categoriesList.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {t(cat)}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="text-red-500 text-xs mt-1">{errors.category}</p>
-              )}
-            </div>
-
-            {/* Status */}
+            {/* Start Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Status")}
@@ -341,8 +376,27 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 ))}
               </select>
             </div>
+            {/* End Status */}
+            {/* Start Read Time */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Read Time")} *
+              </label>
+              <Input
+                name="read_time"
+                type="number"
+                value={formData.read_time}
+                onChange={handleInputChange}
+                placeholder={t("Enter Read Time in minutes")}
+                className={errors.read_time ? "border-red-500" : ""}
+              />
+              {errors.read_time && (
+                <p className="text-red-500 text-xs mt-1">{errors.read_time}</p>
+              )}
+            </div>
 
-            {/* Active Status */}
+            {/* End Read Time */}
+            {/* Start Active Status */}
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -355,16 +409,17 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 {t("Active Post")}
               </label>
             </div>
+            {/* End Active Status */}
           </div>
 
           {/* Right Column */}
           <div className="space-y-4">
-            {/* Writer Selection */}
+            {/* Start Writer Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Writer")} *
               </label>
-              <div className="relative">
+              <div className="relative" ref={writerDropdownRef}>
                 <button
                   type="button"
                   onClick={() => setShowWriterDropdown(!showWriterDropdown)}
@@ -375,16 +430,13 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                   {formData?.writer ? (
                     <>
                       <img
-                        src={formData?.writer?.avatar}
-                        alt={formData?.writer?.name}
+                        src={formData?.writer?.profile_image}
+                        alt={formData?.writer}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                       <div className="flex-1">
                         <div className="font-medium text-sm">
-                          {formData?.writer?.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {formData?.writer?.role}
+                          {formData?.writer}
                         </div>
                       </div>
                     </>
@@ -399,29 +451,78 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 </button>
 
                 {showWriterDropdown && (
-                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {writers.map((writer) => (
-                      <button
-                        key={writer.id}
-                        type="button"
-                        onClick={() => handleWriterSelect(writer)}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                      >
-                        <img
-                          src={writer.avatar}
-                          alt={writer.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">
-                            {writer.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {writer.role}
-                          </div>
+                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                    {/* Search Box */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={writerSearchValue}
+                            onChange={(e) =>
+                              setWriterSearchValue(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleWriterSearch();
+                              }
+                            }}
+                            placeholder={t("Search writers...")}
+                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          {writerSearchValue && (
+                            <button
+                              type="button"
+                              onClick={handleClearWriterSearch}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
-                      </button>
-                    ))}
+                        <button
+                          type="button"
+                          onClick={handleWriterSearch}
+                          className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                          title={t("Search")}
+                        >
+                          <Search className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Writers List */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {writersList.length > 0 ? (
+                        writersList.map((writer) => (
+                          <button
+                            key={writer.id}
+                            type="button"
+                            onClick={() => handleWriterSelect(writer)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          >
+                            <img
+                              src={writer.profile_image}
+                              alt={writer.username}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {writer.username}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {writer.groups[0]}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                          {t("No writers found")}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -429,7 +530,125 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
               )}
             </div>
+            {/* End Writer Selection */}
+            {/* Start Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Category")} *
+              </label>
+              <div className="relative" ref={categoryDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                    errors.category ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  {formData?.category ? (
+                    <>
+                      <Tag className="w-5 h-5 text-blue-600" />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          {categoriesList.find(
+                            (cat) => cat.id === formData.category
+                          )?.name || t("Select Category")}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Tag className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-500">
+                        {t("Select Category")}
+                      </span>
+                    </>
+                  )}
+                </button>
 
+                {showCategoryDropdown && (
+                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                    {/* Search Box */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={categorySearchValue}
+                            onChange={(e) =>
+                              setCategorySearchValue(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                getCategories(categorySearchValue);
+                              }
+                            }}
+                            placeholder={t("Search categories...")}
+                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          {categorySearchValue && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCategorySearchValue("");
+                                getCategories("");
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            getCategories(categorySearchValue);
+                          }}
+                          className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                          title={t("Search")}
+                        >
+                          <Search className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Categories List */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {categoriesList.length > 0 ? (
+                        categoriesList.map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => handleCategorySelect(category)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          >
+                            <Tag className="w-5 h-5 text-blue-600" />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {category.name}
+                              </div>
+                              {category.description && (
+                                <div className="text-xs text-gray-500">
+                                  {category.description}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                          {t("No categories found")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {errors.category && (
+                <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+              )}
+            </div>
+            {/* End Category */}
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

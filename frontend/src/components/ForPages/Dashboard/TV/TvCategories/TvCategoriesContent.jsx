@@ -45,7 +45,7 @@ function TvCategoriesContent() {
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getData(newPage - 1);
+    getCategoriesData(newPage - 1);
   };
 
   const openAddModal = () => {
@@ -71,7 +71,7 @@ function TvCategoriesContent() {
         toast.success(t("Category created"));
       }
       setShowModal(false);
-      getCategoriesData();
+      getCategoriesData(0);
     } catch (err) {
       console.error(err);
       toast.error(t("Operation failed"));

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, X, Tag, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { CreateTeam, EditTeamById } from "@/api/aboutUs";
+import { CreateTeam, EditTeamById, GetPositions } from "@/api/aboutUs";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -21,8 +21,23 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     avatar_url: "",
     social_links: [{ name: "", url: "" }],
   });
+  const [positionsList, setPositionsList] = useState([]);
+  const [showPositionDropdown, setShowPositionDropdown] = useState(false);
+  const positionDropdownRef = useRef(null);
+  const [positionSearchValue, setPositionSearchValue] = useState("");
 
+  const [errors, setErrors] = useState({});
   // Reset form when modal opens/closes or member changes
+
+  const getPositions = async (searchVal) => {
+    try {
+      const res = await GetPositions(10, 0, searchVal);
+      setPositionsList(res?.data?.results || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       if (member?.id) {
@@ -57,6 +72,24 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         ...prev,
         avatar: file,
         avatar_url: "", // Clear URL when file is selected
+      }));
+    }
+  };
+
+  // Handle position selection
+  const handlePositionSelect = (position) => {
+    setFormData((prev) => ({
+      ...prev,
+      position: position.id,
+    }));
+    setShowPositionDropdown(false);
+    setPositionSearchValue("");
+
+    // Clear position error if exists
+    if (errors.position) {
+      setErrors((prev) => ({
+        ...prev,
+        position: "",
       }));
     }
   };
@@ -140,6 +173,31 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
+  useEffect(() => {
+    getPositions();
+  }, []);
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close writer dropdown if clicked outside
+
+      // Close position dropdown if clicked outside
+      if (
+        positionDropdownRef.current &&
+        !positionDropdownRef.current.contains(event.target)
+      ) {
+        setShowPositionDropdown(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   if (!isOpen) return null;
 
   return (
@@ -163,17 +221,115 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
 
         {/* Start Position */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Position")}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Position")} *
           </label>
-          <input
-            type="text"
-            name="position"
-            value={formData.position}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-            required
-          />
+          <div className="relative" ref={positionDropdownRef}>
+            <button
+              type="button"
+              onClick={() => setShowPositionDropdown(!showPositionDropdown)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                errors.position ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              {formData?.position ? (
+                <>
+                  <Tag className="w-5 h-5 text-blue-600" />
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {positionsList.find((pos) => pos.id === formData.position)
+                        ?.name || t("Select Position")}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Tag className="w-5 h-5 text-gray-400" />
+                  <span className="text-gray-500">{t("Select Position")}</span>
+                </>
+              )}
+            </button>
+
+            {showPositionDropdown && (
+              <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                {/* Search Box */}
+                <div className="p-3 border-b border-gray-200 bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={positionSearchValue}
+                        onChange={(e) => setPositionSearchValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            getCategories(positionSearchValue);
+                          }
+                        }}
+                        placeholder={t("Search positions...")}
+                        className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      />
+                      {positionSearchValue && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPositionSearchValue("");
+                            getPositions("");
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        getPositions(positionSearchValue);
+                      }}
+                      className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      title={t("Search")}
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Categories List */}
+                <div className="max-h-60 overflow-y-auto">
+                  {positionsList.length > 0 ? (
+                    positionsList.map((position) => (
+                      <button
+                        key={position.id}
+                        type="button"
+                        onClick={() => handlePositionSelect(position)}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                      >
+                        <Tag className="w-5 h-5 text-blue-600" />
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">
+                            {position.name}
+                          </div>
+                          {position.description && (
+                            <div className="text-xs text-gray-500">
+                              {position.description}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                      {t("No categories found")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          {errors.position && (
+            <p className="text-red-500 text-xs mt-1">{errors.position}</p>
+          )}
         </div>
         {/* End Position */}
         {/* Start Description */}

@@ -331,7 +331,7 @@ const TVList = () => {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {tv.category}
+                      {tv.category?.name}
                     </span>
                   </TableCell>
                   <TableCell>

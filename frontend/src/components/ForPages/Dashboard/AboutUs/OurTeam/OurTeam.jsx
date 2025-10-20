@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 
 import { Edit, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -15,7 +15,7 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetTeam, DeleteTeamById } from "@/api/aboutUs";
+import { GetTeam, DeleteTeamById, GetPositions } from "@/api/aboutUs";
 import Loader from "@/components/Global/Loader/Loader";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
@@ -63,6 +63,7 @@ function OurTeam() {
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [update, setUpdate] = useState(false);
+
   // فلترة الأعضاء بناءً على البحث
   const filteredMembers = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -85,11 +86,11 @@ function OurTeam() {
   };
 
   // Fetch Members from API
-  const getMemberData = async (page) => {
+  const getMemberData = async (page = 0) => {
     const offset = page * 10;
     setIsLoading(true);
     try {
-      const res = await GetTeam(limit, offset, searchTerm);
+      const res = await GetTeam(limit, offset, searchTerm || "");
       setTotalRecords(res.data.count);
       setMembers(res.data.results);
     } catch (error) {
@@ -117,7 +118,7 @@ function OurTeam() {
   const totalPages = Math.ceil(totalRecords / limit);
 
   useEffect(() => {
-    getMemberData();
+    getMemberData(0);
   }, [update]);
 
   return (

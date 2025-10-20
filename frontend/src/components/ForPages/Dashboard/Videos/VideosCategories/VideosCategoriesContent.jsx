@@ -45,7 +45,7 @@ function VideosCategoriesContent() {
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getData(newPage - 1);
+    getCategoriesData(newPage - 1);
   };
 
   const openAddModal = () => {

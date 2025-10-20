@@ -27,12 +27,9 @@ const LANGUAGE_OPTIONS = [
 
 // Type options
 const TYPE_OPTIONS = [
-  { value: "article", label: "Article" },
   { value: "photo", label: "Photo" },
   { value: "gallery", label: "Gallery" },
-  { value: "news", label: "News" },
-  { value: "event", label: "Event" },
-  { value: "announcement", label: "Announcement" },
+  { value: "card", label: "Card" },
 ];
 
 const CreateorEditCardorPhoto = ({
@@ -48,7 +45,7 @@ const CreateorEditCardorPhoto = ({
     description: "",
     theme: "",
     language: "",
-    card_type: "card",
+    kind: "card",
     image: null,
     image_url: "",
     cover_image: null,
@@ -57,19 +54,7 @@ const CreateorEditCardorPhoto = ({
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-  // {
-  //   "title": "string",
-  //   "description": "string",
-  //   "theme": "string",
-  //   "language": "string",
-  //   "kind": "card",
-  //   "card_type": "string",
-  //   "image": "string",
-  //   "image_url": "string",
-  //   "cover_image": "string",
-  //   "cover_image_url": "string",
-  //   "metadata": "string"
-  // }
+
   // State for image previews
   const [imagePreviews, setImagePreviews] = useState({
     image: "",
@@ -86,13 +71,10 @@ const CreateorEditCardorPhoto = ({
           cover_image: null,
           theme: card.theme || "",
           language: card.language || "",
-          card_type: card.card_type || "card",
+          kind: card.kind || "card",
           image_url: card.image_url || "",
           cover_image_url: card.cover_image_url || "",
-          metadata:
-            typeof card.metadata === "object"
-              ? JSON.stringify(card.metadata, null, 2)
-              : card.metadata || "",
+          metadata: card.metadata,
         };
         setFormData(initialData);
         setInitialFormData(initialData);
@@ -108,7 +90,7 @@ const CreateorEditCardorPhoto = ({
           description: "",
           theme: "",
           language: "",
-          card_type: "card",
+          kind: "card",
           image: null,
           image_url: "",
           cover_image: null,
@@ -170,7 +152,7 @@ const CreateorEditCardorPhoto = ({
       description: "",
       theme: "",
       language: "",
-      card_type: "card",
+      kind: "card",
       image: null,
       image_url: "",
       cover_image: null,
@@ -243,7 +225,7 @@ const CreateorEditCardorPhoto = ({
     submitData.append("description", formData.description);
     submitData.append("theme", formData.theme);
     submitData.append("language", formData.language);
-    submitData.append("card_type", formData.card_type);
+    submitData.append("kind", formData.kind);
     submitData.append("image_url", formData.image_url);
     submitData.append("cover_image_url", formData.cover_image_url);
 
@@ -251,7 +233,7 @@ const CreateorEditCardorPhoto = ({
     try {
       const metadataObj = formData.metadata
         ? JSON.parse(formData.metadata)
-        : {};
+        : "";
       submitData.append("metadata", JSON.stringify(metadataObj));
     } catch {
       // If JSON parsing fails, send as empty object
@@ -285,7 +267,6 @@ const CreateorEditCardorPhoto = ({
       setIsLoading(false);
     }
   };
-
   if (!isOpen) return null;
 
   return (
@@ -335,7 +316,6 @@ const CreateorEditCardorPhoto = ({
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
-            <option value="">{t("Select Theme")}</option>
             {THEME_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}
@@ -357,7 +337,6 @@ const CreateorEditCardorPhoto = ({
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
-            <option value="">{t("Select Language")}</option>
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}
@@ -370,16 +349,15 @@ const CreateorEditCardorPhoto = ({
         {/* Start Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Type")}
+            {t("Kind")}
           </label>
           <select
-            name="card_type"
-            value={formData.card_type}
+            name="kind"
+            value={formData.kind}
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
-            <option value="">{t("Select Type")}</option>
             {TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}
@@ -388,42 +366,6 @@ const CreateorEditCardorPhoto = ({
           </select>
         </div>
         {/* End Type */}
-
-        {/* Start  Card Type   */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Card Type")}
-          </label>
-          <select
-            name="card_type"
-            value={formData.card_type}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
-          >
-            <option value="card">{t("Card")}</option>
-            <option value="photo">{t("Photo")}</option>
-          </select>
-        </div>
-        {/* End Card Type */}
-
-        {/* Start Card Type  
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Card Type")}
-          </label>
-          <input
-            type="text"
-            name="card_type"
-            value={formData.card_type}
-            onChange={handleInputChange}
-            placeholder={t(
-              "Enter card type (e.g., featured, regular, special)"
-            )}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-        End Card Type */}
 
         {/* Start Main Image */}
         <div>

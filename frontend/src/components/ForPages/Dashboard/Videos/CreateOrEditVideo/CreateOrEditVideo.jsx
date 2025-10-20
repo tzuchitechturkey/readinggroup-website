@@ -1,34 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-import { Save, Upload, Youtube } from "lucide-react";
+import { Save, Upload, Youtube, X, Tag, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreateVideo, EditVideoById } from "@/api/videos";
+import { CreateVideo, EditVideoById, GetVideoCategories } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-// Categories and types options
-const categories = [
-  "Humanitarian",
-  "Environmental",
-  "Medical",
-  "Educational",
-  "Cultural",
-  "Disaster Relief",
-];
-
 const videoTypes = ["Full Videos", "Unit Clips"];
-
-const subjects = [
-  "Documentary",
-  "News Report",
-  "Educational Content",
-  "Interview",
-  "Event Coverage",
-  "Awareness Campaign",
-];
 
 const languages = [
   "Arabic",
@@ -44,20 +25,21 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [categoriesList, setCategoriesList] = useState([]);
-  const [subjectList, setSubjectList] = useState([]);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categoryDropdownRef = useRef(null);
+  const [categorySearchValue, setCategorySearchValue] = useState("");
+
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
     category: "",
     video_type: "",
-    subject: "",
     language: "",
     thumbnail: null,
     thumbnail_url: "",
-    views: 0,
     featured: false,
     is_new: false,
     reference_code: "",
@@ -72,11 +54,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         duration: video.duration || "",
         category: video.category || "",
         video_type: video.video_type || "",
-        subject: video.subject || "",
         language: video.language || "",
         thumbnail: null, // Reset file input
         thumbnail_url: video.thumbnail_url || "",
-        views: video.views || 0,
         featured: video.featured || false,
         is_new: video.is_new || false,
         reference_code: video.reference_code || "",
@@ -93,19 +73,10 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     }
   }, [video]);
 
-  const getCategoeries = async () => {
+  const getCategories = async (searchVal = "") => {
     try {
-      const res = await getVideoCategories();
-      setCategoriesList(res.data.data);
-    } catch (err) {
-      setErrorFn(err);
-    }
-  };
-
-  const getSubjects = async () => {
-    try {
-      const res = await getVideoSubjects();
-      setSubjectList(res.data.data);
+      const res = await GetVideoCategories(10, 0, searchVal);
+      setCategoriesList(res.data.results);
     } catch (err) {
       setErrorFn(err);
     }
@@ -137,7 +108,23 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       }));
     }
   };
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      category: category.id,
+    }));
+    setShowCategoryDropdown(false);
+    setCategorySearchValue("");
 
+    // Clear category error if exists
+    if (errors.category) {
+      setErrors((prev) => ({
+        ...prev,
+        category: "",
+      }));
+    }
+  };
   // Handle image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -267,7 +254,31 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setHasChanges(hasTextChanges || hasNewThumbnail);
     }
   }, [formData, video, initialFormData]);
+  useEffect(() => {
+    getCategories();
+  }, []);
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close writer dropdown if clicked outside
 
+      // Close category dropdown if clicked outside
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target)
+      ) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     <div className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
@@ -366,29 +377,124 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* End Title */}
 
             {/* Start Category */}
+            {/* Start Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Category")} *
               </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.category ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option value="">{t("Select Category")}</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {t(cat)}
-                  </option>
-                ))}
-              </select>
+              <div className="relative" ref={categoryDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                    errors.category ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  {formData?.category ? (
+                    <>
+                      <Tag className="w-5 h-5 text-blue-600" />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          {categoriesList.find(
+                            (cat) => cat.id === formData.category
+                          )?.name || t("Select Category")}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Tag className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-500">
+                        {t("Select Category")}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {showCategoryDropdown && (
+                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                    {/* Search Box */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={categorySearchValue}
+                            onChange={(e) =>
+                              setCategorySearchValue(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                getCategories(categorySearchValue);
+                              }
+                            }}
+                            placeholder={t("Search categories...")}
+                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          {categorySearchValue && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCategorySearchValue("");
+                                getCategories("");
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            getCategories(categorySearchValue);
+                          }}
+                          className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                          title={t("Search")}
+                        >
+                          <Search className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Categories List */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {categoriesList.length > 0 ? (
+                        categoriesList.map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            onClick={() => handleCategorySelect(category)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          >
+                            <Tag className="w-5 h-5 text-blue-600" />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {category.name}
+                              </div>
+                              {category.description && (
+                                <div className="text-xs text-gray-500">
+                                  {category.description}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                          {t("No categories found")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               {errors.category && (
                 <p className="text-red-500 text-xs mt-1">{errors.category}</p>
               )}
             </div>
+            {/* End Category */}
             {/* End Category */}
 
             {/* Start Type */}
@@ -416,28 +522,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Type */}
-
-            {/* Start Subject */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Subject")}
-              </label>
-              <select
-                name="subject"
-                value={formData.subject}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">{t("Select Subject")}</option>
-                {subjects.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {t(subject)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {/* End Subject */}
- 
           </div>
 
           {/* Right Column */}
@@ -455,7 +539,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                   errors.language ? "border-red-500" : "border-gray-300"
                 }`}
               >
-                <option value="">{t("Select Language")}</option>
+                <option disabled value="">
+                  {t("Select Language")}
+                </option>
                 {languages.map((lang) => (
                   <option key={lang} value={lang}>
                     {t(lang)}

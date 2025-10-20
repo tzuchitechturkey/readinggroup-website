@@ -26,6 +26,7 @@ import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList
 import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
 import History from "@/components/ForPages/Dashboard/AboutUs/History/History";
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
+import PositionsContent from "@/components/ForPages/Dashboard/AboutUs/Positions/PositionsContent";
 import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
 import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList/PhotosList";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
@@ -55,25 +56,24 @@ export default function Page() {
       setSelectedVideo(data);
     }
 
-    // تحديد العنصر الأب تلقائياً بناءً على القسم المحدد
     let autoParent = data;
     if (typeof data === "object" || !autoParent) {
-      // خريطة لتحديد العنصر الأب للعناصر الفرعية
       const parentMap = {
-        refunds: "Read",
-        declines: "Read",
-        payouts: "Read",
         cards: "Cards Or Photos",
         // photos: "Cards Or Photos",
         posts: "Posts",
         createOrEditPost: "Posts",
+        postsCategories: "Posts",
         videos: "Videos",
         createOrEditVideo: "Videos",
+        videosCategories: "Videos",
+        newsList: "Tv",
+        tvCategories: "Tv",
         history: "About Us",
         team: "About Us",
+        positions: "About Us",
         settings: "Settings",
         profile: "Settings",
-        // يمكن إضافة المزيد حسب الحاجة
       };
       autoParent = parentMap[section] || null;
     }
@@ -129,6 +129,8 @@ export default function Page() {
         return <History onSectionChange={handleSectionChange} />;
       case "team":
         return <OurTeam onSectionChange={handleSectionChange} />;
+      case "positions":
+        return <PositionsContent onSectionChange={handleSectionChange} />;
       default:
         return <DashboardSections />;
     }

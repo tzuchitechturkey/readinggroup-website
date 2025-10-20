@@ -169,6 +169,10 @@ export default function AppSidebar({
             title: "Our Team",
             onClick: () => onSectionChange("team"),
           },
+          {
+            title: "Positions",
+            onClick: () => onSectionChange("positions"),
+          },
         ],
       },
     ],

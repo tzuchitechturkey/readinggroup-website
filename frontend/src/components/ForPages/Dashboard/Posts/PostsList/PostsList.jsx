@@ -27,7 +27,6 @@ import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteCon
 import { DeletePostById, GetPosts } from "@/api/posts";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
 import ShowPostDetails from "../ShowPostDetails/ShowPostDetails";
 
@@ -89,22 +88,24 @@ function PostsList({ onSectionChange }) {
       if (bValue === null || bValue === undefined) return -1;
 
       // numeric fields
-      if (sortConfig.key === 'id' || sortConfig.key === 'views') {
-        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      if (sortConfig.key === "id" || sortConfig.key === "views") {
+        return sortConfig.direction === "asc"
+          ? aValue - bValue
+          : bValue - aValue;
       }
 
       // date-like fields
-      if (sortConfig.key === 'createdAt' || sortConfig.key === 'published_at') {
+      if (sortConfig.key === "createdAt" || sortConfig.key === "published_at") {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
-        return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
 
       // string fallback
       const strA = String(aValue).toLowerCase();
       const strB = String(bValue).toLowerCase();
-      if (strA < strB) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (strA > strB) return sortConfig.direction === 'asc' ? 1 : -1;
+      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -275,6 +276,11 @@ function PostsList({ onSectionChange }) {
               </div>
             </TableHead>
             <TableHead className="text-[#5B6B79] font-medium text-xs">
+              <div className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                {t("Excerpt")}
+              </div>
+            </TableHead>
+            <TableHead className="text-[#5B6B79] font-medium text-xs">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("category")}
@@ -345,10 +351,10 @@ function PostsList({ onSectionChange }) {
                     <span className="text-[#9FA2AA] text-[10px]">
                       {post.subtitle}
                     </span>
-                    <span className="text-[#9FA2AA] text-[10px] mt-1 line-clamp-2">
-                      {post.excerpt}
-                    </span>
                   </div>
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                  <span className=" px-2 py-1 text-[12px]">{post.excerpt}</span>
                 </TableCell>
                 <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
