@@ -70,28 +70,48 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("published_at", "created_at", "updated_at")
-    category = VideoCategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
+    category_objs = VideoCategorySerializer(source="category", read_only=True)
     class Meta:
         model = Video
         fields = "__all__"
         file_fields = ("thumbnail",)
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category_objs"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        return data
 
 
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
     datetime_fields = ("published_at", "created_at", "updated_at")
-    category = PostCategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
+    category_objs = PostCategorySerializer(source="category", read_only=True)
+
     class Meta:
         model = Post
         fields = "__all__"
+        extra_fields = ["category_objs"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category_objs"] = PostCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        return data
 
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
-    category = EventCategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
+    category_objs = EventCategorySerializer(source="category", read_only=True)
     class Meta:
         model = Event
         fields = "__all__"
         file_fields = ("image",)
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category_objs"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        return data
 
 class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -103,13 +123,18 @@ class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")
-    category = TvProgramCategorySerializer(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=TvProgramCategory.objects.all(), write_only=True, required=False)
+    category_objs = TvProgramCategorySerializer(source="category", read_only=True)
 
     class Meta:
         model = TvProgram
         fields = "__all__"
         file_fields = ("image",)
-
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category_objs"] = TvProgramCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        return data
 
 class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "created_at", "updated_at")
@@ -121,11 +146,17 @@ class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
-    position = PositionTeamMemberSerializer(read_only=True)
+    position = serializers.PrimaryKeyRelatedField(queryset=PositionTeamMember.objects.all(), write_only=True, required=False)
+    position_objs = PositionTeamMemberSerializer(source="position", read_only=True)
     class Meta:
         model = TeamMember
         fields = "__all__"
         file_fields = ("avatar",)
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["position_objs"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
+        return data
 
 
 class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
