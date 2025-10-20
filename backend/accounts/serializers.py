@@ -73,9 +73,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop("password")
         user = User(**validated_data)
         user.set_password(password)
-        # Set is_first_login to True for new users
         user.is_first_login = True
-        # Set last_password_change but keep is_first_login as True
         user.last_password_change = timezone.now()
         user.save()
         group, _created = Group.objects.get_or_create(name="user")

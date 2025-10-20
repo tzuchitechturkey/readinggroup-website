@@ -21,7 +21,6 @@ class Video(TimestampedModel):
     duration = models.CharField(max_length=64)
     category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
     video_type = models.CharField(max_length=100)
-    subject = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
@@ -91,7 +90,6 @@ class MediaCard(TimestampedModel):
     theme = models.CharField(max_length=50, blank=True)
     language = models.CharField(max_length=50, blank=True)
     kind = models.CharField(max_length=16, choices=MediaCardKind.choices, default="card")
-    card_type = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="cards/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
     cover_image = models.ImageField(upload_to="cards/covers/", blank=True, null=True)
@@ -146,7 +144,7 @@ class WeeklyMoment(TimestampedModel):
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
     name = models.CharField(max_length=255)
-    position = models.CharField(max_length=255, blank=True)
+    position = models.ForeignKey('PositionTeamMember', on_delete=models.SET_NULL, null=True, blank=True)
     job_title = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     avatar = models.ImageField(upload_to="team/avatars/", blank=True, null=True)
@@ -214,6 +212,17 @@ class EventCategory(TimestampedModel):
 #Category for TvPrograms
 class TvProgramCategory(TimestampedModel):
     """Categories for organizing TV programs."""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name
+    
+class PositionTeamMember(TimestampedModel):
+    """Positions for Team Members."""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 

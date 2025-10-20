@@ -14,6 +14,7 @@ from .models import (
     PostCategory,
     EventCategory,
     TvProgramCategory,
+    PositionTeamMember,
 )
 
 
@@ -121,3 +122,10 @@ class TvProgramCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
     class Meta:
         model = TvProgramCategory
         fields = "__all__"
+        
+        
+class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PositionTeamMember
+        fields = ["id", "name", "description"]

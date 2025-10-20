@@ -19,7 +19,7 @@ from .models import (
 class VideoAdmin(admin.ModelAdmin):
     list_display = ("title", "category", "language", "published_at", "views", "featured")
     list_filter = ("category", "language", "featured", "is_new")
-    search_fields = ("title", "category", "subject")
+    search_fields = ("title", "category")
 
 
 @admin.register(Post)

@@ -13,6 +13,7 @@ from .views import (
     PostCategoryViewSet,
     EventCategoryViewSet,
     TvProgramCategoryViewSet,
+    PositionTeamMemberViewSet,
 )
 
 app_name = "content"
@@ -30,6 +31,6 @@ router.register(r"video-categories", VideoCategoryViewSet, basename="video-categ
 router.register(r"post-categories", PostCategoryViewSet, basename="post-category")
 router.register(r"event-categories", EventCategoryViewSet, basename="event-category")
 router.register(r"tvprogram-categories", TvProgramCategoryViewSet, basename="tvprogram-category")
-
+router.register(r"position-team-members", PositionTeamMemberViewSet, basename="position-team-member")
 
 urlpatterns = router.urls

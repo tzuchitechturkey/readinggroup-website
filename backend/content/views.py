@@ -14,6 +14,7 @@ from .models import (
     VideoCategory,
     TvProgramCategory,
     EventCategory,
+    PositionTeamMember,
 )
 from .serializers import (
     EventSerializer,
@@ -28,6 +29,7 @@ from .serializers import (
     VideoCategorySerializer,
     TvProgramCategorySerializer,
     EventCategorySerializer,
+    PositionTeamMemberSerializer,
 )
 
 
@@ -51,7 +53,7 @@ class VideoViewSet(BaseContentViewSet):
     """ViewSet for managing Video content."""
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    search_fields = ("title", "category", "subject", "language")
+    search_fields = ("title", "category", "language")
     ordering_fields = ("published_at", "views", "created_at")
 
 
@@ -137,4 +139,11 @@ class TvProgramCategoryViewSet(BaseContentViewSet):
     queryset = TvProgramCategory.objects.all()
     serializer_class = TvProgramCategorySerializer
     search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+class PositionTeamMemberViewSet(BaseContentViewSet):
+    """ViewSet for managing PositionTeamMember content."""
+    queryset = PositionTeamMember.objects.all()
+    serializer_class = PositionTeamMemberSerializer
+    search_fields = ("name", "position")
     ordering_fields = ("created_at",)
