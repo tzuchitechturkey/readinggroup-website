@@ -102,7 +102,7 @@ class TeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing TeamMember content."""
     queryset = TeamMember.objects.all()
     serializer_class = TeamMemberSerializer
-    search_fields = ("name", "position", "job_title")
+    search_fields = ("name", "job_title", "position__name")
     ordering_fields = ("name", "created_at")
 
 
@@ -145,5 +145,5 @@ class PositionTeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing PositionTeamMember content."""
     queryset = PositionTeamMember.objects.all()
     serializer_class = PositionTeamMemberSerializer
-    search_fields = ("name", "position")
+    search_fields = ("name",)
     ordering_fields = ("created_at",)

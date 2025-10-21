@@ -71,7 +71,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("published_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
-    category_obj = VideoCategorySerializer(source="category", read_only=True)
     class Meta:
         model = Video
         fields = "__all__"
@@ -86,7 +85,6 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
     datetime_fields = ("published_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
-    category_obj = PostCategorySerializer(source="category", read_only=True)
 
     class Meta:
         model = Post
@@ -101,7 +99,6 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
-    category_obj = EventCategorySerializer(source="category", read_only=True)
     class Meta:
         model = Event
         fields = "__all__"
@@ -122,7 +119,6 @@ class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=TvProgramCategory.objects.all(), write_only=True, required=False)
-    category_obj = TvProgramCategorySerializer(source="category", read_only=True)
 
     class Meta:
         model = TvProgram
@@ -144,7 +140,6 @@ class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     position = serializers.PrimaryKeyRelatedField(queryset=PositionTeamMember.objects.all(), write_only=True, required=False)
-    position_obj = PositionTeamMemberSerializer(source="position", read_only=True)
     class Meta:
         model = TeamMember
         fields = "__all__"
