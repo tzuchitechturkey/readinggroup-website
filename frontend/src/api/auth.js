@@ -15,6 +15,9 @@ export async function GetProfile() {
 export async function UpdateProfile(data) {
   return await axios.put(`/user/profile/`, data);
 }
+export async function UpdatePatchProfile(data) {
+  return await axios.patch(`/user/profile/`, data);
+}
 
 export async function ChangePassword(data) {
   return await axios.post(`/user/change-password/`, data);

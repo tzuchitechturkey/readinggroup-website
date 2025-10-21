@@ -46,6 +46,7 @@ function CardsList() {
       const res = await GetMediaCards(limit, offset, searchVal);
       setCardData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
+      console.log(res?.data?.results);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -77,15 +78,15 @@ function CardsList() {
       // Handle different data types
       if (sortConfig.key === "id") {
         // Numeric sort
-        return sortConfig.direction === "asc" 
-          ? aValue - bValue 
+        return sortConfig.direction === "asc"
+          ? aValue - bValue
           : bValue - aValue;
       }
-      
+
       // String sort for title and other text fields
       const strA = String(aValue).toLowerCase();
       const strB = String(bValue).toLowerCase();
-      
+
       if (strA < strB) {
         return sortConfig.direction === "asc" ? -1 : 1;
       }
@@ -249,25 +250,25 @@ function CardsList() {
                     {getSortIcon("id")}
                   </div>
                 </TableHead>
-                <TableHead className="text-[#5B6B79] font-medium text-xs">
-                  {t("The Card")}
+                <TableHead className="text-center  text-[#5B6B79] font-medium text-xs">
+                  {t("Image")}
                 </TableHead>
-                <TableHead className="text-[#5B6B79] font-medium text-xs">
+                <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
                   <div
-                    className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                    className="flex items-center justify-center  gap-1 cursor-pointer hover:text-[#1E1E1E]"
                     onClick={() => sortData("title")}
                   >
                     {t("Title")}
                     {getSortIcon("title")}
                   </div>
                 </TableHead>
-                <TableHead className="text-[#5B6B79] font-medium text-xs">
+                <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
                   {t("Description")}
                 </TableHead>
-                <TableHead className="text-[#5B6B79] font-medium text-xs">
+                <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
                   {t("Cover Image")}
                 </TableHead>
-                <TableHead className="text-[#5B6B79] font-medium text-xs">
+                <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
                   {t("Actions")}
                 </TableHead>
               </TableRow>
@@ -278,11 +279,11 @@ function CardsList() {
                   key={card.id}
                   className="hover:bg-gray-50/60 border-b"
                 >
-                  <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
+                  <TableCell className="text-[#1E1E1E]  font-bold text-[11px] py-4 px-4">
                     {card.id}
                   </TableCell>
                   <TableCell className="py-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center gap-3">
                       <img
                         src={card.image}
                         alt={card.title}
@@ -293,19 +294,14 @@ function CardsList() {
                             card.title.charAt(0);
                         }}
                       />
-                      <div className="flex flex-col">
-                        <span className="text-[#1E1E1E] font-medium text-sm line-clamp-1">
-                          {card.title}
-                        </span>
-                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                  <TableCell className="text-center  text-[#1E1E1E] text-[11px] py-4">
                     <span className="font-medium">{card.title}</span>
                   </TableCell>
                   <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-sm">
                     <p
-                      className="text-sm text-gray-900 line-clamp-2"
+                      className="text-sm text-gray-900 line-clamp-2 text-center"
                       title={card.description}
                     >
                       {card.description.length > 80
@@ -313,7 +309,7 @@ function CardsList() {
                         : card.description}
                     </p>
                   </TableCell>
-                  <TableCell className="py-4">
+                  <TableCell className="py-4 flex justify-center text-center">
                     <img
                       src={card.cover_image}
                       alt={`cover`}
@@ -325,7 +321,7 @@ function CardsList() {
                     />
                   </TableCell>
                   <TableCell className="py-4">
-                    <div className="flex items-center gap-2 text-[#5B6B79]">
+                    <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                       <button
                         title={t("Edit")}
                         onClick={() => {

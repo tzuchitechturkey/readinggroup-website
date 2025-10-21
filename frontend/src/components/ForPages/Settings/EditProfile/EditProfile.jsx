@@ -7,15 +7,17 @@ import countries from "@/constants/countries.json";
 import { GetProfile, UpdateProfile } from "@/api/auth";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import { BASE_URL } from "@/configs";
 
 function EditProfile() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const [profileImageFile, setProfileImageFile] = useState(null); // Store the actual file
 
   // State for form data
   const [formData, setFormData] = useState({
-    avatar: "",
+    profile_image: "",
     first_name: "",
     username: "",
     last_name: "",
@@ -29,10 +31,10 @@ function EditProfile() {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value, // إذا كان حقل ملف نحفظ أول ملف
+      [name]: value,
     }));
   };
   const GetProfileData = async () => {
@@ -40,19 +42,7 @@ function EditProfile() {
     try {
       const res = await GetProfile();
       const profileData = res?.data;
-      setFormData({
-        avatar:
-          profileData.profile_image || profileData.profile_image_url || "",
-        username: profileData.username || "",
-        first_name: profileData.first_name || "",
-        last_name: profileData.last_name || "",
-        display_name: profileData.display_name || "",
-        country: profileData.country || "",
-        address_details: profileData.address_details || "",
-        profession_name: profileData.profession_name || "",
-        email: profileData.email || "",
-        mobile_number: profileData.mobile_number || "",
-      });
+      setFormData(profileData);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -71,11 +61,18 @@ function EditProfile() {
 
     try {
       const data = new FormData();
+
+      // Add all form fields except profile_image
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
+        if (key !== "profile_image" && value !== null && value !== undefined) {
           data.append(key, value);
         }
       });
+
+      // Only append profile_image if a new file was selected
+      if (profileImageFile instanceof File) {
+        data.append("profile_image", profileImageFile);
+      }
 
       await UpdateProfile(data);
       toast.success(t("Updated Profile Successfully"));
@@ -85,7 +82,7 @@ function EditProfile() {
       setIsLoading(false);
     }
   };
-
+  console.log(profileImageFile);
   return (
     <div className="w-full px-4 md:px-8 mt-4">
       {isLoading && <Loader />}
@@ -104,13 +101,18 @@ function EditProfile() {
               const file = e.target.files[0];
               if (file) {
                 const url = URL.createObjectURL(file);
-                setFormData((prev) => ({ ...prev, avatar: url }));
+                setProfileImageFile(file); // Store the actual file
+                setFormData((prev) => ({ ...prev, profile_image: url }));
               }
             }}
           />
 
           <img
-            src={formData.avatar}
+            src={
+              profileImageFile
+                ? formData.profile_image
+                : `${BASE_URL}/${formData.profile_image}`
+            }
             alt="avatar"
             className="w-24 h-24 rounded-full object-contain shadow-sm cursor-pointer"
             onClick={() => fileInputRef.current.click()}

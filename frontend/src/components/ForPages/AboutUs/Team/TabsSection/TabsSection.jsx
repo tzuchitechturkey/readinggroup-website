@@ -1,18 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+import { GetPositions } from "@/api/aboutUs";
 
 function TabsSection({ activeTab, setActiveTab }) {
-  const tabs = [
-    { id: "all", label: "All members" },
-    { id: "programmers", label: "Programmers team" },
-    { id: "media", label: "Media team" },
-    { id: "photographers", label: "Photographers team" },
-    { id: "reading", label: "Reading team" },
-  ];
+  const [positionData, setPositionData] = useState(["All"]);
+  const getPositions = async () => {
+    try {
+      const res = await GetPositions(10, 0);
+      setPositionData((prev) => [...prev, ...(res?.data?.results || [])]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    getPositions();
+  }, []);
   return (
     <div className="mb-6 md:mb-8">
       {/* Desktop and Tablet Tabs */}
       <div className="hidden sm:flex flex-wrap border-b border-gray-200">
-        {tabs.map((tab) => (
+        {positionData.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -23,7 +30,7 @@ function TabsSection({ activeTab, setActiveTab }) {
             }`}
             style={{ fontFamily: "Plus Jakarta Sans, sans-serif" }}
           >
-            {tab.label}
+            {tab.name}
           </button>
         ))}
       </div>
@@ -32,7 +39,7 @@ function TabsSection({ activeTab, setActiveTab }) {
       <div className="sm:hidden border-b border-gray-200">
         <div className="overflow-x-auto scrollbar-hide scroll-smooth">
           <div className="flex space-x-2 min-w-max px-4 pb-1">
-            {tabs.map((tab) => (
+            {positionData.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}

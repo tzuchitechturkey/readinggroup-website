@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import userAvatar from "@/assets/Beared Guy02-min 1.png";
-import { GetProfile, UpdateProfile } from "@/api/auth";
+import { GetProfile, UpdatePatchProfile, UpdateProfile } from "@/api/auth";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -39,16 +39,16 @@ const Labeled = ({ label, children }) => (
 );
 
 // Editable field component
-const EditableField = ({ 
-  label, 
-  value, 
-  isEditing, 
-  onEdit, 
-  onSave, 
-  onCancel, 
+const EditableField = ({
+  label,
+  value,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
   onChange,
   multiline = false,
-  placeholder = ""
+  placeholder = "",
 }) => (
   <div className="space-y-1">
     <div className="flex items-center justify-between">
@@ -117,6 +117,7 @@ function Profile() {
   const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [update, setUpdate] = useState(false);
   const [editingFields, setEditingFields] = useState({
     about_me: false,
     website_address: false,
@@ -129,7 +130,7 @@ function Profile() {
     setIsLoading(true);
     try {
       const res = await GetProfile();
-      const profileData = res?.data?.data;
+      const profileData = res?.data;
       setData(profileData);
       // Initialize form data with current values
       setFormData({
@@ -142,7 +143,6 @@ function Profile() {
       setIsLoading(false);
     }
   };
-
   // Toggle edit mode for a field
   const toggleEdit = (fieldName) => {
     setEditingFields((prev) => ({
@@ -166,12 +166,15 @@ function Profile() {
       [fieldName]: formData[fieldName],
     }));
     toggleEdit(fieldName);
-    
+
     // Show a subtle feedback
-    toast.info("Changes ready to save. Click 'Update Profile' to save all changes.", {
-      autoClose: 2000,
-      position: "bottom-right"
-    });
+    toast.info(
+      "Changes ready to save. Click 'Update Profile' to save all changes.",
+      {
+        autoClose: 2000,
+        position: "bottom-right",
+      }
+    );
   };
 
   // Cancel edit
@@ -184,15 +187,16 @@ function Profile() {
   };
 
   const handleEditUserInfo = async () => {
+    const updateData = {
+      about_me: formData?.about_me,
+      website_address: formData?.website_address,
+    };
+    // console.log(updateData, "updateData ");
     setIsLoading(true);
     try {
-      const updateData = {
-        about_me: data?.about_me,
-        website_address: data?.website_address,
-      };
-      await UpdateProfile(updateData);
+      await UpdatePatchProfile(updateData);
       toast.success(t("Profile updated successfully"));
-      await getProfileData(); // Refresh data
+      setUpdate(!update);
     } catch (err) {
       setErrorFn(err);
     } finally {
@@ -202,7 +206,10 @@ function Profile() {
 
   useEffect(() => {
     getProfileData();
-  }, []);
+  }, [update]);
+  const isButtonDisabled =
+    !editingFields.about_me || !editingFields.website_address || isLoading;
+
   return (
     <div className="space-y-6 my-5 p-1">
       {isLoading && <Loader />}
@@ -274,12 +281,14 @@ function Profile() {
             <div className="px-6 py-5">
               <EditableField
                 label=""
-                value={editingFields.about_me ? formData.about_me : data?.about_me}
+                value={
+                  editingFields.about_me ? formData.about_me : data?.about_me
+                }
                 isEditing={editingFields.about_me}
-                onEdit={() => toggleEdit('about_me')}
-                onSave={() => saveField('about_me')}
-                onCancel={() => cancelEdit('about_me')}
-                onChange={(value) => handleInputChange('about_me', value)}
+                onEdit={() => toggleEdit("about_me")}
+                onSave={() => saveField("about_me")}
+                onCancel={() => cancelEdit("about_me")}
+                onChange={(value) => handleInputChange("about_me", value)}
                 multiline={true}
                 placeholder="Tell us about yourself..."
               />
@@ -306,13 +315,19 @@ function Profile() {
                     <div className="col-span-3">
                       <EditableField
                         label="Website"
-                        value={editingFields.website_address ? formData.website_address : data?.website_address}
+                        value={
+                          editingFields.website_address
+                            ? formData.website_address
+                            : data?.website_address
+                        }
                         isEditing={editingFields.website_address}
-                        onEdit={() => toggleEdit('website_address')}
-                        onSave={() => saveField('website_address')}
-                        onCancel={() => cancelEdit('website_address')}
-                        onChange={(value) => handleInputChange('website_address', value)}
-                        placeholder="https://yourwebsite.com"
+                        onEdit={() => toggleEdit("website_address")}
+                        onSave={() => saveField("website_address")}
+                        onCancel={() => cancelEdit("website_address")}
+                        onChange={(value) =>
+                          handleInputChange("website_address", value)
+                        }
+                        placeholder="example: https://yourwebsite.com"
                       />
                     </div>
                     <div className="col-span-3">
@@ -328,7 +343,8 @@ function Profile() {
           </div>
 
           {/* Show update button only if there are unsaved changes */}
-          {(data?.about_me !== formData.about_me || data?.website_address !== formData.website_address) && (
+          {(data?.about_me !== formData.about_me ||
+            data?.website_address !== formData.website_address) && (
             <div className="mx-5 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
                 You have unsaved changes. Click "Update Profile" to save them.
@@ -338,11 +354,12 @@ function Profile() {
 
           <button
             onClick={handleEditUserInfo}
-            disabled={isLoading}
-            className={`block m-5 ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7 transition-all duration-200 ${
-              isLoading 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'hover:bg-[#3d70e0] hover:scale-105 transform'
+            disabled={isButtonDisabled}
+            aria-disabled={isButtonDisabled}
+            className={`block m-5 ml-auto rounded-full p-2 font-semibold px-7 transition-all duration-200 ${
+              isButtonDisabled
+                ? " bg-gray-300 text-gray-700 cursor-not-allowed opacity-80"
+                : "cursor-pointer bg-[#4680FF] text-white hover:bg-[#3d70e0] hover:scale-105 transform"
             }`}
           >
             {isLoading ? "Updating..." : t("Update Profile")}

@@ -242,6 +242,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     const postData = {
       ...formData,
       id: post ? post.id : Date.now(),
+      category: formData?.category.id || formData?.category,
       created_at: post ? post.created_at : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       views: post ? post.views : 0,

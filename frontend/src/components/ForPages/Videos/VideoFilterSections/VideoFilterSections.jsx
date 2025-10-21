@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -139,6 +139,19 @@ function VideoFilterSections() {
     results: allVideos,
   });
   const [displayedVideos, setDisplayedVideos] = useState(allVideos);
+  const [totalRecords, setTotalRecords] = useState(allVideos);
+  const getVideDataByFilter = async (type) => {
+    setIsLoaiding(true);
+    try {
+      const res = await GetVideosByFilter(typr);
+      setDisplayedVideos(res?.data?.results || []);
+      setTotalRecords(res?.data?.count || 0);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoaiding(false);
+    }
+  };
 
   const handleSortData = () => {
     if (searchValue?.length) {
@@ -163,6 +176,9 @@ function VideoFilterSections() {
     toast.success(t("Load More Clicked!"));
   };
 
+  useEffect(() => {
+    // getVideDataByFilter(contentType);
+  }, []);
   return (
     <>
       {/* Start Search Header */}

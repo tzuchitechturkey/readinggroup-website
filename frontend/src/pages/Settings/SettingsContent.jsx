@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,38 +8,9 @@ import ChangePassword from "@/components/ForPages/Settings/ChangePassword/Change
 
 function SettingsContent() {
   const { t } = useTranslation();
-  const [isLoading, setisLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("editProfile");
   const [userType, setUserType] = useState("user");
-  const handleChangePassword = async () => {
-    toast.success(t("Updated Profile Successfuly"));
-    // setisLoading(true);
-    // try {
-    //   // const res = await EditUserInfo()
-    //   // console.log(res?.data?.data)
-    //   toast.success(t("Updated Profile Successfuly"));
-    // } catch (err) {
-    //   console.log(err);
-    //   toast.error(t("Field Updated Profile"));
-    // } finally {
-    //   setisLoading(false);
-    // }
-  };
 
-  const handleEditUserInfo = async () => {
-    toast.success(t("Updated Profile Successfuly"));
-    // setisLoading(true);
-    // try {
-    //   // const res = await EditUserInfo()
-    //   // console.log(res?.data?.data)
-    //   toast.success(t("Updated Profile Successfuly"));
-    // } catch (err) {
-    //   console.log(err);
-    //   toast.error(t("Field Updated Profile"));
-    // } finally {
-    //   setisLoading(false);
-    // }
-  };
   return (
     <div>
       <div className="w-full bg-[#fff] rounded-lg p-3 pb-6 relative text-[#1E1E1E] flex flex-col">
@@ -84,21 +54,6 @@ function SettingsContent() {
         </Tabs>
         {/* End Tabs */}
       </div>
-      {/* 
-      <button
-        onClick={() => {
-          if (activeTab === "editProfile") {
-            handleEditUserInfo();
-          } else {
-            handleChangePassword();
-          }
-        }}
-        className={`block m-3 mx-10 ${
-          userType === "admin" && "m-5"
-        }  ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7 transition-all duration-300 transform hover:bg-[#2563eb] hover:scale-105 shadow hover:shadow-lg`}
-      >
-        {activeTab === "editProfile" ? t("Save") : t("Save Password")}
-      </button> */}
     </div>
   );
 }
