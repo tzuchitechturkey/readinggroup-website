@@ -176,7 +176,7 @@ class HistoryEntry(TimestampedModel):
 #Category Fot Videos
 class VideoCategory(TimestampedModel):
     """Categories for organizing videos."""
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
@@ -188,7 +188,7 @@ class VideoCategory(TimestampedModel):
 #Category for Posts
 class PostCategory(TimestampedModel):
     """Categories for organizing posts."""
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
@@ -200,7 +200,7 @@ class PostCategory(TimestampedModel):
 #Category for Events
 class EventCategory(TimestampedModel):
     """Categories for organizing events."""
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
@@ -212,7 +212,7 @@ class EventCategory(TimestampedModel):
 #Category for TvPrograms
 class TvProgramCategory(TimestampedModel):
     """Categories for organizing TV programs."""
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
@@ -223,7 +223,7 @@ class TvProgramCategory(TimestampedModel):
     
 class PositionTeamMember(TimestampedModel):
     """Positions for Team Members."""
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
