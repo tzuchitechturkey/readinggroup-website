@@ -234,7 +234,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(UserSerializer(request.user).data)
+        return Response(ProfileUpdateSerializer(request.user).data)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -242,7 +242,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(UserSerializer(instance).data)
+        return Response(ProfileUpdateSerializer(instance).data)
 
 class ForgotPasswordView(APIView):
     """Allow users to reset their password via email."""
