@@ -292,6 +292,15 @@ function PostsList({ onSectionChange }) {
             <TableHead className="text-[#5B6B79] font-medium text-xs">
               <div
                 className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                onClick={() => sortData("type")}
+              >
+                {t("Type")}
+                {getSortIcon("type")}
+              </div>
+            </TableHead>
+            <TableHead className="text-[#5B6B79] font-medium text-xs">
+              <div
+                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("writer")}
               >
                 {t("Writer")}
@@ -359,6 +368,11 @@ function PostsList({ onSectionChange }) {
                 <TableCell className="text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
                     {post.category?.name}
+                  </span>
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
+                    {post.type}
                   </span>
                 </TableCell>
                 <TableCell className="text-[#1E1E1E] text-[11px] py-4">

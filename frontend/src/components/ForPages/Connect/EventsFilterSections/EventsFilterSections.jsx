@@ -18,7 +18,7 @@ function EventsFilterSections() {
     startDate: null,
     endDate: null,
   });
-  const [selectedAuthor, setSelectedAuthor] = useState("");
+  const [selectedWriter, setSelectedWriter] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedContentType, setSelectedContentType] = useState(""); // video or report
   const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -65,9 +65,9 @@ function EventsFilterSections() {
     }
 
     // فلترة حسب الكاتب
-    if (selectedAuthor) {
+    if (selectedWriter) {
       filtered = filtered.filter((item) =>
-        item.author?.toLowerCase().includes(selectedAuthor.toLowerCase())
+        item.writer?.toLowerCase().includes(selectedWriter.toLowerCase())
       );
     }
 
@@ -148,7 +148,7 @@ function EventsFilterSections() {
     applyFilters();
   }, [
     selectedDateRange,
-    selectedAuthor,
+    selectedWriter,
     selectedCountry,
     selectedContentType,
     selectedLanguage,
@@ -181,7 +181,7 @@ function EventsFilterSections() {
       const searchResults = filteredData.filter(
         (item) =>
           item.title?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.author?.toLowerCase().includes(searchValue.toLowerCase()) ||
+          item.writer?.toLowerCase().includes(searchValue.toLowerCase()) ||
           item.category?.toLowerCase().includes(searchValue.toLowerCase())
       );
 
@@ -249,8 +249,8 @@ function EventsFilterSections() {
             <EventsFilter
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
-              selectedAuthor={selectedAuthor}
-              setSelectedAuthor={setSelectedAuthor}
+              selectedWriter={selectedWriter}
+              setSelectedWriter={setSelectedWriter}
               selectedCountry={selectedCountry}
               setSelectedCountry={setSelectedCountry}
               selectedContentType={selectedContentType}
@@ -412,8 +412,8 @@ function EventsFilterSections() {
             <EventsFilter
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
-              selectedAuthor={selectedAuthor}
-              setSelectedAuthor={setSelectedAuthor}
+              selectedWriter={selectedWriter}
+              setSelectedWriter={setSelectedWriter}
               selectedCountry={selectedCountry}
               setSelectedCountry={setSelectedCountry}
               selectedContentType={selectedContentType}

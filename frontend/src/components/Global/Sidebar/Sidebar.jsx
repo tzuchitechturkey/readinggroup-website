@@ -81,21 +81,21 @@ export default function AppSidebar({
         icon: DashboardIcon,
       },
 
-      {
-        title: "Cards Or Photos",
-        onClick: "#",
-        icon: CardsOrPhotos,
-        items: [
-          {
-            title: "All Cards",
-            onClick: () => onSectionChange("cards"),
-          },
-          // {
-          //   title: "All Photos",
-          //   onClick: () => onSectionChange("photos"),
-          // },
-        ],
-      },
+      // {
+      //   title: "Cards Or Photos",
+      //   onClick: "#",
+      //   icon: CardsOrPhotos,
+      //   items: [
+      //     {
+      //       title: "All Cards",
+      //       onClick: () => onSectionChange("cards"),
+      //     },
+      //     // {
+      //     //   title: "All Photos",
+      //     //   onClick: () => onSectionChange("photos"),
+      //     // },
+      //   ],
+      // },
 
       {
         title: "Posts",
@@ -117,11 +117,11 @@ export default function AppSidebar({
         ],
       },
 
-      {
-        title: "Health Posts",
-        onClick: () => onSectionChange("healthPosts"),
-        icon: VaadinHealth,
-      },
+      // {
+      //   title: "Health Posts",
+      //   onClick: () => onSectionChange("healthPosts"),
+      //   icon: VaadinHealth,
+      // },
       {
         title: "Tv",
         onClick: "#",

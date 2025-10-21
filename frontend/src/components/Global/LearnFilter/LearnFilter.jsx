@@ -9,8 +9,8 @@ function LearnFilter({
   t,
   searchDate,
   setSearchDate,
-  author,
-  setAuthor,
+  writer,
+  setWriter,
   category,
   setCategory,
   type,
@@ -44,7 +44,7 @@ function LearnFilter({
   const clearAllFilters = () => {
     setTitleQuery("");
     setSearchDate("");
-    setAuthor("");
+    setWriter("");
     setCategory("");
     setType("");
     setLanguage("");
@@ -98,8 +98,8 @@ function LearnFilter({
     const filters = [];
     if (searchDate)
       filters.push({ type: "date", label: t("Date"), value: searchDate });
-    if (author)
-      filters.push({ type: "author", label: t("Author"), value: author });
+    if (writer)
+      filters.push({ type: "writer", label: t("writer"), value: writer });
     if (category)
       filters.push({ type: "category", label: t("Category"), value: category });
     if (type) filters.push({ type: "type", label: t("Type"), value: type });
@@ -115,8 +115,8 @@ function LearnFilter({
       case "date":
         clearDateFilter();
         break;
-      case "author":
-        setAuthor("");
+      case "writer":
+        setWriter("");
         break;
       case "category":
         setCategory("");
@@ -190,7 +190,7 @@ function LearnFilter({
               {/* Collapsible Advanced Filters */}
               {isAdvancedOpen && (
                 <div className="mt-4 space-y-4">
-                  {/* First Row - Date and Author */}
+                  {/* First Row - Date and writer */}
                   <div className="grid grid-cols-2 gap-4">
                     {/* Date Filter */}
                     <div className="relative">
@@ -220,12 +220,12 @@ function LearnFilter({
                       </button>
                     </div>
 
-                    {/* Author Filter */}
+                    {/* writer Filter */}
                     <input
                       type="text"
-                      placeholder={t("Author")}
-                      value={author}
-                      onChange={(e) => setAuthor(e.target.value)}
+                      placeholder={t("writer")}
+                      value={writer}
+                      onChange={(e) => setWriter(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80"
                     />
                   </div>
@@ -391,12 +391,12 @@ function LearnFilter({
 
               {/* Second Row - Filters */}
               <div className="grid grid-cols-5 gap-3">
-                {/* Author Filter */}
+                {/* writer Filter */}
                 <input
                   type="text"
-                  placeholder={t("Author")}
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder={t("writer")}
+                  value={writer}
+                  onChange={(e) => setWriter(e.target.value)}
                   className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800 placeholder-gray-500"
                 />
 
@@ -469,7 +469,7 @@ function LearnFilter({
               />
             </div>
 
-            {/* Date and Author */}
+            {/* Date and writer */}
             <div className="grid grid-cols-2 gap-3">
               {/* Date Filter */}
               <button
@@ -483,12 +483,12 @@ function LearnFilter({
                 <ChevronDown className="h-4 w-4" />
               </button>
 
-              {/* Author Filter */}
+              {/* writer Filter */}
               <input
                 type="text"
-                placeholder={t("Author")}
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
+                placeholder={t("writer")}
+                value={writer}
+                onChange={(e) => setWriter(e.target.value)}
                 className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800 placeholder-gray-500"
               />
             </div>

@@ -231,9 +231,7 @@ const CreateorEditCardorPhoto = ({
 
     // Handle metadata - parse JSON if it's a string
     try {
-      const metadataObj = formData.metadata
-        ? JSON.parse(formData.metadata)
-        : "";
+      const metadataObj = formData.metadata;
       submitData.append("metadata", JSON.stringify(metadataObj));
     } catch {
       // If JSON parsing fails, send as empty object
@@ -305,7 +303,7 @@ const CreateorEditCardorPhoto = ({
         {/* End Description */}
 
         {/* Start Theme */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Theme")}
           </label>
@@ -315,14 +313,16 @@ const CreateorEditCardorPhoto = ({
             onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
-          >
+          > <option value="" disabled hidden>
+              {t("Select a theme")}
+            </option>
             {THEME_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
         {/* End Theme */}
 
         {/* Start Language */}
@@ -337,6 +337,9 @@ const CreateorEditCardorPhoto = ({
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
+            <option value="" disabled hidden>
+              {t("Select a language")}
+            </option>
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}
@@ -358,6 +361,10 @@ const CreateorEditCardorPhoto = ({
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
+            {" "}
+            <option value="" disabled hidden>
+              {t("Select a Type")}
+            </option>
             {TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {t(option.label)}

@@ -2,7 +2,7 @@ export const readings = [
   {
     id: 1,
     title: "Start with Small Steps, Inspire Big Changes",
-    author: "Anna Diana",
+    writer: "Anna Diana",
     publishDate: "2021-06-15",
     category: "Personal Growth",
     genre: "Non-fiction",
@@ -16,7 +16,7 @@ export const readings = [
   {
     id: 2,
     title: "The Silent Echo of Mountains",
-    author: "David Smith",
+    writer: "David Smith",
     publishDate: "2019-11-03",
     category: "Nature",
     genre: "Fiction",
@@ -30,7 +30,7 @@ export const readings = [
   {
     id: 3,
     title: "AI and the Future of Humanity",
-    author: "Sophia Chen",
+    writer: "Sophia Chen",
     publishDate: "2023-02-10",
     category: "Technology",
     genre: "Research",
@@ -44,7 +44,7 @@ export const readings = [
   {
     id: 4,
     title: "Whispers of Forgotten Cities",
-    author: "Michael Brown",
+    writer: "Michael Brown",
     publishDate: "2020-09-21",
     category: "History",
     genre: "Documentary",
@@ -58,7 +58,7 @@ export const readings = [
   {
     id: 5,
     title: "Cooking with Heritage Flavors",
-    author: "Emma Garcia",
+    writer: "Emma Garcia",
     publishDate: "2022-07-05",
     category: "Lifestyle",
     genre: "Cookbook",
@@ -72,7 +72,7 @@ export const readings = [
   {
     id: 6,
     title: "قراءات في التراث العربي",
-    author: "أحمد محمود",
+    writer: "أحمد محمود",
     publishDate: "2023-05-12",
     category: "Culture",
     genre: "Non-fiction",
@@ -86,7 +86,7 @@ export const readings = [
   {
     id: 7,
     title: "Modern Turkish Literature",
-    author: "Mehmet Özkan",
+    writer: "Mehmet Özkan",
     publishDate: "2021-09-18",
     category: "Culture",
     genre: "Fiction",
@@ -100,7 +100,7 @@ export const readings = [
   {
     id: 8,
     title: "Digital Transformation in Education",
-    author: "Sarah Johnson",
+    writer: "Sarah Johnson",
     publishDate: "2024-01-20",
     category: "Education",
     genre: "Research",
@@ -114,7 +114,7 @@ export const readings = [
   {
     id: 9,
     title: "La Science du Bien-être",
-    author: "Pierre Dubois",
+    writer: "Pierre Dubois",
     publishDate: "2022-11-30",
     category: "Health",
     genre: "Non-fiction",
@@ -128,7 +128,7 @@ export const readings = [
   {
     id: 10,
     title: "Environmental Crisis Solutions",
-    author: "Dr. Lisa Chen",
+    writer: "Dr. Lisa Chen",
     publishDate: "2023-08-14",
     category: "Nature",
     genre: "Documentary",
@@ -142,7 +142,7 @@ export const readings = [
   {
     id: 11,
     title: "Mindful Living Practices",
-    author: "Sophia Williams",
+    writer: "Sophia Williams",
     publishDate: "2023-03-07",
     category: "Personal Growth",
     genre: "Self-Help",
@@ -156,7 +156,7 @@ export const readings = [
   {
     id: 12,
     title: "تاريخ الحضارة الإسلامية",
-    author: "د. فاطمة الزهراء",
+    writer: "د. فاطمة الزهراء",
     publishDate: "2021-12-25",
     category: "History",
     genre: "Non-fiction",

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-import { GetPositions } from "@/api/aboutUs";
+import { GetAllPositions, GetPositions } from "@/api/aboutUs";
 
 function TabsSection({ activeTab, setActiveTab }) {
-  const [positionData, setPositionData] = useState(["All"]);
+  const [positionData, setPositionData] = useState([{ name: "All" }]);
   const getPositions = async () => {
     try {
-      const res = await GetPositions(10, 0);
-      setPositionData((prev) => [...prev, ...(res?.data?.results || [])]);
+      const res = await GetAllPositions();
+      setPositionData([{ name: "All" }, ...(res?.data?.results || [])]);
     } catch (err) {
       console.error(err);
     }
@@ -22,9 +22,9 @@ function TabsSection({ activeTab, setActiveTab }) {
         {positionData.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => setActiveTab(tab.name)}
             className={`px-4 md:px-6 py-3 text-sm md:text-base font-bold transition-colors duration-200 border-b-2 ${
-              activeTab === tab.id
+              activeTab === tab.name
                 ? "text-blue-600 border-blue-600"
                 : "text-gray-700 border-transparent hover:text-blue-600 hover:border-blue-300"
             }`}
@@ -42,15 +42,15 @@ function TabsSection({ activeTab, setActiveTab }) {
             {positionData.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => setActiveTab(tab.name)}
                 className={`flex-shrink-0 px-5 py-3 text-sm font-bold transition-all duration-200 border-b-2 whitespace-nowrap rounded-t-lg ${
-                  activeTab === tab.id
+                  activeTab === tab.name
                     ? "text-blue-600 border-blue-600 bg-blue-50"
                     : "text-gray-700 border-transparent hover:text-blue-600 hover:border-blue-300 hover:bg-gray-50"
                 }`}
                 style={{ fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
-                {tab.label}
+                {tab.name}
               </button>
             ))}
           </div>

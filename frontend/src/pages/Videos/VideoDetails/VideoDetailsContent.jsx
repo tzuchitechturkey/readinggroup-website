@@ -7,12 +7,33 @@ import { useTranslation } from "react-i18next";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
 import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
+import { GetVideoById } from "@/api/videos";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
 
-function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
+const videoDatas = {
+  title: "Tzu Chi Visits Syrian Lands",
+  tags: ["Drama", "History", "War"],
+  duration: "1h 28m",
+  seasons: 3,
+  year: 2024,
+  description:
+    "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
+  backgroundImage: "/authback.jpg",
+  cast: ["Kento Kaku", "Yosuke Eguchi", "Tae Kimura", "John Doe", "Jane Smith"],
+  genres: ["Journey", "Documentary"],
+  themes: ["Dark", "Suspenseful", "Exiting"],
+};
+function VideoDetailsContent({
+  isOpen: externalIsOpen = true,
+  onClose,
+  videoData,
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [isLoading, setIsLoading] = useState(false);
+  // const [videoData, setVideoData] = useState(videoDatas);
   // Use internal state to control modal visibility
   const [internalIsOpen, setInternalIsOpen] = useState(externalIsOpen);
 
@@ -27,7 +48,20 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
 
   // State to control download button clicked status
   const [isDownloadClicked, setIsDownloadClicked] = useState(false);
-
+  // const getVideoData = async ( ) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await GetVideoById(videoId);
+  //     setVideoData(res.data?.data);
+  //   } catch (err) {
+  //     setErrorFn(err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+  //   useEffect(() => {
+  //   getVideoData(videoId);
+  // }, [videoId]);
   // Sync with external isOpen prop when it changes
   useEffect(() => {
     setInternalIsOpen(externalIsOpen);
@@ -52,25 +86,6 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
       navigate(-1);
     }, 300); // Match animation duration in Modal component
   };
-  const videoData = {
-    title: "Tzu Chi Visits Syrian Lands",
-    tags: ["Drama", "History", "War"],
-    duration: "1h 28m",
-    seasons: 3,
-    year: 2024,
-    description:
-      "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
-    backgroundImage: "/authback.jpg",
-    cast: [
-      "Kento Kaku",
-      "Yosuke Eguchi",
-      "Tae Kimura",
-      "John Doe",
-      "Jane Smith",
-    ],
-    genres: ["Journey", "Documentary"],
-    themes: ["Dark", "Suspenseful", "Exiting"],
-  };
 
   return (
     <Modal
@@ -80,6 +95,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
       mountOnEnter={true}
       unmountOnExit={false}
     >
+      {isLoading && <Loader />}
       <div
         className="relative w-full h-full overflow-auto p-0 custom-scrollbar rounded-none"
         style={{
@@ -150,7 +166,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
             >
               <div className="max-w-3xl px-6 md:px-0">
                 <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-4xl mb-3 sm:mb-4 md:mb-6 leading-tight font-bold text-white">
-                  {videoData.title}
+                  {videoDatas.title}
                 </h1>
 
                 {/* Play Button and Controls Row */}
@@ -250,10 +266,10 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
               <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                {videoData.seasons} Seasons · {videoData.year}
+                {videoDatas.seasons} Seasons · {videoDatas.year}
               </p>
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoData.description}
+                {videoDatas.description}
               </p>
             </div>
 
@@ -268,12 +284,12 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                     </span>
                     <span className="font-bold text-gray-900">
                       {showAllCast
-                        ? videoData.cast.join(", ")
-                        : videoData.cast.slice(0, 3).join(", ")}
-                      {!showAllCast && videoData.cast.length > 3 && ", "}
+                        ? videoDatas.cast.join(", ")
+                        : videoDatas.cast.slice(0, 3).join(", ")}
+                      {!showAllCast && videoDatas.cast.length > 3 && ", "}
                     </span>
                   </p>
-                  {videoData.cast.length > 3 && (
+                  {videoDatas.cast.length > 3 && (
                     <button
                       className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
                       onClick={(e) => {
@@ -306,7 +322,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                   <p className="text-sm text-gray-600 leading-snug">
                     <span className="font-medium text-gray-700">Genres: </span>
                     <span className="font-bold text-gray-900">
-                      {videoData.genres.join(", ")}
+                      {videoDatas.genres.join(", ")}
                     </span>
                   </p>
                 </div>
@@ -318,7 +334,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
                       {t("This show is")}:
                     </span>
                     <span className="font-bold text-gray-900">
-                      {videoData.themes.join(", ")}
+                      {videoDatas.themes.join(", ")}
                     </span>
                   </p>
                 </div>
@@ -344,7 +360,7 @@ function VideoDetailsContent({ isOpen: externalIsOpen = true, onClose }) {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={videoData.title}
+        title={videoDatas.title}
       />
     </Modal>
   );

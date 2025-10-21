@@ -26,7 +26,7 @@ const NewsHero = ({
     title: "Supporting Kiran's Path to Healing and Independence",
     description:
       "A young Nepali girl overcomes disability with community support, medical care, and encouragement on her journey to walk again.",
-    author: "Ai Ping Teoh",
+    writer: "Ai Ping Teoh",
     date: "Jan 23, 2025",
     country: "Nepal",
     image: "/testCard.png",
@@ -37,35 +37,35 @@ const NewsHero = ({
     {
       id: 2,
       title: "AI Breakthrough: Machines Now Write Poetry?",
-      author: "Alex Johnson",
+      writer: "Alex Johnson",
       date: "Jan 13, 2025",
       image: "/1-top5.jpg",
     },
     {
       id: 3,
       title: "The Future of Remote Work in 2025",
-      author: "Emily Carter",
+      writer: "Emily Carter",
       date: "Jan 10, 2025",
       image: "/2-top5.jpg",
     },
     {
       id: 4,
       title: "The Truth About Social Media Algorithms",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/3-top5.jpg",
     },
     {
       id: 5,
       title: "The Truth About Social Media Algorithms",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/4-top5.jpg",
     },
     {
       id: 6,
       title: "The Future of Work: Are Offices a Thing of the Past?",
-      author: "Michael Torres",
+      writer: "Michael Torres",
       date: "Jan 13, 2025",
       image: "/testCard.png",
     },
@@ -138,10 +138,10 @@ const NewsHero = ({
         {/* End description */}
         {/* Start Article Info */}
         <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
-          {/* left: author & date */}
+          {/* left: writer & date */}
           <div className="flex items-center gap-4">
             <span className="text-base md:text-lg">
-              {t("By")} {article.author}
+              {t("By")} {article.writer}
             </span>
             <div className="w-px h-6 bg-white opacity-50" />
             <span className="text-base md:text-lg">{article.date}</span>
@@ -223,7 +223,7 @@ const NewsHero = ({
           image: article.image,
           title: article.title,
           subtitle: article.category,
-          author: article.author,
+          writer: article.writer,
           details: `${article.date} • ${article.country}`,
         }}
         onDownloadImage={handleDownloadImage}

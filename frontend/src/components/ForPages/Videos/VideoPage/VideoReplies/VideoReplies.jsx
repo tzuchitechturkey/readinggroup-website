@@ -61,7 +61,7 @@ function VideoReplies({ data, initiallyOpen = false }) {
                 {r.avatar ? (
                   <img
                     src={r.avatar}
-                    alt={r.author || "avatar"}
+                    alt={r.writer || "avatar"}
                     className="w-7 h-7 rounded-full object-cover"
                   />
                 ) : (
@@ -70,7 +70,7 @@ function VideoReplies({ data, initiallyOpen = false }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 text-xs text-gray-600">
                     <span className="font-medium text-gray-900 text-sm">
-                      {r.author || t("User", { defaultValue: "User" })}
+                      {r.writer || t("User", { defaultValue: "User" })}
                     </span>
                     {r.timeAgo && (
                       <span className="text-gray-500">{r.timeAgo}</span>

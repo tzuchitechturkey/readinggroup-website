@@ -70,7 +70,7 @@ function PostDetails({ post, onClose, onEdit }) {
               <div className="flex items-center gap-1">
                 <User className="w-4 h-4" />
                 <span>
-                  {t("By")} {post.writer || t("Unknown Author")}
+                  {t("By")} {post.writer?.name || t("Unknown Writer")}
                 </span>
               </div>
               {post.read_time && (
@@ -101,9 +101,9 @@ function PostDetails({ post, onClose, onEdit }) {
           >
             {getStatusText(post.status)}
           </span>
-          {post.category && (
+          {post.category?.id && (
             <span className="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
-              {post.category}
+              {post.category?.name}
             </span>
           )}
         </div>
@@ -211,7 +211,7 @@ function PostDetails({ post, onClose, onEdit }) {
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Category")}:</span>
               <span className="font-medium">
-                {post.category || t("Uncategorized")}
+                {post.category?.name || t("Uncategorized")}
               </span>
             </div>
             <div className="flex justify-between">
@@ -225,8 +225,10 @@ function PostDetails({ post, onClose, onEdit }) {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">{t("Author")}:</span>
-              <span className="font-medium">{post.writer || t("Unknown")}</span>
+              <span className="text-gray-600">{t("Writer")}:</span>
+              <span className="font-medium">
+                {post.writer?.name || t("Unknown")}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Read Time")}:</span>

@@ -1,13 +1,7 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-import {
-  Star,
-  User,
-  Camera,
-  Calendar,
-  MapPin,
-} from "lucide-react";
+import { Star, User, Camera, Calendar, MapPin } from "lucide-react";
 
 function ContentInfoCard({
   contentData,
@@ -25,13 +19,13 @@ function ContentInfoCard({
   return (
     <div className={`bg-white rounded-xl shadow-sm p-6 mb-6 ${className}`}>
       {/* Header with badge and more options */}
-      <div className="flex items-start justify-between mb-4">
+      {/* <div className="flex items-start justify-between mb-4">
         <div>
           <span className="bg-primary text-white text-xs font-medium px-2 py-1 rounded-md">
             {contentType === "photo" ? contentData.category : contentData.badge}
           </span>
         </div>
-      </div>
+      </div> */}
 
       {/* Title */}
       <h1
@@ -53,7 +47,7 @@ function ContentInfoCard({
         </p>
       )}
 
-      {/* Author/Photographer and Rating Row */}
+      {/* Writer/Photographer and Rating Row */}
       <div
         className={`flex items-center ${
           isRTL ? "flex-row-reverse" : ""
@@ -72,7 +66,7 @@ function ContentInfoCard({
           <span className="text-sm text-primary">
             {contentType === "photo"
               ? contentData.photographer
-              : contentData.author}
+              : contentData.writer}
           </span>
         </div>
         <div

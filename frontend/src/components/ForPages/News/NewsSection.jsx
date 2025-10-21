@@ -9,19 +9,19 @@ const NewsSection = () => {
     {
       id: 1,
       title: "Fitness Trends That Will Dominate This Year!",
-      author: "John Deep",
+      writer: "John Deep",
       date: "Jan 13, 2025",
     },
     {
       id: 2,
       title: "How Gen Z is Changing the Workplace Forever",
-      author: "Ryan Cooper",
+      writer: "Ryan Cooper",
       date: "Jan 13, 2025",
     },
     {
       id: 3,
       title: "Gaming Industry Shakeup: What's Next for Esports?",
-      author: "Jake Wilson",
+      writer: "Jake Wilson",
       date: "Dec 28, 2024",
     },
   ];
@@ -30,28 +30,28 @@ const NewsSection = () => {
     {
       id: 4,
       title: "Inside the World's Most Advanced Smart Cities",
-      author: "Olivia Cartere",
+      writer: "Olivia Cartere",
       date: "Nov 14, 2024",
       image: "/1-top5.jpg",
     },
     {
       id: 5,
       title: "How Streaming Services Are Changing Entertainment",
-      author: "Jason Mitchell",
+      writer: "Jason Mitchell",
       date: "Jan 13, 2025",
       image: "/2-top5.jpg",
     },
     {
       id: 6,
       title: "The Rise of Sustainable Fashion",
-      author: "Emily Thompson",
+      writer: "Emily Thompson",
       date: "Jan 16, 2025",
       image: "/3-top5.jpg",
     },
     {
       id: 7,
       title: "New Space Missions Set to Change Astronomy",
-      author: "Robert Chen",
+      writer: "Robert Chen",
       date: "Jan 16, 2025",
       image: "/4-top5.jpg",
     },
@@ -61,42 +61,42 @@ const NewsSection = () => {
     {
       id: 8,
       title: "The Dark Side of AI: Ethical Concerns & Risks",
-      author: "Anthony Rivera",
+      writer: "Anthony Rivera",
       date: "Jan 13, 2025",
       image: "/testCard.png",
     },
     {
       id: 9,
       title: "How Minimalism is Changing Interior Design",
-      author: "Rachel Stevens",
+      writer: "Rachel Stevens",
       date: "Jan 13, 2025",
       image: "/1-top5.jpg",
     },
     {
       id: 10,
       title: "Hollywood's Biggest Movie Releases This Year",
-      author: "Alex Johnson",
+      writer: "Alex Johnson",
       date: "Jan 15, 2025",
       image: "/2-top5.jpg",
     },
     {
       id: 11,
       title: "Is Cloud Gaming the Future of Play?",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/3-top5.jpg",
     },
     {
       id: 12,
       title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-      author: "Shin tae yong",
+      writer: "Shin tae yong",
       date: "Jan 13, 2025",
       image: "/4-top5.jpg",
     },
     {
       id: 13,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
     },
@@ -106,28 +106,28 @@ const NewsSection = () => {
     {
       id: 14,
       title: "Is Cloud Gaming the Future of Play?",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/3-top5.jpg",
     },
     {
       id: 15,
       title: "Trends You Need to Try This Year",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/testCard.png",
     },
     {
       id: 16,
       title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-      author: "Shin tae yong",
+      writer: "Shin tae yong",
       date: "Jan 13, 2025",
       image: "/4-top5.jpg",
     },
     {
       id: 17,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
     },
@@ -185,7 +185,7 @@ const NewsSection = () => {
         </h3>
         <div className="flex items-center gap-6 text-white/80 text-lg">
           <span>
-            {t("By")} {article.author}
+            {t("By")} {article.writer}
           </span>
           <div className="w-px h-6 bg-white/50" />
           <span>{article.date}</span>
@@ -201,7 +201,7 @@ const NewsSection = () => {
       </h3>
       <div className="flex items-center gap-6 text-white/80 text-lg">
         <span>
-          {t("By")} {article.author}
+          {t("By")} {article.writer}
         </span>
         <div className="w-px h-6 bg-white/50" />
         <span>{article.date}</span>
