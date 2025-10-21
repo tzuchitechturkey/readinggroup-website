@@ -68,7 +68,7 @@ class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    search_fields = ("title", "author", "category", "section", "country")
+    search_fields = ("title", "writer", "category", "section", "country")
     ordering_fields = ("date", "created_at")
     filterset_fields = ("section", "category", "country", "language", "report_type")
 

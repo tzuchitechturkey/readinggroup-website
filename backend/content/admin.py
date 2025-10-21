@@ -32,7 +32,7 @@ class PostAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     list_display = ("title", "section", "category", "language", "date")
     list_filter = ("section", "category", "language")
-    search_fields = ("title", "author", "category")
+    search_fields = ("title", "writer", "category")
 
 
 @admin.register(MediaCard)

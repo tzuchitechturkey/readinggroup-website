@@ -64,7 +64,7 @@ class Post(TimestampedModel):
 class Event(TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)
-    author = models.CharField(max_length=255)
+    writer = models.CharField(max_length=255)
     date = models.DateField()
     image = models.ImageField(upload_to="events/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
