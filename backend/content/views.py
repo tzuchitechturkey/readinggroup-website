@@ -1,5 +1,6 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.pagination import LimitOffsetPagination
 
 from .models import (
     Event,
@@ -93,6 +94,14 @@ class TeamMemberViewSet(BaseContentViewSet):
     serializer_class = TeamMemberSerializer
     search_fields = ("name", "job_title", "position__name")
     ordering_fields = ("name", "created_at")
+    pagination_class = LimitOffsetPagination
+
+    def list(self, request, *args, **kwargs):
+        if 'limit' in request.query_params or 'offset' in request.query_params:
+            return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class HistoryEntryViewSet(BaseContentViewSet):

@@ -38,7 +38,7 @@ class Video(TimestampedModel):
     class Meta:
         ordering = ("-published_at", "-created_at")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return self.title
 
 
@@ -68,7 +68,7 @@ class Post(TimestampedModel):
     class Meta:
         ordering = ("-published_at", "-created_at")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return self.title
 
 class Event(TimestampedModel):
@@ -89,7 +89,7 @@ class Event(TimestampedModel):
     class Meta:
         ordering = ("-date", "title")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return f"{self.title} ({self.get_section_display()})"
 
 
@@ -107,7 +107,7 @@ class TvProgram(TimestampedModel):
     class Meta:
         ordering = ("-air_date", "title")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return self.title
 
 
@@ -127,7 +127,7 @@ class WeeklyMoment(TimestampedModel):
     class Meta:
         ordering = ("-created_at", "title")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return self.title
 
 
@@ -144,7 +144,7 @@ class TeamMember(TimestampedModel):
     class Meta:
         ordering = ("name",)
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return self.name
 
 
@@ -159,7 +159,7 @@ class HistoryEntry(TimestampedModel):
     class Meta:
         ordering = ("story_date", "title")
 
-    def __str__(self) -> str:  # pragma: no cover - trivial
+    def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
     
     
