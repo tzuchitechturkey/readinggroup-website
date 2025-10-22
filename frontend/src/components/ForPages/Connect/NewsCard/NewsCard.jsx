@@ -25,7 +25,7 @@ const NewsCard = ({ t, article, onClick, imgClassName }) => (
         className={`flex items-center gap-3 sm:gap-6 text-xs sm:text-sm text-text/80 `}
       >
         <span className="truncate max-w-[120px] sm:max-w-none">
-          {t("By")} {article.author}
+          {t("By")} {article.writer}
         </span>
         <div className={`w-px bg-text h-4 sm:h-6 flex-shrink-0`} />
         <span className="whitespace-nowrap">{article.date}</span>

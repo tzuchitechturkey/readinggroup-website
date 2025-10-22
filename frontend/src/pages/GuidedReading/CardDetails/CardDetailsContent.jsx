@@ -13,16 +13,43 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
+import { GetPostById } from "@/api/posts";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
 
+const cardDatas = {
+  id: 1,
+  title: "Tzu Chi Visits Syrian Lands",
+  badge: "Incredible Card",
+  writer: "Jenny Wilson",
+  rating: 4,
+  reviews: "2.1",
+  description:
+    "Doctors accompanied and Kim examined patient's checkups include a visit to Universal College of Medical Sciences and Teaching Hospital (UCMS) to monitor the administration centre for Likelihood Checklist (UGCS) in Ramage, near Kathmandu. In case the family's transfer, Nurse Briana Shrestha explained the medical process and supported outreach health insurance Meanwhile, volunteers helped social discussions, answering Kiran and her father's questions about volunteering, making sure she remained healthy during her stay at UCMS, the only source of income, which had been damaged in an accident. After five hours of report of injury received, Tzu Chi staff who were staying she received support to survive their journey to support her family.",
+  video: "/videos/sample-video.mp4",
+  tags: ["Medical", "Volunteer", "Support", "Community"],
+};
 function CardDetailsContent() {
   const { t, i18n } = useTranslation();
-  const { id } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const { id: paramId } = useParams();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [userRating, setUserRating] = useState(0); // تقييم المستخدم
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-
+  const [cardData, setCardData] = useState(cardDatas);
+  const getCardData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetPostById(paramId);
+      setCardData(res.data?.data);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // تطبيق RTL عند تغيير اللغة
   useEffect(() => {
     const isRTL = i18n.language === "ar";
@@ -70,26 +97,11 @@ function CardDetailsContent() {
     }
   };
 
-  // Mock data - في التطبيق الحقيقي سيتم جلب البيانات من API بناء على id
-  // يمكن استخدام id لجلب البيانات: const cardData = await fetchCardDetails(id);
-  const cardData = {
-    id: id || 1,
-    title: "Tzu Chi Visits Syrian Lands",
-    badge: "Incredible Card",
-    author: "Jenny Wilson",
-    rating: 4,
-    reviews: "2.1",
-    description:
-      "Doctors accompanied and Kim examined patient's checkups include a visit to Universal College of Medical Sciences and Teaching Hospital (UCMS) to monitor the administration centre for Likelihood Checklist (UGCS) in Ramage, near Kathmandu. In case the family's transfer, Nurse Briana Shrestha explained the medical process and supported outreach health insurance Meanwhile, volunteers helped social discussions, answering Kiran and her father's questions about volunteering, making sure she remained healthy during her stay at UCMS, the only source of income, which had been damaged in an accident. After five hours of report of injury received, Tzu Chi staff who were staying she received support to survive their journey to support her family.",
-    video: "/videos/sample-video.mp4",
-    tags: ["Medical", "Volunteer", "Support", "Community"],
-  };
-
   // تنسيق البيانات لتتماشى مع مكون CommentsSection
   const comments = [
     {
       id: "c1",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/icons/User 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -100,7 +112,7 @@ function CardDetailsContent() {
         {
           id: 1,
           avatar: "/icons/User 1.png",
-          author: "Ali Ahmed",
+          writer: "Ali Ahmed",
           timeAgo: "2h ago",
           edited: false,
           text: "This is really inspiring work by Tzu Chi Foundation.",
@@ -109,7 +121,7 @@ function CardDetailsContent() {
         {
           id: 2,
           avatar: "/icons/User 1.png",
-          author: "Sara Mohamed",
+          writer: "Sara Mohamed",
           timeAgo: "30m ago",
           edited: true,
           text: "Thank you for sharing this meaningful content 🙂",
@@ -119,7 +131,7 @@ function CardDetailsContent() {
     },
     {
       id: "c2",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/icons/User 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -129,7 +141,7 @@ function CardDetailsContent() {
     },
     {
       id: "c3",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/icons/User 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -139,7 +151,7 @@ function CardDetailsContent() {
     },
     {
       id: "c4",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/icons/User 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -155,7 +167,7 @@ function CardDetailsContent() {
       id: index + 1,
       title: "Report - Community Gathering",
       badge: "STARTING 16:00 PM",
-      author: "Source",
+      writer: "Source",
       rating: 4.8,
       reviews: "2.1",
       type: "Community",
@@ -163,9 +175,12 @@ function CardDetailsContent() {
     }));
 
   const isRTL = i18n.language === "ar";
-
+  useEffect(() => {
+    getCardData();
+  }, [paramId]);
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
+      {isLoading && <Loader />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
@@ -176,7 +191,7 @@ function CardDetailsContent() {
                 <div className="aspect-video bg-black rounded-t-xl flex items-center justify-center">
                   <div className="relative w-full h-full">
                     <img
-                      src="/azem.png"
+                      src={cardData?.image}
                       alt="Video Thumbnail"
                       className="w-full h-full object-cover"
                     />
@@ -252,7 +267,7 @@ function CardDetailsContent() {
           image: "/azem.png",
           title: cardData.title,
           subtitle: cardData.badge,
-          author: cardData.author,
+          writer: cardData.writer,
           details: `★ ${cardData.rating} (${cardData.reviews}k)`,
         }}
         onDownloadImage={handleDownloadImage}

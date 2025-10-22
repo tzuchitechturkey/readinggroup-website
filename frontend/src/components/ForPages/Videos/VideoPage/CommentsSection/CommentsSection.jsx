@@ -34,7 +34,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
   const defaultComments = [
     {
       id: "c1",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -45,7 +45,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         {
           id: 1,
           avatar: "https://i.pravatar.cc/50?img=1",
-          author: "Ali Ahmed",
+          writer: "Ali Ahmed",
           timeAgo: "2h ago",
           edited: false,
           text: "أنا أعتقد أن الحل المناسب هو استخدام useEffect.",
@@ -54,7 +54,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         {
           id: 2,
           avatar: "https://i.pravatar.cc/50?img=2",
-          author: "Sara Mohamed",
+          writer: "Sara Mohamed",
           timeAgo: "30m ago",
           edited: true,
           text: "تم تعديل ردي ليكون أوضح 🙂",
@@ -62,7 +62,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         },
         {
           id: 3,
-          author: "Anonymous",
+          writer: "Anonymous",
           timeAgo: "Just now",
           text: "شكراً على الطرح!",
         },
@@ -70,7 +70,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
     },
     {
       id: "c2",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -81,7 +81,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         {
           id: 1,
           avatar: "https://i.pravatar.cc/50?img=1",
-          author: "Ali Ahmed",
+          writer: "Ali Ahmed",
           timeAgo: "2h ago",
           edited: false,
           text: "أنا أعتقد أن الحل المناسب هو استخدام useEffect.",
@@ -90,7 +90,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         {
           id: 2,
           avatar: "https://i.pravatar.cc/50?img=2",
-          author: "Sara Mohamed",
+          writer: "Sara Mohamed",
           timeAgo: "30m ago",
           edited: true,
           text: "تم تعديل ردي ليكون أوضح 🙂",
@@ -98,7 +98,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         },
         {
           id: 3,
-          author: "Anonymous",
+          writer: "Anonymous",
           timeAgo: "Just now",
           text: "شكراً على الطرح!",
         },
@@ -106,7 +106,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
     },
     {
       id: "c3",
-      author: "Jenny Wilson",
+      writer: "Jenny Wilson",
       avatar: "/Beared Guy02-min 1.png",
       timeAgo: "3 days ago",
       edited: true,
@@ -166,7 +166,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
         const newReply = {
           id: `r-${Date.now()}`,
           avatar: "https://i.pravatar.cc/50?img=12",
-          author: "You",
+          writer: "You",
           timeAgo: "Just now",
           edited: false,
           text: replyText.trim(),
@@ -254,14 +254,14 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
               <div className="flex items-start gap-2">
                 <img
                   src={c.avatar}
-                  alt={c.author}
+                  alt={c.writer}
                   className="w-8 h-8 rounded-full object-cover"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 ">
                     {/* Start Writer Name */}
                     <span className="font-semibold text-sm text-gray-900">
-                      {c.author}
+                      {c.writer}
                     </span>
                     {/* End Writer Name */}
                     {/* Start Date */}

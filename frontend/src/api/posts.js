@@ -5,6 +5,11 @@ export async function GetPosts(limit, offset, search) {
     `/posts/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
+export async function GetPostsbyFilter(limit, offset, filter) {
+  return await axios.get(
+    `/posts/?limit=${limit}&offset=${offset}&filter=${filter}`
+  );
+}
 
 export async function CreatePost(data) {
   return await axios.post(`/posts/`, data);

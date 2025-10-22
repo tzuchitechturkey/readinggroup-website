@@ -4,7 +4,7 @@ export const EventsData = {
     {
       id: 101,
       title: "Climate Change: Are We Doing Enough?",
-      author: "Sarah Johnson",
+      writer: "Sarah Johnson",
       date: "Jan 15, 2025",
       image: "/1-top5.jpg",
       category: "Environment",
@@ -16,7 +16,7 @@ export const EventsData = {
     {
       id: 102,
       title: "The Future of Remote Work: Pros and Cons",
-      author: "Mike Chen",
+      writer: "Mike Chen",
       date: "Jan 14, 2025",
       image: "/2-top5.jpg",
       category: "Business",
@@ -28,7 +28,7 @@ export const EventsData = {
     {
       id: 103,
       title: "Social Media Impact on Mental Health",
-      author: "Dr. Lisa Park",
+      writer: "Dr. Lisa Park",
       date: "Jan 12, 2025",
       image: "/3-top5.jpg",
       category: "Health & Wellness",
@@ -40,7 +40,7 @@ export const EventsData = {
     {
       id: 104,
       title: "AI Ethics: Where Do We Draw the Line?",
-      author: "Robert Kim",
+      writer: "Robert Kim",
       date: "Jan 10, 2025",
       image: "/4-top5.jpg",
       category: "Tech & Innovation",
@@ -56,7 +56,7 @@ export const EventsData = {
     {
       id: 201,
       title: "Celebrity Scandal Rocks Hollywood",
-      author: "Emma Davis",
+      writer: "Emma Davis",
       date: "Jan 16, 2025",
       image: "/testCard.png",
       category: "Entertainment",
@@ -68,7 +68,7 @@ export const EventsData = {
     {
       id: 202,
       title: "Political Drama Unfolds in Parliament",
-      author: "James Wilson",
+      writer: "James Wilson",
       date: "Jan 15, 2025",
       image: "/1-top5.jpg",
       category: "Politics",
@@ -80,7 +80,7 @@ export const EventsData = {
     {
       id: 203,
       title: "Sports Team Rivalry Reaches New Heights",
-      author: "Tom Rodriguez",
+      writer: "Tom Rodriguez",
       date: "Jan 13, 2025",
       image: "/2-top5.jpg",
       category: "Sports",
@@ -92,7 +92,7 @@ export const EventsData = {
     {
       id: 204,
       title: "Tech Company Lawsuit Creates Waves",
-      author: "Amanda Lee",
+      writer: "Amanda Lee",
       date: "Jan 11, 2025",
       image: "/3-top5.jpg",
       category: "Business",
@@ -108,7 +108,7 @@ export const EventsData = {
     {
       id: 301,
       title: "Global Tech Conference 2025 Highlights",
-      author: "David Thompson",
+      writer: "David Thompson",
       date: "Jan 17, 2025",
       image: "/4-top5.jpg",
       category: "Tech & Innovation",
@@ -120,7 +120,7 @@ export const EventsData = {
     {
       id: 302,
       title: "Climate Summit 2025: Key Agreements Reached",
-      author: "Maria Garcia",
+      writer: "Maria Garcia",
       date: "Jan 16, 2025",
       image: "/testCard.png",
       category: "Environment",
@@ -132,7 +132,7 @@ export const EventsData = {
     {
       id: 303,
       title: "Olympic Games 2024: Behind the Scenes",
-      author: "Pierre Dubois",
+      writer: "Pierre Dubois",
       date: "Jan 14, 2025",
       image: "/1-top5.jpg",
       category: "Sports",
@@ -144,7 +144,7 @@ export const EventsData = {
     {
       id: 304,
       title: "Annual Music Festival Breaks Records",
-      author: "Jessica Brown",
+      writer: "Jessica Brown",
       date: "Jan 12, 2025",
       image: "/2-top5.jpg",
       category: "Entertainment",
@@ -159,7 +159,7 @@ export const EventsData = {
     {
       id: 1,
       title: "Fitness Trends That Will Dominate This Year!",
-      author: "John Deep",
+      writer: "John Deep",
       date: "Jan 13, 2025",
       category: "Health & Wellness",
       report_type: "news",
@@ -170,7 +170,7 @@ export const EventsData = {
     {
       id: 2,
       title: "How Gen Z is Changing the Workplace Forever",
-      author: "Ryan Cooper",
+      writer: "Ryan Cooper",
       date: "Jan 13, 2025",
       category: "Business & Economy",
       report_type: "video",
@@ -181,7 +181,7 @@ export const EventsData = {
     {
       id: 3,
       title: "Gaming Industry Shakeup: What's Next for Esports?",
-      author: "Jake Wilson",
+      writer: "Jake Wilson",
       date: "Dec 28, 2024",
       category: "Gaming",
       report_type: "news",
@@ -195,7 +195,7 @@ export const EventsData = {
     {
       id: 4,
       title: "Inside the World's Most Advanced Smart Cities",
-      author: "Olivia Cartere",
+      writer: "Olivia Cartere",
       date: "Nov 14, 2024",
       image: "/1-top5.jpg",
       category: "Tech & Innovation",
@@ -207,7 +207,7 @@ export const EventsData = {
     {
       id: 5,
       title: "How Streaming Services Are Changing Entertainment",
-      author: "Jason Mitchell",
+      writer: "Jason Mitchell",
       date: "Jan 13, 2025",
       image: "/2-top5.jpg",
       category: "Entertainment",
@@ -219,7 +219,7 @@ export const EventsData = {
     {
       id: 6,
       title: "The Rise of Sustainable Fashion",
-      author: "Emily Thompson",
+      writer: "Emily Thompson",
       date: "Jan 16, 2025",
       image: "/3-top5.jpg",
       category: "Lifestyle",
@@ -231,7 +231,7 @@ export const EventsData = {
     {
       id: 7,
       title: "New Space Missions Set to Change Astronomy",
-      author: "Robert Chen",
+      writer: "Robert Chen",
       date: "Jan 16, 2025",
       image: "/4-top5.jpg",
       category: "Science",
@@ -246,7 +246,7 @@ export const EventsData = {
     {
       id: 8,
       title: "The Dark Side of AI: Ethical Concerns & Risks",
-      author: "Anthony Rivera",
+      writer: "Anthony Rivera",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Tech & Innovation",
@@ -258,7 +258,7 @@ export const EventsData = {
     {
       id: 9,
       title: "How Minimalism is Changing Interior Design",
-      author: "Rachel Stevens",
+      writer: "Rachel Stevens",
       date: "Jan 13, 2025",
       image: "/1-top5.jpg",
       category: "Lifestyle",
@@ -270,7 +270,7 @@ export const EventsData = {
     {
       id: 10,
       title: "Hollywood's Biggest Movie Releases This Year",
-      author: "Alex Johnson",
+      writer: "Alex Johnson",
       date: "Jan 15, 2025",
       image: "/2-top5.jpg",
       category: "Entertainment",
@@ -282,7 +282,7 @@ export const EventsData = {
     {
       id: 11,
       title: "Is Cloud Gaming the Future of Play?",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/3-top5.jpg",
       category: "Gaming",
@@ -294,7 +294,7 @@ export const EventsData = {
     {
       id: 12,
       title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-      author: "Shin tae yong",
+      writer: "Shin tae yong",
       date: "Jan 13, 2025",
       image: "/4-top5.jpg",
       category: "Entertainment",
@@ -306,7 +306,7 @@ export const EventsData = {
     {
       id: 13,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Business",
@@ -321,7 +321,7 @@ export const EventsData = {
     {
       id: 14,
       title: "Is Cloud Gaming the Future of Play?",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/3-top5.jpg",
       category: "Gaming",
@@ -333,7 +333,7 @@ export const EventsData = {
     {
       id: 15,
       title: "Trends You Need to Try This Year",
-      author: "John Doe",
+      writer: "John Doe",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Lifestyle",
@@ -345,7 +345,7 @@ export const EventsData = {
     {
       id: 16,
       title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-      author: "Shin tae yong",
+      writer: "Shin tae yong",
       date: "Jan 13, 2025",
       image: "/4-top5.jpg",
       category: "Entertainment",
@@ -357,7 +357,7 @@ export const EventsData = {
     {
       id: 17,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Business",
@@ -369,7 +369,7 @@ export const EventsData = {
     {
       id: 18,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Business",
@@ -381,7 +381,7 @@ export const EventsData = {
     {
       id: 19,
       title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-      author: "Jim corry",
+      writer: "Jim corry",
       date: "Jan 13, 2025",
       image: "/testCard.png",
       category: "Business",

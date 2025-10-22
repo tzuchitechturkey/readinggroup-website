@@ -6,39 +6,54 @@ import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
-import { readings } from "@/mock/reading.js";
+import { GetPostsbyFilter } from "@/api/posts";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function GuidedReadingContent() {
   const { t } = useTranslation();
 
   // Filter states
   const [searchDate, setSearchDate] = useState("");
-  const [author, setAuthor] = useState("");
+  const [writer, setWriter] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
   const [language, setLanguage] = useState("");
   const [source, setSource] = useState("");
   const [titleQuery, setTitleQuery] = useState("");
-
+  const [data, setData] = useState([]);
   // Results state
   const [filteredReadings, setFilteredReadings] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
-
+  const [weeklyMomentData, setWeeklyMomentData] = useState([]);
+  const [weeklyGuidData, setWeeklyGuidData] = useState([]);
   // Pagination state
-  const [currentOffset, setCurrentOffset] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const limit = 10;
 
+  const getData = async (page) => {
+    setIsLoading(true);
+    const offset = page * 10;
+    try {
+      const res = await GetPostsbyFilter(limit, offset, filter);
+      setData(res.data?.results);
+      setTotalRecords(res.data?.count);
+    } catch (err) {
+      setErrorFn(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Apply filters function - simulates API call
-  const applyFilters = (offset = 0, appendResults = false) => {
+  const applyFilters = () => {
     setIsLoading(true);
 
     // Simulate API delay
     setTimeout(() => {
       // Filter all data first (this simulates backend filtering)
-      const allFiltered = readings.filter((reading) => {
+      const allFiltered = data.filter((reading) => {
         // Title search
         if (
           titleQuery &&
@@ -47,10 +62,10 @@ function GuidedReadingContent() {
           return false;
         }
 
-        // Author filter
+        // writer filter
         if (
-          author &&
-          !reading.author.toLowerCase().includes(author.toLowerCase())
+          writer &&
+          !reading?.writer?.toLowerCase().includes(writer.toLowerCase())
         ) {
           return false;
         }
@@ -91,29 +106,37 @@ function GuidedReadingContent() {
         setFilteredReadings((prev) => [...prev, ...paginatedResults]);
       } else {
         setFilteredReadings(paginatedResults);
-        setCurrentOffset(offset);
       }
-
-      setTotalCount(allFiltered.length);
-      setHasMore(offset + limit < allFiltered.length);
-      setIsSearchPerformed(true);
-      setIsLoading(false);
     }, 500); // Simulate 500ms API delay
   };
 
   // Load more function
   const handleLoadMore = () => {
-    const newOffset = currentOffset + limit;
-    setCurrentOffset(newOffset);
-    applyFilters(newOffset, true);
+    applyFilters();
   };
 
-  // Auto-apply filters when any filter changes (reset pagination)
-  useEffect(() => {
-    setCurrentOffset(0);
-    applyFilters(0, false);
-  }, [author, category, type, language, source, titleQuery, searchDate]);
+  const getWeeklyGuidData = async () => {
+    try {
+      const res = await GetWeeklyGuidData();
+      setWeeklyGuidData(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getWeeklyMomentData = async () => {
+    try {
+      const res = await GetWeeklyMomentData();
+      setWeeklyMomentData(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  useEffect(() => {
+    // getData(0)
+    // getWeeklyGuidData();
+    // getWeeklyMomentData();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Start Header */}
@@ -143,8 +166,8 @@ function GuidedReadingContent() {
         t={t}
         searchDate={searchDate}
         setSearchDate={setSearchDate}
-        author={author}
-        setAuthor={setAuthor}
+        writer={writer}
+        setWriter={setWriter}
         category={category}
         setCategory={setCategory}
         type={type}
@@ -166,7 +189,7 @@ function GuidedReadingContent() {
           <FilteredResults
             readings={filteredReadings}
             isSearchPerformed={isSearchPerformed}
-            totalCount={totalCount}
+            totalCount={totalRecords}
             hasMore={hasMore}
             isLoading={isLoading}
             onLoadMore={handleLoadMore}

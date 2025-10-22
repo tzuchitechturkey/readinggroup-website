@@ -13,7 +13,7 @@ const RecommendationNewsCard = ({ t, article, onClick }) => (
       {/* Start ArticleMetadata */}
       <div className={`flex items-center gap-4 sm:gap-6 text-sm sm:text-base text-text/80 `}>
         <span className="truncate max-w-[150px] sm:max-w-none">
-          {t("By")} {article.author}
+          {t("By")} {article.writer}
         </span>
         <div className={`w-px bg-text h-5 sm:h-6 flex-shrink-0`} />
         <span className="whitespace-nowrap">{article.date}</span>

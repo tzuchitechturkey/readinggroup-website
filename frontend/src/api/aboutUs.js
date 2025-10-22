@@ -49,10 +49,12 @@ export async function GetPositions(limit, offset, search = "") {
     `/position-team-members/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
+export async function GetAllPositions() {
+  return await axios.get(`/position-team-members/`);
+}
+
 export async function filterPositions(positionName) {
-  return await axios.get(
-    `/position-team-members/?positionName=${positionName}`
-  );
+  return await axios.get(`/position-team-members/?search=${positionName}`);
 }
 
 export async function CreatePosition(data) {

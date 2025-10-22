@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 function EventsFilter({
   selectedDateRange,
   setSelectedDateRange,
-  selectedAuthor,
-  setSelectedAuthor,
+  selectedWriter,
+  setSelectedWriter,
   selectedCountry,
   setSelectedCountry,
   selectedContentType,
@@ -42,7 +42,7 @@ function EventsFilter({
   };
 
   const clearAllFilters = () => {
-    setSelectedAuthor("");
+    setSelectedWriter("");
     setSelectedCountry("");
     setSelectedContentType("");
     setSelectedLanguage("");
@@ -113,24 +113,24 @@ function EventsFilter({
         </div>
         {/* End Content Type Filter */}
 
-        {/* Start Author Filter */}
+        {/* Start Writer Filter */}
         <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
-              {t("Author")}
+              {t("Writer")}
             </h3>
           </div>
           <div>
             <input
               type="text"
-              placeholder={t("Search by author...")}
-              value={selectedAuthor}
-              onChange={(e) => setSelectedAuthor(e.target.value)}
+              placeholder={t("Search by writer...")}
+              value={selectedWriter}
+              onChange={(e) => setSelectedWriter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         </div>
-        {/* End Author Filter */}
+        {/* End Writer Filter */}
 
         {/* Start Country Filter */}
         <div className="mb-2 lg:mb-5">

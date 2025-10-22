@@ -76,7 +76,7 @@ export default function HomeContent() {
     id: "guide-1",
     badge: t("New"),
     title: t("Start with Small Steps, Inspire Big Change"),
-    author: t("Anas Daas"),
+    writer: t("Anas Daas"),
     rating: 4.6,
     reviews: 1.2,
   };

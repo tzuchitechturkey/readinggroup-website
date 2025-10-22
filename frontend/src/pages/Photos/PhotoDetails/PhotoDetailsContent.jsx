@@ -94,7 +94,7 @@ function PhotoDetailsContent() {
   const comments = [
     {
       id: "c1",
-      author: "Ahmed Hassan",
+      writer: "Ahmed Hassan",
       avatar: "/icons/User 1.png",
       timeAgo: "2 days ago",
       edited: false,
@@ -105,7 +105,7 @@ function PhotoDetailsContent() {
         {
           id: 1,
           avatar: "/icons/User 1.png",
-          author: "Maya Al-Zahra",
+          writer: "Maya Al-Zahra",
           timeAgo: "1 day ago",
           edited: false,
           text: "I completely agree! The photographer really captured the essence of our community.",
@@ -114,7 +114,7 @@ function PhotoDetailsContent() {
         {
           id: 2,
           avatar: "/icons/User 1.png",
-          author: "Omar Khalil",
+          writer: "Omar Khalil",
           timeAgo: "18h ago",
           edited: true,
           text: "These photos bring back such wonderful memories from that day 📸",
@@ -124,7 +124,7 @@ function PhotoDetailsContent() {
     },
     {
       id: "c2",
-      author: "Layla Ibrahim",
+      writer: "Layla Ibrahim",
       avatar: "/icons/User 1.png",
       timeAgo: "1 day ago",
       edited: false,
@@ -134,7 +134,7 @@ function PhotoDetailsContent() {
     },
     {
       id: "c3",
-      author: "Khalid Mansour",
+      writer: "Khalid Mansour",
       avatar: "/icons/User 1.png",
       timeAgo: "1 day ago",
       edited: true,
@@ -315,7 +315,7 @@ function PhotoDetailsContent() {
           image: photoData.image,
           title: photoData.title,
           subtitle: photoData.subtitle,
-          author: photoData.photographer,
+          writer: photoData.photographer,
           details: `${photoData.location} • ${photoData.date}`,
         }}
         onDownloadImage={handleDownloadImage}

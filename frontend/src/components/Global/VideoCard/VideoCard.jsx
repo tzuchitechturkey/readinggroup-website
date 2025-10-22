@@ -81,6 +81,7 @@ const VideoCard = ({ item, showUnit = false, className = "" }) => {
           <VideoDetailsContent
             isOpen={isModalOpen}
             onClose={handleCloseModal}
+            videoData={item}
           />,
           document.body
         )}

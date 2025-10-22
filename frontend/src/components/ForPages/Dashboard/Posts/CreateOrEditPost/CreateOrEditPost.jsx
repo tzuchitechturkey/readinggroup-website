@@ -38,13 +38,19 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     status: "draft",
     is_active: true,
     read_time: "",
-    tags: [],
+    tags: "",
+    language: "",
+    type: "",
+    image: null,
+    image_url: "",
+    metadata: "",
   });
 
-  const [tagInput, setTagInput] = useState("");
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
+  const [tagInput, setTagInput] = useState("");
+
   const getWriters = async (searchVal = "") => {
     try {
       const res = await GetAllUsers(searchVal);
@@ -65,7 +71,14 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   // Status options
   const statusOptions = [
     { value: "draft", label: "Draft" },
-    { value: "published", label: "Published" },
+    { value: "publish", label: "Publish" },
+  ];
+
+  // Type options
+  const typeOptions = [
+    { value: "card", label: "Card" },
+    { value: "photo", label: "Photo" },
+    { value: "reading", label: "Reading" },
   ];
 
   // Initialize form data when editing
@@ -82,7 +95,12 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         status: post.status || "draft",
         is_active: post.is_active !== undefined ? post.is_active : true,
         read_time: post.read_time || "",
-        tags: post.tags || [],
+        tags: post.tags || "",
+        language: post.language || "",
+        type: post.type || "",
+        image: null,
+        image_url: post.image_url || "",
+        metadata: post.metadata || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -114,10 +132,20 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
+
+    let newValue;
+    if (type === "checkbox") {
+      newValue = checked;
+    } else if (type === "file") {
+      newValue = files[0];
+    } else {
+      newValue = value;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: newValue,
     }));
 
     // Clear error when user starts typing
@@ -176,7 +204,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       }));
     }
   };
-
   // Handle tag input
   const handleTagInput = (e) => {
     if (e.key === "Enter" && tagInput.trim()) {
@@ -198,7 +225,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
-
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -227,6 +253,30 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       newErrors.category = t("Category is required");
     }
 
+    if (!formData.status) {
+      newErrors.status = t("Status is required");
+    }
+
+    if (!formData.read_time) {
+      newErrors.read_time = t("Read time is required");
+    }
+
+    if (!formData.tags || formData.tags.length === 0) {
+      newErrors.tags = t("Tags are required");
+    }
+
+    if (!formData.language || !formData.language.trim()) {
+      newErrors.language = t("Language is required");
+    }
+
+    if (!formData.type) {
+      newErrors.type = t("Type is required");
+    }
+
+    if (!formData.image && !formData.image_url && !post) {
+      newErrors.image = t("Image is required");
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -239,14 +289,44 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       return;
     }
 
-    const postData = {
-      ...formData,
-      id: post ? post.id : Date.now(),
-      category: formData?.category.id || formData?.category,
-      created_at: post ? post.created_at : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      views: post ? post.views : 0,
-    };
+    // Create FormData for file upload
+    const postData = new FormData();
+
+    // Add all text fields
+    postData.append("title", formData.title);
+    postData.append("subtitle", formData.subtitle);
+    postData.append("excerpt", formData.excerpt);
+    postData.append("body", formData.body);
+    postData.append("writer", formData.writer);
+    postData.append("category", formData?.category?.id || formData?.category);
+    postData.append("status", formData.status);
+    postData.append("is_active", formData.is_active);
+    postData.append("read_time", formData.read_time);
+    postData.append("tags", formData.tags);
+    postData.append("language", formData.language);
+    postData.append("type", formData.type);
+
+    // Add image if selected
+    if (formData.image) {
+      postData.append("image", formData.image);
+    }
+
+    // Add image_url if provided
+    if (formData.image_url) {
+      postData.append("image_url", formData.image_url);
+    }
+
+    // Add metadata if provided
+    if (formData.metadata) {
+      postData.append("metadata", formData.metadata);
+    }
+
+    // Add timestamps
+    if (post) {
+      postData.append("created_at", post.created_at);
+      postData.append("views", post.views || 0);
+    }
+    postData.append("updated_at", new Date().toISOString());
 
     setIsLoading(true);
     try {
@@ -300,7 +380,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  console.log(formData);
   return (
     <div className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto">
       {isLoading && <Loader />}
@@ -324,7 +403,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-4">
-            {/* Title */}
+            {/* Start Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Title")} *
@@ -340,8 +419,8 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 <p className="text-red-500 text-xs mt-1">{errors.title}</p>
               )}
             </div>
-
-            {/* Subtitle */}
+            {/* End Title */}
+            {/* Start Subtitle */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Subtitle")} *
@@ -357,17 +436,20 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 <p className="text-red-500 text-xs mt-1">{errors.subtitle}</p>
               )}
             </div>
+            {/* End Subtitle */}
 
             {/* Start Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Status")}
+                {t("Status")} *
               </label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.status ? "border-red-500" : "border-gray-300"
+                }`}
               >
                 {statusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -375,6 +457,9 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                   </option>
                 ))}
               </select>
+              {errors.status && (
+                <p className="text-red-500 text-xs mt-1">{errors.status}</p>
+              )}
             </div>
             {/* End Status */}
             {/* Start Read Time */}
@@ -394,22 +479,51 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 <p className="text-red-500 text-xs mt-1">{errors.read_time}</p>
               )}
             </div>
-
             {/* End Read Time */}
-            {/* Start Active Status */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={formData.is_active}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                {t("Active Post")}
+            {/* Start Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Image")} *
               </label>
+              <Input
+                type="file"
+                name="image"
+                onChange={handleInputChange}
+                accept="image/*"
+                className={errors.image ? "border-red-500" : ""}
+              />
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+              )}
+              {(formData.image_url || formData.image) && (
+                <div className="mt-2">
+                  <img
+                    src={
+                      formData.image
+                        ? URL.createObjectURL(formData.image)
+                        : formData.image_url
+                    }
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded"
+                  />
+                </div>
+              )}
             </div>
-            {/* End Active Status */}
+            {/* End Image Upload */}
+
+            {/* Start Image URL */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Image URL")}
+              </label>
+              <Input
+                name="image_url"
+                value={formData.image_url}
+                onChange={handleInputChange}
+                placeholder={t("Or enter image URL")}
+              />
+            </div>
+            {/* End Image URL */}
           </div>
 
           {/* Right Column */}
@@ -655,7 +769,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Tags")}
+                {t("Tags")} *
               </label>
               <div className="space-y-2">
                 <Input
@@ -685,7 +799,79 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                   </div>
                 )}
               </div>
+              {errors.tags && (
+                <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
+              )}
             </div>
+
+            {/* Start Language */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Language")} *
+              </label>
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.language ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <option disabled hidden value="">
+                  {t("Select Language")}
+                </option>
+                {typeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </option>
+                ))}
+              </select>
+              {errors.language && (
+                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
+              )}
+            </div>
+
+            {/* Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Type")} *
+              </label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.type ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <option disabled hidden value="">
+                  {t("Select Type")}
+                </option>
+                {typeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </option>
+                ))}
+              </select>
+              {errors.type && (
+                <p className="text-red-500 text-xs mt-1">{errors.type}</p>
+              )}
+            </div>
+
+            {/* Start Active Status */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="is_active"
+                checked={formData.is_active}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label className="ml-2 text-sm text-gray-700">
+                {t("Active Post")}
+              </label>
+            </div>
+            {/* End Active Status */}
           </div>
         </div>
 
@@ -734,6 +920,24 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           )}
           <p className="text-xs text-gray-500 mt-1">
             {t("This is the main content that will be displayed to readers")}
+          </p>
+        </div>
+
+        {/* Metadata - Full Width */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Metadata")}
+          </label>
+          <textarea
+            name="metadata"
+            value={formData.metadata}
+            onChange={handleInputChange}
+            rows={3}
+            placeholder={t("Enter metadata (JSON format)")}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t("Optional metadata in JSON format")}
           </p>
         </div>
 

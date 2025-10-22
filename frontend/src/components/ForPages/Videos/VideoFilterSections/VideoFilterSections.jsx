@@ -9,6 +9,7 @@ import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { Button } from "@/components/ui/button";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
+import { GetVideosByFilter } from "@/api/videos";
 
 const allVideos = [
   {
@@ -140,10 +141,14 @@ function VideoFilterSections() {
   });
   const [displayedVideos, setDisplayedVideos] = useState(allVideos);
   const [totalRecords, setTotalRecords] = useState(allVideos);
+  const limit = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const getVideDataByFilter = async (type) => {
     setIsLoaiding(true);
+    const offset = page * 10;
     try {
-      const res = await GetVideosByFilter(typr);
+      const res = await GetVideosByFilter(limit, offset, type);
       setDisplayedVideos(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {

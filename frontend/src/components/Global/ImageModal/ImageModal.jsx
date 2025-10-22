@@ -52,7 +52,7 @@ function ImageModal({
               isRTL ? "flex-row-reverse" : ""
             } justify-between text-sm`}
           >
-            <span>{imageData.author}</span>
+            <span>{imageData.writer}</span>
             <span>{imageData.details}</span>
           </div>
         </div>

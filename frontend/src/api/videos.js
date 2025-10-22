@@ -6,6 +6,12 @@ export async function GetVideos(limit, offset, search) {
   );
 }
 
+export async function GetVideosByFilter(limit, offset, filter) {
+  return await axios.get(
+    `/videos/?limit=${limit}&offset=${offset}&filter=${filter}`
+  );
+}
+
 export async function CreateVideo(data) {
   return await axios.post(`/videos/`, data);
 }
