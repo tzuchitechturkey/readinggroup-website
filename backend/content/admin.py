@@ -2,7 +2,6 @@ from django.contrib import admin
 from .models import (
     Event,
     HistoryEntry,
-    MediaCard,
     Post,
     TeamMember,
     TvProgram,
@@ -33,14 +32,6 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ("title", "section", "category", "language", "date")
     list_filter = ("section", "category", "language")
     search_fields = ("title", "writer", "category")
-
-
-@admin.register(MediaCard)
-class MediaCardAdmin(admin.ModelAdmin):
-    list_display = ("title", "kind", "language", "theme", "created_at")
-    list_filter = ("kind", "language", "theme")
-    search_fields = ("title", "description")
-
 
 @admin.register(TvProgram)
 class TvProgramAdmin(admin.ModelAdmin):

@@ -4,7 +4,6 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from .models import (
     Event,
     HistoryEntry,
-    MediaCard,
     Post,
     TeamMember,
     TvProgram,
@@ -107,14 +106,6 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
         return data
-
-class MediaCardSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = MediaCard
-        fields = "__all__"
-        file_fields = ("image", "cover_image")
-
 
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")

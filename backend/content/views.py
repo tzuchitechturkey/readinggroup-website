@@ -4,7 +4,6 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 from .models import (
     Event,
     HistoryEntry,
-    MediaCard,
     Post,
     TeamMember,
     TvProgram,
@@ -19,7 +18,6 @@ from .models import (
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
-    MediaCardSerializer,
     PostSerializer,
     TeamMemberSerializer,
     TvProgramSerializer,
@@ -71,15 +69,6 @@ class EventViewSet(BaseContentViewSet):
     search_fields = ("title", "writer", "category", "section", "country")
     ordering_fields = ("date", "created_at")
     filterset_fields = ("section", "category", "country", "language", "report_type")
-
-
-class MediaCardViewSet(BaseContentViewSet):
-    """ViewSet for managing MediaCard content."""
-    queryset = MediaCard.objects.all()
-    serializer_class = MediaCardSerializer
-    search_fields = ("title", "description", "theme", "language", "kind")
-    ordering_fields = ("created_at", "title")
-    filterset_fields = ("kind", "language", "theme")
 
 
 class TvProgramViewSet(BaseContentViewSet):

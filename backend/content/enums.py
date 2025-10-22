@@ -17,7 +17,7 @@ class EventSection(models.TextChoices):
     LATEST = "latest", "Latest Updates"
     
 #In MediaCard model
-class MediaCardKind(models.TextChoices):
+class POSTTYPE(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
-    GALLERY = "gallery", "Gallery"
+    READING = "reading", "Reading"
