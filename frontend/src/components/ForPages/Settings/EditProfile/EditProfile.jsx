@@ -82,7 +82,6 @@ function EditProfile() {
       setIsLoading(false);
     }
   };
-  console.log(profileImageFile);
   return (
     <div className="w-full px-4 md:px-8 mt-4">
       {isLoading && <Loader />}
@@ -178,7 +177,9 @@ function EditProfile() {
               className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
-              <option value="">{t("Select Country")}</option>
+              <option disabled hidden value="">
+                {t("Select Country")}
+              </option>
               {countries?.map((option) => (
                 <option key={option.code} value={option.code}>
                   {t(option.name)}

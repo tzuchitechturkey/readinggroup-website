@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, X, Upload, User, Tag, Search } from "lucide-react";
+import { Save, X, User, Tag, Search, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -14,12 +14,14 @@ import {
   GetAllUsers,
   GetPostCategories,
 } from "@/api/posts";
+import countries from "@/constants/countries.json";
+import { languages, postStatusOptions } from "@/constants/constants";
+import { BASE_URL } from "@/configs";
 
 function CreateOrEditPost({ onSectionChange, post = null }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const writerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
-
   const [isLoading, setIsLoading] = useState(false);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -35,21 +37,24 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     writer: "",
     writer_avatar: "",
     category: "",
-    status: "draft",
+    status: "",
     is_active: true,
     read_time: "",
     tags: "",
     language: "",
-    type: "",
+    post_type: "",
     image: null,
     image_url: "",
     metadata: "",
+    country: "",
+    camera_name: "",
   });
-
+  console.log(post);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
+  const [imageFile, setImageFile] = useState(null); // Store the actual file
 
   const getWriters = async (searchVal = "") => {
     try {
@@ -67,12 +72,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       console.error(error);
     }
   };
-
-  // Status options
-  const statusOptions = [
-    { value: "draft", label: "Draft" },
-    { value: "publish", label: "Publish" },
-  ];
 
   // Type options
   const typeOptions = [
@@ -97,10 +96,12 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         read_time: post.read_time || "",
         tags: post.tags || "",
         language: post.language || "",
-        type: post.type || "",
-        image: null,
+        post_type: post.post_type || "",
+        image: post.image || null,
         image_url: post.image_url || "",
         metadata: post.metadata || "",
+        country: post.country || "",
+        camera_name: post.camera_name || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -133,7 +134,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
-
     let newValue;
     if (type === "checkbox") {
       newValue = checked;
@@ -215,6 +215,10 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         }));
       }
       setTagInput("");
+      setErrors((prev) => ({
+        ...prev,
+        tags: "",
+      }));
     }
   };
 
@@ -269,8 +273,12 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       newErrors.language = t("Language is required");
     }
 
-    if (!formData.type) {
-      newErrors.type = t("Type is required");
+    if (!formData.post_type) {
+      newErrors.post_type = t("Type is required");
+    }
+
+    if (!formData.country) {
+      newErrors.country = t("Country is required");
     }
 
     if (!formData.image && !formData.image_url && !post) {
@@ -280,7 +288,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -302,15 +309,20 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     postData.append("status", formData.status);
     postData.append("is_active", formData.is_active);
     postData.append("read_time", formData.read_time);
-    postData.append("tags", formData.tags);
+    postData.append("tags", JSON.stringify(formData.tags));
     postData.append("language", formData.language);
-    postData.append("type", formData.type);
+    postData.append("post_type", formData.post_type);
+    postData.append("country", formData.country);
+    postData.append("camera_name", formData.camera_name);
 
     // Add image if selected
-    if (formData.image) {
-      postData.append("image", formData.image);
+    // if (formData.image) {
+    //   postData.append("image", formData.image);
+    // }
+    // Only append image if a new file was selected
+    if (imageFile instanceof File) {
+      postData.append("image", imageFile);
     }
-
     // Add image_url if provided
     if (formData.image_url) {
       postData.append("image_url", formData.image_url);
@@ -381,8 +393,12 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     };
   }, []);
   return (
-    <div className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto">
+    <div
+      className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
+      {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -398,8 +414,86 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           </h2>
         </div>
       </div>
+      {/* End Breadcrumb */}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Start Image Upload Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Post Image")} *
+          </label>
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-32 h-24 border-2 border-dashed rounded-lg flex items-center justify-center ${
+                errors.image ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              {formData.image || formData.image_url ? (
+                <img
+                  src={formData.image}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <Upload className="h-8 w-8 text-gray-400" />
+              )}
+            </div>
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setImageFile(file);
+                    setFormData((prev) => ({ ...prev, image: url }));
+
+                    // Clear error when uploading
+                    if (errors.image) {
+                      setErrors((prev) => ({ ...prev, image: "" }));
+                    }
+                  }
+                }}
+                className="hidden"
+                id="image-upload"
+              />
+              <label
+                htmlFor="image-upload"
+                className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 border ${
+                  errors.image ? "border-red-500" : "border-gray-300"
+                } rounded-md hover:bg-gray-50`}
+              >
+                <Upload className="h-4 w-4" />
+                {t("Upload Image")}
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                {t("Recommended: 16:9 aspect ratio")}
+              </p>
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* End Image Upload Section */}
+
+        {/* Start Image URL Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Image URL")} ({t("Alternative to file upload")})
+          </label>
+          <Input
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleInputChange}
+            placeholder={t("Enter image URL as alternative to file upload")}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t("You can either upload a file above or provide a URL here")}
+          </p>
+        </div>
+        {/* End Image URL Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-4">
@@ -447,16 +541,25 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md outline-0 ${
                   errors.status ? "border-red-500" : "border-gray-300"
-                }`}
+                } ${!formData.status ? "text-gray-400" : "text-black"}`}
               >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
+                <option value="" hidden disabled>
+                  {t("Select Status")}
+                </option>
+
+                {postStatusOptions.map((option) => (
+                  <option
+                    className="text-black"
+                    key={option.value}
+                    value={option.value}
+                  >
                     {t(option.label)}
                   </option>
                 ))}
               </select>
+
               {errors.status && (
                 <p className="text-red-500 text-xs mt-1">{errors.status}</p>
               )}
@@ -480,171 +583,126 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               )}
             </div>
             {/* End Read Time */}
-            {/* Start Image Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Image")} *
-              </label>
-              <Input
-                type="file"
-                name="image"
-                onChange={handleInputChange}
-                accept="image/*"
-                className={errors.image ? "border-red-500" : ""}
-              />
-              {errors.image && (
-                <p className="text-red-500 text-xs mt-1">{errors.image}</p>
-              )}
-              {(formData.image_url || formData.image) && (
-                <div className="mt-2">
-                  <img
-                    src={
-                      formData.image
-                        ? URL.createObjectURL(formData.image)
-                        : formData.image_url
-                    }
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded"
-                  />
-                </div>
-              )}
-            </div>
-            {/* End Image Upload */}
 
-            {/* Start Image URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Image URL")}
-              </label>
-              <Input
-                name="image_url"
-                value={formData.image_url}
-                onChange={handleInputChange}
-                placeholder={t("Or enter image URL")}
-              />
-            </div>
-            {/* End Image URL */}
+            {/* Start Camera */}
+            {formData.post_type === "photo" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("Camera Model")}
+                </label>
+                <Input
+                  name="camera_name"
+                  value={formData.camera_name}
+                  onChange={handleInputChange}
+                  placeholder={t("Enter camera model")}
+                  className={errors.camera_name ? "border-red-500" : ""}
+                />
+              </div>
+            )}
+            {/* End Camera */}
           </div>
 
           {/* Right Column */}
           <div className="space-y-4">
-            {/* Start Writer Selection */}
+            {/* Start Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Writer")} *
+                {t("Type")} *
               </label>
-              <div className="relative" ref={writerDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowWriterDropdown(!showWriterDropdown)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
-                    errors.writer ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  {formData?.writer ? (
-                    <>
-                      <img
-                        src={formData?.writer?.profile_image}
-                        alt={formData?.writer}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-sm">
-                          {formData?.writer}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <User className="w-8 h-8 text-gray-400" />
-                      <span className="text-gray-500">
-                        {t("Select Writer")}
-                      </span>
-                    </>
-                  )}
-                </button>
+              <select
+                name="post_type"
+                value={formData.post_type}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  setFormData((prev) => ({
+                    ...prev,
+                    writer: "",
+                  }));
+                }}
+                className={`w-full px-3 py-2 border rounded-md  outline-none ${
+                  errors.post_type ? "border-red-500" : "border-gray-300"
+                } ${!formData.post_type ? "text-gray-400" : "text-black"}`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select Type")}
+                </option>
 
-                {showWriterDropdown && (
-                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
-                    {/* Search Box */}
-                    <div className="p-3 border-b border-gray-200 bg-gray-50">
-                      <div className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            value={writerSearchValue}
-                            onChange={(e) =>
-                              setWriterSearchValue(e.target.value)
-                            }
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleWriterSearch();
-                              }
-                            }}
-                            placeholder={t("Search writers...")}
-                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          />
-                          {writerSearchValue && (
-                            <button
-                              type="button"
-                              onClick={handleClearWriterSearch}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleWriterSearch}
-                          className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                          title={t("Search")}
-                        >
-                          <Search className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
+                {typeOptions.map((option) => (
+                  <option
+                    key={option.value}
+                    className="text-black"
+                    value={option.value}
+                  >
+                    {t(option.label)}
+                  </option>
+                ))}
+              </select>
 
-                    {/* Writers List */}
-                    <div className="max-h-60 overflow-y-auto">
-                      {writersList.length > 0 ? (
-                        writersList.map((writer) => (
-                          <button
-                            key={writer.id}
-                            type="button"
-                            onClick={() => handleWriterSelect(writer)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                          >
-                            <img
-                              src={writer.profile_image}
-                              alt={writer.username}
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">
-                                {writer.username}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {writer.groups[0]}
-                              </div>
-                            </div>
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                          {t("No writers found")}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-              {errors.writer && (
-                <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
+              {errors.post_type && (
+                <p className="text-red-500 text-xs mt-1">{errors.post_type}</p>
               )}
             </div>
-            {/* End Writer Selection */}
+            {/* End Type */}
+
+            {/* Start Language */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Language")} *
+              </label>
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md  outline-none   ${
+                  errors.language ? "border-red-500" : "border-gray-300"
+                } ${!formData.language ? "text-gray-400" : "text-black"}`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select Language")}
+                </option>
+
+                {languages.map((lang) => (
+                  <option key={lang} className="text-black" value={lang}>
+                    {t(lang)}
+                  </option>
+                ))}
+              </select>
+
+              {errors.language && (
+                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
+              )}
+            </div>
+            {/* End Language */}
+            {/* Start Country */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Country")}
+              </label>
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md  outline-none   ${
+                  errors.country ? "border-red-500" : "border-gray-300"
+                } ${!formData.country ? "text-gray-400" : "text-black"}`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select Country")}
+                </option>
+
+                {countries?.map((option) => (
+                  <option
+                    key={option.code}
+                    className="text-black"
+                    value={option.code}
+                  >
+                    {t(option.name)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* End Country */}
+
             {/* Start Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -766,7 +824,128 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               )}
             </div>
             {/* End Category */}
-            {/* Tags */}
+
+            {/* Start Writer Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {formData?.post_type === "photo"
+                  ? t("Camera Man")
+                  : t("Writer")}
+                *
+              </label>
+              <div className="relative" ref={writerDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowWriterDropdown(!showWriterDropdown)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                    errors.writer ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  {formData?.writer ? (
+                    <>
+                      <img
+                        src={formData?.writer?.profile_image}
+                        alt={formData?.writer}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          {formData?.writer}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-8 h-8 text-gray-400" />
+                      <span className="text-gray-500">
+                        {t("Select Writer")}
+                      </span>
+                    </>
+                  )}
+                </button>
+
+                {showWriterDropdown && (
+                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                    {/* Search Box */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={writerSearchValue}
+                            onChange={(e) =>
+                              setWriterSearchValue(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleWriterSearch();
+                              }
+                            }}
+                            placeholder={t("Search writers...")}
+                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          />
+                          {writerSearchValue && (
+                            <button
+                              type="button"
+                              onClick={handleClearWriterSearch}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleWriterSearch}
+                          className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                          title={t("Search")}
+                        >
+                          <Search className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Writers List */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {writersList.length > 0 ? (
+                        writersList.map((writer) => (
+                          <button
+                            key={writer.id}
+                            type="button"
+                            onClick={() => handleWriterSelect(writer)}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          >
+                            <img
+                              src={writer.profile_image}
+                              alt={writer.username}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">
+                                {writer.username}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {writer.groups[0]}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                          {t("No writers found")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {errors.writer && (
+                <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
+              )}
+            </div>
+            {/* End Writer Selection */}
+            {/* Start Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Tags")} *
@@ -803,60 +982,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
               )}
             </div>
-
-            {/* Start Language */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Language")} *
-              </label>
-              <select
-                name="language"
-                value={formData.language}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.language ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option disabled hidden value="">
-                  {t("Select Language")}
-                </option>
-                {typeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {t(option.label)}
-                  </option>
-                ))}
-              </select>
-              {errors.language && (
-                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
-              )}
-            </div>
-
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Type")} *
-              </label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.type ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option disabled hidden value="">
-                  {t("Select Type")}
-                </option>
-                {typeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {t(option.label)}
-                  </option>
-                ))}
-              </select>
-              {errors.type && (
-                <p className="text-red-500 text-xs mt-1">{errors.type}</p>
-              )}
-            </div>
+            {/* End Tags */}
 
             {/* Start Active Status */}
             <div className="flex items-center">
@@ -895,7 +1021,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           )}
           <p className="text-xs text-gray-500 mt-1">
             {t("Approximately")}{" "}
-            {Math.ceil(formData.excerpt.split(" ").length / 200)}{" "}
+            {Math.ceil(formData.excerpt.split(" ").length / 60)}{" "}
             {t("minute(s) read")}
           </p>
         </div>
@@ -923,7 +1049,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           </p>
         </div>
 
-        {/* Metadata - Full Width */}
+        {/* Start Metadata - Full Width */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("Metadata")}
@@ -940,8 +1066,9 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             {t("Optional metadata in JSON format")}
           </p>
         </div>
+        {/* End Metadata - Full Width */}
 
-        {/* Form Actions */}
+        {/* Start Form Actions */}
         <div className="flex items-center justify-end gap-3 pt-6 border-t">
           <Button
             type="button"

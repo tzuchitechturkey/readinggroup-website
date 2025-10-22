@@ -30,7 +30,7 @@ class Video(TimestampedModel):
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
-    cast = models.TextField(default=list, blank=True)
+    cast = models.JSONField(default=list, blank=True)
     season = models.CharField(max_length=32, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)

@@ -13,6 +13,11 @@ function LogoutConfirmation({ onCancel }) {
   const Logout = () => {
     // مسح التوكن من localStorage
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("dashboardActiveSection");
+    localStorage.removeItem("dashboardActiveParent");
+    localStorage.removeItem("dashboardSelectedPost");
+    localStorage.removeItem("dashboardSelectedVideo");
+    localStorage.removeItem("dashboardSelectedNews");
 
     // إظهار رسالة نجاح
     toast.success(t("You have been logged out successfully."));

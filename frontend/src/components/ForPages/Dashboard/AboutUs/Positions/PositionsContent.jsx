@@ -14,7 +14,7 @@ import {
   DeletePositionsById,
 } from "@/api/aboutUs";
 
-export default function PositionsContent() {
+export default function PositionsContent({ onSectionChange }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [positions, setPositions] = useState([]);
@@ -22,13 +22,17 @@ export default function PositionsContent() {
   const [editingPosition, setEditingPosition] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [form, setForm] = useState({ name: "", description: "" });
+  const [errors, setErrors] = useState({});
 
-  const fetchPositions = async () => {
+  const fetchPositions = async (searchValue = searchTerm) => {
     setIsLoading(true);
     try {
-      const res = await GetPositions(100, 0, "");
+      const res = searchValue
+        ? await GetPositions(100, 0, searchValue)
+        : await GetPositions(100, 0, "");
       setPositions(res?.data?.results || []);
     } catch (err) {
       console.error(err);
@@ -45,6 +49,7 @@ export default function PositionsContent() {
   const openAddModal = () => {
     setEditingPosition(null);
     setForm({ name: "", description: "" });
+    setErrors({});
     setShowModal(true);
   };
 
@@ -54,11 +59,40 @@ export default function PositionsContent() {
       name: position.name || "",
       description: position.description || "",
     });
+    setErrors({});
     setShowModal(true);
+  };
+
+  const handleInputChange = (field, value) => {
+    setForm((p) => ({ ...p, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!form.name.trim()) {
+      newErrors.name = t("Name is required");
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
       if (editingPosition && editingPosition.id) {
         await EditPositionById(editingPosition.id, form);
@@ -90,26 +124,97 @@ export default function PositionsContent() {
   };
 
   return (
-    <div className="bg-white rounded-lg p-4">
+    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
       {isLoading && <Loader />}
-
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">{t("Positions")}</h3>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="h-4 w-4" /> {t("Add Position")}
-        </button>
+      {/* Start Breadcrumb */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onSectionChange("dashboard")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+          >
+            ← {t("Back to Dashboard")}
+          </button>
+          <div className="h-4 w-px bg-gray-300" />
+          <h2 className="text-xl font-semibold text-[#1D2630]">
+            {t("Positions")}
+          </h2>
+        </div>
       </div>
+      {/* End Breadcrumb */}
+      
+      <div className="flex-1">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+          <div>
+            <h2 className="text-lg font-medium text-[#1D2630]">
+              {t("Positions Management")}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              {t("Manage team positions and roles")}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              {t("Total")}: {positions.length} {t("positions")}
+            </span>
+            <button
+              onClick={openAddModal}
+              className="flex items-center gap-2 text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
+            >
+              <Plus className="h-4 w-4" />
+              {t("Add Position")}
+            </button>
+          </div>
+        </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto">
+        {/* Start Search */}
+        {/* <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+          <div className="relative max-w-md flex">
+            <input
+              type="text"
+              placeholder={t("Search Positions")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+            />
+
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  fetchPositions("");
+                }}
+                className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                if (searchTerm.trim()) {
+                  fetchPositions();
+                }
+              }}
+              className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+            >
+              {t("Search")}
+            </button>
+          </div>
+        </div> */}
+        {/* End Search */}
+
+        {/* Start Table */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
           <thead>
             <tr className="text-left text-sm text-gray-600 border-b">
-              <th className="py-2 px-3">{t("Name")}</th>
-              <th className="py-2 px-3">{t("Description")}</th>
-              <th className="py-2 px-3 w-[160px]">{t("Actions")}</th>
+              <th className="py-2 px-3  ">{t("Name")}</th>
+              <th className="py-2 px-3  ">{t("Description")}</th>
+              <th className="py-2 px-3   w-[160px]">{t("Actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -152,7 +257,9 @@ export default function PositionsContent() {
             )}
           </tbody>
         </table>
-      </div>
+          </div>
+        </div>
+        {/* End Table */}
 
       {/* Create / Edit Modal */}
       <Modal
@@ -169,10 +276,14 @@ export default function PositionsContent() {
             <input
               name="name"
               value={form.name}
-              onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-              required
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.name ? "border-red-500" : ""
+              }`}
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -181,9 +292,7 @@ export default function PositionsContent() {
             <textarea
               name="description"
               value={form.description}
-              onChange={(e) =>
-                setForm((p) => ({ ...p, description: e.target.value }))
-              }
+              onChange={(e) => handleInputChange("description", e.target.value)}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={4}
             />
@@ -225,6 +334,7 @@ export default function PositionsContent() {
           itemName={selectedPosition?.name}
         />
       </Modal>
+      </div>
     </div>
   );
 }

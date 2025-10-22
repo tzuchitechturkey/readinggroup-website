@@ -235,9 +235,12 @@ function Profile() {
             <Separator className="my-6" />
 
             <div className="grid grid-cols-3 gap-3">
-              <Stat label="Publications" value={data?.publications || "0"} />
-              <Stat label="Followers" value={data?.followers || "0"} />
-              <Stat label="Following" value={data?.following || "0"} />
+              <Stat
+                label={t("Publications")}
+                value={data?.publications || "0"}
+              />
+              <Stat label={t("Followers")} value={data?.followers || "0"} />
+              <Stat label={t("Following")} value={data?.following || "0"} />
             </div>
 
             <Separator className="my-6" />
@@ -277,7 +280,9 @@ function Profile() {
         <section className="col-span-12 md:col-span-8 lg:col-span-9 space-y-4">
           {/* About me */}
           <div className="rounded-xl border bg-card">
-            <div className="border-b px-6 py-4 font-semibold">About me</div>
+            <div className="border-b px-6 py-4 font-semibold">
+              {t("About me")}
+            </div>
             <div className="px-6 py-5">
               <EditableField
                 label=""
@@ -290,7 +295,7 @@ function Profile() {
                 onCancel={() => cancelEdit("about_me")}
                 onChange={(value) => handleInputChange("about_me", value)}
                 multiline={true}
-                placeholder="Tell us about yourself..."
+                placeholder={t("Tell us about yourself...")}
               />
             </div>
           </div>
@@ -303,18 +308,18 @@ function Profile() {
             <div className="px-6 py-5">
               <div className="grid grid-cols-12 gap-6">
                 <div className="col-span-12 space-y-5">
-                  <Labeled label="Full Name">
+                  <Labeled label={t("Full Name")}>
                     {`${data?.first_name || ""} ${data?.last_name || ""}`}
                   </Labeled>
                   <Separator />
 
-                  <Labeled label="Phone">{data?.mobile_number}</Labeled>
+                  <Labeled label={t("Phone")}>{data?.mobile_number}</Labeled>
                   <Separator />
 
                   <div className="grid grid-cols-7 gap-4 items-center">
                     <div className="col-span-3">
                       <EditableField
-                        label="Website"
+                        label={t("Website")}
                         value={
                           editingFields.website_address
                             ? formData.website_address
@@ -327,16 +332,18 @@ function Profile() {
                         onChange={(value) =>
                           handleInputChange("website_address", value)
                         }
-                        placeholder="example: https://yourwebsite.com"
+                        placeholder={t("example: https://yourwebsite.com")}
                       />
                     </div>
                     <div className="col-span-3">
-                      <Labeled label="Email">{data?.email}</Labeled>
+                      <Labeled label={t("Email")}>{data?.email}</Labeled>
                     </div>
                   </div>
 
                   <Separator />
-                  <Labeled label="Address">{data?.address_details}</Labeled>
+                  <Labeled label={t("Address")}>
+                    {data?.address_details}
+                  </Labeled>
                 </div>
               </div>
             </div>
@@ -347,7 +354,9 @@ function Profile() {
             data?.website_address !== formData.website_address) && (
             <div className="mx-5 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
-                You have unsaved changes. Click "Update Profile" to save them.
+                {t(
+                  "You have unsaved changes. Click 'Update Profile' to save them."
+                )}
               </p>
             </div>
           )}

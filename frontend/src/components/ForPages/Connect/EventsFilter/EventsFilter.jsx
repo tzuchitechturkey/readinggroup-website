@@ -145,7 +145,7 @@ function EventsFilter({
               onChange={(e) => setSelectedCountry(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="">{t("All Countries")}</option>
+              <option disabled hidden value="">{t("All Countries")}</option>
               <option value="USA">{t("USA")}</option>
               <option value="Canada">{t("Canada")}</option>
               <option value="UK">{t("UK")}</option>
@@ -172,7 +172,7 @@ function EventsFilter({
               onChange={(e) => setSelectedLanguage(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="">{t("All Languages")}</option>
+              <option disabled hidden value="">{t("All Languages")}</option>
               <option value="en">{t("English")}</option>
               <option value="ar">{t("Arabic")}</option>
               <option value="tr">{t("Turkish")}</option>

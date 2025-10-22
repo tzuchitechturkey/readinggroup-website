@@ -2,24 +2,28 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { X, User, Search, Tag } from "lucide-react";
+import { X, User, Search, Tag, Calendar, Upload } from "lucide-react";
+import { format } from "date-fns";
 
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
   CreateTvProgram,
   EditTvProgramById,
-  GetTvCategories,
+  GetNewsCategories,
 } from "@/api/tvPrograms";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetAllUsers } from "@/api/posts";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-const CreateOrEditNews = ({
-  isOpen,
-  onClose,
-  news = null,
-  setSelectedNews,
-  setUpdate,
-}) => {
+const CreateOrEditNews = ({ onSectionChange, news = null }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -31,7 +35,7 @@ const CreateOrEditNews = ({
   const [categoriesList, setCategoriesList] = useState([]);
   const [writersList, setWritersList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
-
+  const [openAirDate, setOpenAirDate] = useState(false);
   const [formData, setFormData] = useState({
     image: null,
     image_url: "",
@@ -56,7 +60,7 @@ const CreateOrEditNews = ({
 
   const getCategories = async (searchVal = "") => {
     try {
-      const res = await GetTvCategories(10, 0, searchVal);
+      const res = await GetNewsCategories(10, 0, searchVal);
       setCategoriesList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -64,40 +68,39 @@ const CreateOrEditNews = ({
   };
   // Reset form when modal opens/closes or TV changes
   useEffect(() => {
-    if (isOpen) {
-      if (news?.id) {
-        setFormData({
-          title: news.title || "",
-          description: news.description || "",
-          air_date: news.air_date || "",
-          writer: news.writer || "",
-          category: news.category || "",
-          image: null, // Reset file input
-          image_url: news.image_url || "",
-          is_live: news.is_live || false,
-        });
-        // Set existing image preview for editing
-        setImagePreview(news.image || news.image_url || "");
-      } else {
-        setFormData({
-          image: null,
-          image_url: "",
-          title: "",
-          description: "",
-          air_date: "",
-          writer: "",
-          category: "",
-          is_live: false,
-        });
-        setImagePreview("");
-      }
+    if (news?.id) {
+      setFormData({
+        title: news.title || "",
+        description: news.description || "",
+        air_date: news.air_date || "",
+        writer: news.writer || "",
+        category: news.category || "",
+        image: null, // Reset file input
+        image_url: news.image_url || "",
+        is_live: news.is_live || false,
+      });
+      // Set existing image preview for editing
+      setImagePreview(news.image || news.image_url || "");
     } else {
-      // Clean up preview URL when modal closes
-      if (imagePreview && imagePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(imagePreview);
-      }
+      setFormData({
+        image: null,
+        image_url: "",
+        title: "",
+        description: "",
+        air_date: "",
+        writer: "",
+        category: "",
+        is_live: false,
+      });
+      setImagePreview("");
     }
-  }, [isOpen, news]);
+    // } else {
+    //   // Clean up preview URL when modal closes
+    //   if (imagePreview && imagePreview.startsWith("blob:")) {
+    //     URL.revokeObjectURL(imagePreview);
+    //   }
+    // }
+  }, [news]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -174,16 +177,20 @@ const CreateOrEditNews = ({
     setImagePreview("");
   };
 
-  // Handle category search
-  const handleCategorySearch = () => {
-    getCategories(categorySearchValue);
-  };
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   // Handle file upload and preview
@@ -206,11 +213,56 @@ const CreateOrEditNews = ({
       // Create preview URL
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
+
+      // Clear image error if exists
+      if (errors.image) {
+        setErrors((prev) => ({
+          ...prev,
+          image: "",
+        }));
+      }
     }
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = t("Title is required");
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = t("Description is required");
+    }
+
+    if (!formData.air_date) {
+      newErrors.air_date = t("Air date is required");
+    }
+
+    if (!formData.writer) {
+      newErrors.writer = t("Writer is required");
+    }
+
+    if (!formData.category) {
+      newErrors.category = t("Category is required");
+    }
+
+    if (!formData.image && !formData.image_url && !news?.id) {
+      newErrors.image = t("Image is required");
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
 
     // Create FormData object to handle file uploads
     const submitData = new FormData();
@@ -218,7 +270,13 @@ const CreateOrEditNews = ({
     // Append text fields
     submitData.append("title", formData.title);
     submitData.append("description", formData.description);
-    submitData.append("air_date", formData.air_date);
+
+    // تحويل التاريخ إلى صيغة YYYY-MM-DD
+    const airDateFormatted = formData.air_date
+      ? format(new Date(formData.air_date), "yyyy-MM-dd")
+      : "";
+    submitData.append("air_date", airDateFormatted);
+
     submitData.append("writer", formData.writer);
     submitData.append("category", formData.category);
     submitData.append("image_url", formData.image_url);
@@ -241,12 +299,8 @@ const CreateOrEditNews = ({
         toast.success(t("TV Program created successfully"));
       }
 
-      // Close modal
-      setSelectedNews(null);
+      onSectionChange("newsList");
       resetForm();
-      onClose();
-      // Refresh data
-      setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -286,167 +340,137 @@ const CreateOrEditNews = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  if (!isOpen) return null;
 
   return (
     <div className="bg-white rounded-lg p-3  ">
       {isLoading && <Loader />}
+      {/* Start Breadcrumb */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onSectionChange("dashboard")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+          >
+            ← {t("Back to Video List")}
+          </button>
+          <div className="h-4 w-px bg-gray-300" />
+          <h2 className="text-xl font-semibold text-[#1D2630]">
+            {news?.id ? t("Edit News") : t("Create New News")}
+          </h2>
+        </div>
+      </div>
+      {/* End Breadcrumb */}
+
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Start Image Upload Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Program Image")} *
+          </label>
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-32 h-24 border-2 border-dashed rounded-lg flex items-center justify-center ${
+                errors.image ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              ) : (
+                <Upload className="h-8 w-8 text-gray-400" />
+              )}
+            </div>
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="image-upload"
+              />
+              <label
+                htmlFor="image-upload"
+                className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 border ${
+                  errors.image ? "border-red-500" : "border-gray-300"
+                } rounded-md hover:bg-gray-50`}
+              >
+                <Upload className="h-4 w-4" />
+                {t("Upload Image")}
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                {t("Recommended: 16:9 aspect ratio")}
+              </p>
+              {errors.image && (
+                <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* End Image Upload Section */}
+        {/* Start Image URL Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Image URL")} ({t("Alternative to file upload")})
+          </label>
+          <Input
+            name="image_url"
+            value={formData.image_url}
+            onChange={handleInputChange}
+            placeholder={t("Enter image URL as alternative to file upload")}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {t("You can either upload a file above or provide a URL here")}
+          </p>
+        </div>
+        {/* End Image URL Section */}
         {/* Start Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Title")}
+            {t("Title")} *
           </label>
           <input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-            required
+            className={`w-full p-3 border rounded-lg outline-none ${
+              errors.title ? "border-red-500" : "border-gray-300"
+            }`}
             placeholder={t("Enter program title")}
           />
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+          )}
         </div>
         {/* End Title */}
 
         {/* Start Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Description")}
+            {t("Description")} *
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-            required
+            className={`w-full p-3 border rounded-lg outline-none ${
+              errors.description ? "border-red-500" : "border-gray-300"
+            }`}
             placeholder={t("Enter program description")}
           />
+          {errors.description && (
+            <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+          )}
         </div>
         {/* End Description */}
 
         {/* Start Date and Writer Row */}
-        <div className="space-y-4">
-          {/* Start Air Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Air Date")}
-            </label>
-            <input
-              type="date"
-              name="air_date"
-              value={formData.air_date}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-              required
-            />
-          </div>
-          {/* End Air Date */}
-
-          {/* Start Writer Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("Writer")} *
-            </label>
-            <div className="relative" ref={writerDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowWriterDropdown(!showWriterDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
-                  errors.writer ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                {formData?.writer ? (
-                  <div className="font-medium text-sm">{formData?.writer}</div>
-                ) : (
-                  <>
-                    <User className="w-8 h-8 text-gray-400" />
-                    <span className="text-gray-500">{t("Select Writer")}</span>
-                  </>
-                )}
-              </button>
-
-              {showWriterDropdown && (
-                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
-                  {/* Search Box */}
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={writerSearchValue}
-                          onChange={(e) => setWriterSearchValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleWriterSearch();
-                            }
-                          }}
-                          placeholder={t("Search writers...")}
-                          className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        />
-                        {writerSearchValue && (
-                          <button
-                            type="button"
-                            onClick={handleClearWriterSearch}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleWriterSearch}
-                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        title={t("Search")}
-                      >
-                        <Search className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Writers List */}
-                  <div className="max-h-60 overflow-y-auto">
-                    {writersList.length > 0 ? (
-                      writersList.map((writer) => (
-                        <button
-                          key={writer.id}
-                          type="button"
-                          onClick={() => handleWriterSelect(writer)}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                        >
-                          <img
-                            src={writer.profile_image}
-                            alt={writer.username}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">
-                              {writer.username}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {writer.groups[0]}
-                            </div>
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                        {t("No writers found")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.writer && (
-              <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
-            )}
-          </div>
-          {/* End Writer Selection */}
-          {/* End Date and Writer Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Start Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -567,44 +591,162 @@ const CreateOrEditNews = ({
             )}
           </div>
           {/* End Category */}
+          {/* Start Writer Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Writer")} *
+            </label>
+            <div className="relative" ref={writerDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowWriterDropdown(!showWriterDropdown)}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                  errors.writer ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                {formData?.writer ? (
+                  <div className="font-medium text-sm">{formData?.writer}</div>
+                ) : (
+                  <>
+                    <User className="w-8 h-8 text-gray-400" />
+                    <span className="text-gray-500">{t("Select Writer")}</span>
+                  </>
+                )}
+              </button>
 
-          {/* Start Image */}
+              {showWriterDropdown && (
+                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                  {/* Search Box */}
+                  <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={writerSearchValue}
+                          onChange={(e) => setWriterSearchValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleWriterSearch();
+                            }
+                          }}
+                          placeholder={t("Search writers...")}
+                          className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                        {writerSearchValue && (
+                          <button
+                            type="button"
+                            onClick={handleClearWriterSearch}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleWriterSearch}
+                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        title={t("Search")}
+                      >
+                        <Search className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Writers List */}
+                  <div className="max-h-60 overflow-y-auto">
+                    {writersList.length > 0 ? (
+                      writersList.map((writer) => (
+                        <button
+                          key={writer.id}
+                          type="button"
+                          onClick={() => handleWriterSelect(writer)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                        >
+                          <img
+                            src={writer.profile_image}
+                            alt={writer.username}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">
+                              {writer.username}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {writer.groups[0]}
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                        {t("No writers found")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {errors.writer && (
+              <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
+            )}
+          </div>
+          {/* End Writer Selection */}
+        </div>
+        {/* End Date and Writer Row */}
+
+        {/* Start Category and Image Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Start Air Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Program Image")}
+              {t("Air Date")} *
             </label>
-            <input
-              type="file"
-              name="image"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              onChange={handleFileChange}
-              className="w-full p-3 border border-gray-300 rounded-lg outline-none file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              required={!news?.id}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {t("Max size: 5MB. Supported formats: JPG, PNG, WebP")}
-            </p>
-          </div>
-          {/* End Image */}
+            <Popover
+              open={openAirDate}
+              onOpenChange={setOpenAirDate}
+              className="!z-[999999999999999]"
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.air_date && "text-muted-foreground",
+                    errors.air_date && "border-red-500"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {formData.air_date
+                    ? format(new Date(formData.air_date), "MM/dd/yyyy") // عرض التاريخ بالإنجليزي
+                    : "Pick Air date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={
+                    formData.air_date ? new Date(formData.air_date) : undefined
+                  }
+                  onSelect={(date) => {
+                    handleInputChange({
+                      target: { name: "air_date", value: date },
+                    });
+                    setOpenAirDate(false);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
 
-          {/* Start Image URL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Image URL")} ({t("Alternative to file upload")})
-            </label>
-            <input
-              type="url"
-              name="image_url"
-              value={formData.image_url}
-              onChange={handleInputChange}
-              placeholder={t("Enter image URL as alternative")}
-              className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-            />
+            {errors.air_date && (
+              <p className="text-red-500 text-xs mt-1">{errors.air_date}</p>
+            )}
           </div>
-          {/* End Image URL */}
-
+          {/* End Air Date */}
           {/* Start Is Live */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pt-8">
             <input
               type="checkbox"
               id="is_live"
@@ -621,58 +763,29 @@ const CreateOrEditNews = ({
             </label>
           </div>
           {/* End Is Live */}
-
-          {/* Start Image Preview */}
-          {imagePreview && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("Image Preview")}
-              </label>
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="معاينة صورة البرنامج"
-                  className="w-full h-48 object-cover rounded-lg border"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData((prev) => ({ ...prev, image: null }));
-                    if (imagePreview.startsWith("blob:")) {
-                      URL.revokeObjectURL(imagePreview);
-                    }
-                    setImagePreview("");
-                  }}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm hover:bg-red-600"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
-          {/* End Image Preview */}
-
-          {/* Start Actions */}
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                onClose();
-              }}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              {t("Cancel")}
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
-            >
-              {news?.id ? t("Save Changes") : t("Add Program")}
-            </button>
-          </div>
-          {/* End Actions */}
         </div>
+        {/* End Image URL and Is Live Row */}
+
+        {/* Start Actions */}
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            type="button"
+            onClick={() => {
+              resetForm();
+              onSectionChange("news");
+            }}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            {t("Cancel")}
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
+          >
+            {news?.id ? t("Save Changes") : t("Add Program")}
+          </button>
+        </div>
+        {/* End Actions */}
       </form>
     </div>
   );

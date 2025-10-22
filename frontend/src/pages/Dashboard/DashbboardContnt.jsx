@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -32,28 +32,98 @@ import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
 import Tv from "@/components/ForPages/Dashboard/TV/TV";
 import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
-import TvCategoriesContent from "@/components/ForPages/Dashboard/TV/TvCategories/TvCategoriesContent";
+import NewsCategoriesContent from "@/components/ForPages/Dashboard/TV/News/NewsCategories/NewsCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
+import CreateOrEditNews from "@/components/ForPages/Dashboard/TV/News/CreateOrEditNews/CreateOrEditNews";
 
 import SettingsContent from "../Settings/SettingsContent";
 import ProfileContent from "../Profile/ProfileContent";
 
 export default function Page() {
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState("home");
-  const [activeParent, setActiveParent] = useState(null); // للتحكم في العنصر الأساسي النشط
-  const [selectedPost, setSelectedPost] = useState(null); // لتخزين المقال المحدد للتعديل
-  const [selectedVideo, setSelectedVideo] = useState(null); // لتخزين الفيديو المحدد للتعديل
+  const [activeSection, setActiveSection] = useState(() => {
+    // استرجاع الصفحة المحفوظة من localStorage عند التحميل
+    return localStorage.getItem("dashboardActiveSection") || "home";
+  });
+  const [activeParent, setActiveParent] = useState(() => {
+    // استرجاع العنصر الأساسي المحفوظ من localStorage
+    return localStorage.getItem("dashboardActiveParent") || null;
+  });
+  const [selectedPost, setSelectedPost] = useState(() => {
+    // استرجاع المقال المحفوظ إن وجد
+    const saved = localStorage.getItem("dashboardSelectedPost");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedVideo, setSelectedVideo] = useState(() => {
+    // استرجاع الفيديو المحفوظ إن وجد
+    const saved = localStorage.getItem("dashboardSelectedVideo");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedNews, setSelectedNews] = useState(() => {
+    // استرجاع الأخبار المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedNews");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  // حفظ الحالة في localStorage عند تغييرها
+  useEffect(() => {
+    localStorage.setItem("dashboardActiveSection", activeSection);
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (activeParent) {
+      localStorage.setItem("dashboardActiveParent", activeParent);
+    }
+  }, [activeParent]);
+
+  useEffect(() => {
+    if (selectedPost) {
+      localStorage.setItem(
+        "dashboardSelectedPost",
+        JSON.stringify(selectedPost)
+      );
+    }
+  }, [selectedPost]);
+
+  useEffect(() => {
+    if (selectedVideo) {
+      localStorage.setItem(
+        "dashboardSelectedVideo",
+        JSON.stringify(selectedVideo)
+      );
+    }
+  }, [selectedVideo]);
+
+  useEffect(() => {
+    if (selectedNews) {
+      localStorage.setItem(
+        "dashboardSelectedNews",
+        JSON.stringify(selectedNews)
+      );
+    }
+  }, [selectedNews]);
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
+
+    // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
+    if (section === "home" || section === "Home") {
+      localStorage.removeItem("dashboardSelectedPost");
+      localStorage.removeItem("dashboardSelectedVideo");
+      localStorage.removeItem("dashboardSelectedNews");
+      setSelectedPost(null);
+      setSelectedVideo(null);
+      setSelectedNews(null);
+    }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
     if (section === "createOrEditPost") {
       setSelectedPost(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
+    } else if (section === "createOrEditNews") {
+      setSelectedNews(data);
     }
 
     let autoParent = data;
@@ -68,7 +138,8 @@ export default function Page() {
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
         newsList: "Tv",
-        tvCategories: "Tv",
+        createOrEditNews: "Tv",
+        newsCategories: "Tv",
         history: "About Us",
         team: "About Us",
         positions: "About Us",
@@ -123,8 +194,15 @@ export default function Page() {
         return <HealthPosts onSectionChange={handleSectionChange} />;
       case "newsList":
         return <Tv onSectionChange={handleSectionChange} />;
-      case "tvCategories":
-        return <TvCategoriesContent onSectionChange={handleSectionChange} />;
+      case "createOrEditNews":
+        return (
+          <CreateOrEditNews
+            news={selectedNews}
+            onSectionChange={handleSectionChange}
+          />
+        );
+      case "newsCategories":
+        return <NewsCategoriesContent onSectionChange={handleSectionChange} />;
       case "history":
         return <History onSectionChange={handleSectionChange} />;
       case "team":
@@ -143,10 +221,10 @@ export default function Page() {
         activeParent={activeParent}
       />
       <SidebarInset>
-        <header className="z-40 flex  h-16  shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <header className="z-0 flex  h-16  shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="w-full mt-7 ">
             <AdminNavbar />
-            <div className="absolute top-8 -left-2  h-px w-full z-10">
+            <div className="absolute top-8 -left-0  h-px w-full z-10">
               <SidebarTrigger className="" />
             </div>
             <div className="flex items-center gap-2 px-4 ">
@@ -154,30 +232,6 @@ export default function Page() {
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <Breadcrumb className="text-sm mt-4 ">
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">{t("Home")} </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>
-                      {t(
-                        activeSection === "home"
-                          ? "Dashboard"
-                          : activeSection === "settings" ||
-                            activeSection === "profile"
-                          ? "Settings"
-                          : activeSection === "read"
-                          ? "Read"
-                          : activeSection === "posts"
-                          ? "Posts"
-                          : "Dashboard"
-                      )}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
             </div>
           </div>
         </header>

@@ -23,7 +23,7 @@ import ShowVideoDetails from "../ShowVideoDetails/ShowVideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
 
 function VideosList({ onSectionChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -108,7 +108,6 @@ function VideosList({ onSectionChange }) {
 
   // حساب عدد الصفحات
   const totalPages = Math.ceil(totalRecords / limit);
-
   // تغيير الصفحة
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -167,54 +166,24 @@ function VideosList({ onSectionChange }) {
   const handleEdit = (videoId) => {
     const video = videoData.find((v) => v.id === videoId);
     setEditingVideo(video);
-    setShowCreateEditModal(true);
+    onSectionChange("createOrEditVideo", video);
   };
 
-  // حفظ الفيديو (إنشاء أو تعديل)
-  const handleSaveVideo = async (videoData) => {
-    try {
-      // هنا يتم إرسال البيانات للسيرفر
-      // const response = await saveVideoAPI(videoData);
-      // Temporarily log the data (remove in production)
-      if (videoData) {
-        // Video data will be sent to API
-      }
-
-      // إغلاق النموذج
-      setShowCreateEditModal(false);
-      setEditingVideo(null);
-
-      // إعادة جلب البيانات بعد الحفظ
-      // await fetchVideos(currentPage, limit, sortConfig.key ? sortConfig : null);
-    } catch (error) {
-      console.error("Error saving video:", error);
-    }
-  };
-
-  // جلب البيانات عند تحميل المكون أو تغيير الصفحة
-  useEffect(() => {
-    // fetchVideos(currentPage, limit, sortConfig.key ? sortConfig : null);
-  }, [currentPage, limit]);
-
-  // جلب البيانات عند تغيير الترتيب
-  useEffect(() => {
-    if (sortConfig.key) {
-      // fetchVideos(currentPage, limit, sortConfig);
-    }
-  }, [sortConfig]);
   useEffect(() => {
     getVideoData(0);
   }, [update]);
-
   return (
-    <div className="bg-white rounded-lg border border-gray-200 ">
+    <div
+      className="bg-white rounded-lg border border-gray-200 "
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">
           {t("Videos List")}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <span className="text-sm text-gray-500">
             {t("Total")}: {totalRecords} {t("videos")}
           </span>
@@ -243,7 +212,9 @@ function VideosList({ onSectionChange }) {
             placeholder={t("Search Historical Events")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+            className={`flex-1 px-4 py-2 border border-gray-300 ${
+              i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
+            } text-sm pr-8`}
           />
 
           {searchTerm && (
@@ -252,7 +223,9 @@ function VideosList({ onSectionChange }) {
                 setSearchTerm("");
                 getVideoData(0, "");
               }}
-              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className={` absolute ${
+                i18n?.language === "ar" ? " left-20" : " right-20"
+              } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
             >
               ✕
             </button>
@@ -264,7 +237,9 @@ function VideosList({ onSectionChange }) {
                 getVideoData(0);
               }
             }}
-            className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+            className={`px-4 py-2 bg-[#4680ff] text-white ${
+              i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
+            }  text-sm font-semibold hover:bg-blue-600`}
           >
             {t("Search")}
           </button>
@@ -275,9 +250,9 @@ function VideosList({ onSectionChange }) {
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14 ">
           <TableRow className="border-b">
-            <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("reference_code")}
               >
                 ID
@@ -285,64 +260,69 @@ function VideosList({ onSectionChange }) {
                 {getSortIcon("reference_code")} */}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                {t("Image")}
+              </div>
+            </TableHead>
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("title")}
               >
                 {t("Title")}
                 {getSortIcon("title")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("category")}
               >
                 {t("Category")}
                 {getSortIcon("category")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("video_type")}
               >
                 {t("Type")}
                 {getSortIcon("video_type")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("duration")}
               >
                 {t("Duration")}
                 {getSortIcon("duration")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("views")}
               >
                 {t("Views")}
                 {getSortIcon("views")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("published_at")}
               >
                 {t("Published Date")}
                 {getSortIcon("published_at")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               {t("Status")}
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               {t("Actions")}
             </TableHead>
           </TableRow>
@@ -350,46 +330,48 @@ function VideosList({ onSectionChange }) {
         <TableBody className="text-[11px] ">
           {getSortedData().map((video) => (
             <TableRow key={video.id} className=" hover:bg-gray-50/60 border-b">
-              <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
+              <TableCell className="text-[#1E1E1E] text-center font-bold text-[11px] py-4 px-4">
                 <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
                   {video.id}
                 </span>
               </TableCell>
               <TableCell className="py-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3">
                   <img
                     src={video.thumbnail_url || video.thumbnail}
                     alt={video.title}
-                    className="w-12 h-8 rounded object-cover bg-gray-100"
+                    className="w-12 h-12 rounded object-cover bg-gray-100"
                     onError={(e) => {
                       e.target.src = "/placeholder-video.png";
                     }}
                   />
-                  <div className="flex flex-col">
-                    <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
-                      {video.title}
-                    </span>
-                    <span className="text-[#9FA2AA] text-[10px]">
-                      {video.language} • {video.subject}
-                    </span>
-                  </div>
                 </div>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+              <TableCell className="py-4">
+                <div className="flex flex-col items-center">
+                  <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
+                    {video.title}
+                  </span>
+                  <span className="text-[#9FA2AA] text-[10px]">
+                    {video.language} • {video.subject}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
                   {video.category?.name}
                 </span>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
                   {video.video_type}
                 </span>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="font-medium">{video.duration}</span>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-[11px] py-4">
-                <div className="flex flex-col">
+              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                <div className="flex flex-col items-center">
                   <span className="font-medium">
                     {video.views ? video.views.toLocaleString() : 0}
                   </span>
@@ -398,8 +380,8 @@ function VideosList({ onSectionChange }) {
                   </span>
                 </div>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-[11px] py-4">
-                <div className="flex flex-col">
+              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                <div className="flex flex-col items-center">
                   <span className="font-medium">
                     {new Date(video.published_at).toLocaleDateString("en-GB", {
                       year: "numeric",
@@ -418,7 +400,7 @@ function VideosList({ onSectionChange }) {
                 </div>
               </TableCell>
               <TableCell className="py-4">
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center justify-center gap-1 flex-wrap">
                   {video.featured && (
                     <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-[10px]">
                       {t("Featured")}
@@ -437,7 +419,7 @@ function VideosList({ onSectionChange }) {
                 </div>
               </TableCell>
               <TableCell className="py-4">
-                <div className="flex items-center gap-2 text-[#5B6B79]">
+                <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                   <button
                     title={t("View Details")}
                     onClick={() => handleViewDetails(video)}
@@ -475,25 +457,25 @@ function VideosList({ onSectionChange }) {
 
       {/* Start Pagination */}
       {totalPages >= 1 && (
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">
+        <div className="flex items-center  justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">
           <div className="text-sm text-gray-700">
             {t("Showing")} {(currentPage - 1) * limit + 1} {t("to")}{" "}
             {Math.min(currentPage * limit, totalRecords)} {t("of")}{" "}
             {totalRecords} {t("videos")}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             {/* Start Previous Page Button */}
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="h-4 w-4" />
               {t("Previous")}
             </button>
             {/* End Previous Page Button */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               {/* Start First Page Button */}
               {currentPage > 3 && (
                 <>
@@ -554,7 +536,7 @@ function VideosList({ onSectionChange }) {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("Next")}
               <ChevronLeft className="h-4 w-4" />
@@ -596,7 +578,6 @@ function VideosList({ onSectionChange }) {
             setShowCreateEditModal(false);
             setEditingVideo(null);
           }}
-          onSave={handleSaveVideo}
         />
       </Modal>
       {/* End Create/Edit Video Modal */}

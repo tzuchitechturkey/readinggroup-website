@@ -24,9 +24,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetTvPrograms, DeleteTvProgramById } from "@/api/tvPrograms";
 
-import CreateOrEditNews from "../CreateOrEditNews/CreateOrEditNews";
-
-const TVList = () => {
+const TVList = ({ onSectionChange }) => {
   const { t } = useTranslation();
   // State management
   const [searchTerm, setSearchTerm] = useState("");
@@ -182,7 +180,7 @@ const TVList = () => {
           <button
             onClick={() => {
               setSelectedNews(null);
-              setShowCreateOrEditModal(true);
+              onSectionChange("createOrEditNews");
             }}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
           >
@@ -339,7 +337,7 @@ const TVList = () => {
                       <button
                         onClick={() => {
                           setSelectedNews(tv);
-                          setShowCreateOrEditModal(true);
+                          onSectionChange("createOrEditNews", tv);
                         }}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
@@ -440,21 +438,6 @@ const TVList = () => {
           </div>
         </div>
       )}
-
-      {/* Create/Edit Modal */}
-      <Modal
-        isOpen={showCreateOrEditModal}
-        onClose={() => setShowCreateOrEditModal(false)}
-        title={selectedNews?.id ? t("Edit TV Program") : t("Add TV Program")}
-      >
-        <CreateOrEditNews
-          isOpen={showCreateOrEditModal}
-          onClose={() => setShowCreateOrEditModal(false)}
-          news={selectedNews}
-          setSelectedNews={setSelectedNews}
-          setUpdate={setUpdate}
-        />
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

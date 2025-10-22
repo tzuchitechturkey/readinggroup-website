@@ -238,7 +238,7 @@ function LearnFilter({
                       onChange={(e) => setCategory(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option value="">{t("Category")}</option>
+                      <option disabled hidden value="">{t("Category")}</option>
                       <option value="Personal Growth">
                         {t("Personal Growth")}
                       </option>
@@ -258,7 +258,7 @@ function LearnFilter({
                       onChange={(e) => setType(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option value="">{t("Type")}</option>
+                      <option disabled hidden value="">{t("Type")}</option>
                       <option value="Non-fiction">{t("Non-fiction")}</option>
                       <option value="Fiction">{t("Fiction")}</option>
                       <option value="Research">{t("Research")}</option>
@@ -274,7 +274,7 @@ function LearnFilter({
                       onChange={(e) => setLanguage(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option value="">{t("Language")}</option>
+                      <option disabled hidden value="">{t("Language")}</option>
                       <option value="English">{t("English")}</option>
                       <option value="Arabic">{t("Arabic")}</option>
                       <option value="Turkish">{t("Turkish")}</option>
@@ -288,7 +288,7 @@ function LearnFilter({
                       onChange={(e) => setSource(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option value="">{t("Source")}</option>
+                      <option disabled hidden value="">{t("Source")}</option>
                       <option value="Harvard Review">
                         {t("Harvard Review")}
                       </option>
@@ -406,7 +406,7 @@ function LearnFilter({
                   onChange={(e) => setCategory(e.target.value)}
                   className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
                 >
-                  <option value="">{t("Category")}</option>
+                  <option disabled hidden value="">{t("Category")}</option>
                   <option value="Personal Growth">
                     {t("Personal Growth")}
                   </option>
@@ -420,7 +420,7 @@ function LearnFilter({
                   onChange={(e) => setType(e.target.value)}
                   className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
                 >
-                  <option value="">{t("Type")}</option>
+                  <option disabled hidden value="">{t("Type")}</option>
                   <option value="Non-fiction">{t("Non-fiction")}</option>
                   <option value="Fiction">{t("Fiction")}</option>
                   <option value="Research">{t("Research")}</option>
@@ -432,7 +432,7 @@ function LearnFilter({
                   onChange={(e) => setLanguage(e.target.value)}
                   className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
                 >
-                  <option value="">{t("Language")}</option>
+                  <option disabled hidden value="">{t("Language")}</option>
                   <option value="English">{t("English")}</option>
                   <option value="Arabic">{t("Arabic")}</option>
                   <option value="Turkish">{t("Turkish")}</option>
@@ -444,7 +444,7 @@ function LearnFilter({
                   onChange={(e) => setSource(e.target.value)}
                   className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
                 >
-                  <option value="">{t("Source")}</option>
+                  <option disabled hidden value="">{t("Source")}</option>
                   <option value="Harvard Review">{t("Harvard Review")}</option>
                   <option value="MIT Press">{t("MIT Press")}</option>
                   <option value="Oxford Journal">{t("Oxford Journal")}</option>
@@ -501,7 +501,7 @@ function LearnFilter({
                 onChange={(e) => setCategory(e.target.value)}
                 className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
               >
-                <option value="">{t("Category")}</option>
+                <option disabled hidden value="">{t("Category")}</option>
                 <option value="Personal Growth">{t("Personal Growth")}</option>
                 <option value="Technology">{t("Technology")}</option>
                 <option value="History">{t("History")}</option>
@@ -514,7 +514,7 @@ function LearnFilter({
                 onChange={(e) => setType(e.target.value)}
                 className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
               >
-                <option value="">{t("Type")}</option>
+                <option disabled hidden value="">{t("Type")}</option>
                 <option value="Non-fiction">{t("Non-fiction")}</option>
                 <option value="Fiction">{t("Fiction")}</option>
                 <option value="Research">{t("Research")}</option>
@@ -527,7 +527,7 @@ function LearnFilter({
                 onChange={(e) => setLanguage(e.target.value)}
                 className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
               >
-                <option value="">{t("Language")}</option>
+                <option disabled hidden value="">{t("Language")}</option>
                 <option value="English">{t("English")}</option>
                 <option value="Arabic">{t("Arabic")}</option>
                 <option value="Turkish">{t("Turkish")}</option>
@@ -540,7 +540,7 @@ function LearnFilter({
                 onChange={(e) => setSource(e.target.value)}
                 className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
               >
-                <option value="">{t("Source")}</option>
+                <option disabled hidden value="">{t("Source")}</option>
                 <option value="Harvard Review">{t("Harvard Review")}</option>
                 <option value="MIT Press">{t("MIT Press")}</option>
                 <option value="Oxford Journal">{t("Oxford Journal")}</option>

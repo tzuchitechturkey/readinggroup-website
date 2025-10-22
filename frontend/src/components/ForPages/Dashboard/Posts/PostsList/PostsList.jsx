@@ -31,7 +31,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import ShowPostDetails from "../ShowPostDetails/ShowPostDetails";
 
 function PostsList({ onSectionChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [selectedPost, setSelectedPost] = useState(null);
@@ -160,7 +160,10 @@ function PostsList({ onSectionChange }) {
   }, [update]);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200">
+    <div
+      className="bg-white rounded-lg border border-gray-200"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
@@ -171,20 +174,23 @@ function PostsList({ onSectionChange }) {
           <span className="text-sm text-gray-500">
             {t("Total")}: {totalRecords} {t("posts")}
           </span>
-          <button
-            onClick={() => {
-              setSelectedPost(null);
-              onSectionChange("createOrEditPost", null);
-            }}
-            className="flex items-center gap-2 text-sm bg-blue-600 border border-blue-600 hover:bg-blue-700 transition-all duration-200 text-white px-3 py-1.5 rounded"
-          >
-            <Plus className="h-4 w-4" />
-            {t("Add New Post")}
-          </button>
+
+          {/* Start Add Button */}
+          <div>
+            <button
+              onClick={() => {
+                setSelectedPost(null);
+                onSectionChange("createOrEditPost", null);
+              }}
+              className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
+            >
+              {t("Add New")}
+            </button>
+          </div>
+          {/* End Add Button */}
         </div>
       </div>
       {/* End Header */}
-
       {/* Start Search */}
       <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
         <div className="relative max-w-md flex">
@@ -195,7 +201,9 @@ function PostsList({ onSectionChange }) {
             onChange={(e) => {
               setSearch(e.target.value);
             }}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+            className={`flex-1 px-4 py-2 border border-gray-300 ${
+              i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
+            } text-sm pr-8`}
           />
 
           {search && (
@@ -204,7 +212,9 @@ function PostsList({ onSectionChange }) {
                 setSearch("");
                 getPostData(0, "");
               }}
-              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className={` absolute ${
+                i18n?.language === "ar" ? " left-20" : " right-20"
+              } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
             >
               ✕
             </button>
@@ -212,114 +222,83 @@ function PostsList({ onSectionChange }) {
 
           <button
             onClick={getPostData}
-            className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+            className={`px-4 py-2 bg-[#4680ff] text-white ${
+              i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
+            }  text-sm font-semibold hover:bg-blue-600`}
           >
             {t("Search")}
           </button>
         </div>
       </div>
-
-      {/* <div className="px-4 sm:px-6 py-3 border-b bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="relative max-w-md">
-            <input
-              type="text"
-              placeholder={t("Search posts...")}
-              value={search}
-              onChange={handleSearch}
-              className="w-full pl-10 pr-16 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-              <Search className="w-4 h-4 text-gray-400" />
-            </div>
-            {search && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <button
-                  onClick={clearSearch}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded"
-                  title={t("Clear Search")}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-          {search && (
-            <div className="text-sm text-gray-500">
-              {t("Found")} {totalRecords} {t("results for")} "{search}"
-            </div>
-          )}
-        </div>
-      </div> */}
       {/* End Search */}
 
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14">
           <TableRow className="border-b">
-            <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs px-3">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("id")}
               >
                 {t("ID")}
                 {getSortIcon("id")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("title")}
               >
                 {t("Title")}
                 {getSortIcon("title")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
-              <div className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
                 {t("Excerpt")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("category")}
               >
                 {t("Category")}
                 {getSortIcon("category")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("type")}
               >
                 {t("Type")}
                 {getSortIcon("type")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("writer")}
               >
                 {t("Writer")}
                 {getSortIcon("writer")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div
-                className="flex items-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
+                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("views")}
               >
                 {t("Views")}
                 {getSortIcon("views")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               {t("Status")}
             </TableHead>
-            <TableHead className="text-[#5B6B79] font-medium text-xs">
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               {t("Actions")}
             </TableHead>
           </TableRow>
@@ -349,10 +328,10 @@ function PostsList({ onSectionChange }) {
           ) : (
             getSortedData().map((post) => (
               <TableRow key={post.id} className="hover:bg-gray-50/60 border-b">
-                <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
+                <TableCell className="text-center text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                   {post.id}
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="text-center py-4">
                   <div className="flex flex-col">
                     <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-1">
                       {post.title}
@@ -362,20 +341,20 @@ function PostsList({ onSectionChange }) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <span className=" px-2 py-1 text-[12px]">{post.excerpt}</span>
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
                     {post.category?.name}
                   </span>
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {post.type}
+                    {post.post_type}
                   </span>
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <div className="flex flex-col">
                     <span className="font-medium">{post.writer}</span>
                     <span className="text-[#9FA2AA] text-[10px]">
@@ -383,19 +362,19 @@ function PostsList({ onSectionChange }) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-[#1E1E1E] text-[11px] py-4">
+                <TableCell className="text-center text-[#1E1E1E]  text-[11px] py-4">
                   <span className="font-medium">{post.views}</span>
                 </TableCell>
-                <TableCell className="py-4">
-                  <div className="flex items-center gap-1">
+                <TableCell className="text-center py-4">
+                  <div className="flex items-center justify-center gap-1">
                     <span
                       className={`px-2 py-1 rounded-full text-[10px] ${
-                        post.active
+                        post.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {post.active ? t("Active") : t("Inactive")}
+                      {post.is_active ? t("Active") : t("Inactive")}
                     </span>
                     <span
                       className={`px-2 py-1 rounded-full text-[10px] ${
@@ -408,8 +387,8 @@ function PostsList({ onSectionChange }) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="py-4">
-                  <div className="flex items-center gap-2 text-[#5B6B79]">
+                <TableCell className="text-center py-4">
+                  <div className="flex justify-center items-center gap-2 text-[#5B6B79]">
                     <button
                       title={t("View Details")}
                       onClick={() => {
@@ -461,13 +440,13 @@ function PostsList({ onSectionChange }) {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
               {t("Previous")}
             </button>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNum = i + 1; // يبدأ من 1 ويزيد
                 const isActive = pageNum === currentPage;
@@ -491,7 +470,7 @@ function PostsList({ onSectionChange }) {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("Next")}
               <ChevronRight className="h-4 w-4" />

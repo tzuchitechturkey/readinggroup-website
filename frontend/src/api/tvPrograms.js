@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-export async function GetTvPrograms(limit, offset, search) {
+export async function GetTvPrograms(limit, offset, search = "") {
   return await axios.get(
     `/tv-programs/?limit=${limit}&offset=${offset}&search=${search}`
   );
@@ -22,28 +22,28 @@ export async function DeleteTvProgramById(id) {
   return await axios.delete(`/tv-programs/${id}/`);
 }
 
-export async function GetAllTvCategories() {
+export async function GetAllNewsCategories() {
   return await axios.get(`/tvprogram-categories/`);
 }
 
-export async function GetTvCategories(limit, offset, search = "") {
+export async function GetNewsCategories(limit, offset, search = "") {
   return await axios.get(
     `/tvprogram-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
 
-export async function AddTvCategory(data) {
+export async function AddNewsCategory(data) {
   return await axios.post(`/tvprogram-categories/`, data);
 }
 
-export async function EditTvCategoryById(id, data) {
+export async function EditNewsCategoryById(id, data) {
   return await axios.put(`/tvprogram-categories/${id}/`, data);
 }
 
-export async function GetTvCategoryById(id) {
+export async function GetNewsCategoryById(id) {
   return await axios.get(`/tvprogram-categories/${id}/`);
 }
 
-export async function DeleteTvCategory(id) {
+export async function DeleteNewsCategory(id) {
   return await axios.delete(`/tvprogram-categories/${id}/`);
 }

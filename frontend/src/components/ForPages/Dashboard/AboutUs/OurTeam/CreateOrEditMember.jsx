@@ -71,6 +71,14 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -82,6 +90,14 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         avatar: file,
         avatar_url: "", // Clear URL when file is selected
       }));
+
+      // Clear avatar error if exists
+      if (errors.avatar) {
+        setErrors((prev) => ({
+          ...prev,
+          avatar: "",
+        }));
+      }
     }
   };
 
@@ -129,8 +145,36 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = t("Name is required");
+    }
+
+    if (!formData.position) {
+      newErrors.position = t("Position is required");
+    }
+    if (!formData.job_title.trim()) {
+      newErrors.job_title = t("Job title is required");
+    }
+
+    if (!formData.avatar && !member?.id) {
+      newErrors.avatar = t("Avatar is required");
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     // Prepare data for submission
@@ -204,11 +248,16 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           <input
             type="text"
             name="name"
+            placeholder={t("Enter full name")}
             value={formData.name}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-            required
+            className={`w-full p-3 border rounded-lg outline-none ${
+              errors.name ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.name && (
+            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+          )}
         </div>
 
         {/* Start Position */}
@@ -327,6 +376,26 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           )}
         </div>
         {/* End Position */}
+        {/* Start Job Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Job Title")} *
+          </label>
+          <input
+            type="text"
+            name="job_title"
+            value={formData.job_title}
+            onChange={handleInputChange}
+            placeholder={t("Developer, Manager, etc")}
+            className={`w-full p-3 border border-gray-300 rounded-lg  outline-none ${
+              errors.job_title ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.job_title && (
+            <p className="text-red-500 text-xs mt-1">{errors.job_title}</p>
+          )}
+        </div>
+        {/* End Job Title */}
         {/* Start Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -334,28 +403,14 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           </label>
           <textarea
             name="description"
+            placeholder={t("Enter a brief description or bio")}
             value={formData.description}
             onChange={handleInputChange}
             rows={3}
             className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-            required
           />
         </div>
-
-        {/* Start Job Title */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Job Title")}
-          </label>
-          <input
-            type="text"
-            name="job_title"
-            value={formData.job_title}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-          />
-        </div>
-        {/* End Job Title */}
+        {/* End Description */}
         {/* Start Avatar Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -366,9 +421,13 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
             name="avatar"
             accept="image/*"
             onChange={handleFileChange}
-            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-            required={!member?.id} // Required for new members, optional for editing
+            className={`w-full p-3 border rounded-lg outline-none ${
+              errors.avatar ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.avatar && (
+            <p className="text-red-500 text-xs mt-1">{errors.avatar}</p>
+          )}
           {formData.avatar && typeof formData.avatar === "string" && (
             <div className="mt-2">
               <img
@@ -411,7 +470,9 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
                 }
                 className="w-1/2 p-2 border border-gray-300 rounded-lg outline-none placeholder:text-sm"
               >
-                <option value="">{t("platform")}</option>
+                <option disabled hidden value="">
+                  {t("platform")}
+                </option>
                 {socialPlatforms.map((p) => (
                   <option key={p} value={p}>
                     {p}

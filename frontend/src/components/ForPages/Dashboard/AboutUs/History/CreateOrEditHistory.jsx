@@ -26,6 +26,7 @@ const CreateOrEditHistory = ({
   const { t } = useTranslation();
   const [isLaoding, setIsLaoding] = useState(false);
   const [openStoryDate, setOpenStory] = useState(false);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -63,10 +64,74 @@ const CreateOrEditHistory = ({
       ...prev,
       [name]: value,
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file }));
+      
+      // Clear image error if exists
+      if (errors.image) {
+        setErrors((prev) => ({
+          ...prev,
+          image: "",
+        }));
+      }
+    }
+  };
+
+  const handleDateChange = (date) => {
+    setOpenStory(false);
+    setFormData((prev) => ({ ...prev, story_date: date }));
+    
+    // Clear date error if exists
+    if (errors.story_date) {
+      setErrors((prev) => ({
+        ...prev,
+        story_date: "",
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.story_date) {
+      newErrors.story_date = t("Story date is required");
+    }
+
+    if (!formData.title.trim()) {
+      newErrors.title = t("Title is required");
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = t("Description is required");
+    }
+
+    if (!formData.image && !formData.image_url && !historyItem?.id) {
+      newErrors.image = t("Image is required");
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLaoding(true);
     try {
       // إنشاء FormData لإرسال الصورة بشكل صحيح
@@ -74,12 +139,12 @@ const CreateOrEditHistory = ({
 
       // تحويل التواريخ إلى صيغة YYYY-MM-DD
       if (formData.story_date) {
-        const story_date = new Date(formData.story_date);
+        const storyDate = new Date(formData.story_date);
         // التأكد من صحة التاريخ
-        if (!isNaN(story_date.getTime())) {
+        if (!isNaN(storyDate.getTime())) {
           formDataToSend.append(
             "story_date",
-            story_date.toISOString().split("T")[0]
+            storyDate.toISOString().split("T")[0]
           );
         }
       }
@@ -141,7 +206,7 @@ const CreateOrEditHistory = ({
         {/* Start Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Story Date")}
+            {t("Story Date")} *
           </label>
           <Popover
             open={openStoryDate}
@@ -153,7 +218,8 @@ const CreateOrEditHistory = ({
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !formData.story_date && "text-muted-foreground"
+                  !formData.story_date && "text-muted-foreground",
+                  errors.story_date && "border-red-500"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
@@ -170,46 +236,54 @@ const CreateOrEditHistory = ({
                     ? new Date(formData.story_date)
                     : undefined
                 }
-                onSelect={(date) => {
-                  setFormData((prev) => ({ ...prev, story_date: date }));
-                  setOpenStory(false);
-                }}
+                onSelect={handleDateChange}
                 initialFocus
               />
             </PopoverContent>
           </Popover>
+          {errors.story_date && (
+            <p className="text-red-500 text-xs mt-1">{errors.story_date}</p>
+          )}
         </div>
         {/* End Start Date */}
 
         {/* Start Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Title")}
+            {t("Title")} *
           </label>
           <input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              errors.title ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+          )}
         </div>
         {/* End Title */}
 
         {/* Start Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Description")}
+            {t("Description")} *
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              errors.description ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.description && (
+            <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+          )}
         </div>
         {/* End Description */}
 
@@ -231,19 +305,19 @@ const CreateOrEditHistory = ({
         {/* Start Image Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Event Image")}
+            {t("Event Image")} *
           </label>
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setFormData((prev) => ({ ...prev, image: file }));
-              }
-            }}
-            className="w-full p-2 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            onChange={handleFileChange}
+            className={`w-full p-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
+              errors.image ? "border-red-500" : "border-gray-300"
+            }`}
           />
+          {errors.image && (
+            <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+          )}
 
           {formData.image && (
             <div className="mt-3">

@@ -21,7 +21,7 @@ import Loader from "@/components/Global/Loader/Loader";
 
 import CreateOrEditHistory from "./CreateOrEditHistory";
 
-function History() {
+function History({ onSectionChange }) {
   const { t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -90,6 +90,24 @@ function History() {
   return (
     <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
       {isLaoding && <Loader />}
+      {/* Start Breadcrumb */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onSectionChange("dashboard")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
+          >
+            ← {t("Back to Dashboard")}
+          </button>
+          <div className="h-4 w-px bg-gray-300" />
+          <h2 className="text-xl font-semibold text-[#1D2630]">
+            {t("History")}
+          </h2>
+        </div>
+      </div>
+      {/* End Breadcrumb */}
+      
       <div className="flex-1">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">

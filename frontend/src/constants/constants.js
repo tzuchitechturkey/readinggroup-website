@@ -10,3 +10,18 @@ export const socialPlatforms = [
   "Reddit",
   "WhatsApp",
 ];
+
+export const languages = [
+  "Arabic",
+  "English",
+  "Turkish",
+  "Chinese",
+  "Spanish",
+  "French",
+];
+
+export const postStatusOptions = [
+  { value: "draft", label: "Draft" },
+  { value: "published", label: "Published" },
+  { value: "archived", label: "Archived" },
+];

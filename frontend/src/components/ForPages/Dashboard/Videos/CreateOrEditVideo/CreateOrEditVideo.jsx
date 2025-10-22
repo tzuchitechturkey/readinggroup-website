@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, Upload, Youtube, X, Tag, Search } from "lucide-react";
+import { Save, Upload, Youtube, X, Tag, Search, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -8,20 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreateVideo, EditVideoById, GetVideoCategories } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { languages } from "@/constants/constants";
+import { BASE_URL } from "@/configs";
 
 const videoTypes = ["Full Videos", "Unit Clips"];
 
-const languages = [
-  "Arabic",
-  "English",
-  "Turkish",
-  "Chinese",
-  "Spanish",
-  "French",
-];
-
 function CreateOrEditVideo({ onSectionChange, video = null }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [categoriesList, setCategoriesList] = useState([]);
@@ -32,6 +25,8 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [categorySearchValue, setCategorySearchValue] = useState("");
 
   const [errors, setErrors] = useState({});
+  const [castInput, setCastInput] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
@@ -44,8 +39,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     is_new: false,
     reference_code: "",
     video_url: "",
+    season: "",
+    description: "",
+    cast: [],
+    tags: [],
   });
-
   // Initialize form data when editing
   useEffect(() => {
     if (video) {
@@ -55,18 +53,22 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         category: video.category || "",
         video_type: video.video_type || "",
         language: video.language || "",
-        thumbnail: null, // Reset file input
+        thumbnail: video.thumbnail, // Reset file input
         thumbnail_url: video.thumbnail_url || "",
         featured: video.featured || false,
         is_new: video.is_new || false,
         reference_code: video.reference_code || "",
         video_url: video.video_url || "",
+        season: video.season || "",
+        description: video.description || "",
+        cast: video.cast || [],
+        tags: video.tags || [],
       };
       setFormData(initialData);
       setInitialFormData(initialData);
       setHasChanges(false);
       // Set existing thumbnail preview
-      setImagePreview(video.thumbnail || video.thumbnail_url);
+      setImagePreview(video.thumbnail || null);
     } else {
       setInitialFormData(null);
       setHasChanges(false);
@@ -99,14 +101,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     }
 
     // If thumbnail_url is provided, update preview
-    if (name === "thumbnail_url" && value) {
-      setImagePreview(value);
-      // Clear the file thumbnail if URL is provided
-      setFormData((prev) => ({
-        ...prev,
-        thumbnail: null,
-      }));
-    }
+    // if (name === "thumbnail_url" && value) {
+    //   setImagePreview(value);
+    //   // Clear the file thumbnail if URL is provided
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     thumbnail: null,
+    //   }));
+    // }
   };
   // Handle category selection
   const handleCategorySelect = (category) => {
@@ -125,59 +127,120 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       }));
     }
   };
-  // Handle image upload
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        thumbnail: file,
-        thumbnail_url: "", // Clear URL when file is uploaded
-      }));
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+  // Handle cast input
+  const handleCastInput = (e) => {
+    if (e.key === "Enter" && castInput.trim()) {
+      e.preventDefault();
+      if (!formData?.cast.includes(castInput.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          cast: [...prev.cast, castInput.trim()],
+        }));
+      }
+      setCastInput("");
+
+      // Clear error when adding cast
+      if (errors.cast) {
+        setErrors((prev) => ({
+          ...prev,
+          cast: "",
+        }));
+      }
     }
+  };
+
+  // Remove cast
+  const removeCast = (castToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      cast: prev.cast.filter((item) => item !== castToRemove),
+    }));
+  };
+
+  // Handle tags input
+  const handleTagsInput = (e) => {
+    if (e.key === "Enter" && tagsInput.trim()) {
+      e.preventDefault();
+      if (!formData?.tags.includes(tagsInput.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, tagsInput.trim()],
+        }));
+      }
+      setTagsInput("");
+
+      // Clear error when adding tag
+      if (errors.tags) {
+        setErrors((prev) => ({
+          ...prev,
+          tags: "",
+        }));
+      }
+    }
+  };
+
+  // Remove tag
+  const removeTag = (tagToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
+    }));
   };
 
   // Validate form
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.title.trim()) {
+    if (!formData?.thumbnail) {
+      newErrors.thumbnail = t("Thumbnail is required");
+    }
+
+    if (!formData?.title.trim()) {
       newErrors.title = t("Title is required");
     }
 
-    if (!formData.category) {
+    if (!formData?.category) {
       newErrors.category = t("Category is required");
     }
 
-    if (!formData.video_type) {
+    if (!formData?.video_type) {
       newErrors.video_type = t("Type is required");
     }
 
-    if (!formData.language) {
+    if (!formData?.language) {
       newErrors.language = t("Language is required");
     }
 
-    if (!formData.video_url.trim()) {
+    if (!formData?.video_url.trim()) {
       newErrors.video_url = t("Video URL is required");
-    } else if (!isValidYouTubeUrl(formData.video_url)) {
+    } else if (!isValidYouTubeUrl(formData?.video_url)) {
       newErrors.video_url = t("Please enter a valid YouTube URL");
     }
 
-    if (!formData.duration.trim()) {
+    if (!formData?.duration.trim()) {
       newErrors.duration = t("Duration is required");
+    }
+
+    if (!formData?.season.trim()) {
+      newErrors.season = t("Season is required");
+    }
+
+    if (!formData?.description.trim()) {
+      newErrors.description = t("Description is required");
+    }
+
+    if (!formData?.cast || formData?.cast.length === 0) {
+      newErrors.cast = t("Cast is required");
+    }
+
+    if (!formData?.tags || formData?.tags.length === 0) {
+      newErrors.tags = t("Tags are required");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   // Validate YouTube URL
   const isValidYouTubeUrl = (url) => {
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
@@ -192,33 +255,58 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       return;
     }
 
+    // Create FormData for file upload
+    const formDataToSend = new FormData();
+
+    // Add all form fields to FormData
+    // Object.keys(formData).forEach((key) => {
+    //   if (key === "thumbnail" && formData[key] instanceof File) {
+    //     // Add file if it's actually a file
+    //     formDataToSend.append(key, formData[key]);
+    //   } else if (key !== "thumbnail") {
+    //     // Add all other fields except empty thumbnail
+    //     if (
+    //       formData[key] !== null &&
+    //       formData[key] !== "" &&
+    //       formData[key] !== undefined
+    //     ) {
+    //       // Convert boolean values to string for FormData
+    //       if (typeof formData[key] === "boolean") {
+    //         formDataToSend.append(key, formData[key].toString());
+    //       } else {
+    //         formDataToSend.append(key, formData[key]);
+    //       }
+    //     }
+    //   }
+    // });
+
+    formDataToSend.append("title", formData?.title);
+    formDataToSend.append("duration", formData?.duration);
+    formDataToSend.append(
+      "category",
+      formData?.category?.id || formData?.category
+    );
+    formDataToSend.append("video_type", formData?.video_type);
+    formDataToSend.append("language", formData?.language);
+    formDataToSend.append("featured", formData?.featured);
+    formDataToSend.append("is_new", formData?.is_new);
+    formDataToSend.append("reference_code", formData?.reference_code);
+    formDataToSend.append("video_url", formData?.video_url);
+    formDataToSend.append("season", formData?.season);
+    formDataToSend.append("description", formData?.description);
+    formDataToSend.append("cast", JSON.stringify(formData?.cast));
+    formDataToSend.append("tags", JSON.stringify(formData?.tags));
+    if (imagePreview instanceof File) {
+      formDataToSend.append("thumbnail", imagePreview);
+    }
+    // Add thumbnail_url if provided
+    if (formData?.thumbnail_url) {
+      formDataToSend.append("thumbnail_url", formData?.thumbnail_url);
+    }
+
     setIsLoading(true);
+
     try {
-      // Create FormData for file upload
-      const formDataToSend = new FormData();
-
-      // Add all form fields to FormData
-      Object.keys(formData).forEach((key) => {
-        if (key === "thumbnail" && formData[key] instanceof File) {
-          // Add file if it's actually a file
-          formDataToSend.append(key, formData[key]);
-        } else if (key !== "thumbnail") {
-          // Add all other fields except empty thumbnail
-          if (
-            formData[key] !== null &&
-            formData[key] !== "" &&
-            formData[key] !== undefined
-          ) {
-            // Convert boolean values to string for FormData
-            if (typeof formData[key] === "boolean") {
-              formDataToSend.append(key, formData[key].toString());
-            } else {
-              formDataToSend.append(key, formData[key]);
-            }
-          }
-        }
-      });
-
       video?.id
         ? await EditVideoById(video.id, formDataToSend)
         : await CreateVideo(formDataToSend);
@@ -249,7 +337,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       });
 
       // Check if new thumbnail has been uploaded
-      const hasNewThumbnail = formData.thumbnail !== null;
+      const hasNewThumbnail = formData?.thumbnail !== null;
 
       setHasChanges(hasTextChanges || hasNewThumbnail);
     }
@@ -281,9 +369,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
   return (
-    <div className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto">
+    <div
+      className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
+      {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <button
@@ -299,18 +390,22 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           </h2>
         </div>
       </div>
+      {/* End Breadcrumb */}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Start Image Upload Section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Video Thumbnail")}
+            {t("Video Thumbnail")} *
           </label>
           <div className="flex items-center gap-4">
-            <div className="w-32 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+            <div
+              className={`w-32 h-24 border-2 border-dashed  border-gray-300 rounded-lg flex items-center justify-center`}
+            >
               {imagePreview ? (
                 <img
-                  src={imagePreview}
+                  // src={imagePreview}
+                  src={formData?.thumbnail}
                   alt="Preview"
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -322,13 +417,27 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                // onChange={handleImageUpload}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setImagePreview(file); // Store the actual file
+                    setFormData((prev) => ({ ...prev, thumbnail: url }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      thumbnail: "",
+                    }));
+                  }
+                }}
                 className="hidden"
                 id="image-upload"
               />
               <label
                 htmlFor="image-upload"
-                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 border ${
+                  errors.thumbnail ? "border-red-500" : ""
+                } border-gray-300 rounded-md hover:bg-gray-50`}
               >
                 <Upload className="h-4 w-4" />
                 {t("Upload Image")}
@@ -348,7 +457,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           </label>
           <Input
             name="thumbnail_url"
-            value={formData.thumbnail_url}
+            value={formData?.thumbnail_url}
             onChange={handleInputChange}
             placeholder={t("Enter thumbnail URL as alternative to file upload")}
           />
@@ -368,7 +477,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </label>
               <Input
                 name="title"
-                value={formData.title}
+                value={formData?.title}
                 onChange={handleInputChange}
                 placeholder={t("Enter video title")}
                 className={errors.title ? "border-red-500" : ""}
@@ -400,7 +509,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                           {categoriesList.find(
                             (cat) =>
                               cat.id ===
-                              (formData.category?.id || formData.category)
+                              (formData?.category?.id || formData?.category)
                           )?.name || t("Select Category")}
                         </div>
                       </div>
@@ -499,7 +608,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Category */}
-            {/* End Category */}
 
             {/* Start Type */}
             <div>
@@ -508,24 +616,73 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </label>
               <select
                 name="video_type"
-                value={formData.video_type}
+                value={formData?.video_type}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.video_type ? "border-red-500" : "border-gray-300"
-                }`}
+                } ${!formData?.video_type ? "text-gray-400" : "text-black"}`}
               >
-                <option value="">{t("Select Type")}</option>
+                <option value="" hidden disabled>
+                  {t("Select Type")}
+                </option>
+
                 {videoTypes.map((type) => (
-                  <option key={type} value={type}>
+                  <option key={type} className="text-black" value={type}>
                     {t(type)}
                   </option>
                 ))}
               </select>
+
               {errors.video_type && (
                 <p className="text-red-500 text-xs mt-1">{errors.video_type}</p>
               )}
             </div>
             {/* End Type */}
+            {/* Start Season  */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Season")} *
+              </label>
+              <Input
+                name="season"
+                value={formData?.season}
+                onChange={handleInputChange}
+                placeholder={t("Enter season number or name")}
+                className={errors.season ? "border-red-500" : ""}
+              />
+              {errors.season && (
+                <p className="text-red-500 text-xs mt-1">{errors.season}</p>
+              )}
+            </div>
+            {/* End Season  */}
+            {/* Start Status Checkboxes */}
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  checked={formData?.featured}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700">
+                  {t("Featured Video")}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="is_new"
+                  checked={formData?.is_new}
+                  onChange={handleInputChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700">
+                  {t("Mark as New")}
+                </label>
+              </div>
+            </div>
+            {/* End Status Checkboxes */}
           </div>
 
           {/* Right Column */}
@@ -537,21 +694,27 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </label>
               <select
                 name="language"
-                value={formData.language}
+                value={formData?.language}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.language ? "border-red-500" : "border-gray-300"
+                  errors.language
+                    ? "border-red-500 text-red-500"
+                    : !formData?.language
+                    ? "border-gray-300 text-gray-400"
+                    : "border-gray-300 text-black"
                 }`}
               >
-                <option disabled value="">
+                <option value="" hidden disabled>
                   {t("Select Language")}
                 </option>
+
                 {languages.map((lang) => (
-                  <option key={lang} value={lang}>
+                  <option key={lang} className="text-black" value={lang}>
                     {t(lang)}
                   </option>
                 ))}
               </select>
+
               {errors.language && (
                 <p className="text-red-500 text-xs mt-1">{errors.language}</p>
               )}
@@ -565,7 +728,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </label>
               <Input
                 name="duration"
-                value={formData.duration}
+                value={formData?.duration}
                 onChange={handleInputChange}
                 placeholder={t("e.g., 1h 28min or 15:30")}
                 className={errors.duration ? "border-red-500" : ""}
@@ -584,7 +747,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               <div className="relative">
                 <Input
                   name="video_url"
-                  value={formData.video_url}
+                  value={formData?.video_url}
                   onChange={handleInputChange}
                   placeholder="https://www.youtube.com/watch?v=..."
                   className={`pl-10 ${
@@ -598,36 +761,105 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Video URL */}
-
-            {/* Start Status Checkboxes */}
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="featured"
-                  checked={formData.featured}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            {/* Start Casts */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Casts")} *
+              </label>
+              <div className="space-y-2">
+                <Input
+                  value={castInput}
+                  onChange={(e) => setCastInput(e.target.value)}
+                  onKeyDown={handleCastInput}
+                  placeholder={t("Type a cast member name and press Enter")}
+                  className={errors.cast ? "border-red-500" : ""}
                 />
-                <label className="ml-2 text-sm text-gray-700">
-                  {t("Featured Video")}
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="is_new"
-                  checked={formData.is_new}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">
-                  {t("Mark as New")}
-                </label>
+                {errors.cast && (
+                  <p className="text-red-500 text-xs mt-1">{errors.cast}</p>
+                )}
+                {formData?.cast.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData?.cast.map((member, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        <User className="w-3 h-3" />
+                        {member}
+                        <button
+                          type="button"
+                          onClick={() => removeCast(member)}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            {/* End Status Checkboxes */}
+            {/* End Casts */}
+            {/* Start Tags  */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Tags")} *
+              </label>
+              <div className="space-y-2">
+                <Input
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  onKeyDown={handleTagsInput}
+                  placeholder={t("Type a tag and press Enter")}
+                  className={errors.tags ? "border-red-500" : ""}
+                />
+                {errors.tags && (
+                  <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
+                )}
+                {formData?.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData?.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* End Tags  */}
           </div>
+        </div>
+
+        {/* Description - Full Width */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Description")} *
+          </label>
+          <textarea
+            name="description"
+            value={formData?.description}
+            onChange={handleInputChange}
+            rows={4}
+            placeholder={t("Enter video description")}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.description ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {errors.description && (
+            <p className="text-red-500 text-xs mt-1">{errors.description}</p>
+          )}
         </div>
 
         {/* Form Actions */}

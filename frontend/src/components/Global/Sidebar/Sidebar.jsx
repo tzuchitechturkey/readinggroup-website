@@ -132,8 +132,12 @@ export default function AppSidebar({
             onClick: () => onSectionChange("newsList"),
           },
           {
-            title: "Tv Categories",
-            onClick: () => onSectionChange("tvCategories"),
+            title: "Add/Edit News",
+            onClick: () => onSectionChange("createOrEditNews"),
+          },
+          {
+            title: "News Categories",
+            onClick: () => onSectionChange("newsCategories"),
           },
         ],
       },
@@ -303,7 +307,7 @@ export default function AppSidebar({
 
       <SidebarRail />
 
-      {/* مودال تسجيل الخروج */}
+      {/* Start Logout Modal */}
       <Modal
         isOpen={openLogoutModal}
         onClose={() => setOpenLogoutModal(false)}
@@ -311,6 +315,7 @@ export default function AppSidebar({
       >
         <LogoutConfirmation onCancel={() => setOpenLogoutModal(false)} />
       </Modal>
+      {/* End Logout Modal */}
     </Sidebar>
   );
 }
