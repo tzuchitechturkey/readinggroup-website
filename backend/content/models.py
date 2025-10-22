@@ -25,12 +25,15 @@ class Video(TimestampedModel):
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
-    # Make published_at optional so objects can be created without a publication date.
     published_at = models.DateTimeField(blank=True, null=True)
     featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
+    cast = models.TextField(blank=True)
+    season = models.CharField(max_length=32, blank=True)
+    description = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ("-published_at", "-created_at")
@@ -59,6 +62,8 @@ class Post(TimestampedModel):
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
     metadata = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    camera_name = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ("-published_at", "-created_at")
