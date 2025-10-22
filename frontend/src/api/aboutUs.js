@@ -54,7 +54,7 @@ export async function GetAllPositions() {
 }
 
 export async function filterPositions(positionName) {
-  return await axios.get(`/position-team-members/?search=${positionName}`);
+  return await axios.get(`/team/?search=${positionName}`);
 }
 
 export async function CreatePosition(data) {
