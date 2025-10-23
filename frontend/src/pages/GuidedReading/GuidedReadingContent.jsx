@@ -1,85 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
-import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
-import { GetPostsbyFilter } from "@/api/posts";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import GuindReadingFilterSction from "@/components/ForPages/GuidedReading/GuindReadingFilterSction/GuindReadingFilterSction";
 
 function GuidedReadingContent() {
   const { t, i18n } = useTranslation();
 
-  // Filter states
-  const [searchDate, setSearchDate] = useState("");
-  const [writer, setWriter] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("");
-  const [language, setLanguage] = useState("");
-  const [source, setSource] = useState("");
-  const [titleQuery, setTitleQuery] = useState("");
-  const [data, setData] = useState([]);
-  // Results state
-  const [filteredReadings, setFilteredReadings] = useState([]);
-  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
-  const [weeklyMomentData, setWeeklyMomentData] = useState([]);
-  const [weeklyGuidData, setWeeklyGuidData] = useState([]);
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const limit = 10;
-
-  const getData = async (page) => {
-    setIsLoading(true);
-    const offset = page * 10;
-    try {
-      const res = await GetPostsbyFilter(limit, offset, filter);
-      setData(res.data?.results);
-      setTotalRecords(res.data?.count);
-    } catch (err) {
-      setErrorFn(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getWeeklyGuidData = async () => {
-    try {
-      const res = await GetWeeklyGuidData();
-      setWeeklyGuidData(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const getWeeklyMomentData = async () => {
-    try {
-      const res = await GetWeeklyMomentData();
-      setWeeklyMomentData(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  // Apply filters function - simulates API call
-  const applyFilters = () => {
-    setIsLoading(true);
-  };
-
-  // Load more function
-  const handleLoadMore = () => {
-    applyFilters();
-  };
-
-  useEffect(() => {
-    // getData(0)
-    // getWeeklyGuidData();
-    // getWeeklyMomentData();
-  }, []);
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir={i18n.dir()}>
       {/* Start Header */}
       <div
         className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
@@ -103,40 +34,11 @@ function GuidedReadingContent() {
       {/* End Header */}
 
       {/* Start Filter */}
-      <LearnFilter
-        t={t}
-        i18n={i18n}
-        searchDate={searchDate}
-        setSearchDate={setSearchDate}
-        writer={writer}
-        setWriter={setWriter}
-        category={category}
-        setCategory={setCategory}
-        type={type}
-        setType={setType}
-        language={language}
-        setLanguage={setLanguage}
-        titleQuery={titleQuery}
-        setTitleQuery={setTitleQuery}
-        onSearch={() => applyFilters(0, false)}
-      />
+      <GuindReadingFilterSction />
       {/* End Filter */}
 
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto">
-        {/* Start Filtered Data */}
-        <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-          <FilteredResults
-            readings={filteredReadings}
-            isSearchPerformed={isSearchPerformed}
-            totalCount={totalRecords}
-            hasMore={hasMore}
-            isLoading={isLoading}
-            onLoadMore={handleLoadMore}
-          />
-        </section>
-        {/* End Filtered Data */}
-
         {/* Weekly Moments */}
         <section className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <WeeklyMoments />

@@ -39,7 +39,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef(null);
   const [categorySearchValue, setCategorySearchValue] = useState("");
-  const [penHappendAt, setOpenHappendAt] = useState(false);
+  const [openHappendAt, setOpenHappendAt] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [castInput, setCastInput] = useState("");
@@ -686,13 +686,13 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Season  */}
-            {/* Start Air Date */}
+            {/* Start Happened At */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("Happened At")} *
               </label>
               <Popover
-                open={penHappendAt}
+                open={openHappendAt}
                 onOpenChange={setOpenHappendAt}
                 className="!z-[999999999999999]"
               >
@@ -708,7 +708,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                     <Calendar className="mr-2 h-4 w-4" />
                     {formData.happened_at
                       ? format(new Date(formData.happened_at), "MM/dd/yyyy")
-                      : "Pick Air date"}
+                      : "Pick Happened At date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -736,7 +736,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                 </p>
               )}
             </div>
-            {/* End Air Date */}
+            {/* End Happened At */}
             {/* Start Status Checkboxes */}
             <div className="space-y-3">
               <div className="flex items-center">

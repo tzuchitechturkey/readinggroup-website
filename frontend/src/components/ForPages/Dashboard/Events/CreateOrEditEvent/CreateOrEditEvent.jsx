@@ -2,17 +2,31 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { X, User, Search, Tag, Upload } from "lucide-react";
+import { X, User, Search, Tag, Upload, Calendar } from "lucide-react";
+import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { CreateEvent, EditEventById, GetEventCategories } from "@/api/events";
+import {
+  CreateEvent,
+  EditEventById,
+  GetEventCategories,
+  GetEventSections,
+} from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetAllUsers } from "@/api/posts";
 import countries from "@/constants/countries.json";
 import { languages } from "@/constants/constants";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
+const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -28,6 +42,8 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
   const [writersList, setWritersList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const [sectionSearchValue, setSectionSearchValue] = useState("");
+  const [openHappendAt, setOpenHappendAt] = useState(false);
+
   const [formData, setFormData] = useState({
     category: "",
     title: "",
@@ -39,6 +55,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
     language: "",
     duration_minutes: "",
     section: "",
+    happened_at: "",
     summary: "",
   });
 
@@ -64,8 +81,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
 
   const getSections = async (searchVal = "") => {
     try {
-      // استخدام نفس API للCategories كـ sections
-      const res = await GetEventCategories(10, 0, searchVal);
+      const res = await GetEventSections(10, 0, searchVal);
       setSectionsList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -74,21 +90,22 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
 
   //Reset form when modal opens/closes or event changes
   useEffect(() => {
-    if (news?.id) {
+    if (event?.id) {
       setFormData({
-        category: news.category || "",
-        title: news.title || "",
-        writer: news.writer || "",
+        category: event.category || "",
+        title: event.title || "",
+        writer: event.writer || "",
         image: null,
-        image_url: news.image_url || "",
-        report_type: news.report_type || "",
-        country: news.country || "",
-        language: news.language || "",
-        duration_minutes: news.duration_minutes || "",
-        section: news.section || "",
-        summary: news.summary || "",
+        image_url: event.image_url || "",
+        report_type: event.report_type || "",
+        country: event.country || "",
+        language: event.language || "",
+        duration_minutes: event.duration_minutes || "",
+        section: event.section || "",
+        summary: event.summary || "",
+        happened_at: event.happened_at || "",
       });
-      setImagePreview(news.image || news.image_url || "");
+      setImagePreview(event.image || event.image_url || "");
     } else {
       setFormData({
         category: "",
@@ -102,16 +119,11 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
         duration_minutes: "",
         section: "",
         summary: "",
+        happened_at: "",
       });
       setImagePreview("");
     }
-    // } else {
-    //   // Clean up preview URL when modal closes
-    //   if (imagePreview && imagePreview.startsWith("blob:")) {
-    //     URL.revokeObjectURL(imagePreview);
-    //   }
-    // }
-  }, [news]);
+  }, [event]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -273,7 +285,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
       newErrors.writer = t("Writer is required");
     }
 
-    if (!formData.image && !formData.image_url && !news?.id) {
+    if (!formData.image && !formData.image_url && !event?.id) {
       newErrors.image = t("Image is required");
     }
 
@@ -292,7 +304,9 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
     if (!formData.duration_minutes) {
       newErrors.duration_minutes = t("Duration is required");
     }
-
+    if (!formData?.happened_at) {
+      newErrors.happened_at = t("Happened At is required");
+    }
     if (!formData.section) {
       newErrors.section = t("Section is required");
     }
@@ -317,7 +331,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
     const submitData = new FormData();
 
     // Append text fields
-    submitData.append("category", formData.category);
+    submitData.append("category", formData?.category?.id || formData?.category);
     submitData.append("title", formData.title);
     submitData.append("writer", formData.writer);
     submitData.append("image_url", formData.image_url);
@@ -326,8 +340,14 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
     submitData.append("language", formData.language);
     submitData.append("duration_minutes", formData.duration_minutes);
     submitData.append("section", formData.section);
+    if (formData?.happened_at) {
+      const formattedDate = format(
+        new Date(formData.happened_at),
+        "yyyy-MM-dd"
+      );
+      submitData.append("happened_at", formattedDate);
+    }
     submitData.append("summary", formData.summary);
-
     // Append file if it exists
     if (formData.image) {
       submitData.append("image", formData.image);
@@ -335,9 +355,9 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
 
     setIsLoading(true);
     try {
-      if (news?.id) {
+      if (event?.id) {
         // Update existing Event
-        await EditEventById(news.id, submitData);
+        await EditEventById(event.id, submitData);
         toast.success(t("Event updated successfully"));
       } else {
         // Add new Event
@@ -411,7 +431,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
           </button>
           <div className="h-4 w-px bg-gray-300" />
           <h2 className="text-xl font-semibold text-[#1D2630]">
-            {news?.id ? t("Edit Event") : t("Create New Event")}
+            {event?.id ? t("Edit Event") : t("Create New Event")}
           </h2>
         </div>
       </div>
@@ -946,9 +966,58 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
             )}
           </div>
           {/* End Duration Minutes */}
+
+          {/* Start Happened At */}
+          <div className="-mt-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Happened At")} *
+            </label>
+            <Popover
+              open={openHappendAt}
+              onOpenChange={setOpenHappendAt}
+              className="!z-[999999999999999]"
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.happened_at && "text-muted-foreground",
+                    errors.happened_at && "border-red-500"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {formData.happened_at
+                    ? format(new Date(formData.happened_at), "MM/dd/yyyy")
+                    : "Pick Happened At date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={
+                    formData.happened_at
+                      ? new Date(formData.happened_at)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    handleInputChange({
+                      target: { name: "happened_at", value: date },
+                    });
+                    setOpenHappendAt(false);
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {errors.happened_at && (
+              <p className="text-red-500 text-xs mt-1">{errors.happened_at}</p>
+            )}
+          </div>
+          {/* End Air Date */}
         </div>
         {/* End Two-Column Grid */}
-
         {/* Start Summary */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -986,7 +1055,7 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
             type="submit"
             className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
           >
-            {news?.id ? t("Save Changes") : t("Add Event")}
+            {event?.id ? t("Save Changes") : t("Add Event")}
           </button>
         </div>
         {/* End Actions */}

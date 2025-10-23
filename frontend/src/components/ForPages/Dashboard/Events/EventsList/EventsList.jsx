@@ -29,7 +29,7 @@ const EventsList = ({ onSectionChange }) => {
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
-  const [selectedNews, setSelectedNews] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -38,8 +38,8 @@ const EventsList = ({ onSectionChange }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [newsData, setNewsData] = useState([]);
-
+  const [eventsData, setEventsData] = useState([]);
+  console.log("eventData:", eventsData);
   // Fetch Event from API
   const getEventsData = async (page = 0) => {
     setIsLoading(true);
@@ -48,7 +48,7 @@ const EventsList = ({ onSectionChange }) => {
       const res = await GetEvents(limit, offset, searchTerm);
 
       setTotalRecords(res?.data?.count || 0);
-      setNewsData(res?.data?.results || []);
+      setEventsData(res?.data?.results || []);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -58,9 +58,9 @@ const EventsList = ({ onSectionChange }) => {
 
   // Local sorting for displayed data
   const getSortedData = () => {
-    if (!newsData || !sortConfig.key) return newsData || [];
+    if (!eventsData || !sortConfig.key) return eventsData || [];
 
-    const sorted = [...newsData].sort((a, b) => {
+    const sorted = [...eventsData].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -75,7 +75,7 @@ const EventsList = ({ onSectionChange }) => {
       }
 
       // date fields
-      if (sortConfig.key === "air_date") {
+      if (sortConfig.key === "happened_at") {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
@@ -130,14 +130,14 @@ const EventsList = ({ onSectionChange }) => {
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedNews?.id) return;
+    if (!selectedEvent?.id) return;
 
     setIsLoading(true);
     try {
-      await DeleteEventById(selectedNews.id);
-      toast.success(t("News deleted successfully"));
+      await DeleteEventById(selectedEvent.id);
+      toast.success(t("Event deleted successfully"));
       setShowDeleteModal(false);
-      setSelectedNews(null);
+      setSelectedEvent(null);
       setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error);
@@ -160,7 +160,7 @@ const EventsList = ({ onSectionChange }) => {
       {isLoading && <Loader />}
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">{t("News")}</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{t("Events")}</h1>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           {/* Search */}
@@ -168,7 +168,7 @@ const EventsList = ({ onSectionChange }) => {
             <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <input
               type="text"
-              placeholder={t("Search News...")}
+              placeholder={t("Search Events...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
@@ -178,13 +178,13 @@ const EventsList = ({ onSectionChange }) => {
           {/* Add Button */}
           <button
             onClick={() => {
-              setSelectedNews(null);
-              onSectionChange("createOrEditNews");
+              setSelectedEvent(null);
+              onSectionChange("createOrEditEvent");
             }}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-white border-[1px] border-primary hover:text-primary transition-all duration-200"
           >
             <LuPlus className="h-4 w-4" />
-            {t("Add News")}
+            {t("Add Event")}
           </button>
         </div>
       </div>
@@ -234,21 +234,17 @@ const EventsList = ({ onSectionChange }) => {
                 </button>
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                <button
-                  onClick={() => sortData("description")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Description")}
-                  {getSortIcon("description")}
+                <button className="flex items-center gap-1 font-medium">
+                  {t("Section")}
                 </button>
               </TableHead>
               <TableHead>
                 <button
-                  onClick={() => sortData("air_date")}
+                  onClick={() => sortData("happened_at")}
                   className="flex items-center gap-1 font-medium"
                 >
                   {t("Date")}
-                  {getSortIcon("air_date")}
+                  {getSortIcon("happened_at")}
                 </button>
               </TableHead>
               <TableHead className="hidden sm:table-cell">
@@ -284,25 +280,22 @@ const EventsList = ({ onSectionChange }) => {
               </TableRow>
             ) : getSortedData().length > 0 ? (
               getSortedData().map((event) => (
-                <TableRow key={event.id} className="hover:bg-gray-50">
+                <TableRow key={event?.id} className="hover:bg-gray-50">
                   <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                    {event.id}
+                    {event?.id}
                   </TableCell>
                   <TableCell>
                     <div className="min-w-0">
                       <p className="font-medium text-gray-900 truncate">
-                        {event.title}
-                      </p>
-                      <p className="text-sm text-gray-500 md:hidden truncate">
-                        {event.description.substring(0, 50)}...
+                        {event?.title}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img
-                        src={event.image}
-                        alt={event.title}
+                        src={event?.image}
+                        alt={event?.title}
                         className="w-12 h-12 rounded-lg object-cover"
                         onError={(e) => {
                           e.target.src = "/placeholder-image.png";
@@ -313,30 +306,30 @@ const EventsList = ({ onSectionChange }) => {
                   <TableCell className="hidden md:table-cell">
                     <p
                       className="text-gray-600 max-w-xs truncate"
-                      title={event.description}
+                      title={event?.section?.name}
                     >
-                      {event.description}
+                      {event?.section?.name}
                     </p>
                   </TableCell>
                   <TableCell>
                     <span className="text-gray-600">
-                      {formatDate(event.air_date)}
+                      {formatDate(event?.happened_at)}
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <span className="text-gray-600">{event.writer}</span>
+                    <span className="text-gray-600">{event?.writer}</span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {event.category?.name}
+                      {event?.category?.name}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          setSelectedNews(event);
-                          onSectionChange("createOrEditNews", event);
+                          setSelectedEvent(event);
+                          onSectionChange("createOrEditEvent", event);
                         }}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
@@ -345,7 +338,7 @@ const EventsList = ({ onSectionChange }) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedNews(event);
+                          setSelectedEvent(event);
                           setShowDeleteModal(true);
                         }}
                         className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
@@ -444,21 +437,21 @@ const EventsList = ({ onSectionChange }) => {
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
-          setSelectedNews(null);
+          setSelectedEvent(null);
         }}
       >
         <DeleteConfirmation
           isOpen={showDeleteModal}
           onClose={() => {
             setShowDeleteModal(false);
-            setSelectedNews(null);
+            setSelectedEvent(null);
           }}
           onConfirm={handleConfirmDelete}
           title={t("Delete Post")}
           message={t(
             "Are you sure you want to delete this Post? This action cannot be undone."
           )}
-          itemName={selectedNews?.title}
+          itemName={selectedEvent?.title}
         />
       </Modal>
     </div>
