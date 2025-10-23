@@ -31,8 +31,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "corsheaders",
-    "drf_spectacular",
-    "drf_spectacular_sidecar",
+    "drf_yasg",
 ]
 
 LOCAL_APPS = [
@@ -113,7 +112,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # REST framework configuration
 REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -131,18 +129,15 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3650),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),
     "AUTH_HEADER_TYPES": ("Bearer",),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
 }
 
 
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Reading Group API",
-    "DESCRIPTION": "API powering the Reading Group frontend portal.",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-}
+
 
 
 # CORS

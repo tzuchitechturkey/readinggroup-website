@@ -1,6 +1,9 @@
 from rest_framework import filters, viewsets
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .models import (
     Event,
@@ -47,14 +50,45 @@ class BaseContentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
-
 class VideoViewSet(BaseContentViewSet):
-    """ViewSet for managing Video content."""
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     search_fields = ("title", "category", "language")
-    ordering_fields = ("published_at", "views", "created_at")
+    ordering_fields = ("happened_at", "views", "created_at")
+    filter_backends = [filters.SearchFilter]
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('video_type', openapi.IN_QUERY, description="Filter by video type", type=openapi.TYPE_STRING),
+            openapi.Parameter('language', openapi.IN_QUERY, description="Filter by language", type=openapi.TYPE_STRING),
+            openapi.Parameter('category', openapi.IN_QUERY, description="Filter by category (JSON object with 'name' field)", type=openapi.TYPE_STRING),
+            openapi.Parameter('happened_at', openapi.IN_QUERY, description="Filter by happened date", type=openapi.TYPE_STRING),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+
+        video_type = params.get('video_type')
+        if video_type:
+            queryset = queryset.filter(video_type__iexact=video_type)
+        
+        language = params.get("language")
+        if language:
+            queryset = queryset.filter(language=language)
+            
+        category = params.get("category")
+        if category:
+            queryset = queryset.filter(category__name__iexact=category)
+            
+        happened_at = params.get('happened_at')
+        if happened_at:
+            queryset = queryset.filter(happened_at__date=happened_at)
+
+        return queryset
 
 class PostViewSet(BaseContentViewSet):
     """ViewSet for managing Post content."""
@@ -62,7 +96,46 @@ class PostViewSet(BaseContentViewSet):
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category", "tags")
     ordering_fields = ("published_at", "views", "created_at")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('published_at', openapi.IN_QUERY, description="Filter by published date", type=openapi.TYPE_STRING),
+            openapi.Parameter('writer', openapi.IN_QUERY, description="Filter by writer", type=openapi.TYPE_STRING),
+            openapi.Parameter('category', openapi.IN_QUERY, description="Filter by category", type=openapi.TYPE_STRING),
+            openapi.Parameter('post_type', openapi.IN_QUERY, description="Filter by post type", type=openapi.TYPE_STRING),
+            openapi.Parameter('language', openapi.IN_QUERY, description="Filter by language", type=openapi.TYPE_STRING),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        
+        queryset = super().get_queryset()
+        params = self.request.query_params
 
+        published_at = params.get('published_at')
+        if published_at:
+            queryset = queryset.filter(published_at__date=published_at)
+        
+        writer = params.get("writer")
+        if writer:
+            queryset = queryset.filter(writer__icontains=writer)
+            
+        category = params.get("category")
+        if category:
+            queryset = queryset.filter(category__name__iexact=category)
+        
+        post_type = params.get("post_type")
+        if post_type:
+            queryset = queryset.filter(post_type__iexact=post_type)
+        
+        language = params.get("language")
+        if language:
+            queryset =queryset.filter(language__iexact=language)
+
+        return queryset
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()

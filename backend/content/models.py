@@ -25,7 +25,7 @@ class Video(TimestampedModel):
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
-    published_at = models.DateTimeField(blank=True, null=True)
+    happened_at = models.DateTimeField(blank=True, null=True)
     featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
@@ -36,7 +36,7 @@ class Video(TimestampedModel):
     tags = models.JSONField(default=list, blank=True)
 
     class Meta:
-        ordering = ("-published_at", "-created_at")
+        ordering = ("-happened_at", "-created_at")
 
     def __str__(self) -> str:
         return self.title

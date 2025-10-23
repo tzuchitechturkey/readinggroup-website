@@ -115,7 +115,7 @@ class LoginView(APIView):
 
         user = User.objects.filter(username=username).first() or User.objects.filter(email=username).first()
         if not user:
-            return Response({"error": "Invalid credentials"}, status=400)
+            return Response({"error": "Incorrect Username Or Password"}, status=400)
 
         # Check if user is blocked (if you have is_blocked field)
         if hasattr(user, "is_blocked") and user.is_blocked:
@@ -134,11 +134,11 @@ class LoginView(APIView):
                     user.last_failed_login = timezone.now()
                 user.save()
                 return Response({
-                    "error": "Invalid username or password",
+                    "error": "Incorrect Username Or Password",
                     "failed_attempts": user.failed_login_attempts,
                     "is_blocked": getattr(user, "is_blocked", False),
                 }, status=400)
-            return Response({"error": "Invalid username or password"}, status=400)
+            return Response({"error": "Incorrect Username Or Password"}, status=400)
 
         # Force password change logic (if you have force_password_change field)
         if hasattr(user, "force_password_change") and user.force_password_change:

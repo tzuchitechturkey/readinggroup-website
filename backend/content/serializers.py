@@ -68,7 +68,7 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
 
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
-    datetime_fields = ("published_at", "created_at", "updated_at")
+    datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
     class Meta:
         model = Video

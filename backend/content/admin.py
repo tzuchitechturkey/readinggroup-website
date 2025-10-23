@@ -16,7 +16,7 @@ from .models import (
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "language", "published_at", "views", "featured")
+    list_display = ("title", "category", "language", "views", "featured")
     list_filter = ("category", "language", "featured", "is_new")
     search_fields = ("title", "category")
 
