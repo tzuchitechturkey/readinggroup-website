@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from .enums import (
     PostStatus,
     PostType,
@@ -228,3 +229,110 @@ class EventSection(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
+
+
+# ====================================Like models for each content type start=================================
+class PostLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'post')
+        
+    def __str__(self):
+        return f"{self.user} liked post {self.post.id}"
+
+class VideoLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'video')
+        
+    def __str__(self):
+        return f"{self.user} liked video {self.video.id}"
+
+class EventLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'event')
+        
+    def __str__(self):
+        return f"{self.user} liked event {self.event.id}"
+
+class TvProgramLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    tv_program = models.ForeignKey('TvProgram', on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'tv_program')
+        
+    def __str__(self):
+        return f"{self.user} liked tv program {self.tv_program.id}"
+
+class WeeklyMomentLike(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    weekly_moment = models.ForeignKey('WeeklyMoment', on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'weekly_moment')
+        
+    def __str__(self):
+        return f"{self.user} liked weekly moment {self.weekly_moment.id}"
+    
+# ====================================Like models for each content type end=================================
+
+# ====================================Comment models for each content type start=================================
+class PostComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user} commented on post {self.post.id}"
+
+class VideoComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user} commented on video {self.video.id}"
+
+class EventComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user} commented on event {self.event.id}"
+
+class TvProgramComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    tv_program = models.ForeignKey('TvProgram', on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user} commented on tv program {self.tv_program.id}"
+
+class WeeklyMomentComment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    weekly_moment = models.ForeignKey('WeeklyMoment', on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user} commented on weekly moment {self.weekly_moment.id}"
+    
+# ====================================Comment models for each content type end=================================

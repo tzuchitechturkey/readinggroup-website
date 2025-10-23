@@ -15,6 +15,16 @@ from .models import (
     TvProgramCategory,
     PositionTeamMember,
     EventSection,
+    TvProgramLike,
+    WeeklyMomentLike,
+    PostLike,
+    VideoLike,
+    EventLike,
+    PostComment,
+    VideoComment,
+    TvProgramComment,
+    EventComment,
+    WeeklyMomentComment,
 )
 
 
@@ -155,3 +165,68 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
         file_fields = ("image",)
         
+class PostLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PostLike
+        fields = "__all__"
+        
+class VideoLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = VideoLike
+        fields = "__all__"
+        
+class EventLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventLike
+        fields = "__all__"
+        
+class TvProgramLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = TvProgramLike
+        fields = "__all__"
+        
+class WeeklyMomentLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = WeeklyMomentLike
+        fields = "__all__"
+        
+class TvProgramLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = TvProgramLike
+        fields = "__all__"
+        
+class PostCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PostComment
+        fields = "__all__"
+        
+class VideoCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = VideoComment
+        fields = "__all__"
+    
+class TvProgramCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = TvProgramComment
+        fields = "__all__"
+        
+class EventCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventComment
+        fields = "__all__"
+        
+class WeeklyMomentCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = WeeklyMomentComment
+        fields = "__all__"

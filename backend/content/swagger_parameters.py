@@ -108,3 +108,176 @@ team_member_manual_parameters = [
         type=openapi.TYPE_STRING
     ),
 ]
+
+# Like & Comment manual parameters for each content type
+post_like_parameters = [
+    openapi.Parameter(
+        'post',
+        openapi.IN_QUERY,
+        description="Post ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+]
+video_like_parameters = [
+    openapi.Parameter(
+        'video',
+        openapi.IN_QUERY,
+        description="Video ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+]
+event_like_parameters = [
+    openapi.Parameter(
+        'event',
+        openapi.IN_QUERY,
+        description="Event ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+]
+tvprogram_like_parameters = [
+    openapi.Parameter(
+        'tv_program',
+        openapi.IN_QUERY,
+        description="TV Program ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+]
+weeklymoment_like_parameters = [
+    openapi.Parameter(
+        'weekly_moment',
+        openapi.IN_QUERY,
+        description="Weekly Moment ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+]
+
+post_comment_parameters = [
+    openapi.Parameter(
+        'post',
+        openapi.IN_QUERY,
+        description="Post ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'text',
+        openapi.IN_QUERY,
+        description="Comment text",
+        type=openapi.TYPE_STRING
+    ),
+]
+video_comment_parameters = [
+    openapi.Parameter(
+        'video',
+        openapi.IN_QUERY,
+        description="Video ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'text',
+        openapi.IN_QUERY,
+        description="Comment text",
+        type=openapi.TYPE_STRING
+    ),
+]
+event_comment_parameters = [
+    openapi.Parameter(
+        'event',
+        openapi.IN_QUERY,
+        description="Event ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'text',
+        openapi.IN_QUERY,
+        description="Comment text",
+        type=openapi.TYPE_STRING
+    ),
+]
+tvprogram_comment_parameters = [
+    openapi.Parameter(
+        'tv_program',
+        openapi.IN_QUERY,
+        description="TV Program ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'text',
+        openapi.IN_QUERY,
+        description="Comment text",
+        type=openapi.TYPE_STRING
+    ),
+]
+weeklymoment_comment_parameters = [
+    openapi.Parameter(
+        'weekly_moment',
+        openapi.IN_QUERY,
+        description="Weekly Moment ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'user',
+        openapi.IN_QUERY,
+        description="User ID",
+        type=openapi.TYPE_INTEGER
+    ),
+    openapi.Parameter(
+        'text',
+        openapi.IN_QUERY,
+        description="Comment text",
+        type=openapi.TYPE_STRING
+    ),
+]
