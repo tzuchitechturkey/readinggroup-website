@@ -114,6 +114,7 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
+    section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
     class Meta:
         model = Event
         fields = "__all__"
@@ -122,6 +123,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        data["section"] = EventSectionSerializer(instance.section, context=self.context).data if instance.section else None
         return data
 
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

@@ -3,7 +3,6 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,

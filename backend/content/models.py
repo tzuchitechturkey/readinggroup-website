@@ -90,7 +90,7 @@ class Event(TimestampedModel):
         ordering = ("-happened_at", "title")
 
     def __str__(self) -> str:
-        return f"{self.title} ({self.get_section_display()})"
+        return f"{self.title} ({self.section.name if self.section else ''})"
 
 
 class TvProgram(TimestampedModel):
@@ -232,7 +232,7 @@ class EventSection(TimestampedModel):
 
 
 # ====================================Like models for each content type start=================================
-class PostLike(models.Model):
+class PostLike(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -242,7 +242,7 @@ class PostLike(models.Model):
     def __str__(self):
         return f"{self.user} liked post {self.post.id}"
 
-class VideoLike(models.Model):
+class VideoLike(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -252,7 +252,7 @@ class VideoLike(models.Model):
     def __str__(self):
         return f"{self.user} liked video {self.video.id}"
 
-class EventLike(models.Model):
+class EventLike(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -262,7 +262,7 @@ class EventLike(models.Model):
     def __str__(self):
         return f"{self.user} liked event {self.event.id}"
 
-class TvProgramLike(models.Model):
+class TvProgramLike(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     tv_program = models.ForeignKey('TvProgram', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -272,7 +272,7 @@ class TvProgramLike(models.Model):
     def __str__(self):
         return f"{self.user} liked tv program {self.tv_program.id}"
 
-class WeeklyMomentLike(models.Model):
+class WeeklyMomentLike(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     weekly_moment = models.ForeignKey('WeeklyMoment', on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -285,7 +285,7 @@ class WeeklyMomentLike(models.Model):
 # ====================================Like models for each content type end=================================
 
 # ====================================Comment models for each content type start=================================
-class PostComment(models.Model):
+class PostComment(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
@@ -295,7 +295,7 @@ class PostComment(models.Model):
     def __str__(self):
         return f"{self.user} commented on post {self.post.id}"
 
-class VideoComment(models.Model):
+class VideoComment(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
@@ -305,7 +305,7 @@ class VideoComment(models.Model):
     def __str__(self):
         return f"{self.user} commented on video {self.video.id}"
 
-class EventComment(models.Model):
+class EventComment(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
@@ -315,7 +315,7 @@ class EventComment(models.Model):
     def __str__(self):
         return f"{self.user} commented on event {self.event.id}"
 
-class TvProgramComment(models.Model):
+class TvProgramComment(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     tv_program = models.ForeignKey('TvProgram', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
@@ -325,7 +325,7 @@ class TvProgramComment(models.Model):
     def __str__(self):
         return f"{self.user} commented on tv program {self.tv_program.id}"
 
-class WeeklyMomentComment(models.Model):
+class WeeklyMomentComment(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     weekly_moment = models.ForeignKey('WeeklyMoment', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
