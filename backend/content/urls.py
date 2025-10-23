@@ -1,4 +1,5 @@
 from rest_framework.routers import DefaultRouter
+from django.urls import path
 from .views import (
     EventViewSet,
     HistoryEntryViewSet,
@@ -23,6 +24,9 @@ from .views import (
     TvProgramCommentViewSet,
     EventCommentViewSet,
     WeeklyMomentCommentViewSet,
+    Top5VideosView,
+    Top1VideoView,
+    Top5VideosByLikesView,
 )
 
 app_name = "content"
@@ -52,4 +56,8 @@ router.register(r"comments/events", EventCommentViewSet, basename="comment-event
 router.register(r"comments/tv-programs", TvProgramCommentViewSet, basename="comment-tvprogram")
 router.register(r"comments/weekly-moments", WeeklyMomentCommentViewSet, basename="comment-weeklymoment")
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('top5-videos/', Top5VideosView.as_view(), name='top5-videos'),
+    path('top1-video/', Top1VideoView.as_view(), name='top1-video'),
+    path('top5-videos-by-likes/', Top5VideosByLikesView.as_view(), name='top5-videos-by-likes'),
+]

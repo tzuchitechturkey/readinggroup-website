@@ -1,9 +1,9 @@
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, status
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,
@@ -73,6 +73,27 @@ from .serializers import (
 )
 
 
+# Top 5 videos by views
+class Top5VideosView(APIView):
+    def get(self, request):
+        top_videos = Video.top_by_views()
+        serializer = VideoSerializer(top_videos, many=True, context={'request': request})
+        return Response(serializer.data)
+
+# Top 1 video by views
+class Top1VideoView(APIView):
+    def get(self, request):
+        top_video = Video.top1_by_views()
+        serializer = VideoSerializer(top_video, context={'request': request}) if top_video else None
+        return Response(serializer.data if serializer else None)
+
+# Top 5 videos by likes
+class Top5VideosByLikesView(APIView):
+    def get(self, request):
+        top_videos = Video.top_by_likes()
+        serializer = VideoSerializer(top_videos, many=True, context={'request': request})
+        return Response(serializer.data)
+    
 class IsStaffOrReadOnly(BasePermission):
     """Allow read access to everyone but limit writes to staff members."""
 
@@ -84,9 +105,9 @@ class IsStaffOrReadOnly(BasePermission):
 
 class BaseContentViewSet(viewsets.ModelViewSet):
     """Common configuration shared across content viewsets."""
-
     permission_classes = [IsStaffOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
 
 class VideoViewSet(BaseContentViewSet):
     queryset = Video.objects.all()
@@ -98,9 +119,15 @@ class VideoViewSet(BaseContentViewSet):
     @swagger_auto_schema(
         manual_parameters=video_manual_parameters
     )
-    
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = super().get_queryset()

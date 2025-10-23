@@ -114,6 +114,7 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
+    section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
     class Meta:
         model = Event
         fields = "__all__"
@@ -122,6 +123,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        data["section"] = EventSectionSerializer(instance.section, context=self.context).data if instance.section else None
         return data
 
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -132,6 +134,7 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = TvProgram
         fields = "__all__"
         file_fields = ("image",)
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = TvProgramCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -152,6 +155,7 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = TeamMember
         fields = "__all__"
         file_fields = ("avatar",)
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["position"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
