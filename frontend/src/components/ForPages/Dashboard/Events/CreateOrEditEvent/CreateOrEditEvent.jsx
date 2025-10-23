@@ -912,8 +912,8 @@ const CreateOrEditEvent = ({ onSectionChange, news = null }) => {
             >
               <option value="">{t("Select Language")}</option>
               {languages.map((lang) => (
-                <option key={lang.code} value={lang.name}>
-                  {lang.name}
+                <option key={lang.code} value={lang}>
+                  {lang}
                 </option>
               ))}
             </select>

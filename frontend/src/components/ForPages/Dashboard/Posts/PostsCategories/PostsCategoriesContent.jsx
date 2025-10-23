@@ -27,6 +27,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState({ name: "", description: "" });
+  const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const getCategoriesData = async (page, searchValue = searchTerm) => {
@@ -53,17 +54,45 @@ function PostsCategoriesContent({ onSectionChange }) {
   const openAddModal = () => {
     setEditingCategory(null);
     setForm({ name: "", description: "" });
+    setErrors({});
     setShowModal(true);
   };
 
   const openEditModal = (cat) => {
     setEditingCategory(cat);
     setForm({ name: cat.name || "", description: cat.description || "" });
+    setErrors({});
     setShowModal(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    
+    // إزالة الخطأ عند الإدخال
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!form.name || !form.name.trim()) {
+      newErrors.name = t("Name is required");
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
     try {
       if (editingCategory && editingCategory.id) {
@@ -278,17 +307,19 @@ function PostsCategoriesContent({ onSectionChange }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
-                {t("Name")}
+                {t("Name")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="name"
                 value={form.name}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, name: e.target.value }))
-                }
-                required
-                className="w-full p-2 border rounded"
+                onChange={handleInputChange}
+                className={`w-full p-2 border rounded ${
+                  errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -297,10 +328,8 @@ function PostsCategoriesContent({ onSectionChange }) {
               <textarea
                 name="description"
                 value={form.description}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, description: e.target.value }))
-                }
-                className="w-full p-2 border rounded"
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
                 rows={4}
               />
             </div>

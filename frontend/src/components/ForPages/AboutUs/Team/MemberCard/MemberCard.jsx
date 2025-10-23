@@ -12,7 +12,7 @@ function MemberCard({ member }) {
       <div className="relative w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 mb-2 rounded-lg overflow-hidden">
         <div className="relative w-full h-full border border-gray-300 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200">
           <img
-            src={member.image}
+            src={member.avatar}
             alt={member.name}
             className="w-full h-full object-cover"
           />
@@ -33,7 +33,7 @@ function MemberCard({ member }) {
           className="text-xs sm:text-sm text-gray-600 font-light"
           style={{ fontFamily: "Lato, sans-serif" }}
         >
-          {member.position}
+          {member.position?.name}
         </p>
       </div>
       {/* End Member Info */}

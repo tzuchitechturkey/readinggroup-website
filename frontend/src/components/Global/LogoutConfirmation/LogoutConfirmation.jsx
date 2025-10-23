@@ -11,7 +11,7 @@ function LogoutConfirmation({ onCancel }) {
   const navigate = useNavigate();
 
   const Logout = () => {
-    // مسح التوكن من localStorage
+    // مسح بيانات التخزين المحلي
     localStorage.removeItem("accessToken");
     localStorage.removeItem("dashboardActiveSection");
     localStorage.removeItem("dashboardActiveParent");
@@ -19,15 +19,18 @@ function LogoutConfirmation({ onCancel }) {
     localStorage.removeItem("dashboardSelectedVideo");
     localStorage.removeItem("dashboardSelectedNews");
 
-    // إظهار رسالة نجاح
     toast.success(t("You have been logged out successfully."));
 
-    // إغلاق المودال
-    onCancel();
+    const currentPath = window.location.pathname;
 
-    // التوجه إلى صفحة تسجيل الدخول
-    navigate("/auth/login");
+    if (currentPath.includes("/dashboard")) {
+      navigate("/auth/login");
+    } else {
+      navigate(currentPath);
+    }
+    onCancel();
   };
+
   return (
     <div className="p-4 text-center">
       <p className="text-lg font-medium text-gray-700 mb-6">

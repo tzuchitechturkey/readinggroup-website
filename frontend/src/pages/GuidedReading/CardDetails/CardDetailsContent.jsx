@@ -84,7 +84,7 @@ function CardDetailsContent() {
       const imageUrl = "/azem.png";
       const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `${cardData.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${cardData?.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -256,7 +256,7 @@ function CardDetailsContent() {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={cardData.title}
+        title={cardData?.title}
       />
 
       {/* Image Modal */}
@@ -265,10 +265,10 @@ function CardDetailsContent() {
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
           image: "/azem.png",
-          title: cardData.title,
-          subtitle: cardData.badge,
-          writer: cardData.writer,
-          details: `★ ${cardData.rating} (${cardData.reviews}k)`,
+          title: cardData?.title,
+          subtitle: cardData?.badge,
+          writer: cardData?.writer,
+          details: `★ ${cardData?.rating} (${cardData?.reviews}k)`,
         }}
         onDownloadImage={handleDownloadImage}
         isRTL={isRTL}

@@ -1,15 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, Upload, Youtube, X, Tag, Search, User } from "lucide-react";
+import {
+  Save,
+  Upload,
+  Youtube,
+  X,
+  Tag,
+  Search,
+  Calendar,
+  User,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
 
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreateVideo, EditVideoById, GetVideoCategories } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages } from "@/constants/constants";
-import { BASE_URL } from "@/configs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const videoTypes = ["Full Videos", "Unit Clips"];
 
@@ -23,6 +39,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef(null);
   const [categorySearchValue, setCategorySearchValue] = useState("");
+  const [penHappendAt, setOpenHappendAt] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [castInput, setCastInput] = useState("");
@@ -40,6 +57,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     reference_code: "",
     video_url: "",
     season: "",
+    happened_at: "",
     description: "",
     cast: [],
     tags: [],
@@ -60,6 +78,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         reference_code: video.reference_code || "",
         video_url: video.video_url || "",
         season: video.season || "",
+        happened_at: video.happened_at || "",
         description: video.description || "",
         cast: video.cast || [],
         tags: video.tags || [],
@@ -226,6 +245,10 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       newErrors.season = t("Season is required");
     }
 
+    if (!formData?.happened_at) {
+      newErrors.happened_at = t("Happened At is required");
+    }
+
     if (!formData?.description.trim()) {
       newErrors.description = t("Description is required");
     }
@@ -293,6 +316,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
     formDataToSend.append("season", formData?.season);
+    // Format happened_at to ISO 8601 format (YYYY-MM-DDThh:mm:ss)
+    if (formData?.happened_at) {
+      const formattedDate = format(
+        new Date(formData.happened_at),
+        "yyyy-MM-dd'T'HH:mm:ss"
+      );
+      formDataToSend.append("happened_at", formattedDate);
+    }
     formDataToSend.append("description", formData?.description);
     formDataToSend.append("cast", JSON.stringify(formData?.cast));
     formDataToSend.append("tags", JSON.stringify(formData?.tags));
@@ -655,6 +686,57 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Season  */}
+            {/* Start Air Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("Happened At")} *
+              </label>
+              <Popover
+                open={penHappendAt}
+                onOpenChange={setOpenHappendAt}
+                className="!z-[999999999999999]"
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.happened_at && "text-muted-foreground",
+                      errors.happened_at && "border-red-500"
+                    )}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {formData.happened_at
+                      ? format(new Date(formData.happened_at), "MM/dd/yyyy")
+                      : "Pick Air date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={
+                      formData.happened_at
+                        ? new Date(formData.happened_at)
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      handleInputChange({
+                        target: { name: "happened_at", value: date },
+                      });
+                      setOpenHappendAt(false);
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              {errors.happened_at && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.happened_at}
+                </p>
+              )}
+            </div>
+            {/* End Air Date */}
             {/* Start Status Checkboxes */}
             <div className="space-y-3">
               <div className="flex items-center">

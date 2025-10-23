@@ -4,9 +4,15 @@ import { Calendar, Search, ChevronDown, X, Filter } from "lucide-react";
 
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
+import { GetAllUsers, GetPostCategories } from "@/api/posts";
+import { languages } from "@/constants/constants";
+
+import AutoComplete from "../AutoComplete/AutoComplete";
+import Loader from "../Loader/Loader";
 
 function LearnFilter({
   t,
+  i18n,
   searchDate,
   setSearchDate,
   writer,
@@ -18,7 +24,6 @@ function LearnFilter({
   language,
   setLanguage,
   source,
-  setSource,
   titleQuery,
   setTitleQuery,
   onSearch,
@@ -29,8 +34,30 @@ function LearnFilter({
     startDate: null,
     endDate: null,
   });
-
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [writersList, setWritersList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef(null);
+
+  const getWriters = async (searchVal = "") => {
+    try {
+      const res = await GetAllUsers(searchVal);
+      setWritersList(res?.data?.results);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getCategories = async (searchVal) => {
+    setIsLoading(true);
+    try {
+      const res = await GetPostCategories(10, 0, searchVal);
+      setCategoriesList(res?.data?.results);
+    } catch (err) {
+      setErrorFn(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (searchInputRef.current) searchInputRef.current.focus();
@@ -48,7 +75,6 @@ function LearnFilter({
     setCategory("");
     setType("");
     setLanguage("");
-    setSource("");
     setSelectedDateRange({ startDate: null, endDate: null });
   };
 
@@ -98,8 +124,12 @@ function LearnFilter({
     const filters = [];
     if (searchDate)
       filters.push({ type: "date", label: t("Date"), value: searchDate });
-    if (writer)
-      filters.push({ type: "writer", label: t("writer"), value: writer });
+    if (writer?.username)
+      filters.push({
+        type: "writer",
+        label: t("writer"),
+        value: writer?.username,
+      });
     if (category)
       filters.push({ type: "category", label: t("Category"), value: category });
     if (type) filters.push({ type: "type", label: t("Type"), value: type });
@@ -121,24 +151,23 @@ function LearnFilter({
       case "category":
         setCategory("");
         break;
-      case "type":
-        setType("");
-        break;
       case "language":
         setLanguage("");
         break;
-      case "source":
-        setSource("");
-        break;
+
       default:
         break;
     }
   };
 
   const activeFilters = getActiveFilters();
-
+  useEffect(() => {
+    getCategories();
+    getWriters();
+  }, []);
   return (
-    <div>
+    <div dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
+      {isLoading && <Loader />}
       <div className="w-full px-4">
         <div className="mx-auto max-w-6xl rounded-3xl bg-[#457DF6] px-6 py-6 text-white shadow-xl sm:px-8 sm:py-8">
           <h2 className="text-xl font-bold sm:text-2xl mb-6">
@@ -192,7 +221,7 @@ function LearnFilter({
                 <div className="mt-4 space-y-4">
                   {/* First Row - Date and writer */}
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Date Filter */}
+                    {/* Start Date Filter */}
                     <div className="relative">
                       <button
                         onClick={() => setIsDateModalOpen(true)}
@@ -219,100 +248,71 @@ function LearnFilter({
                         <ChevronDown className="h-4 w-4 text-gray-400" />
                       </button>
                     </div>
+                    {/* End Date Filter */}
 
-                    {/* writer Filter */}
-                    <input
-                      type="text"
-                      placeholder={t("writer")}
-                      value={writer}
-                      onChange={(e) => setWriter(e.target.value)}
-                      className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80"
+                    {/* Start Writer Filter */}
+                    <AutoComplete
+                      placeholder={t("Select Writer")}
+                      customStyle="bg-white"
+                      selectedItem={writer}
+                      onSelect={(item) => {
+                        setWriter(item);
+                      }}
+                      searchMethod={getWriters}
+                      searchApi={true}
+                      list={writersList}
+                      searchPlaceholder={t("Search writers...")}
+                      required={false}
+                      renderItemLabel={(item) => item.username}
+                      renderItemSubLabel={(item) => item.groups?.[0]}
+                      showWriterAvatar={false}
                     />
+                    {/* End writer Filter */}
                   </div>
 
                   {/* Second Row - Category, type, Language, Source */}
                   <div className="grid grid-cols-4 gap-4">
-                    {/* Category Filter */}
+                    {/* Start Category Filter */}
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option disabled hidden value="">{t("Category")}</option>
-                      <option value="Personal Growth">
-                        {t("Personal Growth")}
+                      <option disabled hidden value="">
+                        {t("Category")}
                       </option>
-                      <option value="Nature">{t("Nature")}</option>
-                      <option value="Technology">{t("Technology")}</option>
-                      <option value="History">{t("History")}</option>
-                      <option value="Lifestyle">{t("Lifestyle")}</option>
-                      <option value="Education">{t("Education")}</option>
-                      <option value="Health">{t("Health")}</option>
-                      <option value="Culture">{t("Culture")}</option>
-                      <option value="Religion">{t("Religion")}</option>
-                    </select>
 
-                    {/* type Filter */}
-                    <select
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
-                    >
-                      <option disabled hidden value="">{t("Type")}</option>
-                      <option value="Non-fiction">{t("Non-fiction")}</option>
-                      <option value="Fiction">{t("Fiction")}</option>
-                      <option value="Research">{t("Research")}</option>
-                      <option value="Documentary">{t("Documentary")}</option>
-                      <option value="Cookbook">{t("Cookbook")}</option>
-                      <option value="Biography">{t("Biography")}</option>
-                      <option value="Article">{t("Article")}</option>
+                      {categoriesList?.map((category) => (
+                        <option key={category?.id} value={category?.id}>
+                          {t(category?.name)}
+                        </option>
+                      ))}
                     </select>
+                    {/* End Category Filter */}
 
-                    {/* Language Filter */}
+                    {/* Start Language Filter */}
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
-                      <option disabled hidden value="">{t("Language")}</option>
-                      <option value="English">{t("English")}</option>
-                      <option value="Arabic">{t("Arabic")}</option>
-                      <option value="Turkish">{t("Turkish")}</option>
-                      <option value="French">{t("French")}</option>
-                      <option value="Spanish">{t("Spanish")}</option>
+                      <option disabled hidden value="">
+                        {t("Language")}
+                      </option>
+                      {languages?.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {t(lang)}
+                        </option>
+                      ))}
                     </select>
-
-                    {/* Source Filter */}
-                    <select
-                      value={source}
-                      onChange={(e) => setSource(e.target.value)}
-                      className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
-                    >
-                      <option disabled hidden value="">{t("Source")}</option>
-                      <option value="Harvard Review">
-                        {t("Harvard Review")}
-                      </option>
-                      <option value="National Geographic">
-                        {t("National Geographic")}
-                      </option>
-                      <option value="MIT Press">{t("MIT Press")}</option>
-                      <option value="Oxford Journal">
-                        {t("Oxford Journal")}
-                      </option>
-                      <option value="Food & Culture Magazine">
-                        {t("Food & Culture Magazine")}
-                      </option>
-                      <option value="Academic Press">
-                        {t("Academic Press")}
-                      </option>
-                    </select>
+                    {/* End Language Filter */}
                   </div>
                 </div>
               )}
 
               {/* Action Buttons and Active Filters */}
               {isAdvancedOpen && (
-                <div className="mt-4">
+                <div className="mt-4 ">
                   <div className="flex items-center justify-between">
                     {/* Active Filters Chips */}
                     {activeFilters.length > 0 && (
@@ -348,219 +348,6 @@ function LearnFilter({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Desktop Compact Row (for medium screens) */}
-          <div className="hidden md:block lg:hidden">
-            <div className="space-y-3">
-              {/* First Row */}
-              <div className="grid grid-cols-4 gap-3 items-center">
-                {/* Search Input */}
-                <div className="col-span-2 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder={t("Search by title...")}
-                    value={titleQuery}
-                    onChange={(e) => setTitleQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="h-10 w-full rounded-md border-0 bg-white pl-10 pr-3 text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80"
-                  />
-                </div>
-
-                {/* Date Filter */}
-                <button
-                  onClick={() => setIsDateModalOpen(true)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center justify-between"
-                >
-                  <Calendar className="h-4 w-4" />
-                  <span className="ml-1 text-xs">{t("Date")}</span>
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-
-                {/* Search Button */}
-                <button
-                  onClick={handleSearch}
-                  className="h-10 bg-white text-[#1f3fb3] rounded-md px-4 font-semibold hover:bg-gray-50 transition-all"
-                >
-                  {t("Search")}
-                </button>
-              </div>
-
-              {/* Second Row - Filters */}
-              <div className="grid grid-cols-5 gap-3">
-                {/* writer Filter */}
-                <input
-                  type="text"
-                  placeholder={t("writer")}
-                  value={writer}
-                  onChange={(e) => setWriter(e.target.value)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800 placeholder-gray-500"
-                />
-
-                {/* Category Filter */}
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
-                >
-                  <option disabled hidden value="">{t("Category")}</option>
-                  <option value="Personal Growth">
-                    {t("Personal Growth")}
-                  </option>
-                  <option value="Technology">{t("Technology")}</option>
-                  <option value="History">{t("History")}</option>
-                </select>
-
-                {/* type Filter */}
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
-                >
-                  <option disabled hidden value="">{t("Type")}</option>
-                  <option value="Non-fiction">{t("Non-fiction")}</option>
-                  <option value="Fiction">{t("Fiction")}</option>
-                  <option value="Research">{t("Research")}</option>
-                </select>
-
-                {/* Language Filter */}
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
-                >
-                  <option disabled hidden value="">{t("Language")}</option>
-                  <option value="English">{t("English")}</option>
-                  <option value="Arabic">{t("Arabic")}</option>
-                  <option value="Turkish">{t("Turkish")}</option>
-                </select>
-
-                {/* Source Filter */}
-                <select
-                  value={source}
-                  onChange={(e) => setSource(e.target.value)}
-                  className="h-10 w-full rounded-md bg-white px-3 text-sm text-gray-800"
-                >
-                  <option disabled hidden value="">{t("Source")}</option>
-                  <option value="Harvard Review">{t("Harvard Review")}</option>
-                  <option value="MIT Press">{t("MIT Press")}</option>
-                  <option value="Oxford Journal">{t("Oxford Journal")}</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Stacked Design */}
-          <div className="block md:hidden space-y-3">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder={t("Search by title...")}
-                value={titleQuery}
-                onChange={(e) => setTitleQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="h-12 w-full rounded-lg border-0 bg-white pl-10 pr-4 text-sm text-gray-800 placeholder-gray-500 outline-none"
-              />
-            </div>
-
-            {/* Date and writer */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Date Filter */}
-              <button
-                onClick={() => setIsDateModalOpen(true)}
-                className="h-12 rounded-lg bg-white px-4 text-sm text-gray-700 flex items-center justify-between"
-              >
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span>{t("Date")}</span>
-                </div>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-
-              {/* writer Filter */}
-              <input
-                type="text"
-                placeholder={t("writer")}
-                value={writer}
-                onChange={(e) => setWriter(e.target.value)}
-                className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800 placeholder-gray-500"
-              />
-            </div>
-
-            {/* Filter Selectors */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Category Filter */}
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
-              >
-                <option disabled hidden value="">{t("Category")}</option>
-                <option value="Personal Growth">{t("Personal Growth")}</option>
-                <option value="Technology">{t("Technology")}</option>
-                <option value="History">{t("History")}</option>
-                <option value="Lifestyle">{t("Lifestyle")}</option>
-              </select>
-
-              {/* type Filter */}
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
-              >
-                <option disabled hidden value="">{t("Type")}</option>
-                <option value="Non-fiction">{t("Non-fiction")}</option>
-                <option value="Fiction">{t("Fiction")}</option>
-                <option value="Research">{t("Research")}</option>
-                <option value="Documentary">{t("Documentary")}</option>
-              </select>
-
-              {/* Language Filter */}
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
-              >
-                <option disabled hidden value="">{t("Language")}</option>
-                <option value="English">{t("English")}</option>
-                <option value="Arabic">{t("Arabic")}</option>
-                <option value="Turkish">{t("Turkish")}</option>
-                <option value="French">{t("French")}</option>
-              </select>
-
-              {/* Source Filter */}
-              <select
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-                className="h-12 w-full rounded-lg bg-white px-4 text-sm text-gray-800"
-              >
-                <option disabled hidden value="">{t("Source")}</option>
-                <option value="Harvard Review">{t("Harvard Review")}</option>
-                <option value="MIT Press">{t("MIT Press")}</option>
-                <option value="Oxford Journal">{t("Oxford Journal")}</option>
-              </select>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={clearAllFilters}
-                className="h-12 rounded-lg border border-white/30 text-white/90 font-medium hover:bg-white/10 transition-all"
-              >
-                {t("Clear Filters")}
-              </button>
-              <button
-                onClick={handleSearch}
-                className="h-12 rounded-lg bg-white text-[#1f3fb3] font-semibold hover:bg-gray-50 transition-all"
-              >
-                {t("Search")}
-              </button>
             </div>
           </div>
         </div>

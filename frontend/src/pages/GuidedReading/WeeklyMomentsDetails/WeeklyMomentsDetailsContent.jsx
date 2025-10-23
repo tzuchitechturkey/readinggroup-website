@@ -13,101 +13,8 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
-
-function WeeklyMomentsDetailsContent() {
-  const { t, i18n } = useTranslation();
-  const { id } = useParams();
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [userRating, setUserRating] = useState(0);
-  const [hoveredRating, setHoveredRating] = useState(0);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const isRTL = i18n.language === "ar";
-    document.dir = isRTL ? "rtl" : "ltr";
-    document.documentElement.style.direction = isRTL ? "rtl" : "ltr";
-  }, [i18n.language]);
-
-  const isRTL = i18n.language === "ar";
-
-  // دالة الإعجاب
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      toast.success(t("Added to favorites!"));
-    } else {
-      toast.info(t("Removed from favorites"));
-    }
-  };
-
-  // دالة تقييم النجوم
-  const handleStarRating = (rating) => {
-    setUserRating(rating);
-    toast.success(t(`You rated this content ${rating} stars!`));
-  };
-
-  // دالة فتح الصورة في عرض مكبر
-  const handleOpenImage = () => {
-    setIsImageModalOpen(true);
-  };
-
-  // دالة تحميل المحتوى
-  const handleDownloadContent = () => {
-    try {
-      const contentUrl = weeklyMomentData.image;
-      const link = document.createElement("a");
-      link.href = contentUrl;
-      link.download = `${weeklyMomentData.title.replace(/\s+/g, "_")}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success(t("Content downloaded successfully!"));
-    } catch (error) {
-      console.error("خطأ في تحميل المحتوى:", error);
-      toast.error(t("Failed to download content"));
-    }
-  };
-
-  // دالة تشغيل/إيقاف المحتوى (إذا كان فيديو)
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      toast.info(t("Playing content"));
-    } else {
-      toast.info(t("Content paused"));
-    }
-  };
-
-  // Mock data للـ Weekly Moment
-  const weeklyMomentData = {
-    id: id || 1,
-    title: "Report - Community Gathering",
-    subtitle: "This Week's Special Moment",
-    writer: "Community Team",
-    location: "Damascus, Syria",
-    date: "Oct 15, 2024",
-    startTime: "6:00 AM",
-    views: 1842,
-    rating: 4.8,
-    reviews: "4.1",
-    image: "/authback.jpg",
-    statusLabel: "147",
-    statusColor: "bg-purple-600",
-    type: "News",
-    source: "Community",
-    language: "AR / EN",
-    description:
-      "This week's special moment captures the essence of our community gathering. A heartwarming report showcasing the unity, compassion, and shared values that bring us together every week. Experience the stories, faces, and emotions that make our community strong and vibrant.",
-    tags: ["Community", "Weekly", "Report", "Gathering", "Unity"],
-    category: "Community Report",
-    duration: "5:30",
-    hasVideo: true,
-  };
-
-  // بيانات التعليقات
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+// بيانات التعليقات
   const comments = [
     {
       id: "c1",
@@ -160,68 +67,88 @@ function WeeklyMomentsDetailsContent() {
       repliesCount: 12,
     },
   ];
+function WeeklyMomentsDetailsContent() {
+  const { t, i18n } = useTranslation();
+  const { id } = useParams();
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // محتوى مشابه
-  const similarMoments = [
-    {
-      id: 1,
-      title: "Charity Drive Report",
-      image: "/1-top5.jpg",
-      writer: "Volunteer Team",
-      views: 1156,
-      category: "Community Service",
-      statusLabel: "SEPT 30",
-      statusColor: "bg-red-600",
-    },
-    {
-      id: 2,
-      title: "Educational Workshop",
-      image: "/2-top5.jpg",
-      writer: "Learning Team",
-      views: 890,
-      category: "Education",
-      statusLabel: "SEPT 28",
-      statusColor: "bg-green-600",
-    },
-    {
-      id: 3,
-      title: "Cultural Exchange Event",
-      image: "/3-top5.jpg",
-      writer: "Cultural Team",
-      views: 1234,
-      category: "Cultural",
-      statusLabel: "SEPT 25",
-      statusColor: "bg-blue-600",
-    },
-    {
-      id: 4,
-      title: "Youth Activity Day",
-      image: "/4-top5.jpg",
-      writer: "Youth Team",
-      views: 1567,
-      category: "Youth",
-      statusLabel: "SEPT 22",
-      statusColor: "bg-yellow-600",
-    },
-  ];
+ 
+  // دالة الإعجاب
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      toast.success(t("Added to favorites!"));
+    } else {
+      toast.info(t("Removed from favorites"));
+    }
+  };
 
-  // لحظات هذا الأسبوع
-  const thisWeekMoments = Array(3)
-    .fill(null)
-    .map((_, index) => ({
-      id: index + 1,
-      title: `Weekly Report ${index + 1}`,
-      subtitle: "Community Highlights",
-      image: `/${index + 1}-top5.jpg`,
-      writer: "Community Team",
-      views: Math.floor(Math.random() * 1000) + 500,
-      startTime: `${6 + index}:00 AM`,
-      statusLabel: index === 0 ? "LIVE" : `SEPT ${28 - index}`,
-      statusColor: index === 0 ? "bg-red-600" : "bg-green-600",
-      type: "News",
-      source: "Community",
-      language: "AR / EN",
-    }));
+  // دالة تقييم النجوم
+  const handleStarRating = (rating) => {
+    setUserRating(rating);
+    toast.success(t(`You rated this content ${rating} stars!`));
+  };
+
+  // دالة فتح الصورة في عرض مكبر
+  const handleOpenImage = () => {
+    setIsImageModalOpen(true);
+  };
+
+  // دالة تحميل المحتوى
+  const handleDownloadContent = () => {
+   setIsLoading(true);
+    try {
+      // const res = await 
+    }catch(err){
+      setErrorFn(err);
+    }finally{
+      setIsLoading(false);
+    }
+  };
+
+  // دالة تشغيل/إيقاف المحتوى (إذا كان فيديو)
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+    if (!isPlaying) {
+      toast.info(t("Playing content"));
+    } else {
+      toast.info(t("Content paused"));
+    }
+  };
+
+  // Mock data للـ Weekly Moment
+  const weeklyMomentData = {
+    id: id || 1,
+    title: "Report - Community Gathering",
+    subtitle: "This Week's Special Moment",
+    writer: "Community Team",
+    location: "Damascus, Syria",
+    date: "Oct 15, 2024",
+    startTime: "6:00 AM",
+    views: 1842,
+    rating: 4.8,
+    reviews: "4.1",
+    image: "/authback.jpg",
+    statusLabel: "147",
+    statusColor: "bg-purple-600",
+    type: "News",
+    source: "Community",
+    language: "AR / EN",
+    description:
+      "This week's special moment captures the essence of our community gathering. A heartwarming report showcasing the unity, compassion, and shared values that bring us together every week. Experience the stories, faces, and emotions that make our community strong and vibrant.",
+    tags: ["Community", "Weekly", "Report", "Gathering", "Unity"],
+    category: "Community Report",
+    duration: "5:30",
+    hasVideo: true,
+  };
+
+  
+ 
 
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>

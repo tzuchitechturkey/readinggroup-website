@@ -72,7 +72,7 @@ function RatingSection({
               <Star
                 key={i}
                 className={`w-4 h-4 ${
-                  i < Math.floor(contentData.rating)
+                  i < Math.floor(contentData?.rating)
                     ? "fill-yellow-400 text-yellow-400"
                     : "text-gray-300"
                 }`}
@@ -80,11 +80,10 @@ function RatingSection({
             ))}
           </div>
           <span className="text-sm text-gray-600">
-            {contentData.rating} ({contentData.reviews}k {t("reviews")})
+            {contentData?.rating} ({contentData?.reviews}k {t("reviews")})
           </span>
         </div>
       </div>
-     
     </div>
   );
 }

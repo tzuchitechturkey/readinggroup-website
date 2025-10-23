@@ -10,13 +10,13 @@ import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingContent";
 import CardDetailsContent from "@/pages/GuidedReading/CardDetails/CardDetailsContent";
-import WeeklyMomentsDetailsContent from "@/pages/GuidedReading/WeeklyMomentsDetails/WeeklyMomentsDetailsContent";
 import PhotoDetailsContent from "@/pages/Photos/PhotoDetails/PhotoDetailsContent";
 import EventsContent from "@/pages/Events/EventsContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
 import NewsContent from "@/pages/Events/News/NewsContent";
 import Pages404 from "@/pages/NotFound/NotFound";
+import SearchContent from "@/pages/Search/SearchPageContent";
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -33,12 +33,14 @@ export const userRoutes = [
   { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   {
     path: "/guiding-reading/weekly-moments/:id",
-    element: <WeeklyMomentsDetailsContent />,
+    element: <CardDetailsContent />,
   },
   { path: "/events", element: <EventsContent /> },
   { path: "/events/:id", element: <NewsContent /> },
   { path: "/profile", element: <UserProfileContent /> },
   { path: "/settings", element: <UserSettingContent /> },
+  { path: "/search", element: <SearchContent /> },
+
   // Catch-all route for 404 - يجب أن يكون في النهاية
   { path: "*", element: <Pages404 /> },
 ];
