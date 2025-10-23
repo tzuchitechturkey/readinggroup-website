@@ -168,13 +168,29 @@ class TeamMemberViewSet(BaseContentViewSet):
     search_fields = ("name", "job_title", "position__name")
     ordering_fields = ("name", "created_at")
     pagination_class = LimitOffsetPagination
-
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('Position', openapi.IN_QUERY, description="Filter by Position", type=openapi.TYPE_STRING),
+        ]
+    )
     def list(self, request, *args, **kwargs):
         if 'limit' in request.query_params or 'offset' in request.query_params:
             return super().list(request, *args, **kwargs)
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+
+        position = params.get('Position')
+        if position:
+            queryset = queryset.filter(position__name__iexact=position)
+
+        return queryset
 
 
 class HistoryEntryViewSet(BaseContentViewSet):
