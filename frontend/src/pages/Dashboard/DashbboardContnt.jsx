@@ -35,9 +35,13 @@ import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsC
 import NewsCategoriesContent from "@/components/ForPages/Dashboard/TV/News/NewsCategories/NewsCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import CreateOrEditNews from "@/components/ForPages/Dashboard/TV/News/CreateOrEditNews/CreateOrEditNews";
+import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
+import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
+import EventCategoriesContent from "@/components/ForPages/Dashboard/Events/EventsCategories/EventCategoriesContent";
+import EventSectionsContent from "@/components/ForPages/Dashboard/Events/EventsSections/EventSectionsContent";
 
-import SettingsContent from "../Settings/SettingsContent";
 import ProfileContent from "../Profile/ProfileContent";
+import SettingsContent from "../Settings/SettingsContent";
 
 export default function Page() {
   const { t } = useTranslation();
@@ -62,6 +66,11 @@ export default function Page() {
   const [selectedNews, setSelectedNews] = useState(() => {
     // استرجاع الأخبار المحفوظة إن وجدت
     const saved = localStorage.getItem("dashboardSelectedNews");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedEvent, setSelectedEvent] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedEvent");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -103,6 +112,15 @@ export default function Page() {
     }
   }, [selectedNews]);
 
+  useEffect(() => {
+    if (selectedEvent) {
+      localStorage.setItem(
+        "dashboardSelectedEvent",
+        JSON.stringify(selectedEvent)
+      );
+    }
+  }, [selectedEvent]);
+
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
@@ -112,9 +130,11 @@ export default function Page() {
       localStorage.removeItem("dashboardSelectedPost");
       localStorage.removeItem("dashboardSelectedVideo");
       localStorage.removeItem("dashboardSelectedNews");
+      localStorage.removeItem("dashboardSelectedEvent");
       setSelectedPost(null);
       setSelectedVideo(null);
       setSelectedNews(null);
+      setSelectedEvent(null);
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
@@ -124,6 +144,8 @@ export default function Page() {
       setSelectedVideo(data);
     } else if (section === "createOrEditNews") {
       setSelectedNews(data);
+    } else if (section === "createOrEditEvent") {
+      setSelectedEvent(data);
     }
 
     let autoParent = data;
@@ -140,6 +162,10 @@ export default function Page() {
         newsList: "Tv",
         createOrEditNews: "Tv",
         newsCategories: "Tv",
+        events: "Events",
+        eventsCategories: "Events",
+        createOrEditEvent: "Events",
+        eventsSections: "Events",
         history: "About Us",
         team: "About Us",
         positions: "About Us",
@@ -194,6 +220,8 @@ export default function Page() {
         return <HealthPosts onSectionChange={handleSectionChange} />;
       case "newsList":
         return <Tv onSectionChange={handleSectionChange} />;
+      case "newsCategories":
+        return <NewsCategoriesContent onSectionChange={handleSectionChange} />;
       case "createOrEditNews":
         return (
           <CreateOrEditNews
@@ -201,8 +229,19 @@ export default function Page() {
             onSectionChange={handleSectionChange}
           />
         );
-      case "newsCategories":
-        return <NewsCategoriesContent onSectionChange={handleSectionChange} />;
+      case "eventsList":
+        return <EventsList onSectionChange={handleSectionChange} />;
+      case "createOrEditEvent":
+        return (
+          <CreateOrEditEvent
+            event={selectedEvent}
+            onSectionChange={handleSectionChange}
+          />
+        );
+      case "eventsCategories":
+        return <EventCategoriesContent onSectionChange={handleSectionChange} />;
+      case "eventsSections":
+        return <EventSectionsContent onSectionChange={handleSectionChange} />;
       case "history":
         return <History onSectionChange={handleSectionChange} />;
       case "team":

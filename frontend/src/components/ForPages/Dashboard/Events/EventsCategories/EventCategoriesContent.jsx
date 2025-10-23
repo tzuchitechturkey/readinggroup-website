@@ -8,15 +8,14 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import {
-  GetPostCategories,
-  AddPostCategory,
-  EditPostCategoryById,
-  DeletePostCategory,
-} from "@/api/posts";
+  GetEventCategories,
+  AddEventCategory,
+  EditEventCategoryById,
+  DeleteEventCategory,
+} from "@/api/events";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function PostsCategoriesContent({ onSectionChange }) {
+function EventCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -33,14 +32,16 @@ function PostsCategoriesContent({ onSectionChange }) {
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
+
     try {
       const res = searchValue
-        ? await GetPostCategories(limit, offset, searchValue)
-        : await GetPostCategories(limit, offset);
+        ? await GetEventCategories(limit, offset, searchValue)
+        : await GetEventCategories(limit, offset);
       setCategories(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
-      setErrorFn(err);
+      console.error(err);
+      toast.error(t("Failed to load categories"));
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +69,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    
+
     // إزالة الخطأ عند الإدخال
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -77,45 +78,42 @@ function PostsCategoriesContent({ onSectionChange }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!form.name || !form.name.trim()) {
       newErrors.name = t("Name is required");
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
-    setIsLoading(true);
+
     try {
       if (editingCategory && editingCategory.id) {
-        await EditPostCategoryById(editingCategory.id, form);
+        await EditEventCategoryById(editingCategory.id, form);
         toast.success(t("Category updated"));
       } else {
-        await AddPostCategory(form);
+        await AddEventCategory(form);
         toast.success(t("Category created"));
       }
       setShowModal(false);
       getCategoriesData(0);
     } catch (err) {
-      setErrorFn(err);
-    } finally {
-      setIsLoading(false);
+      console.error(err);
+      toast.error(t("Operation failed"));
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!selectedCategory?.id) return;
-    setIsLoading(true);
     try {
-      await DeletePostCategory(selectedCategory.id);
+      await DeleteEventCategory(selectedCategory.id);
       toast.success(t("Category deleted"));
       setShowDeleteModal(false);
       setSelectedCategory(null);
@@ -123,13 +121,9 @@ function PostsCategoriesContent({ onSectionChange }) {
     } catch (err) {
       console.error(err);
       toast.error(t("Delete failed"));
-    } finally {
-      setIsLoading(false);
     }
   };
-
   const totalPages = Math.ceil(totalRecords / limit);
-
   useEffect(() => {
     getCategoriesData(0);
   }, []);
@@ -137,7 +131,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   return (
     <div
       className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
-      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+      dir={i18n.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
@@ -145,14 +139,14 @@ function PostsCategoriesContent({ onSectionChange }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => onSectionChange("posts")}
+            onClick={() => onSectionChange("eventsList")}
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
           >
-            ← {t("Go to Posts List")}
+            ← {t("Go to Events List")}
           </button>
           <div className="h-4 w-px bg-gray-300" />
           <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Posts Categories")}
+            {t("Events Categories")}
           </h2>
         </div>
       </div>
@@ -163,10 +157,10 @@ function PostsCategoriesContent({ onSectionChange }) {
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
           <div>
             <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Posts Categories")}
+              {t("Events Categories")}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              {t("Manage posts categories and classifications")}
+              {t("Manage events categories and classifications")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -232,37 +226,31 @@ function PostsCategoriesContent({ onSectionChange }) {
               <thead>
                 <tr
                   className={`${
-                    i18n?.language === "ar" ? "text-right " : "text-left"
-                  }text-sm text-gray-600`}
+                    i18n?.language === "ar" ? "text-right " : "  text-left"
+                  } text-sm text-gray-600`}
                 >
                   <th
-                    className={`${
+                    className={` ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
+                    } py-2 px-3 `}
                   >
-                    {t("Name")}
-                  </th>
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
-                  >
-                    {t("Description")}
+                    {t("Name")}{" "}
                   </th>
                   <th
                     className={` ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3 w-[160px]`}
+                    } py-2 px-3 `}
                   >
-                    {t("Actions")}
+                    {t("Description")}
                   </th>
+                  <th className="py-2 px-3 w-[160px]">{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {categories?.map((cat) => (
                   <tr key={cat.id} className="border-t">
                     <td className="py-3 px-3">{cat.name}</td>
-                    <td className="py-3 px-3">{cat.description}</td>
+                    <td className="py-3 px-3">{cat.description || "-"}</td>
                     <td className="py-3 px-3">
                       <div className="flex gap-2">
                         <button
@@ -375,4 +363,4 @@ function PostsCategoriesContent({ onSectionChange }) {
   );
 }
 
-export default PostsCategoriesContent;
+export default EventCategoriesContent;

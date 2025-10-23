@@ -8,39 +8,40 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import {
-  GetPostCategories,
-  AddPostCategory,
-  EditPostCategoryById,
-  DeletePostCategory,
-} from "@/api/posts";
+  GetEventSections,
+  AddEventSection,
+  EditEventSectionById,
+  DeleteEventSection,
+} from "@/api/events";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function PostsCategoriesContent({ onSectionChange }) {
+function EventSectionsContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [sections, setSections] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingSection, setEditingSection] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState({ name: "", description: "" });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const getCategoriesData = async (page, searchValue = searchTerm) => {
+  const getSectionsData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
+
     try {
       const res = searchValue
-        ? await GetPostCategories(limit, offset, searchValue)
-        : await GetPostCategories(limit, offset);
-      setCategories(res?.data?.results || []);
+        ? await GetEventSections(limit, offset, searchValue)
+        : await GetEventSections(limit, offset);
+      setSections(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
-      setErrorFn(err);
+      console.error(err);
+      toast.error(t("Failed to load sections"));
     } finally {
       setIsLoading(false);
     }
@@ -48,19 +49,19 @@ function PostsCategoriesContent({ onSectionChange }) {
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getCategoriesData(newPage - 1);
+    getSectionsData(newPage - 1);
   };
 
   const openAddModal = () => {
-    setEditingCategory(null);
+    setEditingSection(null);
     setForm({ name: "", description: "" });
     setErrors({});
     setShowModal(true);
   };
 
-  const openEditModal = (cat) => {
-    setEditingCategory(cat);
-    setForm({ name: cat.name || "", description: cat.description || "" });
+  const openEditModal = (sec) => {
+    setEditingSection(sec);
+    setForm({ name: sec.name || "", description: sec.description || "" });
     setErrors({});
     setShowModal(true);
   };
@@ -68,7 +69,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    
+
     // إزالة الخطأ عند الإدخال
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -77,67 +78,60 @@ function PostsCategoriesContent({ onSectionChange }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!form.name || !form.name.trim()) {
       newErrors.name = t("Name is required");
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
-    setIsLoading(true);
+
     try {
-      if (editingCategory && editingCategory.id) {
-        await EditPostCategoryById(editingCategory.id, form);
-        toast.success(t("Category updated"));
+      if (editingSection && editingSection.id) {
+        await EditEventSectionById(editingSection.id, form);
+        toast.success(t("Section updated"));
       } else {
-        await AddPostCategory(form);
-        toast.success(t("Category created"));
+        await AddEventSection(form);
+        toast.success(t("Section created"));
       }
       setShowModal(false);
-      getCategoriesData(0);
+      getSectionsData(0);
     } catch (err) {
-      setErrorFn(err);
-    } finally {
-      setIsLoading(false);
+      console.error(err);
+      toast.error(t("Operation failed"));
     }
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedCategory?.id) return;
-    setIsLoading(true);
+    if (!selectedSection?.id) return;
     try {
-      await DeletePostCategory(selectedCategory.id);
-      toast.success(t("Category deleted"));
+      await DeleteEventSection(selectedSection.id);
+      toast.success(t("Section deleted"));
       setShowDeleteModal(false);
-      setSelectedCategory(null);
-      getCategoriesData(0);
+      setSelectedSection(null);
+      getSectionsData(0);
     } catch (err) {
       console.error(err);
       toast.error(t("Delete failed"));
-    } finally {
-      setIsLoading(false);
     }
   };
-
   const totalPages = Math.ceil(totalRecords / limit);
-
   useEffect(() => {
-    getCategoriesData(0);
+    getSectionsData(0);
   }, []);
 
   return (
     <div
       className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
-      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+      dir={i18n.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
@@ -145,14 +139,14 @@ function PostsCategoriesContent({ onSectionChange }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => onSectionChange("posts")}
+            onClick={() => onSectionChange("eventsList")}
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
           >
-            ← {t("Go to Posts List")}
+            ← {t("Go to Events List")}
           </button>
           <div className="h-4 w-px bg-gray-300" />
           <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Posts Categories")}
+            {t("Events Sections")}
           </h2>
         </div>
       </div>
@@ -163,22 +157,22 @@ function PostsCategoriesContent({ onSectionChange }) {
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
           <div>
             <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Posts Categories")}
+              {t("Events Sections")}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              {t("Manage posts categories and classifications")}
+              {t("Manage events sections and classifications")}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">
-              {t("Total")}: {categories.length} {t("categories")}
+              {t("Total")}: {sections.length} {t("sections")}
             </span>
             <button
               onClick={openAddModal}
               className="flex items-center gap-2 text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
-              {t("Add Category")}
+              {t("Add Section")}
             </button>
           </div>
         </div>
@@ -188,7 +182,7 @@ function PostsCategoriesContent({ onSectionChange }) {
           <div className="relative max-w-md flex">
             <input
               type="text"
-              placeholder={t("Search Categories")}
+              placeholder={t("Search Sections")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`flex-1 px-4 py-2 border border-gray-300 ${
@@ -200,7 +194,7 @@ function PostsCategoriesContent({ onSectionChange }) {
               <button
                 onClick={() => {
                   setSearchTerm("");
-                  getCategoriesData(0, "");
+                  getSectionsData(0, "");
                 }}
                 className={` absolute ${
                   i18n?.language === "ar" ? " left-20" : " right-20"
@@ -213,7 +207,7 @@ function PostsCategoriesContent({ onSectionChange }) {
             <button
               onClick={() => {
                 if (searchTerm.trim()) {
-                  getCategoriesData(0);
+                  getSectionsData(0);
                 }
               }}
               className={`px-4 py-2 bg-[#4680ff] text-white ${
@@ -232,41 +226,35 @@ function PostsCategoriesContent({ onSectionChange }) {
               <thead>
                 <tr
                   className={`${
-                    i18n?.language === "ar" ? "text-right " : "text-left"
-                  }text-sm text-gray-600`}
+                    i18n?.language === "ar" ? "text-right " : "  text-left"
+                  } text-sm text-gray-600`}
                 >
                   <th
-                    className={`${
+                    className={` ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
+                    } py-2 px-3 `}
                   >
-                    {t("Name")}
-                  </th>
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
-                  >
-                    {t("Description")}
+                    {t("Name")}{" "}
                   </th>
                   <th
                     className={` ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3 w-[160px]`}
+                    } py-2 px-3 `}
                   >
-                    {t("Actions")}
+                    {t("Description")}
                   </th>
+                  <th className="py-2 px-3 w-[160px]">{t("Actions")}</th>
                 </tr>
               </thead>
               <tbody>
-                {categories?.map((cat) => (
-                  <tr key={cat.id} className="border-t">
-                    <td className="py-3 px-3">{cat.name}</td>
-                    <td className="py-3 px-3">{cat.description}</td>
+                {sections?.map((sec) => (
+                  <tr key={sec.id} className="border-t">
+                    <td className="py-3 px-3">{sec.name}</td>
+                    <td className="py-3 px-3">{sec.description || "-"}</td>
                     <td className="py-3 px-3">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => openEditModal(cat)}
+                          onClick={() => openEditModal(sec)}
                           className="p-1 rounded hover:bg-gray-100"
                           title={t("Edit")}
                         >
@@ -274,7 +262,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                         </button>
                         <button
                           onClick={() => {
-                            setSelectedCategory(cat);
+                            setSelectedSection(sec);
                             setShowDeleteModal(true);
                           }}
                           className="p-1 rounded hover:bg-gray-100"
@@ -301,7 +289,7 @@ function PostsCategoriesContent({ onSectionChange }) {
         <Modal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          title={editingCategory ? t("Edit Category") : t("Add Category")}
+          title={editingSection ? t("Edit Section") : t("Add Section")}
           width="600px"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -346,7 +334,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded"
               >
-                {editingCategory ? t("Save Changes") : t("Add Category")}
+                {editingSection ? t("Save Changes") : t("Add Section")}
               </button>
             </div>
           </form>
@@ -363,11 +351,11 @@ function PostsCategoriesContent({ onSectionChange }) {
             isOpen={showDeleteModal}
             onClose={() => setShowDeleteModal(false)}
             onConfirm={handleConfirmDelete}
-            title={t("Delete Category")}
+            title={t("Delete Section")}
             message={t(
-              "Are you sure you want to delete this category? This action cannot be undone."
+              "Are you sure you want to delete this section? This action cannot be undone."
             )}
-            itemName={selectedCategory?.name}
+            itemName={selectedSection?.name}
           />
         </Modal>
       </div>
@@ -375,4 +363,4 @@ function PostsCategoriesContent({ onSectionChange }) {
   );
 }
 
-export default PostsCategoriesContent;
+export default EventSectionsContent;

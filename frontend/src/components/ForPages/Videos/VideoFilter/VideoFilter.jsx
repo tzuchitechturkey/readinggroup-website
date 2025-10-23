@@ -13,7 +13,7 @@ function VideoFilter({
   selectedDateRange,
   setSelectedDateRange,
   setContentType,
-  setIndexSubject,
+  setIndexCategory,
   setLanguageContent,
   setOpenFilterModal,
 }) {
@@ -109,11 +109,11 @@ function VideoFilter({
           </div>
         </div>
 
-        {/* Index Subject */}
+        {/* Index Category */}
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
-              {t("Index Subject")}
+              {t("Index Category")}
             </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
@@ -127,9 +127,9 @@ function VideoFilter({
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setIndexSubject((prev) => [...prev, "health"]);
+                    setIndexCategory((prev) => [...prev, "health"]);
                   } else {
-                    setIndexSubject((prev) =>
+                    setIndexCategory((prev) =>
                       prev.filter((type) => type !== "health")
                     );
                   }
@@ -154,9 +154,9 @@ function VideoFilter({
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setIndexSubject((prev) => [...prev, "environment"]);
+                    setIndexCategory((prev) => [...prev, "environment"]);
                   } else {
-                    setIndexSubject((prev) =>
+                    setIndexCategory((prev) =>
                       prev.filter((type) => type !== "environment")
                     );
                   }
@@ -180,9 +180,9 @@ function VideoFilter({
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setIndexSubject((prev) => [...prev, "education"]);
+                    setIndexCategory((prev) => [...prev, "education"]);
                   } else {
-                    setIndexSubject((prev) =>
+                    setIndexCategory((prev) =>
                       prev.filter((type) => type !== "education")
                     );
                   }

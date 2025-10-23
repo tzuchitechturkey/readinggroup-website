@@ -14,18 +14,23 @@ function AboutTeamContent() {
   const [teamData, setTeamData] = useState([]);
   const getTeamData = async () => {
     setIsLoading(true);
+    console.log("Fetching data for tab:", activeTab);
     try {
       const res = await filterPositions(activeTab);
-      setTeamData(res.data?.results || []);
+      console.log("API response:", res);
+      setTeamData(res.data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     getTeamData();
   }, [activeTab]);
+  console.log("teamData:", teamData);
+
   return (
     <div className="max-w-7xl mx-auto lg:p-6 pt-0">
       {isLoading && <Loader />}

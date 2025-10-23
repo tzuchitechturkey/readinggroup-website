@@ -49,7 +49,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     country: "",
     camera_name: "",
   });
-  console.log(post);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});

@@ -10,7 +10,7 @@ import { GetPostsbyFilter } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function GuidedReadingContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Filter states
   const [searchDate, setSearchDate] = useState("");
@@ -46,74 +46,6 @@ function GuidedReadingContent() {
       setIsLoading(false);
     }
   };
-  // Apply filters function - simulates API call
-  const applyFilters = () => {
-    setIsLoading(true);
-
-    // Simulate API delay
-    setTimeout(() => {
-      // Filter all data first (this simulates backend filtering)
-      const allFiltered = data.filter((reading) => {
-        // Title search
-        if (
-          titleQuery &&
-          !reading.title.toLowerCase().includes(titleQuery.toLowerCase())
-        ) {
-          return false;
-        }
-
-        // writer filter
-        if (
-          writer &&
-          !reading?.writer?.toLowerCase().includes(writer.toLowerCase())
-        ) {
-          return false;
-        }
-
-        // Category filter
-        if (category && reading.category !== category) {
-          return false;
-        }
-
-        // Genre filter
-        if (type && reading.genre !== type) {
-          return false;
-        }
-
-        // Language filter
-        if (language && reading.language !== language) {
-          return false;
-        }
-
-        // Source filter
-        if (source && reading.source !== source) {
-          return false;
-        }
-
-        // Date filter (simplified - checking if publish date contains the search term)
-        if (searchDate && !reading.publishDate.includes(searchDate)) {
-          return false;
-        }
-
-        return true;
-      });
-
-      // Simulate pagination (slice results based on offset and limit)
-      const paginatedResults = allFiltered.slice(offset, offset + limit);
-
-      // Update state based on whether we're appending or replacing
-      if (appendResults) {
-        setFilteredReadings((prev) => [...prev, ...paginatedResults]);
-      } else {
-        setFilteredReadings(paginatedResults);
-      }
-    }, 500); // Simulate 500ms API delay
-  };
-
-  // Load more function
-  const handleLoadMore = () => {
-    applyFilters();
-  };
 
   const getWeeklyGuidData = async () => {
     try {
@@ -130,6 +62,15 @@ function GuidedReadingContent() {
     } catch (error) {
       console.error(error);
     }
+  };
+  // Apply filters function - simulates API call
+  const applyFilters = () => {
+    setIsLoading(true);
+  };
+
+  // Load more function
+  const handleLoadMore = () => {
+    applyFilters();
   };
 
   useEffect(() => {
@@ -164,6 +105,7 @@ function GuidedReadingContent() {
       {/* Start Filter */}
       <LearnFilter
         t={t}
+        i18n={i18n}
         searchDate={searchDate}
         setSearchDate={setSearchDate}
         writer={writer}
@@ -174,8 +116,6 @@ function GuidedReadingContent() {
         setType={setType}
         language={language}
         setLanguage={setLanguage}
-        source={source}
-        setSource={setSource}
         titleQuery={titleQuery}
         setTitleQuery={setTitleQuery}
         onSearch={() => applyFilters(0, false)}

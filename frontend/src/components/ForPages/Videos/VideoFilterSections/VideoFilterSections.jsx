@@ -10,6 +10,7 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { Button } from "@/components/ui/button";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import { GetVideosByFilter } from "@/api/videos";
+import Loader from "@/components/Global/Loader/Loader";
 
 const allVideos = [
   {
@@ -18,7 +19,6 @@ const allVideos = [
     duration: "32:15",
     category: "Technology",
     type: "Full Videos",
-    subject: "Science",
     language: "English",
     image: "/authback.jpg",
     featured: true,
@@ -29,7 +29,6 @@ const allVideos = [
     duration: "45:10",
     category: "Nature",
     type: "Unit Video",
-    subject: "Environment",
     language: "Spanish",
     image: "/authback.jpg",
     featured: false,
@@ -40,7 +39,6 @@ const allVideos = [
     duration: "55:20",
     category: "History",
     type: "Full Videos",
-    subject: "Education",
     language: "Italian",
     image: "/authback.jpg",
     featured: true,
@@ -51,7 +49,6 @@ const allVideos = [
     duration: "28:45",
     category: "Programming",
     type: "Unit Video",
-    subject: "Technology",
     language: "English",
     image: "/authback.jpg",
     featured: false,
@@ -62,7 +59,6 @@ const allVideos = [
     duration: "38:05",
     category: "Cooking",
     type: "Full Videos",
-    subject: "Lifestyle",
     language: "French",
     image: "/authback.jpg",
     featured: true,
@@ -73,7 +69,6 @@ const allVideos = [
     duration: "50:00",
     category: "Astronomy",
     type: "Unit Video",
-    subject: "Science",
     language: "German",
     image: "/authback.jpg",
     featured: false,
@@ -84,7 +79,6 @@ const allVideos = [
     duration: "42:30",
     category: "Finance",
     type: "Full Videos",
-    subject: "Business",
     language: "Japanese",
     image: "/authback.jpg",
     featured: true,
@@ -95,7 +89,6 @@ const allVideos = [
     duration: "33:50",
     category: "Art",
     type: "Unit Video",
-    subject: "Creativity",
     language: "Chinese",
     image: "/authback.jpg",
     featured: false,
@@ -106,7 +99,6 @@ const allVideos = [
     duration: "29:55",
     category: "Lifestyle",
     type: "Full Videos",
-    subject: "Environment",
     language: "Russian",
     image: "/authback.jpg",
     featured: true,
@@ -117,7 +109,6 @@ const allVideos = [
     duration: "22:00",
     category: "Health",
     type: "Unit Video",
-    subject: "Wellness",
     language: "Arabic",
     image: "/authback.jpg",
     featured: false,
@@ -125,36 +116,73 @@ const allVideos = [
 ];
 function VideoFilterSections() {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
+
+  const [contentType, setContentType] = useState(["full_video"]);
+  const [indexCategory, setIndexCategory] = useState(["health"]);
+  const [languageContent, setLanguageContent] = useState(["en"]);
+  const [searchValue, setSearchValue] = useState("");
+
+  const [searchData, setSearchData] = useState({
+    count: allVideos.length,
+    results: allVideos,
+  });
+
+  const [videoTypeData, setVideoTypeData] = useState({
+    count: allVideos.length,
+    results: allVideos,
+  });
+  const [videoCategoryData, setVideoCategoryData] = useState({
+    count: allVideos.length,
+    results: allVideos,
+  });
+  const [videoLanguageData, setVideoLanguageData] = useState({
+    count: allVideos.length,
+    results: allVideos,
+  });
   const [selectedDateRange, setSelectedDateRange] = useState({
     startDate: null,
     endDate: null,
   });
-  const [contentType, setContentType] = useState(["full_video"]);
-  const [indexSubject, setIndexSubject] = useState(["health"]);
-  const [languageContent, setLanguageContent] = useState(["en"]);
-  const [searchValue, setSearchValue] = useState("");
-  const [searchData, setSearchData] = useState({
-    count: 10,
-    results: allVideos,
-  });
-  const [displayedVideos, setDisplayedVideos] = useState(allVideos);
-  const [totalRecords, setTotalRecords] = useState(allVideos);
-  const limit = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
 
-  const getVideDataByFilter = async (type) => {
-    setIsLoaiding(true);
+  const getVideoTypeDataByFilter = async (type) => {
+    setIsLoading(true);
     const offset = page * 10;
     try {
       const res = await GetVideosByFilter(limit, offset, type);
-      setDisplayedVideos(res?.data?.results || []);
-      setTotalRecords(res?.data?.count || 0);
+      setVideoTypeData(res?.data);
     } catch (error) {
       setErrorFn(error);
     } finally {
-      setIsLoaiding(false);
+      setIsLoading(false);
+    }
+  };
+  const getVideoCategoryDataByFilter = async (type) => {
+    setIsLoading(true);
+    const offset = page * 10;
+    try {
+      const res = await GetVideosByFilter(limit, offset, type);
+      setVideoCategoryData(res?.data);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const getVideoLanguageDataByFilter = async (type) => {
+    setIsLoading(true);
+    const offset = page * 10;
+    try {
+      const res = await GetVideosByFilter(limit, offset, type);
+      setVideoLanguageData(res?.data);
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -171,7 +199,7 @@ function VideoFilterSections() {
       // and a setter `setFilteredVideos`.
       // Since that state doesn't exist, I'll reverse `allVideos` and put it in a new state.
       // Let's create a new state for the videos displayed in the carousels.
-      setDisplayedVideos((prevVideos) => [...prevVideos].reverse());
+      setSearchData((prevVideos) => [...prevVideos].reverse());
     }
     toast.success(t("Data Sorted!"));
   };
@@ -186,6 +214,7 @@ function VideoFilterSections() {
   }, []);
   return (
     <>
+      {isLoading && <Loader />}
       {/* Start Search Header */}
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
         <SearchSecion
@@ -206,7 +235,7 @@ function VideoFilterSections() {
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
               setContentType={setContentType}
-              setIndexSubject={setIndexSubject}
+              setIndexCategory={setIndexCategory}
               setLanguageContent={setLanguageContent}
             />
           </div>
@@ -258,8 +287,8 @@ function VideoFilterSections() {
                       </div>
                       <div className="">
                         <BrokenCarousel
-                          data={displayedVideos}
-                          showArrows={displayedVideos?.length > 4}
+                          data={videoTypeData?.results}
+                          showArrows={videoTypeData?.results?.length > 4}
                           cardName={VideoCard}
                           nextArrowClassname={"-right-5"}
                           prevArrowClassname={"-left-5 "}
@@ -272,34 +301,34 @@ function VideoFilterSections() {
                 )}
                 {/* End This Full Videos . Unit Video Section */}
                 {/* Start This Full Videos . Unit Video Section */}
-                {indexSubject?.length > 0 ? (
+                {indexCategory?.length > 0 ? (
                   <div className="flex-1">
                     <div>
                       <div className="my-2 flex items-center ">
                         <p className="font-bold text-2xl text-text">
-                          {t("This Index Subject")}
+                          {t("This Index Category")}
                         </p>
                         <h2 className="text-2xl text-text ">
                           {" "}
                           :{" "}
-                          {indexSubject.map((subject, idx) => (
-                            <span key={subject}>
-                              {subject === "health"
+                          {indexCategory.map((category, idx) => (
+                            <span key={category}>
+                              {category === "health"
                                 ? t("Health")
-                                : subject === "environment"
+                                : category === "environment"
                                 ? t("Environment")
-                                : subject === "education"
+                                : category === "education"
                                 ? t("Education")
-                                : t(subject)}
-                              {idx < indexSubject.length - 1 && " ، "}
+                                : t(category)}
+                              {idx < indexCategory.length - 1 && " ، "}
                             </span>
                           ))}
                         </h2>
                       </div>
                       <div className="">
                         <BrokenCarousel
-                          data={displayedVideos}
-                          showArrows={displayedVideos?.length > 4}
+                          data={videoCategoryData?.results}
+                          showArrows={videoCategoryData?.results?.length > 4}
                           cardName={VideoCard}
                           nextArrowClassname={"-right-5"}
                           prevArrowClassname={"-left-5 "}
@@ -347,8 +376,8 @@ function VideoFilterSections() {
                       </div>
                       <div className="">
                         <BrokenCarousel
-                          data={displayedVideos}
-                          showArrows={displayedVideos?.length > 4}
+                          data={videoLanguageData?.results}
+                          showArrows={videoLanguageData?.results?.length > 4}
                           cardName={VideoCard}
                           nextArrowClassname={"-right-5"}
                           prevArrowClassname={"-left-5"}
@@ -376,7 +405,7 @@ function VideoFilterSections() {
               selectedDateRange={selectedDateRange}
               setSelectedDateRange={setSelectedDateRange}
               setContentType={setContentType}
-              setIndexSubject={setIndexSubject}
+              setIndexCategory={setIndexCategory}
               setLanguageContent={setLanguageContent}
               setOpenFilterModa={setOpenFilterModal}
             />

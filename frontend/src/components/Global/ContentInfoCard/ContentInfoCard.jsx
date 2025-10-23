@@ -22,7 +22,7 @@ function ContentInfoCard({
       {/* <div className="flex items-start justify-between mb-4">
         <div>
           <span className="bg-primary text-white text-xs font-medium px-2 py-1 rounded-md">
-            {contentType === "photo" ? contentData.category : contentData.badge}
+            {contentType === "photo" ? contentData?.category : contentData?.badge}
           </span>
         </div>
       </div> */}
@@ -33,17 +33,17 @@ function ContentInfoCard({
           isRTL ? "text-right" : "text-left"
         }`}
       >
-        {contentData.title}
+        {contentData?.title}
       </h1>
 
       {/* Subtitle for photos */}
-      {contentType === "photo" && contentData.subtitle && (
+      {contentType === "photo" && contentData?.subtitle && (
         <p
           className={`text-gray-600 text-sm mb-4 ${
             isRTL ? "text-right" : "text-left"
           }`}
         >
-          {contentData.subtitle}
+          {contentData?.subtitle}
         </p>
       )}
 
@@ -65,8 +65,8 @@ function ContentInfoCard({
           )}
           <span className="text-sm text-primary">
             {contentType === "photo"
-              ? contentData.photographer
-              : contentData.writer}
+              ? contentData?.photographer
+              : contentData?.writer}
           </span>
         </div>
         <div
@@ -79,7 +79,7 @@ function ContentInfoCard({
               <Star
                 key={i}
                 className={`w-4 h-4 ${
-                  i < Math.floor(contentData.rating)
+                  i < Math.floor(contentData?.rating)
                     ? "fill-yellow-400 text-yellow-400"
                     : "text-gray-300"
                 }`}
@@ -87,7 +87,7 @@ function ContentInfoCard({
             ))}
           </div>
           <span className="text-sm text-gray-600">
-            ({contentData.reviews}k{contentType === "photo" ? "" : ""})
+            ({contentData?.reviews}k{contentType === "photo" ? "" : ""})
           </span>
         </div>
       </div>
@@ -105,7 +105,7 @@ function ContentInfoCard({
             } space-x-2`}
           >
             <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{contentData.date}</span>
+            <span className="text-sm text-gray-600">{contentData?.date}</span>
           </div>
           <div
             className={`flex items-center ${
@@ -114,7 +114,7 @@ function ContentInfoCard({
           >
             <MapPin className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-600">
-              {contentData.location}
+              {contentData?.location}
             </span>
           </div>
         </div>
@@ -126,13 +126,13 @@ function ContentInfoCard({
           isRTL ? "text-right" : "text-left"
         }`}
       >
-        {contentData.description}
+        {contentData?.description}
       </p>
 
       {/* Camera Settings for photos */}
       {contentType === "photo" &&
-        contentData.camera &&
-        contentData.settings && (
+        contentData?.camera &&
+        contentData?.settings && (
           <div className="bg-gray-50 rounded-lg p-3 mb-4">
             <h4 className="text-sm font-semibold text-gray-900 mb-2">
               {t("Camera Settings")}
@@ -144,7 +144,7 @@ function ContentInfoCard({
                 } justify-between text-xs`}
               >
                 <span className="text-gray-600">{t("Camera")}:</span>
-                <span className="text-gray-900">{contentData.camera}</span>
+                <span className="text-gray-900">{contentData?.camera}</span>
               </div>
               <div
                 className={`flex ${
@@ -152,7 +152,7 @@ function ContentInfoCard({
                 } justify-between text-xs`}
               >
                 <span className="text-gray-600">{t("Settings")}:</span>
-                <span className="text-gray-900">{contentData.settings}</span>
+                <span className="text-gray-900">{contentData?.settings}</span>
               </div>
             </div>
           </div>
@@ -164,8 +164,8 @@ function ContentInfoCard({
           isRTL ? "justify-start" : "justify-start"
         }`}
       >
-        {contentData.tags &&
-          contentData.tags.map((tag, index) => (
+        {contentData?.tags &&
+          contentData?.tags.map((tag, index) => (
             <span
               key={index}
               className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full"

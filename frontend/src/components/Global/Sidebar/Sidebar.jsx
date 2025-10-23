@@ -142,6 +142,29 @@ export default function AppSidebar({
         ],
       },
       {
+        title: "Events",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "Events List",
+            onClick: () => onSectionChange("eventsList"),
+          },
+          {
+            title: "Add/Edit Event",
+            onClick: () => onSectionChange("createOrEditEvent"),
+          },
+          {
+            title: "Events Categories",
+            onClick: () => onSectionChange("eventsCategories"),
+          },
+          {
+            title: "Events Sections",
+            onClick: () => onSectionChange("eventsSections"), 
+          },
+        ],
+      },
+      {
         title: "Videos",
         onClick: () => onSectionChange("videos"),
         icon: Video,
