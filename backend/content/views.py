@@ -4,6 +4,12 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from .swagger_parameters import(
+    video_manual_parameters,
+    post_manual_parameters,
+    event_manual_parameters,
+    team_member_manual_parameters
+)
 
 from .models import (
     Event,
@@ -60,13 +66,9 @@ class VideoViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter]
 
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('video_type', openapi.IN_QUERY, description="Filter by video type", type=openapi.TYPE_STRING),
-            openapi.Parameter('language', openapi.IN_QUERY, description="Filter by language", type=openapi.TYPE_STRING),
-            openapi.Parameter('category', openapi.IN_QUERY, description="Filter by category (JSON object with 'name' field)", type=openapi.TYPE_STRING),
-            openapi.Parameter('happened_at', openapi.IN_QUERY, description="Filter by happened date", type=openapi.TYPE_STRING),
-        ]
+        manual_parameters=[video_manual_parameters]
     )
+    
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -101,14 +103,9 @@ class PostViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('published_at', openapi.IN_QUERY, description="Filter by published date", type=openapi.TYPE_STRING),
-            openapi.Parameter('writer', openapi.IN_QUERY, description="Filter by writer", type=openapi.TYPE_STRING),
-            openapi.Parameter('category', openapi.IN_QUERY, description="Filter by category", type=openapi.TYPE_STRING),
-            openapi.Parameter('post_type', openapi.IN_QUERY, description="Filter by post type", type=openapi.TYPE_STRING),
-            openapi.Parameter('language', openapi.IN_QUERY, description="Filter by language", type=openapi.TYPE_STRING),
-        ]
+        manual_parameters=[post_manual_parameters]
     )
+    
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     
@@ -143,8 +140,34 @@ class EventViewSet(BaseContentViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     search_fields = ("title", "writer", "category", "section", "country")
-    ordering_fields = ("date", "created_at")
+    ordering_fields = ("happened_at", "created_at")
     filterset_fields = ("section", "category", "country", "language", "report_type")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    
+    @swagger_auto_schema(
+        manual_parameters=[event_manual_parameters]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        
+        queryset = super().get_queryset()
+        params = self.request.query_params
+
+        section = params.get('section')
+        if section:
+            queryset = queryset.filter(section__name__iexact=section)
+        
+        category = params.get("category")
+        if category:
+            queryset =queryset.filter(category__name__iexact=category)
+            
+        country = params.get("country")
+        if country:
+            queryset =queryset.filter(country__iexact=country)
+
+        return queryset
 
 
 class TvProgramViewSet(BaseContentViewSet):
@@ -154,14 +177,12 @@ class TvProgramViewSet(BaseContentViewSet):
     search_fields = ("title", "description", "writer", "category")
     ordering_fields = ("air_date", "created_at")
 
-
 class WeeklyMomentViewSet(BaseContentViewSet):
     """ViewSet for managing WeeklyMoment content."""
     queryset = WeeklyMoment.objects.all()
     serializer_class = WeeklyMomentSerializer
     search_fields = ("title", "source", "language", "content_type")
     ordering_fields = ("created_at", "title")
-
 
 class TeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing TeamMember content."""
@@ -173,10 +194,9 @@ class TeamMemberViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
-        manual_parameters=[
-            openapi.Parameter('Position', openapi.IN_QUERY, description="Filter by Position", type=openapi.TYPE_STRING),
-        ]
+        manual_parameters=[team_member_manual_parameters]
     )
+
     def list(self, request, *args, **kwargs):
         if 'limit' in request.query_params or 'offset' in request.query_params:
             return super().list(request, *args, **kwargs)
@@ -194,7 +214,6 @@ class TeamMemberViewSet(BaseContentViewSet):
 
         return queryset
 
-
 class HistoryEntryViewSet(BaseContentViewSet):
     """ViewSet for managing HistoryEntry content."""
     queryset = HistoryEntry.objects.all()
@@ -202,6 +221,8 @@ class HistoryEntryViewSet(BaseContentViewSet):
     search_fields = ("title", "description")
     ordering_fields = ("story_date")
     
+    
+#This endpoint is passed inside the main endpoint.
 class VideoCategoryViewSet(BaseContentViewSet):
     """ViewSet for managing VideoCategory content."""
     queryset = VideoCategory.objects.all()

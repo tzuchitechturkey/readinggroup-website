@@ -59,7 +59,12 @@ class TvProgramCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
     class Meta:
         model = TvProgramCategory
         fields = "__all__"
-        
+
+class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventSection
+        fields = "__all__"
         
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -103,6 +108,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = Event
         fields = "__all__"
         file_fields = ("image",)
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -149,9 +155,3 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
         file_fields = ("image",)
         
-
-class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = EventSection
-        fields = "__all__"
