@@ -14,6 +14,7 @@ from .models import (
     EventCategory,
     TvProgramCategory,
     PositionTeamMember,
+    EventSection,
 )
 
 
@@ -147,3 +148,10 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = HistoryEntry
         fields = "__all__"
         file_fields = ("image",)
+        
+
+class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventSection
+        fields = "__all__"

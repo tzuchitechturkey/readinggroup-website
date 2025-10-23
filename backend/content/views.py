@@ -18,6 +18,7 @@ from .models import (
     TvProgramCategory,
     EventCategory,
     PositionTeamMember,
+    EventSection,
 )
 from .serializers import (
     EventSerializer,
@@ -32,6 +33,7 @@ from .serializers import (
     TvProgramCategorySerializer,
     EventCategorySerializer,
     PositionTeamMemberSerializer,
+    EventSectionSerializer,
 )
 
 
@@ -232,5 +234,13 @@ class PositionTeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing PositionTeamMember content."""
     queryset = PositionTeamMember.objects.all()
     serializer_class = PositionTeamMemberSerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+    
+class EventSectionViewSet(BaseContentViewSet):
+    """ViewSet for managing EventSection content."""
+    queryset = EventSection.objects.all()
+    serializer_class = EventSectionSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)

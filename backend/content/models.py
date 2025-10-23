@@ -1,8 +1,7 @@
 from django.db import models
 from .enums import (
     PostStatus,
-    EventSection,
-    POSTTYPE,
+    PostType,
 )
 
 
@@ -57,7 +56,7 @@ class Post(TimestampedModel):
     read_time = models.CharField(max_length=32, blank=True)
     tags = models.JSONField(default=list, blank=True)
     published_at = models.DateTimeField(blank=True, null=True)
-    post_type = models.CharField(max_length=100, blank=True, choices=POSTTYPE.choices, default=POSTTYPE.CARD)
+    post_type = models.CharField(max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD)
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
@@ -83,7 +82,7 @@ class Event(TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
-    section = models.CharField(max_length=32, choices=EventSection.choices)
+    section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
     summary = models.TextField(blank=True)
 
     class Meta:
@@ -221,3 +220,11 @@ class PositionTeamMember(TimestampedModel):
 
     def __str__(self) -> str: 
         return self.name
+
+class EventSection(TimestampedModel):
+    """Sections for Events."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
