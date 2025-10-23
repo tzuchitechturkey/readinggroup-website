@@ -29,7 +29,7 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "section", "category", "language", "date")
+    list_display = ("title", "section", "category", "language", "happened_at")
     list_filter = ("section", "category", "language")
     search_fields = ("title", "writer", "category")
 
