@@ -1,4 +1,4 @@
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, status
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -105,9 +105,9 @@ class IsStaffOrReadOnly(BasePermission):
 
 class BaseContentViewSet(viewsets.ModelViewSet):
     """Common configuration shared across content viewsets."""
-
     permission_classes = [IsStaffOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
 
 class VideoViewSet(BaseContentViewSet):
     queryset = Video.objects.all()
@@ -119,9 +119,15 @@ class VideoViewSet(BaseContentViewSet):
     @swagger_auto_schema(
         manual_parameters=video_manual_parameters
     )
-    
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = super().get_queryset()
