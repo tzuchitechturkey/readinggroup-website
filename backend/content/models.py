@@ -41,6 +41,21 @@ class Video(TimestampedModel):
     def __str__(self) -> str:
         return self.title
 
+    @classmethod
+    def top_by_views(cls, n=5):
+        """Return top n videos by views."""
+        return cls.objects.order_by('-views')[:n]
+
+    @classmethod
+    def top1_by_views(cls):
+        """Return top 1 video by views."""
+        return cls.objects.order_by('-views').first()
+
+    @classmethod
+    def top_by_likes(cls, n=5):
+        """Return top n videos by like count."""
+        return cls.objects.annotate(like_count=models.Count('likes')).order_by('-like_count')[:n]
+
 
 class Post(TimestampedModel):
     """Landing posts that appear across the application."""
@@ -103,6 +118,7 @@ class TvProgram(TimestampedModel):
     writer = models.CharField(max_length=255)
     category = models.ForeignKey('TvProgramCategory', on_delete=models.SET_NULL, null=True, blank=True)
     is_live = models.BooleanField(default=False)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("-air_date", "title")
@@ -110,6 +126,20 @@ class TvProgram(TimestampedModel):
     def __str__(self) -> str:
         return self.title
 
+    @classmethod
+    def top_by_views(cls, n=5):
+        """Return top n tv programs by views."""
+        return cls.objects.order_by('-views')[:n]
+
+    @classmethod
+    def top1_by_views(cls):
+        """Return top 1 tv program by views."""
+        return cls.objects.order_by('-views').first()
+
+    @classmethod
+    def top_by_likes(cls, n=5):
+        """Return top n tv programs by like count."""
+        return cls.objects.annotate(like_count=models.Count('likes')).order_by('-like_count')[:n]
 
 class WeeklyMoment(TimestampedModel):
     """Weekly highlighted items displayed on the home page."""

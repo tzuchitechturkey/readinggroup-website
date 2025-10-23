@@ -134,6 +134,7 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = TvProgram
         fields = "__all__"
         file_fields = ("image",)
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = TvProgramCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -154,6 +155,7 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = TeamMember
         fields = "__all__"
         file_fields = ("avatar",)
+        
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["position"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
