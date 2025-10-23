@@ -1,29 +1,31 @@
 import React from "react";
 
 import { useNavigate } from "react-router-dom";
-import { Star, User } from "lucide-react";
+import { Star, User, Tag } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function GuidingReadingcard({ item }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleCardClick = () => {
     navigate(`/cards-photos/card/${item.id}`);
   };
-// {
-//   "category": 0,
-//   "title": "string",
-//   "subtitle": "string",
-//   "excerpt": "string",
-//   "body": "string",
-//   "writer": "string",
-//   "writer_avatar": "string",
-//   "status": "draft",
-//   "is_active": true,
-//   "views": 9223372036854776000,
-//   "read_time": "string",
-//   "tags": "string",
-//   "published_at": "2025-10-21T13:21:48.537Z"
-// }
+  // {
+  //   "category": 0,
+  //   "title": "string",
+  //   "subtitle": "string",
+  //   "excerpt": "string",
+  //   "body": "string",
+  //   "writer": "string",
+  //   "writer_avatar": "string",
+  //   "status": "draft",
+  //   "is_active": true,
+  //   "views": 9223372036854776000,
+  //   "read_time": "string",
+  //   "tags": "string",
+  //   "published_at": "2025-10-21T13:21:48.537Z"
+  // }
   return (
     <div
       key={item.id}
@@ -34,10 +36,10 @@ function GuidingReadingcard({ item }) {
       <div className="absolute z-50 top-3 left-3">
         {item.tags && item.tags.length > 0 && (
           <div>
-            <h4 className="font-semibold text-[#1D2630] mb-3 flex items-center gap-2">
+            {/* <h4 className="font-semibold text-[#1D2630] mb-3 flex items-center gap-2">
               <Tag className="w-4 h-4" />
               {t("Tags")}
-            </h4>
+            </h4> */}
             <div className="flex flex-wrap gap-2">
               {item.tags.map((tag, index) => (
                 <span

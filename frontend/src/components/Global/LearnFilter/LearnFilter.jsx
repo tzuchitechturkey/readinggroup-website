@@ -13,26 +13,17 @@ import Loader from "../Loader/Loader";
 function LearnFilter({
   t,
   i18n,
-  searchDate,
-  setSearchDate,
-  writer,
-  setWriter,
-  category,
-  setCategory,
-  type,
-  setType,
-  language,
-  setLanguage,
-  source,
-  titleQuery,
-  setTitleQuery,
+  filters,
+  updateFilter,
   onSearch,
+  onResetFilters,
 }) {
+  // Destructure filters for easier access
+  const { searchDate, writer, category, type, language, titleQuery } = filters;
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState({
-    startDate: null,
-    endDate: null,
+    published_at: null,
   });
   const [categoriesList, setCategoriesList] = useState([]);
   const [writersList, setWritersList] = useState([]);
@@ -64,42 +55,22 @@ function LearnFilter({
   }, []);
 
   const clearDateFilter = () => {
-    setSelectedDateRange({ startDate: null, endDate: null });
-    setSearchDate("");
+    setSelectedDateRange({ published_at: null });
+    updateFilter("searchDate", "");
   };
 
   const clearAllFilters = () => {
-    setTitleQuery("");
-    setSearchDate("");
-    setWriter("");
-    setCategory("");
-    setType("");
-    setLanguage("");
-    setSelectedDateRange({ startDate: null, endDate: null });
+    if (onResetFilters) {
+      onResetFilters();
+    }
+    setSelectedDateRange({ published_at: null });
+    onSearch(true);
   };
 
   const handleDateSelection = () => {
     let dateText = "";
-    if (selectedDateRange.startDate && selectedDateRange.endDate) {
-      const startDate = selectedDateRange.startDate
-        .toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-        .replace(/,/g, "")
-        .replace(/\s/g, " / ");
-      const endDate = selectedDateRange.endDate
-        .toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-        .replace(/,/g, "")
-        .replace(/\s/g, " / ");
-      dateText = `${startDate} - ${endDate}`;
-    } else if (selectedDateRange.startDate) {
-      dateText = selectedDateRange.startDate
+    if (selectedDateRange.published_at) {
+      dateText = selectedDateRange.published_at
         .toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
@@ -108,16 +79,12 @@ function LearnFilter({
         .replace(/,/g, "")
         .replace(/\s/g, " / ");
     }
-    setSearchDate(dateText);
+    updateFilter("searchDate", dateText);
     setIsDateModalOpen(false);
   };
 
-  const handleSearch = () => {
-    if (onSearch) onSearch();
-  };
-
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSearch();
+    if (e.key === "Enter") onSearch();
   };
 
   const getActiveFilters = () => {
@@ -135,8 +102,6 @@ function LearnFilter({
     if (type) filters.push({ type: "type", label: t("Type"), value: type });
     if (language)
       filters.push({ type: "language", label: t("Language"), value: language });
-    if (source)
-      filters.push({ type: "source", label: t("Source"), value: source });
     return filters;
   };
 
@@ -146,13 +111,13 @@ function LearnFilter({
         clearDateFilter();
         break;
       case "writer":
-        setWriter("");
+        updateFilter("writer", "");
         break;
       case "category":
-        setCategory("");
+        updateFilter("category", "");
         break;
       case "language":
-        setLanguage("");
+        updateFilter("language", "");
         break;
 
       default:
@@ -185,13 +150,13 @@ function LearnFilter({
                   type="text"
                   placeholder={t("Search by title or keyword...")}
                   value={titleQuery}
-                  onChange={(e) => setTitleQuery(e.target.value)}
+                  onChange={(e) => updateFilter("titleQuery", e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="h-12 w-full rounded-lg border-0 bg-white pl-10 pr-4 text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80 transition-all"
                 />
               </div>
               <button
-                onClick={handleSearch}
+                onClick={onSearch}
                 className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 text-sm font-semibold text-[#1f3fb3] shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/80"
               >
                 <Search className="h-4 w-4 mr-2" />
@@ -256,7 +221,7 @@ function LearnFilter({
                       customStyle="bg-white"
                       selectedItem={writer}
                       onSelect={(item) => {
-                        setWriter(item);
+                        updateFilter("writer", item);
                       }}
                       searchMethod={getWriters}
                       searchApi={true}
@@ -270,12 +235,12 @@ function LearnFilter({
                     {/* End writer Filter */}
                   </div>
 
-                  {/* Second Row - Category, type, Language, Source */}
+                  {/* Second Row - Category, type, Language,   */}
                   <div className="grid grid-cols-4 gap-4">
                     {/* Start Category Filter */}
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      onChange={(e) => updateFilter("category", e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
                       <option disabled hidden value="">
@@ -283,7 +248,7 @@ function LearnFilter({
                       </option>
 
                       {categoriesList?.map((category) => (
-                        <option key={category?.id} value={category?.id}>
+                        <option key={category?.id} value={category?.name}>
                           {t(category?.name)}
                         </option>
                       ))}
@@ -293,7 +258,7 @@ function LearnFilter({
                     {/* Start Language Filter */}
                     <select
                       value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
+                      onChange={(e) => updateFilter("language", e.target.value)}
                       className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
                     >
                       <option disabled hidden value="">
@@ -338,13 +303,22 @@ function LearnFilter({
                         ))}
                       </div>
                     )}
-
-                    <button
-                      onClick={handleSearch}
-                      className="px-6 py-2 text-sm font-semibold bg-white text-[#1f3fb3] rounded-lg hover:bg-gray-50 transition-all"
-                    >
-                      {t("Apply Filters")}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {activeFilters?.length > 0 && (
+                        <button
+                          onClick={clearAllFilters}
+                          className="px-6 py-2 text-sm font-semibold bg-white text-[#1f3fb3] rounded-lg hover:bg-gray-50 transition-all"
+                        >
+                          {t("Clear Filters")}
+                        </button>
+                      )}
+                      <button
+                        onClick={onSearch}
+                        className="px-6 py-2 text-sm font-semibold bg-white text-[#1f3fb3] rounded-lg hover:bg-gray-50 transition-all"
+                      >
+                        {t("Apply Filters")}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

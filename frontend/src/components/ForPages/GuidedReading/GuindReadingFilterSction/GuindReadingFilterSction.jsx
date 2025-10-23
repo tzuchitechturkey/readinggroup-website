@@ -10,13 +10,16 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 function GuindReadingFilterSction() {
   const { t, i18n } = useTranslation();
 
-  // Filter states
-  const [searchDate, setSearchDate] = useState("");
-  const [writer, setWriter] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("");
-  const [language, setLanguage] = useState("");
-  const [titleQuery, setTitleQuery] = useState("");
+  // Filter states - all in one object
+  const [filters, setFilters] = useState({
+    searchDate: "",
+    writer: "",
+    category: "",
+    type: "",
+    language: "",
+    titleQuery: "",
+  });
+
   // Results state
   const [filteredReadings, setFilteredReadings] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
@@ -27,58 +30,76 @@ function GuindReadingFilterSction() {
   const [hasMore, setHasMore] = useState(false);
   const limit = 10;
 
-  // Build filters object from current state
-  const buildFilters = () => {
-    const filters = {};
-    
-    // Add search query
-    if (titleQuery) filters.search = titleQuery;
-    
-    // Add date filter - need to convert to ISO format if needed
-    if (searchDate) filters.published_at = searchDate;
-    
-    // Add writer filter - send writer ID
-    if (writer?.id) filters.writer = writer.id;
-    
-    // Add category filter
-    if (category) filters.category = category;
-    
-    // Add post type filter
-    if (type) filters.post_type = type;
-    
-    // Add language filter
-    if (language) filters.language = language;
-    
-    return filters;
+  // Helper function to update a single filter
+  const updateFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const getData = async (page = 0, resetData = false) => {
+  // Helper function to reset all filters
+  const resetFilters = () => {
+    setFilters({
+      searchDate: "",
+      writer: "",
+      category: "",
+      type: "",
+      language: "",
+      titleQuery: "",
+    });
+  };
+
+  // Build filters object from current state
+  const buildFilters = () => {
+    const apiFilters = {};
+
+    // Add search query
+    if (filters.titleQuery) apiFilters.search = filters.titleQuery;
+
+    // Add date filter - need to convert to ISO format if needed
+    if (filters.searchDate) apiFilters.published_at = filters.searchDate;
+
+    // Add writer filter - send writer ID
+    if (filters.writer?.name) apiFilters.writer = filters.writer.name;
+
+    // Add category filter
+    if (filters.category?.name) apiFilters.category = filters.category.name;
+
+    // Add post type filter
+    if (filters.type) apiFilters.post_type = filters.type;
+
+    // Add language filter
+    if (filters.language) apiFilters.language = filters.language;
+
+    return apiFilters;
+  };
+
+  const getData = async (page = 0, resetData = false, clearFilter = false) => {
     setIsLoading(true);
     const offset = page * limit;
-    
+
     try {
-      const filters = buildFilters();
-      const res = await GetPosts(limit, offset, filters);
-      
+      const apiFilters = clearFilter === true ? {} : buildFilters();
+      const res = await GetPosts(limit, offset, apiFilters);
+
       const newResults = res.data?.results || [];
       const totalCount = res.data?.count || 0;
-      
+
       if (resetData) {
         // Reset data when applying new filters
         setFilteredReadings(newResults);
       } else {
         // Append data for load more
-        setFilteredReadings(prev => [...prev, ...newResults]);
+        setFilteredReadings((prev) => [...prev, ...newResults]);
       }
-      
+
       setTotalRecords(totalCount);
       setCurrentPage(page);
       setIsSearchPerformed(true);
-      
+
       // Check if there are more results to load
-      const loadedCount = resetData ? newResults.length : filteredReadings.length + newResults.length;
+      const loadedCount = resetData
+        ? newResults.length
+        : filteredReadings.length + newResults.length;
       setHasMore(loadedCount < totalCount);
-      
     } catch (err) {
       setErrorFn(err);
     } finally {
@@ -87,11 +108,11 @@ function GuindReadingFilterSction() {
   };
 
   // Apply filters function - called when user clicks search or apply filters
-  const applyFilters = () => {
+  const applyFilters = (clearFilter) => {
     setCurrentPage(0);
-    getData(0, true); // Reset data with new filters
+    getData(0, true, clearFilter); // Reset data with new filters
   };
-  
+
   // Load more function
   const handleLoadMore = () => {
     const nextPage = currentPage + 1;
@@ -100,26 +121,18 @@ function GuindReadingFilterSction() {
 
   useEffect(() => {
     // Load initial data if needed
-    // getData(0, true);
+    getData(0, true);
   }, []);
+
   return (
     <div>
       <LearnFilter
         t={t}
         i18n={i18n}
-        searchDate={searchDate}
-        setSearchDate={setSearchDate}
-        writer={writer}
-        setWriter={setWriter}
-        category={category}
-        setCategory={setCategory}
-        type={type}
-        setType={setType}
-        language={language}
-        setLanguage={setLanguage}
-        titleQuery={titleQuery}
-        setTitleQuery={setTitleQuery}
+        filters={filters}
+        updateFilter={updateFilter}
         onSearch={applyFilters}
+        onResetFilters={resetFilters}
       />
       {/* Start Filtered Data */}
       <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
