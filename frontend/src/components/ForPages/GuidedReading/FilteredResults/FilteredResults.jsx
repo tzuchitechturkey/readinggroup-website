@@ -1,17 +1,25 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-import { Star, Calendar, User, BookOpen, Globe, MapPin, Plus } from "lucide-react";
+import {
+  Star,
+  Calendar,
+  User,
+  BookOpen,
+  Globe,
+  MapPin,
+  Plus,
+} from "lucide-react";
 
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 
-function FilteredResults({ 
-  readings, 
-  isSearchPerformed, 
-  totalCount, 
-  hasMore, 
-  isLoading, 
-  onLoadMore 
+function FilteredResults({
+  data,
+  isSearchPerformed,
+  totalCount,
+  hasMore,
+  isLoading,
+  onLoadMore,
 }) {
   const { t } = useTranslation();
 
@@ -27,16 +35,16 @@ function FilteredResults({
           {t("Search Results")}
         </h2>
         <p className="text-gray-600">
-          {t("Showing")} {readings.length} {t("of")} {totalCount || readings.length} {t("reading(s)")}
+          {t("Showing")} {data.length} {t("of")} {totalCount || data.length} {t("reading(s)")}
         </p>
       </div> */}
 
       {/* Results Grid */}
-      {readings.length > 0 ? (
+      {data.length > 0 ? (
         <div className="space-y-8">
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {readings.map((item) => (
+            {data.map((item) => (
               <div key={item.id}>
                 <GuidingReadingcard item={item} />
               </div>
@@ -52,9 +60,10 @@ function FilteredResults({
                 className={`
                   inline-flex items-center gap-2 px-8 py-3 rounded-lg font-medium text-sm
                   transition-all duration-200 min-w-[160px] justify-center
-                  ${isLoading 
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+                  ${
+                    isLoading
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
                   }
                 `}
               >

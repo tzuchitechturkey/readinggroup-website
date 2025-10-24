@@ -54,7 +54,8 @@ function PostsList({ onSectionChange }) {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetPosts(limit, offset, searchVal);
+      const res = await GetPosts(limit, offset, { search: searchVal });
+      console.log(res);
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {

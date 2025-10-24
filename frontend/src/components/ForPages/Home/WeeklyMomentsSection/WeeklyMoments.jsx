@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,6 +7,8 @@ import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomen
 
 const WeeklyMoments = () => {
   const { t } = useTranslation();
+  const [weeklyMomentData, setWeeklyMomentData] = useState([]);
+
   const moments = [
     {
       id: 1,
@@ -64,7 +66,17 @@ const WeeklyMoments = () => {
       language: "AR / EN",
     },
   ];
-
+  const getWeeklyMomentData = async () => {
+    try {
+      const res = await GetWeeklyMomentData();
+      setWeeklyMomentData(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    // getWeeklyGuidData();
+  }, []);
   return (
     <div className="mt-6 md:mt-9 lg:mt-12">
       <DynamicSection

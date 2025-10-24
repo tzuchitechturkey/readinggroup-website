@@ -23,43 +23,42 @@ function FilterDatePickerModal({
   const { t } = useTranslation();
 
   // State للتحكم في فتح وإغلاق الـ Popover
-  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
-  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
   return (
     <div>
       <div className="space-y-4">
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Start Date")}
+            {t("Published Date")}
           </label>
-          <Popover open={isStartDateOpen} onOpenChange={setIsStartDateOpen}>
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !selectedDateRange.startDate && "text-muted-foreground"
+                  !selectedDateRange.published_at && "text-muted-foreground"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {selectedDateRange.startDate ? (
-                  format(selectedDateRange.startDate, "PPP")
+                {selectedDateRange.published_at ? (
+                  format(selectedDateRange.published_at, "PPP")
                 ) : (
-                  <span>{t("Pick start date")}</span>
+                  <span>{t("Pick published date")}</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={selectedDateRange.startDate}
+                selected={selectedDateRange.published_at}
                 onSelect={(date) => {
                   setSelectedDateRange((prev) => ({
                     ...prev,
-                    startDate: date,
+                    published_at: date,
                   }));
-                  setIsStartDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
+                  setDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
                 }}
                 disabled={(date) =>
                   date > new Date() || date < new Date("1900-01-01")
@@ -70,51 +69,6 @@ function FilterDatePickerModal({
           </Popover>
         </div>
         {/* End Start Date */}
-        {/* Start End Date */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("End Date")}
-          </label>
-          <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !selectedDateRange.endDate && "text-muted-foreground"
-                )}
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                {selectedDateRange.endDate ? (
-                  format(selectedDateRange.endDate, "PPP")
-                ) : (
-                  <span>{t("Pick end date")}</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDateRange.endDate}
-                onSelect={(date) => {
-                  setSelectedDateRange((prev) => ({
-                    ...prev,
-                    endDate: date,
-                  }));
-                  setIsEndDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
-                }}
-                disabled={(date) =>
-                  date > new Date() ||
-                  date < new Date("1900-01-01") ||
-                  (selectedDateRange.startDate &&
-                    date < selectedDateRange.startDate)
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        {/* End End Date */}
 
         {/* Quick Select Options */}
         <div>
@@ -128,8 +82,7 @@ function FilterDatePickerModal({
                 const lastWeek = new Date(today);
                 lastWeek.setDate(today.getDate() - 7);
                 setSelectedDateRange({
-                  startDate: lastWeek,
-                  endDate: today,
+                  published_at: lastWeek,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -142,8 +95,7 @@ function FilterDatePickerModal({
                 const lastMonth = new Date(today);
                 lastMonth.setMonth(today.getMonth() - 1);
                 setSelectedDateRange({
-                  startDate: lastMonth,
-                  endDate: today,
+                  published_at: lastMonth,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -156,8 +108,7 @@ function FilterDatePickerModal({
                 const lastYear = new Date(today);
                 lastYear.setFullYear(today.getFullYear() - 1);
                 setSelectedDateRange({
-                  startDate: lastYear,
-                  endDate: today,
+                  published_at: lastYear,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
