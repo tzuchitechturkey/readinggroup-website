@@ -88,7 +88,7 @@ export default function AutoComplete({
               />
               <div className="flex-1">
                 <div className="font-medium text-black/60 text-sm">
-                  {renderItemLabel(selectedItem)}asdasd
+                  {renderItemLabel(selectedItem)}
                 </div>
               </div>
             </>

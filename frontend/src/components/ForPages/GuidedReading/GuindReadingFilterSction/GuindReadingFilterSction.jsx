@@ -23,11 +23,11 @@ function GuindReadingFilterSction() {
   // Results state
   const [filteredReadings, setFilteredReadings] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
+  const [clearFilterResult, setClearFilterResult] = useState(false);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
   const limit = 10;
 
   // Helper function to update a single filter
@@ -48,58 +48,46 @@ function GuindReadingFilterSction() {
   };
 
   // Build filters object from current state
-  const buildFilters = () => {
+  const buildFilters = (customFilters = filters) => {
     const apiFilters = {};
 
     // Add search query
-    if (filters.titleQuery) apiFilters.search = filters.titleQuery;
+    if (customFilters.titleQuery) apiFilters.search = customFilters.titleQuery;
 
-    // Add date filter - need to convert to ISO format if needed
-    if (filters.searchDate) apiFilters.published_at = filters.searchDate;
+    // Add date filter
+    if (customFilters.searchDate) apiFilters.created_at = customFilters.searchDate;
 
     // Add writer filter - send writer ID
-    if (filters.writer?.name) apiFilters.writer = filters.writer.name;
+    if (customFilters.writer?.id) apiFilters.writer = customFilters.writer.id;
 
-    // Add category filter
-    if (filters.category?.name) apiFilters.category = filters.category.name;
+    // Add category filter - category is stored as string directly
+    if (customFilters.category) apiFilters.category = customFilters.category;
 
-    // Add post type filter
-    if (filters.type) apiFilters.post_type = filters.type;
+    // Always filter by 'reading' for guided reading page
+    apiFilters.post_type = "reading";
 
     // Add language filter
-    if (filters.language) apiFilters.language = filters.language;
+    if (customFilters.language) apiFilters.language = customFilters.language;
 
     return apiFilters;
   };
 
-  const getData = async (page = 0, resetData = false, clearFilter = false) => {
+  const getData = async (page = 0, clearFilter = false, customFilters = filters) => {
     setIsLoading(true);
     const offset = page * limit;
 
     try {
-      const apiFilters = clearFilter === true ? {} : buildFilters();
+      const apiFilters = clearFilter === true ? {} : buildFilters(customFilters);
       const res = await GetPosts(limit, offset, apiFilters);
 
       const newResults = res.data?.results || [];
       const totalCount = res.data?.count || 0;
 
-      if (resetData) {
-        // Reset data when applying new filters
-        setFilteredReadings(newResults);
-      } else {
-        // Append data for load more
-        setFilteredReadings((prev) => [...prev, ...newResults]);
-      }
-
+      // Always reset data for pagination (not load more pattern)
+      setFilteredReadings(newResults);
       setTotalRecords(totalCount);
       setCurrentPage(page);
       setIsSearchPerformed(true);
-
-      // Check if there are more results to load
-      const loadedCount = resetData
-        ? newResults.length
-        : filteredReadings.length + newResults.length;
-      setHasMore(loadedCount < totalCount);
     } catch (err) {
       setErrorFn(err);
     } finally {
@@ -108,15 +96,18 @@ function GuindReadingFilterSction() {
   };
 
   // Apply filters function - called when user clicks search or apply filters
-  const applyFilters = (clearFilter) => {
+  const applyFilters = (clearFilter, customFilters = filters) => {
     setCurrentPage(0);
-    getData(0, true, clearFilter); // Reset data with new filters
+    setClearFilterResult(true); // Show results section
+    getData(0, clearFilter, customFilters); // Reset data with new filters
   };
 
-  // Load more function
-  const handleLoadMore = () => {
-    const nextPage = currentPage + 1;
-    getData(nextPage, false);
+  // Page change function for pagination
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    getData(newPage, false); // Load new page with current filters
+    // Scroll to top of results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -133,18 +124,23 @@ function GuindReadingFilterSction() {
         updateFilter={updateFilter}
         onSearch={applyFilters}
         onResetFilters={resetFilters}
+        setClearFilterResult={setClearFilterResult}
       />
       {/* Start Filtered Data */}
-      <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-        <FilteredResults
-          data={filteredReadings}
-          isSearchPerformed={isSearchPerformed}
-          totalCount={totalRecords}
-          hasMore={hasMore}
-          isLoading={isLoading}
-          onLoadMore={handleLoadMore}
-        />
-      </section>
+      {clearFilterResult && (
+        <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+          <FilteredResults
+            data={filteredReadings}
+            isSearchPerformed={isSearchPerformed}
+            totalCount={totalRecords}
+            currentPage={currentPage}
+            limit={limit}
+            totalRecords={totalRecords}
+            isLoading={isLoading}
+            onPageChange={handlePageChange}
+          />
+        </section>
+      )}
       {/* End Filtered Data */}
     </div>
   );

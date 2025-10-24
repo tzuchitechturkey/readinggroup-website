@@ -6,18 +6,16 @@ export async function GetPosts(limit, offset = 0, filters = {}) {
   // Add pagination
   params.append("limit", limit);
   params.append("offset", offset);
-  console.log(params, "sssssssssss");
 
   // Add search term
   if (filters.search) params.append("search", filters.search);
 
   // Add filter parameters
-  if (filters.published_at) params.append("published_at", filters.published_at);
+  if (filters.created_at) params.append("created_at", filters.created_at);
   if (filters.writer) params.append("writer", filters.writer);
   if (filters.category) params.append("category", filters.category);
   if (filters.post_type) params.append("post_type", filters.post_type);
   if (filters.language) params.append("language", filters.language);
-  console.log(params.toString());
   return await axios.get(`/posts/?${params.toString()}`);
 }
 

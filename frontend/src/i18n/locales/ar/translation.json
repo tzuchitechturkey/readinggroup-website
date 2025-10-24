@@ -761,5 +761,15 @@
   "Search writers...": "البحث عن الكتاب...",
   "Event updated successfully": "تم تحديث الحدث بنجاح",
   "Happened At": "حدث في",
+  "Please fix the errors in the form": "  يرجى تصحيح الأخطاء في النموذج",
+  "Status is required": "الحالة مطلوبة",
+  "Read time is required": "وقت القراءة مطلوب",
+  "Card": "كرت",
+  "Reading": "قراءة",
+  "Camera Model": "طراز الكاميرا",
+  "Camera Man": "المصور",
+  "Enter camera model": "أدخل طراز الكاميرا",
+  "": "",
+  "": "",
   "": ""
 }

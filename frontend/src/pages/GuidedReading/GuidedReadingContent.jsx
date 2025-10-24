@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
-import GuindReadingFilterSction from "@/components/ForPages/GuidedReading/GuindReadingFilterSction/GuindReadingFilterSction";
+import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 
 function GuidedReadingContent() {
   const { t, i18n } = useTranslation();
@@ -34,7 +34,7 @@ function GuidedReadingContent() {
       {/* End Header */}
 
       {/* Start Filter */}
-      <GuindReadingFilterSction />
+      <PostsFilterSction />
       {/* End Filter */}
 
       {/* Main Content Container */}

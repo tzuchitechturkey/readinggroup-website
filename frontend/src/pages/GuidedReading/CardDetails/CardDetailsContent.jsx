@@ -17,18 +17,69 @@ import { GetPostById } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
-const cardDatas = {
-  id: 1,
-  title: "Tzu Chi Visits Syrian Lands",
-  badge: "Incredible Card",
-  writer: "Jenny Wilson",
-  rating: 4,
-  reviews: "2.1",
-  description:
-    "Doctors accompanied and Kim examined patient's checkups include a visit to Universal College of Medical Sciences and Teaching Hospital (UCMS) to monitor the administration centre for Likelihood Checklist (UGCS) in Ramage, near Kathmandu. In case the family's transfer, Nurse Briana Shrestha explained the medical process and supported outreach health insurance Meanwhile, volunteers helped social discussions, answering Kiran and her father's questions about volunteering, making sure she remained healthy during her stay at UCMS, the only source of income, which had been damaged in an accident. After five hours of report of injury received, Tzu Chi staff who were staying she received support to survive their journey to support her family.",
-  video: "/videos/sample-video.mp4",
-  tags: ["Medical", "Volunteer", "Support", "Community"],
-};
+const comments = [
+  {
+    id: "c1",
+    writer: "Jenny Wilson",
+    avatar: "/icons/User 1.png",
+    timeAgo: "3 days ago",
+    edited: true,
+    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
+    likes: 124,
+    repliesCount: 18,
+    replies: [
+      {
+        id: 1,
+        avatar: "/icons/User 1.png",
+        writer: "Ali Ahmed",
+        timeAgo: "2h ago",
+        edited: false,
+        text: "This is really inspiring work by Tzu Chi Foundation.",
+        likes: 4,
+      },
+      {
+        id: 2,
+        avatar: "/icons/User 1.png",
+        writer: "Sara Mohamed",
+        timeAgo: "30m ago",
+        edited: true,
+        text: "Thank you for sharing this meaningful content 🙂",
+        likes: 2,
+      },
+    ],
+  },
+  {
+    id: "c2",
+    writer: "Jenny Wilson",
+    avatar: "/icons/User 1.png",
+    timeAgo: "3 days ago",
+    edited: true,
+    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
+    likes: 124,
+    repliesCount: 18,
+  },
+  {
+    id: "c3",
+    writer: "Jenny Wilson",
+    avatar: "/icons/User 1.png",
+    timeAgo: "3 days ago",
+    edited: true,
+    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
+    likes: 174,
+    repliesCount: 18,
+  },
+  {
+    id: "c4",
+    writer: "Jenny Wilson",
+    avatar: "/icons/User 1.png",
+    timeAgo: "3 days ago",
+    edited: true,
+    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
+    likes: 124,
+    repliesCount: 18,
+  },
+];
+
 function CardDetailsContent() {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -38,12 +89,13 @@ function CardDetailsContent() {
   const [userRating, setUserRating] = useState(0); // تقييم المستخدم
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [cardData, setCardData] = useState(cardDatas);
+  const [cardData, setCardData] = useState();
   const getCardData = async () => {
     setIsLoading(true);
     try {
       const res = await GetPostById(paramId);
-      setCardData(res.data?.data);
+      setCardData(res.data);
+      console.log("Card Data:", res.data);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -98,68 +150,6 @@ function CardDetailsContent() {
   };
 
   // تنسيق البيانات لتتماشى مع مكون CommentsSection
-  const comments = [
-    {
-      id: "c1",
-      writer: "Jenny Wilson",
-      avatar: "/icons/User 1.png",
-      timeAgo: "3 days ago",
-      edited: true,
-      text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-      likes: 124,
-      repliesCount: 18,
-      replies: [
-        {
-          id: 1,
-          avatar: "/icons/User 1.png",
-          writer: "Ali Ahmed",
-          timeAgo: "2h ago",
-          edited: false,
-          text: "This is really inspiring work by Tzu Chi Foundation.",
-          likes: 4,
-        },
-        {
-          id: 2,
-          avatar: "/icons/User 1.png",
-          writer: "Sara Mohamed",
-          timeAgo: "30m ago",
-          edited: true,
-          text: "Thank you for sharing this meaningful content 🙂",
-          likes: 2,
-        },
-      ],
-    },
-    {
-      id: "c2",
-      writer: "Jenny Wilson",
-      avatar: "/icons/User 1.png",
-      timeAgo: "3 days ago",
-      edited: true,
-      text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-      likes: 124,
-      repliesCount: 18,
-    },
-    {
-      id: "c3",
-      writer: "Jenny Wilson",
-      avatar: "/icons/User 1.png",
-      timeAgo: "3 days ago",
-      edited: true,
-      text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-      likes: 174,
-      repliesCount: 18,
-    },
-    {
-      id: "c4",
-      writer: "Jenny Wilson",
-      avatar: "/icons/User 1.png",
-      timeAgo: "3 days ago",
-      edited: true,
-      text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-      likes: 124,
-      repliesCount: 18,
-    },
-  ];
 
   const thisWeekCards = Array(3)
     .fill(null)
@@ -193,7 +183,7 @@ function CardDetailsContent() {
                     <img
                       src={cardData?.image}
                       alt="Video Thumbnail"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>

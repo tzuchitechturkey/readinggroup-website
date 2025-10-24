@@ -59,7 +59,7 @@ function GuidingReadingcard({ item }) {
         <img
           src={item.image}
           alt="Chinese Text"
-          className="  w-full h-full rounded-lg"
+          className="  w-full h-[200px] rounded-lg object-cover"
         />
 
         <div className="absolute bottom-3 right-3">

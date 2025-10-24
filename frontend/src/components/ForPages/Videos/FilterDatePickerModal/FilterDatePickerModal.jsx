@@ -30,7 +30,7 @@ function FilterDatePickerModal({
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Published Date")}
+            {t("Created Date")}
           </label>
           <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger asChild>
@@ -38,27 +38,29 @@ function FilterDatePickerModal({
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !selectedDateRange.published_at && "text-muted-foreground"
+                  !selectedDateRange.created_at && "text-muted-foreground"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {selectedDateRange.published_at ? (
-                  format(selectedDateRange.published_at, "PPP")
+                {selectedDateRange.created_at ? (
+                  format(selectedDateRange.created_at, "PPP")
                 ) : (
-                  <span>{t("Pick published date")}</span>
+                  <span>{t("Pick created date")}</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={selectedDateRange.published_at}
+                selected={selectedDateRange.created_at}
                 onSelect={(date) => {
+                  if (!date) return;
+                  date.setHours(12); // نثبت منتصف النهار
                   setSelectedDateRange((prev) => ({
                     ...prev,
-                    published_at: date,
+                    created_at: date,
                   }));
-                  setDateOpen(false); // إغلاق الـ Popover بعد اختيار التاريخ
+                  setDateOpen(false);
                 }}
                 disabled={(date) =>
                   date > new Date() || date < new Date("1900-01-01")
@@ -82,7 +84,7 @@ function FilterDatePickerModal({
                 const lastWeek = new Date(today);
                 lastWeek.setDate(today.getDate() - 7);
                 setSelectedDateRange({
-                  published_at: lastWeek,
+                  created_at: lastWeek,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -95,7 +97,7 @@ function FilterDatePickerModal({
                 const lastMonth = new Date(today);
                 lastMonth.setMonth(today.getMonth() - 1);
                 setSelectedDateRange({
-                  published_at: lastMonth,
+                  created_at: lastMonth,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -108,7 +110,7 @@ function FilterDatePickerModal({
                 const lastYear = new Date(today);
                 lastYear.setFullYear(today.getFullYear() - 1);
                 setSelectedDateRange({
-                  published_at: lastYear,
+                  created_at: lastYear,
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

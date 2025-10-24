@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,14 +7,11 @@ import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingRe
 import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
 import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
-import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
 import heroImg from "@/assets/guiding-image.png";
+import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 
 function CardsAndPhotosContent() {
-  const { t } = useTranslation();
-  const [searchDate, setSearchDate] = useState("");
-  const [type, setType] = useState("");
-  const [theme, setTheme] = useState("");
+  const { t, i18n } = useTranslation();
 
   return (
     <div className="min-h-screen w-full bg-white text-gray-900">
@@ -27,15 +24,7 @@ function CardsAndPhotosContent() {
         />
 
         {/* Start Filter */}
-        <LearnFilter
-          t={t}
-          searchDate={searchDate}
-          setSearchDate={setSearchDate}
-          type={type}
-          setType={setType}
-          theme={theme}
-          setTheme={setTheme}
-        />
+        <PostsFilterSction cardAndPhoto={true} />
         {/* End Filter */}
       </div>
 

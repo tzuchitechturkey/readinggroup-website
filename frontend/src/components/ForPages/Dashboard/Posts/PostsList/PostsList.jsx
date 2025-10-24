@@ -50,12 +50,12 @@ function PostsList({ onSectionChange }) {
     getPostData(newPage - 1, search);
   };
 
-  const getPostData = async (page, searchVal = search) => {
+  const getPostData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * 10;
+    console.log(offset, "offset", page);
     try {
       const res = await GetPosts(limit, offset, { search: searchVal });
-      console.log(res);
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {
@@ -222,7 +222,7 @@ function PostsList({ onSectionChange }) {
           )}
 
           <button
-            onClick={getPostData}
+            onClick={() => getPostData(0, search)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}

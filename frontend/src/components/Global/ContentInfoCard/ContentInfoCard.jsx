@@ -47,7 +47,7 @@ function ContentInfoCard({
         </p>
       )}
 
-      {/* Writer/Photographer and Rating Row */}
+      {/* Start Writer/Photographer and Rating Row */}
       <div
         className={`flex items-center ${
           isRTL ? "flex-row-reverse" : ""
@@ -63,11 +63,7 @@ function ContentInfoCard({
           ) : (
             <User className="w-4 h-4 text-primary" />
           )}
-          <span className="text-sm text-primary">
-            {contentType === "photo"
-              ? contentData?.photographer
-              : contentData?.writer}
-          </span>
+          <span className="text-sm text-primary">{contentData?.writer}</span>
         </div>
         <div
           className={`flex items-center ${
@@ -91,7 +87,13 @@ function ContentInfoCard({
           </span>
         </div>
       </div>
+      {/* End Writer/Photographer and Rating Row */}
 
+      {/* Start Body  */}
+      <div>
+        <p className="m-1">{contentData?.body}</p>
+      </div>
+      {/* End Body  */}
       {/* Date and Location Row for photos */}
       {contentType === "photo" && (
         <div

@@ -17,13 +17,15 @@ function LearnFilter({
   updateFilter,
   onSearch,
   onResetFilters,
+  cardAndPhoto = false,
+  setClearFilterResult,
 }) {
   // Destructure filters for easier access
   const { searchDate, writer, category, type, language, titleQuery } = filters;
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState({
-    published_at: null,
+    created_at: null,
   });
   const [categoriesList, setCategoriesList] = useState([]);
   const [writersList, setWritersList] = useState([]);
@@ -55,7 +57,7 @@ function LearnFilter({
   }, []);
 
   const clearDateFilter = () => {
-    setSelectedDateRange({ published_at: null });
+    setSelectedDateRange({ created_at: null });
     updateFilter("searchDate", "");
   };
 
@@ -63,22 +65,15 @@ function LearnFilter({
     if (onResetFilters) {
       onResetFilters();
     }
-    setSelectedDateRange({ published_at: null });
+    setSelectedDateRange({ created_at: null });
     onSearch(true);
+    setClearFilterResult(false);
   };
 
   const handleDateSelection = () => {
-    let dateText = "";
-    if (selectedDateRange.published_at) {
-      dateText = selectedDateRange.published_at
-        .toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-        .replace(/,/g, "")
-        .replace(/\s/g, " / ");
-    }
+    const dateText = selectedDateRange.created_at.toISOString().split("T")[0]; // yyyy-mm-dd
+    console.log("Selected date:", dateText);
+
     updateFilter("searchDate", dateText);
     setIsDateModalOpen(false);
   };
@@ -106,22 +101,67 @@ function LearnFilter({
   };
 
   const removeFilter = (filterType) => {
+    // Create updated filters object with the removed filter
+    const updatedFilters = { ...filters };
+
+    // Remove the specific filter
     switch (filterType) {
       case "date":
-        clearDateFilter();
+        updatedFilters.searchDate = "";
+        setSelectedDateRange({ created_at: null });
         break;
       case "writer":
-        updateFilter("writer", "");
+        updatedFilters.writer = "";
         break;
       case "category":
-        updateFilter("category", "");
+        updatedFilters.category = "";
         break;
       case "language":
-        updateFilter("language", "");
+        updatedFilters.language = "";
         break;
-
+      case "type":
+        updatedFilters.type = "";
+        break;
       default:
         break;
+    }
+
+    // Update the state
+    if (onResetFilters) {
+      // Update individual filter through updateFilter
+      switch (filterType) {
+        case "date":
+          updateFilter("searchDate", "");
+          break;
+        case "writer":
+          updateFilter("writer", "");
+          break;
+        case "category":
+          updateFilter("category", "");
+          break;
+        case "language":
+          updateFilter("language", "");
+          break;
+        case "type":
+          updateFilter("type", "");
+          break;
+      }
+    }
+
+    // Check if this was the last active filter using the updated filters
+    const hasAnyFilter =
+      updatedFilters.searchDate ||
+      updatedFilters.writer ||
+      updatedFilters.category ||
+      updatedFilters.language ||
+      updatedFilters.type ||
+      updatedFilters.titleQuery;
+
+    if (!hasAnyFilter && setClearFilterResult) {
+      setClearFilterResult(false);
+    } else {
+      // Pass the updated filters directly to onSearch
+      onSearch(false, updatedFilters);
     }
   };
 
@@ -130,6 +170,7 @@ function LearnFilter({
     getCategories();
     getWriters();
   }, []);
+
   return (
     <div dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
@@ -156,7 +197,9 @@ function LearnFilter({
                 />
               </div>
               <button
-                onClick={onSearch}
+                onClick={() => {
+                  onSearch();
+                }}
                 className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 text-sm font-semibold text-[#1f3fb3] shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/80"
               >
                 <Search className="h-4 w-4 mr-2" />
@@ -207,7 +250,7 @@ function LearnFilter({
                               searchDate ? "text-blue-800" : "text-gray-500"
                             }`}
                           >
-                            {searchDate || t("Publication Date")}
+                            {searchDate || t("Created Date")}
                           </span>
                         </div>
                         <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -271,6 +314,18 @@ function LearnFilter({
                       ))}
                     </select>
                     {/* End Language Filter */}
+                    {/* Start Type Filter */}
+                    {cardAndPhoto && (
+                      <select
+                        value={type}
+                        onChange={(e) => updateFilter("type", e.target.value)}
+                        className="h-10 w-full rounded-md border-0 bg-white px-3 text-sm text-gray-800 outline-none ring-2 ring-transparent focus:ring-white/80"
+                      >
+                        <option value={"card"}>{t("Card")}</option>
+                        <option value={"photo"}>{t("Photo")}</option>
+                      </select>
+                    )}
+                    {/* End Type Filter */}
                   </div>
                 </div>
               )}
@@ -313,8 +368,15 @@ function LearnFilter({
                         </button>
                       )}
                       <button
-                        onClick={onSearch}
-                        className="px-6 py-2 text-sm font-semibold bg-white text-[#1f3fb3] rounded-lg hover:bg-gray-50 transition-all"
+                        onClick={() => {
+                          onSearch();
+                        }}
+                        disabled={isLoading || activeFilters.length === 0}
+                        className={`${
+                          isLoading || activeFilters.length === 0
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                            : "bg-white text-[#1f3fb3] hover:bg-gray-50"
+                        } px-6 py-2 text-sm font-semibold rounded-lg transition-all`}
                       >
                         {t("Apply Filters")}
                       </button>
