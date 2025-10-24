@@ -155,7 +155,7 @@ class PostViewSet(BaseContentViewSet):
     """ViewSet for managing Post content."""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    search_fields = ("title", "subtitle", "writer", "category", "tags")
+    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
     ordering_fields = ("published_at", "views", "created_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
