@@ -98,7 +98,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
-    datetime_fields = ("published_at", "created_at", "updated_at")
+    datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
 
     class Meta:

@@ -30,9 +30,9 @@ video_manual_parameters = [
 
 post_manual_parameters = [
     openapi.Parameter(
-        'published_at',
+        'created_at',
         openapi.IN_QUERY,
-        description="Filter by published date",
+        description="Filter by created date",
         type=openapi.TYPE_STRING
     ),
     openapi.Parameter(

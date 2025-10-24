@@ -71,7 +71,6 @@ class Post(TimestampedModel):
     views = models.PositiveIntegerField(default=0)
     read_time = models.CharField(max_length=32, blank=True)
     tags = models.JSONField(default=list, blank=True)
-    published_at = models.DateTimeField(blank=True, null=True)
     post_type = models.CharField(max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD)
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
@@ -81,7 +80,7 @@ class Post(TimestampedModel):
     camera_name = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        ordering = ("-published_at", "-created_at")
+        ordering = ("-created_at",)
 
     def __str__(self) -> str:
         return self.title

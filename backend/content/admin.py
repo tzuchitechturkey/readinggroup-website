@@ -35,7 +35,7 @@ class VideoAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("title", "writer", "category", "status", "is_active", "published_at")
+    list_display = ("title", "writer", "category", "status", "is_active")
     list_filter = ("status", "category", "is_active")
     search_fields = ("title", "writer", "category")
 

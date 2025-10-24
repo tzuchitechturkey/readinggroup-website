@@ -156,7 +156,7 @@ class PostViewSet(BaseContentViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
-    ordering_fields = ("published_at", "views", "created_at")
+    ordering_fields = ("views", "created_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
@@ -171,10 +171,10 @@ class PostViewSet(BaseContentViewSet):
         queryset = super().get_queryset()
         params = self.request.query_params
 
-        published_at = params.get('published_at')
-        if published_at:
-            queryset = queryset.filter(published_at__date=published_at)
-        
+        created_at = params.get("created_at")
+        if created_at:
+            queryset = queryset.filter(created_at__date=created_at)
+
         writer = params.get("writer")
         if writer:
             queryset = queryset.filter(writer__icontains=writer)
