@@ -13,16 +13,6 @@ from .models import (
     TvProgramCategory,
     PositionTeamMember,
     EventSection,
-    TvProgramLike,
-    WeeklyMomentLike,
-    PostLike,
-    VideoLike,
-    EventLike,
-    PostComment,
-    VideoComment,
-    TvProgramComment,
-    EventComment,
-    WeeklyMomentComment,
 )
 
 
@@ -101,53 +91,3 @@ class PositionTeamMemberAdmin(admin.ModelAdmin):
 class EventSectionAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
-    
-@admin.register(VideoComment)
-class VideoCommentAdmin(admin.ModelAdmin):
-    list_display = ("user", "video", "created_at")
-    search_fields = ("user__username", "video__title", "text")  
-    
-@admin.register(EventComment)
-class EventCommentAdmin(admin.ModelAdmin):
-    list_display = ("user", "event", "created_at")
-    search_fields = ("user__username", "event__title", "text")
-    
-@admin.register(TvProgramComment)
-class TvProgramCommentAdmin(admin.ModelAdmin):
-    list_display = ("user", "tv_program", "created_at")
-    search_fields = ("user__username", "tv_program__title", "text")
-    
-@admin.register(WeeklyMomentComment)
-class WeeklyMomentCommentAdmin(admin.ModelAdmin):
-    list_display = ("user", "weekly_moment", "created_at")
-    search_fields = ("user__username", "weekly_moment__title", "text")
-    
-@admin.register(PostLike)
-class PostLikeAdmin(admin.ModelAdmin):
-    list_display = ("post", "user", "created_at")
-    search_fields = ("post__title", "user__username")
-    
-@admin.register(VideoLike)
-class VideoLikeAdmin(admin.ModelAdmin):
-    list_display = ("video", "user", "created_at")
-    search_fields = ("video__title", "user__username")
-    
-@admin.register(EventLike)
-class EventLikeAdmin(admin.ModelAdmin):
-    list_display = ("event", "user", "created_at")
-    search_fields = ("event__title", "user__username")
-    
-@admin.register(TvProgramLike)
-class TvProgramLikeAdmin(admin.ModelAdmin):
-    list_display = ("tv_program", "user", "created_at")
-    search_fields = ("tv_program__title", "user__username")
-    
-@admin.register(WeeklyMomentLike)
-class WeeklyMomentLikeAdmin(admin.ModelAdmin):
-    list_display = ("weekly_moment", "user", "created_at")
-    search_fields = ("weekly_moment__title", "user__username")
-    
-@admin.register(PostComment)
-class PostCommentAdmin(admin.ModelAdmin):
-    list_display = ("user", "post", "created_at")
-    search_fields = ("user__username", "post__title", "text")

@@ -15,16 +15,6 @@ from .models import (
     TvProgramCategory,
     PositionTeamMember,
     EventSection,
-    TvProgramLike,
-    WeeklyMomentLike,
-    PostLike,
-    VideoLike,
-    EventLike,
-    PostComment,
-    VideoComment,
-    TvProgramComment,
-    EventComment,
-    WeeklyMomentComment,
 )
 
 
@@ -86,10 +76,19 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = Video
         fields = "__all__"
         file_fields = ("thumbnail",)
+        extra_fields = ["is_liked"]
+        
+    def get_is_liked(self, obj):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -101,10 +100,17 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
 
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = "__all__"
-        extra_fields = ["category_obj"]
+        extra_fields = ["is_liked"]
+
+    def get_is_liked(self, obj):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -115,11 +121,19 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
     section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = Event
         fields = "__all__"
         file_fields = ("image",)
+        extra_fields = ["is_liked"]
         
+    def get_is_liked(self, obj):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -130,11 +144,19 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=TvProgramCategory.objects.all(), write_only=True, required=False)
 
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = TvProgram
         fields = "__all__"
         file_fields = ("image",)
+        extra_fields = ["is_liked"]
         
+    def get_is_liked(self, obj):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
+    
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = TvProgramCategorySerializer(instance.category, context=self.context).data if instance.category else None
@@ -142,10 +164,18 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "created_at", "updated_at")
+    is_liked = serializers.SerializerMethodField()
     class Meta:
         model = WeeklyMoment
         fields = "__all__"
         file_fields = ("image",)
+        extra_fields = ["is_liked"]
+        
+    def get_is_liked(self, obj):
+        user = self.context.get("request").user if self.context.get("request") else None
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
 
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -169,68 +199,3 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
         file_fields = ("image",)
         
-class PostLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = PostLike
-        fields = "__all__"
-        
-class VideoLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = VideoLike
-        fields = "__all__"
-        
-class EventLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = EventLike
-        fields = "__all__"
-        
-class TvProgramLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = TvProgramLike
-        fields = "__all__"
-        
-class WeeklyMomentLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = WeeklyMomentLike
-        fields = "__all__"
-        
-class TvProgramLikeSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = TvProgramLike
-        fields = "__all__"
-        
-class PostCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = PostComment
-        fields = "__all__"
-        
-class VideoCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = VideoComment
-        fields = "__all__"
-    
-class TvProgramCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = TvProgramComment
-        fields = "__all__"
-        
-class EventCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = EventComment
-        fields = "__all__"
-        
-class WeeklyMomentCommentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = WeeklyMomentComment
-        fields = "__all__"
