@@ -133,18 +133,30 @@ class VideoViewSet(BaseContentViewSet):
         queryset = super().get_queryset()
         params = self.request.query_params
 
-        video_type = params.get('video_type')
+        video_type = params.getlist('video_type')
         if video_type:
-            queryset = queryset.filter(video_type__iexact=video_type)
-        
-        language = params.get("language")
+            values = []
+            for item in video_type:
+                values.extend([v.strip() for v in item.split(",") if v.strip()])
+            if values:
+                queryset = queryset.filter(video_type__in=values)
+
+        language = params.getlist("language")
         if language:
-            queryset = queryset.filter(language=language)
-            
-        category = params.get("category")
+            values = []
+            for item in language:
+                values.extend([v.strip() for v in item.split(",") if v.strip()])
+            if values:
+                queryset = queryset.filter(language__in=values)
+
+        category = params.getlist("category")
         if category:
-            queryset = queryset.filter(category__name__iexact=category)
-            
+            values = []
+            for item in category:
+                values.extend([v.strip() for v in item.split(",") if v.strip()])
+            if values:
+                queryset = queryset.filter(category__name__in=values)
+
         happened_at = params.get('happened_at')
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
@@ -177,20 +189,36 @@ class PostViewSet(BaseContentViewSet):
 
         writer = params.get("writer")
         if writer:
-            queryset = queryset.filter(writer__icontains=writer)
-            
-        category = params.get("category")
-        if category:
-            queryset = queryset.filter(category__name__iexact=category)
-        
-        post_type = params.get("post_type")
-        if post_type:
-            queryset = queryset.filter(post_type__iexact=post_type)
-        
+            values = []
+            for item in writer.split(","):
+                values.append(item.strip())
+            if values:
+                queryset = queryset.filter(writer__in=values)
+                
+        Category = params.get("category")
+        if Category:
+            values = []
+            for item in Category.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(category__name__in=values)
+                
         language = params.get("language")
         if language:
-            queryset =queryset.filter(language__iexact=language)
-
+            values = []
+            for item in language.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(language__in=values)
+                
+        post_type = params.get("post_type")
+        if post_type:
+            values = []
+            for item in post_type.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(post_type__in=values)
+                                
         return queryset
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
@@ -214,18 +242,39 @@ class EventViewSet(BaseContentViewSet):
 
         section = params.get('section')
         if section:
-            queryset = queryset.filter(section__name__iexact=section)
-        
-        category = params.get("category")
-        if category:
-            queryset =queryset.filter(category__name__iexact=category)
-            
+            values = []
+            for item in section.split(","):
+                values.append(item.strip())
+            if values:
+                queryset = queryset.filter(section__name__in=values)
+                
+        writer = params.get("writer")
+        if writer:
+            values = []
+            for item in writer.split(","):
+                values.append(item.strip())
+            if values:
+                queryset = queryset.filter(writer__in=values)
+
         country = params.get("country")
         if country:
-            queryset =queryset.filter(country__iexact=country)
-
-        return queryset
-
+            values = []
+            for item in country.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(country__in=values)
+                
+        language = params.get("language")
+        if language:
+            values = []
+            for item in language.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(language__in=values)
+        
+        happened_at = params.get('happened_at')
+        if happened_at:
+            queryset = queryset.filter(happened_at__date=happened_at)
 
 class TvProgramViewSet(BaseContentViewSet):
     """ViewSet for managing TvProgram content."""

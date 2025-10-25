@@ -21,3 +21,14 @@ class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
     READING = "reading", "Reading"
+
+
+class VideoType(models.TextChoices):
+    FULL_VIDEO = "full_video", "Full Video"
+    UNIT_VIDEO = "unit_video", "Unit Video"
+    
+
+class ReportType(models.TextChoices):
+    VIDEOS = "videos", "Videos"
+    REPORTS = "reports", "Reports"
+    NEWS = "news", "News"

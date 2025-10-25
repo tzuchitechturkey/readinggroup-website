@@ -2,30 +2,34 @@ from drf_yasg import openapi
 
 
 video_manual_parameters = [
+    
     openapi.Parameter(
         'video_type',
-        openapi.IN_QUERY, 
+        openapi.IN_QUERY,
         description="Filter by video type",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'language',
         openapi.IN_QUERY,
         description="Filter by language",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'category',
         openapi.IN_QUERY,
         description="Filter by category (JSON object with 'name' field)",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'happened_at',
         openapi.IN_QUERY,
         description="Filter by happened date",
         type=openapi.TYPE_STRING
-    ),
+    ),  
 ]
 
 post_manual_parameters = [
@@ -36,28 +40,32 @@ post_manual_parameters = [
         type=openapi.TYPE_STRING
     ),
     openapi.Parameter(
-        'writer',
-        openapi.IN_QUERY,
-        description="Filter by writer",
-        type=openapi.TYPE_STRING
-    ),
-    openapi.Parameter(
         'category',
         openapi.IN_QUERY,
-        description="Filter by category",
-        type=openapi.TYPE_STRING
-    ),
-    openapi.Parameter(
-        'post_type',
-        openapi.IN_QUERY,
-        description="Filter by post type",
-        type=openapi.TYPE_STRING
+        description="Filter by category (JSON object with 'name' field)",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'language',
         openapi.IN_QUERY,
         description="Filter by language",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'writer',
+        openapi.IN_QUERY,
+        description="Filter by writer",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'post_type',
+        openapi.IN_QUERY,
+        description="Filter by Post Type",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
 ]
 
@@ -66,31 +74,29 @@ event_manual_parameters = [
         'section',
         openapi.IN_QUERY,
         description="Filter by Section",
-        type=openapi.TYPE_STRING
-    ),
-    openapi.Parameter(
-        'category',
-        openapi.IN_QUERY,
-        description="Filter by Category",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'country',
         openapi.IN_QUERY,
         description="Filter by Country",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'writer',
         openapi.IN_QUERY,
         description="Filter by Writer",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'language',
         openapi.IN_QUERY,
         description="Filter by Language",
-        type=openapi.TYPE_STRING
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
     ),
     openapi.Parameter(
         'happened_at',

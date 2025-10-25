@@ -3,6 +3,8 @@ from django.conf import settings
 from .enums import (
     PostStatus,
     PostType,
+    VideoType,
+    ReportType,
 )
 
 
@@ -20,7 +22,7 @@ class Video(TimestampedModel):
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64)
     category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    video_type = models.CharField(max_length=100)
+    video_type = models.CharField(max_length=100, choices=VideoType.choices, default=VideoType.FULL_VIDEO)
     language = models.CharField(max_length=50)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
@@ -93,7 +95,7 @@ class Event(TimestampedModel):
     image = models.ImageField(upload_to="events/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
     category = models.ForeignKey('EventCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    report_type = models.CharField(max_length=50)
+    report_type = models.CharField(max_length=50, choices=ReportType.choices, default=ReportType.NEWS)
     country = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
