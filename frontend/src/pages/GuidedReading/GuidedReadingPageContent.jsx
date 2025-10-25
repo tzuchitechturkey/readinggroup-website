@@ -6,7 +6,7 @@ import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/Weekl
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 
-function GuidedReadingContent() {
+function GuidedReadingPageContent() {
   const { t, i18n } = useTranslation();
 
   return (
@@ -53,4 +53,4 @@ function GuidedReadingContent() {
   );
 }
 
-export default GuidedReadingContent;
+export default GuidedReadingPageContent;

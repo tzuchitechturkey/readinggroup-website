@@ -60,3 +60,29 @@ export async function GetPostCategoryById(id) {
 export async function DeletePostCategory(id) {
   return await axios.delete(`/post-categories/${id}/`);
 }
+
+// Like a post
+export async function LikePost(data) {
+  return await axios.post(`/likes/posts/`, data);
+}
+
+export async function UnlikePost(data) {
+  return await axios.delete(`/likes/posts/`, data);
+}
+
+// Comment a Post
+export async function GetCommentPost(data) {
+  return await axios.get(`/comments/posts/`, { params: data });
+}
+
+export async function CommentPost(data) {
+  return await axios.post(`/comments/posts/`, data);
+}
+
+export async function EditCommentPost(data) {
+  return await axios.put(`/comments/posts/`, data);
+}
+
+export async function DeleteCommentPost(data) {
+  return await axios.delete(`/comments/posts/`, data);
+}

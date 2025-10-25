@@ -11,9 +11,7 @@ const RecommendationNewsCard = ({ t, article, onClick }) => (
         {article.title}
       </h3>
       {/* Start ArticleMetadata */}
-      <div
-        className={`flex items-center gap-4 sm:gap-6 text-sm sm:text-base text-text/80 `}
-      >
+      <div className={`flex items-center gap-4 sm:gap-6 text-sm sm:text-base text-text/80 `}>
         <span className="truncate max-w-[150px] sm:max-w-none">
           {t("By")} {article.writer}
         </span>

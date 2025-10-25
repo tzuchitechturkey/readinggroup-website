@@ -25,7 +25,7 @@ function BrokenCarousel({
       "DynamicSection: cardName must be a valid React component function"
     );
   }
-
+  console.log(data, title);
   // حساب الـ basis classes حسب عدد العناصر
   const getItemBasisClass = () => {
     const itemCount = data?.length || 0;
@@ -41,6 +41,7 @@ function BrokenCarousel({
       showCount === 4 ? "xl:basis-[22.57%]" : "xl:basis-[27.57%]"
     }`;
   };
+
   return (
     <div>
       {title && (

@@ -42,6 +42,7 @@ function EditProfile() {
     try {
       const res = await GetProfile();
       const profileData = res?.data;
+      console.log("Profile Data:", profileData);
       setFormData(profileData);
     } catch (error) {
       setErrorFn(error);
@@ -82,6 +83,7 @@ function EditProfile() {
       setIsLoading(false);
     }
   };
+  console.log("Form Data State:", formData);
   return (
     <div className="w-full px-4 md:px-8 mt-4">
       {isLoading && <Loader />}
@@ -202,7 +204,7 @@ function EditProfile() {
           <FormInput
             label={t("Mobile Number")}
             name="mobile_number"
-            type="tel"
+            type="number"
             placeholder="+1 1234567890"
             value={formData.mobile_number}
             onChange={handleInputChange}

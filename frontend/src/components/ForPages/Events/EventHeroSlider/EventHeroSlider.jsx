@@ -1,10 +1,9 @@
-import * as React from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Play, Info, Plus } from "lucide-react";
+import { Play, Info, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
 import {
   Carousel,
   CarouselContent,
@@ -12,153 +11,125 @@ import {
 } from "@/components/ui/carousel";
 import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
+import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
+import Loader from "@/components/Global/Loader/Loader";
+import { GetEventSections, GetTop5EventsBySectionId } from "@/api/events";
 
-function ArrowButton({ side, onClick, label }) {
-  const isLeft = side === "left";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={[
-        "absolute top-1/2 -translate-y-1/2 z-20 transition",
-        isLeft ? "left-3 md:left-6" : "right-3 md:right-6",
-        "h-11 w-11 md:h-12 md:w-12 grid place-items-center rounded-full",
-        "bg-white/15 text-white backdrop-blur-sm shadow-lg",
-        "ring-1 ring-white/20 hover:bg-white/25 hover:ring-white/30",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0b63d6]",
-      ].join(" ")}
-    >
-      {isLeft ? (
-        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
-      ) : (
-        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
-      )}
-    </button>
-  );
-}
-
-export default function CarouselDemo({ newsPage = false }) {
-  const { t } = useTranslation();
+export default function HeroSlider({ newsPage = false }) {
+  const { t, i18n } = useTranslation();
   const isMobile = useIsMobile(1024);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const homePageSlider = [
-    {
-      id: 1,
-      image: "/authback.jpg",
-      h1Line1: t("Discover Weekly Moments, Photos"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— all in one place."),
-      description: t(
-        "Stay connected with highlights, inspiring stories, and community updates every week."
-      ),
-      primaryTo: "/videos",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 2,
-      image: "/authback.jpg",
-      h1Line1: t("Explore Guided Reading"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— curated for you."),
-      description: t(
-        "Dive into inspiring readings and thoughtful insights every week."
-      ),
-      primaryTo: "/guiding-reading",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 3,
-      image: "/authback.jpg",
-      h1Line1: t("Browse Cards & Photos"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— captured weekly."),
-      description: t(
-        "Visual snapshots that highlight stories, people, and places."
-      ),
-      primaryTo: "/cards-photos",
-      secondaryTo: "/connect",
-    },
-  ];
-  const newsPageSlider = [
-    {
-      id: 1,
-      image: "/authback.jpg",
-      h1Line1: t("Warm discussion"),
-      description: t(
-        "Stay connected with highlights, inspiring stories, and community updates every week."
-      ),
-      primaryTo: "/videos",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 2,
-      image: "/authback.jpg",
-      h1Line1: t("Drama"),
-      primaryTo: "/guiding-reading",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 3,
-      image: "/authback.jpg",
-      h1Line1: t("Event Reports"),
-      primaryTo: "/cards-photos",
-      secondaryTo: "/connect",
-    },
-  ];
-  const sliders = newsPage ? newsPageSlider : homePageSlider;
-  const [api, setApi] = React.useState(null);
-  const timerRef = React.useRef(null);
-  const pausedRef = React.useRef(false);
+  const [sliders, setSliders] = useState([]);
+  const [api, setApi] = useState(null);
+  const timerRef = useRef(null);
+  const pausedRef = useRef(false);
 
-  const startAuto = React.useCallback(() => {
+  const getSectionsList = async () => {
+    try {
+      const res = await GetEventSections(100, 0, "");
+      return res.data.results;
+    } catch (error) {
+      console.error("Error fetching sections list:", error);
+      return [];
+    }
+  };
+
+  const topFiveBySectionId = async (sectionId) => {
+    try {
+      const res = await GetTop5EventsBySectionId(sectionId);
+      return res.data.results;
+    } catch (error) {
+      console.error("Error fetching top five videos:", error);
+      return [];
+    }
+  };
+
+  const startAuto = useCallback(() => {
     if (!api || pausedRef.current) return;
     timerRef.current = window.setInterval(() => {
       if (!pausedRef.current) api.scrollNext();
     }, 9000);
   }, [api]);
 
-  const stopAuto = React.useCallback(() => {
+  const stopAuto = useCallback(() => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
   }, []);
 
-  const onEnter = React.useCallback(() => {
+  const onEnter = useCallback(() => {
     pausedRef.current = true;
     stopAuto();
   }, [stopAuto]);
 
-  const onLeave = React.useCallback(() => {
+  const onLeave = useCallback(() => {
     pausedRef.current = false;
     stopAuto();
     startAuto();
   }, [startAuto, stopAuto]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) return;
     startAuto();
     return () => stopAuto();
   }, [api, startAuto, stopAuto]);
 
+  useEffect(() => {
+    const fetchSectionsWithTop5 = async () => {
+      setIsLoading(true);
+
+      const sections = await getSectionsList();
+
+      const slidersData = await Promise.all(
+        sections.map(async (section) => {
+          const topFive = await topFiveBySectionId(section.id);
+
+          return {
+            id: section.id,
+            image: section.image,
+            h1Line1: section.title,
+            h1Line2Prefix: section.prefix,
+            h1Line2Under: section.under,
+            description: section.description,
+            primaryTo: section.primaryTo,
+            secondaryTo: section.secondaryTo,
+            topFive,
+          };
+        })
+      );
+
+      setSliders(slidersData);
+      setIsLoading(false);
+    };
+
+    fetchSectionsWithTop5();
+  }, []);
+
   return (
     <div className="w-full lg:pt-8">
+      {isLoading && <Loader />}
       <Carousel
         className="w-full"
         opts={{ align: "center", loop: true, skipSnaps: false }}
         setApi={setApi}
       >
         <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-          <CarouselContent className="-ml-2 md:-ml-4">
+          <CarouselContent
+            className={` ${
+              i18n.language === "ar"
+                ? "flex-row-reverse"
+                : "flex-row -ml-2 md:-ml-4"
+            }`}
+          >
             {sliders.map((slide) => (
               <CarouselItem
                 key={slide.id}
                 className="pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"
               >
-                <div
-                  className={`relative w-full min-h-[600px] md:min-h-[660px]  lg:min-h-[700px]  py-8 md:py-12 overflow-hidden rounded-2xl shadow-2xl group`}
-                >
+                <div className="relative w-full min-h-[600px] md:min-h-[660px]  lg:min-h-[700px]  py-8 md:py-12 overflow-hidden rounded-2xl shadow-2xl group">
                   <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
                     style={{ backgroundImage: `url(${slide.image})` }}
@@ -169,7 +140,6 @@ export default function CarouselDemo({ newsPage = false }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
 
-                  {/* Start Title && Actions */}
                   <div className="absolute inset-0 flex items-center">
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
                       <div className="pb-24 md:pb-32 lg:pb-40">
@@ -253,7 +223,7 @@ export default function CarouselDemo({ newsPage = false }) {
                   {/* End Title && Actions */}
 
                   <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-10 z-10">
-                    <TopFiveSection />
+                    <TopFiveSection data={slide.topFive} />
                   </div>
                 </div>
               </CarouselItem>

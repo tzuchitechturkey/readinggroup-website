@@ -3,45 +3,33 @@ import React, { useState, useEffect } from "react";
 import { Play, Heart, Download, Share2, X } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
 import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
-import { GetVideoById } from "@/api/videos";
+import { GetVideoById, LikeVideo, UnlikeVideo } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
-const videoDatas = {
-  title: "Tzu Chi Visits Syrian Lands",
-  tags: ["Drama", "History", "War"],
-  duration: "1h 28m",
-  seasons: 3,
-  year: 2024,
-  description:
-    "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through even in the most challenging times.",
-  backgroundImage: "/authback.jpg",
-  cast: ["Kento Kaku", "Yosuke Eguchi", "Tae Kimura", "John Doe", "Jane Smith"],
-  genres: ["Journey", "Documentary"],
-  themes: ["Dark", "Suspenseful", "Exiting"],
-};
 function VideoDetailsContent({
   isOpen: externalIsOpen = true,
   onClose,
   videoData,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  // const [videoData, setVideoData] = useState(videoDatas);
+  // const [videoData, setVideoData] = useState(videoData);
   // Use internal state to control modal visibility
   const [internalIsOpen, setInternalIsOpen] = useState(externalIsOpen);
+  const [userId, setUserId] = useState();
 
-  // State to control showing all cast members
   const [showAllCast, setShowAllCast] = useState(false);
 
   // State to control favorite status
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   // State to control share modal visibility
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -63,6 +51,23 @@ function VideoDetailsContent({
   //   getVideoData(videoId);
   // }, [videoId]);
   // Sync with external isOpen prop when it changes
+
+  // دالة الإعجاب
+  const handleLike = async () => {
+    try {
+      if (!isLiked) {
+        await LikeVideo({ user: userId, video: videoData?.id });
+        toast.success(t("Added to favorites!"));
+      } else {
+        await UnlikeVideo({ user: userId, video: videoData?.id });
+        toast.info(t("Removed from favorites"));
+      }
+      setIsLiked(!isLiked);
+    } catch (error) {
+      setErrorFn(error);
+    }
+  };
+
   useEffect(() => {
     setInternalIsOpen(externalIsOpen);
   }, [externalIsOpen]);
@@ -71,7 +76,10 @@ function VideoDetailsContent({
   useEffect(() => {
     setInternalIsOpen(true);
   }, [location.pathname, location.search]);
-
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
   const handleClose = () => {
     // Set internal state first
     setInternalIsOpen(false);
@@ -86,7 +94,6 @@ function VideoDetailsContent({
       navigate(-1);
     }, 300); // Match animation duration in Modal component
   };
-
   return (
     <Modal
       isOpen={internalIsOpen}
@@ -109,6 +116,7 @@ function VideoDetailsContent({
         onClick={(e) => {
           e.stopPropagation();
         }}
+        dir={i18n?.language === "ar" ? "rtl" : "ltr"}
       >
         {/* Close Button */}
         <button
@@ -132,7 +140,7 @@ function VideoDetailsContent({
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
               <img
-                src={`/testCard.png`}
+                src={videoData.thumbnail || videoData?.thumbnail_url}
                 alt="Video background"
                 className="w-full h-full object-cover rounded-none -m-1"
                 onError={(e) => {
@@ -166,13 +174,13 @@ function VideoDetailsContent({
             >
               <div className="max-w-3xl px-6 md:px-0">
                 <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-4xl mb-3 sm:mb-4 md:mb-6 leading-tight font-bold text-white">
-                  {videoDatas.title}
+                  {videoData.title}
                 </h1>
 
                 {/* Play Button and Controls Row */}
-                <div className="flex items-center gap-2  xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 relative z-50 xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <Link
-                    to={`/videos/${2}`}
+                    to={`/videos/${videoData.id}`}
                     className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -185,23 +193,23 @@ function VideoDetailsContent({
                   </Link>
 
                   <button
-                    className={`p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
-                      isFavorite
+                    className={`  p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
+                      isLiked
                         ? "bg-red-500/20 border-red-400/60 hover:bg-red-500/30 hover:border-red-400/80"
                         : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
                     }`}
                     title={
-                      isFavorite ? "Remove from Favorites" : "Add to Favorites"
+                      isLiked ? "Remove from Favorites" : "Add to Favorites"
                     }
                     onClick={(e) => {
                       e.stopPropagation();
-                      setIsFavorite(!isFavorite);
+                      handleLike();
                     }}
                     style={{ touchAction: "manipulation" }}
                   >
                     <Heart
                       className={`w-3.5 xs:w-4 h-3.5 xs:h-4 transition-all duration-200 group-hover:scale-110 pointer-events-none ${
-                        isFavorite
+                        isLiked
                           ? "text-red-500 fill-red-500 group-hover:text-red-400 group-hover:fill-red-400"
                           : "text-white group-hover:text-red-300"
                       }`}
@@ -249,7 +257,7 @@ function VideoDetailsContent({
           {/* Start Blur Background */}
           <div
             className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white via-white/50 to-transparent"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 1 }}
           />
           <div
             className="absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-white/70 to-transparent"
@@ -266,30 +274,32 @@ function VideoDetailsContent({
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
               <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                {videoDatas.seasons} Seasons · {videoDatas.year}
+                {t("Season")} · {videoData.season}
               </p>
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoDatas.description}
+                {videoData.description}
               </p>
             </div>
 
             {/* Right Column - Additional Info */}
             <div className="lg:col-span-1">
               <div className="space-y-3">
-                {/* Cast Info */}
+                {/* Start Cast   */}
                 <div>
-                  <p className="text-sm text-gray-600 leading-snug mb-2">
+                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
                     <span className="font-medium text-gray-700">
                       {t("Top Cast")}:{" "}
                     </span>
-                    <span className="font-bold text-gray-900">
-                      {showAllCast
-                        ? videoDatas.cast.join(", ")
-                        : videoDatas.cast.slice(0, 3).join(", ")}
-                      {!showAllCast && videoDatas.cast.length > 3 && ", "}
-                    </span>
+                    {videoData?.cast?.map((cas, index) => (
+                      <span
+                        key={index}
+                        className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
+                      >
+                        {cas}
+                      </span>
+                    ))}
                   </p>
-                  {videoDatas.cast.length > 3 && (
+                  {/* {videoData.cast.length > 3 && (
                     <button
                       className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
                       onClick={(e) => {
@@ -314,30 +324,38 @@ function VideoDetailsContent({
                         />
                       </svg>
                     </button>
-                  )}
+                  )} */}
                 </div>
+                {/* End Cast   */}
 
-                {/* Genres Info */}
                 <div>
-                  <p className="text-sm text-gray-600 leading-snug">
-                    <span className="font-medium text-gray-700">Genres: </span>
-                    <span className="font-bold text-gray-900">
-                      {videoDatas.genres.join(", ")}
-                    </span>
-                  </p>
-                </div>
-
-                {/* This show is */}
-                <div>
-                  <p className="text-sm text-gray-600 leading-snug">
+                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
                     <span className="font-medium text-gray-700">
-                      {t("This show is")}:
+                      {t("Tags")}:{" "}
                     </span>
-                    <span className="font-bold text-gray-900">
-                      {videoDatas.themes.join(", ")}
+                    {videoData?.tags?.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+
+                {/* Start Category   */}
+                <div>
+                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
+                    <span className="font-medium text-gray-700">
+                      {t("Category")}:{" "}
+                    </span>
+                    <span className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs">
+                      {videoData?.category?.name}
                     </span>
                   </p>
                 </div>
+                {/* End Cast   */}
               </div>
             </div>
           </div>
@@ -360,7 +378,7 @@ function VideoDetailsContent({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={videoDatas.title}
+        title={videoData.title}
       />
     </Modal>
   );

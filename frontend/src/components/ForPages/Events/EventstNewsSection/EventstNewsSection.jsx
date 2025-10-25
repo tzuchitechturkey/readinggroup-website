@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import NewsCard from "@/components/ForPages/Events/NewsCard/NewsCard";
 import RecommendationNewsCard from "@/components/ForPages/Events/RecommendationNewsCard/RecommendationNewsCard";
-import CategoryTag from "@/components/ForPages/Events/CategoryTag/CategoryTag";
+import CategoryTag from "@/components/ForPages/Events/EventsCategoryTag/CategoryTag";
 
 const EventstNewsSection = () => {
   const { t } = useTranslation();
@@ -191,7 +191,7 @@ const EventstNewsSection = () => {
     <div className="flex items-center gap-6 mb-2">
       <div className={`w-4 ${ornamentHeight} bg-black`} />
       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-medium text-text tracking-tight leading-tight">
-        {t(title)}
+        {title}
       </h2>
     </div>
   );

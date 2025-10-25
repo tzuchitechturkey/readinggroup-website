@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
@@ -13,7 +13,7 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
-import { GetPostById } from "@/api/posts";
+import { GetPostById, LikePost, UnlikePost } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -80,7 +80,7 @@ const comments = [
   },
 ];
 
-function CardDetailsContent() {
+function CardDetailsPageContent() {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
@@ -90,6 +90,8 @@ function CardDetailsContent() {
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [cardData, setCardData] = useState();
+  const [userId, setUserId] = useState();
+
   const getCardData = async () => {
     setIsLoading(true);
     try {
@@ -110,12 +112,18 @@ function CardDetailsContent() {
   }, [i18n.language]);
 
   // دالة الإعجاب
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      toast.success(t("Added to favorites!"));
-    } else {
-      toast.info(t("Removed from favorites"));
+  const handleLike = async () => {
+    try {
+      if (!isLiked) {
+        await LikePost({ user: userId, post: cardData.id });
+        toast.success(t("Added to favorites!"));
+      } else {
+        await UnlikePost({ user: userId, post: cardData.id });
+        toast.info(t("Removed from favorites"));
+      }
+      setIsLiked(!isLiked);
+    } catch (error) {
+      setErrorFn(error);
     }
   };
 
@@ -168,6 +176,10 @@ function CardDetailsContent() {
   useEffect(() => {
     getCardData();
   }, [paramId]);
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
       {isLoading && <Loader />}
@@ -267,4 +279,4 @@ function CardDetailsContent() {
   );
 }
 
-export default CardDetailsContent;
+export default CardDetailsPageContent;

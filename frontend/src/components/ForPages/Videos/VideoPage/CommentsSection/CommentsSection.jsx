@@ -195,7 +195,7 @@ function CommentsSection({ comments: incomingComments, selectedId }) {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Add a comment..."
+              placeholder={t("Add a comment...")}
               className="w-full placeholder:text-sm border-b outline-none focus:border-blue-500 transition-colors py-1 text-sm text-text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}

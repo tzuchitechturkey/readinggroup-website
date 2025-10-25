@@ -1,117 +1,140 @@
-import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 
-import { ChevronDown, X, Calendar } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import Modal from "@/components/Global/Modal/Modal";
-import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
+import countries from "@/constants/countries.json";
 import { Button } from "@/components/ui/button";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { languages } from "@/constants/constants";
+import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
+import { GetAllUsers } from "@/api/posts";
+import { GetEventCategories } from "@/api/events";
 
 function EventsFilter({
-  selectedDateRange,
-  setSelectedDateRange,
-  selectedWriter,
-  setSelectedWriter,
-  selectedCountry,
-  setSelectedCountry,
-  selectedContentType,
-  setSelectedContentType,
-  selectedLanguage,
-  setSelectedLanguage,
-  selectedDuration,
-  setSelectedDuration,
+  filters,
+  updateFilter,
+  sectionsList,
   setOpenFilterModal,
 }) {
   const { t } = useTranslation();
-  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
+  const [writersList, setWritersList] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([]);
 
-  const clearDateFilter = () => {
-    setSelectedDateRange({ startDate: null, endDate: null });
+  const getWriters = async (searchVal = "") => {
+    try {
+      const res = await GetAllUsers(searchVal);
+      setWritersList(res?.data?.results);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDateSelection = (dateSelection) => {
-    if (dateSelection.selection) {
-      setSelectedDateRange({
-        startDate: dateSelection.selection.startDate,
-        endDate: dateSelection.selection.endDate,
-      });
+  const loadCategories = async () => {
+    try {
+      const res = await GetEventCategories(100, 0, "");
+      setCategoriesList(res?.data?.results || []);
+    } catch (error) {
+      console.error(error);
     }
-    setIsDateModalOpen(false);
   };
 
   const clearAllFilters = () => {
-    setSelectedWriter("");
-    setSelectedCountry("");
-    setSelectedContentType("");
-    setSelectedLanguage("");
-    setSelectedDuration("");
-    setSelectedDateRange({ startDate: null, endDate: null });
+    updateFilter("search", "");
+    updateFilter("section", "");
+    updateFilter("category", "");
+    updateFilter("country", "");
+    updateFilter("writer", "");
+    updateFilter("language", "");
+    updateFilter("happened_at", null);
   };
+
+  useEffect(() => {
+    getWriters();
+    loadCategories();
+  }, []);
 
   return (
     <div className="w-full lg:w-80 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
-        {/* Start Content Type Filter */}
+        {/* Start Section Filter */}
         <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
-              {t("Content Type")}
+              {t("Sections")}
             </h3>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <input
-                type="radio"
-                id="all-content"
-                name="contentType"
-                checked={!selectedContentType}
-                className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                onChange={() => setSelectedContentType("")}
-              />
-              <label
-                htmlFor="all-content"
-                className="text-xs sm:text-sm text-gray-700"
-              >
-                {t("All Content")}
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="radio"
-                id="video-content"
-                name="contentType"
-                checked={selectedContentType === "video"}
-                className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                onChange={() => setSelectedContentType("video")}
-              />
-              <label
-                htmlFor="video-content"
-                className="text-xs sm:text-sm text-gray-700"
-              >
-                {t("Videos Only")}
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="radio"
-                id="news-content"
-                name="contentType"
-                checked={selectedContentType === "news"}
-                className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                onChange={() => setSelectedContentType("news")}
-              />
-              <label
-                htmlFor="news-content"
-                className="text-xs sm:text-sm text-gray-700"
-              >
-                {t("Reports Only")}
-              </label>
-            </div>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {sectionsList.map((section) => (
+              <div key={section.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`section-${section.id}`}
+                  checked={filters.section === section.name}
+                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-[\'\'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      updateFilter("section", section.name);
+                    } else {
+                      updateFilter("section", "");
+                    }
+                  }}
+                />
+                <label
+                  htmlFor={`section-${section.id}`}
+                  className="text-xs sm:text-sm text-gray-700 cursor-pointer"
+                >
+                  {section.name}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
-        {/* End Content Type Filter */}
+        {/* End Section Filter */}
+
+        {/* Start Category Filter */}
+        <div className="mb-2 lg:mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900">
+              {t("Category")}
+            </h3>
+          </div>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {categoriesList.map((category) => (
+              <div key={category.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`category-${category.id}`}
+                  checked={filters.category === category.name}
+                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-[\'\'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      updateFilter("category", category.name);
+                    } else {
+                      updateFilter("category", "");
+                    }
+                  }}
+                />
+                <label
+                  htmlFor={`category-${category.id}`}
+                  className="text-xs sm:text-sm text-gray-700 cursor-pointer"
+                >
+                  {category.name}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* End Category Filter */}
 
         {/* Start Writer Filter */}
         <div className="mb-2 lg:mb-5">
@@ -120,15 +143,22 @@ function EventsFilter({
               {t("Writer")}
             </h3>
           </div>
-          <div>
-            <input
-              type="text"
-              placeholder={t("Search by Writer...")}
-              value={selectedWriter}
-              onChange={(e) => setSelectedWriter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+          <AutoComplete
+            placeholder={t("Select Writer")}
+            customStyle="bg-white"
+            selectedItem={filters.writer}
+            onSelect={(item) => {
+              updateFilter("writer", item?.username || "");
+            }}
+            searchMethod={getWriters}
+            searchApi={true}
+            list={writersList}
+            searchPlaceholder={t("Search writers...")}
+            required={false}
+            renderItemLabel={(item) => item.username}
+            renderItemSubLabel={(item) => item.groups?.[0]}
+            showWriterAvatar={false}
+          />
         </div>
         {/* End Writer Filter */}
 
@@ -141,19 +171,16 @@ function EventsFilter({
           </div>
           <div>
             <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
+              value={filters.country}
+              onChange={(e) => updateFilter("country", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option disabled hidden value="">{t("All Countries")}</option>
-              <option value="USA">{t("USA")}</option>
-              <option value="Canada">{t("Canada")}</option>
-              <option value="UK">{t("UK")}</option>
-              <option value="France">{t("France")}</option>
-              <option value="Germany">{t("Germany")}</option>
-              <option value="China">{t("China")}</option>
-              <option value="Japan">{t("Japan")}</option>
-              <option value="Singapore">{t("Singapore")}</option>
+              <option value="" disabled hidden >{t("Select Country")}</option>
+              {countries.map((country) => (
+                <option key={country.code} value={country.name}>
+                  {country.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -168,148 +195,82 @@ function EventsFilter({
           </div>
           <div>
             <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+              value={filters.language}
+              onChange={(e) => updateFilter("language", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option disabled hidden value="">{t("All Languages")}</option>
-              <option value="en">{t("English")}</option>
-              <option value="ar">{t("Arabic")}</option>
-              <option value="tr">{t("Turkish")}</option>
-              <option value="fr">{t("French")}</option>
-              <option value="es">{t("Spanish")}</option>
+              <option value="" disabled hidden >{t("Select Language")}</option>
+              {languages.map((lang) => (
+                <option key={lang.code} value={lang}>
+                  {t(lang)}
+                </option>
+              ))}
             </select>
           </div>
         </div>
         {/* End Language Filter */}
 
-        {/* Start Video Duration Filter */}
-        {selectedContentType === "video" && (
-          <div className="mb-2 lg:mb-5">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm lg:text-lg lg:font-semibold text-text">
-                {t("Video Duration")}
-              </h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="all-duration"
-                  name="duration"
-                  checked={!selectedDuration}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={() => setSelectedDuration("")}
-                />
-                <label
-                  htmlFor="all-duration"
-                  className="text-xs sm:text-sm text-gray-700"
+        {/* Start Date */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Happened Date")}
+          </label>
+          <div className="relative">
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full text-left font-normal flex items-center",
+                    !filters.happened_at && "text-muted-foreground"
+                  )}
                 >
-                  {t("All Durations")}
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="short-duration"
-                  name="duration"
-                  checked={selectedDuration === "short"}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={() => setSelectedDuration("short")}
-                />
-                <label
-                  htmlFor="short-duration"
-                  className="text-xs sm:text-sm text-gray-700"
-                >
-                  {t("Short (< 5 minutes)")}
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="medium-duration"
-                  name="duration"
-                  checked={selectedDuration === "medium"}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={() => setSelectedDuration("medium")}
-                />
-                <label
-                  htmlFor="medium-duration"
-                  className="text-xs sm:text-sm text-gray-700"
-                >
-                  {t("Medium (5-20 minutes)")}
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  id="long-duration"
-                  name="duration"
-                  checked={selectedDuration === "long"}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={() => setSelectedDuration("long")}
-                />
-                <label
-                  htmlFor="long-duration"
-                  className="text-xs sm:text-sm text-gray-700"
-                >
-                  {t("Long (> 20 minutes)")}
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* End Video Duration Filter */}
-        {/* Start Date Filter */}
-        <div className="mb-2 lg:mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm lg:text-lg lg:font-semibold text-text">
-              {t("Publication Date")}
-            </h3>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          </div>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {filters.happened_at ? (
+                    format(new Date(filters.happened_at), "dd-MM-yyyy")
+                  ) : (
+                    <span>{t("Pick Happened Date")}</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
 
-          <div className="space-y-3">
-            <Button
-              onClick={() => setIsDateModalOpen(true)}
-              variant="outline"
-              className="w-full justify-start text-left font-normal text-xs px-1"
-            >
-              <Calendar className="  h-4 w-4" />
-              {selectedDateRange?.startDate && selectedDateRange?.endDate ? (
-                `${format(selectedDateRange.startDate, "PPP")} - ${format(
-                  selectedDateRange.endDate,
-                  "PPP"
-                )}`
-              ) : (
-                <span className="text-base">{t("Pick a date range")}</span>
-              )}
-            </Button>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={
+                    filters.happened_at
+                      ? new Date(filters.happened_at)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    if (!date) return;
+                    date.setHours(12);
+                    updateFilter("happened_at", format(date, "yyyy-MM-dd"));
+                    setDateOpen(false);
+                  }}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
 
-            {(selectedDateRange?.startDate || selectedDateRange?.endDate) && (
-              <Button
-                onClick={clearDateFilter}
-                variant="ghost"
-                size="sm"
-                className="w-full border-[1px] border-gray-300 rounded-lg"
+            {filters.happened_at && (
+              <button
+                onClick={() => updateFilter("happened_at", null)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                type="button"
               >
-                <X className="mr-2 h-3 w-3" />
-                {t("Clear Date Filter")}
-              </Button>
+                <X className="h-4 w-4 text-red-500" />
+              </button>
             )}
           </div>
         </div>
-        {/* End Date Filter */}
+        {/* End Date */}
 
         {/* Clear Filters Button */}
         <div className="mb-4 ">
-          {/* <Button
-            variant="outline"
-            onClick={clearAllFilters}
-            className="w-full"
-          >
-            {t("Clear All Filters")}
-          </Button> */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 mt-7 md:mt-auto">
             <Button
               variant="outline"
@@ -324,7 +285,7 @@ function EventsFilter({
               className="bg-primary hover:bg-white text-white hover:text-primary text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
               onClick={() => {
                 toast.success(t("Filters applied successfully"));
-                setOpenFilterModal(false);
+                if (setOpenFilterModal) setOpenFilterModal(false);
               }}
             >
               {t("Apply")}
@@ -332,21 +293,6 @@ function EventsFilter({
           </div>
         </div>
       </div>
-
-      {/* Date Picker Modal */}
-      <Modal
-        isOpen={isDateModalOpen}
-        onClose={() => setIsDateModalOpen(false)}
-        title={t("Select Date Range")}
-      >
-        <FilterDatePickerModal
-          setIsDateModalOpen={setIsDateModalOpen}
-          selectedDateRange={selectedDateRange}
-          setSelectedDateRange={setSelectedDateRange}
-          clearDateFilter={clearDateFilter}
-          handleDateSelection={handleDateSelection}
-        />
-      </Modal>
     </div>
   );
 }

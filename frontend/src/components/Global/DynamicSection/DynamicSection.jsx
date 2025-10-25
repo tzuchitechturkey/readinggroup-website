@@ -50,7 +50,7 @@ const DynamicSection = ({
       <div className=" mx-auto">
         {/* Start Title && View More */}
         <div className="flex items-center justify-between mb-1 md:mb-4">
-          {/* Start Title */}
+          {/* Start Tit````le */}
           <div className="">
             <h2
               className={`font-bold text-black text-[26px] lg:text-4xl ${titleClassName}`}

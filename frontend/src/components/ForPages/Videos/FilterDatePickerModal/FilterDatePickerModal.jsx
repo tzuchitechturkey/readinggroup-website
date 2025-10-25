@@ -24,13 +24,17 @@ function FilterDatePickerModal({
 
   // State للتحكم في فتح وإغلاق الـ Popover
   const [dateOpen, setDateOpen] = useState(false);
+  
+  // Use startDate as the single date (happened_at)
+  const selectedDate = selectedDateRange?.startDate || null;
+  
   return (
     <div>
       <div className="space-y-4">
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Created Date")}
+            {t("Happened Date")}
           </label>
           <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger asChild>
@@ -38,28 +42,28 @@ function FilterDatePickerModal({
                 variant="outline"
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !selectedDateRange.created_at && "text-muted-foreground"
+                  !selectedDate && "text-muted-foreground"
                 )}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                {selectedDateRange.created_at ? (
-                  format(selectedDateRange.created_at, "PPP")
+                {selectedDate ? (
+                  format(selectedDate, "PPP")
                 ) : (
-                  <span>{t("Pick created date")}</span>
+                  <span>{t("Pick happened date")}</span>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <CalendarComponent
                 mode="single"
-                selected={selectedDateRange.created_at}
+                selected={selectedDate}
                 onSelect={(date) => {
                   if (!date) return;
                   date.setHours(12); // نثبت منتصف النهار
-                  setSelectedDateRange((prev) => ({
-                    ...prev,
-                    created_at: date,
-                  }));
+                  setSelectedDateRange({
+                    startDate: date,
+                    endDate: null
+                  });
                   setDateOpen(false);
                 }}
                 disabled={(date) =>
@@ -84,7 +88,8 @@ function FilterDatePickerModal({
                 const lastWeek = new Date(today);
                 lastWeek.setDate(today.getDate() - 7);
                 setSelectedDateRange({
-                  created_at: lastWeek,
+                  startDate: lastWeek,
+                  endDate: null
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -97,7 +102,8 @@ function FilterDatePickerModal({
                 const lastMonth = new Date(today);
                 lastMonth.setMonth(today.getMonth() - 1);
                 setSelectedDateRange({
-                  created_at: lastMonth,
+                  startDate: lastMonth,
+                  endDate: null
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -110,7 +116,8 @@ function FilterDatePickerModal({
                 const lastYear = new Date(today);
                 lastYear.setFullYear(today.getFullYear() - 1);
                 setSelectedDateRange({
-                  created_at: lastYear,
+                  startDate: lastYear,
+                  endDate: null
                 });
               }}
               className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

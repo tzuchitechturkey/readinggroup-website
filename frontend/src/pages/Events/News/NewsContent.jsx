@@ -1,7 +1,7 @@
 import React from "react";
 
 import NewsHeroEnhanced from "@/components/ForPages/News/NewsHeroEnhanced";
-import ConnectNewsSection from "@/components/ForPages/Connect/EventstNewsSection/EventstNewsSection";
+import ConnectNewsSection from "@/components/ForPages/Events/EventstNewsSection/EventstNewsSection";
 
 function NewsContent() {
   return (

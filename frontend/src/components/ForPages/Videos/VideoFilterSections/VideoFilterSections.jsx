@@ -9,176 +9,85 @@ import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { Button } from "@/components/ui/button";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
-import { GetVideosByFilter } from "@/api/videos";
+import { GetVideosByFilter, GetVideoCategories } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
-const allVideos = [
-  {
-    id: 1,
-    title: "The Future of AI",
-    duration: "32:15",
-    category: "Technology",
-    type: "Full Videos",
-    language: "English",
-    image: "/authback.jpg",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "Secrets of the Deep Ocean",
-    duration: "45:10",
-    category: "Nature",
-    type: "Unit Video",
-    language: "Spanish",
-    image: "/authback.jpg",
-    featured: false,
-  },
-  {
-    id: 3,
-    title: "Ancient Civilizations: Rome",
-    duration: "55:20",
-    category: "History",
-    type: "Full Videos",
-    language: "Italian",
-    image: "/authback.jpg",
-    featured: true,
-  },
-  {
-    id: 4,
-    title: "Mastering Python in 10 Steps",
-    duration: "28:45",
-    category: "Programming",
-    type: "Unit Video",
-    language: "English",
-    image: "/authback.jpg",
-    featured: false,
-  },
-  {
-    id: 5,
-    title: "The Art of French Cuisine",
-    duration: "38:05",
-    category: "Cooking",
-    type: "Full Videos",
-    language: "French",
-    image: "/authback.jpg",
-    featured: true,
-  },
-  {
-    id: 6,
-    title: "Journey to the Stars",
-    duration: "50:00",
-    category: "Astronomy",
-    type: "Unit Video",
-    language: "German",
-    image: "/authback.jpg",
-    featured: false,
-  },
-  {
-    id: 7,
-    title: "Financial Freedom 101",
-    duration: "42:30",
-    category: "Finance",
-    type: "Full Videos",
-    language: "Japanese",
-    image: "/authback.jpg",
-    featured: true,
-  },
-  {
-    id: 8,
-    title: "The World of Digital Art",
-    duration: "33:50",
-    category: "Art",
-    type: "Unit Video",
-    language: "Chinese",
-    image: "/authback.jpg",
-    featured: false,
-  },
-  {
-    id: 9,
-    title: "Sustainable Living",
-    duration: "29:55",
-    category: "Lifestyle",
-    type: "Full Videos",
-    language: "Russian",
-    image: "/authback.jpg",
-    featured: true,
-  },
-  {
-    id: 10,
-    title: "Beginner's Guide to Yoga",
-    duration: "22:00",
-    category: "Health",
-    type: "Unit Video",
-    language: "Arabic",
-    image: "/authback.jpg",
-    featured: false,
-  },
-];
 function VideoFilterSections() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-
-  const [contentType, setContentType] = useState(["full_video"]);
-  const [indexCategory, setIndexCategory] = useState(["health"]);
-  const [languageContent, setLanguageContent] = useState(["en"]);
+  const [categoriesList, setCategoriesList] = useState([]);
+  // Filter states
+  const [contentType, setContentType] = useState([]);
+  const [indexCategory, setIndexCategory] = useState([]);
+  const [languageContent, setLanguageContent] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  const [happenedAt, setHappenedAt] = useState(null);
 
-  const [searchData, setSearchData] = useState({
-    count: allVideos.length,
-    results: allVideos,
+  // Data states
+  const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
+  const [defaultVideos, setDefaultVideos] = useState({
+    videoTypeData: { count: 0, results: [] },
+    videoCategoryData: { count: 0, results: [] },
+    videoLanguageData: { count: 0, results: [] },
   });
 
-  const [videoTypeData, setVideoTypeData] = useState({
-    count: allVideos.length,
-    results: allVideos,
-  });
-  const [videoCategoryData, setVideoCategoryData] = useState({
-    count: allVideos.length,
-    results: allVideos,
-  });
-  const [videoLanguageData, setVideoLanguageData] = useState({
-    count: allVideos.length,
-    results: allVideos,
-  });
-  const [selectedDateRange, setSelectedDateRange] = useState({
-    startDate: null,
-    endDate: null,
-  });
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
-  const getVideoTypeDataByFilter = async (type) => {
-    setIsLoading(true);
-    const offset = page * 10;
+  // Check if any filter is active
+  const hasActiveFilters =
+    searchValue.length > 0 ||
+    contentType.length > 0 ||
+    indexCategory.length > 0 ||
+    languageContent.length > 0 ||
+    happenedAt !== null;
+
+  const setErrorFn = (error) => {
+    const errorMessage =
+      error?.response?.data?.message || t("An error occurred");
+    toast.error(errorMessage);
+  };
+  const getCategoriesList = async () => {
     try {
-      const res = await GetVideosByFilter(limit, offset, type);
-      setVideoTypeData(res?.data);
+      const res = await GetVideoCategories(100, 0, "");
+      if (res?.data) {
+        // Transform data to include id, name and count
+        const categories = res.data?.results?.map((category) => ({
+          id: category.id,
+          name: category.name,
+          count: category.video_count || 0,
+        }));
+        setCategoriesList(categories);
+      }
     } catch (error) {
       setErrorFn(error);
-    } finally {
-      setIsLoading(false);
     }
   };
-  const getVideoCategoryDataByFilter = async (type) => {
-    setIsLoading(true);
-    const offset = page * 10;
+  // Fetch filtered videos based on all active filters
+  const fetchFilteredVideos = async (page = 1) => {
+    // setIsLoading(true);
+    const offset = (page - 1) * limit;
+    const params = {};
+
+    if (searchValue) params.search = searchValue;
+    if (contentType.length > 0) params.video_type = contentType.join(",");
+    if (indexCategory.length > 0) params.category = indexCategory.join(",");
+    if (languageContent.length > 0) params.language = languageContent.join(",");
+    if (happenedAt) params.happened_at = happenedAt;
     try {
-      const res = await GetVideosByFilter(limit, offset, type);
-      setVideoCategoryData(res?.data);
-    } catch (error) {
-      setErrorFn(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const getVideoLanguageDataByFilter = async (type) => {
-    setIsLoading(true);
-    const offset = page * 10;
-    try {
-      const res = await GetVideosByFilter(limit, offset, type);
-      setVideoLanguageData(res?.data);
+      const res = await GetVideosByFilter(limit, offset, params);
+
+      if (page === 1) {
+        setFilteredData(res?.data);
+      } else {
+        // Append results for pagination
+        setFilteredData((prev) => ({
+          count: res?.data?.count || 0,
+          results: [...prev.results, ...(res?.data?.results || [])],
+        }));
+      }
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -186,34 +95,89 @@ function VideoFilterSections() {
     }
   };
 
+  // Load default carousels (when no filters active)
+  const loadDefaultVideos = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch videos for each default category
+      const [typeRes, categoryRes, languageRes] = await Promise.all([
+        GetVideosByFilter(10, 0, { video_type: "full_video" }),
+        GetVideosByFilter(10, 0, { category: "health" }),
+        GetVideosByFilter(10, 0, { language: "en" }),
+      ]);
+
+      setDefaultVideos({
+        videoTypeData: typeRes?.data || { count: 0, results: [] },
+        videoCategoryData: categoryRes?.data || { count: 0, results: [] },
+        videoLanguageData: languageRes?.data || { count: 0, results: [] },
+      });
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Clear all filters and reset to default view
+  const handleClearFilters = () => {
+    setSearchValue("");
+    setContentType([]);
+    setIndexCategory([]);
+    setLanguageContent([]);
+    setHappenedAt(null);
+    setCurrentPage(1);
+    setFilteredData({ count: 0, results: [] });
+    toast.success(t("Filters cleared"));
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchFilteredVideos(nextPage);
+  };
+
   const handleSortData = () => {
-    if (searchValue?.length) {
-      setSearchData((prevData) => ({
+    if (hasActiveFilters) {
+      setFilteredData((prevData) => ({
         ...prevData,
         results: [...prevData.results].reverse(),
       }));
     } else {
-      // This part is tricky because allVideos is a constant.
-      // To make the view update, we need a state for the filtered videos.
-      // For now, let's assume we have a state for filtered videos, e.g., `filteredVideos`
-      // and a setter `setFilteredVideos`.
-      // Since that state doesn't exist, I'll reverse `allVideos` and put it in a new state.
-      // Let's create a new state for the videos displayed in the carousels.
-      setSearchData((prevVideos) => [...prevVideos].reverse());
+      setDefaultVideos((prev) => ({
+        videoTypeData: {
+          ...prev.videoTypeData,
+          results: [...prev.videoTypeData.results].reverse(),
+        },
+        videoCategoryData: {
+          ...prev.videoCategoryData,
+          results: [...prev.videoCategoryData.results].reverse(),
+        },
+        videoLanguageData: {
+          ...prev.videoLanguageData,
+          results: [...prev.videoLanguageData.results].reverse(),
+        },
+      }));
     }
     toast.success(t("Data Sorted!"));
   };
 
-  const handleSearchPagination = (searchTerm) => {
-    console.log("searchTerm", searchTerm);
-    toast.success(t("Load More Clicked!"));
-  };
-
+  // Trigger fetch when filters change
   useEffect(() => {
-    // getVideDataByFilter(contentType);
+    // if (hasActiveFilters) {
+    setCurrentPage(1);
+    fetchFilteredVideos(1);
+    console.log("active");
+    // }
+    console.log("var");
+  }, [searchValue, contentType, indexCategory, languageContent, happenedAt]);
+
+  // Load default videos on mount
+  useEffect(() => {
+    loadDefaultVideos();
+    getCategoriesList();
   }, []);
   return (
-    <>
+    <div rtl={i18n.language === "ar" ? "rtl" : "ltr"} className="w-full ">
       {isLoading && <Loader />}
       {/* Start Search Header */}
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
@@ -222,8 +186,22 @@ function VideoFilterSections() {
           setViewMode={setViewMode}
           viewMode={viewMode}
           setSearchValue={setSearchValue}
+          searchValue={searchValue}
           handleSortData={handleSortData}
         />
+
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              className="text-red-600 border-red-600 hover:bg-red-50"
+            >
+              {t("Clear All Filters")}
+            </Button>
+          </div>
+        )}
       </div>
       {/* End Search Header */}
 
@@ -232,165 +210,117 @@ function VideoFilterSections() {
           {/* Start Sidebar Filters */}
           <div className="hidden lg:flex w-full lg:w-80 ">
             <VideoFilter
-              selectedDateRange={selectedDateRange}
-              setSelectedDateRange={setSelectedDateRange}
+              happenedAt={happenedAt}
+              setHappenedAt={setHappenedAt}
               setContentType={setContentType}
               setIndexCategory={setIndexCategory}
               setLanguageContent={setLanguageContent}
+              contentType={contentType}
+              indexCategory={indexCategory}
+              languageContent={languageContent}
+              categoriesList={categoriesList}
             />
           </div>
           {/* End Sidebar Filters */}
 
           {/* Start Show Data */}
-          <div>
-            {/* Start Search Result */}
-            {searchValue?.length ? (
+          <div className="flex-1 min-w-0">
+            {/* Start Filtered Results (Grid View) */}
+            {hasActiveFilters ? (
               <div>
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold text-text">
+                    {t("Search Results")} ({filteredData.count})
+                  </h2>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
-                  {searchData?.results?.map((video) => (
+                  {filteredData?.results?.map((video) => (
                     <VideoCard key={video.id} item={video} />
                   ))}
                 </div>
-                {searchData.count > 9 && (
+
+                {filteredData?.results?.length === 0 && !isLoading && (
+                  <div className="text-center py-10">
+                    <p className="text-gray-500 text-lg">
+                      {t("No videos found")}
+                    </p>
+                  </div>
+                )}
+
+                {filteredData.count > filteredData?.results?.length && (
                   <div className="text-center mt-8">
-                    <Button onClick={handleSearchPagination}>
-                      {t("Load More")}
+                    <Button onClick={handleLoadMore} disabled={isLoading}>
+                      {isLoading ? t("Loading...") : t("Load More")}
                     </Button>
                   </div>
                 )}
               </div>
             ) : (
-              /* End Search Result */
-              /* Start Filter Result */
+              /* End Filtered Results */
+              /* Start Default Carousels */
+              <div className="flex-1 min-w-0 space-y-8">
+                {/* Full Videos Section */}
+                {defaultVideos.videoTypeData?.results?.length > 0 && (
+                  <div>
+                    <div className="mb-2">
+                      <h2 className="text-2xl font-bold text-text">
+                        {t("Full Videos")}
+                      </h2>
+                    </div>
+                    <BrokenCarousel
+                      data={defaultVideos.videoTypeData.results}
+                      showArrows={
+                        defaultVideos.videoTypeData.results.length > 4
+                      }
+                      cardName={VideoCard}
+                      nextArrowClassname={"-right-5"}
+                      prevArrowClassname={"-left-5"}
+                    />
+                  </div>
+                )}
 
-              <div className="flex-1 min-w-0 ">
-                {/* Start This Full Videos . Unit Video Section */}
-                {contentType?.length > 0 ? (
-                  <div className="flex-1">
-                    <div>
-                      <div className="mb-2 flex items-center gap-1 ">
-                        <p className="font-bold text-2xl text-text">
-                          {t("This")}
-                        </p>
-                        <h2 className="text-2xl text-text ">
-                          {contentType.map((type, idx) => (
-                            <span key={type}>
-                              {type === "full_video"
-                                ? t("Full Videos")
-                                : type === "unit_video"
-                                ? t("Unit Video")
-                                : t(type)}
-                              {idx < contentType.length - 1 && " ، "}
-                            </span>
-                          ))}
-                        </h2>
-                      </div>
-                      <div className="">
-                        <BrokenCarousel
-                          data={videoTypeData?.results}
-                          showArrows={videoTypeData?.results?.length > 4}
-                          cardName={VideoCard}
-                          nextArrowClassname={"-right-5"}
-                          prevArrowClassname={"-left-5 "}
-                        />
-                      </div>
+                {/* Category Section */}
+                {defaultVideos.videoCategoryData?.results?.length > 0 && (
+                  <div>
+                    <div className="mb-2">
+                      <h2 className="text-2xl font-bold text-text">
+                        {t("Health")}
+                      </h2>
                     </div>
+                    <BrokenCarousel
+                      data={defaultVideos.videoCategoryData.results}
+                      showArrows={
+                        defaultVideos.videoCategoryData.results.length > 4
+                      }
+                      cardName={VideoCard}
+                      nextArrowClassname={"-right-5"}
+                      prevArrowClassname={"-left-5"}
+                    />
                   </div>
-                ) : (
-                  ""
                 )}
-                {/* End This Full Videos . Unit Video Section */}
-                {/* Start This Full Videos . Unit Video Section */}
-                {indexCategory?.length > 0 ? (
-                  <div className="flex-1">
-                    <div>
-                      <div className="my-2 flex items-center ">
-                        <p className="font-bold text-2xl text-text">
-                          {t("This Index Category")}
-                        </p>
-                        <h2 className="text-2xl text-text ">
-                          {" "}
-                          :{" "}
-                          {indexCategory.map((category, idx) => (
-                            <span key={category}>
-                              {category === "health"
-                                ? t("Health")
-                                : category === "environment"
-                                ? t("Environment")
-                                : category === "education"
-                                ? t("Education")
-                                : t(category)}
-                              {idx < indexCategory.length - 1 && " ، "}
-                            </span>
-                          ))}
-                        </h2>
-                      </div>
-                      <div className="">
-                        <BrokenCarousel
-                          data={videoCategoryData?.results}
-                          showArrows={videoCategoryData?.results?.length > 4}
-                          cardName={VideoCard}
-                          nextArrowClassname={"-right-5"}
-                          prevArrowClassname={"-left-5 "}
-                        />
-                      </div>
+
+                {/* Language Section */}
+                {defaultVideos.videoLanguageData?.results?.length > 0 && (
+                  <div>
+                    <div className="mb-2">
+                      <h2 className="text-2xl font-bold text-text">
+                        {t("English Videos")}
+                      </h2>
                     </div>
+                    <BrokenCarousel
+                      data={defaultVideos.videoLanguageData.results}
+                      showArrows={
+                        defaultVideos.videoLanguageData.results.length > 4
+                      }
+                      cardName={VideoCard}
+                      nextArrowClassname={"-right-5"}
+                      prevArrowClassname={"-left-5"}
+                    />
                   </div>
-                ) : (
-                  ""
                 )}
-                {/* End This Full Videos . Unit Video Section */}
-                {/* Start This Full Videos . Unit Video Section */}
-                {languageContent?.length > 0 ? (
-                  <div className="flex-1">
-                    <div>
-                      <div className="my-2 flex items-center  ">
-                        <p className="font-bold text-2xl text-text">
-                          {t("Language")}
-                        </p>
-                        <h2 className="text-2xl text-text ">
-                          :{" "}
-                          {languageContent.map((lang, idx) => (
-                            <span key={lang}>
-                              {lang === "ar"
-                                ? t("Arabic")
-                                : lang === "ch"
-                                ? t("Chinese")
-                                : lang === "en"
-                                ? t("English")
-                                : lang === "jp"
-                                ? t("Japanese")
-                                : lang === "fr"
-                                ? t("French")
-                                : lang === "de"
-                                ? t("German")
-                                : lang === "ru"
-                                ? t("Russian")
-                                : lang === "es"
-                                ? t("Spanish")
-                                : t(lang)}
-                              {idx < languageContent.length - 1 && " ، "}
-                            </span>
-                          ))}
-                        </h2>
-                      </div>
-                      <div className="">
-                        <BrokenCarousel
-                          data={videoLanguageData?.results}
-                          showArrows={videoLanguageData?.results?.length > 4}
-                          cardName={VideoCard}
-                          nextArrowClassname={"-right-5"}
-                          prevArrowClassname={"-left-5"}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  ""
-                )}
-                {/* End This Full Videos . Unit Video Section */}
               </div>
-              /* End Filter Result */
+              /* End Default Carousels */
             )}
           </div>
           {/* End Show Data */}
@@ -402,18 +332,22 @@ function VideoFilterSections() {
             title={t("Filter")}
           >
             <VideoFilter
-              selectedDateRange={selectedDateRange}
-              setSelectedDateRange={setSelectedDateRange}
+              happenedAt={happenedAt}
+              setHappenedAt={setHappenedAt}
               setContentType={setContentType}
               setIndexCategory={setIndexCategory}
               setLanguageContent={setLanguageContent}
-              setOpenFilterModa={setOpenFilterModal}
+              setOpenFilterModal={setOpenFilterModal}
+              contentType={contentType}
+              indexCategory={indexCategory}
+              languageContent={languageContent}
+              categoriesList={categoriesList}
             />
           </Modal>
           {/* End DatePicker Modal  */}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

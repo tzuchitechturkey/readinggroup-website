@@ -163,6 +163,7 @@ export default function Page() {
         createOrEditNews: "Tv",
         newsCategories: "Tv",
         events: "Events",
+        eventsList: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
         eventsSections: "Events",

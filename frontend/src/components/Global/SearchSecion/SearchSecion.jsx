@@ -21,7 +21,7 @@ function SearchSecion({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <Input
             type="text"
-            placeholder="Search items, collections, and accounts"
+            placeholder={t("Search items, collections, and accounts")}
             className="pl-8 sm:pl-10 pr-4 py-3 sm:py-4 lg:py-5 w-full border border-primary rounded-lg sm:rounded-xl lg:rounded-2xl outline-none text-sm sm:text-base"
             onChange={(e) => {
               setSearchValue(e.target.value);

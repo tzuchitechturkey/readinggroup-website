@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -8,427 +8,331 @@ import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import ExternalNewsCard from "@/components/Global/ExternalNewsCard/ExternalNewsCard";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import EventsFilter from "@/components/ForPages/Events/EventsFilter/EventsFilter";
-import { EventsData } from "@/mock/events";
+import {
+  GetEventSections,
+  GetTop5EventsBySectionId,
+  GetEvents,
+} from "@/api/events";
+import Loader from "@/components/Global/Loader/Loader";
+import { Button } from "@/components/ui/button";
 
 function EventsFilterSections() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [selectedDateRange, setSelectedDateRange] = useState({
-    startDate: null,
-    endDate: null,
-  });
-  const [selectedWriter, setSelectedWriter] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedContentType, setSelectedContentType] = useState(""); // video or report
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState(""); // for videos only
-  const [searchValue, setSearchValue] = useState("");
-  // دمج جميع البيانات في مصفوفة واحدة للفلترة الموحدة
-  const allData = [
-    ...(EventsData.warmDiscussion || []),
-    ...(EventsData.dramaData || []),
-    ...(EventsData.eventReports || []),
-    ...(EventsData.breakingNews || []),
-    ...(EventsData.recommendationNews || []),
-    ...(EventsData.trendingNews || []),
-  ];
 
-  const [filteredData, setFilteredData] = useState([]);
-  const [displayedData, setDisplayedData] = useState({
-    warm_discussion: [],
-    drama: [],
-    event_reports: [],
-  });
-  const [searchData, setSearchData] = useState({
-    count: 10,
-    results: {
-      warm_discussion: [],
-      drama: [],
-      event_reports: [],
-    },
+  const [sectionsList, setSectionsList] = useState([]);
+  const [defaultSections, setDefaultSections] = useState({
+    section1: { id: null, name: "", events: [] },
+    section2: { id: null, name: "", events: [] },
+    section3: { id: null, name: "", events: [] },
   });
 
-  // دالة الفلترة الجديدة
-  const applyFilters = () => {
-    let filtered = [...allData];
+  const [filters, setFilters] = useState({
+    search: "",
+    section: "",
+    category: "",
+    country: "",
+    writer: "",
+    language: "",
+    happened_at: null,
+  });
 
-    // فلترة حسب التاريخ
-    if (selectedDateRange.startDate && selectedDateRange.endDate) {
-      filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.date);
-        return (
-          itemDate >= selectedDateRange.startDate &&
-          itemDate <= selectedDateRange.endDate
-        );
-      });
-    }
+  const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
 
-    // فلترة حسب الكاتب
-    if (selectedWriter) {
-      filtered = filtered.filter((item) =>
-        item.writer?.toLowerCase().includes(selectedWriter.toLowerCase())
-      );
-    }
+  const hasActiveFilters =
+    filters.search.length > 0 ||
+    filters.section.length > 0 ||
+    filters.category.length > 0 ||
+    filters.country.length > 0 ||
+    filters.writer.length > 0 ||
+    filters.language.length > 0 ||
+    filters.happened_at !== null;
 
-    // فلترة حسب البلد
-    if (selectedCountry) {
-      filtered = filtered.filter((item) =>
-        item.country?.toLowerCase().includes(selectedCountry.toLowerCase())
-      );
-    }
-
-    // فلترة حسب نوع المحتوى
-    if (selectedContentType) {
-      filtered = filtered.filter(
-        (item) => item.report_type === selectedContentType
-      );
-    }
-
-    // فلترة حسب اللغة
-    if (selectedLanguage) {
-      filtered = filtered.filter((item) => item.language === selectedLanguage);
-    }
-
-    // فلترة حسب مدة الفيديو (للفيديوهات فقط)
-    if (selectedDuration && selectedContentType === "video") {
-      filtered = filtered.filter((item) => {
-        if (item.report_type !== "video") return false;
-        const duration = item.duration || 0;
-        switch (selectedDuration) {
-          case "short":
-            return duration <= 5; // أقل من 5 دقائق
-          case "medium":
-            return duration > 5 && duration <= 20; // 5-20 دقيقة
-          case "long":
-            return duration > 20; // أكثر من 20 دقيقة
-          default:
-            return true;
-        }
-      });
-    }
-
-    setFilteredData(filtered);
-
-    // تقسيم البيانات المفلترة إلى المجموعات الثلاث
-    const categorizedData = {
-      warm_discussion: filtered.filter(
-        (item) =>
-          EventsData.warmDiscussion &&
-          EventsData.warmDiscussion.some((original) => original.id === item.id)
-      ),
-      drama: filtered.filter(
-        (item) =>
-          EventsData.dramaData &&
-          EventsData.dramaData.some((original) => original.id === item.id)
-      ),
-      event_reports: filtered.filter(
-        (item) =>
-          EventsData.eventReports &&
-          EventsData.eventReports.some((original) => original.id === item.id)
-      ),
-    };
-
-    setDisplayedData(categorizedData);
+  const setErrorFn = (error) => {
+    const errorMessage =
+      error?.response?.data?.message || t("An error occurred");
+    toast.error(errorMessage);
   };
 
-  // تحميل البيانات الأولية
-  useEffect(() => {
-    const initialData = {
-      warm_discussion: EventsData.warmDiscussion || [],
-      drama: EventsData.dramaData || [],
-      event_reports: EventsData.eventReports || [],
-    };
-    setDisplayedData(initialData);
-    setFilteredData(allData);
-  }, []);
+  const updateFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
-  // تطبيق الفلاتر عند تغيير أي فلتر
-  useEffect(() => {
-    applyFilters();
-  }, [
-    selectedDateRange,
-    selectedWriter,
-    selectedCountry,
-    selectedContentType,
-    selectedLanguage,
-    selectedDuration,
-  ]);
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      section: "",
+      category: "",
+      country: "",
+      writer: "",
+      language: "",
+      happened_at: null,
+    });
+    setCurrentPage(1);
+    setFilteredData({ count: 0, results: [] });
+    toast.success(t("Filters cleared"));
+  };
+
+  const loadSectionsList = async () => {
+    try {
+      const res = await GetEventSections(100, 0, "");
+      setSectionsList(res.data?.results || []);
+      return res.data?.results || [];
+    } catch (error) {
+      setErrorFn(error);
+      return [];
+    }
+  };
+
+  const loadDefaultSections = async () => {
+    setIsLoading(true);
+    try {
+      const sections = await loadSectionsList();
+
+      if (sections.length >= 3) {
+        const [section1Data, section2Data, section3Data] = await Promise.all([
+          GetTop5EventsBySectionId(sections[0].id),
+          GetTop5EventsBySectionId(sections[1].id),
+          GetTop5EventsBySectionId(sections[2].id),
+        ]);
+
+        setDefaultSections({
+          section1: {
+            id: sections[0].id,
+            name: sections[0].name,
+            events: section1Data?.data || [],
+          },
+          section2: {
+            id: sections[1].id,
+            name: sections[1].name,
+            events: section2Data?.data || [],
+          },
+          section3: {
+            id: sections[2].id,
+            name: sections[2].name,
+            events: section3Data?.data || [],
+          },
+        });
+      }
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchFilteredEvents = async (page = 1) => {
+    setIsLoading(true);
+    const offset = (page - 1) * limit;
+
+    try {
+      const params = {};
+
+      if (filters.search) params.search = filters.search;
+      if (filters.section) params.section = filters.section;
+      if (filters.category) params.category = filters.category;
+      if (filters.country) params.country = filters.country;
+      if (filters.writer) params.writer = filters.writer;
+      if (filters.language) params.language = filters.language;
+      if (filters.happened_at) params.happened_at = filters.happened_at;
+
+      const res = await GetEvents(limit, offset, params);
+
+      if (page === 1) {
+        setFilteredData(res?.data);
+      } else {
+        setFilteredData((prev) => ({
+          count: res?.data?.count || 0,
+          results: [...prev.results, ...(res?.data?.results || [])],
+        }));
+      }
+    } catch (error) {
+      setErrorFn(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchFilteredEvents(nextPage);
+  };
 
   const handleSortData = () => {
-    if (searchValue?.length) {
-      setSearchData((prevData) => ({
+    if (hasActiveFilters) {
+      setFilteredData((prevData) => ({
         ...prevData,
-        results: {
-          warm_discussion: [...prevData.results.warm_discussion].reverse(),
-          drama: [...prevData.results.drama].reverse(),
-          event_reports: [...prevData.results.event_reports].reverse(),
-        },
+        results: [...prevData.results].reverse(),
       }));
     } else {
-      setDisplayedData((prevData) => ({
-        warm_discussion: [...prevData.warm_discussion].reverse(),
-        drama: [...prevData.drama].reverse(),
-        event_reports: [...prevData.event_reports].reverse(),
+      setDefaultSections((prev) => ({
+        section1: {
+          ...prev.section1,
+          events: [...prev.section1.events].reverse(),
+        },
+        section2: {
+          ...prev.section2,
+          events: [...prev.section2.events].reverse(),
+        },
+        section3: {
+          ...prev.section3,
+          events: [...prev.section3.events].reverse(),
+        },
       }));
     }
     toast.success(t("Data Sorted!"));
   };
 
-  // البحث في البيانات المفلترة
   useEffect(() => {
-    if (searchValue?.length) {
-      const searchResults = filteredData.filter(
-        (item) =>
-          item.title?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.writer?.toLowerCase().includes(searchValue.toLowerCase()) ||
-          item.category?.toLowerCase().includes(searchValue.toLowerCase())
-      );
-
-      // تقسيم نتائج البحث إلى المجموعات الثلاث
-      const categorizedSearchResults = {
-        warm_discussion: searchResults.filter(
-          (item) =>
-            EventsData.warmDiscussion &&
-            EventsData.warmDiscussion.some(
-              (original) => original.id === item.id
-            )
-        ),
-        drama: searchResults.filter(
-          (item) =>
-            EventsData.dramaData &&
-            EventsData.dramaData.some((original) => original.id === item.id)
-        ),
-        event_reports: searchResults.filter(
-          (item) =>
-            EventsData.eventReports &&
-            EventsData.eventReports.some((original) => original.id === item.id)
-        ),
-      };
-
-      setSearchData({
-        count: searchResults.length,
-        results: categorizedSearchResults,
-      });
-    } else {
-      setSearchData({
-        count: 0,
-        results: {
-          warm_discussion: [],
-          drama: [],
-          event_reports: [],
-        },
-      });
+    if (hasActiveFilters) {
+      setCurrentPage(1);
+      fetchFilteredEvents(1);
     }
-  }, [searchValue, filteredData]);
+  }, [
+    filters.search,
+    filters.section,
+    filters.category,
+    filters.country,
+    filters.writer,
+    filters.language,
+    filters.happened_at,
+  ]);
 
-  // eslint-disable-next-line no-unused-vars
-  const handleSearchPagination = () => {
-    // إمكانية إضافة المزيد من النتائج هنا
-    toast.success(t("Load More Clicked!"));
-  };
+  useEffect(() => {
+    loadDefaultSections();
+  }, []);
 
   return (
-    <>
-      {/* Start Search Header */}
+    <div rtl={i18n.language === "ar" ? "rtl" : "ltr"} className="w-full">
+      {isLoading && <Loader />}
+
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
         <SearchSecion
           setOpenFilterModal={setOpenFilterModal}
           setViewMode={setViewMode}
           viewMode={viewMode}
-          setSearchValue={setSearchValue}
+          setSearchValue={(value) => updateFilter("search", value)}
+          searchValue={filters.search}
           handleSortData={handleSortData}
         />
-      </div>
-      {/* End Search Header */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-0   ">
+        {hasActiveFilters && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              className="text-red-600 border-red-600 hover:bg-red-50"
+            >
+              {t("Clear All Filters")}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-0">
         <div className="flex flex-col lg:flex-row gap-4 ">
-          {/* Start Sidebar Filters */}
           <div className="hidden lg:flex w-full lg:w-80 ">
             <EventsFilter
-              selectedDateRange={selectedDateRange}
-              setSelectedDateRange={setSelectedDateRange}
-              selectedWriter={selectedWriter}
-              setSelectedWriter={setSelectedWriter}
-              selectedCountry={selectedCountry}
-              setSelectedCountry={setSelectedCountry}
-              selectedContentType={selectedContentType}
-              setSelectedContentType={setSelectedContentType}
-              selectedLanguage={selectedLanguage}
-              setSelectedLanguage={setSelectedLanguage}
-              selectedDuration={selectedDuration}
-              setSelectedDuration={setSelectedDuration}
+              filters={filters}
+              updateFilter={updateFilter}
+              sectionsList={sectionsList}
             />
           </div>
-          {/* End Sidebar Filters */}
 
-          {/* Start Show Data */}
-          <div>
-            {/* Start Search Result */}
-            {searchValue?.length ? (
-              <div className="flex-1 min-w-0">
-                {/* Warm Discussion Results */}
-                {searchData.results.warm_discussion?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Warm discussion")} (
-                        {searchData.results.warm_discussion.length})
-                      </p>
-                    </div>
-                    <BrokenCarousel
-                      data={searchData.results.warm_discussion}
-                      showArrows={false}
-                      cardName={ExternalNewsCard}
-                    />
-                  </div>
-                )}
+          <div className="flex-1 min-w-0">
+            {hasActiveFilters ? (
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold text-text">
+                    {t("Search Results")} ({filteredData.count})
+                  </h2>
+                </div>
 
-                {/* Drama Results */}
-                {searchData.results.drama?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Drama")} ({searchData.results.drama.length})
-                      </p>
-                    </div>
-                    <BrokenCarousel
-                      data={searchData.results.drama}
-                      showArrows={false}
-                      cardName={ExternalNewsCard}
-                    />
-                  </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
+                  {filteredData?.results?.map((event) => (
+                    <ExternalNewsCard key={event.id} item={event} />
+                  ))}
+                </div>
 
-                {/* Event Reports Results */}
-                {searchData.results.event_reports?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Event Reports")} (
-                        {searchData.results.event_reports.length})
-                      </p>
-                    </div>
-                    <BrokenCarousel
-                      data={searchData.results.event_reports}
-                      showArrows={false}
-                      cardName={ExternalNewsCard}
-                    />
-                  </div>
-                )}
-
-                {/* No Search Results */}
-                {searchData.count === 0 && (
-                  <div className="flex-1 text-center py-8">
+                {filteredData?.results?.length === 0 && !isLoading && (
+                  <div className="text-center py-10">
                     <p className="text-gray-500 text-lg">
-                      {t("No search results found")}
+                      {t("No events found")}
                     </p>
+                  </div>
+                )}
+
+                {filteredData.count > filteredData?.results?.length && (
+                  <div className="text-center mt-8">
+                    <Button onClick={handleLoadMore} disabled={isLoading}>
+                      {isLoading ? t("Loading...") : t("Load More")}
+                    </Button>
                   </div>
                 )}
               </div>
             ) : (
-              /* End Search Result */
-              /* Start Filter Result */
-              <div className="flex-1 min-w-0">
-                {/* Warm Discussion */}
-                {displayedData.warm_discussion?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Warm discussion")} (
-                        {displayedData.warm_discussion.length})
-                      </p>
+              <div className="space-y-8">
+                {defaultSections.section1.events?.length > 0 && (
+                  <div>
+                    <div className="mb-4">
+                      <h2 className="text-2xl font-bold text-text">
+                        {defaultSections.section1.name}
+                      </h2>
                     </div>
                     <BrokenCarousel
-                      data={displayedData.warm_discussion}
+                      data={defaultSections.section1.events}
+                      showArrows={defaultSections.section1.events.length > 4}
                       cardName={ExternalNewsCard}
-                      showArrows={displayedData.warm_discussion?.length > 4}
                       nextArrowClassname={"-right-5"}
-                      prevArrowClassname={"-left-5 "}
+                      prevArrowClassname={"-left-5"}
                     />
                   </div>
                 )}
 
-                {/* Drama */}
-                {displayedData.drama?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Drama")} ({displayedData.drama.length})
-                      </p>
+                {defaultSections.section2.events?.length > 0 && (
+                  <div>
+                    <div className="mb-4">
+                      <h2 className="text-2xl font-bold text-text">
+                        {defaultSections.section2.name}
+                      </h2>
                     </div>
                     <BrokenCarousel
-                      data={displayedData.drama}
-                      showArrows={displayedData.drama?.length > 4}
+                      data={defaultSections.section2.events}
+                      showArrows={defaultSections.section2.events.length > 4}
                       cardName={ExternalNewsCard}
                       nextArrowClassname={"-right-5"}
-                      prevArrowClassname={"-left-5 "}
+                      prevArrowClassname={"-left-5"}
                     />
                   </div>
                 )}
 
-                {/* Event Reports */}
-                {displayedData.event_reports?.length > 0 && (
-                  <div className="mb-8">
-                    <div className="mb-4 flex items-center gap-1">
-                      <p className="font-bold text-2xl text-text">
-                        {t("Event Reports")} (
-                        {displayedData.event_reports.length})
-                      </p>
+                {defaultSections.section3.events?.length > 0 && (
+                  <div>
+                    <div className="mb-4">
+                      <h2 className="text-2xl font-bold text-text">
+                        {defaultSections.section3.name}
+                      </h2>
                     </div>
                     <BrokenCarousel
-                      data={displayedData.event_reports}
-                      showArrows={displayedData.event_reports?.length > 4}
+                      data={defaultSections.section3.events}
+                      showArrows={defaultSections.section3.events.length > 4}
                       cardName={ExternalNewsCard}
                       nextArrowClassname={"-right-5"}
-                      prevArrowClassname={"-left-5 "}
+                      prevArrowClassname={"-left-5"}
                     />
                   </div>
                 )}
-
-                {/* No Filter Results */}
-                {displayedData.warm_discussion?.length === 0 &&
-                  displayedData.drama?.length === 0 &&
-                  displayedData.event_reports?.length === 0 && (
-                    <div className="flex-1 text-center py-8">
-                      <p className="text-gray-500 text-lg">
-                        {t("No results found")}
-                      </p>
-                    </div>
-                  )}
               </div>
-              /* End Filter Result */
             )}
           </div>
-          {/* End Show Data */}
-
-          {/* DatePicker Modal  */}
-          <Modal
-            isOpen={openFilterModal}
-            onClose={() => setOpenFilterModal(false)}
-            title={t("Filter")}
-          >
-            <EventsFilter
-              selectedDateRange={selectedDateRange}
-              setSelectedDateRange={setSelectedDateRange}
-              selectedWriter={selectedWriter}
-              setSelectedWriter={setSelectedWriter}
-              selectedCountry={selectedCountry}
-              setSelectedCountry={setSelectedCountry}
-              selectedContentType={selectedContentType}
-              setSelectedContentType={setSelectedContentType}
-              selectedLanguage={selectedLanguage}
-              setSelectedLanguage={setSelectedLanguage}
-              selectedDuration={selectedDuration}
-              setSelectedDuration={setSelectedDuration}
-              setOpenFilterModal={setOpenFilterModal}
-            />
-          </Modal>
-          {/* End DatePicker Modal  */}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

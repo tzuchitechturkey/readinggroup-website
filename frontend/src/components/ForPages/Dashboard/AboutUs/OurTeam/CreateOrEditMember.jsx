@@ -237,7 +237,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   }, []);
   if (!isOpen) return null;
   return (
-    <div className="bg-white rounded-lg p-6 w-full   overflow-y-auto">
+    <div className="bg-white rounded-lg p-6 px-1 w-full   overflow-y-auto">
       {isLoading && <Loader />}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Start Name */}

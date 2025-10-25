@@ -17,10 +17,10 @@ import { toast } from "react-toastify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import userAvatar from "@/assets/Beared Guy02-min 1.png";
 import { GetProfile, UpdatePatchProfile, UpdateProfile } from "@/api/auth";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import { BASE_URL } from "@/configs";
 
 // Simple stat item
 const Stat = ({ label, value }) => (
@@ -118,6 +118,7 @@ function Profile() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editingFields, setEditingFields] = useState({
     about_me: false,
     website_address: false,
@@ -137,6 +138,7 @@ function Profile() {
         about_me: profileData?.about_me || "",
         website_address: profileData?.website_address || "",
       });
+      setHasUnsavedChanges(false);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -166,10 +168,11 @@ function Profile() {
       [fieldName]: formData[fieldName],
     }));
     toggleEdit(fieldName);
+    setHasUnsavedChanges(true);
 
     // Show a subtle feedback
     toast.info(
-      "Changes ready to save. Click 'Update Profile' to save all changes.",
+     t( "Changes ready to save. Click 'Update Profile' to save all changes."),
       {
         autoClose: 2000,
         position: "bottom-right",
@@ -191,11 +194,11 @@ function Profile() {
       about_me: formData?.about_me,
       website_address: formData?.website_address,
     };
-    // console.log(updateData, "updateData ");
     setIsLoading(true);
     try {
       await UpdatePatchProfile(updateData);
       toast.success(t("Profile updated successfully"));
+      setHasUnsavedChanges(false);
       setUpdate(!update);
     } catch (err) {
       setErrorFn(err);
@@ -207,9 +210,6 @@ function Profile() {
   useEffect(() => {
     getProfileData();
   }, [update]);
-  const isButtonDisabled =
-    !editingFields.about_me || !editingFields.website_address || isLoading;
-
   return (
     <div className="space-y-6 my-5 p-1">
       {isLoading && <Loader />}
@@ -219,7 +219,14 @@ function Profile() {
           <div className="rounded-xl border bg-card p-6">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={data?.avatar || userAvatar} alt="avatar" />
+                <AvatarImage
+                  src={
+                    data?.profile_image
+                      ? `${BASE_URL}/${data.profile_image}`
+                      : data?.profile_image_url
+                  }
+                  alt="avatar"
+                />
                 <AvatarFallback>
                   {data?.display_name?.slice(0, 2)?.toUpperCase() || "NA"}
                 </AvatarFallback>
@@ -350,8 +357,7 @@ function Profile() {
           </div>
 
           {/* Show update button only if there are unsaved changes */}
-          {(data?.about_me !== formData.about_me ||
-            data?.website_address !== formData.website_address) && (
+          {hasUnsavedChanges && (
             <div className="mx-5 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
                 {t(
@@ -363,10 +369,10 @@ function Profile() {
 
           <button
             onClick={handleEditUserInfo}
-            disabled={isButtonDisabled}
-            aria-disabled={isButtonDisabled}
+            disabled={!hasUnsavedChanges || isLoading}
+            aria-disabled={!hasUnsavedChanges || isLoading}
             className={`block m-5 ml-auto rounded-full p-2 font-semibold px-7 transition-all duration-200 ${
-              isButtonDisabled
+              !hasUnsavedChanges || isLoading
                 ? " bg-gray-300 text-gray-700 cursor-not-allowed opacity-80"
                 : "cursor-pointer bg-[#4680FF] text-white hover:bg-[#3d70e0] hover:scale-105 transform"
             }`}

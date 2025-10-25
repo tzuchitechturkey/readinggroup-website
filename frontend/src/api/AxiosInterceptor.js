@@ -9,13 +9,14 @@ export function AxiosInterceptor() {
       (response) => response,
       async (error) => {
         const status = error?.response?.status;
+        console.log(status);
         if (status === 401 || status === 403) {
           // Token invalid/expired or forbidden. Clear and redirect to login.
           clearTokens();
           // Prevent infinite loops if already on auth pages
           const isOnAuth = window.location.pathname.startsWith("/auth");
           if (!isOnAuth) {
-            // window.location.href = "/auth/login";
+            window.location.href = "/auth/login";
           }
         }
         return Promise.reject(error);

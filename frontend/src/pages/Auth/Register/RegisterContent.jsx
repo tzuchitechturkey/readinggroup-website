@@ -32,10 +32,10 @@ function RegisterContent() {
       }}
     >
       <div className="absolute inset-0 bg-cover bg-center w-full h-full opacity-60 z-0 bg-black" />
-      <div className="relative z-1 mt-32">
+      <div className="relative z-1 mt-2 md:mt-6 lg:mt-8">
         <RegisterForm />
       </div>
-      <div className="flex  items-end  h-full z-10 mt-20 flex-1">
+      <div className="flex items-end h-full z-10 mt-6 flex-1">
         <Footer authPages={true} />
       </div>
     </div>

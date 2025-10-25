@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,14 +7,35 @@ import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { mockVideos } from "@/mock/Viedeos";
 import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
+import { CommentVideo, GetVideoById } from "@/api/videos";
+import Loader from "@/components/Global/Loader/Loader";
 
 function VideoPageContent() {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+  const videoId = window.location.pathname.split("/").pop();
+  const [videoData, setVideoData] = useState(null);
+  const getData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetVideoById(videoId);
+      setVideoData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch video data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, [videoId]);
 
   return (
     <div className="bg-white">
+      {isLoading && <Loader />}
       {/* Start Show Video */}
-      <CustomyoutubeVideo />
+      <CustomyoutubeVideo videoData={videoData} />
       {/* End Show Video */}
 
       {/* Start Content of a similar type */}

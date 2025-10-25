@@ -4,11 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
-import UserIcons from "../UserIcons/UserIcons";
 import logo from "@/assets/logo.png";
 
+import UserIcons from "../UserIcons/UserIcons";
+
 function Usernavbar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const linkList = [
@@ -73,7 +74,7 @@ function Usernavbar() {
   }, [isMenuOpen]);
 
   return (
-    <nav className="relative bg-white shadow-sm">
+    <nav className="relative bg-white shadow-sm" dir={i18n.dir()}>
       <div className="  mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
@@ -162,11 +163,7 @@ function Usernavbar() {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <Link to="/" onClick={closeMenu} className="flex items-center">
-              <img
-                src={logo}
-                alt="logo"
-                className="w-24 h-8 object-contain"
-              />
+              <img src={logo} alt="logo" className="w-24 h-8 object-contain" />
             </Link>
             <button
               onClick={closeMenu}

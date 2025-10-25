@@ -209,7 +209,7 @@ function VideosList({ onSectionChange }) {
         <div className="relative max-w-md flex">
           <input
             type="text"
-            placeholder={t("Search Historical Events")}
+            placeholder={t("Search Videos...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={`flex-1 px-4 py-2 border border-gray-300 ${
@@ -313,10 +313,10 @@ function VideosList({ onSectionChange }) {
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
                 className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("published_at")}
+                onClick={() => sortData("happened_at")}
               >
-                {t("Published Date")}
-                {getSortIcon("published_at")}
+                {t("Happened Date")}
+                {getSortIcon("happened_at")}
               </div>
             </TableHead>
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
@@ -383,15 +383,15 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {new Date(video.published_at).toLocaleDateString("en-GB", {
+                    {new Date(video.happened_at).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
                     })}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
-                    {video.published_at
-                      ? new Date(video.published_at).toLocaleTimeString([], {
+                    {video.happened_at
+                      ? new Date(video.happened_at).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })

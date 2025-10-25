@@ -1,37 +1,23 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { ThumbsUp, ListPlus } from "lucide-react";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
+import { CommentVideo } from "@/api/videos";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [liked, setLiked] = React.useState(false);
-  const [currentTime, setCurrentTime] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
-  const [showControls, setShowControls] = React.useState(true);
-  const videoRef = React.useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState();
 
-  const defaultVideoData = {
-    title: "Tzu Chi Visits Syrian Lands",
-    videoUrl: "https://www.youtube.com/watch?v=CXD816uXjzw",
-    thumbnail: "/api/placeholder/800/450",
-    views: "132,757 views",
-    timeAgo: "22 hours ago",
-    durationText: "1h 28m",
-    tags: ["Journey", "Documentary", "Humanitarian"],
-    description:
-      "In this heartfelt documentary, Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict. Through touching encounters with families and volunteers, the film highlights real stories of hope, resilience, and compassion that shine through resilience, and compassion that shine through ",
-    channelName: "Musa AL AHMED",
-    channelAvatar: "/Beared Guy02-min 1.png",
-    channelVerified: true,
-    channelSubscribers: "14.1M Subscriber",
-  };
-
-  const video = videoData || defaultVideoData;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const videoRef = useRef(null);
 
   const isYouTubeUrl = (url) =>
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
@@ -98,12 +84,30 @@ function CustomyoutubeVideo({ videoData }) {
     return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
   };
 
-  const youTube = isYouTubeUrl(video.videoUrl);
-  const [isShareOpen, setIsShareOpen] = React.useState(false);
-
+  const youTube = isYouTubeUrl(videoData?.video_url);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const sendComment = async () => {
+    setIsLoading(true);
+    const payload = {
+      video: videoData?.id,
+      user: userId,
+      text: "This is a sample comment",
+    };
+    try {
+      await CommentVideo(payload);
+    } catch (err) {
+      setErrorFn(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleOpenShare = () => setIsShareOpen(true);
   const handleCloseShare = () => setIsShareOpen(false);
   const toggleLike = () => setLiked((s) => !s);
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
   return (
     <div className="bg-gray-100 px-4 sm:px-0  ">
       <div className="  ">
@@ -115,12 +119,12 @@ function CustomyoutubeVideo({ videoData }) {
           >
             {/* Start video player */}
             <div className="w-full relative aspect-video">
-              {video.videoUrl ? (
+              {videoData?.video_url ? (
                 youTube ? (
                   <iframe
                     className="w-full h-full"
-                    src={getYouTubeEmbedUrl(video.videoUrl)}
-                    title={video.title || "YouTube video"}
+                    src={getYouTubeEmbedUrl(videoData?.video_url)}
+                    title={videoData?.title || "YouTube video"}
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -130,20 +134,20 @@ function CustomyoutubeVideo({ videoData }) {
                   <video
                     ref={videoRef}
                     className="w-full h-full object-cover cursor-pointer"
-                    poster={video.thumbnail}
+                    poster={videoData?.thumbnail}
                     controls={false}
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleTimeUpdate}
                     onClick={handlePlayPause}
                   >
-                    <source src={video.videoUrl} type="video/mp4" />
+                    <source src={videoData?.video_url} type="video/mp4" />
                     {t("Your browser does not support.")}
                   </video>
                 )
               ) : (
                 <div className="w-full h-full relative">
                   <img
-                    src={video.thumbnail}
+                    src={videoData?.thumbnail}
                     alt="Video thumbnail"
                     className="w-full h-full object-cover"
                   />
@@ -215,9 +219,9 @@ function CustomyoutubeVideo({ videoData }) {
             {/* Start Tags && Watch on YouTube Button */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
               {/* Start Tags */}
-              {Array.isArray(video.tags) && video.tags.length > 0 && (
+              {Array.isArray(videoData?.tags) && videoData?.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {video.tags.map((t, i) => (
+                  {videoData?.tags.map((t, i) => (
                     <span
                       key={`${t}-${i}`}
                       className={`px-2 sm:px-3 py-1 bg-transparent ${
@@ -227,16 +231,19 @@ function CustomyoutubeVideo({ videoData }) {
                       {t}
                     </span>
                   ))}
-                  {video.durationText && (
+                  {videoData?.durationText && (
                     <span className="px-2 sm:px-3 py-1 bg-transparent text-xs sm:text-sm rounded-full">
-                      {video.durationText}
+                      {videoData?.durationText}
                     </span>
                   )}
                 </div>
               )}
               {/* End Tags */}
               {/* Start Watch on YouTube Button */}
-              <button className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap">
+              <button
+                onClick={() => window.open(videoData?.video_url, "_blank")}
+                className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap"
+              >
                 <span className="font-medium">{t("Watch on YouTube")}</span>
                 <img
                   src="/icons/youtube-icon.png"
@@ -244,33 +251,38 @@ function CustomyoutubeVideo({ videoData }) {
                   className="w-4 h-4 sm:w-5 sm:h-5"
                 />
               </button>
+
               {/* End Watch on YouTube Button */}
             </div>
             {/* End Tags && Watch on YouTube Button */}
 
             {/* Start Title */}
-            {video.title && (
+            {videoData?.title && (
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 my-4 sm:my-5 md:my-6 lg:my-7 leading-tight">
-                {video.title}
+                {videoData?.title}
               </h2>
             )}
             {/* End Title */}
 
             {/* Start Views */}
-            {(video.views || video.timeAgo) && (
+            {(videoData?.views || videoData?.timeAgo) && (
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
-                {video.views && <span>{video.views}</span>}
-                {video.views && video.timeAgo && <span>•</span>}
-                {video.timeAgo && <span>{video.timeAgo}</span>}
+                {videoData?.views && <span>{videoData?.views}</span>}
+                {videoData?.views && videoData?.timeAgo && <span>•</span>}
+                {videoData?.timeAgo && <span>{videoData?.timeAgo}</span>}
               </div>
             )}
             {/* End Views */}
 
             {/* Start Description */}
-            {video.description && (
+            {videoData?.description && (
               <div className="pt-4 sm:pt-6 md:pt-8 max-w-5xl">
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                  <ShowHideText text={video.description} t={t} count={210} />
+                  <ShowHideText
+                    text={videoData?.description}
+                    t={t}
+                    count={210}
+                  />
                 </p>
               </div>
             )}
@@ -329,25 +341,25 @@ function CustomyoutubeVideo({ videoData }) {
             <ShareModal
               isOpen={isShareOpen}
               onClose={handleCloseShare}
-              url={video.videoUrl}
-              title={video.title}
+              url={videoData?.video_url}
+              title={videoData?.title}
             />
             {/* Start channel info */}
             <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Start Image && Name && Subscribers */}
               <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                 <img
-                  src={video.channelAvatar}
-                  alt={video.channelName}
+                  src={videoData?.channelAvatar}
+                  alt={videoData?.channelName}
                   className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover"
                 />
                 <div>
                   {/* Start Name && Verify Icon */}
                   <div className="flex items-center gap-1 sm:gap-2">
                     <span className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
-                      {video.channelName}
+                      {videoData?.channelName}
                     </span>
-                    {video.channelVerified && (
+                    {videoData?.channelVerified && (
                       <img
                         src="/icons/verifyAcoount.png"
                         alt="Verified"
@@ -358,7 +370,7 @@ function CustomyoutubeVideo({ videoData }) {
                   {/* End Name && Verify Icon */}
                   {/* Start Subscribers */}
                   <div className="mt-1 text-gray-500 text-xs sm:text-sm md:text-base">
-                    {video.channelSubscribers}
+                    {videoData?.channelSubscribers}
                   </div>
                   {/* End Subscribers */}
                 </div>

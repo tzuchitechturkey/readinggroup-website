@@ -15,9 +15,9 @@ const TopFiveSection = () => {
     <div className="mt-12">
       <DynamicSection
         title={
-          <h3 className="text-white text-xl md:text-2xl font-semibold">
+          <p className="text-white text-xl md:text-2xl font-semibold">
             {t("This Week’s Top 5")}
-          </h3>
+          </p>
         }
         data={mockVideos}
         isSlider={isMobile}
