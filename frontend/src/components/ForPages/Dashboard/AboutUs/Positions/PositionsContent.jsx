@@ -15,7 +15,7 @@ import {
 } from "@/api/aboutUs";
 
 export default function PositionsContent({ onSectionChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [positions, setPositions] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -65,7 +65,7 @@ export default function PositionsContent({ onSectionChange }) {
 
   const handleInputChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({
@@ -77,22 +77,22 @@ export default function PositionsContent({ onSectionChange }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!form.name.trim()) {
       newErrors.name = t("Name is required");
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       if (editingPosition && editingPosition.id) {
         await EditPositionById(editingPosition.id, form);
@@ -124,7 +124,10 @@ export default function PositionsContent({ onSectionChange }) {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
+    <div
+      className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">
@@ -143,7 +146,7 @@ export default function PositionsContent({ onSectionChange }) {
         </div>
       </div>
       {/* End Breadcrumb */}
-      
+
       <div className="flex-1">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
@@ -210,130 +213,146 @@ export default function PositionsContent({ onSectionChange }) {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
-          <thead>
-            <tr className="text-left text-sm text-gray-600 border-b">
-              <th className="py-2 px-3  ">{t("Name")}</th>
-              <th className="py-2 px-3  ">{t("Description")}</th>
-              <th className="py-2 px-3   w-[160px]">{t("Actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positions.length > 0 ? (
-              positions.map((position) => (
-                <tr key={position.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-3 font-medium">{position.name}</td>
-                  <td className="py-3 px-3 text-gray-600">
-                    {position.description}
-                  </td>
-                  <td className="py-3 px-3">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openEditModal(position)}
-                        className="p-1 rounded hover:bg-gray-100"
-                        title={t("Edit")}
-                      >
-                        <Edit className="h-4 w-4 text-green-600" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedPosition(position);
-                          setShowDeleteModal(true);
-                        }}
-                        className="p-1 rounded hover:bg-gray-100"
-                        title={t("Delete")}
-                      >
-                        <Trash2 className="h-4 w-4 text-rose-600" />
-                      </button>
-                    </div>
-                  </td>
+              <thead>
+                <tr className="text-left text-sm text-gray-600 border-b">
+                  <th
+                    className={` ${
+                      i18n?.language === "ar" ? "text-right " : "  text-left"
+                    } py-2 px-3 `}
+                  >
+                    {t("Name")}
+                  </th>
+                  <th
+                    className={` ${
+                      i18n?.language === "ar" ? "text-right " : "  text-left"
+                    } py-2 px-3 `}
+                  >
+                    {t("Description")}
+                  </th>
+                  <th className={`py-2 px-3   ${
+                      i18n?.language === "ar" ? "text-right " : "  text-left"
+                    } w-[160px]`}>{t("Actions")}</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" className="py-8 text-center text-gray-500">
-                  {t("No positions found")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {positions.length > 0 ? (
+                  positions.map((position) => (
+                    <tr key={position.id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-3 font-medium">{position.name}</td>
+                      <td className="py-3 px-3 text-gray-600">
+                        {position.description}
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditModal(position)}
+                            className="p-1 rounded hover:bg-gray-100"
+                            title={t("Edit")}
+                          >
+                            <Edit className="h-4 w-4 text-green-600" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedPosition(position);
+                              setShowDeleteModal(true);
+                            }}
+                            className="p-1 rounded hover:bg-gray-100"
+                            title={t("Delete")}
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-600" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="py-8 text-center text-gray-500">
+                      {t("No positions found")}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
         {/* End Table */}
 
-      {/* Create / Edit Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={editingPosition ? t("Edit Position") : t("Add Position")}
-        width="600px"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("Name")} *
-            </label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.name ? "border-red-500" : ""
-              }`}
-            />
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("Description")}
-            </label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-            />
-          </div>
+        {/* Create / Edit Modal */}
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingPosition ? t("Edit Position") : t("Add Position")}
+          width="600px"
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("Name")} *
+              </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.name ? "border-red-500" : ""
+                }`}
+              />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("Description")}
+              </label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+              />
+            </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="px-4 py-2 border rounded hover:bg-gray-50"
-            >
-              {t("Cancel")}
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              {editingPosition ? t("Save Changes") : t("Add Position")}
-            </button>
-          </div>
-        </form>
-      </Modal>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                {t("Cancel")}
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                {editingPosition ? t("Save Changes") : t("Add Position")}
+              </button>
+            </div>
+          </form>
+        </Modal>
 
-      {/* Delete Confirmation */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title={t("Confirm Deletion")}
-        width="500px"
-      >
-        <DeleteConfirmation
+        {/* Delete Confirmation */}
+        <Modal
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleConfirmDelete}
-          title={t("Delete Position")}
-          message={t(
-            "Are you sure you want to delete this position? This action cannot be undone."
-          )}
-          itemName={selectedPosition?.name}
-        />
-      </Modal>
+          title={t("Confirm Deletion")}
+          width="500px"
+        >
+          <DeleteConfirmation
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleConfirmDelete}
+            title={t("Delete Position")}
+            message={t(
+              "Are you sure you want to delete this position? This action cannot be undone."
+            )}
+            itemName={selectedPosition?.name}
+          />
+        </Modal>
       </div>
     </div>
   );

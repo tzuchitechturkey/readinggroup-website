@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
-
-import NewsCard from "../Connect/NewsCard/NewsCard";
+import NewsCard from "@/components/ForPages/Events/NewsCard/NewsCard";
+import { LikeEvent, UnlikeEvent } from "@/api/events";
 
 const NewsHero = ({
   mainArticle = null,
@@ -19,6 +19,7 @@ const NewsHero = ({
   const [isLiked, setIsLiked] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [userId, setUserId] = useState();
 
   // Default data if no props are provided
   const defaultMainArticle = {
@@ -76,12 +77,18 @@ const NewsHero = ({
     // يمكن إضافة منطق التنقل هنا
   };
   // دالة الإعجاب
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      toast.success(t("Added to favorites!"));
-    } else {
-      toast.info(t("Removed from favorites"));
+  const handleLike = async () => {
+    try {
+      if (!isLiked) {
+        await LikeEvent({ user: userId, event: mainArticle?.id });
+        toast.success(t("Added to favorites!"));
+      } else {
+        await UnlikeEvent({ user: userId, event: mainArticle?.id });
+        toast.info(t("Removed from favorites"));
+      }
+      setIsLiked(!isLiked);
+    } catch (error) {
+      setErrorFn(error);
     }
   };
   // دالة فتح الصورة في عرض مكبر
@@ -109,7 +116,10 @@ const NewsHero = ({
   const article = mainArticle || defaultMainArticle;
   const articles = sideArticles.length > 0 ? sideArticles : defaultSideArticles;
   const [isShareOpen, setIsShareOpen] = useState(false);
-
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    setUserId(storedUserId);
+  }, []);
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}

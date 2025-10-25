@@ -25,7 +25,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetEvents, DeleteEventById } from "@/api/events";
 
 const EventsList = ({ onSectionChange }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
@@ -39,13 +39,16 @@ const EventsList = ({ onSectionChange }) => {
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [eventsData, setEventsData] = useState([]);
-  console.log("eventData:", eventsData);
   // Fetch Event from API
   const getEventsData = async (page = 0) => {
     setIsLoading(true);
     const offset = page * limit;
+
+    // params سيكون كائن حتى لو كان فقط search
+    const params = searchTerm ? { search: searchTerm } : {};
+
     try {
-      const res = await GetEvents(limit, offset, searchTerm);
+      const res = await GetEvents(limit, offset, params);
 
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
@@ -156,7 +159,7 @@ const EventsList = ({ onSectionChange }) => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4" dir={i18n.dir()}>
       {isLoading && <Loader />}
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">

@@ -275,6 +275,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     e.preventDefault();
 
     if (!validateForm()) {
+      toast.error(t("Please fix the errors in the form"));
       return;
     }
 
@@ -708,7 +709,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                     <Calendar className="mr-2 h-4 w-4" />
                     {formData.happened_at
                       ? format(new Date(formData.happened_at), "MM/dd/yyyy")
-                      : "Pick Happened At date"}
+                      : t("Pick Happened At date")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

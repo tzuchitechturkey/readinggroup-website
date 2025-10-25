@@ -2,87 +2,79 @@ import React from "react";
 
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Home, ArrowLeft, Search, Book } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import NotFoundImg from "@/assets/icons/img/404.png";
 
 function NotFound() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
-  const goHome = () => {
-    navigate("/");
-  };
-
-  const goBack = () => {
-    navigate(-1);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full text-center">
-        {/* Logo/Icon Section */}
-        <div className="mb-8">
-          <div className="mx-auto w-24 h-24 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20">
-            <Book className="w-12 h-12 text-white" />
-          </div>
-        </div>
-
-        {/* 404 Number */}
-        <div className="mb-6">
-          <h1 className="text-8xl sm:text-9xl lg:text-[12rem] font-bold text-white/20 leading-none">
-            404
+    <div className="min-h-screen flex flex-col items-start justify-start w-full">
+      <div
+        className="flex-1 w-full flex flex-row items-center justify-between px-8 md:px-20 lg:px-32 xl:px-48 py-8"
+        style={{ minHeight: "calc(100vh - 64px)" }}
+      >
+        {/* Left: Texts */}
+        <div
+          className="flex-1 flex flex-col items-start justify-center text-left pl-0 md:pl-0 mt-[-40px]"
+          style={{ alignItems: "flex-start", maxWidth: 460 }}
+        >
+          <h1
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-black mb-4"
+            style={{ letterSpacing: "-1px" }}
+          >
+            {t("Ooops...")}
           </h1>
-        </div>
-
-        {/* Error Message */}
-        <div className="mb-8">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-normal text-black mb-4">
             {t("Page Not Found")}
           </h2>
-          <p className="text-lg sm:text-xl text-white/80 max-w-md mx-auto leading-relaxed">
-            {t(
-              "Sorry, the page you are looking for doesn't exist or has been moved."
-            )}
+          <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-lg">
+            {t("Sorry, the content you're looking for doesn't exist.")}
+            <br />
+            {t("Either it was removed, or you mistyped the link.")}
           </p>
-        </div>
-
-        {/* Start Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-          <Button
-            onClick={goHome}
-            className="bg-primary hover:bg-white text-white hover:text-primary border-[1px] border-primary px-8 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 min-w-[160px]"
+          <button
+            onClick={() => navigate(-1)}
+            className="text-white font-semibold px-10 py-3 rounded-lg shadow-md border transition-all duration-200 text-lg focus:outline-none focus:ring-2 focus:ring-blue-300 hover:scale-105 hover:shadow-lg"
+            style={{
+              minWidth: 170,
+              background: "#0b63d6",
+              borderColor: "#0b63d6",
+            }}
           >
-            <Home className="w-5 h-5" />
-            {t("Go Home")}
-          </Button>
-
-          <Button
-            onClick={goBack}
-            variant="outline"
-            className="border-2 border-white/30 text-text hover:text-white hover:bg-white/10 px-8 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2 min-w-[160px]"
-          >
-            <ArrowLeft className="w-5 h-5" />
             {t("Go Back")}
-          </Button>
+          </button>
         </div>
-        {/* End Action Buttons */}
-
-        {/* Start Search Suggestion */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 text-white/60 text-sm">
-            <Search className="w-4 h-4" />
-            <span>
-              {t("Try searching for what you need from the main page")}
-            </span>
+        {/* Center: Image */}
+        <div
+          className="flex-1 flex justify-center items-start py-0 md:py-0"
+          style={{ minHeight: 700, maxWidth: 600 }}
+        >
+          <img
+            src={NotFoundImg}
+            alt="404 Not Found"
+            className="w-96 h-96 md:w-[28rem] md:h-[28rem] object-contain"
+            style={{ maxWidth: 448 }}
+          />
+        </div>
+        {/* Right: Large 404 */}
+        <div
+          className="hidden md:flex flex-col items-center justify-center flex-1 h-full"
+          style={{ minHeight: 500, maxWidth: 100 }}
+        >
+          <div
+            className="text-[10rem] lg:text-[14rem] font-extrabold text-white/60 select-none tracking-tight leading-none"
+            style={{
+              WebkitTextStroke: "3px #0b63d6",
+              color: "transparent",
+              lineHeight: 1,
+            }}
+          >
+            <span style={{ display: "block", lineHeight: 1 }}>4</span>
+            <span style={{ display: "block", lineHeight: 1 }}>0</span>
+            <span style={{ display: "block", lineHeight: 1 }}>4</span>
           </div>
         </div>
-        {/* End Search Suggestion */}
-
-        {/* Decorative Elements */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl -z-20" />
       </div>
     </div>
   );

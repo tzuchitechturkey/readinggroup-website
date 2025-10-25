@@ -22,7 +22,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import CreateOrEditHistory from "./CreateOrEditHistory";
 
 function History({ onSectionChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
   const [isLaoding, setIsLaoding] = useState(false);
@@ -88,7 +88,7 @@ function History({ onSectionChange }) {
     getData(0);
   }, [update]);
   return (
-    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col">
+    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col" dir={i18n.dir()}>
       {isLaoding && <Loader />}
       {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">

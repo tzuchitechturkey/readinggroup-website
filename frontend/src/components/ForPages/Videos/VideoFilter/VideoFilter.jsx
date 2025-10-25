@@ -8,27 +8,43 @@ import { toast } from "react-toastify";
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import { Button } from "@/components/ui/button";
+import { languages } from "@/constants/constants";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 function VideoFilter({
-  selectedDateRange,
-  setSelectedDateRange,
+  happenedAt,
+  setHappenedAt,
   setContentType,
   setIndexCategory,
   setLanguageContent,
   setOpenFilterModal,
+  contentType = [],
+  indexCategory = [],
+  languageContent = [],
+  categoriesList,
 }) {
   const { t } = useTranslation();
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
+
   const clearDateFilter = () => {
-    setSelectedDateRange({ startDate: null, endDate: null });
+    setHappenedAt(null);
   };
 
   const handleDateSelection = (dateSelection) => {
-    if (dateSelection.selection) {
-      setSelectedDateRange({
-        startDate: dateSelection.selection.startDate,
-        endDate: dateSelection.selection.endDate,
-      });
+    if (dateSelection.selection && dateSelection.selection.startDate) {
+      // Format date as YYYY-MM-DD for API
+      const formattedDate = format(
+        dateSelection.selection.startDate,
+        "yyyy-MM-dd"
+      );
+      setHappenedAt(formattedDate);
     }
     setIsDateModalOpen(false);
   };
@@ -57,7 +73,7 @@ function VideoFilter({
               <input
                 type="checkbox"
                 id="full-videos"
-                defaultChecked
+                checked={contentType.includes("full_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
@@ -84,7 +100,7 @@ function VideoFilter({
               <input
                 type="checkbox"
                 id="unit-video"
-                defaultChecked
+                checked={contentType.includes("unit_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
@@ -113,89 +129,55 @@ function VideoFilter({
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
-              {t("Index Category")}
+              {t("Categories")}
             </h3>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="health"
-                defaultChecked
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setIndexCategory((prev) => [...prev, "health"]);
-                  } else {
-                    setIndexCategory((prev) =>
-                      prev.filter((type) => type !== "health")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="health"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Health")}
-              </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                113
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="environment"
-                defaultChecked
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setIndexCategory((prev) => [...prev, "environment"]);
-                  } else {
-                    setIndexCategory((prev) =>
-                      prev.filter((type) => type !== "environment")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="environment"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Environment")}
-              </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                56
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="education"
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setIndexCategory((prev) => [...prev, "education"]);
-                  } else {
-                    setIndexCategory((prev) =>
-                      prev.filter((type) => type !== "education")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="education"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Education")}
-              </label>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded">45</span>
-            </div>
+            {categoriesList && categoriesList.length > 0 ? (
+              categoriesList.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex items-center gap-2 sm:gap-3"
+                >
+                  <input
+                    type="checkbox"
+                    id={`category-${category.id}`}
+                    checked={indexCategory.includes(category.name)}
+                    className="rounded border-gray-300 w-4 h-4"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setIndexCategory((prev) => [...prev, category.name]);
+                      } else {
+                        setIndexCategory((prev) =>
+                          prev.filter((name) => name !== category.name)
+                        );
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`category-${category.id}`}
+                    className="text-xs sm:text-sm text-gray-700 flex-1 cursor-pointer"
+                  >
+                    {t(category.name)}
+                  </label>
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      indexCategory.includes(category.name)
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {category.count || 0}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs sm:text-sm text-gray-500 text-center py-2">
+                {t("No categories available")}
+              </p>
+            )}
           </div>
         </div>
 
@@ -209,162 +191,123 @@ function VideoFilter({
           </div>
 
           <div className="space-y-2 sm:space-y-3">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="arabic"
-                defaultChecked
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setLanguageContent((prev) => [...prev, "ar"]);
-                  } else {
-                    setLanguageContent((prev) =>
-                      prev.filter((type) => type !== "ar")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="arabic"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Arabic")}
-              </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                113
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="chinese"
-                defaultChecked
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setLanguageContent((prev) => [...prev, "ch"]);
-                  } else {
-                    setLanguageContent((prev) =>
-                      prev.filter((type) => type !== "ch")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="chinese"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Chinese")}
-              </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                56
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="japanese"
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setLanguageContent((prev) => [...prev, "jp"]);
-                  } else {
-                    setLanguageContent((prev) =>
-                      prev.filter((type) => type !== "jp")
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="japanese"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Japanese")}
-              </label>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded">45</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Date Filter */}
-        <div className="">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <button
-              onClick={() => setIsDateModalOpen(true)}
-              className="flex items-center gap-2 text-sm sm:text-base font-medium text-gray-900 hover:text-blue-600 transition-colors"
-            >
-              <Calendar className="w-4 h-4" />
-              {t("Date")}
-            </button>
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          </div>
-
-          {/* Selected Date Display */}
-          {(selectedDateRange.startDate || selectedDateRange.endDate) && (
-            <div className="mb-3 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-start sm:items-center justify-between gap-2">
-                <div className="text-xs sm:text-sm text-blue-800 flex-1 min-w-0 break-words">
-                  {selectedDateRange.startDate && selectedDateRange.endDate
-                    ? `${format(
-                        selectedDateRange.startDate,
-                        "MMM dd"
-                      )} - ${format(selectedDateRange.endDate, "MMM dd, yyyy")}`
-                    : selectedDateRange.startDate
-                    ? format(selectedDateRange.startDate, "MMM dd, yyyy")
-                    : format(selectedDateRange.endDate, "MMM dd, yyyy")}
+            {languages && languages.length > 0 ? (
+              languages.map((lan) => (
+                <div key={lan} className="flex items-center gap-2 sm:gap-3">
+                  <input
+                    type="checkbox"
+                    id={`category-${lan}`}
+                    checked={languageContent.includes(lan)}
+                    className="rounded border-gray-300 w-4 h-4"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setLanguageContent((prev) => [...prev, lan]);
+                      } else {
+                        setLanguageContent((prev) =>
+                          prev.filter((name) => name !== lan)
+                        );
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={`category-${lan}`}
+                    className="text-xs sm:text-sm text-gray-700 flex-1 cursor-pointer"
+                  >
+                    {t(lan)}
+                  </label>
+                  {/* Start Count */}
+                  {/* <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      indexCategory.includes(lan)
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {lan || 0}
+                  </span> */}
+                  {/* End Count */}
                 </div>
-                <button
-                  onClick={() =>
-                    setSelectedDateRange({
-                      startDate: null,
-                      endDate: null,
-                    })
-                  }
-                  className="text-blue-600 hover:text-red-600 transition-colors p-1"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-gray-600 text-xs sm:text-sm px-3 py-2"
-              onClick={() =>
-                setSelectedDateRange({ startDate: null, endDate: null })
-              }
-            >
-              {t("Reset")}
-            </Button>
-            <Button
-              size="sm"
-              className="bg-primary hover:bg-white text-white hover:text-primary text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
-              onClick={() => {
-                toast.success(t("Filters applied successfully"));
-                setOpenFilterModal(false);
-              }}
-            >
-              {t("Apply")}
-            </Button>
+              ))
+            ) : (
+              <p className="text-xs sm:text-sm text-gray-500 text-center py-2">
+                {t("No categories available")}
+              </p>
+            )}
           </div>
         </div>
+        {/* Start Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Happened Date")}
+          </label>
+          <div className="relative">
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full text-left font-normal flex items-center",
+                    !happenedAt && "text-muted-foreground"
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {happenedAt ? (
+                    format(happenedAt, "dd-MM-yyyy")
+                  ) : (
+                    <span>{t("Pick Happened Date")}</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={happenedAt ? new Date(happenedAt) : undefined}
+                  onSelect={(date) => {
+                    if (!date) return;
+                    date.setHours(12);
+                    setHappenedAt(format(date, "yyyy-MM-dd"));
+                    setDateOpen(false);
+                  }}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            
+            {happenedAt && (
+              <button
+                onClick={() => setHappenedAt(null)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                type="button"
+              >
+                <X className="h-4 w-4 text-red-500" />
+              </button>
+            )}
+          </div>
+        </div>
+        {/* End Date */}
+
       </div>
       {/* DatePicker Modal  */}
       <Modal
         isOpen={isDateModalOpen}
         onClose={() => setIsDateModalOpen(false)}
-        title={t("Are you sure you want to send the data?")}
+        title={t("Select Date")}
       >
         <FilterDatePickerModal
           setIsDateModalOpen={setIsDateModalOpen}
-          selectedDateRange={selectedDateRange}
-          setSelectedDateRange={setSelectedDateRange}
+          selectedDateRange={{
+            startDate: happenedAt ? new Date(happenedAt) : null,
+            endDate: null,
+          }}
+          setSelectedDateRange={(range) => {
+            if (range.startDate) {
+              setHappenedAt(format(range.startDate, "yyyy-MM-dd"));
+            }
+          }}
           clearDateFilter={clearDateFilter}
           handleDateSelection={handleDateSelection}
         />

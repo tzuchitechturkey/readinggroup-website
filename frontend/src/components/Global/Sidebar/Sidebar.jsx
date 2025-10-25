@@ -122,25 +122,25 @@ export default function AppSidebar({
       //   onClick: () => onSectionChange("healthPosts"),
       //   icon: VaadinHealth,
       // },
-      {
-        title: "Tv",
-        onClick: "#",
-        icon: TV,
-        items: [
-          {
-            title: "News List",
-            onClick: () => onSectionChange("newsList"),
-          },
-          {
-            title: "Add/Edit News",
-            onClick: () => onSectionChange("createOrEditNews"),
-          },
-          {
-            title: "News Categories",
-            onClick: () => onSectionChange("newsCategories"),
-          },
-        ],
-      },
+      // {
+      //   title: "Tv",
+      //   onClick: "#",
+      //   icon: TV,
+      //   items: [
+      //     {
+      //       title: "News List",
+      //       onClick: () => onSectionChange("newsList"),
+      //     },
+      //     {
+      //       title: "Add/Edit News",
+      //       onClick: () => onSectionChange("createOrEditNews"),
+      //     },
+      //     {
+      //       title: "News Categories",
+      //       onClick: () => onSectionChange("newsCategories"),
+      //     },
+      //   ],
+      // },
       {
         title: "Events",
         onClick: "#",

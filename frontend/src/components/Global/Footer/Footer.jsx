@@ -1,6 +1,7 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
+import { FaFacebookF, FaXTwitter, FaInstagram } from "react-icons/fa6";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
@@ -9,10 +10,7 @@ function Footer({ authPages }) {
   // تحديد إذا كانت اللغة الحالية RTL
   const isMobile = useIsMobile(1224);
 
-  const rtlLanguages = ["ar", "fa", "he", "ur"];
-  const currentLang = localStorage.getItem("I18N_LANGUAGE") || "en";
-  const isRTL = rtlLanguages.includes(currentLang);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const linkList = [
     { name: t("Guided Reading"), href: "/guided-reading" },
     { name: t("Videos"), href: "/videos" },
@@ -25,55 +23,25 @@ function Footer({ authPages }) {
     {
       name: "Facebook",
       href: "https://www.facebook.com",
-      icon: "fa-brands fa-facebook-f",
+      icon: FaFacebookF,
     },
     {
       name: "Twitter",
       href: "https://www.twitter.com",
-      icon: "fa-brands fa-x-twitter",
+      icon: FaXTwitter,
     },
     {
       name: "Instagram",
       href: "https://www.instagram.com",
-      icon: "fa-brands fa-instagram",
+      icon: FaInstagram,
     },
   ];
+
   return (
     <div
       className={`px-4 sm:px-8 md:px-10 lg:px-20 ${authPages ? "w-full" : ""}`}
-      dir={isRTL ? "rtl" : "ltr"}
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
-      <div
-        className={`bg-[#fff] border mt-4  ${
-          authPages ? "border-[#999EAD] " : "border-[#141414]"
-        } w-full  md:w-fit rounded-lg flex md:flex-row  items-center justify-between px-2 py-1 gap-2 transition-all duration-300 ease-out hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5  `}
-      >
-        <div className="flex items-center justify-between w-full gap-2">
-          <input
-            aria-label={t("Enter your email")}
-            className={`w-44 ${
-              authPages
-                ? " placeholder:text-[#999EAD] text-[#999EAD] "
-                : " placeholder:text-[#141414] text-[#141414]"
-            }   border-none bg-transparent rounded-lg outline-0 p-2 text-xs sm:text-sm transition-colors duration-300`}
-            placeholder={t("Enter your email")}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              /* subscription stub - implement real submit later */
-              // console.log('subscribe clicked')
-            }}
-            className={` px-3 py-2 border rounded-md text-xs font-medium transition-colors duration-200 ${
-              authPages
-                ? "bg-[#ffffff] text-[#141414] border border-[#ffffff]/20"
-                : "bg-[#141414] text-[#ffffff]"
-            } hover:opacity-90    `}
-          >
-            {t("Subscribe")}
-          </button>
-        </div>
-      </div>
       {/* End Input  */}
       <div className="mt-4">
         <p
@@ -108,24 +76,30 @@ function Footer({ authPages }) {
         </ul>
         {/* Start Social Links and Language Dropdown */}
         <div className="flex items-center gap-3 sm:gap-4">
-          {socialLinks.map((link, index) => (
-            <a
-              key={index}
-              href={link.href}
-              className={`text-white group`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i
-                className={`${link.icon} w-5 h-5 text-xl ${
-                  authPages ? "#fff" : "text-text"
-                }  transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
-                aria-label={link.name}
-              />
-            </a>
-          ))}
+          {socialLinks.map((link, index) => {
+            const Icon = link.icon;
+            return (
+              <a
+                key={index}
+                href={link.href}
+                className="text-white group"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon
+                  size={22}
+                  className={`${
+                    authPages ? "text-white" : "text-text"
+                  } transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
+                  aria-label={link.name}
+                />
+              </a>
+            );
+          })}
+
           <LanguageDropdown iconColor={authPages ? "#fff" : "#141414"} />
         </div>
+
         {/* End Social Links */}
       </div>
     </div>

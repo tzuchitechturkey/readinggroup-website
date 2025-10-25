@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { CiSearch, CiLogin } from "react-icons/ci";
 import { Link, useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, LayoutDashboard } from "lucide-react";
 
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import UserProfileDropdown from "@/components/Global/UserProfileDropdown/UserProfileDropdown";
@@ -13,7 +13,12 @@ function UserIcons() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef(null);
   const navigate = useNavigate();
+  const [userType, setUserType] = useState(null);
 
+  useEffect(() => {
+    const storedUserType = localStorage.getItem("userType");
+    setUserType(storedUserType);
+  }, []);
   // Focus input when search opens
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -40,7 +45,7 @@ function UserIcons() {
   return (
     <div className="flex items-center gap-2 ">
       <div className="hidden sm:block border-l border-gray-300 h-6 w-[1px]" />
-      
+
       {/* Search Section */}
       <div className="flex items-center">
         <div
@@ -68,7 +73,7 @@ function UserIcons() {
             )}
           </form>
         </div>
-        
+
         <CiSearch
           onClick={() => setIsSearchOpen(!isSearchOpen)}
           className="cursor-pointer text-4xl sm:text-xl hover:text-primary transition-all duration-200 p-1 mx-2 sm:p-0 rounded-full hover:bg-gray-100"
@@ -81,6 +86,11 @@ function UserIcons() {
       ) : (
         <Link to="/auth/login">
           <CiLogin className="text-xl" />
+        </Link>
+      )}
+      {isLoggedIn && userType === "admin" && (
+        <Link to="/dashboard">
+          <LayoutDashboard className="text-xl" />
         </Link>
       )}
     </div>

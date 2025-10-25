@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,12 +7,37 @@ import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/Vid
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { mockVideos } from "@/mock/Viedeos";
+import { GetMyListedVideos, GetTopViewedVideos } from "@/api/videos";
 
 function VideosPageContent() {
-  const { t } = useTranslation();
-
+  const { i18n } = useTranslation();
+  const [topViewedVideos, setTopViewedVideos] = useState([]);
+  const [myListedVideos, setMyListedVideos] = useState([]);
+  const getMyListedVideos = async () => {
+    try {
+      const res = await GetMyListedVideos();
+      setMyListedVideos(res.data);
+    } catch (err) {
+      console.error("Failed to fetch my listed videos:", err);
+    }
+  };
+  const getTopViewedVideos = async () => {
+    try {
+      const res = await GetTopViewedVideos();
+      setTopViewedVideos(res.data);
+    } catch (err) {
+      console.error("Failed to fetch top viewed videos:", err);
+    }
+  };
+  useEffect(() => {
+    getTopViewedVideos();
+    getMyListedVideos();
+  }, []);
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div
+      className="min-h-screen bg-gray-100"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {/* Hero Section */}
       <VideosHeader />
 
@@ -25,7 +50,7 @@ function VideosPageContent() {
         <DynamicSection
           title="Top 5 in your like"
           titleClassName="text-[30px] font-medium mb-2"
-          data={mockVideos}
+          data={topViewedVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}
@@ -38,7 +63,7 @@ function VideosPageContent() {
         <DynamicSection
           title="My LIST"
           titleClassName="text-[30px] font-medium mb-2"
-          data={mockVideos}
+          data={myListedVideos}
           isSlider={false}
           cardName={VideoCard}
           viewMore={true}

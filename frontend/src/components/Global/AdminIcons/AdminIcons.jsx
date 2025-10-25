@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Link } from "react-router-dom";
+import { Home } from "lucide-react";
 
 import Notification from "../Notifications/Notifications";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
@@ -30,6 +31,23 @@ export default function AdminIcons() {
           <LanguageDropdown iconColor="#999EAD" />
         </div>
         {/* End Language Dropdown */}
+
+        {/* Start Got TO Home */}
+        <div
+          onClick={() => {
+            localStorage.removeItem("dashboardSelectedPost");
+            localStorage.removeItem("dashboardSelectedVideo");
+            localStorage.removeItem("dashboardSelectedNews");
+            localStorage.removeItem("dashboardSelectedEvent");
+            localStorage.removeItem("dashboardActiveParent");
+            localStorage.removeItem("dashboardActiveSection");
+          }}
+        >
+          <Link to="/" className="mx-3">
+            <Home size={20} color="#999EAD" />
+          </Link>
+        </div>
+        {/* End Got TO Home */}
       </div>
     </div>
   );

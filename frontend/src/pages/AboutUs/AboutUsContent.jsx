@@ -6,7 +6,7 @@ import AboutTeamContent from "./Team/TeamContent";
 import AboutHistoryContent from "./History/HistoryContent";
 
 function AboutUsContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("history");
 
   const tabs = [
@@ -15,7 +15,10 @@ function AboutUsContent() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div
+      className="max-w-7xl mx-auto p-6"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {/* Start Tabs */}
       <div className="mb-8">
         <div className="flex flex-wrap border-b border-gray-200">

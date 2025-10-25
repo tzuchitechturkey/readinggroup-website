@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
-const VideoCard = ({ item, showUnit = false, className = "" }) => {
+const VideoCard = ({ item, className = "" }) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -18,7 +18,6 @@ const VideoCard = ({ item, showUnit = false, className = "" }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
   return (
     <>
       <div
@@ -29,9 +28,9 @@ const VideoCard = ({ item, showUnit = false, className = "" }) => {
           <div className="relative h-full flex-shrink-0">
             {/* Start Image */}
             <img
-              src={item.image}
+              src={item.thumbnail || item?.thumbnail_url}
               alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-[200px] object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
 
@@ -41,20 +40,24 @@ const VideoCard = ({ item, showUnit = false, className = "" }) => {
 
             {/* Start Badges */}
             <div className="absolute top-3 left-3 flex gap-2">
-              {showUnit && (
-                <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                  {item.unit}
-                </span>
+              {item?.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {item?.tags?.map((tag, index) => (
+                    <span key={index} className="px-1 py-1 text-white">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 
             {/* Start Duration */}
             <div className="absolute top-5 left-5 flex items-center gap-3">
               <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-                {t(item?.category)}
+                {t(item?.category?.name)}
               </span>
               <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-                {item.duration}s
+                {item.duration} : 00 m
               </span>
             </div>
 

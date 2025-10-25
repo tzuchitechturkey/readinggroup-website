@@ -762,7 +762,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.report_type ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="">{t("Select Type")}</option>
+              <option value="" disabled hidden >{t("Select Type")}</option>
               <option value="news">{t("News")}</option>
               <option value="video">{t("Video")}</option>
             </select>
@@ -904,7 +904,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.country ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="">{t("Select Country")}</option>
+              <option value="" disabled hidden >{t("Select Country")}</option>
               {countries.map((country) => (
                 <option key={country.code} value={country.name}>
                   {country.name}
@@ -930,7 +930,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.language ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="">{t("Select Language")}</option>
+              <option value="" disabled hidden >{t("Select Language")}</option>
               {languages.map((lang) => (
                 <option key={lang.code} value={lang}>
                   {lang}

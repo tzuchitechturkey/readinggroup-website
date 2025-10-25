@@ -200,7 +200,9 @@ function RegisterForm() {
           />
           {/* Start Toggle show/hide password */}
           <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+            className={`absolute ${
+              i18n?.language === "ar" ? "left-3" : "right-3"
+            } top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer`}
             onClick={() => setShowPassword((prev) => !prev)}
             tabIndex={0}
             role="button"
@@ -276,7 +278,9 @@ function RegisterForm() {
           />
           {/* Start Toggle show/hide password */}
           <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+            className={`absolute ${
+              i18n?.language === "ar" ? "left-3" : "right-3"
+            } top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer`}
             onClick={() => setShowReTypePassword((prev) => !prev)}
             tabIndex={0}
             role="button"

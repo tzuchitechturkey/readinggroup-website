@@ -1,14 +1,21 @@
 import axios from "./axios";
 
-export async function GetEvents(limit, offset, search) {
-  return await axios.get(
-    `/events/?limit=${limit}&offset=${offset}&search=${search}`
-  );
-}
-export async function GetEventsbyFilter(limit, offset, filter) {
-  return await axios.get(
-    `/events/?limit=${limit}&offset=${offset}&filter=${filter}`
-  );
+export async function GetEvents(limit, offset, params = {}) {
+  const queryParams = new URLSearchParams();
+
+  queryParams.append("limit", limit);
+  queryParams.append("offset", offset);
+
+  if (params.search) queryParams.append("search", params.search);
+  if (params.ordering) queryParams.append("ordering", params.ordering);
+  if (params.section) queryParams.append("section", params.section);
+  if (params.category) queryParams.append("category", params.category);
+  if (params.country) queryParams.append("country", params.country);
+  if (params.writer) queryParams.append("writer", params.writer);
+  if (params.language) queryParams.append("language", params.language);
+  if (params.happened_at) queryParams.append("happened_at", params.happened_at);
+
+  return await axios.get(`/events/?${queryParams.toString()}`);
 }
 
 export async function CreateEvent(data) {
@@ -71,4 +78,34 @@ export async function GetEventSectionById(id) {
 
 export async function DeleteEventSection(id) {
   return await axios.delete(`/event-sections/${id}/`);
+}
+
+// /top5-events-sections/
+export async function GetTop5EventsBySectionId(sectionId) {
+  return await axios.get(`/top5-events/${sectionId}`);
+}
+
+// Like Event
+export async function LikeEvent(data) {
+  return await axios.post(`/likes/events/`, data);
+}
+export async function UnlikeEvent(data) {
+  return await axios.delete(`/likes/events/`, { data });
+}
+
+// Comment a Event
+export async function GetCommentEvent(data) {
+  return await axios.get(`/comments/events/`, data);
+}
+
+export async function CommentEvent(data) {
+  return await axios.post(`/comments/events/`, data);
+}
+
+export async function EditCommentEvent(data) {
+  return await axios.put(`/comments/events/`, data);
+}
+
+export async function DeleteCommentEvent(data) {
+  return await axios.delete(`/comments/events/`, data);
 }
