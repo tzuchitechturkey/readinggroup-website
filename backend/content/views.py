@@ -134,7 +134,7 @@ class VideoViewSet(BaseContentViewSet):
         happened_at = params.get('happened_at')
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
-
+        
         return queryset
 
 class PostViewSet(BaseContentViewSet):
@@ -249,6 +249,8 @@ class EventViewSet(BaseContentViewSet):
         happened_at = params.get('happened_at')
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
+            
+        return queryset
 
 class TvProgramViewSet(BaseContentViewSet):
     """ViewSet for managing TvProgram content."""
