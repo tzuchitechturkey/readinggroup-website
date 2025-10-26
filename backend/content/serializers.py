@@ -6,6 +6,9 @@ from .models import (
     HistoryEntry,
     Post,
     TeamMember,
+    Comments,
+    Reply,
+    LikeComment,
     TvProgram,
     Video,
     WeeklyMoment,
@@ -72,10 +75,45 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
         model = PositionTeamMember
         fields = ["id", "name", "description"]
 
+
+class ReplySerializer(serializers.ModelSerializer):
+    """Serializer for reply model attached to comments."""
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Reply
+        fields = ("id", "user", "text", "created_at")
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    """Serializer for comments with nested replies and like info."""
+    user = serializers.StringRelatedField(read_only=True)
+    replies = ReplySerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comments
+        fields = ("id", "user", "text", "created_at", "likes_count", "is_liked", "replies")
+
+    def get_likes_count(self, obj):
+        # reverse related name on LikeComment is 'likes'
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        user = request.user if request else None
+        if user and user.is_authenticated:
+            return LikeComment.objects.filter(comment=obj, user=user).exists()
+        return False
+
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
+    # nested comments and likes info
+    comments = CommentsSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     class Meta:
         model = Video
@@ -86,8 +124,12 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def get_is_liked(self, obj):
         user = self.context.get("request").user if self.context.get("request") else None
         if user and user.is_authenticated:
-            return obj.likes.filter(user=user).exists()
+            likes_rel = getattr(obj, "likes", None)
+            if likes_rel is not None:
+                return likes_rel.filter(user=user).exists()
         return False
+    def get_likes_count(self, obj):
+        return obj.likes.count()
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -99,7 +141,9 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
     datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
-
+    # nested comments serialized with CommentsSerializer
+    comments = CommentsSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     class Meta:
         model = Post
@@ -115,34 +159,57 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = PostCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        # include nested comments with replies and like info
+        data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
+        data["likes_count"] = self.get_likes_count(instance)
         return data
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
 
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
+    # nested comments and likes
+    comments = CommentsSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
     section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
     is_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Event
         fields = "__all__"
         file_fields = ("image",)
         extra_fields = ["is_liked"]
-        
+
     def get_is_liked(self, obj):
         user = self.context.get("request").user if self.context.get("request") else None
         if user and user.is_authenticated:
             return obj.likes.filter(user=user).exists()
         return False
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
         data["section"] = EventSectionSerializer(instance.section, context=self.context).data if instance.section else None
+        # include comments and likes count for models that have GenericRelation
+        try:
+            data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
+        except Exception:
+            data["comments"] = []
+        data["likes_count"] = self.get_likes_count(instance)
         return data
+
+    def get_likes_count(self, obj):
+        likes_rel = getattr(obj, "likes", None)
+        return likes_rel.count() if likes_rel is not None else 0
 
 class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("air_date", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=TvProgramCategory.objects.all(), write_only=True, required=False)
+    # nested comments and likes info
+    comments = CommentsSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField()
 
     is_liked = serializers.SerializerMethodField()
     class Meta:
@@ -156,6 +223,8 @@ class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.likes.filter(user=user).exists()
         return False
+    def get_likes_count(self, obj):
+        return obj.likes.count()
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

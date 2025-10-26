@@ -13,6 +13,10 @@ from .models import (
     TvProgramCategory,
     PositionTeamMember,
     EventSection,
+    Like,
+    Comments,
+    Reply,
+    LikeComment,
 )
 
 
@@ -91,3 +95,23 @@ class PositionTeamMemberAdmin(admin.ModelAdmin):
 class EventSectionAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
+    
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ("user", "content_type", "object_id", "created_at")
+    search_fields = ("user__username",)
+    
+@admin.register(Comments)
+class CommentsAdmin(admin.ModelAdmin):
+    list_display = ("user", "content_type", "object_id", "created_at")
+    search_fields = ("user__username", "comment_text")
+
+@admin.register(Reply)
+class ReplyAdmin(admin.ModelAdmin):
+    list_display = ("user", "comment", "created_at")
+    search_fields = ("user__username", "reply_text")
+    
+@admin.register(LikeComment)
+class LikeCommentAdmin(admin.ModelAdmin):
+    list_display = ("user", "comment", "created_at")
+    search_fields = ("user__username",)

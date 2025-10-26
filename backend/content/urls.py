@@ -17,6 +17,8 @@ from .views import (
     Top5VideosView,
     Top1VideoView,
     Top5VideosByLikesView,
+    CommentsViewSet,
+    ReplyViewSet,
 )
 
 app_name = "content"
@@ -35,6 +37,9 @@ router.register(r"event-categories", EventCategoryViewSet, basename="event-categ
 router.register(r"tvprogram-categories", TvProgramCategoryViewSet, basename="tvprogram-category")
 router.register(r"position-team-members", PositionTeamMemberViewSet, basename="position-team-member")
 router.register(r"event-sections", EventSectionViewSet, basename="event-section")
+router.register(r"comments", CommentsViewSet, basename="comments")
+router.register(r"replies", ReplyViewSet, basename="reply")
+
 
 urlpatterns = router.urls + [
     path('top5-videos/', Top5VideosView.as_view(), name='top5-videos'),

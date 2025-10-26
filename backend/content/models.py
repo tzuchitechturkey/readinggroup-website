@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.conf import settings
 from .enums import (
     PostStatus,
@@ -36,6 +38,9 @@ class Video(TimestampedModel):
     season = models.CharField(max_length=32, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
+    # Generic relations to Comments and Like (Comments/Like are generic models)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
+    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='likes')
 
     class Meta:
         ordering = ("-happened_at", "-created_at")
@@ -80,6 +85,8 @@ class Post(TimestampedModel):
     metadata = models.CharField(max_length=255, blank=True)
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='post_likes')
 
     class Meta:
         ordering = ("-created_at",)
@@ -101,6 +108,8 @@ class Event(TimestampedModel):
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
     section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
     summary = models.TextField(blank=True)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
+    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='event_likes')
 
     class Meta:
         ordering = ("-happened_at", "title")
@@ -120,6 +129,8 @@ class TvProgram(TimestampedModel):
     category = models.ForeignKey('TvProgramCategory', on_delete=models.SET_NULL, null=True, blank=True)
     is_live = models.BooleanField(default=False)
     views = models.PositiveIntegerField(default=0)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='tvprograms')
+    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='tvprograms')
 
     class Meta:
         ordering = ("-air_date", "title")
@@ -260,3 +271,43 @@ class EventSection(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
+
+class Comments(TimestampedModel):
+    """Comments for all models."""
+    content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    text = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        
+class Reply(TimestampedModel):
+    """Replies to comments."""
+    comment = models.ForeignKey(Comments, related_name='replies', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    text = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+class LikeComment(TimestampedModel):
+    """Likes for comments."""
+    comment = models.ForeignKey(Comments, related_name='likes', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('comment', 'user'),)
+        
+#add new models for like to all models
+class Like(TimestampedModel):
+    """Likes for videos."""
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('content_type', 'object_id', 'user'),)

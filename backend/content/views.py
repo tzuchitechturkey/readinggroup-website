@@ -25,6 +25,8 @@ from .models import (
     EventCategory,
     PositionTeamMember,
     EventSection,
+    Comments,
+    Reply,
 )
 from .serializers import (
     EventSerializer,
@@ -40,6 +42,8 @@ from .serializers import (
     EventCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
+    CommentsSerializer,
+    ReplySerializer,
 )
 
 
@@ -289,6 +293,21 @@ class TeamMemberViewSet(BaseContentViewSet):
             queryset = queryset.filter(position__name__iexact=position)
 
         return queryset
+    
+    
+class CommentsViewSet(BaseContentViewSet):
+    """ViewSet for managing Comments content."""
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    search_fields = ("user__username", "content_type", "object_id", "text")
+    ordering_fields = ("created_at",)
+    
+class ReplyViewSet(BaseContentViewSet):
+    """ViewSet for managing Reply content."""
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    search_fields = ("user__username", "comment__id", "text")
+    ordering_fields = ("created_at",)
 
 class HistoryEntryViewSet(BaseContentViewSet):
     """ViewSet for managing HistoryEntry content."""
