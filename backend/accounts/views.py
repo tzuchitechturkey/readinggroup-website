@@ -444,7 +444,7 @@ class ResetTOTPAPIView(APIView):
             required=["username", "email"],
         ),
         responses={
-            200: openapi.Response("TOTP reset and email sent"),
+            200: openapi.Response("TOTP reset and QR returned (email disabled)"),
             400: "Validation Error",
             404: "User not found",
         },
@@ -460,52 +460,23 @@ class ResetTOTPAPIView(APIView):
         if not user.totp_secret:
             return Response({"error": "TOTP is not enabled for this user"}, status=400)
 
-        # Generate new TOTP secret
+        # Generate new TOTP secret and mark that user must re-setup TOTP on next login
         new_secret = generate_totp_secret()
         user.totp_secret = new_secret
-        user.save()
+        user.is_first_login = True
+        # persist only the changed fields
+        user.save(update_fields=["totp_secret", "is_first_login"])
 
-        # Create QR code
+        # Create QR code (base64) and return it in the response so frontend can display it.
         uri = get_totp_uri(new_secret, user.username)
         qr_base64 = generate_qr_code_base64(uri)
-        if qr_base64.startswith("data:image"):
-            qr_base64 = qr_base64.split(",")[1]
 
-        qr_image_data = base64.b64decode(qr_base64)
-
-        # Create email
-        subject = "Your TOTP Reset Instructions"
-        from_email = settings.DEFAULT_FROM_EMAIL
-        to = [user.email]
-        text_content = f"Hi {user.username},\nYour TOTP has been reset. Please check your email in HTML view to see the QR code."
-
-        html_content = f"""
-        <html>
-        <body>
-            <p>Hi {user.username},</p>
-            <p>Your TOTP secret has been <strong>reset</strong>.</p>
-            <p>Please scan the new QR code below using your authenticator app:</p>
-            <img src=\"cid:qr_code\" alt=\"QR Code\" />
-            <p>If you did not request this, please contact support immediately.</p>
-        </body>
-        </html>
-        """
-
-        # Build email
-        email_msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-        email_msg.attach_alternative(html_content, "text/html")
-
-        # Attach image
-        qr_image = MIMEImage(qr_image_data)
-        qr_image.add_header("Content-ID", "<qr_code>")
-        qr_image.add_header("Content-Disposition", "inline", filename="qrcode.png")
-        email_msg.attach(qr_image)
-
-        # Send
-        try:
-            email_msg.send()
-            return Response(
-                {"message": "TOTP reset and email sent successfully"}, status=200
-            )
-        except Exception as e:
-            return Response({"error": f"Failed to send email: {str(e)}"}, status=500)
+        # Don't send email anymore — the QR is returned in the API response.
+        return Response(
+            {
+                "message": "TOTP reset successfully",
+                "qr": qr_base64,
+                "uri": uri,
+            },
+            status=200,
+        )
