@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -47,27 +48,6 @@ from .serializers import (
 )
 
 
-# Top 5 videos by views
-class Top5VideosView(APIView):
-    def get(self, request):
-        top_videos = Video.top_by_views()
-        serializer = VideoSerializer(top_videos, many=True, context={'request': request})
-        return Response(serializer.data)
-
-# Top 1 video by views
-class Top1VideoView(APIView):
-    def get(self, request):
-        top_video = Video.top1_by_views()
-        serializer = VideoSerializer(top_video, context={'request': request}) if top_video else None
-        return Response(serializer.data if serializer else None)
-
-# Top 5 videos by likes
-class Top5VideosByLikesView(APIView):
-    def get(self, request):
-        top_videos = Video.top_by_likes()
-        serializer = VideoSerializer(top_videos, many=True, context={'request': request})
-        return Response(serializer.data)
-    
 class IsStaffOrReadOnly(BasePermission):
     """Allow read access to everyone but limit writes to staff members."""
 
@@ -301,13 +281,43 @@ class CommentsViewSet(BaseContentViewSet):
     """ViewSet for managing Comments content."""
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
+    # enable pagination for comments list
+    pagination_class = LimitOffsetPagination
     search_fields = ("user__username", "content_type", "object_id", "text")
     ordering_fields = ("created_at",)
+
+    @action(detail=True, methods=("get", "post"), url_path="replies", url_name="replies")
+    def replies(self, request, pk=None):
+        """List (paginated) replies for a specific comment, or create a reply tied to that comment.
+
+        GET  /api/v1/comments/{id}/replies/?limit=10&offset=0  -> paginated list
+        POST /api/v1/comments/{id}/replies/  -> create a reply (body: {"text": "..."})
+        """
+        comment = self.get_object()
+        if request.method == "POST":
+            data = request.data.copy()
+            # ensure the reply is attached to this comment
+            data["comment"] = comment.pk
+            serializer = ReplySerializer(data=data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # GET: return paginated replies
+        qs = comment.replies.all()
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = ReplySerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+        serializer = ReplySerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
     
 class ReplyViewSet(BaseContentViewSet):
     """ViewSet for managing Reply content."""
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
+    # paginate replies list (global setting applies but set explicitly)
+    pagination_class = LimitOffsetPagination
     search_fields = ("user__username", "comment__id", "text")
     ordering_fields = ("created_at",)
 

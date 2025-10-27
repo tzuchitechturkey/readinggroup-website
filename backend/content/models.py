@@ -38,31 +38,14 @@ class Video(TimestampedModel):
     season = models.CharField(max_length=32, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
-    # Generic relations to Comments and Like (Comments/Like are generic models)
+    # Generic relations to Comments (Comments are generic models)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
-    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='likes')
 
     class Meta:
         ordering = ("-happened_at", "-created_at")
 
     def __str__(self) -> str:
         return self.title
-
-    @classmethod
-    def top_by_views(cls, n=5):
-        """Return top n videos by views."""
-        return cls.objects.order_by('-views')[:n]
-
-    @classmethod
-    def top1_by_views(cls):
-        """Return top 1 video by views."""
-        return cls.objects.order_by('-views').first()
-
-    @classmethod
-    def top_by_likes(cls, n=5):
-        """Return top n videos by like count."""
-        return cls.objects.annotate(like_count=models.Count('likes')).order_by('-like_count')[:n]
-
 
 class Post(TimestampedModel):
     """Landing posts that appear across the application."""
@@ -86,14 +69,11 @@ class Post(TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
-    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='post_likes')
-
     class Meta:
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
         return self.title
-
 class Event(TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)
@@ -109,14 +89,11 @@ class Event(TimestampedModel):
     section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
     summary = models.TextField(blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
-    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='event_likes')
-
     class Meta:
         ordering = ("-happened_at", "title")
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
-
 
 class TvProgram(TimestampedModel):
     """Represents TV/news programs curated for the TV section."""
@@ -130,28 +107,12 @@ class TvProgram(TimestampedModel):
     is_live = models.BooleanField(default=False)
     views = models.PositiveIntegerField(default=0)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='tvprograms')
-    likes = GenericRelation('Like', content_type_field='content_type', object_id_field='object_id', related_query_name='tvprograms')
 
     class Meta:
         ordering = ("-air_date", "title")
 
     def __str__(self) -> str:
         return self.title
-
-    @classmethod
-    def top_by_views(cls, n=5):
-        """Return top n tv programs by views."""
-        return cls.objects.order_by('-views')[:n]
-
-    @classmethod
-    def top1_by_views(cls):
-        """Return top 1 tv program by views."""
-        return cls.objects.order_by('-views').first()
-
-    @classmethod
-    def top_by_likes(cls, n=5):
-        """Return top n tv programs by like count."""
-        return cls.objects.annotate(like_count=models.Count('likes')).order_by('-like_count')[:n]
 
 class WeeklyMoment(TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
@@ -292,22 +253,3 @@ class Reply(TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
-
-class LikeComment(TimestampedModel):
-    """Likes for comments."""
-    comment = models.ForeignKey(Comments, related_name='likes', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = (('comment', 'user'),)
-        
-#add new models for like to all models
-class Like(TimestampedModel):
-    """Likes for videos."""
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = (('content_type', 'object_id', 'user'),)
