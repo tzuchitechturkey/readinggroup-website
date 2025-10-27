@@ -475,7 +475,7 @@ function PostCommentsSection({ postId }) {
                       {/* End Writer Name */}
                       {/* Start Date */}
                       <span className="text-gray-400 text-xs">
-                        {c.created_at}
+                        {c.created_at.split("T")[0]}
                       </span>
                       {/* End Date */}
                     </div>

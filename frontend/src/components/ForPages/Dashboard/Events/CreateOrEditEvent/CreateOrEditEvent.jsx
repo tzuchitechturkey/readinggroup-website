@@ -43,6 +43,8 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const [sectionSearchValue, setSectionSearchValue] = useState("");
   const [openHappendAt, setOpenHappendAt] = useState(false);
+  const [castInput, setCastInput] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
 
   const [formData, setFormData] = useState({
     category: "",
@@ -57,6 +59,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     section: "",
     happened_at: "",
     summary: "",
+    thumbnail: null,
+    thumbnail_url: "",
+    video_url: "",
+    cast: [],
+    tags: [],
   });
 
   const [imagePreview, setImagePreview] = useState("");
@@ -104,8 +111,17 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         section: event.section || "",
         summary: event.summary || "",
         happened_at: event.happened_at || "",
+        thumbnail: null,
+        thumbnail_url: event.thumbnail_url || "",
+        video_url: event.video_url || "",
+        cast: event.cast || [],
+        tags: event.tags || [],
       });
-      setImagePreview(event.image || event.image_url || "");
+      setImagePreview(
+        event?.report_type === "videos"
+          ? event.thumbnail || event.thumbnail_url
+          : event.image || event.image_url
+      );
     } else {
       setFormData({
         category: "",
@@ -120,6 +136,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         section: "",
         summary: "",
         happened_at: "",
+        thumbnail: null,
+        thumbnail_url: "",
+        video_url: "",
+        cast: [],
+        tags: [],
       });
       setImagePreview("");
     }
@@ -212,6 +233,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       duration_minutes: "",
       section: "",
       summary: "",
+      happened_at: "",
+      thumbnail: null,
+      thumbnail_url: "",
+      video_url: "",
+      cast: [],
+      tags: [],
     });
 
     // Clean up existing preview
@@ -220,6 +247,8 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
 
     setImagePreview("");
+    setCastInput("");
+    setTagsInput("");
   };
 
   const handleInputChange = (e) => {
@@ -269,6 +298,66 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
 
+  // Handle cast input
+  const handleCastInput = (e) => {
+    if (e.key === "Enter" && castInput.trim()) {
+      e.preventDefault();
+      if (!formData?.cast.includes(castInput.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          cast: [...prev.cast, castInput.trim()],
+        }));
+      }
+      setCastInput("");
+
+      // Clear error when adding cast
+      if (errors.cast) {
+        setErrors((prev) => ({
+          ...prev,
+          cast: "",
+        }));
+      }
+    }
+  };
+
+  // Remove cast
+  const removeCast = (castToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      cast: prev.cast.filter((item) => item !== castToRemove),
+    }));
+  };
+
+  // Handle tags input
+  const handleTagsInput = (e) => {
+    if (e.key === "Enter" && tagsInput.trim()) {
+      e.preventDefault();
+      if (!formData?.tags.includes(tagsInput.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          tags: [...prev.tags, tagsInput.trim()],
+        }));
+      }
+      setTagsInput("");
+
+      // Clear error when adding tag
+      if (errors.tags) {
+        setErrors((prev) => ({
+          ...prev,
+          tags: "",
+        }));
+      }
+    }
+  };
+
+  // Remove tag
+  const removeTag = (tagToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
+    }));
+  };
+
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -315,6 +404,21 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.summary = t("Summary is required");
     }
 
+    // Validate video fields if report type is "videos"
+    if (formData.report_type === "videos") {
+      if (!formData?.video_url.trim()) {
+        newErrors.video_url = t("Video URL is required");
+      }
+
+      if (!formData?.cast || formData?.cast.length === 0) {
+        newErrors.cast = t("Cast is required");
+      }
+
+      if (!formData?.tags || formData?.tags.length === 0) {
+        newErrors.tags = t("Tags are required");
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -335,12 +439,22 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     submitData.append("category", formData?.category?.id || formData?.category);
     submitData.append("title", formData.title);
     submitData.append("writer", formData.writer);
-    submitData.append("image_url", formData.image_url);
     submitData.append("report_type", formData.report_type);
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
     submitData.append("duration_minutes", formData.duration_minutes);
     submitData.append("section", formData.section);
+    if (formData.image) {
+      submitData.append(
+        formData.report_type === "videos" ? "thumbnail" : "image",
+        formData.image
+      );
+    }
+
+    submitData.append(
+      formData?.report_type === "videos" ? "thumbnail_url" : "image_url",
+      formData.image_url
+    );
     if (formData?.happened_at) {
       const formattedDate = format(
         new Date(formData.happened_at),
@@ -349,10 +463,27 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       submitData.append("happened_at", formattedDate);
     }
     submitData.append("summary", formData.summary);
-    // Append file if it exists
-    if (formData.image) {
-      submitData.append("image", formData.image);
+
+    // Append video fields if report type is "videos"
+    if (formData.report_type === "videos") {
+      submitData.append("video_url", formData.video_url);
+      // Append cast as JSON array
+      if (formData.cast && formData.cast.length > 0) {
+        submitData.append("cast", JSON.stringify(formData.cast));
+      }
+      // Append tags as JSON array
+      if (formData.tags && formData.tags.length > 0) {
+        submitData.append("tags", JSON.stringify(formData.tags));
+      }
+
+      // submitData.append("thumbnail_url", formData.thumbnail_url);
+      // Append thumbnail file if it exists
+      // if (formData.thumbnail) {
+      //   submitData.append("thumbnail", formData.thumbnail);
+      // }
     }
+
+    // Append file if it exists
 
     setIsLoading(true);
     try {
@@ -442,7 +573,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         {/* Start Image Upload Section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Event Image")} *
+            {formData?.report_type === "videos"
+              ? t("Event Video Thumbnail")
+              : t("Event Image")}{" "}
+            *
           </label>
           <div className="flex items-center gap-4">
             <div
@@ -496,7 +630,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             name="image_url"
             value={formData.image_url}
             onChange={handleInputChange}
-            placeholder={t("Enter image URL as alternative to file upload")}
+            placeholder={
+              formData?.report_type === "videos"
+                ? t("Enter thumbnail URL as alternative to file upload")
+                : t("Enter image URL as alternative to file upload")
+            }
           />
           <p className="text-xs text-gray-500 mt-1">
             {t("You can either upload a file above or provide a URL here")}
@@ -766,7 +904,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <option value="" disabled hidden>
                 {t("Select Type")}
               </option>
-              <option value="news">{t("News")}</option>
+              {/* <option value="news">{t("News")}</option> */}
               <option value="videos">{t("Videos")}</option>
               <option value="reports">{t("Reports")}</option>
             </select>
@@ -913,7 +1051,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </option>
               {countries.map((country) => (
                 <option key={country.code} value={country.name}>
-                  {country.name}
+                  {t(country.name)}
                 </option>
               ))}
             </select>
@@ -941,7 +1079,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </option>
               {languages.map((lang) => (
                 <option key={lang.code} value={lang}>
-                  {lang}
+                  {t(lang)}
                 </option>
               ))}
             </select>
@@ -997,7 +1135,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   <Calendar className="mr-2 h-4 w-4" />
                   {formData.happened_at
                     ? format(new Date(formData.happened_at), "MM/dd/yyyy")
-                    : "Pick Happened At date"}
+                    : t("Pick Happened At date")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -1023,6 +1161,122 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <p className="text-red-500 text-xs mt-1">{errors.happened_at}</p>
             )}
           </div>
+          {/* End Air Date */}
+
+          {/* Start Video Fields - Only show if report_type is videos */}
+          {formData.report_type === "videos" && (
+            <>
+              {/* Start Video URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("Video URL")} *
+                </label>
+                <input
+                  type="text"
+                  name="video_url"
+                  value={formData.video_url}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 border rounded-lg outline-none ${
+                    errors.video_url ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder={t("Enter video URL (YouTube)")}
+                />
+                {errors.video_url && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.video_url}
+                  </p>
+                )}
+              </div>
+              {/* End Video URL */}
+
+              {/* Start Cast */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("Cast")} *
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={castInput}
+                    onChange={(e) => setCastInput(e.target.value)}
+                    onKeyPress={handleCastInput}
+                    className={`flex-1 p-3 border rounded-lg outline-none ${
+                      errors.cast ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder={t("Add cast member (press Enter)")}
+                  />
+                </div>
+                {formData.cast && formData.cast.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.cast.map((cast, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                      >
+                        <span>{cast}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeCast(cast)}
+                          className="text-blue-800 hover:text-red-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {errors.cast && (
+                  <p className="text-red-500 text-xs mt-1">{errors.cast}</p>
+                )}
+              </div>
+              {/* End Cast */}
+
+              {/* Start Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("Tags")} *
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    onKeyPress={handleTagsInput}
+                    className={`flex-1 p-3 border rounded-lg outline-none ${
+                      errors.tags ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder={t("Add tags (press Enter)")}
+                  />
+                </div>
+                {formData.tags && formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {formData.tags.map((tag, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full"
+                      >
+                        <Tag size={14} />
+                        <span>{tag}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="text-purple-800 hover:text-red-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {errors.tags && (
+                  <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
+                )}
+              </div>
+              {/* End Tags */}
+            </>
+          )}
+          {/* End Video Fields */}
+
           {/* End Air Date */}
         </div>
         {/* End Two-Column Grid */}

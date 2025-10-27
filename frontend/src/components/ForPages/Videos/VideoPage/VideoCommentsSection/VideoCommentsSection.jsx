@@ -454,14 +454,14 @@ function VideoCommentsSection({ videoId }) {
                 <div className="flex items-start gap-2">
                   <img
                     src={c.avatar || "/Beared Guy02-min 1.png"}
-                    alt={c.user}
+                    alt={c.user?.display_name}
                     className="w-8 h-8 rounded-full object-cover"
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       {/* Start Writer Name */}
                       <span className="font-semibold text-sm text-gray-900">
-                        {c.user}
+                        {c.user?.display_name}
                       </span>
                       {/* End Writer Name */}
                       {/* Start Date */}
@@ -577,16 +577,16 @@ function VideoCommentsSection({ videoId }) {
                             >
                               <img
                                 src={reply.avatar || "/Beared Guy02-min 1.png"}
-                                alt={reply.user}
+                                alt={reply.user?.display_name}
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                   <span className="font-semibold text-xs text-gray-900">
-                                    {reply.user}
+                                    {reply.user?.display_name}
                                   </span>
                                   <span className="text-gray-400 text-xs">
-                                    {reply.created_at}
+                                    {reply.created_at.split("T")[0]}
                                   </span>
                                 </div>
                                 {editingReplyId === reply.id ? (
