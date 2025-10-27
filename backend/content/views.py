@@ -28,6 +28,7 @@ from .models import (
     EventSection,
     Comments,
     Reply,
+    Like,
 )
 from .serializers import (
     EventSerializer,
@@ -62,6 +63,30 @@ class BaseContentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
+    def annotate_likes(self, queryset):
+        """Annotate a queryset with likes_count and (when request.user authenticated) has_liked."""
+        from django.db.models import Count, Exists, OuterRef
+        from django.contrib.contenttypes.models import ContentType
+
+        request = getattr(self, 'request', None)
+        # annotate total likes into a non-conflicting name to avoid model property collisions
+        try:
+            queryset = queryset.annotate(annotated_likes_count=Count('likes'))
+        except Exception:
+            # if model doesn't have 'likes' relation, skip
+            return queryset
+
+        # annotate whether the current user has liked each item into a non-conflicting name
+        if request and getattr(request, 'user', None) and request.user.is_authenticated:
+            ct = ContentType.objects.get_for_model(queryset.model)
+            likes_subq = Like.objects.filter(content_type=ct, object_id=OuterRef('pk'), user=request.user)
+            try:
+                queryset = queryset.annotate(annotated_has_liked=Exists(likes_subq))
+            except Exception:
+                # fallback: ignore annotation if something fails
+                pass
+        return queryset
+
 
 class VideoViewSet(BaseContentViewSet):
     queryset = Video.objects.all()
@@ -85,6 +110,8 @@ class VideoViewSet(BaseContentViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        # annotate likes info
+        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         video_type = params.getlist('video_type')
@@ -135,6 +162,8 @@ class PostViewSet(BaseContentViewSet):
     def get_queryset(self):
         
         queryset = super().get_queryset()
+        # annotate likes info
+        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         created_at = params.get("created_at")
@@ -192,6 +221,8 @@ class EventViewSet(BaseContentViewSet):
     def get_queryset(self):
         
         queryset = super().get_queryset()
+        # annotate likes info
+        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         section = params.get('section')
@@ -230,6 +261,14 @@ class EventViewSet(BaseContentViewSet):
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
             
+        report_type = params.get('report_type')
+        if report_type:
+            values = []
+            for item in report_type.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(report_type__in=values)
+            
         return queryset
 
 class TvProgramViewSet(BaseContentViewSet):
@@ -238,6 +277,10 @@ class TvProgramViewSet(BaseContentViewSet):
     serializer_class = TvProgramSerializer
     search_fields = ("title", "description", "writer", "category")
     ordering_fields = ("air_date", "created_at")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return self.annotate_likes(queryset)
 
 class WeeklyMomentViewSet(BaseContentViewSet):
     """ViewSet for managing WeeklyMoment content."""
@@ -287,16 +330,16 @@ class CommentsViewSet(BaseContentViewSet):
     ordering_fields = ("created_at",)
 
     def get_queryset(self):
-        """Filter comments by object_id and content_type if provided."""
+        """Filter comments by object_id and content_type if provided, then annotate likes."""
         from django.contrib.contenttypes.models import ContentType
-        
+
         queryset = super().get_queryset()
         object_id = self.request.query_params.get('object_id')
         content_type_name = self.request.query_params.get('content_type')
-        
+
         if object_id:
             queryset = queryset.filter(object_id=object_id)
-        
+
         if content_type_name:
             # Convert content_type string (e.g., 'video', 'post') to ContentType object
             try:
@@ -305,7 +348,9 @@ class CommentsViewSet(BaseContentViewSet):
             except ContentType.DoesNotExist:
                 # If content_type not found, return empty queryset
                 queryset = queryset.none()
-        
+
+        # annotate likes info (uses annotated_* fields to avoid model property collisions)
+        queryset = self.annotate_likes(queryset)
         return queryset.order_by('-created_at')
 
     @action(detail=True, methods=("get", "post"), url_path="replies", url_name="replies")
@@ -325,8 +370,9 @@ class CommentsViewSet(BaseContentViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # GET: return ALL replies without pagination
+        # GET: return ALL replies without pagination (annotate likes on replies too)
         qs = comment.replies.all().order_by('-created_at')
+        qs = self.annotate_likes(qs)
         serializer = ReplySerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
@@ -338,13 +384,14 @@ class ReplyViewSet(BaseContentViewSet):
     ordering_fields = ("created_at",)
 
     def get_queryset(self):
-        """Filter replies by comment if provided."""
+        """Filter replies by comment if provided, then annotate likes."""
         queryset = super().get_queryset()
         comment_id = self.request.query_params.get('comment')
-        
+
         if comment_id:
             queryset = queryset.filter(comment_id=comment_id)
-        
+
+        queryset = self.annotate_likes(queryset)
         return queryset.order_by('-created_at')
 
 class HistoryEntryViewSet(BaseContentViewSet):
