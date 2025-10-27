@@ -81,6 +81,45 @@ class BaseContentViewSet(viewsets.ModelViewSet):
                 # fallback: ignore annotation if something fails
                 pass
         return queryset
+    
+    @action(detail=True, methods=("post", "delete"), url_path="like", url_name="like")
+    def like(self, request, pk=None):
+        """POST to like, DELETE to unlike. Accessible to authenticated users."""
+        instance = self.get_object()
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if request.method == "POST":
+            instance.add_like(user)
+        else:
+            instance.remove_like(user)
+
+        serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Allow toggling `has_liked` via PATCH with { has_liked: true/false } for authenticated users.
+
+        This keeps compatibility with the frontend which PATCHes `has_liked` on posts.
+        """
+        instance = self.get_object()
+        user = request.user
+        if "has_liked" in request.data:
+            if not user or not user.is_authenticated:
+                return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                want = bool(request.data.get("has_liked"))
+            except Exception:
+                want = False
+            if want:
+                instance.add_like(user)
+            else:
+                instance.remove_like(user)
+            serializer = self.get_serializer(instance, context={"request": request})
+            return Response(serializer.data)
+
+        return super().partial_update(request, *args, **kwargs)
 
 
 class VideoViewSet(BaseContentViewSet):
