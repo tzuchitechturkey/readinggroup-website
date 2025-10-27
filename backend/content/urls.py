@@ -14,19 +14,11 @@ from .views import (
     TvProgramCategoryViewSet,
     PositionTeamMemberViewSet,
     EventSectionViewSet,
-    TvProgramLikeViewSet,
-    WeeklyMomentLikeViewSet,
-    PostLikeViewSet,
-    VideoLikeViewSet,
-    EventLikeViewSet,
-    PostCommentViewSet,
-    VideoCommentViewSet,
-    TvProgramCommentViewSet,
-    EventCommentViewSet,
-    WeeklyMomentCommentViewSet,
     Top5VideosView,
     Top1VideoView,
     Top5VideosByLikesView,
+    CommentsViewSet,
+    ReplyViewSet,
 )
 
 app_name = "content"
@@ -45,16 +37,9 @@ router.register(r"event-categories", EventCategoryViewSet, basename="event-categ
 router.register(r"tvprogram-categories", TvProgramCategoryViewSet, basename="tvprogram-category")
 router.register(r"position-team-members", PositionTeamMemberViewSet, basename="position-team-member")
 router.register(r"event-sections", EventSectionViewSet, basename="event-section")
-router.register(r"likes/videos", VideoLikeViewSet, basename="like-video")
-router.register(r"likes/posts", PostLikeViewSet, basename="like-post")
-router.register(r"likes/events", EventLikeViewSet, basename="like-event")
-router.register(r"likes/tv-programs", TvProgramLikeViewSet, basename="like-tvprogram")
-router.register(r"likes/weekly-moments", WeeklyMomentLikeViewSet, basename="like-weeklymoment")
-router.register(r"comments/posts", PostCommentViewSet, basename="comment-post")
-router.register(r"comments/videos", VideoCommentViewSet, basename="comment-video")
-router.register(r"comments/events", EventCommentViewSet, basename="comment-event")
-router.register(r"comments/tv-programs", TvProgramCommentViewSet, basename="comment-tvprogram")
-router.register(r"comments/weekly-moments", WeeklyMomentCommentViewSet, basename="comment-weeklymoment")
+router.register(r"comments", CommentsViewSet, basename="comments")
+router.register(r"replies", ReplyViewSet, basename="reply")
+
 
 urlpatterns = router.urls + [
     path('top5-videos/', Top5VideosView.as_view(), name='top5-videos'),

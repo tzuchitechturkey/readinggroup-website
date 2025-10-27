@@ -16,19 +16,18 @@ class EventSection(models.TextChoices):
     BREAKING = "breaking", "Breaking News"
     LATEST = "latest", "Latest Updates"
     
+class ReportType(models.TextChoices):
+    VIDEOS = "videos", "Videos"
+    REPORTS = "reports", "Reports"
+    NEWS = "news", "News"
+    
 #In MediaCard model
 class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
     READING = "reading", "Reading"
 
-
+#In Video model
 class VideoType(models.TextChoices):
     FULL_VIDEO = "full_video", "Full Video"
     UNIT_VIDEO = "unit_video", "Unit Video"
-    
-
-class ReportType(models.TextChoices):
-    VIDEOS = "videos", "Videos"
-    REPORTS = "reports", "Reports"
-    NEWS = "news", "News"

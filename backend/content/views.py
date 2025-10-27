@@ -9,16 +9,6 @@ from .swagger_parameters import(
     post_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
-    post_like_parameters,
-    video_like_parameters,
-    event_like_parameters,
-    tvprogram_like_parameters,
-    weeklymoment_like_parameters,
-    post_comment_parameters,
-    video_comment_parameters,
-    event_comment_parameters,
-    tvprogram_comment_parameters,
-    weeklymoment_comment_parameters
 )
 
 from .models import (
@@ -35,16 +25,8 @@ from .models import (
     EventCategory,
     PositionTeamMember,
     EventSection,
-    TvProgramLike,
-    WeeklyMomentLike,
-    PostLike,
-    VideoLike,
-    EventLike,
-    PostComment,
-    VideoComment,
-    TvProgramComment,
-    EventComment,
-    WeeklyMomentComment,
+    Comments,
+    Reply,
 )
 from .serializers import (
     EventSerializer,
@@ -60,16 +42,8 @@ from .serializers import (
     EventCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
-    TvProgramLikeSerializer,
-    WeeklyMomentLikeSerializer,
-    PostLikeSerializer,
-    VideoLikeSerializer,
-    EventLikeSerializer,
-    PostCommentSerializer,
-    VideoCommentSerializer,
-    TvProgramCommentSerializer,
-    EventCommentSerializer,
-    WeeklyMomentCommentSerializer,
+    CommentsSerializer,
+    ReplySerializer,
 )
 
 
@@ -160,7 +134,7 @@ class VideoViewSet(BaseContentViewSet):
         happened_at = params.get('happened_at')
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
-
+        
         return queryset
 
 class PostViewSet(BaseContentViewSet):
@@ -275,6 +249,8 @@ class EventViewSet(BaseContentViewSet):
         happened_at = params.get('happened_at')
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
+            
+        return queryset
 
 class TvProgramViewSet(BaseContentViewSet):
     """ViewSet for managing TvProgram content."""
@@ -319,6 +295,21 @@ class TeamMemberViewSet(BaseContentViewSet):
             queryset = queryset.filter(position__name__iexact=position)
 
         return queryset
+    
+    
+class CommentsViewSet(BaseContentViewSet):
+    """ViewSet for managing Comments content."""
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    search_fields = ("user__username", "content_type", "object_id", "text")
+    ordering_fields = ("created_at",)
+    
+class ReplyViewSet(BaseContentViewSet):
+    """ViewSet for managing Reply content."""
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    search_fields = ("user__username", "comment__id", "text")
+    ordering_fields = ("created_at",)
 
 class HistoryEntryViewSet(BaseContentViewSet):
     """ViewSet for managing HistoryEntry content."""
@@ -372,280 +363,3 @@ class EventSectionViewSet(BaseContentViewSet):
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     
-class TvProgramLikeViewSet(BaseContentViewSet):
-    """ViewSet for managing TvProgramLike content."""
-    queryset = TvProgramLike.objects.all()
-    serializer_class = TvProgramLikeSerializer
-    search_fields = ("user", "tv_program")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=tvprogram_like_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        tv_program = params.get('tv_program')
-        if tv_program:
-            queryset =queryset.filter(tv_program__id=tv_program)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class WeeklyMomentLikeViewSet(BaseContentViewSet):
-    """ViewSet for managing WeeklyMomentLike content."""
-    queryset = WeeklyMomentLike.objects.all()
-    serializer_class = WeeklyMomentLikeSerializer
-    search_fields = ("user", "weekly_moment")
-    ordering_fields = ("created_at",)
-    
-    @swagger_auto_schema(
-        manual_parameters=weeklymoment_like_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        weekly_moment = params.get('weekly_moment')
-        if weekly_moment:
-            queryset =queryset.filter(weekly_moment__id=weekly_moment)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class PostLikeViewSet(BaseContentViewSet):
-    """ViewSet for managing PostLike content."""
-    queryset = PostLike.objects.all()
-    serializer_class = PostLikeSerializer
-    search_fields = ("user", "post")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=post_like_parameters  
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        post = params.get('post')
-        if post:
-            queryset =queryset.filter(post__id=post)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class VideoLikeViewSet(BaseContentViewSet):
-    """ViewSet for managing VideoLike content."""
-    queryset = VideoLike.objects.all()
-    serializer_class = VideoLikeSerializer
-    search_fields = ("user", "video")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=video_like_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        video = params.get('video')
-        if video:
-            queryset =queryset.filter(video__id=video)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class EventLikeViewSet(BaseContentViewSet):
-    """ViewSet for managing EventLike content."""
-    queryset = EventLike.objects.all()
-    serializer_class = EventLikeSerializer
-    search_fields = ("user", "event")
-    ordering_fields = ("created_at",)
-    
-    @swagger_auto_schema(
-        manual_parameters=event_like_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        event = params.get('event')
-        if event:
-            queryset =queryset.filter(event__id=event)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class PostCommentViewSet(BaseContentViewSet):
-    """ViewSet for managing PostComment content."""
-    queryset = PostComment.objects.all()
-    serializer_class = PostCommentSerializer
-    search_fields = ("user", "post", "content")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=post_comment_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        post = params.get('post')
-        if post:
-            queryset =queryset.filter(post__id=post)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class VideoCommentViewSet(BaseContentViewSet):
-    """ViewSet for managing VideoComment content."""
-    queryset = VideoComment.objects.all()
-    serializer_class = VideoCommentSerializer
-    search_fields = ("user", "video", "content")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=video_comment_parameters
-    ) 
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        video = params.get('video')
-        if video:
-            queryset =queryset.filter(video__id=video)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class TvProgramCommentViewSet(BaseContentViewSet):
-    """ViewSet for managing TvProgramComment content."""
-    queryset = TvProgramComment.objects.all()
-    serializer_class = TvProgramCommentSerializer
-    search_fields = ("user", "tv_program", "content")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=tvprogram_comment_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        tv_program = params.get('tv_program')
-        if tv_program:
-            queryset =queryset.filter(tv_program__id=tv_program)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class EventCommentViewSet(BaseContentViewSet):
-    """ViewSet for managing EventComment content."""
-    queryset = EventComment.objects.all()
-    serializer_class = EventCommentSerializer
-    search_fields = ("user", "event", "content")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=event_comment_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        event = params.get('event')
-        if event:
-            queryset =queryset.filter(event__id=event)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
-    
-class WeeklyMomentCommentViewSet(BaseContentViewSet):
-    """ViewSet for managing WeeklyMomentComment content."""
-    queryset = WeeklyMomentComment.objects.all()
-    serializer_class = WeeklyMomentCommentSerializer
-    search_fields = ("user", "weekly_moment", "content")
-    ordering_fields = ("created_at",)
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
-    @swagger_auto_schema(
-        manual_parameters=weeklymoment_comment_parameters
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)   
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        weekly_moment = params.get('weekly_moment')
-        if weekly_moment:
-            queryset =queryset.filter(weekly_moment__id=weekly_moment)
-        
-        user = params.get("user")
-        if user:
-            queryset =queryset.filter(user__id=user)
-
-        return queryset
