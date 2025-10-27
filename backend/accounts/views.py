@@ -16,7 +16,9 @@ from .serializers import (
     ProfileUpdateSerializer,
     RegisterSerializer,
     UserSerializer,
+    FriendRequestSerializer,
 )
+from .models import FriendRequest
 import pyotp
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -26,6 +28,65 @@ import base64
 
 
 User = get_user_model()
+
+
+class FriendRequestListCreateView(generics.ListCreateAPIView):
+    """List incoming/outgoing friend requests or create a new friend request.
+
+    Query params:
+    - direction=incoming|outgoing (default incoming)
+    """
+    serializer_class = FriendRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        direction = self.request.query_params.get("direction", "incoming").lower()
+        if direction == "outgoing":
+            return FriendRequest.objects.filter(from_user=user).order_by("-created_at")
+        # incoming
+        return FriendRequest.objects.filter(to_user=user).order_by("-created_at")
+
+    def perform_create(self, serializer):
+        serializer.save(from_user=self.request.user)
+
+
+class FriendRequestActionView(APIView):
+    """Accept / reject / block a friend request by id.
+
+    POST body: { "action": "accept" | "reject" | "block" }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        action = request.data.get("action")
+        if action not in ("accept", "reject", "block"):
+            return Response({"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            fr = FriendRequest.objects.get(pk=pk)
+        except FriendRequest.DoesNotExist:
+            return Response({"detail": "Friend request not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # only the recipient may accept/reject; block may be performed by recipient or requestor
+        user = request.user
+        if action == "accept":
+            if fr.to_user != user:
+                return Response({"detail": "Only recipient can accept."}, status=status.HTTP_403_FORBIDDEN)
+            fr.accept()
+            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+
+        if action == "reject":
+            if fr.to_user != user:
+                return Response({"detail": "Only recipient can reject."}, status=status.HTTP_403_FORBIDDEN)
+            fr.reject()
+            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+
+        # block
+        if action == "block":
+            # allow both sides to block; create or update inverse request as BLOCKED too
+            fr.block()
+            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
 
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
