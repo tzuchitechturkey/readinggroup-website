@@ -81,10 +81,26 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
 class ReplySerializer(serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
     user = serializers.StringRelatedField(read_only=True)
+    # accept comment id when creating a reply
+    comment = serializers.PrimaryKeyRelatedField(queryset=Comments.objects.all())
 
     class Meta:
         model = Reply
-        fields = ("id", "user", "text", "created_at")
+        fields = ("id", "user", "comment", "text", "created_at")
+
+    def validate(self, attrs):
+        # ensure comment is provided
+        if not attrs.get("comment"):
+            raise ValidationError({"comment": "This field is required."})
+        return attrs
+
+    def create(self, validated_data):
+        # set the user from request context if available
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            validated_data["user"] = user
+        return super().create(validated_data)
 
 
 class CommentsSerializer(serializers.ModelSerializer):
