@@ -712,7 +712,7 @@
   "Tags are required": "العلامات مطلوبة",
   "Cast is required": "الطاقم مطلوب",
   "Description is required": "الوصف مطلوب",
-  "Unit Clips": "مقاطع  ",
+  "Unit Clips": "المقاطع القصيرة  ",
   "Work Team": "فريق العمل",
   "Manage team members and their data": "إدارة أعضاء الفريق وبياناتهم",
   "Search members?...": "البحث عن الأعضاء...",
@@ -918,5 +918,14 @@
   "Load more": "تحميل المزيد",
   "Ooops...": "عذراً...",
   "Sorry, the content you're looking for doesn't exist.": "عذراً، المحتوى الذي تبحث عنه غير موجود.",
-  "Either it was removed, or you mistyped the link.": "قد يكون قد تمت إزالته أو أنك أدخلت رابطاً غير صحيح."
+  "Either it was removed, or you mistyped the link.": "قد يكون قد تمت إزالته أو أنك أدخلت رابطاً غير صحيح.",
+  "Full Video": "فيديو كامل",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": ""
 }
