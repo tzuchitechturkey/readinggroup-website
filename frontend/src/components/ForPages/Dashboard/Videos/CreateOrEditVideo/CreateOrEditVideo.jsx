@@ -27,7 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const videoTypes = ["Full Videos", "Unit Clips"];
+const videoTypes = ["full_video", "unit_video"];
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();

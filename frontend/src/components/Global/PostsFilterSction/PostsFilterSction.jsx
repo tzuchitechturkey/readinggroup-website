@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
+import PostsFilter from "@/components/Global/PostsFilter/PostsFilter";
 import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
 import { GetPosts } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -57,17 +57,37 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       apiFilters.created_at = filter.searchDate;
     }
 
-    // Add writer filter - send writer ID
-    if (filter.writer?.name) apiFilters.writer = filter.writer.name;
+    // Add writer filter - send username (string)
+    if (filter.writer?.username) {
+      apiFilters.writer = filter.writer.username;
+    }
 
-    // Add category filter - category is stored as string directly
-    if (filter.category) apiFilters.category = filter.category;
+    // Add category filter - convert array of objects to comma-separated string
+    if (filter.category) {
+      if (Array.isArray(filter.category)) {
+        const categoryNames = filter.category
+          .map((cat) => cat?.name || cat)
+          .filter(Boolean)
+          .join(",");
+        if (categoryNames) apiFilters.category = categoryNames;
+      } else if (typeof filter.category === "string") {
+        apiFilters.category = filter.category;
+      }
+    }
 
-    // Add post type filter
+    // Add post type filter - convert array of objects to comma-separated string
     if (cardAndPhoto) {
-      // For card & photo page: use selected type if exists
+      // For card & photo page: use selected types if exist
       if (filter.type) {
-        apiFilters.post_type = filter.type;
+        if (Array.isArray(filter.type)) {
+          const typeNames = filter.type
+            .map((t) => t?.name || t)
+            .filter(Boolean)
+            .join(",");
+          if (typeNames) apiFilters.post_type = typeNames;
+        } else if (typeof filter.type === "string") {
+          apiFilters.post_type = filter.type;
+        }
       } else {
         apiFilters.post_type = "card";
       }
@@ -76,8 +96,16 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       apiFilters.post_type = "reading";
     }
 
-    // Add language filter
-    if (filter.language) apiFilters.language = filter.language;
+    // Add language filter - convert array of strings to comma-separated string
+    if (filter.language) {
+      if (Array.isArray(filter.language)) {
+        const languageNames = filter.language.filter(Boolean).join(",");
+        if (languageNames) apiFilters.language = languageNames;
+      } else if (typeof filter.language === "string") {
+        apiFilters.language = filter.language;
+      }
+    }
+
     return apiFilters;
   };
 
@@ -122,7 +150,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
     setCurrentPage(newPage);
     getData(newPage, false, filters); // Load new page with current filters
     // Scroll to top of results
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -132,7 +160,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
 
   return (
     <div>
-      <LearnFilter
+      <PostsFilter
         t={t}
         i18n={i18n}
         filters={filters}

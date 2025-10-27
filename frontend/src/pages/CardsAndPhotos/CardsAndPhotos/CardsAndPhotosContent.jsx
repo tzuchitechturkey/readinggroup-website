@@ -14,7 +14,10 @@ function CardsAndPhotosContent() {
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="min-h-screen w-full bg-white text-gray-900">
+    <div
+      className="min-h-screen w-full bg-white text-gray-900"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {/* Header with hero image */}
       <div className="relative">
         <img

@@ -105,7 +105,7 @@ export default function HeroSlider({ newsPage = false }) {
       setIsLoading(false);
     };
 
-    fetchSectionsWithTop5();
+    // fetchSectionsWithTop5();
   }, []);
 
   return (

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
-function ExternalNewsCard({ className = "", item, showUnit = false }) {
+function ExternalNewsCard({ className = "", item }) {
   const { t } = useTranslation();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
 
@@ -36,19 +36,27 @@ function ExternalNewsCard({ className = "", item, showUnit = false }) {
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
           {/* End Gradient Overlay */}
 
-          {/* Start Badges */}
-          <div className="absolute top-3 left-3 flex gap-2">
-            {showUnit && (
-              <span className="bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                {item.unit}
-              </span>
-            )}
-          </div>
+          {/* Start Tags */}
+          {Array.isArray(item?.tags) && item?.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {item?.tags.map((t, i) => (
+                <span
+                  key={`${t}-${i}`}
+                  className={`px-2 sm:px-3 py-1 bg-transparent ${
+                    i === 0 ? "border-[1px] border-text" : ""
+                  } text-xs sm:text-sm rounded-full`}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+          {/* End Tags */}
 
           {/* Start Tag */}
           <div className="absolute top-5 left-5 flex items-center gap-3">
             <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-              {t(item?.category)}
+              {t(item?.category?.name)}
             </span>
           </div>
           {/* End Tag */}

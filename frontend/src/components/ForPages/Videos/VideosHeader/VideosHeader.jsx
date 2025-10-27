@@ -2,16 +2,21 @@ import React, { useEffect, useState } from "react";
 
 import { Play, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 import { GetTop1Video, GetTop5Videos } from "@/api/videos";
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
 function VideosHeader() {
   const { t } = useTranslation();
   const [top5Videos, setTop5Videos] = useState([]);
   const [top1Video, setTop1Video] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const getTop5Videos = async () => {
     try {
       const res = await GetTop5Videos();
@@ -73,13 +78,25 @@ function VideosHeader() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button className="bg-white font-bold text-black hover:bg-gray-200 px-6 py-3">
-              <Play className="w-4 h-4 mr-2" />
-              {t("Watch Now")}
-            </Button>
+            <Link
+              to={`/videos/${top1Video?.id}`}
+              className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Play className="w-3.5 xs:w-4 h-3.5 xs:h-4 mr-1.5 xs:mr-2 transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5 pointer-events-none" />
+              <span className="text-sm transition-all duration-300 group-hover:font-semibold pointer-events-none">
+                {t("Watch Now")}
+              </span>
+            </Link>
             <Button
               variant="outline"
               className="border-white font-bold text-black hover:bg-white hover:text-black px-6 py-3"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
             >
               {t("More Info")}
               <Info className="w-4 h-4 mr-2" />
@@ -99,6 +116,18 @@ function VideosHeader() {
         {/* End Weekly Videos Carousel */}
       </div>
       {/* End Content */}
+      {/* Video Details Modal - Using Portal to render outside normal DOM hierarchy */}
+      {isModalOpen &&
+        createPortal(
+          <VideoDetailsContent
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+            }}
+            videoData={top1Video}
+          />,
+          document.body
+        )}
     </div>
   );
 }

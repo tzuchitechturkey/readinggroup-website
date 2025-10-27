@@ -5,12 +5,10 @@ import { ThumbsUp, ListPlus } from "lucide-react";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
-import { CommentVideo } from "@/api/videos";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -86,28 +84,11 @@ function CustomyoutubeVideo({ videoData }) {
 
   const youTube = isYouTubeUrl(videoData?.video_url);
   const [isShareOpen, setIsShareOpen] = useState(false);
-  const sendComment = async () => {
-    setIsLoading(true);
-    const payload = {
-      video: videoData?.id,
-      user: userId,
-      text: "This is a sample comment",
-    };
-    try {
-      await CommentVideo(payload);
-    } catch (err) {
-      setErrorFn(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
   const handleOpenShare = () => setIsShareOpen(true);
   const handleCloseShare = () => setIsShareOpen(false);
   const toggleLike = () => setLiked((s) => !s);
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    setUserId(storedUserId);
-  }, []);
+
   return (
     <div className="bg-gray-100 px-4 sm:px-0  ">
       <div className="  ">

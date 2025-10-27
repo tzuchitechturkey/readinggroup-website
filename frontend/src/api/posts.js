@@ -61,28 +61,67 @@ export async function DeletePostCategory(id) {
   return await axios.delete(`/post-categories/${id}/`);
 }
 
-// Like a post
-export async function LikePost(data) {
-  return await axios.post(`/likes/posts/`, data);
+// Comments management for posts
+export async function GetPostComments(postId, limit = 10, offset = 0) {
+  return await axios.get(
+    `/comments/?limit=${limit}&offset=${offset}&object_id=${postId}&content_type=post`
+  );
 }
 
-export async function UnlikePost(data) {
-  return await axios.delete(`/likes/posts/`, data);
+export async function CreatePostComment(postId, text) {
+  const userId = localStorage.getItem("userId");
+  return await axios.post(`/comments/`, {
+    object_id: postId,
+    content_type: "post",
+    text,
+    user: userId,
+  });
 }
 
-// Comment a Post
-export async function GetCommentPost(data) {
-  return await axios.get(`/comments/posts/`, { params: data });
+export async function DeletePostComment(commentId) {
+  return await axios.delete(`/comments/${commentId}/`);
 }
 
-export async function CommentPost(data) {
-  return await axios.post(`/comments/posts/`, data);
+export async function EditPostComment(commentId, text) {
+  return await axios.patch(`/comments/${commentId}/`, { text });
 }
 
-export async function EditCommentPost(data) {
-  return await axios.put(`/comments/posts/`, data);
+// Replies management for post comments
+export async function GetCommentReplies(commentId) {
+  return await axios.get(`/replies/?comment=${commentId}`);
 }
 
-export async function DeleteCommentPost(data) {
-  return await axios.delete(`/comments/posts/`, data);
+export async function CreateCommentReply(commentId, text) {
+  const userId = localStorage.getItem("userId");
+  return await axios.post(`/replies/`, {
+    comment: commentId,
+    text,
+    user: userId,
+  });
+}
+
+export async function DeleteCommentReply(replyId) {
+  return await axios.delete(`/replies/${replyId}/`);
+}
+
+export async function EditCommentReply(replyId, text) {
+  return await axios.patch(`/replies/${replyId}/`, { text });
+}
+
+// Likes for comments
+export async function LikeComment(commentId) {
+  return await axios.post(`/comments/${commentId}/like/`);
+}
+
+export async function UnlikeComment(commentId) {
+  return await axios.delete(`/comments/${commentId}/like/`);
+}
+
+// Likes for replies
+export async function LikeReply(replyId) {
+  return await axios.post(`/replies/${replyId}/like/`);
+}
+
+export async function UnlikeReply(replyId) {
+  return await axios.delete(`/replies/${replyId}/like/`);
 }

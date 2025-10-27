@@ -7,7 +7,7 @@ import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { mockVideos } from "@/mock/Viedeos";
 import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
-import { CommentVideo, GetVideoById } from "@/api/videos";
+import { GetVideoById } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
 function VideoPageContent() {
@@ -30,7 +30,7 @@ function VideoPageContent() {
   useEffect(() => {
     getData();
   }, [videoId]);
-
+  console.log(videoData);
   return (
     <div className="bg-white">
       {isLoading && <Loader />}
@@ -55,7 +55,7 @@ function VideoPageContent() {
       {/* Start Comments Section */}
       <div className="w-full">
         <div className="w-full lg:w-3/4 lg:pl-8">
-          <CommentsSection />
+          <CommentsSection videoId={videoId} />
         </div>
       </div>
       {/* End Comments Section */}

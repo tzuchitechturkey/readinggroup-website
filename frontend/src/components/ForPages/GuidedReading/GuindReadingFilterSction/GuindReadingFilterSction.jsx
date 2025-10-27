@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import LearnFilter from "@/components/Global/LearnFilter/LearnFilter";
+import PostsFilter from "@/components/Global/PostsFilter/PostsFilter";
 import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
 import { GetPosts } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -55,7 +55,8 @@ function GuindReadingFilterSction() {
     if (customFilters.titleQuery) apiFilters.search = customFilters.titleQuery;
 
     // Add date filter
-    if (customFilters.searchDate) apiFilters.created_at = customFilters.searchDate;
+    if (customFilters.searchDate)
+      apiFilters.created_at = customFilters.searchDate;
 
     // Add writer filter - send writer ID
     if (customFilters.writer?.id) apiFilters.writer = customFilters.writer.id;
@@ -72,12 +73,17 @@ function GuindReadingFilterSction() {
     return apiFilters;
   };
 
-  const getData = async (page = 0, clearFilter = false, customFilters = filters) => {
+  const getData = async (
+    page = 0,
+    clearFilter = false,
+    customFilters = filters
+  ) => {
     setIsLoading(true);
     const offset = page * limit;
 
     try {
-      const apiFilters = clearFilter === true ? {} : buildFilters(customFilters);
+      const apiFilters =
+        clearFilter === true ? {} : buildFilters(customFilters);
       const res = await GetPosts(limit, offset, apiFilters);
 
       const newResults = res.data?.results || [];
@@ -107,7 +113,7 @@ function GuindReadingFilterSction() {
     setCurrentPage(newPage);
     getData(newPage, false); // Load new page with current filters
     // Scroll to top of results
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -117,7 +123,7 @@ function GuindReadingFilterSction() {
 
   return (
     <div>
-      <LearnFilter
+      <PostsFilter
         t={t}
         i18n={i18n}
         filters={filters}

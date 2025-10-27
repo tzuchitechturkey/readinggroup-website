@@ -324,6 +324,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
 
     // Validate form
     if (!validateForm()) {
+      toast.error(t("Please fix the errors in the form"));
       return;
     }
 
@@ -762,9 +763,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.report_type ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="" disabled hidden >{t("Select Type")}</option>
+              <option value="" disabled hidden>
+                {t("Select Type")}
+              </option>
               <option value="news">{t("News")}</option>
-              <option value="video">{t("Video")}</option>
+              <option value="videos">{t("Videos")}</option>
+              <option value="reports">{t("Reports")}</option>
             </select>
             {errors.report_type && (
               <p className="text-red-500 text-xs mt-1">{errors.report_type}</p>
@@ -904,7 +908,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.country ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="" disabled hidden >{t("Select Country")}</option>
+              <option value="" disabled hidden>
+                {t("Select Country")}
+              </option>
               {countries.map((country) => (
                 <option key={country.code} value={country.name}>
                   {country.name}
@@ -930,7 +936,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 errors.language ? "border-red-500" : "border-gray-300"
               }`}
             >
-              <option value="" disabled hidden >{t("Select Language")}</option>
+              <option value="" disabled hidden>
+                {t("Select Language")}
+              </option>
               {languages.map((lang) => (
                 <option key={lang.code} value={lang}>
                   {lang}

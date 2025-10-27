@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
@@ -104,10 +103,10 @@ function VideoFilter({
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "Unit Clips"]);
+                    setContentType((prev) => [...prev, "Unit Video"]);
                   } else {
                     setContentType((prev) =>
-                      prev.filter((type) => type !== "Unit Clips")
+                      prev.filter((type) => type !== "Unit Video")
                     );
                   }
                 }}

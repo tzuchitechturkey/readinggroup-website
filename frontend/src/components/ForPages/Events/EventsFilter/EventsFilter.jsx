@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { languages } from "@/constants/constants";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
+import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetAllUsers } from "@/api/posts";
 import { GetEventCategories } from "@/api/events";
 
@@ -50,11 +51,11 @@ function EventsFilter({
 
   const clearAllFilters = () => {
     updateFilter("search", "");
-    updateFilter("section", "");
-    updateFilter("category", "");
-    updateFilter("country", "");
+    updateFilter("section", []);
+    updateFilter("category", []);
+    updateFilter("country", []);
     updateFilter("writer", "");
-    updateFilter("language", "");
+    updateFilter("language", []);
     updateFilter("happened_at", null);
   };
 
@@ -73,31 +74,15 @@ function EventsFilter({
               {t("Sections")}
             </h3>
           </div>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {sectionsList.map((section) => (
-              <div key={section.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`section-${section.id}`}
-                  checked={filters.section === section.name}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-[\'\'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      updateFilter("section", section.name);
-                    } else {
-                      updateFilter("section", "");
-                    }
-                  }}
-                />
-                <label
-                  htmlFor={`section-${section.id}`}
-                  className="text-xs sm:text-sm text-gray-700 cursor-pointer"
-                >
-                  {section.name}
-                </label>
-              </div>
-            ))}
-          </div>
+          <MultiSelect
+            items={sectionsList}
+            selected={Array.isArray(filters.section) ? filters.section : []}
+            onChange={(selected) => updateFilter("section", selected)}
+            placeholder={t("Select Sections")}
+            renderLabel={(item) => item?.name || item}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
         </div>
         {/* End Section Filter */}
 
@@ -108,31 +93,15 @@ function EventsFilter({
               {t("Category")}
             </h3>
           </div>
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {categoriesList.map((category) => (
-              <div key={category.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`category-${category.id}`}
-                  checked={filters.category === category.name}
-                  className="w-4 h-4 appearance-none border-2 border-gray-300 rounded-sm checked:bg-blue-600 checked:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 relative checked:after:content-[\'\'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:-top-[2px] checked:after:left-0.5 checked:after:font-bold"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      updateFilter("category", category.name);
-                    } else {
-                      updateFilter("category", "");
-                    }
-                  }}
-                />
-                <label
-                  htmlFor={`category-${category.id}`}
-                  className="text-xs sm:text-sm text-gray-700 cursor-pointer"
-                >
-                  {category.name}
-                </label>
-              </div>
-            ))}
-          </div>
+          <MultiSelect
+            items={categoriesList}
+            selected={Array.isArray(filters.category) ? filters.category : []}
+            onChange={(selected) => updateFilter("category", selected)}
+            placeholder={t("Select Category")}
+            renderLabel={(item) => item?.name || item}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
         </div>
         {/* End Category Filter */}
 
@@ -148,7 +117,7 @@ function EventsFilter({
             customStyle="bg-white"
             selectedItem={filters.writer}
             onSelect={(item) => {
-              updateFilter("writer", item?.username || "");
+              updateFilter("writer", item);
             }}
             searchMethod={getWriters}
             searchApi={true}
@@ -169,20 +138,15 @@ function EventsFilter({
               {t("Country")}
             </h3>
           </div>
-          <div>
-            <select
-              value={filters.country}
-              onChange={(e) => updateFilter("country", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="" disabled hidden >{t("Select Country")}</option>
-              {countries.map((country) => (
-                <option key={country.code} value={country.name}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <MultiSelect
+            items={countries}
+            selected={Array.isArray(filters.country) ? filters.country : []}
+            onChange={(selected) => updateFilter("country", selected)}
+            placeholder={t("Select Country")}
+            renderLabel={(item) => item?.name || item}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
         </div>
         {/* End Country Filter */}
 
@@ -193,20 +157,15 @@ function EventsFilter({
               {t("Language")}
             </h3>
           </div>
-          <div>
-            <select
-              value={filters.language}
-              onChange={(e) => updateFilter("language", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="" disabled hidden >{t("Select Language")}</option>
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang}>
-                  {t(lang)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <MultiSelect
+            items={languages}
+            selected={Array.isArray(filters.language) ? filters.language : []}
+            onChange={(selected) => updateFilter("language", selected)}
+            placeholder={t("Select Language")}
+            renderLabel={(item) => t(item)}
+            renderValue={(item) => item}
+            searchable={true}
+          />
         </div>
         {/* End Language Filter */}
 

@@ -95,19 +95,67 @@ export async function UnlikeVideo(data) {
   return await axios.delete(`/likes/videos/`, data);
 }
 
-// Comment a video
-export async function GetCommentVideo(data) {
-  return await axios.get(`/comments/videos/`, data);
+// Comments management for videos
+export async function GetVideoComments(videoId, limit = 10, offset = 0) {
+  return await axios.get(
+    `/comments/?limit=${limit}&offset=${offset}&object_id=${videoId}&content_type=video`
+  );
 }
 
-export async function CommentVideo(data) {
-  return await axios.post(`/comments/videos/`, data);
+export async function CreateVideoComment(videoId, text) {
+  const userId = localStorage.getItem("userId");
+  return await axios.post(`/comments/`, {
+    object_id: videoId,
+    content_type: "video",
+    text,
+    user: userId,
+  });
 }
 
-export async function EditCommentVideo(data) {
-  return await axios.put(`/comments/videos/`, data);
+export async function DeleteVideoComment(commentId) {
+  return await axios.delete(`/comments/${commentId}/`);
 }
 
-export async function DeleteCommentVideo(data) {
-  return await axios.delete(`/comments/videos/`, data);
+export async function EditVideoComment(commentId, text) {
+  return await axios.patch(`/comments/${commentId}/`, { text });
+}
+
+// Replies management for video comments
+export async function GetCommentReplies(commentId) {
+  return await axios.get(`/replies/?comment=${commentId}`);
+}
+
+export async function CreateCommentReply(commentId, text) {
+  const userId = localStorage.getItem("userId");
+  return await axios.post(`/replies/`, {
+    comment: commentId,
+    text,
+    user: userId,
+  });
+} 
+
+export async function DeleteCommentReply(replyId) {
+  return await axios.delete(`/replies/${replyId}/`);
+}
+
+export async function EditCommentReply(replyId, text) {
+  return await axios.patch(`/replies/${replyId}/`, { text });
+}
+
+// Likes for comments
+export async function LikeComment(commentId) {
+  return await axios.post(`/comments/${commentId}/like/`);
+}
+
+export async function UnlikeComment(commentId) {
+  return await axios.delete(`/comments/${commentId}/like/`);
+}
+
+// Likes for replies
+export async function LikeReply(replyId) {
+  return await axios.post(`/replies/${replyId}/like/`);
+}
+
+export async function UnlikeReply(replyId) {
+  return await axios.delete(`/replies/${replyId}/like/`);
 }

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { ThumbsUp, Loader } from "lucide-react";
 import { toast } from "react-toastify";
 
-import PostVideoReplies from "@/components/ForPages/Videos/VideoPage/VideoReplies/VideoReplies";
 import {
   GetPostComments,
   CreatePostComment,
@@ -13,6 +12,11 @@ import {
   EditPostComment,
   LikeComment,
   UnlikeComment,
+  CreateCommentReply,
+  DeleteCommentReply,
+  GetCommentReplies,
+  LikeReply,
+  UnlikeReply,
 } from "@/api/posts";
 
 function PostCommentsSection({ postId }) {
@@ -27,6 +31,12 @@ function PostCommentsSection({ postId }) {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // Replies state
+  const [replyText, setReplyText] = useState({});
+  const [activeReplyComment, setActiveReplyComment] = useState(null);
+  const [isSubmittingReply, setIsSubmittingReply] = useState({});
+  const [_loadingReplies, _setLoadingReplies] = useState({});
 
   const commentsPerPage = 5;
 
@@ -140,6 +150,112 @@ function PostCommentsSection({ postId }) {
 
   const loadMoreComments = () => {
     loadComments(currentPage + 1);
+  };
+
+  // Load replies for a comment
+  const loadReplies = async (commentId) => {
+    _setLoadingReplies((prev) => ({ ...prev, [commentId]: true }));
+    try {
+      const res = await GetCommentReplies(commentId);
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies: res.data?.results || [],
+            };
+          }
+          return c;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to load replies:", error);
+      toast.error(t("Failed to load replies"));
+    } finally {
+      _setLoadingReplies((prev) => ({ ...prev, [commentId]: false }));
+    }
+  };
+
+  // Submit a reply
+  const handleSubmitReply = async (commentId) => {
+    const text = replyText[commentId];
+    if (!text || !text.trim()) {
+      toast.error(t("Reply cannot be empty"));
+      return;
+    }
+
+    setIsSubmittingReply((prev) => ({ ...prev, [commentId]: true }));
+    try {
+      await CreateCommentReply(commentId, text.trim());
+      setReplyText((prev) => ({ ...prev, [commentId]: "" }));
+      setActiveReplyComment(null);
+      toast.success(t("Reply added successfully"));
+      // Reload replies
+      await loadReplies(commentId);
+    } catch (error) {
+      console.error("Failed to create reply:", error);
+      toast.error(t("Failed to add reply"));
+    } finally {
+      setIsSubmittingReply((prev) => ({ ...prev, [commentId]: false }));
+    }
+  };
+
+  // Delete a reply
+  const handleDeleteReply = async (replyId, commentId) => {
+    try {
+      await DeleteCommentReply(replyId);
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies: c.replies?.filter((r) => r.id !== replyId) || [],
+            };
+          }
+          return c;
+        })
+      );
+      toast.success(t("Reply deleted successfully"));
+    } catch (error) {
+      console.error("Failed to delete reply:", error);
+      toast.error(t("Failed to delete reply"));
+    }
+  };
+
+  // Like/unlike reply
+  const handleLikeReply = async (replyId, commentId, isLiked) => {
+    try {
+      if (isLiked) {
+        await UnlikeReply(replyId);
+      } else {
+        await LikeReply(replyId);
+      }
+
+      // Update local state
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies: c.replies?.map((r) => {
+                if (r.id === replyId) {
+                  return {
+                    ...r,
+                    is_liked: !r.is_liked,
+                    likes_count: isLiked ? r.likes_count - 1 : r.likes_count + 1,
+                  };
+                }
+                return r;
+              }) || [],
+            };
+          }
+          return c;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to like reply:", error);
+      toast.error(t("Failed to update like"));
+    }
   };
 
   return (
@@ -268,7 +384,12 @@ function PostCommentsSection({ postId }) {
                       <button
                         className="text-xs hover:text-black"
                         onClick={() => {
-                          // TODO: Implement reply functionality
+                          if (!c.replies) {
+                            loadReplies(c.id);
+                          }
+                          setActiveReplyComment(
+                            activeReplyComment === c.id ? null : c.id
+                          );
                         }}
                       >
                         {t("Reply")}
@@ -285,10 +406,123 @@ function PostCommentsSection({ postId }) {
 
                     {/* Start Replies */}
                     {c.replies && c.replies.length > 0 && (
-                      <PostVideoReplies
-                        replies={c.replies}
-                        commentId={c.id}
-                      />
+                      <div className="mt-4 pl-4 border-l-2 border-gray-300">
+                        <ul className="space-y-4">
+                          {c.replies.map((reply) => (
+                            <li key={reply.id} className="flex items-start gap-2">
+                              <img
+                                src={reply.avatar || "/Beared Guy02-min 1.png"}
+                                alt={reply.user}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-xs text-gray-900">
+                                    {reply.user}
+                                  </span>
+                                  <span className="text-gray-400 text-xs">
+                                    {reply.created_at}
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-xs text-gray-800 leading-snug">
+                                  {reply.text}
+                                </p>
+                                <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
+                                  <button
+                                    className={`flex items-center gap-1 ${
+                                      reply.is_liked
+                                        ? "bg-primary text-white rounded px-2 py-0.5"
+                                        : "hover:text-black"
+                                    }`}
+                                    onClick={() =>
+                                      handleLikeReply(
+                                        reply.id,
+                                        c.id,
+                                        reply.is_liked
+                                      )
+                                    }
+                                  >
+                                    <ThumbsUp
+                                      className="w-3 h-3"
+                                      {...(reply.is_liked
+                                        ? { fill: "currentColor", stroke: "none" }
+                                        : {})}
+                                    />
+                                    <span
+                                      className={`text-xs ${
+                                        reply.is_liked ? "text-white" : ""
+                                      }`}
+                                    >
+                                      {reply.likes_count || 0}
+                                    </span>
+                                  </button>
+
+                                  <button
+                                    className="text-xs hover:text-red-500"
+                                    onClick={() =>
+                                      handleDeleteReply(reply.id, c.id)
+                                    }
+                                  >
+                                    {t("Delete")}
+                                  </button>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Reply Form */}
+                    {activeReplyComment === c.id && (
+                      <div className="mt-4 flex items-start gap-2 pl-4">
+                        <img
+                          src="/Beared Guy02-min 1.png"
+                          alt="me"
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder={t("Write a reply...")}
+                            className="w-full text-xs border-b outline-none focus:border-blue-500 transition-colors py-1"
+                            value={replyText[c.id] || ""}
+                            onChange={(e) =>
+                              setReplyText((prev) => ({
+                                ...prev,
+                                [c.id]: e.target.value,
+                              }))
+                            }
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSubmitReply(c.id);
+                              }
+                            }}
+                          />
+                          <div className="flex items-center justify-end gap-2 mt-2">
+                            <button
+                              onClick={() => setActiveReplyComment(null)}
+                              className="text-xs px-2 py-1 text-gray-600 hover:text-gray-900"
+                            >
+                              {t("Cancel")}
+                            </button>
+                            <button
+                              onClick={() => handleSubmitReply(c.id)}
+                              disabled={
+                                isSubmittingReply[c.id] ||
+                                !(replyText[c.id]?.trim())
+                              }
+                              className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                            >
+                              {isSubmittingReply[c.id] && (
+                                <Loader className="w-3 h-3 animate-spin" />
+                              )}
+                              {t("Reply")}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     )}
                     {/* End Replies */}
                   </div>

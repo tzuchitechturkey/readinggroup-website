@@ -13,7 +13,9 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
-import { GetPostById, LikePost, UnlikePost } from "@/api/posts";
+import { GetPostById, 
+  // LikePost, UnlikePost 
+} from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -113,18 +115,18 @@ function CardDetailsPageContent() {
 
   // دالة الإعجاب
   const handleLike = async () => {
-    try {
-      if (!isLiked) {
-        await LikePost({ user: userId, post: cardData.id });
-        toast.success(t("Added to favorites!"));
-      } else {
-        await UnlikePost({ user: userId, post: cardData.id });
-        toast.info(t("Removed from favorites"));
-      }
-      setIsLiked(!isLiked);
-    } catch (error) {
-      setErrorFn(error);
-    }
+    // try {
+    //   if (!isLiked) {
+    //     await LikePost({ user: userId, post: cardData.id });
+    //     toast.success(t("Added to favorites!"));
+    //   } else {
+    //     await UnlikePost({ user: userId, post: cardData.id });
+    //     toast.info(t("Removed from favorites"));
+    //   }
+    //   setIsLiked(!isLiked);
+    // } catch (error) {
+    //   setErrorFn(error);
+    // }
   };
 
   // دالة فتح الصورة في عرض مكبر

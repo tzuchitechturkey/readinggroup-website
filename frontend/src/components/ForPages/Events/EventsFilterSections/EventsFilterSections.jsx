@@ -31,11 +31,11 @@ function EventsFilterSections() {
 
   const [filters, setFilters] = useState({
     search: "",
-    section: "",
-    category: "",
-    country: "",
+    section: [],
+    category: [],
+    country: [],
     writer: "",
-    language: "",
+    language: [],
     happened_at: null,
   });
 
@@ -45,11 +45,11 @@ function EventsFilterSections() {
 
   const hasActiveFilters =
     filters.search.length > 0 ||
-    filters.section.length > 0 ||
-    filters.category.length > 0 ||
-    filters.country.length > 0 ||
-    filters.writer.length > 0 ||
-    filters.language.length > 0 ||
+    (Array.isArray(filters.section) && filters.section.length > 0) ||
+    (Array.isArray(filters.category) && filters.category.length > 0) ||
+    (Array.isArray(filters.country) && filters.country.length > 0) ||
+    (filters.writer && Object.keys(filters.writer).length > 0) ||
+    (Array.isArray(filters.language) && filters.language.length > 0) ||
     filters.happened_at !== null;
 
   const setErrorFn = (error) => {
@@ -65,11 +65,11 @@ function EventsFilterSections() {
   const handleClearFilters = () => {
     setFilters({
       search: "",
-      section: "",
-      category: "",
-      country: "",
+      section: [],
+      category: [],
+      country: [],
       writer: "",
-      language: "",
+      language: [],
       happened_at: null,
     });
     setCurrentPage(1);
@@ -133,11 +133,42 @@ function EventsFilterSections() {
       const params = {};
 
       if (filters.search) params.search = filters.search;
-      if (filters.section) params.section = filters.section;
-      if (filters.category) params.category = filters.category;
-      if (filters.country) params.country = filters.country;
-      if (filters.writer) params.writer = filters.writer;
-      if (filters.language) params.language = filters.language;
+
+      // Convert section array to comma-separated string
+      if (Array.isArray(filters.section) && filters.section.length > 0) {
+        params.section = filters.section
+          .map((item) => item?.name || item)
+          .join(",");
+      }
+
+      // Convert category array to comma-separated string
+      if (Array.isArray(filters.category) && filters.category.length > 0) {
+        params.category = filters.category
+          .map((item) => item?.name || item)
+          .join(",");
+      }
+
+      // Convert country array to comma-separated string
+      if (Array.isArray(filters.country) && filters.country.length > 0) {
+        params.country = filters.country
+          .map((item) => item?.name || item)
+          .join(",");
+      }
+
+      // Handle writer (can be object with username or string)
+      if (filters.writer) {
+        if (typeof filters.writer === "object" && filters.writer.username) {
+          params.writer = filters.writer.username;
+        } else if (typeof filters.writer === "string") {
+          params.writer = filters.writer;
+        }
+      }
+
+      // Convert language array to comma-separated string
+      if (Array.isArray(filters.language) && filters.language.length > 0) {
+        params.language = filters.language.join(",");
+      }
+
       if (filters.happened_at) params.happened_at = filters.happened_at;
 
       const res = await GetEvents(limit, offset, params);
