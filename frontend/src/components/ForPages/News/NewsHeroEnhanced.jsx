@@ -117,13 +117,13 @@ const NewsHero = ({
       toast.error(t("Failed to download image"));
     }
   };
-  const articles = sideArticles.length > 0 ? sideArticles : defaultSideArticles;
   const [isShareOpen, setIsShareOpen] = useState(false);
   const getData = async () => {
     setIsLoading(true);
     try {
       const res = await GetEventById(paramId);
       setData(res.data);
+      console.log(res, "ddddddddddddddddd");
     } catch (err) {
       console.error("Failed to fetch event data:", err);
     } finally {
@@ -222,7 +222,7 @@ const NewsHero = ({
 
       {/* Start Side Articles */}
       <div className="flex flex-col gap-1 w-full lg:w-80 flex-shrink-0 news-hero-sidebar news-sidebar max-h-screen overflow-y-auto">
-        {articles?.map((sideArticle) => (
+        {/* {data?.map((sideArticle) => (
           <NewsCard
             key={sideArticle.id}
             t={t}
@@ -230,7 +230,7 @@ const NewsHero = ({
             onClick={handleArticleClick}
             imgClassName="w-20 h-20"
           />
-        ))}
+        ))} */}
       </div>
       {/* End Side Articles */}
       {/* Start Share Modal */}
