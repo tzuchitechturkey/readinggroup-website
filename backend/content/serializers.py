@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from readinggroup_backend.helpers import DateTimeFormattingMixin
+from rest_framework.exceptions import ValidationError
+from django.contrib.contenttypes.models import ContentType
 
 from .models import (
     Event,
@@ -91,10 +93,12 @@ class CommentsSerializer(serializers.ModelSerializer):
     replies = ReplySerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    # accept content_type as a model name string on input
+    content_type = serializers.CharField(write_only=True)
 
     class Meta:
         model = Comments
-        fields = ("id", "user", "text", "created_at", "likes_count", "is_liked", "replies")
+        fields = ("id", "user", "text", "created_at", "likes_count", "is_liked", "replies", "content_type", "object_id")
 
     def get_likes_count(self, obj):
         # reverse related name on LikeComment is 'likes'
@@ -106,6 +110,60 @@ class CommentsSerializer(serializers.ModelSerializer):
         if user and user.is_authenticated:
             return LikeComment.objects.filter(comment=obj, user=user).exists()
         return False
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # represent content_type as its model name
+        try:
+            data["content_type"] = instance.content_type.model
+        except Exception:
+            data["content_type"] = None
+        return data
+
+    def validate(self, attrs):
+        # 'content_type' arrives as a model name string; convert to ContentType
+        ct_name = self.initial_data.get("content_type")
+        if not ct_name:
+            raise ValidationError({"content_type": "This field is required."})
+
+        # allow shorthand 'content' to mean the Post model in the content app
+        ct_lookup_name = ct_name.strip().lower()
+        if ct_lookup_name in ("content", "post", "posts"):
+            try:
+                ct = ContentType.objects.get(app_label__iexact="content", model__iexact="post")
+            except ContentType.DoesNotExist:
+                raise ValidationError({"content_type": "Post content type not found in ContentType table."})
+        else:
+            try:
+                ct = ContentType.objects.get(model__iexact=ct_name)
+            except ContentType.DoesNotExist:
+                raise ValidationError({"content_type": f"ContentType with name '{ct_name}' does not exist."})
+
+        attrs["content_type"] = ct
+
+        # ensure object_id exists on that model
+        obj_id = attrs.get("object_id") or self.initial_data.get("object_id")
+        if obj_id is None:
+            raise ValidationError({"object_id": "This field is required."})
+
+        model_cls = ct.model_class()
+        if model_cls is None:
+            raise ValidationError({"content_type": "Invalid content type."})
+
+        try:
+            model_cls.objects.get(pk=obj_id)
+        except model_cls.DoesNotExist:
+            raise ValidationError({"object_id": f"Object with id {obj_id} not found for content_type {ct_name}."})
+
+        return attrs
+
+    def create(self, validated_data):
+        # set the user from request context if available
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            validated_data["user"] = user
+        return super().create(validated_data)
 
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
