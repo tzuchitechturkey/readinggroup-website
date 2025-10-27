@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.conf import settings
@@ -17,9 +18,61 @@ class TimestampedModel(models.Model):
 
     class Meta:
         abstract = True
+        
+        
+class Like(models.Model):
+    """Generic like model for any entity (Video/Post/Event/...)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes")
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        unique_together = (("user", "content_type", "object_id"),)  
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["user"]),
+        ]
+        ordering = ("-created_at",)
 
-class Video(TimestampedModel):
+    def __str__(self):
+        return f"Like<{self.user_id}:{self.content_type_id}:{self.object_id}>"
+
+class LikableMixin(models.Model):
+    """Mixin to add liking functionality to any model."""
+    likes = GenericRelation(Like, content_type_field='content_type', object_id_field='object_id', related_query_name='likes')
+
+    class Meta:
+        abstract = True
+
+    @property
+    def likes_count(self) -> int:
+        return self.likes.count()
+
+    def has_liked(self, user) -> bool:
+        if not user or not user.is_authenticated:
+            return False
+        return self.likes.filter(user=user).exists()
+
+    def add_like(self, user):
+        if user and user.is_authenticated:
+            Like.objects.get_or_create(user=user, content_type=ContentType.objects.get_for_model(self), object_id=self.pk)
+
+    def remove_like(self, user):
+        if user and user.is_authenticated:
+            self.likes.filter(user=user).delete()
+
+    def toggle_like(self, user):
+        if self.has_liked(user):
+            self.remove_like(user)
+            return False
+        else:
+            self.add_like(user)
+            return True
+    
+
+class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64)
@@ -47,7 +100,7 @@ class Video(TimestampedModel):
     def __str__(self) -> str:
         return self.title
 
-class Post(TimestampedModel):
+class Post(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255, blank=True)
@@ -74,7 +127,7 @@ class Post(TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
-class Event(TimestampedModel):
+class Event(LikableMixin, TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)
     writer = models.CharField(max_length=255)
@@ -95,7 +148,7 @@ class Event(TimestampedModel):
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
 
-class TvProgram(TimestampedModel):
+class TvProgram(LikableMixin, TimestampedModel):
     """Represents TV/news programs curated for the TV section."""
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -114,7 +167,7 @@ class TvProgram(TimestampedModel):
     def __str__(self) -> str:
         return self.title
 
-class WeeklyMoment(TimestampedModel):
+class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
 
     title = models.CharField(max_length=255)
@@ -151,7 +204,7 @@ class TeamMember(TimestampedModel):
         return self.name
 
 
-class HistoryEntry(TimestampedModel):
+class HistoryEntry(LikableMixin, TimestampedModel):
     """Timeline entries for the organisation history section."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -233,7 +286,7 @@ class EventSection(TimestampedModel):
     class Meta:
         ordering = ("name",)
 
-class Comments(TimestampedModel):
+class Comments(LikableMixin, TimestampedModel):
     """Comments for all models."""
     content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -242,8 +295,8 @@ class Comments(TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
-        
-class Reply(TimestampedModel):
+
+class Reply(LikableMixin, TimestampedModel):
     """Replies to comments."""
     comment = models.ForeignKey(Comments, related_name='replies', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
