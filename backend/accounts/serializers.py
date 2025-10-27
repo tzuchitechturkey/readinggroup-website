@@ -63,8 +63,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {"username": {"required": False}}
 
     def validate(self, attrs):
+        """Normalize username and validate uniqueness of email and username.
+
+        Behavior:
+        - If `username` is not provided, use the email as username.
+        - Reject registration when the email OR username is already taken (case-insensitive).
+        """
         attrs = super().validate(attrs)
-        username = attrs.get("username") or attrs.get("email")
+        username = (attrs.get("username") or attrs.get("email") or "").strip()
+        email = (attrs.get("email") or "").strip()
+
+        # Validate email presence (Model will also enforce, but provide clearer message)
+        if not email:
+            raise serializers.ValidationError({"email": "Email is required."})
+
+        # Check email uniqueness (case-insensitive)
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError({"email": "A user with this email already exists."})
+
+        # Check username uniqueness (case-insensitive)
+        if username and User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError({"username": "A user with this username already exists."})
+
         attrs["username"] = username
         return attrs
 
