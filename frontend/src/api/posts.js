@@ -31,6 +31,10 @@ export async function EditPostById(id, data) {
   return await axios.put(`/posts/${id}/`, data);
 }
 
+export async function PatchPostById(id, data) {
+  return await axios.patch(`/posts/${id}/`, data);
+}
+
 export async function DeletePostById(id) {
   return await axios.delete(`/posts/${id}/`);
 }

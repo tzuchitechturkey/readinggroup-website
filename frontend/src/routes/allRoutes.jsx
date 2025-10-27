@@ -29,7 +29,6 @@ export const userRoutes = [
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
   { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
-  { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   {
     path: "/guiding-reading/weekly-moments/:id",

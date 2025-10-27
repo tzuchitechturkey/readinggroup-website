@@ -13,6 +13,7 @@ import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import {
   GetPostById,
+  PatchPostById,
   // LikePost, UnlikePost
 } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -24,19 +25,16 @@ function CardDetailsPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
   const [userRating, setUserRating] = useState(0); // تقييم المستخدم
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [cardData, setCardData] = useState();
-  const [userId, setUserId] = useState();
 
   const getCardData = async () => {
     setIsLoading(true);
     try {
       const res = await GetPostById(paramId);
       setCardData(res.data);
-      console.log("Card Data:", res.data);
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -52,18 +50,25 @@ function CardDetailsPageContent() {
 
   // دالة الإعجاب
   const handleLike = async () => {
-    // try {
-    //   if (!isLiked) {
-    //     await LikePost({ user: userId, post: cardData.id });
-    //     toast.success(t("Added to favorites!"));
-    //   } else {
-    //     await UnlikePost({ user: userId, post: cardData.id });
-    //     toast.info(t("Removed from favorites"));
-    //   }
-    //   setIsLiked(!isLiked);
-    // } catch (error) {
-    //   setErrorFn(error);
-    // }
+    try {
+      const newLikedState = !cardData?.has_liked;
+
+      await PatchPostById(cardData.id, {
+        has_liked: newLikedState,
+      });
+
+      setCardData({
+        ...cardData,
+        has_liked: newLikedState,
+      });
+
+      toast.success(
+        newLikedState ? t("Added to favorites!") : t("Removed from favorites")
+      );
+    } catch (error) {
+      setErrorFn(error);
+      toast.error(t("Failed to update like status"));
+    }
   };
 
   // دالة فتح الصورة في عرض مكبر
@@ -114,11 +119,6 @@ function CardDetailsPageContent() {
     getCardData();
   }, [paramId]);
 
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    setUserId(storedUserId);
-  }, []);
-
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -145,7 +145,7 @@ function CardDetailsPageContent() {
 
                 {/* Cart Controls */}
                 <ImageControls
-                  isLiked={isLiked}
+                  isLiked={cardData?.has_liked}
                   onLike={handleLike}
                   onExpandImage={handleOpenImage}
                   onDownloadImage={handleDownloadImage}
@@ -166,8 +166,9 @@ function CardDetailsPageContent() {
               isRTL={i18n.language === "ar"}
             />
 
-            {/* Comments Section */}
+            {/* Start Comments Section */}
             <PostCommentsSection postId={cardData?.id} />
+            {/* End Comments Section */}
           </div>
 
           {/* Sidebar - Right Side */}
