@@ -73,14 +73,14 @@ function VideoFilter({
               <input
                 type="checkbox"
                 id="full-videos"
-                checked={contentType.includes("full_video")}
+                checked={contentType.includes("Full Videos")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "full_video"]);
+                    setContentType((prev) => [...prev, "Full Videos"]);
                   } else {
                     setContentType((prev) =>
-                      prev.filter((type) => type !== "full_video")
+                      prev.filter((type) => type !== "Full Videos")
                     );
                   }
                 }}
@@ -100,14 +100,14 @@ function VideoFilter({
               <input
                 type="checkbox"
                 id="unit-video"
-                checked={contentType.includes("unit_video")}
+                checked={contentType.includes("Unit Video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "unit_video"]);
+                    setContentType((prev) => [...prev, "Unit Clips"]);
                   } else {
                     setContentType((prev) =>
-                      prev.filter((type) => type !== "unit_video")
+                      prev.filter((type) => type !== "Unit Clips")
                     );
                   }
                 }}
@@ -276,7 +276,7 @@ function VideoFilter({
                 />
               </PopoverContent>
             </Popover>
-            
+
             {happenedAt && (
               <button
                 onClick={() => setHappenedAt(null)}
@@ -289,7 +289,6 @@ function VideoFilter({
           </div>
         </div>
         {/* End Date */}
-
       </div>
       {/* DatePicker Modal  */}
       <Modal

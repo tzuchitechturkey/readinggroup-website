@@ -364,7 +364,7 @@ function VideosList({ onSectionChange }) {
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
-                  {video.video_type}
+                  {t(video.video_type)}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
