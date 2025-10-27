@@ -34,7 +34,7 @@ function FilteredResults({
   // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = [];
-    const maxPagesToShow = 5;
+    const maxPagesToShow = 10;
     
     if (totalPages <= maxPagesToShow) {
       // Show all pages if total is less than max

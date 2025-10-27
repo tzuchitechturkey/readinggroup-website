@@ -81,15 +81,16 @@ class ReplySerializer(serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
     user = serializers.StringRelatedField(read_only=True)
     # accept comment id when creating a reply
-    comment = serializers.PrimaryKeyRelatedField(queryset=Comments.objects.all())
+    comment = serializers.PrimaryKeyRelatedField(queryset=Comments.objects.all(), required=False)
 
     class Meta:
         model = Reply
-        fields = ("id", "user", "comment", "text", "created_at")
+        fields = ("id", "user", "comment", "text", "created_at", "updated_at")
 
     def validate(self, attrs):
-        # ensure comment is provided
-        if not attrs.get("comment"):
+        # ensure comment is provided only when creating (POST), not when updating (PATCH)
+        request = self.context.get("request")
+        if request and request.method == "POST" and not attrs.get("comment"):
             raise ValidationError({"comment": "This field is required."})
         return attrs
 
@@ -106,11 +107,11 @@ class CommentsSerializer(serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
     user = serializers.StringRelatedField(read_only=True)
     replies = ReplySerializer(many=True, read_only=True)
-    content_type = serializers.CharField(write_only=True)
+    content_type = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Comments
-        fields = ("id", "user", "text", "created_at", "replies", "content_type", "object_id")
+        fields = ("id", "user", "text", "created_at", "updated_at", "replies", "content_type", "object_id")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -122,40 +123,42 @@ class CommentsSerializer(serializers.ModelSerializer):
         return data
 
     def validate(self, attrs):
-        # 'content_type' arrives as a model name string; convert to ContentType
-        ct_name = self.initial_data.get("content_type")
-        if not ct_name:
-            raise ValidationError({"content_type": "This field is required."})
+        # 'content_type' is required only when creating (POST), not when updating (PATCH)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            ct_name = self.initial_data.get("content_type")
+            if not ct_name:
+                raise ValidationError({"content_type": "This field is required."})
 
-        # allow shorthand 'content' to mean the Post model in the content app
-        ct_lookup_name = ct_name.strip().lower()
-        if ct_lookup_name in ("content", "post", "posts"):
+            # allow shorthand 'content' to mean the Post model in the content app
+            ct_lookup_name = ct_name.strip().lower()
+            if ct_lookup_name in ("content", "post", "posts"):
+                try:
+                    ct = ContentType.objects.get(app_label__iexact="content", model__iexact="post")
+                except ContentType.DoesNotExist:
+                    raise ValidationError({"content_type": "Post content type not found in ContentType table."})
+            else:
+                try:
+                    ct = ContentType.objects.get(model__iexact=ct_name)
+                except ContentType.DoesNotExist:
+                    raise ValidationError({"content_type": f"ContentType with name '{ct_name}' does not exist."})
+
+            attrs["content_type"] = ct
+
+            # ensure object_id exists on that model
+            obj_id = attrs.get("object_id") or self.initial_data.get("object_id")
+            if obj_id is None:
+                raise ValidationError({"object_id": "This field is required."})
+
+            model_cls = ct.model_class()
+            if model_cls is None:
+                raise ValidationError({"content_type": "Invalid content type."})
+
             try:
-                ct = ContentType.objects.get(app_label__iexact="content", model__iexact="post")
-            except ContentType.DoesNotExist:
-                raise ValidationError({"content_type": "Post content type not found in ContentType table."})
-        else:
-            try:
-                ct = ContentType.objects.get(model__iexact=ct_name)
-            except ContentType.DoesNotExist:
-                raise ValidationError({"content_type": f"ContentType with name '{ct_name}' does not exist."})
-
-        attrs["content_type"] = ct
-
-        # ensure object_id exists on that model
-        obj_id = attrs.get("object_id") or self.initial_data.get("object_id")
-        if obj_id is None:
-            raise ValidationError({"object_id": "This field is required."})
-
-        model_cls = ct.model_class()
-        if model_cls is None:
-            raise ValidationError({"content_type": "Invalid content type."})
-
-        try:
-            model_cls.objects.get(pk=obj_id)
-        except model_cls.DoesNotExist:
-            raise ValidationError({"object_id": f"Object with id {obj_id} not found for content_type {ct_name}."})
-
+                model_cls.objects.get(pk=obj_id)
+            except model_cls.DoesNotExist:
+                raise ValidationError({"object_id": f"Object with id {obj_id} not found for content_type {ct_name}."})
+        
         return attrs
 
     def create(self, validated_data):

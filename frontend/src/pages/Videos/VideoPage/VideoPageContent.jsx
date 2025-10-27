@@ -6,7 +6,7 @@ import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/Customyou
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { mockVideos } from "@/mock/Viedeos";
-import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
+import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCommentsSection/VideoCommentsSection";
 import { GetVideoById } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -55,7 +55,7 @@ function VideoPageContent() {
       {/* Start Comments Section */}
       <div className="w-full">
         <div className="w-full lg:w-3/4 lg:pl-8">
-          <CommentsSection videoId={videoId} />
+          <VideoCommentsSection videoId={videoId} />
         </div>
       </div>
       {/* End Comments Section */}

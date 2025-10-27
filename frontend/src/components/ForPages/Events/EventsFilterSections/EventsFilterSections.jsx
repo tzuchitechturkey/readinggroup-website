@@ -61,7 +61,7 @@ function EventsFilterSections() {
   const updateFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
+  console.log(filteredData, "filtersfiltersfiltersfilters");
   const handleClearFilters = () => {
     setFilters({
       search: "",
@@ -285,9 +285,10 @@ function EventsFilterSections() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
-                  {filteredData?.results?.map((event) => (
-                    <ExternalNewsCard key={event.id} item={event} />
-                  ))}
+                  {filteredData?.results?.map((event) => {
+                    console.log(event, "eeeeeeeeeeeeeeeeeeeee");
+                    return <ExternalNewsCard key={event.id} item={event} />;
+                  })}
                 </div>
 
                 {filteredData?.results?.length === 0 && !isLoading && (

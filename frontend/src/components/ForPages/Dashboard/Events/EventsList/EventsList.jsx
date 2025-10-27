@@ -252,11 +252,11 @@ const EventsList = ({ onSectionChange }) => {
               </TableHead>
               <TableHead className="hidden sm:table-cell">
                 <button
-                  onClick={() => sortData("writer")}
+                  onClick={() => sortData("report_type")}
                   className="flex items-center gap-1 font-medium"
                 >
-                  {t("Writer")}
-                  {getSortIcon("writer")}
+                  {t("Type")}
+                  {getSortIcon("report_type")}
                 </button>
               </TableHead>
               <TableHead className="hidden sm:table-cell">
@@ -320,7 +320,7 @@ const EventsList = ({ onSectionChange }) => {
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    <span className="text-gray-600">{event?.writer}</span>
+                    <span className="text-gray-600">{event?.report_type}</span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

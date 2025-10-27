@@ -17,6 +17,7 @@ import {
   GetCommentReplies,
   LikeReply,
   UnlikeReply,
+  EditCommentReply,
 } from "@/api/posts";
 
 function PostCommentsSection({ postId }) {
@@ -38,7 +39,15 @@ function PostCommentsSection({ postId }) {
   const [isSubmittingReply, setIsSubmittingReply] = useState({});
   const [_loadingReplies, _setLoadingReplies] = useState({});
 
-  const commentsPerPage = 5;
+  // Edit state
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [isEditingComment, setIsEditingComment] = useState(false);
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyText, setEditReplyText] = useState("");
+  const [isEditingReply, setIsEditingReply] = useState(false);
+
+  const commentsPerPage = 10;
 
   // 🌟 الاستماع للنقر خارج المكون
   useEffect(() => {
@@ -65,9 +74,9 @@ function PostCommentsSection({ postId }) {
     setIsLoadingComments(true);
     try {
       const res = await GetPostComments(
-        postId,
         commentsPerPage,
-        page * commentsPerPage
+        page * commentsPerPage,
+        postId
       );
       if (page === 0) {
         setComments(res.data?.results || []);
@@ -94,9 +103,18 @@ function PostCommentsSection({ postId }) {
       return;
     }
 
+    // تحقق من postId وحوله إلى رقم
+    if (!postId) {
+      console.error("postId is missing:", postId);
+      toast.error("Post ID is missing");
+      return;
+    }
+
     setIsSubmittingComment(true);
     try {
-      await CreatePostComment(postId, comment.trim());
+      // تحويل postId إلى رقم
+      const commentPostId = parseInt(postId) || postId;
+      await CreatePostComment(commentPostId, comment.trim());
       setComment("");
       setShowPicker(false);
       toast.success(t("Comment added successfully"));
@@ -114,11 +132,53 @@ function PostCommentsSection({ postId }) {
     try {
       await DeletePostComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
-      toast.success(t("Comment deleted successfully"));
+      toast.success(t("Comment deleted successfully1111"));
     } catch (error) {
       console.error("Failed to delete comment:", error);
       toast.error(t("Failed to delete comment"));
     }
+  };
+
+  // Edit comment
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentText(comment.text);
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!editCommentText.trim()) {
+      toast.error(t("Comment cannot be empty"));
+      return;
+    }
+
+    setIsEditingComment(true);
+    try {
+      await EditPostComment(commentId, editCommentText.trim());
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              text: editCommentText.trim(),
+            };
+          }
+          return c;
+        })
+      );
+      setEditingCommentId(null);
+      setEditCommentText("");
+      toast.success(t("Comment updated successfully"));
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      toast.error(t("Failed to edit comment"));
+    } finally {
+      setIsEditingComment(false);
+    }
+  };
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditCommentText("");
   };
 
   const handleLikeComment = async (commentId, isLiked) => {
@@ -157,12 +217,18 @@ function PostCommentsSection({ postId }) {
     _setLoadingReplies((prev) => ({ ...prev, [commentId]: true }));
     try {
       const res = await GetCommentReplies(commentId);
+
+      // تصفية الردود لضمان أنها تنتمي للتعليق الصحيح فقط
+      const filteredReplies = (res.data?.results || []).filter(
+        (reply) => reply.comment === commentId || reply.comment_id === commentId
+      );
+
       setComments((prev) =>
         prev.map((c) => {
           if (c.id === commentId) {
             return {
               ...c,
-              replies: res.data?.results || [],
+              replies: filteredReplies,
             };
           }
           return c;
@@ -237,16 +303,19 @@ function PostCommentsSection({ postId }) {
           if (c.id === commentId) {
             return {
               ...c,
-              replies: c.replies?.map((r) => {
-                if (r.id === replyId) {
-                  return {
-                    ...r,
-                    is_liked: !r.is_liked,
-                    likes_count: isLiked ? r.likes_count - 1 : r.likes_count + 1,
-                  };
-                }
-                return r;
-              }) || [],
+              replies:
+                c.replies?.map((r) => {
+                  if (r.id === replyId) {
+                    return {
+                      ...r,
+                      is_liked: !r.is_liked,
+                      likes_count: isLiked
+                        ? r.likes_count - 1
+                        : r.likes_count + 1,
+                    };
+                  }
+                  return r;
+                }) || [],
             };
           }
           return c;
@@ -256,6 +325,57 @@ function PostCommentsSection({ postId }) {
       console.error("Failed to like reply:", error);
       toast.error(t("Failed to update like"));
     }
+  };
+
+  // Edit reply
+  const handleEditReply = (reply) => {
+    setEditingReplyId(reply.id);
+    setEditReplyText(reply.text);
+  };
+
+  const handleSaveEditReply = async (replyId, commentId) => {
+    if (!editReplyText.trim()) {
+      toast.error(t("Reply cannot be empty"));
+      return;
+    }
+
+    setIsEditingReply(true);
+    try {
+      await EditCommentReply(replyId, editReplyText.trim());
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies:
+                c.replies?.map((r) => {
+                  if (r.id === replyId) {
+                    return {
+                      ...r,
+                      text: editReplyText.trim(),
+                    };
+                  }
+                  return r;
+                }) || [],
+            };
+          }
+          return c;
+        })
+      );
+      setEditingReplyId(null);
+      setEditReplyText("");
+      toast.success(t("Reply updated successfully"));
+    } catch (error) {
+      console.error("Failed to edit reply:", error);
+      toast.error(t("Failed to edit reply"));
+    } finally {
+      setIsEditingReply(false);
+    }
+  };
+
+  const handleCancelEditReply = () => {
+    setEditingReplyId(null);
+    setEditReplyText("");
   };
 
   return (
@@ -318,7 +438,9 @@ function PostCommentsSection({ postId }) {
                   disabled={isSubmittingComment || !comment.trim()}
                   className="text-xs bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
-                  {isSubmittingComment && <Loader className="w-3 h-3 animate-spin" />}
+                  {isSubmittingComment && (
+                    <Loader className="w-3 h-3 animate-spin" />
+                  )}
                   {t("Comment")}
                 </button>
               </div>
@@ -352,12 +474,48 @@ function PostCommentsSection({ postId }) {
                       </span>
                       {/* End Writer Name */}
                       {/* Start Date */}
-                      <span className="text-gray-400 text-xs">{c.created_at}</span>
+                      <span className="text-gray-400 text-xs">
+                        {c.created_at}
+                      </span>
                       {/* End Date */}
                     </div>
 
                     {/* Start Comment Content */}
-                    <p className="mt-1 text-sm text-gray-800 leading-snug">{c.text}</p>
+                    {editingCommentId === c.id ? (
+                      <div className="mt-3 flex flex-col gap-2">
+                        <input
+                          type="text"
+                          value={editCommentText}
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          className="w-full border-b outline-none focus:border-blue-500 transition-colors py-1 text-sm"
+                          autoFocus
+                        />
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={handleCancelEditComment}
+                            className="text-xs px-2 py-1 text-gray-600 hover:text-gray-900"
+                          >
+                            {t("Cancel")}
+                          </button>
+                          <button
+                            onClick={() => handleSaveEditComment(c.id)}
+                            disabled={
+                              isEditingComment || !editCommentText.trim()
+                            }
+                            className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            {isEditingComment && (
+                              <Loader className="w-3 h-3 animate-spin" />
+                            )}
+                            {t("Save")}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-sm text-gray-800 leading-snug">
+                        {c.text}
+                      </p>
+                    )}
                     {/* End Comment Content */}
 
                     {/* Start Actions */}
@@ -376,7 +534,11 @@ function PostCommentsSection({ postId }) {
                             ? { fill: "currentColor", stroke: "none" }
                             : {})}
                         />
-                        <span className={`text-xs ${c.is_liked ? "text-white" : ""}`}>
+                        <span
+                          className={`text-xs ${
+                            c.is_liked ? "text-white" : ""
+                          }`}
+                        >
                           {c.likes_count || 0}
                         </span>
                       </button>
@@ -401,6 +563,15 @@ function PostCommentsSection({ postId }) {
                       >
                         {t("Delete")}
                       </button>
+
+                      {!editingCommentId && (
+                        <button
+                          className="text-xs hover:text-blue-500"
+                          onClick={() => handleEditComment(c)}
+                        >
+                          {t("Edit")}
+                        </button>
+                      )}
                     </div>
                     {/* End Actions */}
 
@@ -409,7 +580,10 @@ function PostCommentsSection({ postId }) {
                       <div className="mt-4 pl-4 border-l-2 border-gray-300">
                         <ul className="space-y-4">
                           {c.replies.map((reply) => (
-                            <li key={reply.id} className="flex items-start gap-2">
+                            <li
+                              key={reply.id}
+                              className="flex items-start gap-2"
+                            >
                               <img
                                 src={reply.avatar || "/Beared Guy02-min 1.png"}
                                 alt={reply.user}
@@ -424,9 +598,46 @@ function PostCommentsSection({ postId }) {
                                     {reply.created_at}
                                   </span>
                                 </div>
-                                <p className="mt-1 text-xs text-gray-800 leading-snug">
-                                  {reply.text}
-                                </p>
+                                {editingReplyId === reply.id ? (
+                                  <div className="mt-3 flex flex-col gap-2">
+                                    <input
+                                      type="text"
+                                      value={editReplyText}
+                                      onChange={(e) =>
+                                        setEditReplyText(e.target.value)
+                                      }
+                                      className="w-full border-b outline-none focus:border-blue-500 transition-colors py-1 text-xs"
+                                      autoFocus
+                                    />
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={handleCancelEditReply}
+                                        className="text-xs px-2 py-1 text-gray-600 hover:text-gray-900"
+                                      >
+                                        {t("Cancel")}
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleSaveEditReply(reply.id, c.id)
+                                        }
+                                        disabled={
+                                          isEditingReply ||
+                                          !editReplyText.trim()
+                                        }
+                                        className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                      >
+                                        {isEditingReply && (
+                                          <Loader className="w-3 h-3 animate-spin" />
+                                        )}
+                                        {t("Save")}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="mt-1 text-xs text-gray-800 leading-snug">
+                                    {reply.text}
+                                  </p>
+                                )}
                                 <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
                                   <button
                                     className={`flex items-center gap-1 ${
@@ -445,7 +656,10 @@ function PostCommentsSection({ postId }) {
                                     <ThumbsUp
                                       className="w-3 h-3"
                                       {...(reply.is_liked
-                                        ? { fill: "currentColor", stroke: "none" }
+                                        ? {
+                                            fill: "currentColor",
+                                            stroke: "none",
+                                          }
                                         : {})}
                                     />
                                     <span
@@ -465,6 +679,15 @@ function PostCommentsSection({ postId }) {
                                   >
                                     {t("Delete")}
                                   </button>
+
+                                  {!editingReplyId && (
+                                    <button
+                                      className="text-xs hover:text-blue-500"
+                                      onClick={() => handleEditReply(reply)}
+                                    >
+                                      {t("Edit")}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </li>
@@ -511,7 +734,7 @@ function PostCommentsSection({ postId }) {
                               onClick={() => handleSubmitReply(c.id)}
                               disabled={
                                 isSubmittingReply[c.id] ||
-                                !(replyText[c.id]?.trim())
+                                !replyText[c.id]?.trim()
                               }
                               className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                             >

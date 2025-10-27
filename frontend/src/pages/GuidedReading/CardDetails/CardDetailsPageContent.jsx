@@ -1,86 +1,23 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Download, Bookmark, Star } from "lucide-react";
 
 // Import components
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
-import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
-import { GetPostById, 
-  // LikePost, UnlikePost 
+import {
+  GetPostById,
+  // LikePost, UnlikePost
 } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
-
-const comments = [
-  {
-    id: "c1",
-    writer: "Jenny Wilson",
-    avatar: "/icons/User 1.png",
-    timeAgo: "3 days ago",
-    edited: true,
-    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-    likes: 124,
-    repliesCount: 18,
-    replies: [
-      {
-        id: 1,
-        avatar: "/icons/User 1.png",
-        writer: "Ali Ahmed",
-        timeAgo: "2h ago",
-        edited: false,
-        text: "This is really inspiring work by Tzu Chi Foundation.",
-        likes: 4,
-      },
-      {
-        id: 2,
-        avatar: "/icons/User 1.png",
-        writer: "Sara Mohamed",
-        timeAgo: "30m ago",
-        edited: true,
-        text: "Thank you for sharing this meaningful content 🙂",
-        likes: 2,
-      },
-    ],
-  },
-  {
-    id: "c2",
-    writer: "Jenny Wilson",
-    avatar: "/icons/User 1.png",
-    timeAgo: "3 days ago",
-    edited: true,
-    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-    likes: 124,
-    repliesCount: 18,
-  },
-  {
-    id: "c3",
-    writer: "Jenny Wilson",
-    avatar: "/icons/User 1.png",
-    timeAgo: "3 days ago",
-    edited: true,
-    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-    likes: 174,
-    repliesCount: 18,
-  },
-  {
-    id: "c4",
-    writer: "Jenny Wilson",
-    avatar: "/icons/User 1.png",
-    timeAgo: "3 days ago",
-    edited: true,
-    text: "Tzu Chi Foundation visits Syrian lands to provide humanitarian aid and relief to communities affected by conflict",
-    likes: 124,
-    repliesCount: 18,
-  },
-];
+import PostCommentsSection from "@/components/ForPages/GuidedReading/PostCommentsSection/PostCommentsSection";
 
 function CardDetailsPageContent() {
   const { t, i18n } = useTranslation();
@@ -160,7 +97,6 @@ function CardDetailsPageContent() {
   };
 
   // تنسيق البيانات لتتماشى مع مكون CommentsSection
-
   const thisWeekCards = Array(3)
     .fill(null)
     .map((_, index) => ({
@@ -174,16 +110,21 @@ function CardDetailsPageContent() {
       date: "Apr 18",
     }));
 
-  const isRTL = i18n.language === "ar";
   useEffect(() => {
     getCardData();
   }, [paramId]);
+
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     setUserId(storedUserId);
   }, []);
+
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
+    <div
+      className={`min-h-screen bg-gray-50 ${
+        i18n.language === "ar" ? "rtl" : "ltr"
+      }`}
+    >
       {isLoading && <Loader />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -209,7 +150,7 @@ function CardDetailsPageContent() {
                   onExpandImage={handleOpenImage}
                   onDownloadImage={handleDownloadImage}
                   onShareImage={() => setIsShareModalOpen(true)}
-                  isRTL={isRTL}
+                  isRTL={i18n.language === "ar"}
                 />
               </div>
             </div>
@@ -222,11 +163,11 @@ function CardDetailsPageContent() {
               onStarHover={setHoveredRating}
               onStarLeave={() => setHoveredRating(0)}
               contentData={cardData}
-              isRTL={isRTL}
+              isRTL={i18n.language === "ar"}
             />
 
             {/* Comments Section */}
-            <CommentsSection comments={comments} />
+            <PostCommentsSection postId={cardData?.id} />
           </div>
 
           {/* Sidebar - Right Side */}
@@ -235,7 +176,7 @@ function CardDetailsPageContent() {
             <ContentInfoCard
               contentData={cardData}
               contentType="card"
-              isRTL={isRTL}
+              isRTL={i18n.language === "ar"}
             />
 
             {/* This Week's Cards */}
@@ -275,7 +216,7 @@ function CardDetailsPageContent() {
           details: `★ ${cardData?.rating} (${cardData?.reviews}k)`,
         }}
         onDownloadImage={handleDownloadImage}
-        isRTL={isRTL}
+        isRTL={i18n.language === "ar"}
       />
     </div>
   );

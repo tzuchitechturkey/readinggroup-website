@@ -132,7 +132,7 @@ export async function CreateCommentReply(commentId, text) {
     text,
     user: userId,
   });
-} 
+}
 
 export async function DeleteCommentReply(replyId) {
   return await axios.delete(`/replies/${replyId}/`);

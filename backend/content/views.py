@@ -286,11 +286,33 @@ class CommentsViewSet(BaseContentViewSet):
     search_fields = ("user__username", "content_type", "object_id", "text")
     ordering_fields = ("created_at",)
 
+    def get_queryset(self):
+        """Filter comments by object_id and content_type if provided."""
+        from django.contrib.contenttypes.models import ContentType
+        
+        queryset = super().get_queryset()
+        object_id = self.request.query_params.get('object_id')
+        content_type_name = self.request.query_params.get('content_type')
+        
+        if object_id:
+            queryset = queryset.filter(object_id=object_id)
+        
+        if content_type_name:
+            # Convert content_type string (e.g., 'video', 'post') to ContentType object
+            try:
+                content_type = ContentType.objects.get(model__iexact=content_type_name)
+                queryset = queryset.filter(content_type=content_type)
+            except ContentType.DoesNotExist:
+                # If content_type not found, return empty queryset
+                queryset = queryset.none()
+        
+        return queryset.order_by('-created_at')
+
     @action(detail=True, methods=("get", "post"), url_path="replies", url_name="replies")
     def replies(self, request, pk=None):
-        """List (paginated) replies for a specific comment, or create a reply tied to that comment.
+        """List all replies for a specific comment (no pagination), or create a reply tied to that comment.
 
-        GET  /api/v1/comments/{id}/replies/?limit=10&offset=0  -> paginated list
+        GET  /api/v1/comments/{id}/replies/  -> all replies (no pagination)
         POST /api/v1/comments/{id}/replies/  -> create a reply (body: {"text": "..."})
         """
         comment = self.get_object()
@@ -303,12 +325,8 @@ class CommentsViewSet(BaseContentViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # GET: return paginated replies
-        qs = comment.replies.all()
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = ReplySerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
+        # GET: return ALL replies without pagination
+        qs = comment.replies.all().order_by('-created_at')
         serializer = ReplySerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
@@ -316,10 +334,18 @@ class ReplyViewSet(BaseContentViewSet):
     """ViewSet for managing Reply content."""
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    # paginate replies list (global setting applies but set explicitly)
-    pagination_class = LimitOffsetPagination
     search_fields = ("user__username", "comment__id", "text")
     ordering_fields = ("created_at",)
+
+    def get_queryset(self):
+        """Filter replies by comment if provided."""
+        queryset = super().get_queryset()
+        comment_id = self.request.query_params.get('comment')
+        
+        if comment_id:
+            queryset = queryset.filter(comment_id=comment_id)
+        
+        return queryset.order_by('-created_at')
 
 class HistoryEntryViewSet(BaseContentViewSet):
     """ViewSet for managing HistoryEntry content."""

@@ -9,12 +9,13 @@ import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent
 function ExternalNewsCard({ className = "", item }) {
   const { t } = useTranslation();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
-
   const navigate = useNavigate();
+
+  console.log(item, "itemitemitemitemitemitem");
   return (
     <div
       onClick={() => {
-        if (item.report_type === "video") {
+        if (item.report_type === "videos") {
           setOpenDetailsVideoModal(true);
         } else {
           navigate(`/events/${item.id}`);
@@ -75,6 +76,7 @@ function ExternalNewsCard({ className = "", item }) {
           <VideoDetailsContent
             isOpen={openDetailsVideoModal}
             onClose={() => setOpenDetailsVideoModal(false)}
+            videoData={item}
           />,
           document.body
         )}

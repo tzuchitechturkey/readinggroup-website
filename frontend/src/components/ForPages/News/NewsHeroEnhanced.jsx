@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Download, Share2 } from "lucide-react";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import NewsCard from "@/components/ForPages/Events/NewsCard/NewsCard";
-import { LikeEvent, UnlikeEvent } from "@/api/events";
+import { GetEventById, LikeEvent, UnlikeEvent } from "@/api/events";
+import Loader from "@/components/Global/Loader/Loader";
 
 const NewsHero = ({
   mainArticle = null,
@@ -17,10 +19,12 @@ const NewsHero = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [isLiked, setIsLiked] = useState(false);
+  const { id: paramId } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [userId, setUserId] = useState();
-
+  const [data, setData] = useState({});
   // Default data if no props are provided
   const defaultMainArticle = {
     id: 1,
@@ -98,10 +102,10 @@ const NewsHero = ({
   // دالة تحميل الصورة
   const handleDownloadImage = () => {
     try {
-      const imageUrl = article.image;
+      const imageUrl = data.image;
       const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `${article.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${data.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -113,29 +117,42 @@ const NewsHero = ({
       toast.error(t("Failed to download image"));
     }
   };
-  const article = mainArticle || defaultMainArticle;
   const articles = sideArticles.length > 0 ? sideArticles : defaultSideArticles;
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const getData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetEventById(paramId);
+      setData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch event data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     setUserId(storedUserId);
-  }, []);
+    getData();
+  }, [paramId]);
+  console.log(data, "aaaaaaaaaaaaa");
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
     >
+      {isLoading && <Loader />}
       {/* Start Main Article */}
       <div className="flex flex-col gap-6 flex-1 max-w-4xl news-hero-main">
         {/* Start TItle */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-text leading-tight tracking-tight">
-          {article.title}
+          {data.title}
         </h1>
         {/* End Title */}
         {/* Start Image */}
         <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
           <img
-            src={article.image}
-            alt={article.title}
+            src={data.image}
+            alt={data.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
@@ -143,7 +160,7 @@ const NewsHero = ({
         {/* ENd Image */}
         {/* Start Description */}
         <p className="text-base md:text-lg text-text leading-relaxed">
-          {article.description}
+          {data.description}
         </p>
         {/* End description */}
         {/* Start Article Info */}
@@ -151,16 +168,16 @@ const NewsHero = ({
           {/* left: writer & date */}
           <div className="flex items-center gap-4">
             <span className="text-base md:text-lg">
-              {t("By")} {article.writer}
+              {t("By")} {data.writer}
             </span>
             <div className="w-px h-6 bg-white opacity-50" />
-            <span className="text-base md:text-lg">{article.date}</span>
+            <span className="text-base md:text-lg">{data.date}</span>
           </div>
 
           {/* right: country pill + image controls */}
           <div className="flex items-center gap-3">
             <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
-              {article.country}
+              {data.country}
             </span>
 
             <ImageControls
@@ -221,7 +238,7 @@ const NewsHero = ({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={article.title}
+        title={data.title}
       />
       {/* End Share Modal */}
 
@@ -230,11 +247,11 @@ const NewsHero = ({
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: article.image,
-          title: article.title,
-          subtitle: article.category,
-          writer: article.writer,
-          details: `${article.date} • ${article.country}`,
+          image: data.image,
+          title: data.title,
+          subtitle: data.category,
+          writer: data.writer,
+          details: `${data.date} • ${data.country}`,
         }}
         onDownloadImage={handleDownloadImage}
         isRTL={i18n.language === "ar"}

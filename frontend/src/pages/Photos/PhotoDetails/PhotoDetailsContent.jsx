@@ -7,12 +7,12 @@ import { Star } from "lucide-react";
 
 // Import components
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
-import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
+import PostCommentsSection from "@/components/ForPages/GuidedReading/PostCommentsSection/PostCommentsSection";
 
 function PhotoDetailsContent() {
   const { t, i18n } = useTranslation();
@@ -270,7 +270,7 @@ function PhotoDetailsContent() {
             </div>
 
             {/* Comments Section */}
-            <CommentsSection comments={comments} />
+            <PostCommentsSection postId={photoData.id} />
           </div>
 
           {/* Sidebar - Right Side */}

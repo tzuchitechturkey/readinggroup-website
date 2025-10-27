@@ -62,7 +62,7 @@ export async function DeletePostCategory(id) {
 }
 
 // Comments management for posts
-export async function GetPostComments(postId, limit = 10, offset = 0) {
+export async function GetPostComments(limit = 10, offset = 0, postId) {
   return await axios.get(
     `/comments/?limit=${limit}&offset=${offset}&object_id=${postId}&content_type=post`
   );

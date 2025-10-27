@@ -2,14 +2,14 @@ import React, { useState } from "react";
 
 import { ChevronDown } from "lucide-react";
 
-import CommentsSection from "@/components/ForPages/Videos/VideoPage/CommentsSection/CommentsSection";
+import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCommentsSection/VideoCommentsSection";
 
 import EpisodeCard from "./EpisodeCard";
 
 const TabsSection = () => {
   const [activeTab, setActiveTab] = useState("episodes");
   const [showAllEpisodes, setShowAllEpisodes] = useState(false);
-
+  const [videoData, setVideoData] = useState(null);
   const tabs = [
     { id: "episodes", label: "Episodes" },
     { id: "reviews", label: "User Reviews" },
@@ -141,7 +141,9 @@ const TabsSection = () => {
           </>
         )}
 
-        {activeTab === "reviews" && <CommentsSection />}
+        {activeTab === "reviews" && (
+          <VideoCommentsSection videoId={videoData?.id} />
+        )}
       </div>
     </div>
   );

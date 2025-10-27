@@ -239,7 +239,6 @@ class Comments(TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     text = models.CharField(max_length=1000)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -249,7 +248,6 @@ class Reply(TimestampedModel):
     comment = models.ForeignKey(Comments, related_name='replies', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.CharField(max_length=1000)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)

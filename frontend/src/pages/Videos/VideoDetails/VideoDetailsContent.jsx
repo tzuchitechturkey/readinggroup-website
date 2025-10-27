@@ -140,7 +140,7 @@ function VideoDetailsContent({
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
               <img
-                src={videoData.thumbnail || videoData?.thumbnail_url}
+                src={videoData?.thumbnail || videoData?.thumbnail_url}
                 alt="Video background"
                 className="w-full h-full object-cover rounded-none -m-1"
                 onError={(e) => {
@@ -174,13 +174,13 @@ function VideoDetailsContent({
             >
               <div className="max-w-3xl px-6 md:px-0">
                 <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-4xl mb-3 sm:mb-4 md:mb-6 leading-tight font-bold text-white">
-                  {videoData.title}
+                  {videoData?.title}
                 </h1>
 
                 {/* Play Button and Controls Row */}
                 <div className="flex items-center gap-2 relative z-50 xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <Link
-                    to={`/videos/${videoData.id}`}
+                    to={`/videos/${videoData?.id}`}
                     className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -274,10 +274,10 @@ function VideoDetailsContent({
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
               <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                {t("Season")} · {videoData.season}
+                {t("Season")} · {videoData?.season}
               </p>
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoData.description}
+                {videoData?.description}
               </p>
             </div>
 
@@ -299,7 +299,7 @@ function VideoDetailsContent({
                       </span>
                     ))}
                   </p>
-                  {/* {videoData.cast.length > 3 && (
+                  {/* {videoData?.cast.length > 3 && (
                     <button
                       className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
                       onClick={(e) => {
@@ -378,7 +378,7 @@ function VideoDetailsContent({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={videoData.title}
+        title={videoData?.title}
       />
     </Modal>
   );

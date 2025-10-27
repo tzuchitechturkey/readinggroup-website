@@ -17,6 +17,7 @@ import {
   GetCommentReplies,
   LikeReply,
   UnlikeReply,
+  EditCommentReply,
 } from "@/api/videos";
 
 function VideoCommentsSection({ videoId }) {
@@ -37,6 +38,14 @@ function VideoCommentsSection({ videoId }) {
   const [activeReplyComment, setActiveReplyComment] = useState(null);
   const [isSubmittingReply, setIsSubmittingReply] = useState({});
   const [_loadingReplies, _setLoadingReplies] = useState({});
+
+  // Edit state
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [isEditingComment, setIsEditingComment] = useState(false);
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyText, setEditReplyText] = useState("");
+  const [isEditingReply, setIsEditingReply] = useState(false);
 
   const commentsPerPage = 10;
 
@@ -119,6 +128,48 @@ function VideoCommentsSection({ videoId }) {
       console.error("Failed to delete comment:", error);
       toast.error(t("Failed to delete comment"));
     }
+  };
+
+  // Edit comment
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentText(comment.text);
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!editCommentText.trim()) {
+      toast.error(t("Comment cannot be empty"));
+      return;
+    }
+
+    setIsEditingComment(true);
+    try {
+      await EditVideoComment(commentId, editCommentText.trim());
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              text: editCommentText.trim(),
+            };
+          }
+          return c;
+        })
+      );
+      setEditingCommentId(null);
+      setEditCommentText("");
+      toast.success(t("Comment updated successfully"));
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      toast.error(t("Failed to edit comment"));
+    } finally {
+      setIsEditingComment(false);
+    }
+  };
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditCommentText("");
   };
 
   const handleLikeComment = async (commentId, isLiked) => {
@@ -267,6 +318,57 @@ function VideoCommentsSection({ videoId }) {
     }
   };
 
+  // Edit reply
+  const handleEditReply = (reply) => {
+    setEditingReplyId(reply.id);
+    setEditReplyText(reply.text);
+  };
+
+  const handleSaveEditReply = async (replyId, commentId) => {
+    if (!editReplyText.trim()) {
+      toast.error(t("Reply cannot be empty"));
+      return;
+    }
+
+    setIsEditingReply(true);
+    try {
+      await EditCommentReply(replyId, editReplyText.trim());
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies:
+                c.replies?.map((r) => {
+                  if (r.id === replyId) {
+                    return {
+                      ...r,
+                      text: editReplyText.trim(),
+                    };
+                  }
+                  return r;
+                }) || [],
+            };
+          }
+          return c;
+        })
+      );
+      setEditingReplyId(null);
+      setEditReplyText("");
+      toast.success(t("Reply updated successfully"));
+    } catch (error) {
+      console.error("Failed to edit reply:", error);
+      toast.error(t("Failed to edit reply"));
+    } finally {
+      setIsEditingReply(false);
+    }
+  };
+
+  const handleCancelEditReply = () => {
+    setEditingReplyId(null);
+    setEditReplyText("");
+  };
+
   return (
     <div className="bg-white">
       {/* Start Comment Editor */}
@@ -370,9 +472,41 @@ function VideoCommentsSection({ videoId }) {
                     </div>
 
                     {/* Start Comment Content */}
-                    <p className="mt-1 text-sm text-gray-800 leading-snug">
-                      {c.text}
-                    </p>
+                    {editingCommentId === c.id ? (
+                      <div className="mt-3 flex flex-col gap-2">
+                        <input
+                          type="text"
+                          value={editCommentText}
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          className="w-full border-b outline-none focus:border-blue-500 transition-colors py-1 text-sm"
+                          autoFocus
+                        />
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={handleCancelEditComment}
+                            className="text-xs px-2 py-1 text-gray-600 hover:text-gray-900"
+                          >
+                            {t("Cancel")}
+                          </button>
+                          <button
+                            onClick={() => handleSaveEditComment(c.id)}
+                            disabled={
+                              isEditingComment || !editCommentText.trim()
+                            }
+                            className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            {isEditingComment && (
+                              <Loader className="w-3 h-3 animate-spin" />
+                            )}
+                            {t("Save")}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-sm text-gray-800 leading-snug">
+                        {c.text}
+                      </p>
+                    )}
                     {/* End Comment Content */}
 
                     {/* Start Actions */}
@@ -420,6 +554,15 @@ function VideoCommentsSection({ videoId }) {
                       >
                         {t("Delete")}
                       </button>
+
+                      {!editingCommentId && (
+                        <button
+                          className="text-xs hover:text-blue-500"
+                          onClick={() => handleEditComment(c)}
+                        >
+                          {t("Edit")}
+                        </button>
+                      )}
                     </div>
                     {/* End Actions */}
 
@@ -446,9 +589,46 @@ function VideoCommentsSection({ videoId }) {
                                     {reply.created_at}
                                   </span>
                                 </div>
-                                <p className="mt-1 text-xs text-gray-800 leading-snug">
-                                  {reply.text}
-                                </p>
+                                {editingReplyId === reply.id ? (
+                                  <div className="mt-3 flex flex-col gap-2">
+                                    <input
+                                      type="text"
+                                      value={editReplyText}
+                                      onChange={(e) =>
+                                        setEditReplyText(e.target.value)
+                                      }
+                                      className="w-full border-b outline-none focus:border-blue-500 transition-colors py-1 text-xs"
+                                      autoFocus
+                                    />
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={handleCancelEditReply}
+                                        className="text-xs px-2 py-1 text-gray-600 hover:text-gray-900"
+                                      >
+                                        {t("Cancel")}
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleSaveEditReply(reply.id, c.id)
+                                        }
+                                        disabled={
+                                          isEditingReply ||
+                                          !editReplyText.trim()
+                                        }
+                                        className="text-xs bg-primary text-white px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                      >
+                                        {isEditingReply && (
+                                          <Loader className="w-3 h-3 animate-spin" />
+                                        )}
+                                        {t("Save")}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="mt-1 text-xs text-gray-800 leading-snug">
+                                    {reply.text}
+                                  </p>
+                                )}
                                 <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
                                   <button
                                     className={`flex items-center gap-1 ${
@@ -490,6 +670,15 @@ function VideoCommentsSection({ videoId }) {
                                   >
                                     {t("Delete")}
                                   </button>
+
+                                  {!editingReplyId && (
+                                    <button
+                                      className="text-xs hover:text-blue-500"
+                                      onClick={() => handleEditReply(reply)}
+                                    >
+                                      {t("Edit")}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </li>
