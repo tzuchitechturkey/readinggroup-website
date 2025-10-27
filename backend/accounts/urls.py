@@ -10,6 +10,8 @@ from .views import (
     ResetTOTPAPIView,
     TOTPSetupAPIView,
     UserListView,
+    FriendRequestListCreateView,
+    FriendRequestActionView,
 )
 
 app_name = "accounts"
@@ -25,4 +27,6 @@ urlpatterns = [
     path("reset-totp/", ResetTOTPAPIView.as_view(), name="reset-totp"),
     path("setup-totp/", TOTPSetupAPIView.as_view(), name="setup-totp"),
     path("users/", UserListView.as_view(), name="users-list"),
+    path("friend-requests/", FriendRequestListCreateView.as_view(), name="friend-requests-list-create"),
+    path("friend-requests/<int:pk>/action/", FriendRequestActionView.as_view(), name="friend-requests-action"),
 ]

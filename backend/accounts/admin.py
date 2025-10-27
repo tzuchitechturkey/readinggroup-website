@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import User
+from .models import User, FriendRequest
 
 
 @admin.register(User)
@@ -14,3 +14,11 @@ class UserAdmin(DjangoUserAdmin):
     )
     list_display = ("username", "email", "display_name", "is_staff", "is_active")
     search_fields = ("username", "email", "display_name")
+    
+@admin.register(FriendRequest)
+class FriendRequestAdmin(admin.ModelAdmin):
+    """Admin interface for FriendRequest model."""
+
+    list_display = ("from_user", "to_user", "status", "created_at", "updated_at")
+    list_filter = ("status", "created_at", "updated_at")
+    search_fields = ("from_user__username", "to_user__username", "message")

@@ -4,13 +4,11 @@ from .models import (
     HistoryEntry,
     Post,
     TeamMember,
-    TvProgram,
     Video,
     WeeklyMoment,
     PostCategory,
     VideoCategory,
     EventCategory,
-    TvProgramCategory,
     PositionTeamMember,
     EventSection,
     Comments,
@@ -36,13 +34,6 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ("title", "section", "category", "language", "happened_at")
     list_filter = ("section", "category", "language")
     search_fields = ("title", "writer", "category")
-
-@admin.register(TvProgram)
-class TvProgramAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "writer", "air_date", "is_live")
-    list_filter = ("category", "is_live")
-    search_fields = ("title", "description", "writer")
-
 
 @admin.register(WeeklyMoment)
 class WeeklyMomentAdmin(admin.ModelAdmin):
@@ -76,11 +67,6 @@ class PostCategoryAdmin(admin.ModelAdmin):
     
 @admin.register(EventCategory)
 class EventCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
-    
-@admin.register(TvProgramCategory)
-class TvProgramCategoryAdmin(admin.ModelAdmin): 
     list_display = ("name",)
     search_fields = ("name",)
     

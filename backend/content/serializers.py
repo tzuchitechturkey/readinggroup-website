@@ -10,13 +10,11 @@ from .models import (
     TeamMember,
     Comments,
     Reply,
-    TvProgram,
     Video,
     WeeklyMoment,
     VideoCategory,
     PostCategory,
     EventCategory,
-    TvProgramCategory,
     PositionTeamMember,
     EventSection,
 )
@@ -58,11 +56,6 @@ class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = EventCategory
-        fields = "__all__"
-class TvProgramCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = TvProgramCategory
         fields = "__all__"
 
 class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -133,7 +126,7 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ("id", "user", "text", "created_at", "replies", "content_type", "object_id", "likes_count", "has_liked")
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # represent content_type as its model name
@@ -307,39 +300,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
-
-class TvProgramSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("air_date", "created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=TvProgramCategory.objects.all(), write_only=True, required=False)
-    # nested comments info
-    comments = CommentsSerializer(many=True, read_only=True)
-    likes_count = serializers.SerializerMethodField(read_only=True)
-    has_liked = serializers.SerializerMethodField(read_only=True)
-    class Meta:
-        model = TvProgram
-        fields = "__all__"
-        file_fields = ("image",)
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["category"] = TvProgramCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        annotated = getattr(instance, "annotated_has_liked", None)
-        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
-        return data
-
-    def get_likes_count(self, obj):
-        return getattr(obj, "likes_count", 0)
-
-    def get_has_liked(self, obj):
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        if user and user.is_authenticated:
-            return obj.has_liked(user)
-        return False
-
 class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "created_at", "updated_at")
     class Meta:

@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import(
     video_manual_parameters,
@@ -17,12 +16,10 @@ from .models import (
     HistoryEntry,
     Post,
     TeamMember,
-    TvProgram,
     Video,
     WeeklyMoment,
     PostCategory,
     VideoCategory,
-    TvProgramCategory,
     EventCategory,
     PositionTeamMember,
     EventSection,
@@ -35,12 +32,10 @@ from .serializers import (
     HistoryEntrySerializer,
     PostSerializer,
     TeamMemberSerializer,
-    TvProgramSerializer,
     VideoSerializer,
     WeeklyMomentSerializer,
     PostCategorySerializer,
     VideoCategorySerializer,
-    TvProgramCategorySerializer,
     EventCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
@@ -271,17 +266,6 @@ class EventViewSet(BaseContentViewSet):
             
         return queryset
 
-class TvProgramViewSet(BaseContentViewSet):
-    """ViewSet for managing TvProgram content."""
-    queryset = TvProgram.objects.all()
-    serializer_class = TvProgramSerializer
-    search_fields = ("title", "description", "writer", "category")
-    ordering_fields = ("air_date", "created_at")
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return self.annotate_likes(queryset)
-
 class WeeklyMomentViewSet(BaseContentViewSet):
     """ViewSet for managing WeeklyMoment content."""
     queryset = WeeklyMoment.objects.all()
@@ -421,13 +405,6 @@ class EventCategoryViewSet(BaseContentViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    
-class TvProgramCategoryViewSet(BaseContentViewSet):
-    """ViewSet for managing TvProgramCategory content."""
-    queryset = TvProgramCategory.objects.all()
-    serializer_class = TvProgramCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     

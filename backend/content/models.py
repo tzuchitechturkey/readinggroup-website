@@ -141,31 +141,16 @@ class Event(LikableMixin, TimestampedModel):
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
     section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
     summary = models.TextField(blank=True)
+    thumbnail = models.ImageField(upload_to="events/thumbnails/", blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True)
+    cast = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
     class Meta:
         ordering = ("-happened_at", "title")
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
-
-class TvProgram(LikableMixin, TimestampedModel):
-    """Represents TV/news programs curated for the TV section."""
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    air_date = models.DateField()
-    image = models.ImageField(upload_to="tv/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
-    writer = models.CharField(max_length=255)
-    category = models.ForeignKey('TvProgramCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    is_live = models.BooleanField(default=False)
-    views = models.PositiveIntegerField(default=0)
-    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='tvprograms')
-
-    class Meta:
-        ordering = ("-air_date", "title")
-
-    def __str__(self) -> str:
-        return self.title
 
 class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
@@ -246,18 +231,6 @@ class PostCategory(TimestampedModel):
 #Category for Events
 class EventCategory(TimestampedModel):
     """Categories for organizing events."""
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str: 
-        return self.name
-    
-#Category for TvPrograms
-class TvProgramCategory(TimestampedModel):
-    """Categories for organizing TV programs."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
