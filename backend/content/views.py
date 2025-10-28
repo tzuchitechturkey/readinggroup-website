@@ -4,6 +4,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+from django.http import HttpResponseRedirect
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,
@@ -27,6 +28,7 @@ from .models import (
     Reply,
     Like,
 )
+from .enums import VideoType
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
@@ -81,6 +83,87 @@ class BaseContentViewSet(viewsets.ModelViewSet):
                 # fallback: ignore annotation if something fails
                 pass
         return queryset
+
+    @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
+    def top_liked(self, request):
+        """Return top liked instances for this resource.
+
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        # annotate queryset with likes info then order by annotated_likes_count
+        qs = self.get_queryset()
+        qs = self.annotate_likes(qs)
+        # prefer annotated_likes_count (annotate_likes uses Count('likes'))
+        try:
+            qs = qs.order_by('-annotated_likes_count', '-created_at')[:limit]
+        except Exception:
+            # fallback: try ordering by annotated field name or likes_count
+            qs = qs[:limit]
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=("get",), url_path="top-viewed", url_name="top_viewed")
+    def top_viewed(self, request):
+        """Return top viewed instances for this resource.
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = self.get_queryset()
+        # if model has 'views' field, order by it; fallback to created_at if not
+        try:
+            qs = qs.order_by('-views', '-created_at')[:limit]
+        except Exception:
+            qs = qs.order_by('-created_at')[:limit]
+
+        # annotate likes info as well so serializers can show likes_count/has_liked
+        qs = self.annotate_likes(qs)
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=("get",), url_path="image", url_name="image")
+    def image(self, request, pk=None):
+        """Return a redirect to the instance image URL and increment the views counter.
+        Usage: GET /api/v1/<resource>/{id}/image/
+        This is intended to be used as the <img src="/api/v1/.../image/"> so each access
+        increments the model's `views` field (if present) then redirects to the real image.
+        """
+        instance = self.get_object()
+        url = None
+        for attr in ("image", "thumbnail", "thumbnail_url", "image_url"):
+            val = getattr(instance, attr, None)
+            if val:
+                try:
+                    if hasattr(val, 'url'):
+                        url = request.build_absolute_uri(val.url)
+                    else:
+                        url = val
+                except Exception:
+                    url = str(val)
+                if url:
+                    break
+        if not url:
+            return Response({"detail": "No image available for this resource."}, status=status.HTTP_404_NOT_FOUND)
+
+        if hasattr(instance, 'views'):
+            try:
+                instance.views = (instance.views or 0) + 1
+                instance.save(update_fields=['views'])
+            except Exception:
+                pass
+
+        return HttpResponseRedirect(url)
     
     @action(detail=True, methods=("post", "delete"), url_path="like", url_name="like")
     def like(self, request, pk=None):
@@ -100,7 +183,6 @@ class BaseContentViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         """Allow toggling `has_liked` via PATCH with { has_liked: true/false } for authenticated users.
-
         This keeps compatibility with the frontend which PATCHes `has_liked` on posts.
         """
         instance = self.get_object()
@@ -130,6 +212,8 @@ class VideoViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter]
 
     @swagger_auto_schema(
+        operation_summary="List videos",
+        operation_description="Retrieve a list of videos with optional filtering by video_type, language, category, and happened_at date.",
         manual_parameters=video_manual_parameters
     )
     def list(self, request, *args, **kwargs):
@@ -177,6 +261,51 @@ class VideoViewSet(BaseContentViewSet):
             queryset = queryset.filter(happened_at__date=happened_at)
         
         return queryset
+
+    @action(detail=False, methods=("get",), url_path="top-mix", url_name="top_mix")
+    def top_mix(self, request):
+        """Return a combined payload with:
+        - top_1: single top liked video overall
+        - top_5_full: top 5 liked videos of type FULL_VIDEO
+        - top_5_unit: top 5 liked videos of type UNIT_VIDEO
+        """
+
+        # overall queryset annotated with likes info (and has_liked when user present)
+        base_queryset = self.annotate_likes(Video.objects.all())
+
+        # overall top 1 by likes
+        try:
+            overall_qs = base_queryset.order_by('-annotated_likes_count', '-created_at')
+        except Exception:
+            overall_qs = base_queryset
+        top1 = overall_qs.first()
+
+        # top 5 for full videos
+        queryset_full = Video.objects.filter(video_type=VideoType.FULL_VIDEO)
+        queryset_full = self.annotate_likes(queryset_full)
+        try:
+            queryset_full = queryset_full.order_by('-annotated_likes_count', '-created_at')[:5]
+        except Exception:
+            queryset_full = queryset_full[:5]
+
+        # top 5 for unit videos
+        queryset_unit = Video.objects.filter(video_type=VideoType.UNIT_VIDEO)
+        queryset_unit = self.annotate_likes(queryset_unit)
+        try:
+            queryset_unit = queryset_unit.order_by('-annotated_likes_count', '-created_at')[:5]
+        except Exception:
+            queryset_unit = queryset_unit[:5]
+
+        # serialize results
+        top1_data = VideoSerializer(top1, context={"request": request}).data if top1 else None
+        top_full_data = VideoSerializer(queryset_full, many=True, context={"request": request}).data
+        top_unit_data = VideoSerializer(queryset_unit, many=True, context={"request": request}).data
+
+        return Response({
+            "top_1": top1_data,
+            "top_5_full": top_full_data,
+            "top_5_unit": top_unit_data,
+        })
 
 class PostViewSet(BaseContentViewSet):
     """ViewSet for managing Post content."""

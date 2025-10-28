@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -71,6 +72,15 @@ class LikableMixin(models.Model):
             self.add_like(user)
             return True
     
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """Return top `limit` instances of this model ordered by number of likes.
+
+        Uses an aggregate Count on the related `likes` GenericRelation and orders
+        by `-likes_count` then `-created_at` as a tiebreaker.
+        """
+        return cls.objects.annotate(likes_count=Count('likes')).order_by('-likes_count', '-created_at')[:limit]
+    
 
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
@@ -91,7 +101,6 @@ class Video(LikableMixin, TimestampedModel):
     season = models.CharField(max_length=32, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
-    # Generic relations to Comments (Comments are generic models)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
 
     class Meta:
@@ -143,6 +152,7 @@ class Event(LikableMixin, TimestampedModel):
     summary = models.TextField(blank=True)
     thumbnail = models.ImageField(upload_to="events/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
+    views = models.PositiveIntegerField(default=0)
     cast = models.JSONField(default=list, blank=True)
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
@@ -164,6 +174,7 @@ class WeeklyMoment(LikableMixin, TimestampedModel):
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="weekly/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("-created_at", "title")
@@ -196,6 +207,7 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     story_date = models.DateField()
     image = models.ImageField(upload_to="history/images/", blank=True, null=True)
     image_url = models.URLField(blank=True)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("story_date", "title")
