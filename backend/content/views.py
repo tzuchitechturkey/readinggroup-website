@@ -28,6 +28,7 @@ from .models import (
     Reply,
     Like,
 )
+from .enums import VideoType
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
@@ -260,6 +261,51 @@ class VideoViewSet(BaseContentViewSet):
             queryset = queryset.filter(happened_at__date=happened_at)
         
         return queryset
+
+    @action(detail=False, methods=("get",), url_path="top-mix", url_name="top_mix")
+    def top_mix(self, request):
+        """Return a combined payload with:
+        - top_1: single top liked video overall
+        - top_5_full: top 5 liked videos of type FULL_VIDEO
+        - top_5_unit: top 5 liked videos of type UNIT_VIDEO
+        """
+
+        # overall queryset annotated with likes info (and has_liked when user present)
+        base_queryset = self.annotate_likes(Video.objects.all())
+
+        # overall top 1 by likes
+        try:
+            overall_qs = base_queryset.order_by('-annotated_likes_count', '-created_at')
+        except Exception:
+            overall_qs = base_queryset
+        top1 = overall_qs.first()
+
+        # top 5 for full videos
+        queryset_full = Video.objects.filter(video_type=VideoType.FULL_VIDEO)
+        queryset_full = self.annotate_likes(queryset_full)
+        try:
+            queryset_full = queryset_full.order_by('-annotated_likes_count', '-created_at')[:5]
+        except Exception:
+            queryset_full = queryset_full[:5]
+
+        # top 5 for unit videos
+        queryset_unit = Video.objects.filter(video_type=VideoType.UNIT_VIDEO)
+        queryset_unit = self.annotate_likes(queryset_unit)
+        try:
+            queryset_unit = queryset_unit.order_by('-annotated_likes_count', '-created_at')[:5]
+        except Exception:
+            queryset_unit = queryset_unit[:5]
+
+        # serialize results
+        top1_data = VideoSerializer(top1, context={"request": request}).data if top1 else None
+        top_full_data = VideoSerializer(queryset_full, many=True, context={"request": request}).data
+        top_unit_data = VideoSerializer(queryset_unit, many=True, context={"request": request}).data
+
+        return Response({
+            "top_1": top1_data,
+            "top_5_full": top_full_data,
+            "top_5_unit": top_unit_data,
+        })
 
 class PostViewSet(BaseContentViewSet):
     """ViewSet for managing Post content."""
