@@ -33,6 +33,10 @@ export async function EditVideoById(id, data) {
   return await axios.put(`/videos/${id}/`, data);
 }
 
+export async function PatchVideoById(id, data) {
+  return await axios.patch(`/videos/${id}/`, data);
+}
+
 export async function DeleteVideoById(id) {
   return await axios.delete(`/videos/${id}/`);
 }

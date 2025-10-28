@@ -52,6 +52,7 @@ function EventsFilter({
   const clearAllFilters = () => {
     updateFilter("search", "");
     updateFilter("section", []);
+    updateFilter("report_type", []);
     updateFilter("category", []);
     updateFilter("country", []);
     updateFilter("writer", "");
@@ -86,6 +87,26 @@ function EventsFilter({
         </div>
         {/* End Section Filter */}
 
+        {/* Start Category Filter */}
+        <div className="mb-2 lg:mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900">
+              {t("Report Type")}
+            </h3>
+          </div>
+          <MultiSelect
+            items={[{ name: "videos" }, { name: "reports" }]}
+            selected={
+              Array.isArray(filters.report_type) ? filters.report_type : []
+            }
+            onChange={(selected) => updateFilter("report_type", selected)}
+            placeholder={t("Select Type")}
+            renderLabel={(item) => item?.name || item}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
+        </div>
+        {/* End Category Filter */}
         {/* Start Category Filter */}
         <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">

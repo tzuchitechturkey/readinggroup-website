@@ -35,9 +35,9 @@ function PhotoDetailsContent() {
   const handleLike = () => {
     setIsLiked(!isLiked);
     if (!isLiked) {
-      toast.success(t("Added to favorites!"));
+      toast.success(t("Like Added"));
     } else {
-      toast.info(t("Removed from favorites"));
+      toast.info(t("Like Removed"));
     }
   };
 

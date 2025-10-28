@@ -62,9 +62,7 @@ function CardDetailsPageContent() {
         has_liked: newLikedState,
       });
 
-      toast.success(
-        newLikedState ? t("Added to favorites!") : t("Removed from favorites")
-      );
+      toast.success(newLikedState ? t("Like Added") : t("Like removed"));
     } catch (error) {
       setErrorFn(error);
       toast.error(t("Failed to update like status"));
@@ -145,7 +143,7 @@ function CardDetailsPageContent() {
 
                 {/* Cart Controls */}
                 <ImageControls
-                  isLiked={cardData?.has_liked}
+                  has_liked={cardData?.has_liked}
                   onLike={handleLike}
                   onExpandImage={handleOpenImage}
                   onDownloadImage={handleDownloadImage}

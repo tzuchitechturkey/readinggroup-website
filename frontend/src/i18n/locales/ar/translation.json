@@ -1010,5 +1010,22 @@
   "Add tags (press Enter)": "إضافة علامات (اضغط Enter)",
   "Enter video URL (YouTube)": "أدخل رابط الفيديو (يوتيوب)",
   "Event Video Thumbnail": "صورة مصغرة للفيديو",
-  "Cast": "طاقم العمل"
+  "Cast": "طاقم العمل",
+  "Like Added": "  تمت الإضافة إلى الإعجابات",
+  "Like Removed": "  تمت إزالة الإعجابات",
+  "Watch Later": "مشاهدة لاحقاً",
+  "Add to Playlist": "إضافة إلى قائمة التشغيل",
+  "Remove from Playlist": "إزالة من قائمة التشغيل",
+  "Select Sections": "إختر قسما",
+  "A user with this email already exists.": "",
+  "Email is required.": "",
+  "A user with this username already exists.": "",
+  "Username or Email": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": ""
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Heart, Expand, Download, Share } from "lucide-react";
 
 function ImageControls({
-  isLiked,
+  has_liked,
   onLike,
   onExpandImage,
   onDownloadImage,
@@ -13,7 +13,6 @@ function ImageControls({
   className = "",
 }) {
   const { t } = useTranslation();
-
   return (
     <div
       className={`absolute bottom-3 ${
@@ -25,15 +24,15 @@ function ImageControls({
       <button
         onClick={onLike}
         className={`w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
-          isLiked
+          has_liked
             ? "bg-red-500 text-white hover:bg-red-600"
             : "bg-black bg-opacity-70 text-white hover:bg-opacity-80"
         }`}
-        title={t(isLiked ? "Remove from favorites" : "Add to favorites")}
+        title={t(has_liked ? "Remove from favorites" : "Add to favorites")}
       >
         <Heart
           className={`w-3 h-3 lg:w-4 lg:h-4 transition-all duration-300 ${
-            isLiked ? "fill-white" : ""
+            has_liked ? "fill-white" : ""
           }`}
         />
       </button>

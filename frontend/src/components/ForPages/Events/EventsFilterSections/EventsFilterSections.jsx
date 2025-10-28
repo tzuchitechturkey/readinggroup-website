@@ -32,6 +32,7 @@ function EventsFilterSections() {
   const [filters, setFilters] = useState({
     search: "",
     section: [],
+    report_type: [],
     category: [],
     country: [],
     writer: "",
@@ -46,6 +47,7 @@ function EventsFilterSections() {
   const hasActiveFilters =
     filters.search.length > 0 ||
     (Array.isArray(filters.section) && filters.section.length > 0) ||
+    (Array.isArray(filters.report_type) && filters.report_type.length > 0) ||
     (Array.isArray(filters.category) && filters.category.length > 0) ||
     (Array.isArray(filters.country) && filters.country.length > 0) ||
     (filters.writer && Object.keys(filters.writer).length > 0) ||
@@ -61,11 +63,11 @@ function EventsFilterSections() {
   const updateFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-  console.log(filteredData, "filtersfiltersfiltersfilters");
   const handleClearFilters = () => {
     setFilters({
       search: "",
       section: [],
+      report_type: [],
       category: [],
       country: [],
       writer: "",
@@ -142,6 +144,16 @@ function EventsFilterSections() {
       }
 
       // Convert category array to comma-separated string
+      if (
+        Array.isArray(filters.report_type) &&
+        filters.report_type.length > 0
+      ) {
+        params.report_type = filters.report_type
+          .map((item) => item?.name || item)
+          .join(",");
+      }
+
+      // Convert category array to comma-separated string
       if (Array.isArray(filters.category) && filters.category.length > 0) {
         params.category = filters.category
           .map((item) => item?.name || item)
@@ -170,6 +182,7 @@ function EventsFilterSections() {
       }
 
       if (filters.happened_at) params.happened_at = filters.happened_at;
+        console.log(params, "rrrrrrrrrrrrrrrrrrr");
 
       const res = await GetEvents(limit, offset, params);
 
@@ -227,6 +240,7 @@ function EventsFilterSections() {
   }, [
     filters.search,
     filters.section,
+    filters.report_type,
     filters.category,
     filters.country,
     filters.writer,
@@ -286,7 +300,6 @@ function EventsFilterSections() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
                   {filteredData?.results?.map((event) => {
-                    console.log(event, "eeeeeeeeeeeeeeeeeeeee");
                     return <ExternalNewsCard key={event.id} item={event} />;
                   })}
                 </div>

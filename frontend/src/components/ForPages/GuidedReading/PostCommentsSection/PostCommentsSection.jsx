@@ -188,14 +188,18 @@ function PostCommentsSection({ postId }) {
       } else {
         await LikeComment(commentId);
       }
-
+      if (isLiked) {
+        toast.success(t("Like Removed"));
+      } else {
+        toast.success(t("Like Added"));
+      }
       // Update local state
       setComments((prev) =>
         prev.map((c) => {
           if (c.id === commentId) {
             return {
               ...c,
-              is_liked: !c.is_liked,
+              has_liked: !c.has_liked,
               likes_count: isLiked ? c.likes_count - 1 : c.likes_count + 1,
             };
           }
@@ -204,6 +208,45 @@ function PostCommentsSection({ postId }) {
       );
     } catch (error) {
       console.error("Failed to like comment:", error);
+      toast.error(t("Failed to update like"));
+    }
+  };
+
+  // Like/unlike reply
+  const handleLikeReply = async (replyId, commentId, isLiked) => {
+    try {
+      if (isLiked) {
+        await UnlikeReply(replyId);
+      } else {
+        await LikeReply(replyId);
+      }
+
+      // Update local state
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies:
+                c.replies?.map((r) => {
+                  if (r.id === replyId) {
+                    return {
+                      ...r,
+                      has_liked: !r.has_liked,
+                      likes_count: isLiked
+                        ? r.likes_count - 1
+                        : r.likes_count + 1,
+                    };
+                  }
+                  return r;
+                }) || [],
+            };
+          }
+          return c;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to like reply:", error);
       toast.error(t("Failed to update like"));
     }
   };
@@ -288,45 +331,6 @@ function PostCommentsSection({ postId }) {
     }
   };
 
-  // Like/unlike reply
-  const handleLikeReply = async (replyId, commentId, isLiked) => {
-    try {
-      if (isLiked) {
-        await UnlikeReply(replyId);
-      } else {
-        await LikeReply(replyId);
-      }
-
-      // Update local state
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c.id === commentId) {
-            return {
-              ...c,
-              replies:
-                c.replies?.map((r) => {
-                  if (r.id === replyId) {
-                    return {
-                      ...r,
-                      is_liked: !r.is_liked,
-                      likes_count: isLiked
-                        ? r.likes_count - 1
-                        : r.likes_count + 1,
-                    };
-                  }
-                  return r;
-                }) || [],
-            };
-          }
-          return c;
-        })
-      );
-    } catch (error) {
-      console.error("Failed to like reply:", error);
-      toast.error(t("Failed to update like"));
-    }
-  };
-
   // Edit reply
   const handleEditReply = (reply) => {
     setEditingReplyId(reply.id);
@@ -377,7 +381,7 @@ function PostCommentsSection({ postId }) {
     setEditingReplyId(null);
     setEditReplyText("");
   };
-
+  console.log(comments);
   return (
     <div className="bg-white">
       {/* Start Comment Editor */}
@@ -522,21 +526,21 @@ function PostCommentsSection({ postId }) {
                     <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
                       <button
                         className={`flex items-center gap-1 ${
-                          c.is_liked
+                          c.has_liked
                             ? "bg-primary text-white rounded px-2 py-0.5"
                             : "hover:text-black"
                         }`}
-                        onClick={() => handleLikeComment(c.id, c.is_liked)}
+                        onClick={() => handleLikeComment(c.id, c.has_liked)}
                       >
                         <ThumbsUp
                           className="w-4 h-4"
-                          {...(c.is_liked
+                          {...(c.has_liked
                             ? { fill: "currentColor", stroke: "none" }
                             : {})}
                         />
                         <span
                           className={`text-xs ${
-                            c.is_liked ? "text-white" : ""
+                            c.has_liked ? "text-white" : ""
                           }`}
                         >
                           {c.likes_count || 0}
@@ -595,7 +599,7 @@ function PostCommentsSection({ postId }) {
                                     {reply.user?.display_name}
                                   </span>
                                   <span className="text-gray-400 text-xs">
-                                    {reply.created_at}
+                                    {reply.created_at.split("T")[0]}
                                   </span>
                                 </div>
                                 {editingReplyId === reply.id ? (
@@ -641,7 +645,7 @@ function PostCommentsSection({ postId }) {
                                 <div className="mt-2 flex items-center gap-4 text-gray-600 text-xs">
                                   <button
                                     className={`flex items-center gap-1 ${
-                                      reply.is_liked
+                                      reply.has_liked
                                         ? "bg-primary text-white rounded px-2 py-0.5"
                                         : "hover:text-black"
                                     }`}
@@ -649,13 +653,13 @@ function PostCommentsSection({ postId }) {
                                       handleLikeReply(
                                         reply.id,
                                         c.id,
-                                        reply.is_liked
+                                        reply.has_liked
                                       )
                                     }
                                   >
                                     <ThumbsUp
                                       className="w-3 h-3"
-                                      {...(reply.is_liked
+                                      {...(reply.has_liked
                                         ? {
                                             fill: "currentColor",
                                             stroke: "none",
@@ -664,7 +668,7 @@ function PostCommentsSection({ postId }) {
                                     />
                                     <span
                                       className={`text-xs ${
-                                        reply.is_liked ? "text-white" : ""
+                                        reply.has_liked ? "text-white" : ""
                                       }`}
                                     >
                                       {reply.likes_count || 0}

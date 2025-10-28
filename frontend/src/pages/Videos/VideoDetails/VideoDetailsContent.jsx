@@ -8,7 +8,12 @@ import { toast } from "react-toastify";
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
 import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
-import { GetVideoById, LikeVideo, UnlikeVideo } from "@/api/videos";
+import {
+  GetVideoById,
+  LikeVideo,
+  PatchVideoById,
+  UnlikeVideo,
+} from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -21,15 +26,12 @@ function VideoDetailsContent({
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
-  // const [videoData, setVideoData] = useState(videoData);
+  const [videoItem, setVideoItem] = useState(videoData);
   // Use internal state to control modal visibility
   const [internalIsOpen, setInternalIsOpen] = useState(externalIsOpen);
   const [userId, setUserId] = useState();
 
   const [showAllCast, setShowAllCast] = useState(false);
-
-  // State to control favorite status
-  const [isLiked, setIsLiked] = useState(false);
 
   // State to control share modal visibility
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -55,16 +57,20 @@ function VideoDetailsContent({
   // دالة الإعجاب
   const handleLike = async () => {
     try {
-      if (!isLiked) {
-        await LikeVideo({ user: userId, video: videoData?.id });
-        toast.success(t("Added to favorites!"));
-      } else {
-        await UnlikeVideo({ user: userId, video: videoData?.id });
-        toast.info(t("Removed from favorites"));
-      }
-      setIsLiked(!isLiked);
+      const newLikedState = !videoItem?.has_liked;
+
+      await PatchVideoById(videoItem.id, {
+        has_liked: newLikedState,
+      });
+
+      setVideoItem({
+        ...videoItem,
+        has_liked: newLikedState,
+      });
+      toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch (error) {
       setErrorFn(error);
+      toast.error(t("Failed to update like status"));
     }
   };
 
@@ -80,6 +86,10 @@ function VideoDetailsContent({
     const storedUserId = localStorage.getItem("userId");
     setUserId(storedUserId);
   }, []);
+  useEffect(() => {
+    setVideoItem(videoData);
+  }, [videoData]);
+
   const handleClose = () => {
     // Set internal state first
     setInternalIsOpen(false);
@@ -140,7 +150,7 @@ function VideoDetailsContent({
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
               <img
-                src={videoData?.thumbnail || videoData?.thumbnail_url}
+                src={videoItem?.thumbnail || videoItem?.thumbnail_url}
                 alt="Video background"
                 className="w-full h-full object-cover rounded-none -m-1"
                 onError={(e) => {
@@ -174,13 +184,13 @@ function VideoDetailsContent({
             >
               <div className="max-w-3xl px-6 md:px-0">
                 <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-4xl mb-3 sm:mb-4 md:mb-6 leading-tight font-bold text-white">
-                  {videoData?.title}
+                  {videoItem?.title}
                 </h1>
 
                 {/* Play Button and Controls Row */}
                 <div className="flex items-center gap-2 relative z-50 xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <Link
-                    to={`/videos/${videoData?.id}`}
+                    to={`/videos/${videoItem?.id}`}
                     className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -194,12 +204,14 @@ function VideoDetailsContent({
 
                   <button
                     className={`  p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
-                      isLiked
+                      videoItem?.has_liked
                         ? "bg-red-500/20 border-red-400/60 hover:bg-red-500/30 hover:border-red-400/80"
                         : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
                     }`}
                     title={
-                      isLiked ? "Remove from Favorites" : "Add to Favorites"
+                      videoItem?.has_liked
+                        ? "Remove from Favorites"
+                        : "Add to Favorites"
                     }
                     onClick={(e) => {
                       e.stopPropagation();
@@ -209,7 +221,7 @@ function VideoDetailsContent({
                   >
                     <Heart
                       className={`w-3.5 xs:w-4 h-3.5 xs:h-4 transition-all duration-200 group-hover:scale-110 pointer-events-none ${
-                        isLiked
+                        videoItem?.has_liked
                           ? "text-red-500 fill-red-500 group-hover:text-red-400 group-hover:fill-red-400"
                           : "text-white group-hover:text-red-300"
                       }`}
@@ -274,10 +286,10 @@ function VideoDetailsContent({
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
               <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                {t("Season")} · {videoData?.season}
+                {t("Season")} · {videoItem?.season}
               </p>
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoData?.description}
+                {videoItem?.description}
               </p>
             </div>
 
@@ -290,7 +302,7 @@ function VideoDetailsContent({
                     <span className="font-medium text-gray-700">
                       {t("Top Cast")}:{" "}
                     </span>
-                    {videoData?.cast?.map((cas, index) => (
+                    {videoItem?.cast?.map((cas, index) => (
                       <span
                         key={index}
                         className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
@@ -299,7 +311,7 @@ function VideoDetailsContent({
                       </span>
                     ))}
                   </p>
-                  {/* {videoData?.cast.length > 3 && (
+                  {/* {videoItem?.cast.length > 3 && (
                     <button
                       className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
                       onClick={(e) => {
@@ -333,7 +345,7 @@ function VideoDetailsContent({
                     <span className="font-medium text-gray-700">
                       {t("Tags")}:{" "}
                     </span>
-                    {videoData?.tags?.map((tag, index) => (
+                    {videoItem?.tags?.map((tag, index) => (
                       <span
                         key={index}
                         className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
@@ -351,7 +363,7 @@ function VideoDetailsContent({
                       {t("Category")}:{" "}
                     </span>
                     <span className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs">
-                      {videoData?.category?.name}
+                      {videoItem?.category?.name}
                     </span>
                   </p>
                 </div>
@@ -378,7 +390,7 @@ function VideoDetailsContent({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={videoData?.title}
+        title={videoItem?.title}
       />
     </Modal>
   );
