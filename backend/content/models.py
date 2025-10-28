@@ -168,6 +168,7 @@ class Event(LikableMixin, TimestampedModel):
     thumbnail = models.ImageField(upload_to="events/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
+    video_url = models.CharField(max_length=255, blank=True)
     cast = models.JSONField(default=list, blank=True)
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
