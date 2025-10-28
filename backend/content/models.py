@@ -131,6 +131,30 @@ class Post(LikableMixin, TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    @classmethod
+    def top_liked_grouped(cls, limit: int = 5):
+        """
+        Return top liked posts grouped into two categories:
+        - 'card_photo': top `limit` posts where post_type is Card or Photo
+        - 'reading': top `limit` posts where post_type is Reading
+
+        Each returned queryset is annotated with `likes_count` and ordered
+        by `-likes_count` then `-created_at` as a tiebreaker.
+        """
+        # Annotate using the same field name used elsewhere in the codebase
+        # (annotated_likes_count) so view helpers and serializers remain
+        # consistent.
+        card_photo_qs = (
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO])
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')[:limit]
+        )
+        reading_qs = (
+            cls.objects.filter(post_type=PostType.READING)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')[:limit]
+        )
+        return {"card_photo": card_photo_qs, "reading": reading_qs}
     class Meta:
         ordering = ("-created_at",)
 

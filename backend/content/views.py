@@ -405,6 +405,33 @@ class PostViewSet(BaseContentViewSet):
                 queryset =queryset.filter(post_type__in=values)
                                 
         return queryset
+    
+    @action(detail=False, methods=("get",), url_path="top-liked-grouped", url_name="top_liked_grouped")
+    def top_liked_grouped(self, request):
+        """Return grouped top liked posts:
+
+        - card_photo: top N posts where post_type is CARD or PHOTO
+        - reading: top N posts where post_type is READING
+
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        # Use the model helper to get grouped querysets
+        groups = Post.top_liked_grouped(limit=limit)
+
+        # Ensure annotated fields and has_liked are present using annotate_likes
+        card_photo_qs = self.annotate_likes(groups.get('card_photo') or Post.objects.none())
+        reading_qs = self.annotate_likes(groups.get('reading') or Post.objects.none())
+
+        card_photo_data = PostSerializer(card_photo_qs, many=True, context={"request": request}).data
+        reading_data = PostSerializer(reading_qs, many=True, context={"request": request}).data
+
+        return Response({"card_photo": card_photo_data, "reading": reading_data})
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
