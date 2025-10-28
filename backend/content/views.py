@@ -29,7 +29,7 @@ from .models import (
     Like,
     MyListEntry,
 )
-from .enums import VideoType
+from .enums import VideoType, PostType
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
@@ -432,6 +432,28 @@ class PostViewSet(BaseContentViewSet):
         reading_data = PostSerializer(reading_qs, many=True, context={"request": request}).data
 
         return Response({"card_photo": card_photo_data, "reading": reading_data})
+    
+    @action(detail=False, methods=("get",), url_path="top-commented-card-photo", url_name="top_commented_card_photo")
+    def top_commented_card_photo(self, request):
+        """Return top N posts by number of comments for post_type in (CARD, PHOTO).
+
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        types = [PostType.CARD, PostType.PHOTO]
+
+        qs = Post.top_commented_by_types(types=types, limit=limit)
+
+        # annotate likes info (and has_liked for authenticated user)
+        qs = self.annotate_likes(qs)
+
+        serializer = PostSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()

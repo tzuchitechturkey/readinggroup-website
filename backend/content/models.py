@@ -155,6 +155,22 @@ class Post(LikableMixin, TimestampedModel):
             .order_by('-annotated_likes_count', '-created_at')[:limit]
         )
         return {"card_photo": card_photo_qs, "reading": reading_qs}
+    
+    @classmethod
+    def top_commented_by_types(cls, types: list, limit: int = 5):
+        """
+        Return top `limit` posts filtered by `post_type` in `types`, ordered by
+        number of comments (descending) then created_at as tiebreaker.
+
+        The returned queryset is annotated with `annotated_comments_count` to
+        match the annotate_* naming convention used elsewhere.
+        """
+        qs = (
+            cls.objects.filter(post_type__in=types)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')[:limit]
+        )
+        return qs
     class Meta:
         ordering = ("-created_at",)
 
