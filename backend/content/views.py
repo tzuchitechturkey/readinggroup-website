@@ -1,6 +1,6 @@
 from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -515,7 +515,7 @@ class CommentsViewSet(BaseContentViewSet):
     """ViewSet for managing Comments content."""
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
-    # enable pagination for comments list
+    permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = LimitOffsetPagination
     search_fields = ("user__username", "content_type", "object_id", "text")
     ordering_fields = ("created_at",)
@@ -571,6 +571,7 @@ class ReplyViewSet(BaseContentViewSet):
     """ViewSet for managing Reply content."""
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     search_fields = ("user__username", "comment__id", "text")
     ordering_fields = ("created_at",)
 
