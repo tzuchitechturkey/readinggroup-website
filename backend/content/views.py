@@ -629,4 +629,28 @@ class EventSectionViewSet(BaseContentViewSet):
     serializer_class = EventSectionSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+
+    @action(detail=True, methods=("get",), url_path="events", url_name="events")
+    def events(self, request, pk=None):
+        """Return events that belong to this EventSection.
+
+        Use this endpoint to fetch all Event objects for a section. It is the
+        semantically-correct path for the frontend to retrieve events for a
+        section: GET /api/v1/event-sections/{id}/events/
+        """
+        try:
+            section = self.get_object()
+        except Exception:
+            return Response({"detail": "Section not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        queryset = section.events()
+        queryset = self.annotate_likes(queryset)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = EventSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = EventSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data)
     

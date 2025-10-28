@@ -286,6 +286,13 @@ class EventSection(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
+    
+    def events(self):
+        """Return a queryset of Event objects that belong to this section."""
+        return self.event_set.all()
+
+    def __str__(self) -> str:
+        return self.name
 
 class Comments(LikableMixin, TimestampedModel):
     """Comments for all models."""
