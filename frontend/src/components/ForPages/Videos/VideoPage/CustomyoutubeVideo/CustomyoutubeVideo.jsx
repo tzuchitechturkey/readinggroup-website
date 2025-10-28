@@ -2,20 +2,25 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { ThumbsUp, ListPlus } from "lucide-react";
+import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
+import { PatchVideoById } from "@/api/videos";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
+  const [videoItem, setVideoItem] = useState(videoData);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [liked, setLiked] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const videoRef = useRef(null);
+
+  useEffect(() => {
+    setVideoItem(videoData);
+  }, [videoData]);
 
   const isYouTubeUrl = (url) =>
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
@@ -87,8 +92,28 @@ function CustomyoutubeVideo({ videoData }) {
 
   const handleOpenShare = () => setIsShareOpen(true);
   const handleCloseShare = () => setIsShareOpen(false);
-  const toggleLike = () => setLiked((s) => !s);
 
+  // دالة الإعجاب
+  const handleLike = async () => {
+    try {
+      const newLikedState = !videoItem?.has_liked;
+
+      await PatchVideoById(videoItem.id, {
+        has_liked: newLikedState,
+      });
+
+      setVideoItem({
+        ...videoItem,
+        has_liked: newLikedState,
+        likes_count: newLikedState
+          ? videoItem?.likes_count + 1
+          : videoItem?.likes_count - 1,
+      });
+      toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
+    } catch {
+      toast.error(t("Failed to update like status"));
+    }
+  };
   return (
     <div className="bg-gray-100 px-4 sm:px-0  ">
       <div className="  ">
@@ -272,13 +297,13 @@ function CustomyoutubeVideo({ videoData }) {
             {/* Start social Actions */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700 my-4 sm:my-6 md:my-8">
               <button
-                onClick={toggleLike}
+                onClick={handleLike}
                 className={`flex items-center gap-1 sm:gap-2 transition-colors ${
-                  liked ? "text-blue-600" : "hover:text-black"
+                  videoItem?.has_liked ? "text-blue-600" : "hover:text-black"
                 }`}
-                aria-pressed={liked}
+                aria-pressed={videoItem?.has_liked}
               >
-                {liked ? (
+                {videoItem?.has_liked ? (
                   // filled thumbs up (simple svg)
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5"
@@ -292,7 +317,7 @@ function CustomyoutubeVideo({ videoData }) {
                   <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 )}
                 <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
-                  21K
+                  {videoItem?.likes_count || "0"}
                 </span>
               </button>
 

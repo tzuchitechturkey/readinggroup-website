@@ -85,10 +85,10 @@ const NewsHero = ({
     try {
       if (!isLiked) {
         await LikeEvent({ user: userId, event: mainArticle?.id });
-        toast.success(t("Added to favorites!"));
+        toast.success(t("Liked Added"));
       } else {
         await UnlikeEvent({ user: userId, event: mainArticle?.id });
-        toast.info(t("Removed from favorites"));
+        toast.info(t("Like removed"));
       }
       setIsLiked(!isLiked);
     } catch (error) {

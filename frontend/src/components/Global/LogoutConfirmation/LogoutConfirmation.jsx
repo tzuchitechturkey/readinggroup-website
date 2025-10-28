@@ -26,7 +26,7 @@ function LogoutConfirmation({ onCancel }) {
     if (currentPath.includes("/dashboard")) {
       navigate("/auth/login");
     } else {
-      navigate(currentPath);
+      navigate("/");
     }
     onCancel();
   };

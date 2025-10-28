@@ -11,7 +11,6 @@ function ExternalNewsCard({ className = "", item }) {
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
   const navigate = useNavigate();
 
-  console.log(item, "itemitemitemitemitemitem");
   return (
     <div
       onClick={() => {

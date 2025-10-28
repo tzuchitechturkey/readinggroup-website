@@ -9,6 +9,7 @@ export async function GetEvents(limit, offset, params = {}) {
   if (params.search) queryParams.append("search", params.search);
   if (params.ordering) queryParams.append("ordering", params.ordering);
   if (params.section) queryParams.append("section", params.section);
+  if (params.report_type) queryParams.append("report_type", params.report_type);
   if (params.category) queryParams.append("category", params.category);
   if (params.country) queryParams.append("country", params.country);
   if (params.writer) queryParams.append("writer", params.writer);
