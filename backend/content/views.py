@@ -27,6 +27,7 @@ from .models import (
     Comments,
     Reply,
     Like,
+    MyListEntry,
 )
 from .enums import VideoType
 from .serializers import (
@@ -261,6 +262,44 @@ class VideoViewSet(BaseContentViewSet):
             queryset = queryset.filter(happened_at__date=happened_at)
         
         return queryset
+
+    @action(detail=True, methods=("post", "delete"), url_path="my-list", url_name="my_list_item")
+    def my_list_item(self, request, pk=None):
+        """Add or remove a video from the requesting user's My List.
+        POST -> add (idempotent)
+        DELETE -> remove (idempotent)
+        """
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            video = Video.objects.get(pk=pk)
+        except Video.DoesNotExist:
+            return Response({"detail": "Video not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == "POST":
+            # create if not exists
+            MyListEntry.objects.get_or_create(user=user, video=video)
+            serializer = self.get_serializer(video, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # DELETE
+        MyListEntry.objects.filter(user=user, video=video).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=("get",), url_path="my-list", url_name="my_list")
+    def my_list(self, request):
+        """Return the list of videos saved by the requesting user."""
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # get videos via MyListEntry, preserve ordering by created_at in MyListEntry
+        entries = MyListEntry.objects.filter(user=user).select_related('video').order_by('-created_at')
+        videos = [e.video for e in entries]
+        serializer = VideoSerializer(videos, many=True, context={"request": request})
+        return Response(serializer.data)
 
     @action(detail=False, methods=("get",), url_path="top-mix", url_name="top_mix")
     def top_mix(self, request):

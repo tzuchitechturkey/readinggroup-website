@@ -136,6 +136,21 @@ class Post(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
+
+
+class MyListEntry(TimestampedModel):
+    """User saved videos for later viewing."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_list")
+    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='saved_by')
+
+    class Meta:
+        unique_together = (('user', 'video'),)
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return f"MyListEntry<{self.user_id}:{self.video_id}>"
+    
+    
 class Event(LikableMixin, TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)

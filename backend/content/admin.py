@@ -13,6 +13,7 @@ from .models import (
     EventSection,
     Comments,
     Reply,
+    MyListEntry,
 )
 
 
@@ -83,10 +84,17 @@ class EventSectionAdmin(admin.ModelAdmin):
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
     list_display = ("user", "content_type", "object_id", "created_at")
-    search_fields = ("user__username", "comment_text")
+    # 'Comments' model uses the field name 'text'
+    search_fields = ("user__username", "text")
 
 @admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
     list_display = ("user", "comment", "created_at")
-    search_fields = ("user__username", "reply_text")
-    
+    # 'Reply' model uses the field name 'text'
+    search_fields = ("user__username", "text")
+  
+@admin.register(MyListEntry)
+class MyListEntryAdmin(admin.ModelAdmin):
+    # ensure fields listed exist on MyListEntry model
+    list_display = ("user", "video", "created_at")
+    search_fields = ("user__username", "video__title")

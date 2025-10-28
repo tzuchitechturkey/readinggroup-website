@@ -11,6 +11,7 @@ from .models import (
     Comments,
     Reply,
     Video,
+    MyListEntry,
     WeeklyMoment,
     VideoCategory,
     PostCategory,
@@ -204,6 +205,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
+    has_in_my_list = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Video
         fields = "__all__"
@@ -217,6 +219,14 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
         data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        # has_in_my_list indicates if the requesting user has saved this video
+        try:
+            if user and user.is_authenticated:
+                data["has_in_my_list"] = MyListEntry.objects.filter(user=user, video=instance).exists()
+            else:
+                data["has_in_my_list"] = False
+        except Exception:
+            data["has_in_my_list"] = False
         return data
 
     def get_likes_count(self, obj):
@@ -228,6 +238,16 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
+
+    def get_has_in_my_list(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            return False
+        try:
+            return MyListEntry.objects.filter(user=user, video=obj).exists()
+        except Exception:
+            return False
 
 
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
