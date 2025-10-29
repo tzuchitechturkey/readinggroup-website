@@ -132,39 +132,6 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         qs = self.annotate_likes(qs)
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
-
-    @action(detail=True, methods=("get",), url_path="image", url_name="image")
-    def image(self, request, pk=None):
-        """Return a redirect to the instance image URL and increment the views counter.
-        Usage: GET /api/v1/<resource>/{id}/image/
-        This is intended to be used as the <img src="/api/v1/.../image/"> so each access
-        increments the model's `views` field (if present) then redirects to the real image.
-        """
-        instance = self.get_object()
-        url = None
-        for attr in ("image", "thumbnail", "thumbnail_url", "image_url"):
-            val = getattr(instance, attr, None)
-            if val:
-                try:
-                    if hasattr(val, 'url'):
-                        url = request.build_absolute_uri(val.url)
-                    else:
-                        url = val
-                except Exception:
-                    url = str(val)
-                if url:
-                    break
-        if not url:
-            return Response({"detail": "No image available for this resource."}, status=status.HTTP_404_NOT_FOUND)
-
-        if hasattr(instance, 'views'):
-            try:
-                instance.views = (instance.views or 0) + 1
-                instance.save(update_fields=['views'])
-            except Exception:
-                pass
-
-        return HttpResponseRedirect(url)
     
     @action(detail=True, methods=("post", "delete"), url_path="like", url_name="like")
     def like(self, request, pk=None):
@@ -680,27 +647,48 @@ class EventSectionViewSet(BaseContentViewSet):
     search_fields = ("name",)
     ordering_fields = ("created_at",)
 
-    @action(detail=True, methods=("get",), url_path="events", url_name="events")
-    def events(self, request, pk=None):
-        """Return events that belong to this EventSection.
+    @action(detail=False, methods=("get",), url_path="top-with-events", url_name="top_with_events")
+    def top_with_events(self, request):
+        """Return top N EventSections ordered by number of events, including their events.
 
-        Use this endpoint to fetch all Event objects for a section. It is the
-        semantically-correct path for the frontend to retrieve events for a
-        section: GET /api/v1/event-sections/{id}/events/
+        Query params:
+        - limit: int (default 3) number of sections to return
+        - events_limit: optional int to limit number of events returned per section (default: all)
         """
         try:
-            section = self.get_object()
+            limit = int(request.query_params.get("limit", 3))
         except Exception:
-            return Response({"detail": "Section not found."}, status=status.HTTP_404_NOT_FOUND)
+            limit = 3
 
-        queryset = section.events()
-        queryset = self.annotate_likes(queryset)
+        try:
+            events_limit = request.query_params.get("events_limit")
+            events_limit = int(events_limit) if events_limit is not None else None
+        except Exception:
+            events_limit = None
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = EventSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
+        from django.db.models import Count
 
-        serializer = EventSerializer(queryset, many=True, context={"request": request})
-        return Response(serializer.data)
+        # annotate sections by number of related Event objects and pick top N
+        sections_qs = EventSection.objects.annotate(events_count=Count("event")).order_by("-events_count")[:limit]
+
+        result = []
+        for section in sections_qs:
+            # get events for this section; use section.events() helper
+            events_qs = section.events().order_by("-happened_at", "-created_at")
+            if events_limit is not None:
+                events_qs = events_qs[:events_limit]
+
+            # annotate likes on events so EventSerializer can include likes_count/has_liked
+            events_qs = self.annotate_likes(events_qs)
+
+            section_data = EventSectionSerializer(section, context={"request": request}).data
+            events_data = EventSerializer(events_qs, many=True, context={"request": request}).data
+
+            result.append({
+                "section": section_data,
+                "events": events_data,
+                "events_count": getattr(section, "events_count", len(events_data)),
+            })
+
+        return Response(result)
     
