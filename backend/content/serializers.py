@@ -18,6 +18,7 @@ from .models import (
     EventCategory,
     PositionTeamMember,
     EventSection,
+    PostRating,
 )
 from accounts.serializers import UserSerializer
 
@@ -257,6 +258,9 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True)
+    rating_count = serializers.SerializerMethodField(read_only=True)
+    user_rating = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Post
         fields = "__all__"
@@ -270,6 +274,29 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
         data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        # ratings: average, count, and the requesting user's rating (if any)
+        try:
+            avg = getattr(instance, 'annotated_rating_avg', None)
+            count = getattr(instance, 'annotated_rating_count', None)
+            if avg is None or count is None:
+                from django.db.models import Avg, Count
+                agg = PostRating.objects.filter(post=instance).aggregate(avg=Avg('rating'), count=Count('id'))
+                avg = agg.get('avg')
+                count = agg.get('count')
+            data['average_rating'] = round(avg, 2) if avg is not None else None
+            data['rating_count'] = int(count or 0)
+        except Exception:
+            data['average_rating'] = None
+            data['rating_count'] = 0
+
+        try:
+            if user and user.is_authenticated:
+                pr = PostRating.objects.filter(post=instance, user=user).first()
+                data['user_rating'] = pr.rating if pr else None
+            else:
+                data['user_rating'] = None
+        except Exception:
+            data['user_rating'] = None
         return data
 
     def get_likes_count(self, obj):

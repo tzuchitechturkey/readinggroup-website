@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from .enums import (
     PostStatus,
@@ -238,6 +239,20 @@ class Event(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
+
+
+class PostRating(TimestampedModel):
+    """User rating for a Post (1-5 stars). Each user may rate a post once."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_ratings")
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='ratings')
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = (('user', 'post'),)
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:  # pragma: no cover - trivial
+        return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
 
 class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""

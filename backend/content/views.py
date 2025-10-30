@@ -45,6 +45,7 @@ from .serializers import (
     CommentsSerializer,
     ReplySerializer,
 )
+from .models import PostRating
 
 
 class IsStaffOrReadOnly(BasePermission):
@@ -380,6 +381,41 @@ class PostViewSet(BaseContentViewSet):
                 queryset =queryset.filter(post_type__in=values)
                                 
         return queryset
+
+    @action(detail=True, methods=("post", "delete"), url_path="rating", url_name="rating")
+    def rating(self, request, pk=None):
+        """POST to set/update rating (body: { "rating": 1-5 }), DELETE to remove user's rating.
+
+        Returns the serialized Post (with updated average/count/user_rating).
+        """
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == "POST":
+            try:
+                # coerce to int and validate range
+                raw = request.data.get('rating')
+                rating_value = int(raw)
+                if rating_value < 1 or rating_value > 5:
+                    raise ValueError()
+            except Exception:
+                return Response({"detail": "Invalid rating. Must be integer 1-5."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # create or update rating
+            PostRating.objects.update_or_create(user=user, post=post, defaults={"rating": rating_value})
+            serializer = PostSerializer(post, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # DELETE: remove user's rating if exists
+        PostRating.objects.filter(user=user, post=post).delete()
+        serializer = PostSerializer(post, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=("get",), url_path="top-liked-grouped", url_name="top_liked_grouped")
     def top_liked_grouped(self, request):
