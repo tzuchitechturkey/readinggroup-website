@@ -4,7 +4,6 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthentic
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from django.http import HttpResponseRedirect
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,

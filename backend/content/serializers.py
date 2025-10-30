@@ -145,11 +145,11 @@ class CommentsSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, seri
                     raise ValidationError({"content_type": "Post content type not found in ContentType table."})
             else:
                 try:
-                    content_type = ContentType.objects.get(model__iexact=content_type_name)
+                    ct = ContentType.objects.get(model__iexact=content_type_name)
                 except ContentType.DoesNotExist:
                     raise ValidationError({"content_type": f"ContentType with name '{content_type_name}' does not exist."})
 
-            attrs["content_type"] = content_type
+            attrs["content_type"] = ct
 
             # ensure object_id exists on that model
             obj_id = attrs.get("object_id") or self.initial_data.get("object_id")
