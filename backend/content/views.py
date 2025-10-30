@@ -691,4 +691,52 @@ class EventSectionViewSet(BaseContentViewSet):
             })
 
         return Response(result)
+
+    @action(detail=False, methods=("get",), url_path="top-with-top-liked", url_name="top_with_top_liked")
+    def top_with_top_liked(self, request):
+        """Return top N EventSections each containing their top M events ordered by likes.
+
+        Query params:
+        - limit: int (default 3) number of sections to return
+        - events_limit: int (default 5) number of top-liked events to include per section
+        """
+        try:
+            limit = int(request.query_params.get("limit", 3))
+        except Exception:
+            limit = 3
+
+        try:
+            events_limit = request.query_params.get("events_limit")
+            events_limit = int(events_limit) if events_limit is not None else 5
+        except Exception:
+            events_limit = 5
+
+        from django.db.models import Count
+
+        # pick top sections by number of related Event objects (same as top_with_events)
+        sections_qs = EventSection.objects.annotate(events_count=Count("event")).order_by("-events_count")[:limit]
+
+        result = []
+        for section in sections_qs:
+            # get events for this section
+            events_qs = section.events().all()
+
+            # annotate likes info so EventSerializer can include likes_count/has_liked
+            events_qs = self.annotate_likes(events_qs)
+
+            # order by annotated likes count (fallback to created_at)
+            try:
+                events_qs = events_qs.order_by('-annotated_likes_count', '-created_at')[:events_limit]
+            except Exception:
+                events_qs = events_qs[:events_limit]
+
+            section_data = EventSectionSerializer(section, context={"request": request}).data
+            events_data = EventSerializer(events_qs, many=True, context={"request": request}).data
+
+            result.append({
+                "section": section_data,
+                "top_5": events_data,
+            })
+
+        return Response(result)
     
