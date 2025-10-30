@@ -559,6 +559,26 @@ class EventViewSet(BaseContentViewSet):
                 queryset =queryset.filter(report_type__in=values)
             
         return queryset
+    
+    #add new action for top 5 in commented
+    @action(detail=False, methods=("get",), url_path="top-commented", url_name="top_commented")
+    def top_commented(self, request):
+        """Return top N events by number of comments.
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = Event.top_commented(limit=limit)
+
+        # annotate likes info (and has_liked for authenticated user)
+        qs = self.annotate_likes(qs)
+
+        serializer = EventSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)    
 
 class WeeklyMomentViewSet(BaseContentViewSet):
     """ViewSet for managing WeeklyMoment content."""
