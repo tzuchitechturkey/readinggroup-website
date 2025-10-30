@@ -1,0 +1,62 @@
+import React, { useState, useEffect } from "react";
+
+import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/CustomyoutubeVideo/CustomyoutubeVideo";
+import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import { mockVideos } from "@/mock/Viedeos";
+import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCommentsSection/VideoCommentsSection";
+import Loader from "@/components/Global/Loader/Loader";
+import { GetEventById } from "@/api/events";
+
+function EventsVideoPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const videoId = window.location.pathname.split("/").pop();
+  const [videoData, setVideoData] = useState(null);
+  const getData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetEventById(videoId);
+      setVideoData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch video data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, [videoId]);
+
+  return (
+    <div className="bg-white">
+      {isLoading && <Loader />}
+      {/* Start Show Video */}
+      <CustomyoutubeVideo videoData={videoData} />
+      {/* End Show Video */}
+
+      {/* Start Content of a similar type */}
+      <div className="bg-white">
+        <DynamicSection
+          title="Similar Content"
+          titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium  "
+          data={mockVideos}
+          isSlider={false}
+          cardName={VideoCard}
+          viewMoreUrl="/videos"
+        />
+      </div>
+      {/* End Content of a similar type */}
+
+      {/* Start Comments Section */}
+      <div className="w-full">
+        <div className="w-full lg:w-3/4 lg:pl-8">
+          <VideoCommentsSection videoId={videoId} />
+        </div>
+      </div>
+      {/* End Comments Section */}
+    </div>
+  );
+}
+
+export default EventsVideoPage;

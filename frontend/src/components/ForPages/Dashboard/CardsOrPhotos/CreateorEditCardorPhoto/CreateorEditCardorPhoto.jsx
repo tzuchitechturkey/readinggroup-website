@@ -260,7 +260,7 @@ const CreateorEditCardorPhoto = ({
       resetForm();
       onClose();
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

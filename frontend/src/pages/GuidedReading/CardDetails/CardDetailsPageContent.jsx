@@ -36,7 +36,7 @@ function CardDetailsPageContent() {
       const res = await GetPostById(paramId);
       setCardData(res.data);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +64,7 @@ function CardDetailsPageContent() {
 
       toast.success(newLikedState ? t("Like Added") : t("Like removed"));
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
       toast.error(t("Failed to update like status"));
     }
   };
@@ -116,7 +116,6 @@ function CardDetailsPageContent() {
   useEffect(() => {
     getCardData();
   }, [paramId]);
-
   return (
     <div
       className={`min-h-screen bg-gray-50 ${

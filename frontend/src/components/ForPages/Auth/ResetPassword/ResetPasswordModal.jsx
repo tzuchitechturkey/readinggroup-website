@@ -25,7 +25,7 @@ function ResetPasswordModal({ open, onClose }) {
       onClose();
       setResetEmail("");
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setResetLoading(false);
     }

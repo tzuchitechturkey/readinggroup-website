@@ -36,7 +36,7 @@ function ResetQrModal({ onClose, mode = "resend" }) {
     e.preventDefault();
     const newErrors = {
       username: mode === "resend" && formData?.username?.trim() === "",
-      phoneNumber: mode === "resend" && formData?.phoneNumber?.trim() === "",
+      // phoneNumber: mode === "resend" && formData?.phoneNumber?.trim() === "",
       email: formData?.email?.trim() === "",
     };
 
@@ -78,7 +78,7 @@ function ResetQrModal({ onClose, mode = "resend" }) {
       }
     } catch (err) {
       console.error(err);
-      setErrorFn({ message: t("An error occurred. Please try again later.") });
+      setErrorFn({ err, t });
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +117,7 @@ function ResetQrModal({ onClose, mode = "resend" }) {
                   </p>
                 )}
               </div>
-
+              {/* 
               <div>
                 <input
                   type="text"
@@ -147,7 +147,7 @@ function ResetQrModal({ onClose, mode = "resend" }) {
                     {t("Please enter your Mobile Number.")}
                   </p>
                 )}
-              </div>
+              </div> */}
             </>
           )}
 

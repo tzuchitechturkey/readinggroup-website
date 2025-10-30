@@ -48,7 +48,7 @@ function CardsList() {
       setTotalRecords(res?.data?.count || 0);
       console.log(res?.data?.results);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +129,7 @@ function CardsList() {
       setUpdate((prev) => !prev);
       toast.success(t("Card deleted successfully"));
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

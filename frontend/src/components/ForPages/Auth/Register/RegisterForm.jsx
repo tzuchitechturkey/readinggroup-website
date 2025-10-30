@@ -39,6 +39,12 @@ function RegisterForm() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // منع الأحرف العربية في username
+    if (name === "username" && /[\u0600-\u06FF]/.test(value)) {
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [name]: value }));
 
     // إزالة الخطأ عند تعديل الحقل
@@ -60,6 +66,7 @@ function RegisterForm() {
         return rest;
       });
     }
+
     if (
       name === "confirmPassword" &&
       inputErrors.confirmPassword &&
@@ -70,6 +77,7 @@ function RegisterForm() {
         return rest;
       });
     }
+
     setError("");
   };
 
@@ -116,7 +124,7 @@ function RegisterForm() {
       toast.success(t("Registration successful"));
       navigate("/auth/login");
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const categories = [
@@ -49,8 +51,9 @@ function CategoryGrid() {
 }
 
 function Archives() {
+  const { t, i18n } = useTranslation();
   return (
-    <div className="w-full">
+    <div className="w-full" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       <Tabs defaultValue="Guided Reading" className="w-full">
         <TabsList className="bg-white shadow-none flex justify-start flex-wrap gap-6 h-auto p-0 my-5 ">
           {categories.map((c) => (

@@ -78,7 +78,7 @@ function LoginForm() {
         }
       }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -105,6 +105,15 @@ function LoginForm() {
         console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         localStorage.setItem("userId", JSON.stringify(res?.data?.user?.id));
+
+        localStorage.setItem(
+          "username",
+          JSON.stringify(res?.data?.user?.username)
+        );
+        localStorage.setItem(
+          "userImage",
+          JSON.stringify(res?.data?.user?.profile_image_url)
+        );
         setShowTOTPModal(false);
         if (res?.data.user?.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");

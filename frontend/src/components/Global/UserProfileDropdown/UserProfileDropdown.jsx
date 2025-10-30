@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CiSettings } from "react-icons/ci";
 import { CgProfile } from "react-icons/cg";
@@ -19,6 +19,11 @@ export default function UserProfileDropdown({ iconColor }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
+  const [userId, setUserId] = useState(null);
+  useEffect(() => {
+    const user = localStorage.getItem("userId");
+    setUserId(user);
+  }, []);
 
   return (
     <DropdownMenu>
@@ -31,7 +36,7 @@ export default function UserProfileDropdown({ iconColor }) {
       <DropdownMenuContent className="min-w-[160px] rounded-xl shadow-lg border border-gray-100 bg-white/95 py-2 px-1">
         <DropdownMenuItem
           onClick={() => {
-            navigate("/profile");
+            navigate(`/profile/${userId}`);
           }}
           className={`flex items-center gap-2 justify-between px-4 py-2 rounded-lg cursor-pointer transition-colors duration-150
                 hover:bg-[var(--color-primary)] hover:text-[#fff]  text-text
@@ -81,7 +86,7 @@ export default function UserProfileDropdown({ iconColor }) {
         onClose={() => setOpenLogoutModal(false)}
         title={t("Log Out")}
       >
-        <LogoutConfirmation onCancel={() => setOpenLogoutModal(false)}  />
+        <LogoutConfirmation onCancel={() => setOpenLogoutModal(false)} />
       </Modal>
     </DropdownMenu>
   );

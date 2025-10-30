@@ -12,10 +12,9 @@ import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import { GetVideosByFilter, GetVideoCategories } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
-function VideoFilterSections() {
+function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
   // Filter states
@@ -24,21 +23,16 @@ function VideoFilterSections() {
   const [languageContent, setLanguageContent] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [happenedAt, setHappenedAt] = useState(null);
-
+  const [makingSearch, setMakingSearch] = useState(false);
   // Data states
   const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
-  const [defaultVideos, setDefaultVideos] = useState({
-    videoTypeData: { count: 0, results: [] },
-    videoCategoryData: { count: 0, results: [] },
-    videoLanguageData: { count: 0, results: [] },
-  });
 
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
   // Check if any filter is active
   const hasActiveFilters =
-    searchValue.length > 0 ||
+    makingSearch ||
     contentType.length > 0 ||
     indexCategory.length > 0 ||
     languageContent.length > 0 ||
@@ -62,21 +56,41 @@ function VideoFilterSections() {
         setCategoriesList(categories);
       }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     }
   };
+
   // Fetch filtered videos based on all active filters
-  const fetchFilteredVideos = async (page = 1) => {
+  const fetchFilteredVideos = async (page = 1, searchVal = searchValue) => {
     // setIsLoading(true);
     const offset = (page - 1) * limit;
     const params = {};
 
-    if (searchValue) params.search = searchValue;
+    if (searchVal) {
+      params.search = searchVal;
+      setMakingSearch(true);
+    }
     if (contentType.length > 0) params.video_type = contentType.join(",");
-    if (indexCategory.length > 0) params.category = indexCategory.join(",");
-    if (languageContent.length > 0) params.language = languageContent.join(",");
+
+    // Extract category names from objects
+    if (indexCategory.length > 0) {
+      const categoryNames = indexCategory
+        .map((cat) => (typeof cat === "object" ? cat.name : cat))
+        .filter(Boolean);
+      params.category = categoryNames.join(",");
+    }
+
+    // Extract language names from objects
+    if (languageContent.length > 0) {
+      const languageNames = languageContent
+        .map((lang) => (typeof lang === "object" ? lang.name : lang))
+        .filter(Boolean);
+      params.language = languageNames.join(",");
+    }
+
     if (happenedAt) params.happened_at = happenedAt;
     try {
+      // console.log("Fetching videos with params:", params)
       const res = await GetVideosByFilter(limit, offset, params);
 
       if (page === 1) {
@@ -89,45 +103,10 @@ function VideoFilterSections() {
         }));
       }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Load default carousels (when no filters active)
-  const loadDefaultVideos = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch videos for each default category
-      const [typeRes, categoryRes, languageRes] = await Promise.all([
-        GetVideosByFilter(10, 0, { video_type: "full_video" }),
-        GetVideosByFilter(10, 0, { category: "health" }),
-        GetVideosByFilter(10, 0, { language: "en" }),
-      ]);
-
-      setDefaultVideos({
-        videoTypeData: typeRes?.data || { count: 0, results: [] },
-        videoCategoryData: categoryRes?.data || { count: 0, results: [] },
-        videoLanguageData: languageRes?.data || { count: 0, results: [] },
-      });
-    } catch (error) {
-      setErrorFn(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Clear all filters and reset to default view
-  const handleClearFilters = () => {
-    setSearchValue("");
-    setContentType([]);
-    setIndexCategory([]);
-    setLanguageContent([]);
-    setHappenedAt(null);
-    setCurrentPage(1);
-    setFilteredData({ count: 0, results: [] });
-    toast.success(t("Filters cleared"));
   };
 
   const handleLoadMore = () => {
@@ -143,22 +122,26 @@ function VideoFilterSections() {
         results: [...prevData.results].reverse(),
       }));
     } else {
-      setDefaultVideos((prev) => ({
-        videoTypeData: {
-          ...prev.videoTypeData,
-          results: [...prev.videoTypeData.results].reverse(),
-        },
-        videoCategoryData: {
-          ...prev.videoCategoryData,
-          results: [...prev.videoCategoryData.results].reverse(),
-        },
-        videoLanguageData: {
-          ...prev.videoLanguageData,
-          results: [...prev.videoLanguageData.results].reverse(),
-        },
-      }));
+      // setDefaultVideos((prev) => ({
+      //   videoTypeData: {
+      //     ...prev.videoTypeData,
+      //     results: [...prev.videoTypeData.results].reverse(),
+      //   },
+      //   videoCategoryData: {
+      //     ...prev.videoCategoryData,
+      //     results: [...prev.videoCategoryData.results].reverse(),
+      //   },
+      //   videoLanguageData: {
+      //     ...prev.videoLanguageData,
+      //     results: [...prev.videoLanguageData.results].reverse(),
+      //   },
+      // }));
     }
     toast.success(t("Data Sorted!"));
+  };
+  const onSearch = (searchVal) => {
+    setCurrentPage(1);
+    fetchFilteredVideos(1, searchVal);
   };
 
   // Trigger fetch when filters change
@@ -166,14 +149,12 @@ function VideoFilterSections() {
     // if (hasActiveFilters) {
     setCurrentPage(1);
     fetchFilteredVideos(1);
-    console.log("active");
     // }
-    console.log("var");
-  }, [searchValue, contentType, indexCategory, languageContent, happenedAt]);
+  }, [contentType, indexCategory, languageContent, happenedAt]);
 
   // Load default videos on mount
   useEffect(() => {
-    loadDefaultVideos();
+    // loadDefaultVideos();
     getCategoriesList();
   }, []);
   return (
@@ -183,31 +164,19 @@ function VideoFilterSections() {
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
         <SearchSecion
           setOpenFilterModal={setOpenFilterModal}
-          setViewMode={setViewMode}
-          viewMode={viewMode}
           setSearchValue={setSearchValue}
+          setMakingSearch={setMakingSearch}
           searchValue={searchValue}
           handleSortData={handleSortData}
+          onSearch={onSearch}
         />
-
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              className="text-red-600 border-red-600 hover:bg-red-50"
-            >
-              {t("Clear All Filters")}
-            </Button>
-          </div>
-        )}
       </div>
       {/* End Search Header */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-0   ">
+      <div className="max-w-7xl mx-auto p-4 sm:px-6 md:px-8 py-4    ">
         <div className="flex flex-col lg:flex-row gap-4 ">
           {/* Start Sidebar Filters */}
+
           <div className="hidden lg:flex w-full lg:w-80 ">
             <VideoFilter
               happenedAt={happenedAt}
@@ -219,6 +188,11 @@ function VideoFilterSections() {
               indexCategory={indexCategory}
               languageContent={languageContent}
               categoriesList={categoriesList}
+              hasActiveFilters={hasActiveFilters}
+              setSearchValue={setSearchValue}
+              setCurrentPage={setCurrentPage}
+              setMakingSearch={setMakingSearch}
+              setFilteredData={setFilteredData}
             />
           </div>
           {/* End Sidebar Filters */}
@@ -259,20 +233,18 @@ function VideoFilterSections() {
             ) : (
               /* End Filtered Results */
               /* Start Default Carousels */
-              <div className="flex-1 min-w-0 space-y-8">
+              <div className="flex-1 min-w-0 space-y-2">
                 {/* Full Videos Section */}
-                {defaultVideos.videoTypeData?.results?.length > 0 && (
+                {[...fullVideos, ...unitVideos]?.length > 0 && (
                   <div>
                     <div className="mb-2">
                       <h2 className="text-2xl font-bold text-text">
-                        {t("Full Videos")}
+                        {t("Mix Videos")}
                       </h2>
                     </div>
                     <BrokenCarousel
-                      data={defaultVideos.videoTypeData.results}
-                      showArrows={
-                        defaultVideos.videoTypeData.results.length > 4
-                      }
+                      data={[...fullVideos, ...unitVideos]}
+                      showArrows={[...fullVideos, ...unitVideos]?.length > 4}
                       cardName={VideoCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}
@@ -281,38 +253,16 @@ function VideoFilterSections() {
                 )}
 
                 {/* Category Section */}
-                {defaultVideos.videoCategoryData?.results?.length > 0 && (
-                  <div>
+                {likedVideos.length > 0 && (
+                  <div className="">
                     <div className="mb-2">
                       <h2 className="text-2xl font-bold text-text">
-                        {t("Health")}
+                        {t("Top 5 in your like")}
                       </h2>
                     </div>
                     <BrokenCarousel
-                      data={defaultVideos.videoCategoryData.results}
-                      showArrows={
-                        defaultVideos.videoCategoryData.results.length > 4
-                      }
-                      cardName={VideoCard}
-                      nextArrowClassname={"-right-5"}
-                      prevArrowClassname={"-left-5"}
-                    />
-                  </div>
-                )}
-
-                {/* Language Section */}
-                {defaultVideos.videoLanguageData?.results?.length > 0 && (
-                  <div>
-                    <div className="mb-2">
-                      <h2 className="text-2xl font-bold text-text">
-                        {t("English Videos")}
-                      </h2>
-                    </div>
-                    <BrokenCarousel
-                      data={defaultVideos.videoLanguageData.results}
-                      showArrows={
-                        defaultVideos.videoLanguageData.results.length > 4
-                      }
+                      data={likedVideos}
+                      showArrows={likedVideos.length > 4}
                       cardName={VideoCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}
@@ -325,7 +275,7 @@ function VideoFilterSections() {
           </div>
           {/* End Show Data */}
 
-          {/* DatePicker Modal  */}
+          {/* Start Mobile Modal  */}
           <Modal
             isOpen={openFilterModal}
             onClose={() => setOpenFilterModal(false)}
@@ -344,7 +294,7 @@ function VideoFilterSections() {
               categoriesList={categoriesList}
             />
           </Modal>
-          {/* End DatePicker Modal  */}
+          {/* End Mobile Modal  */}
         </div>
       </div>
     </div>

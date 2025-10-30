@@ -10,14 +10,13 @@ import ThemeToggle from "../ThemeToggle/ThemeToggle";
 export default function AdminIcons() {
   return (
     <div>
-      <div className="flex justify-end items-center gap-4">
+      <div className="flex justify-end items-center lg:gap-4">
         {/* Start Toggle Theme */}
         {/* <div className="">
           <ThemeToggle />
         </div> */}
         {/* End Toggle Theme */}
         {/* Start Notification */}
-
         <Notification />
         <div className=" ">{/* End Notification */}</div>
 

@@ -46,8 +46,8 @@ function UserIcons() {
     <div className="flex items-center gap-2 ">
       <div className="hidden sm:block border-l border-gray-300 h-6 w-[1px]" />
 
-      {/* Search Section */}
-      <div className="flex items-center">
+      {/* Start Search Section */}
+      {/* <div className="flex items-center">
         <div
           className={`flex items-center transition-all duration-300 ease-in-out overflow-hidden ${
             isSearchOpen ? "w-48 sm:w-64" : "w-0"
@@ -78,9 +78,11 @@ function UserIcons() {
           onClick={() => setIsSearchOpen(!isSearchOpen)}
           className="cursor-pointer text-4xl sm:text-xl hover:text-primary transition-all duration-200 p-1 mx-2 sm:p-0 rounded-full hover:bg-gray-100"
         />
-      </div>
+      </div> */}
+      {/* End Search Section */}
 
       <LanguageDropdown />
+
       {isLoggedIn ? (
         <UserProfileDropdown />
       ) : (
@@ -89,9 +91,20 @@ function UserIcons() {
         </Link>
       )}
       {isLoggedIn && userType === "admin" && (
-        <Link to="/dashboard">
-          <LayoutDashboard className="text-xl" />
-        </Link>
+        <div
+          onClick={() => {
+            localStorage.removeItem("dashboardSelectedPost");
+            localStorage.removeItem("dashboardSelectedVideo");
+            localStorage.removeItem("dashboardSelectedNews");
+            localStorage.removeItem("dashboardSelectedEvent");
+            localStorage.removeItem("dashboardActiveParent");
+            localStorage.removeItem("dashboardActiveSection");
+          }}
+        >
+          <Link to="/dashboard">
+            <LayoutDashboard className="text-xl" />
+          </Link>
+        </div>
       )}
     </div>
   );

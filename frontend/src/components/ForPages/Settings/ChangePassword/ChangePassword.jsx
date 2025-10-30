@@ -21,6 +21,7 @@ function ChangePassword({ userType }) {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const [matchPasswords, set_matchPasswords] = useState(false);
 
   const passwordStrength = getPasswordStrength(formData.newPassword);
 
@@ -44,11 +45,13 @@ function ChangePassword({ userType }) {
   };
 
   const handleInputChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: value,
-    }));
-    
+    };
+
+    setFormData(newFormData);
+
     // Clear errors when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
@@ -56,40 +59,56 @@ function ChangePassword({ userType }) {
         [name]: "",
       }));
     }
+
+    // Check if passwords match when either newPassword or confirmPassword changes
+    if (name === "newPassword" || name === "confirmPassword") {
+      const newPassword = name === "newPassword" ? value : formData.newPassword;
+      const confirmPassword =
+        name === "confirmPassword" ? value : formData.confirmPassword;
+
+      if (newPassword && confirmPassword && newPassword === confirmPassword) {
+        set_matchPasswords(true);
+      } else {
+        set_matchPasswords(false);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors = {};
-    
+
     if (!formData.currentPassword) {
       newErrors.currentPassword = t("Current password is required");
     }
-    
+
     if (!formData.newPassword) {
       newErrors.newPassword = t("New password is required");
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = t("Confirm password is required");
     }
-    
+
     // Check if passwords match
-    if (formData.newPassword && formData.confirmPassword && 
-        formData.newPassword !== formData.confirmPassword) {
+    if (
+      formData.newPassword &&
+      formData.confirmPassword &&
+      formData.newPassword !== formData.confirmPassword
+    ) {
       newErrors.confirmPassword = t("Passwords do not match");
     }
-    
+
     // Validate new password strength
     const pwErrors = validatePassword(formData.newPassword);
     if (pwErrors.length > 0) {
       newErrors.newPassword = pwErrors.join("\n");
     }
-    
+
     setErrors(newErrors);
-    
+
     // If there are errors, don't submit
     if (Object.keys(newErrors).length > 0) {
       return;
@@ -103,7 +122,7 @@ function ChangePassword({ userType }) {
         confirm_password: formData.confirmPassword,
       });
       toast.success(t("Password changed successfully!"));
-      
+
       // Reset form
       setFormData({
         currentPassword: "",
@@ -111,7 +130,7 @@ function ChangePassword({ userType }) {
         confirmPassword: "",
       });
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +138,10 @@ function ChangePassword({ userType }) {
   return (
     <div className="w-full">
       <div className="max-w-3xl mx-[52px] p-6">
-        <form onSubmit={handleSubmit} className={userType === "admin" ? "space-y-8 m-8" : "space-y-2 "}>
+        <form
+          onSubmit={handleSubmit}
+          className={userType === "admin" ? "space-y-8 m-8" : "space-y-2 "}
+        >
           <PasswordField
             label={t("Current Password")}
             name="currentPassword"
@@ -137,6 +159,9 @@ function ChangePassword({ userType }) {
             userType={userType}
             showStrength={true}
             passwordStrength={passwordStrength}
+            isMatching={
+              matchPasswords && formData.newPassword && formData.confirmPassword
+            }
           />
           <PasswordField
             label={t("Confirm Password")}
@@ -145,6 +170,9 @@ function ChangePassword({ userType }) {
             onChange={handleInputChange}
             error={errors.confirmPassword}
             userType={userType}
+            isMatching={
+              matchPasswords && formData.newPassword && formData.confirmPassword
+            }
           />
 
           {/* Requirements */}
@@ -168,7 +196,12 @@ function ChangePassword({ userType }) {
                     }`}
                   >
                     {passed ? (
-                      <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 16 16"
+                      >
                         <circle cx="8" cy="8" r="8" fill="#22C55E" />
                         <path
                           d="M5 8.5l2 2 4-4"
@@ -179,7 +212,12 @@ function ChangePassword({ userType }) {
                         />
                       </svg>
                     ) : (
-                      <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 16 16"
+                      >
                         <circle cx="8" cy="8" r="8" fill="#D1D5DB" />
                         <path
                           d="M6 10l4-4M10 10L6 6"
@@ -199,7 +237,14 @@ function ChangePassword({ userType }) {
           <div className="col-span-2 mt-6 flex justify-end">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                Object.keys(errors).length > 0 ||
+                !formData.currentPassword ||
+                !formData.newPassword ||
+                !formData.confirmPassword ||
+                !matchPasswords
+              }
               className={`w-44 ml-auto bg-[#4680FF] text-white rounded-full p-2 font-semibold px-7 transition-all duration-300 transform hover:bg-[#2563eb] hover:scale-105 shadow hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
             >
               {isLoading ? t("Saving...") : t("Save Changes")}
@@ -213,25 +258,40 @@ function ChangePassword({ userType }) {
 
 export default ChangePassword;
 
-const PasswordField = ({ 
-  label, 
-  placeholder = "********", 
-  name, 
-  value = "", 
-  onChange, 
-  error, 
-  userType, 
-  showStrength = false, 
-  passwordStrength = 0 
+const PasswordField = ({
+  label,
+  placeholder = "********",
+  name,
+  value = "",
+  onChange,
+  error,
+  userType,
+  showStrength = false,
+  passwordStrength = 0,
+  isMatching = false,
 }) => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const id = `input-${name}`;
-  
+
   const handleChange = (e) => {
     if (onChange) {
       onChange(name, e.target.value);
     }
+  };
+
+  // Get border color based on state
+  const getBorderColor = () => {
+    if (error) return "border-red-500";
+    if (isMatching) return "border-green-500";
+    return "border-slate-200";
+  };
+
+  // Get focus ring color based on state
+  const getFocusColor = () => {
+    if (error) return "focus:ring-red-500";
+    if (isMatching) return "focus:ring-green-500";
+    return "focus:ring-blue-500";
   };
 
   return (
@@ -247,9 +307,7 @@ const PasswordField = ({
           placeholder={placeholder}
           value={value}
           onChange={handleChange}
-          className={`w-full rounded-lg border ${
-            error ? "border-red-500" : "border-slate-200"
-          } bg-white px-4 py-3 pr-10 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+          className={`w-full rounded-lg border ${getBorderColor()} bg-white px-4 py-3 pr-10 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 ${getFocusColor()} focus:border-transparent transition-colors duration-200`}
         />
         <button
           type="button"
@@ -260,13 +318,11 @@ const PasswordField = ({
           {visible ? <EyeOff /> : <Eye />}
         </button>
       </div>
-      
+
       {/* Password strength indicator */}
       {showStrength && value && (
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-xs text-gray-500">
-            {t("Security level")}
-          </span>
+          <span className="text-xs text-gray-500">{t("Security level")}</span>
           <div className="flex gap-1">
             {[0, 1, 2].map((i) => (
               <span
@@ -281,7 +337,24 @@ const PasswordField = ({
           </div>
         </div>
       )}
-      
+
+      {/* Success message for matching passwords */}
+      {isMatching && name === "confirmPassword" && (
+        <div className="flex items-center gap-2 text-xs text-green-600 mt-1">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="8" fill="#22C55E" />
+            <path
+              d="M5 8.5l2 2 4-4"
+              stroke="#fff"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>{t("Passwords match!")}</span>
+        </div>
+      )}
+
       {/* Error message */}
       {error && (
         <div className="text-xs text-red-500 mt-1 whitespace-pre-line">

@@ -127,7 +127,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       setCurrentPage(page);
       setIsSearchPerformed(true);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }

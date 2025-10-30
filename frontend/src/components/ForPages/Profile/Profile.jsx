@@ -1,120 +1,27 @@
 import React, { useEffect, useState } from "react";
 
-import {
-  User as UserIcon,
-  Archive as ArchiveIcon,
-  MessagesSquare as InteractionsIcon,
-  Mail,
-  Phone,
-  MapPin,
-  Edit3,
-  Check,
-  X,
-} from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { FiUserPlus, FiUserX } from "react-icons/fi";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { GetProfile, UpdatePatchProfile, UpdateProfile } from "@/api/auth";
+import {
+  GetUserProfile,
+  SendFriendRequest,
+  UpdatePatchProfile,
+} from "@/api/auth";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import { BASE_URL } from "@/configs";
 
-// Simple stat item
-const Stat = ({ label, value }) => (
-  <div className="flex flex-col items-center gap-1">
-    <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="text-lg font-semibold leading-none">{value}</span>
-  </div>
-);
+import EditableField from "./EditableField/EditableField";
+import Labeled from "./Labeled/Labeled";
+import Stat from "./Stat/Stat";
 
-// Simple labeled row used on the right details card
-const Labeled = ({ label, children }) => (
-  <div className="space-y-1">
-    <div className="text-sm font-normal text-[#5B6B79]">{label}</div>
-    <div className="text-sm text-[#1D2630]">{children}</div>
-  </div>
-);
-
-// Editable field component
-const EditableField = ({
-  label,
-  value,
-  isEditing,
-  onEdit,
-  onSave,
-  onCancel,
-  onChange,
-  multiline = false,
-  placeholder = "",
-}) => (
-  <div className="space-y-1">
-    <div className="flex items-center justify-between">
-      <div className="text-sm font-normal text-[#5B6B79]">{label}</div>
-      <div className="flex items-center gap-1">
-        {!isEditing ? (
-          <button
-            onClick={onEdit}
-            className="p-1 text-gray-400 hover:text-blue-500 transition-colors duration-200"
-            aria-label={`Edit ${label}`}
-          >
-            <Edit3 size={14} />
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={onSave}
-              className="p-1 text-green-500 hover:text-green-600 transition-colors duration-200"
-              aria-label={`Save ${label}`}
-            >
-              <Check size={14} />
-            </button>
-            <button
-              onClick={onCancel}
-              className="p-1 text-red-500 hover:text-red-600 transition-colors duration-200"
-              aria-label={`Cancel edit ${label}`}
-            >
-              <X size={14} />
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-    <div className="text-sm text-[#1D2630]">
-      <div className="transition-all duration-300 ease-in-out">
-        {isEditing ? (
-          multiline ? (
-            <textarea
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder={placeholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 animate-in fade-in-0"
-              rows={3}
-              autoFocus
-            />
-          ) : (
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder={placeholder}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 animate-in fade-in-0"
-              autoFocus
-            />
-          )
-        ) : (
-          <span className="transition-all duration-300 ease-in-out cursor-pointer hover:text-gray-700">
-            {value || placeholder || "No information provided"}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
-);
-function Profile() {
-  const { t } = useTranslation();
+function Profile({ myUserId, userId }) {
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -130,7 +37,7 @@ function Profile() {
   const getProfileData = async () => {
     setIsLoading(true);
     try {
-      const res = await GetProfile();
+      const res = await GetUserProfile(userId);
       const profileData = res?.data;
       setData(profileData);
       // Initialize form data with current values
@@ -140,7 +47,7 @@ function Profile() {
       });
       setHasUnsavedChanges(false);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +79,7 @@ function Profile() {
 
     // Show a subtle feedback
     toast.info(
-     t( "Changes ready to save. Click 'Update Profile' to save all changes."),
+      t("Changes ready to save. Click 'Update Profile' to save all changes."),
       {
         autoClose: 2000,
         position: "bottom-right",
@@ -201,22 +108,39 @@ function Profile() {
       setHasUnsavedChanges(false);
       setUpdate(!update);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
   };
-
+  const handleFollow = async (followUserId) => {
+    setIsLoading(true);
+    const payload = {
+      to_user: followUserId,
+    };
+    try {
+      await SendFriendRequest(payload);
+      toast.success(t("Friend request sent successfully"));
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     getProfileData();
-  }, [update]);
+  }, [userId, update]);
+
   return (
-    <div className="space-y-6 my-5 p-1">
+    <div
+      className="space-y-6 my-5 p-1"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       <div className="grid grid-cols-12 gap-6">
         {/* Left profile card */}
         <section className="col-span-12 md:col-span-4 lg:col-span-3">
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-xl border bg-card p-6 p">
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-16 w-16">
                 <AvatarImage
@@ -231,23 +155,49 @@ function Profile() {
                   {data?.display_name?.slice(0, 2)?.toUpperCase() || "NA"}
                 </AvatarFallback>
               </Avatar>
-              <div className="mt-4 text-xs font-semibold">
-                {data?.display_name || data?.username || "Unknown"}
+              <div className="mt-4 text-xs border font-semibold">
+                <span>{data?.display_name || data?.username || "Unknown"}</span>
               </div>
-              <div className="text-[11px] text-[#5B6B79]">
+              <div className="text-[11px] border text-[#5B6B79]">
                 {data?.profession_name || "Not specified"}
               </div>
+              {+userId !== myUserId && (
+                <button
+                  onClick={() => handleFollow(userId)}
+                  className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200 flex items-center gap-1 mt-3 border px-3 py-1 rounded-full hover:bg-blue-50"
+                >
+                  {data?.is_friend ? (
+                    <>
+                      <FiUserX className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        {t("Unfollow")}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <FiUserPlus className="w-4 h-4" />
+                      <span className="text-sm font-medium">{t("Follow")}</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
-            <Separator className="my-6" />
+            <Separator className="mb-6 mt-4" />
 
             <div className="grid grid-cols-3 gap-3">
               <Stat
                 label={t("Publications")}
-                value={data?.publications || "0"}
+                value={data?.posts_count || "0"}
               />
-              <Stat label={t("Followers")} value={data?.followers || "0"} />
-              <Stat label={t("Following")} value={data?.following || "0"} />
+              <Stat
+                label={t("Followers")}
+                value={data?.followers_count || "0"}
+              />
+              <Stat
+                label={t("Following")}
+                value={data?.following_count || "0"}
+              />
             </div>
 
             <Separator className="my-6" />
@@ -302,7 +252,10 @@ function Profile() {
                 onCancel={() => cancelEdit("about_me")}
                 onChange={(value) => handleInputChange("about_me", value)}
                 multiline={true}
-                placeholder={t("Tell us about yourself...")}
+                placeholder={
+                  userId !== myUserId ? t("-") : t("Tell us about yourself...")
+                }
+                disabled={userId !== myUserId}
               />
             </div>
           </div>
@@ -316,7 +269,7 @@ function Profile() {
               <div className="grid grid-cols-12 gap-6">
                 <div className="col-span-12 space-y-5">
                   <Labeled label={t("Full Name")}>
-                    {`${data?.first_name || ""} ${data?.last_name || ""}`}
+                    {data?.display_name || data?.username}
                   </Labeled>
                   <Separator />
 
@@ -339,7 +292,12 @@ function Profile() {
                         onChange={(value) =>
                           handleInputChange("website_address", value)
                         }
-                        placeholder={t("example: https://yourwebsite.com")}
+                        placeholder={
+                          userId !== myUserId
+                            ? t("-")
+                            : t("example: https://yourwebsite.com")
+                        }
+                        disabled={userId !== myUserId}
                       />
                     </div>
                     <div className="col-span-3">
@@ -366,19 +324,20 @@ function Profile() {
               </p>
             </div>
           )}
-
-          <button
-            onClick={handleEditUserInfo}
-            disabled={!hasUnsavedChanges || isLoading}
-            aria-disabled={!hasUnsavedChanges || isLoading}
-            className={`block m-5 ml-auto rounded-full p-2 font-semibold px-7 transition-all duration-200 ${
-              !hasUnsavedChanges || isLoading
-                ? " bg-gray-300 text-gray-700 cursor-not-allowed opacity-80"
-                : "cursor-pointer bg-[#4680FF] text-white hover:bg-[#3d70e0] hover:scale-105 transform"
-            }`}
-          >
-            {isLoading ? "Updating..." : t("Update Profile")}
-          </button>
+          {+userId === +myUserId && (
+            <button
+              onClick={handleEditUserInfo}
+              disabled={!hasUnsavedChanges || isLoading}
+              aria-disabled={!hasUnsavedChanges || isLoading}
+              className={`block m-5 ml-auto rounded-full p-2 font-semibold px-7 transition-all duration-200 ${
+                !hasUnsavedChanges || isLoading
+                  ? " bg-gray-300 text-gray-700 cursor-not-allowed opacity-80"
+                  : "cursor-pointer bg-[#4680FF] text-white hover:bg-[#3d70e0] hover:scale-105 transform"
+              }`}
+            >
+              {isLoading ? "Updating..." : t("Update Profile")}
+            </button>
+          )}
         </section>
       </div>
     </div>

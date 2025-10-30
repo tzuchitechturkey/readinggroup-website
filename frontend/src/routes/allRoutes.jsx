@@ -17,6 +17,9 @@ import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
 import NewsContent from "@/pages/Events/News/NewsContent";
 import Pages404 from "@/pages/NotFound/NotFound";
 import SearchContent from "@/pages/Search/SearchPageContent";
+import EventsVideoPage from "@/components/ForPages/Events/EventsVideoPage/EventsVideoPage";
+import TOTPSetup from "@/components/ForPages/Auth/TOTPSetup/TOTPSetup";
+import MyListContent from "@/pages/MyList/MyListContent";
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -28,6 +31,7 @@ export const userRoutes = [
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
   { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
+  { path: "/guiding-reading/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   {
@@ -36,7 +40,9 @@ export const userRoutes = [
   },
   { path: "/events", element: <EventsContent /> },
   { path: "/events/:id", element: <NewsContent /> },
-  { path: "/profile", element: <UserProfileContent /> },
+  { path: "/events/video/:id", element: <EventsVideoPage /> },
+  { path: "/profile/:id", element: <UserProfileContent /> },
+  { path: "/my-list", element: <MyListContent /> },
   { path: "/settings", element: <UserSettingContent /> },
   { path: "/search", element: <SearchContent /> },
 
@@ -47,5 +53,6 @@ export const userRoutes = [
 export const authRoutes = [
   { path: "/auth/login", element: <Login /> },
   { path: "/auth/register", element: <Register /> },
+  { path: "/auth/totp-setup", element: <TOTPSetup /> },
   { path: "/pages-404", element: <Pages404 /> },
 ];

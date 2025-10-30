@@ -349,6 +349,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       }
     }
   };
+  console.log(formData);
 
   // Remove tag
   const removeTag = (tagToRemove) => {
@@ -443,18 +444,20 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
     submitData.append("duration_minutes", formData.duration_minutes);
-    submitData.append("section", formData.section);
+    submitData.append("section", formData.section?.id || formData.section);
     if (formData.image) {
-      submitData.append(
-        formData.report_type === "videos" ? "thumbnail" : "image",
-        formData.image
-      );
+      submitData.append("image", formData.image);
+      if (formData?.report_type === "videos") {
+        submitData.append("thumbnail", formData.image);
+      }
+    }
+    if (formData?.image_url) {
+      submitData.append("image_url", formData.image_url);
+      if (formData?.report_type === "videos") {
+        submitData.append("thumbnail_url", formData.image_url);
+      }
     }
 
-    submitData.append(
-      formData?.report_type === "videos" ? "thumbnail_url" : "image_url",
-      formData.image_url
-    );
     if (formData?.happened_at) {
       const formattedDate = format(
         new Date(formData.happened_at),
@@ -500,7 +503,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       onSectionChange("eventsList");
       resetForm();
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -905,7 +908,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 {t("Select Type")}
               </option>
               {/* <option value="news">{t("News")}</option> */}
-              <option value="videos">{t("Videos")}</option>
+              <option value="videos">{t("Video")}</option>
               <option value="reports">{t("Reports")}</option>
             </select>
             {errors.report_type && (

@@ -7,25 +7,13 @@ import { useTranslation } from "react-i18next";
 function GuidingReadingcard({ item }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
   const handleCardClick = () => {
-    navigate(`/cards-photos/card/${item.id}`);
+    navigate(
+      `/${
+        item?.post_type === "reading" ? "guiding-reading" : "cards-photos"
+      }/card/${item.id}`
+    );
   };
-  // {
-  //   "category": 0,
-  //   "title": "string",
-  //   "subtitle": "string",
-  //   "excerpt": "string",
-  //   "body": "string",
-  //   "writer": "string",
-  //   "writer_avatar": "string",
-  //   "status": "draft",
-  //   "is_active": true,
-  //   "views": 9223372036854776000,
-  //   "read_time": "string",
-  //   "tags": "string",
-  //   "published_at": "2025-10-21T13:21:48.537Z"
-  // }
   return (
     <div
       key={item.id}

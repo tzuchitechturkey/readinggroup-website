@@ -353,7 +353,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       );
       onSectionChange("posts");
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

@@ -19,7 +19,7 @@ function SearchPageContent() {
       setDataResult(response.data?.results || []);
       setTotalRecords(response.data?.count || 0);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

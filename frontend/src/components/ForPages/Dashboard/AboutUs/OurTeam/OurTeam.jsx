@@ -49,7 +49,7 @@ function OurTeam({ onSectionChange }) {
       setTotalRecords(res.data.count);
       setMembers(res.data.results);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +64,7 @@ function OurTeam({ onSectionChange }) {
       setShowDeleteMemberModal(false);
       setUpdate(!update);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

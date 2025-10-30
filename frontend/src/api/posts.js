@@ -129,3 +129,28 @@ export async function LikeReply(replyId) {
 export async function UnlikeReply(replyId) {
   return await axios.delete(`/replies/${replyId}/like/`);
 }
+
+// TOP
+export async function TopCommentedPosts() {
+  return await axios.get(`/posts/top-commented-card-photo/?limit=5`);
+}
+
+export async function weeklyMomentsPosts() {
+  return await axios.get(`/weekly-moments/top-liked/?limit=5`);
+}
+
+// it Gieves to data card_photo And reading
+export async function TopLikedPosts() {
+  return await axios.get(`/posts/top-liked-grouped/`);
+}
+
+// X X X X X
+export async function WeeklyCardPhotoPosts() {
+  return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
+}
+
+export async function WeeklyReadingPosts() {
+  return await axios.get(`/posts/reading/`);
+}
+//  /api/content/posts/card_photo/
+//  /api/content/posts/reading/

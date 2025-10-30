@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,18 +7,27 @@ import EditProfile from "@/components/ForPages/Settings/EditProfile/EditProfile"
 import ChangePassword from "@/components/ForPages/Settings/ChangePassword/ChangePassword";
 
 function SettingsContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("editProfile");
   const [userType, setUserType] = useState("user");
-
+  useEffect(() => {
+    const storedUserType = localStorage.getItem("userType");
+    if (storedUserType) {
+      setUserType(storedUserType);
+    }
+  }, []);
   return (
     <div>
-      <div className="w-full bg-[#fff] rounded-lg p-3 pb-6 relative text-[#1E1E1E] flex flex-col">
+      <div
+        className="w-full bg-[#fff] rounded-lg p-3 pb-6 relative text-[#1E1E1E] flex flex-col"
+        dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+      >
         {/* Start Tabs */}
         <Tabs
           value={activeTab}
           onValueChange={(val) => setActiveTab(val)}
           className=" "
+          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
         >
           <TabsList className="bg-white shadow-none">
             <TabsTrigger

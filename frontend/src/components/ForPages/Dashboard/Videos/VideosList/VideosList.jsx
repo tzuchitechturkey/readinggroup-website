@@ -48,7 +48,7 @@ function VideosList({ onSectionChange }) {
       setVideoData(res?.data?.results || []);
       setTotalRecords(res?.data?.count);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +150,7 @@ function VideosList({ onSectionChange }) {
       toast.success(t("Video deleted successfully"));
       setUpdate(!update);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

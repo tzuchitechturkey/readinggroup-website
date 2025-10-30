@@ -9,6 +9,7 @@ export function AxiosInterceptor() {
       (response) => response,
       async (error) => {
         const status = error?.response?.status;
+        console.log(error,"error from Mian axios file");
         console.log(status);
         if (status === 401 || status === 403) {
           // Token invalid/expired or forbidden. Clear and redirect to login.

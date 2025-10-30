@@ -43,41 +43,6 @@ function CardsAndPhotosContent() {
       <CardsAndPhotosTabs />
       {/* End Tabs */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
-        {/* Start Image */}
-        <div className="order-2 lg:order-1 mt-0 lg:mt-8">
-          <img
-            src="/authback.jpg"
-            alt="Weekly featured image"
-            className="w-full h-64 sm:h-80 md:h-96 lg:h-full object-cover rounded-xl shadow-lg"
-          />
-        </div>
-        {/* End Image */}
-
-        {/* Start Grid Cards */}
-        <div className="order-1 lg:order-2 px-0 sm:px-3 md:px-5 lg:px-7">
-          {/* Start Title */}
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
-            {t("This Week's Good Effect Cards")}
-          </h2>
-          {/* End Title */}
-
-          {/* Start Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 lg:gap-7">
-            {readings?.slice(0, 4).map((item, index) => (
-              <div
-                key={index}
-                className="transform hover:scale-105 transition-transform duration-200"
-              >
-                <GuidingReadingcard item={item} />
-              </div>
-            ))}
-          </div>
-          {/* End Cards */}
-        </div>
-        {/* End Grid Cards */}
-      </div>
-
       {/* Start Weekly Moments */}
       <WeeklyMoments />
       {/* End Weekly Moments */}

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
-function ExternalNewsCard({ className = "", item }) {
+function EventCard({ className = "", item }) {
   const { t } = useTranslation();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ function ExternalNewsCard({ className = "", item }) {
       className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}
     >
       <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg h-full">
-        <div className="relative h-full flex-shrink-0">
+        <div className="w-[300px] h-[200px]  relative  flex-shrink-0">
           {/* Start Image */}
           <img
             src={item.image}
@@ -83,4 +83,4 @@ function ExternalNewsCard({ className = "", item }) {
   );
 }
 
-export default ExternalNewsCard;
+export default EventCard;

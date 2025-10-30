@@ -6,7 +6,9 @@ import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
-import { PatchVideoById } from "@/api/videos";
+import { AddToMyList, PatchVideoById } from "@/api/videos";
+import { PatchEventById } from "@/api/events";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t } = useTranslation();
@@ -97,10 +99,15 @@ function CustomyoutubeVideo({ videoData }) {
   const handleLike = async () => {
     try {
       const newLikedState = !videoItem?.has_liked;
-
-      await PatchVideoById(videoItem.id, {
-        has_liked: newLikedState,
-      });
+      if (videoData?.report_type) {
+        await PatchEventById(videoItem.id, {
+          has_liked: newLikedState,
+        });
+      } else {
+        await PatchVideoById(videoItem.id, {
+          has_liked: newLikedState,
+        });
+      }
 
       setVideoItem({
         ...videoItem,
@@ -112,6 +119,23 @@ function CustomyoutubeVideo({ videoData }) {
       toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch {
       toast.error(t("Failed to update like status"));
+    }
+  };
+
+  const handleAddToMyList = async () => {
+    try {
+      await AddToMyList(videoItem.id);
+      if (videoData?.has_in_my_list === false) {
+        toast.success(t("Added to your list"));
+      } else {
+        toast.success(t("Removed from your list"));
+      }
+      setVideoItem((prev) => ({
+        ...prev,
+        has_in_my_list: !prev.has_in_my_list,
+      }));
+    } catch (err) {
+      setErrorFn(err, t);
     }
   };
   return (
@@ -163,7 +187,7 @@ function CustomyoutubeVideo({ videoData }) {
                         ▶
                       </div>
                       <p className="text-xs sm:text-sm opacity-80">
-                        Video Link
+                        {t("Video Link")}
                       </p>
                     </div>
                   </div>
@@ -298,7 +322,7 @@ function CustomyoutubeVideo({ videoData }) {
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700 my-4 sm:my-6 md:my-8">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-1 sm:gap-2 transition-colors ${
+                className={`outline-0 flex items-center gap-1 sm:gap-2 transition-colors ${
                   videoItem?.has_liked ? "text-blue-600" : "hover:text-black"
                 }`}
                 aria-pressed={videoItem?.has_liked}
@@ -335,10 +359,17 @@ function CustomyoutubeVideo({ videoData }) {
                 </span>
               </button>
 
-              <button className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors">
+              <button
+                onClick={() => {
+                  handleAddToMyList();
+                }}
+                className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
+              >
                 <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
-                  {t("Save")}
+                  {videoItem?.has_in_my_list
+                    ? t("Remove from My List")
+                    : t("Save")}
                 </span>
               </button>
             </div>

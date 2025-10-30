@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { FiTrash2, FiPlusCircle } from "react-icons/fi";
 
 import countries from "@/constants/countries.json";
 import { GetProfile, UpdateProfile } from "@/api/auth";
@@ -10,7 +11,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { BASE_URL } from "@/configs";
 
 function EditProfile() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
   const [profileImageFile, setProfileImageFile] = useState(null); // Store the actual file
@@ -42,10 +43,9 @@ function EditProfile() {
     try {
       const res = await GetProfile();
       const profileData = res?.data;
-      console.log("Profile Data:", profileData);
       setFormData(profileData);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -78,14 +78,16 @@ function EditProfile() {
       await UpdateProfile(data);
       toast.success(t("Updated Profile Successfully"));
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
-  console.log("Form Data State:", formData);
   return (
-    <div className="w-full px-4 md:px-8 mt-4">
+    <div
+      className="w-full px-4 md:px-8 mt-4"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
@@ -107,17 +109,41 @@ function EditProfile() {
               }
             }}
           />
+          <div className="flex flex-col items-center gap-3">
+            <img
+              src={
+                profileImageFile
+                  ? formData.profile_image
+                  : `${BASE_URL}/${formData.profile_image}`
+              }
+              alt="avatar"
+              className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
+              onClick={() => fileInputRef.current.click()}
+            />
 
-          <img
-            src={
-              profileImageFile
-                ? formData.profile_image
-                : `${BASE_URL}/${formData.profile_image}`
-            }
-            alt="avatar"
-            className="w-24 h-24 rounded-full object-contain shadow-sm cursor-pointer"
-            onClick={() => fileInputRef.current.click()}
-          />
+            {profileImageFile || formData.profile_image ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileImageFile(null);
+                  setFormData((prev) => ({ ...prev, profile_image: null }));
+                }}
+                className="w-28  flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 px-2 py-2 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+              >
+                <FiTrash2 size={14} />
+                {t("Delete image")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current.click()}
+                className="w-28 flex items-center gap-2 text-green-600 bg-green-50 border border-green-200 px-2 py-2 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
+              >
+                <FiPlusCircle size={16} />
+                {t("Add image")}
+              </button>
+            )}
+          </div>
         </div>
         {/* End Avatar */}
 

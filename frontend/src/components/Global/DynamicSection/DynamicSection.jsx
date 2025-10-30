@@ -23,16 +23,10 @@ const DynamicSection = ({
   showArrows = false,
   prevArrowClassname = "",
   nextArrowClassname = "",
+  stopslider = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const Card = cardName;
-
-  // التحقق من صحة البيانات
-  if (cardName && typeof cardName !== "function") {
-    console.error(
-      "DynamicSection: cardName must be a valid React component function"
-    );
-  }
 
   // إذا لم يتم تمرير data، عرض رسالة
   if (!data || data.length === 0) {
@@ -46,7 +40,10 @@ const DynamicSection = ({
     );
   }
   return (
-    <div className="px-4 md:px-8 lg:px-10 ">
+    <div
+      className="px-4 md:px-8 lg:px-10 "
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       <div className=" mx-auto">
         {/* Start Title && View More */}
         <div className="flex items-center justify-between mb-1 md:mb-4">
@@ -66,7 +63,9 @@ const DynamicSection = ({
               className="flex items-center gap- border-[1px] border-primary text-text text-sm rounded-full px-4 py-[4px] lg:py-[6px] hover:bg-primary hover:text-white transition-all duration-300"
             >
               {t("View More")}
-              <ChevronRight />
+              <ChevronRight
+                className={`${i18n?.language === "ar" ? "rotate-180" : ""} `}
+              />
             </Link>
           )}
           {/* End View More Button */}
@@ -74,24 +73,43 @@ const DynamicSection = ({
         {/* End Title && View More */}
         {!isSlider ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 px-2">
-            {data.map((item) => (
+            {data.map((item, ind) => (
               <div key={item.id}>
-                <Card item={item} />
+                <Card item={item} index={ind} />
               </div>
             ))}
           </div>
         ) : (
           <div>
-            <div className=" ">
-              <Carousel className="w-full overflow-visible">
-                <CarouselContent className="-ml-3 md:-ml-6 overflow-visible">
-                  {data.map((item) => (
+            <div className=" " style={{ touchAction: "pan-x" }}>
+              <Carousel
+                className="w-full overflow-visible"
+                opts={{
+                  watchDrag: true,
+                  containScroll: "trimSnaps",
+                }}
+              >
+                <CarouselContent
+                  className="-ml-3 md:-ml-6 overflow-visible"
+                  style={{ touchAction: "pan-x" }}
+                  onPointerDownCapture={(e) => {
+                    if (stopslider) {
+                      e.stopPropagation();
+                    }
+                  }}
+                  onTouchStartCapture={(e) => {
+                    if (stopslider) {
+                      e.stopPropagation();
+                    }
+                  }}
+                >
+                  {data.map((item, ind) => (
                     <CarouselItem
                       key={item.id}
                       className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 overflow-visible"
                     >
                       {Card && typeof Card === "function" ? (
-                        <Card item={item} />
+                        <Card item={item} index={ind} />
                       ) : (
                         // Default Card - تصميم افتراضي إذا لم يتم تمرير cardName صحيح
                         <div className="bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">

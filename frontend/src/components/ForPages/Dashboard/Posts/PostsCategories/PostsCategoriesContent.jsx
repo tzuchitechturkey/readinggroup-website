@@ -40,7 +40,7 @@ function PostsCategoriesContent({ onSectionChange }) {
       setCategories(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +105,7 @@ function PostsCategoriesContent({ onSectionChange }) {
       setShowModal(false);
       getCategoriesData(0);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }

@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { ChevronDown, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
+import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { Button } from "@/components/ui/button";
 import { languages } from "@/constants/constants";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -27,29 +29,31 @@ function VideoFilter({
   indexCategory = [],
   languageContent = [],
   categoriesList,
+  hasActiveFilters,
+  setSearchValue,
+  setCurrentPage,
+  setMakingSearch,
+  setFilteredData,
 }) {
   const { t } = useTranslation();
-  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
 
-  const clearDateFilter = () => {
+  // Clear all filters and reset to default view
+  const handleClearFilters = () => {
+    setSearchValue("");
+    setMakingSearch(false);
+    setContentType([]);
+    setIndexCategory([]);
+    setLanguageContent([]);
     setHappenedAt(null);
+    setCurrentPage(1);
+    setFilteredData({ count: 0, results: [] });
+    toast.success(t("Filters cleared"));
   };
 
-  const handleDateSelection = (dateSelection) => {
-    if (dateSelection.selection && dateSelection.selection.startDate) {
-      // Format date as YYYY-MM-DD for API
-      const formattedDate = format(
-        dateSelection.selection.startDate,
-        "yyyy-MM-dd"
-      );
-      setHappenedAt(formattedDate);
-    }
-    setIsDateModalOpen(false);
-  };
   return (
-    <div className="w-full lg:w-80 flex-shrink-0">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
+    <div className="w-full lg:w-80 flex-shrink-0 ">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6 lg:pb-7 ">
         {/* Side Filtration */}
         <div className="mb-4 sm:mb-5 lg:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -62,9 +66,9 @@ function VideoFilter({
           {/* Content Type Filter */}
           <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm text-gray-700">
-                {t("All content")}
-              </span>
+              <h3 className="text-sm sm:text-base font-medium text-gray-900">
+                {t("Content Type")}
+              </h3>
               <span className="text-xs bg-gray-100 px-2 py-1 rounded">169</span>
             </div>
 
@@ -133,51 +137,15 @@ function VideoFilter({
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            {categoriesList && categoriesList.length > 0 ? (
-              categoriesList.map((category) => (
-                <div
-                  key={category.id}
-                  className="flex items-center gap-2 sm:gap-3"
-                >
-                  <input
-                    type="checkbox"
-                    id={`category-${category.id}`}
-                    checked={indexCategory.includes(category.name)}
-                    className="rounded border-gray-300 w-4 h-4"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setIndexCategory((prev) => [...prev, category.name]);
-                      } else {
-                        setIndexCategory((prev) =>
-                          prev.filter((name) => name !== category.name)
-                        );
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={`category-${category.id}`}
-                    className="text-xs sm:text-sm text-gray-700 flex-1 cursor-pointer"
-                  >
-                    {t(category.name)}
-                  </label>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      indexCategory.includes(category.name)
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {category.count || 0}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs sm:text-sm text-gray-500 text-center py-2">
-                {t("No categories available")}
-              </p>
-            )}
-          </div>
+          <MultiSelect
+            items={categoriesList || []}
+            selected={Array.isArray(indexCategory) ? indexCategory : []}
+            onChange={(selected) => setIndexCategory(selected)}
+            placeholder={t("Select Categories")}
+            renderLabel={(item) => t(item?.name || item)}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
         </div>
 
         {/* Language Filter */}
@@ -189,54 +157,19 @@ function VideoFilter({
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </div>
 
-          <div className="space-y-2 sm:space-y-3">
-            {languages && languages.length > 0 ? (
-              languages.map((lan) => (
-                <div key={lan} className="flex items-center gap-2 sm:gap-3">
-                  <input
-                    type="checkbox"
-                    id={`category-${lan}`}
-                    checked={languageContent.includes(lan)}
-                    className="rounded border-gray-300 w-4 h-4"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setLanguageContent((prev) => [...prev, lan]);
-                      } else {
-                        setLanguageContent((prev) =>
-                          prev.filter((name) => name !== lan)
-                        );
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={`category-${lan}`}
-                    className="text-xs sm:text-sm text-gray-700 flex-1 cursor-pointer"
-                  >
-                    {t(lan)}
-                  </label>
-                  {/* Start Count */}
-                  {/* <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      indexCategory.includes(lan)
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {lan || 0}
-                  </span> */}
-                  {/* End Count */}
-                </div>
-              ))
-            ) : (
-              <p className="text-xs sm:text-sm text-gray-500 text-center py-2">
-                {t("No categories available")}
-              </p>
-            )}
-          </div>
+          <MultiSelect
+            items={languages?.map((lang) => ({ name: lang })) || []}
+            selected={Array.isArray(languageContent) ? languageContent : []}
+            onChange={(selected) => setLanguageContent(selected)}
+            placeholder={t("Select Languages")}
+            renderLabel={(item) => t(item?.name || item)}
+            renderValue={(item) => item?.name || item}
+            searchable={true}
+          />
         </div>
         {/* Start Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             {t("Happened Date")}
           </label>
           <div className="relative">
@@ -288,29 +221,21 @@ function VideoFilter({
           </div>
         </div>
         {/* End Date */}
+
+        {/* Start Clear Filters Button */}
+        {hasActiveFilters && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              className="text-red-600 border-red-600 hover:bg-red-50 w-full"
+            >
+              {t("Clear All Filters")}
+            </Button>
+          </div>
+        )}
+        {/* End Clear Filters Button */}
       </div>
-      {/* DatePicker Modal  */}
-      <Modal
-        isOpen={isDateModalOpen}
-        onClose={() => setIsDateModalOpen(false)}
-        title={t("Select Date")}
-      >
-        <FilterDatePickerModal
-          setIsDateModalOpen={setIsDateModalOpen}
-          selectedDateRange={{
-            startDate: happenedAt ? new Date(happenedAt) : null,
-            endDate: null,
-          }}
-          setSelectedDateRange={(range) => {
-            if (range.startDate) {
-              setHappenedAt(format(range.startDate, "yyyy-MM-dd"));
-            }
-          }}
-          clearDateFilter={clearDateFilter}
-          handleDateSelection={handleDateSelection}
-        />
-      </Modal>
-      {/* End DatePicker Modal  */}
     </div>
   );
 }

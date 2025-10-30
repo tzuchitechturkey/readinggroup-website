@@ -34,7 +34,7 @@ const AboutHistoryContent = () => {
       // إذا البيانات الجديدة أقل من limit => لا يوجد المزيد
       if (results.length < limit) setHasMore(false);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLaoding(false);
     }
@@ -75,7 +75,7 @@ const AboutHistoryContent = () => {
           </div>
         </div>
 
-        {/* زر عرض المزيد */}
+        {/* Start pagination */}
         {hasMore && (
           <div className="flex justify-center mt-12">
             <button
@@ -87,6 +87,7 @@ const AboutHistoryContent = () => {
             </button>
           </div>
         )}
+        {/* End pagination */}
       </div>
     </div>
   );

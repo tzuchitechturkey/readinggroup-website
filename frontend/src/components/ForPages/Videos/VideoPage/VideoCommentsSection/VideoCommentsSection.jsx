@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 
 import Picker from "emoji-picker-react";
 import { useTranslation } from "react-i18next";
-import { ThumbsUp, ThumbsDown, Loader } from "lucide-react";
+import { ThumbsUp, Loader } from "lucide-react";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import { FiUserPlus } from "react-icons/fi";
 
 import {
   GetVideoComments,
@@ -19,13 +21,16 @@ import {
   UnlikeReply,
   EditCommentReply,
 } from "@/api/videos";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { BASE_URL } from "@/configs";
+import { SendFriendRequest } from "@/api/auth";
 
 function VideoCommentsSection({ videoId }) {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [comment, setComment] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
-
   // Comments state
   const [comments, setComments] = useState([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
@@ -46,9 +51,9 @@ function VideoCommentsSection({ videoId }) {
   const [editingReplyId, setEditingReplyId] = useState(null);
   const [editReplyText, setEditReplyText] = useState("");
   const [isEditingReply, setIsEditingReply] = useState(false);
-
+  const [userId, setUserId] = useState(null);
   const commentsPerPage = 10;
-
+  const [userImage, setUserImage] = useState();
   // 🌟 الاستماع للنقر خارج المكون
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -372,16 +377,38 @@ function VideoCommentsSection({ videoId }) {
     setEditingReplyId(null);
     setEditReplyText("");
   };
+  const handleFollow = async (followUserId) => {
+    setIsLoading(true);
+    const payload = {
+      to_user: followUserId,
+    };
+    try {
+      await SendFriendRequest(payload);
+      toast.success(t("Friend request sent successfully"));
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const userImage = localStorage.getItem("userImage");
+    setUserId(userId);
+    setUserImage(JSON.parse(userImage));
+  }, []);
+  console.log(comments);
   return (
     <div className="bg-white">
+      {isLoading && <Loader />}
       {/* Start Comment Editor */}
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
-            src="/Beared Guy02-min 1.png"
+            src={`${BASE_URL}/${userImage}`}
             alt="me"
-            className="w-7 h-7 rounded-full object-cover"
+            className="p-[3px] border-[1px] border-gray-300 w-8 h-8 rounded-full object-cover"
           />
           <div className="flex-1">
             <input
@@ -456,23 +483,40 @@ function VideoCommentsSection({ videoId }) {
             {comments.map((c) => (
               <li key={c.id} className="relative py-6">
                 <div className="flex items-start gap-2">
-                  <img
-                    src={c.avatar || "/Beared Guy02-min 1.png"}
-                    alt={c.user?.display_name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  <Link to={`/profile/${c.user?.id}`}>
+                    <img
+                      src={
+                        c.user?.profile_image_url ||
+                        c.user?.profile_image ||
+                        "/icons/User 1.png"
+                      }
+                      alt={c.user?.display_name || "User"}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  </Link>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       {/* Start Writer Name */}
                       <span className="font-semibold text-sm text-gray-900">
-                        {c.user?.display_name}
+                        {c.user?.display_name || "User"}
                       </span>
-                      {/* End Writer Name */}
                       {/* Start Date */}
                       <span className="text-gray-400 text-xs">
                         {c.created_at.split("T")[0]}
                       </span>
-                      {/* End Date */}
+
+                      {/* Start Follow Button */}
+                      {+userId !== c?.user?.id &&
+                        !c?.user?.is_friend &&
+                        !c?.user?.is_blocked && (
+                          <button
+                            onClick={() => handleFollow(c.user?.id)}
+                            className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
+                          >
+                            <FiUserPlus size={18} />
+                          </button>
+                        )}
+                      {/* End Follow Button */}
                     </div>
 
                     {/* Start Comment Content */}
@@ -537,29 +581,32 @@ function VideoCommentsSection({ videoId }) {
                           {c.likes_count || 0}
                         </span>
                       </button>
+                      {+userId !== c?.user?.id && (
+                        <button
+                          className="text-xs hover:text-black"
+                          onClick={() => {
+                            if (!c.replies) {
+                              loadReplies(c.id);
+                            }
+                            setActiveReplyComment(
+                              activeReplyComment === c.id ? null : c.id
+                            );
+                          }}
+                        >
+                          {t("Reply")}
+                        </button>
+                      )}
 
-                      <button
-                        className="text-xs hover:text-black"
-                        onClick={() => {
-                          if (!c.replies) {
-                            loadReplies(c.id);
-                          }
-                          setActiveReplyComment(
-                            activeReplyComment === c.id ? null : c.id
-                          );
-                        }}
-                      >
-                        {t("Reply")}
-                      </button>
+                      {+userId === c?.user?.id && (
+                        <button
+                          className="text-xs hover:text-red-500"
+                          onClick={() => handleDeleteComment(c.id)}
+                        >
+                          {t("Delete")}
+                        </button>
+                      )}
 
-                      <button
-                        className="text-xs hover:text-red-500"
-                        onClick={() => handleDeleteComment(c.id)}
-                      >
-                        {t("Delete")}
-                      </button>
-
-                      {!editingCommentId && (
+                      {!editingCommentId && +userId === c?.user?.id && (
                         <button
                           className="text-xs hover:text-blue-500"
                           onClick={() => handleEditComment(c)}
@@ -581,13 +628,13 @@ function VideoCommentsSection({ videoId }) {
                             >
                               <img
                                 src={reply.avatar || "/Beared Guy02-min 1.png"}
-                                alt={reply.user?.display_name}
+                                alt={reply.user?.display_name || "User"}
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                   <span className="font-semibold text-xs text-gray-900">
-                                    {reply.user?.display_name}
+                                    {reply.user?.display_name || "User"}
                                   </span>
                                   <span className="text-gray-400 text-xs">
                                     {reply.created_at.split("T")[0]}
@@ -695,7 +742,7 @@ function VideoCommentsSection({ videoId }) {
                     {activeReplyComment === c.id && (
                       <div className="mt-4 flex items-start gap-2 pl-4">
                         <img
-                          src="/Beared Guy02-min 1.png"
+                          src={`${BASE_URL}/${userImage}`}
                           alt="me"
                           className="w-6 h-6 rounded-full object-cover"
                         />

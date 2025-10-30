@@ -14,7 +14,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetEventSections, GetTop5EventsBySectionId } from "@/api/events";
+import { GetTop5BySections } from "@/api/events";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 export default function HeroSlider({ newsPage = false }) {
   const { t, i18n } = useTranslation();
@@ -25,26 +26,7 @@ export default function HeroSlider({ newsPage = false }) {
   const [api, setApi] = useState(null);
   const timerRef = useRef(null);
   const pausedRef = useRef(false);
-
-  const getSectionsList = async () => {
-    try {
-      const res = await GetEventSections(100, 0, "");
-      return res.data.results;
-    } catch (error) {
-      console.error("Error fetching sections list:", error);
-      return [];
-    }
-  };
-
-  const topFiveBySectionId = async (sectionId) => {
-    try {
-      const res = await GetTop5EventsBySectionId(sectionId);
-      return res.data.results;
-    } catch (error) {
-      console.error("Error fetching top five videos:", error);
-      return [];
-    }
-  };
+  const isInteractingWithInnerCarousel = useRef(false);
 
   const startAuto = useCallback(() => {
     if (!api || pausedRef.current) return;
@@ -72,42 +54,72 @@ export default function HeroSlider({ newsPage = false }) {
   }, [startAuto, stopAuto]);
 
   useEffect(() => {
-    if (!api) return;
-    startAuto();
-    return () => stopAuto();
-  }, [api, startAuto, stopAuto]);
+    if (!api) {
+      return () => {};
+    }
 
-  useEffect(() => {
-    const fetchSectionsWithTop5 = async () => {
-      setIsLoading(true);
-
-      const sections = await getSectionsList();
-
-      const slidersData = await Promise.all(
-        sections.map(async (section) => {
-          const topFive = await topFiveBySectionId(section.id);
-
-          return {
-            id: section.id,
-            image: section.image,
-            h1Line1: section.title,
-            h1Line2Prefix: section.prefix,
-            h1Line2Under: section.under,
-            description: section.description,
-            primaryTo: section.primaryTo,
-            secondaryTo: section.secondaryTo,
-            topFive,
-          };
-        })
-      );
-
-      setSliders(slidersData);
-      setIsLoading(false);
+    // Disable dragging when interacting with inner carousel
+    const handlePointerDown = (evt) => {
+      const target = evt.target;
+      const innerCarousel = target.closest('[data-inner-carousel="true"]');
+      if (innerCarousel) {
+        isInteractingWithInnerCarousel.current = true;
+        // Temporarily disable the main carousel dragging
+        if (api.plugins()?.autoplay) {
+          api.plugins().autoplay.stop();
+        }
+      }
     };
 
-    // fetchSectionsWithTop5();
-  }, []);
+    const handlePointerUp = () => {
+      if (isInteractingWithInnerCarousel.current) {
+        isInteractingWithInnerCarousel.current = false;
+      }
+    };
 
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("touchend", handlePointerUp);
+
+    startAuto();
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener("touchend", handlePointerUp);
+    };
+  }, [api, startAuto, stopAuto]);
+
+  const fetchSectionsWithTop5 = async () => {
+    setIsLoading(true);
+    try {
+      const response = await GetTop5BySections();
+
+      // Transform API data to slider format
+      const transformedSliders =
+        response?.data?.map((item) => ({
+          id: item.section.id,
+          h1Line1: item.section.name,
+          h1Line2Prefix: "",
+          h1Line2Under: "",
+          description: item.section.description || "",
+          image: item.top_5[0]?.image || "/authback.jpg", // Use first event image
+          primaryTo: `/events/${item.section.id}`,
+          secondaryTo: `/events/${item.section.id}`,
+          topFive: item.top_5 || [],
+        })) || [];
+
+      setSliders(transformedSliders);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSectionsWithTop5();
+  }, []);
   return (
     <div className="w-full lg:pt-8">
       {isLoading && <Loader />}
@@ -222,7 +234,11 @@ export default function HeroSlider({ newsPage = false }) {
                   </div>
                   {/* End Title && Actions */}
 
-                  <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-10 z-10">
+                  <div
+                    className="absolute left-6 right-6 bottom-3 md:bottom-10 z-10"
+                    data-inner-carousel="true"
+                    style={{ touchAction: "pan-x" }}
+                  >
                     <TopFiveSection data={slide.topFive} />
                   </div>
                 </div>

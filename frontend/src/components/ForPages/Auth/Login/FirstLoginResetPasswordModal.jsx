@@ -73,7 +73,7 @@ function FirstLoginResetPasswordModal({ open, onClose }) {
       toast.success(t("Password changed successfully!"));
       onClose();
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       ("");
       setLoading(false);

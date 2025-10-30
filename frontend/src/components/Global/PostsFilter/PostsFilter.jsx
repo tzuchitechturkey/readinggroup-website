@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Calendar, Search, ChevronDown, X, Filter } from "lucide-react";
 import { format } from "date-fns";
 
-import Modal from "@/components/Global/Modal/Modal";
-import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetAllUsers, GetPostCategories } from "@/api/posts";
 import { languages } from "@/constants/constants";
@@ -55,7 +53,7 @@ function PostsFilter({
       const res = await GetPostCategories(10, 0, searchVal);
       setCategoriesList(res?.data?.results);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +72,7 @@ function PostsFilter({
     if (onResetFilters) {
       onResetFilters();
     }
-    setSelectedDateRange({ created_at: null });
+    setHappenedAt("");
     onSearch(true);
     setClearFilterResult(false);
   };
@@ -228,15 +226,15 @@ function PostsFilter({
     <div dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
       <div className="w-full px-4">
-        <div className="mx-auto max-w-6xl rounded-3xl bg-[#457DF6] px-6 py-6 text-white shadow-xl sm:px-8 sm:py-8">
+        <div className="mx-auto max-w-6xl rounded-3xl bg-[#457DF6] px-3 py-6 text-white shadow-xl sm:px-8 sm:py-8">
           <h2 className="text-xl font-bold sm:text-2xl mb-6">
             {t("What would you like to read about today ?")}
           </h2>
 
           {/* Desktop Smart Bar - Collapsible Advanced Filters */}
-          <div className="hidden lg:block">
+          <div className=" ">
             {/* Main Search Bar */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-1 lg:gap-4 mb-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <input
@@ -253,10 +251,14 @@ function PostsFilter({
                 onClick={() => {
                   onSearch();
                 }}
-                className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 text-sm font-semibold text-[#1f3fb3] shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/80"
+                className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-2 lg:px-6 text-sm font-semibold text-[#1f3fb3] shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/80"
               >
-                <Search className="h-4 w-4 mr-2" />
-                {t("Search")}
+                <Search
+                  className={`h-4 w-4 ${
+                    i18n?.language === "ar" ? "mr-1" : "mr-1"
+                  } `}
+                />
+                <span className="hidden lg:inline-block">{t("Search")}</span>
               </button>
             </div>
 
@@ -277,11 +279,10 @@ function PostsFilter({
                 />
               </button>
 
-              {/* Collapsible Advanced Filters */}
               {isAdvancedOpen && (
                 <div className="mt-4 space-y-4">
-                  {/* First Row - Date and writer */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Start  Date && writer */}
+                  <div className="grid lg:grid-cols-2 gap-4">
                     {/* Start Date */}
                     <div>
                       <div className="relative">
@@ -361,10 +362,11 @@ function PostsFilter({
                     />
                     {/* End writer */}
                   </div>
+                  {/* End Date && writer */}
 
-                  {/* Second Row - Category, type, Language,   */}
-                  <div className="grid grid-cols-4 gap-4">
-                    {/* Start Category Filter - MultiSelect */}
+                  {/* Start Category && type && Language,   */}
+                  <div className="grid lg:grid-cols-4 gap-4">
+                    {/* Start Category */}
                     <MultiSelect
                       items={categoriesList}
                       selected={
@@ -417,6 +419,7 @@ function PostsFilter({
                     )}
                     {/* End Type */}
                   </div>
+                  {/* End Category && type && Language,   */}
                 </div>
               )}
 
@@ -488,22 +491,6 @@ function PostsFilter({
           </div>
         </div>
       </div>
-
-      {/* Start Date Filter Modal */}
-      {/* <Modal
-        isOpen={isDateModalOpen}
-        onClose={() => setIsDateModalOpen(false)}
-        title={t("Select Date Range")}
-      >
-        <FilterDatePickerModal
-          setIsDateModalOpen={setIsDateModalOpen}
-          selectedDateRange={selectedDateRange}
-          setSelectedDateRange={setSelectedDateRange}
-          clearDateFilter={clearDateFilter}
-          handleDateSelection={handleDateSelection}
-        />
-      </Modal> */}
-      {/* End Date Filter Modal */}
     </div>
   );
 }

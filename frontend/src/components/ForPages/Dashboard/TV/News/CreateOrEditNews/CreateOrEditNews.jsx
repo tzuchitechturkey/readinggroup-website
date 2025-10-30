@@ -302,7 +302,7 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
       onSectionChange("newsList");
       resetForm();
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

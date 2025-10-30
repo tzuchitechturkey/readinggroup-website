@@ -53,7 +53,7 @@ const EventsList = ({ onSectionChange }) => {
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +143,7 @@ const EventsList = ({ onSectionChange }) => {
       setSelectedEvent(null);
       setUpdate((prev) => !prev);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +211,7 @@ const EventsList = ({ onSectionChange }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-[#5B6B79] font-medium text-xs px-3">
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
                 <button
                   onClick={() => sortData("id")}
                   className="flex items-center gap-1 font-medium"
@@ -219,56 +219,68 @@ const EventsList = ({ onSectionChange }) => {
                   #{getSortIcon("id")}
                 </button>
               </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => sortData("title")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Title")}
-                  {getSortIcon("title")}
-                </button>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("title")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Title")}
+                    {getSortIcon("title")}
+                  </button>
+                </div>
               </TableHead>
               <TableHead>
-                <button
-                  onClick={() => sortData("title")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Image")}
-                </button>
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("title")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Image")}
+                  </button>
+                </div>
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                <button className="flex items-center gap-1 font-medium">
-                  {t("Section")}
-                </button>
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button className="flex items-center gap-1 font-medium">
+                    {t("Section")}
+                  </button>
+                </div>
               </TableHead>
-              <TableHead>
-                <button
-                  onClick={() => sortData("happened_at")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Date")}
-                  {getSortIcon("happened_at")}
-                </button>
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <button
-                  onClick={() => sortData("report_type")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Type")}
-                  {getSortIcon("report_type")}
-                </button>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("happened_at")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Date")}
+                    {getSortIcon("happened_at")}
+                  </button>
+                </div>
               </TableHead>
               <TableHead className="hidden sm:table-cell">
-                <button
-                  onClick={() => sortData("category")}
-                  className="flex items-center gap-1 font-medium"
-                >
-                  {t("Category")}
-                  {getSortIcon("category")}
-                </button>
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("report_type")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Type")}
+                    {getSortIcon("report_type")}
+                  </button>
+                </div>
               </TableHead>
-              <TableHead className="w-[100px]">{t("Actions")}</TableHead>
+              <TableHead className="hidden sm:table-cell">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("category")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Category")}
+                    {getSortIcon("category")}
+                  </button>
+                </div>
+              </TableHead>
+              <TableHead className="text-center w-[100px]">{t("Actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -288,14 +300,14 @@ const EventsList = ({ onSectionChange }) => {
                     {event?.id}
                   </TableCell>
                   <TableCell>
-                    <div className="min-w-0">
+                    <div className="min-w-0 text-center ">
                       <p className="font-medium text-gray-900 truncate">
                         {event?.title}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center gap-3">
                       <img
                         src={event?.image}
                         alt={event?.title}
@@ -308,21 +320,38 @@ const EventsList = ({ onSectionChange }) => {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <p
-                      className="text-gray-600 max-w-xs truncate"
+                      className="text-gray-600 max-w-xs truncate text-center"
                       title={event?.section?.name}
                     >
                       {event?.section?.name}
                     </p>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-gray-600">
-                      {formatDate(event?.happened_at)}
-                    </span>
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                    <div className="flex flex-col items-center ">
+                      <span className="font-medium">
+                        {new Date(event.happened_at).toLocaleDateString(
+                          "en-GB",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          }
+                        )}
+                      </span>
+                      <span className="text-[#9FA2AA] text-[10px]">
+                        {event.happened_at
+                          ? new Date(event.happened_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : ""}
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <span className="text-gray-600">{event?.report_type}</span>
+                  <TableCell className="hidden sm:table-cell text-center">
+                    <span className="text-gray-600 ">{t(event?.report_type)}</span>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell">
+                  <TableCell className="hidden sm:table-cell text-center">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {event?.category?.name}
                     </span>

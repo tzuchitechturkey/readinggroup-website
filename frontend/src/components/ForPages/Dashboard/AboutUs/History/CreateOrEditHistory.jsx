@@ -190,7 +190,7 @@ const CreateOrEditHistory = ({
       setUpdate((prev) => !prev);
     } catch (error) {
       console.error("Submit error:", error);
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLaoding(false);
     }

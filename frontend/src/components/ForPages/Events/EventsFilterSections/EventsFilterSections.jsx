@@ -5,16 +5,18 @@ import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
-import ExternalNewsCard from "@/components/Global/ExternalNewsCard/ExternalNewsCard";
+import EventCard from "@/components/Global/EventCard/EventCard";
 import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import EventsFilter from "@/components/ForPages/Events/EventsFilter/EventsFilter";
 import {
   GetEventSections,
   GetTop5EventsBySectionId,
   GetEvents,
+  GetTopSections,
 } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { Button } from "@/components/ui/button";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function EventsFilterSections() {
   const { t, i18n } = useTranslation();
@@ -24,11 +26,10 @@ function EventsFilterSections() {
 
   const [sectionsList, setSectionsList] = useState([]);
   const [defaultSections, setDefaultSections] = useState({
-    section1: { id: null, name: "", events: [] },
-    section2: { id: null, name: "", events: [] },
-    section3: { id: null, name: "", events: [] },
+    section1: { id: null, name: "", events: [], events_count: 0 },
+    section2: { id: null, name: "", events: [], events_count: 0 },
+    section3: { id: null, name: "", events: [], events_count: 0 },
   });
-
   const [filters, setFilters] = useState({
     search: "",
     section: [],
@@ -39,13 +40,14 @@ function EventsFilterSections() {
     language: [],
     happened_at: null,
   });
+  const [makingSearch, setMakingSearch] = useState(false);
 
   const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
   const hasActiveFilters =
-    filters.search.length > 0 ||
+    makingSearch ||
     (Array.isArray(filters.section) && filters.section.length > 0) ||
     (Array.isArray(filters.report_type) && filters.report_type.length > 0) ||
     (Array.isArray(filters.category) && filters.category.length > 0) ||
@@ -53,31 +55,6 @@ function EventsFilterSections() {
     (filters.writer && Object.keys(filters.writer).length > 0) ||
     (Array.isArray(filters.language) && filters.language.length > 0) ||
     filters.happened_at !== null;
-
-  const setErrorFn = (error) => {
-    const errorMessage =
-      error?.response?.data?.message || t("An error occurred");
-    toast.error(errorMessage);
-  };
-
-  const updateFilter = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
-  const handleClearFilters = () => {
-    setFilters({
-      search: "",
-      section: [],
-      report_type: [],
-      category: [],
-      country: [],
-      writer: "",
-      language: [],
-      happened_at: null,
-    });
-    setCurrentPage(1);
-    setFilteredData({ count: 0, results: [] });
-    toast.success(t("Filters cleared"));
-  };
 
   const loadSectionsList = async () => {
     try {
@@ -90,51 +67,55 @@ function EventsFilterSections() {
     }
   };
 
+  const updateFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
   const loadDefaultSections = async () => {
     setIsLoading(true);
     try {
-      const sections = await loadSectionsList();
+      const res = await GetTopSections();
+      const sections = res.data;
 
-      if (sections.length >= 3) {
-        const [section1Data, section2Data, section3Data] = await Promise.all([
-          GetTop5EventsBySectionId(sections[0].id),
-          GetTop5EventsBySectionId(sections[1].id),
-          GetTop5EventsBySectionId(sections[2].id),
-        ]);
-
-        setDefaultSections({
-          section1: {
-            id: sections[0].id,
-            name: sections[0].name,
-            events: section1Data?.data || [],
-          },
-          section2: {
-            id: sections[1].id,
-            name: sections[1].name,
-            events: section2Data?.data || [],
-          },
-          section3: {
-            id: sections[2].id,
-            name: sections[2].name,
-            events: section3Data?.data || [],
-          },
-        });
-      }
+      setDefaultSections({
+        section1: {
+          id: sections[0]?.section?.id,
+          name: sections[0]?.section?.name,
+          events: sections[0]?.events || [],
+          events_count: sections[0]?.events_count || 0,
+        },
+        section2: {
+          id: sections[1]?.section?.id,
+          name: sections[1]?.section?.name,
+          events: sections[1]?.events || [],
+          events_count: sections[1]?.events_count || 0,
+        },
+        section3: {
+          id: sections[2]?.section?.id,
+          name: sections[2]?.section?.name,
+          events: sections[2]?.events || [],
+          events_count: sections[2]?.events_count || 0,
+        },
+      });
+      // }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchFilteredEvents = async (page = 1) => {
+  const fetchFilteredEvents = async (page = 1, searchVal = filters.search) => {
     setIsLoading(true);
     const offset = (page - 1) * limit;
 
     try {
       const params = {};
 
-      if (filters.search) params.search = filters.search;
+      if (searchVal) {
+        setMakingSearch(true);
+        params.search = searchVal;
+      }
 
       // Convert section array to comma-separated string
       if (Array.isArray(filters.section) && filters.section.length > 0) {
@@ -182,7 +163,6 @@ function EventsFilterSections() {
       }
 
       if (filters.happened_at) params.happened_at = filters.happened_at;
-        console.log(params, "rrrrrrrrrrrrrrrrrrr");
 
       const res = await GetEvents(limit, offset, params);
 
@@ -195,7 +175,7 @@ function EventsFilterSections() {
         }));
       }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -231,6 +211,10 @@ function EventsFilterSections() {
     }
     toast.success(t("Data Sorted!"));
   };
+  const onSearch = (searchVal) => {
+    setCurrentPage(1);
+    fetchFilteredEvents(1, searchVal);
+  };
 
   useEffect(() => {
     if (hasActiveFilters) {
@@ -238,7 +222,6 @@ function EventsFilterSections() {
       fetchFilteredEvents(1);
     }
   }, [
-    filters.search,
     filters.section,
     filters.report_type,
     filters.category,
@@ -247,9 +230,24 @@ function EventsFilterSections() {
     filters.language,
     filters.happened_at,
   ]);
-
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      section: [],
+      report_type: [],
+      category: [],
+      country: [],
+      writer: "",
+      language: [],
+      happened_at: null,
+    });
+    setCurrentPage(1);
+    setFilteredData({ count: 0, results: [] });
+    toast.success(t("Filters cleared"));
+  };
   useEffect(() => {
     loadDefaultSections();
+    loadSectionsList();
   }, []);
 
   return (
@@ -259,24 +257,12 @@ function EventsFilterSections() {
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
         <SearchSecion
           setOpenFilterModal={setOpenFilterModal}
-          setViewMode={setViewMode}
-          viewMode={viewMode}
           setSearchValue={(value) => updateFilter("search", value)}
           searchValue={filters.search}
           handleSortData={handleSortData}
+          setMakingSearch={setMakingSearch}
+          onSearch={onSearch}
         />
-
-        {hasActiveFilters && (
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              className="text-red-600 border-red-600 hover:bg-red-50"
-            >
-              {t("Clear All Filters")}
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-0">
@@ -286,13 +272,15 @@ function EventsFilterSections() {
               filters={filters}
               updateFilter={updateFilter}
               sectionsList={sectionsList}
+              hasActiveFilters={hasActiveFilters}
+              handleClearFilters={handleClearFilters}
             />
           </div>
 
           <div className="flex-1 min-w-0">
             {hasActiveFilters ? (
               <div>
-                <div className="mb-4">
+                <div className="">
                   <h2 className="text-2xl font-bold text-text">
                     {t("Search Results")} ({filteredData.count})
                   </h2>
@@ -300,7 +288,7 @@ function EventsFilterSections() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
                   {filteredData?.results?.map((event) => {
-                    return <ExternalNewsCard key={event.id} item={event} />;
+                    return <EventCard key={event.id} item={event} />;
                   })}
                 </div>
 
@@ -321,10 +309,10 @@ function EventsFilterSections() {
                 )}
               </div>
             ) : (
-              <div className="space-y-8">
+              <div className="space-y-3">
                 {defaultSections.section1.events?.length > 0 && (
                   <div>
-                    <div className="mb-4">
+                    <div className="">
                       <h2 className="text-2xl font-bold text-text">
                         {defaultSections.section1.name}
                       </h2>
@@ -332,7 +320,7 @@ function EventsFilterSections() {
                     <BrokenCarousel
                       data={defaultSections.section1.events}
                       showArrows={defaultSections.section1.events.length > 4}
-                      cardName={ExternalNewsCard}
+                      cardName={EventCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}
                     />
@@ -341,7 +329,7 @@ function EventsFilterSections() {
 
                 {defaultSections.section2.events?.length > 0 && (
                   <div>
-                    <div className="mb-4">
+                    <div className="">
                       <h2 className="text-2xl font-bold text-text">
                         {defaultSections.section2.name}
                       </h2>
@@ -349,7 +337,7 @@ function EventsFilterSections() {
                     <BrokenCarousel
                       data={defaultSections.section2.events}
                       showArrows={defaultSections.section2.events.length > 4}
-                      cardName={ExternalNewsCard}
+                      cardName={EventCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}
                     />
@@ -358,7 +346,7 @@ function EventsFilterSections() {
 
                 {defaultSections.section3.events?.length > 0 && (
                   <div>
-                    <div className="mb-4">
+                    <div className="">
                       <h2 className="text-2xl font-bold text-text">
                         {defaultSections.section3.name}
                       </h2>
@@ -366,7 +354,7 @@ function EventsFilterSections() {
                     <BrokenCarousel
                       data={defaultSections.section3.events}
                       showArrows={defaultSections.section3.events.length > 4}
-                      cardName={ExternalNewsCard}
+                      cardName={EventCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}
                     />
@@ -377,6 +365,19 @@ function EventsFilterSections() {
           </div>
         </div>
       </div>
+      {/* Start Mobile Modal  */}
+      <Modal
+        isOpen={openFilterModal}
+        onClose={() => setOpenFilterModal(false)}
+        title={t("Filter")}
+      >
+        <EventsFilter
+          filters={filters}
+          updateFilter={updateFilter}
+          sectionsList={sectionsList}
+        />
+      </Modal>
+      {/* End Mobile Modal  */}
     </div>
   );
 }

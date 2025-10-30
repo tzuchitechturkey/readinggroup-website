@@ -83,7 +83,7 @@ function ContentInfoCard({
             ))}
           </div>
           <span className="text-sm text-gray-600">
-            ({contentData?.reviews}k{contentType === "photo" ? "" : ""})
+            ({contentData?.reviews})
           </span>
         </div>
       </div>

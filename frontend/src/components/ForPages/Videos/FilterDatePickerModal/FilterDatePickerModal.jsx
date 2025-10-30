@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 
 function FilterDatePickerModal({
   setIsDateModalOpen,
-  selectedDateRange,
-  setSelectedDateRange,
+  setHappenedAt,
+  happenedAt,
   clearDateFilter,
   handleDateSelection,
 }) {
@@ -26,7 +26,7 @@ function FilterDatePickerModal({
   const [dateOpen, setDateOpen] = useState(false);
   
   // Use startDate as the single date (happened_at)
-  const selectedDate = selectedDateRange?.startDate || null;
+  const selectedDate = happenedAt || null;
   
   return (
     <div>

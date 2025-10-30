@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
-function TopFiveSectionCard({ item }) {
+function TopFiveSectionCard({ item, index }) {
   const isMobile = useIsMobile();
+  const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
 
+  const navigate = useNavigate();
   return (
     <div
-      key={item.id}
+      onClick={() => {
+        if (item.report_type === "videos") {
+          setOpenDetailsVideoModal(true);
+          return;
+        }
+
+        let router = "";
+
+        if (item.report_type === "videos") {
+          router = `/events/video/${item.id}`;
+        } else if (item.report_type === "reports") {
+          router = `/events/${item.id}`;
+        } else if (item.video_type === "videos") {
+          router = `/videos/${item.id}`;
+        } else if (item.post_type === "reading") {
+          router = `/guiding-reading/card/${item.id}`;
+        } else {
+          router = `/cards-photos/card/${item.id}`;
+        }
+
+        navigate(router);
+      }}
+      key={item?.id}
       className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300 flex items-center gap-1"
     >
       {/* Start Number */}
@@ -22,7 +50,7 @@ function TopFiveSectionCard({ item }) {
               marginLeft: isMobile ? "0px" : "-1rem",
             }}
           >
-            {item.number}
+            {+index + 1}
           </span>
           <span
             className="absolute top-1 -left-0 md:-left-4 text-8xl md:text-9xl font-black leading-none text-black/20 -z-10"
@@ -30,7 +58,7 @@ function TopFiveSectionCard({ item }) {
               fontFamily: "Arial Black, sans-serif",
             }}
           >
-            {item.number}
+            {+index + 1}
           </span>
         </div>
       </div>
@@ -38,8 +66,12 @@ function TopFiveSectionCard({ item }) {
       <div className="flex-1 relative z-10">
         <div className="relative w-full 2xl:w-[210px] h-40 lg:h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
           <img
-            src={item.image}
-            alt={item.title}
+            src={
+              item?.report_type === "videos"
+                ? item?.thumbnail || item?.thumbnail_url
+                : item?.image || item?.image_url
+            }
+            alt={item?.title}
             className="w-full h-full  group-hover:scale-110 transition-transform duration-700 ease-out object-cover"
           />
 
@@ -50,35 +82,48 @@ function TopFiveSectionCard({ item }) {
           {/* Start Content */}
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="text-white">
-              {item.category && (
+              {item?.category?.id && (
                 <div className="text-xs font-medium text-gray-300 mb-1 uppercase tracking-wide opacity-80">
-                  {item.category}
+                  {item?.category?.name}
                 </div>
               )}
               <h3 className="font-bold text-lg md:text-xl line-clamp-2 leading-tight mb-2 text-white">
-                {item.title}
+                {item?.title} {item?.report_type}
               </h3>
-              {item.description && (
-                <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed opacity-90">
-                  {item.description}
-                </p>
-              )}
+              <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed opacity-90">
+                {item?.report_type === "videos"
+                  ? item?.summary
+                  : item?.description}
+              </p>
             </div>
           </div>
           {/* End Content */}
 
           {/* Start Play Icon */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transform scale-50 group-hover:scale-100 transition-all duration-500">
-              <div className="w-0 h-0 border-l-[18px] border-l-white border-t-[11px] border-t-transparent border-b-[11px] border-b-transparent ml-1" />
+          {item?.report_type === "videos" || item?.video_type ? (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transform scale-50 group-hover:scale-100 transition-all duration-500">
+                <div className="w-0 h-0 border-l-[18px] border-l-white border-t-[11px] border-t-transparent border-b-[11px] border-b-transparent ml-1" />
+              </div>
             </div>
-          </div>
+          ) : (
+            ""
+          )}
           {/* End Play Icon */}
 
           {/* Inside Blur */}
           <div className="absolute inset-0 shadow-inner" />
         </div>
       </div>
+      {openDetailsVideoModal &&
+        createPortal(
+          <VideoDetailsContent
+            isOpen={openDetailsVideoModal}
+            onClose={() => setOpenDetailsVideoModal(false)}
+            videoData={item}
+          />,
+          document.body
+        )}
     </div>
   );
 }

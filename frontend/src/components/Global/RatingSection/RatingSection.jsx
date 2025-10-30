@@ -67,7 +67,7 @@ function RatingSection({
             isRTL ? "space-x-reverse" : ""
           } space-x-2`}
         >
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
@@ -78,9 +78,9 @@ function RatingSection({
                 }`}
               />
             ))}
-          </div>
+          </div> */}
           <span className="text-sm text-gray-600">
-            {contentData?.rating} ({contentData?.reviews}k {t("reviews")})
+            {contentData?.rating} ({contentData?.reviews} {t("reviews")})
           </span>
         </div>
       </div>

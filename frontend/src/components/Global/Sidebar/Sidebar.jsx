@@ -22,16 +22,12 @@ import {
   SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import Avatar from "@/assets/Beared Guy02-min 1.png";
 import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
 import Help from "@/assets/icons/Help.png";
 import LogOut from "@/assets/icons/Log-out.png";
-import Reading from "@/assets/icons/Page.png";
 import Settings from "@/assets/icons/Settings.png";
-import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
-import CardsOrPhotos from "@/assets/icons/cardsOrphoto-icon.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
 import TV from "@/assets/icons/tv.png";
 
@@ -49,8 +45,6 @@ export default function AppSidebar({
   };
 
   const handleHelp = () => {
-    // يمكن إضافة وظيفة المساعدة هنا
-    // eslint-disable-next-line no-console
     console.log("Help clicked");
   };
 
@@ -68,11 +62,6 @@ export default function AppSidebar({
         onClick: handleLogout,
       },
     ],
-    userInfo: {
-      name: "MUSA AL AHMED",
-      avatar: Avatar,
-      plan: "web-developer",
-    },
 
     navMain: [
       {
@@ -160,7 +149,7 @@ export default function AppSidebar({
           },
           {
             title: "Events Sections",
-            onClick: () => onSectionChange("eventsSections"), 
+            onClick: () => onSectionChange("eventsSections"),
           },
         ],
       },
@@ -225,7 +214,7 @@ export default function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <UserSwitcher data={data.userInfo} />
+        <UserSwitcher />
       </SidebarHeader>
 
       <SidebarContent>

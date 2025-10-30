@@ -69,11 +69,10 @@ function VideoDetailsContent({
       });
       toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
       toast.error(t("Failed to update like status"));
     }
   };
-
   useEffect(() => {
     setInternalIsOpen(externalIsOpen);
   }, [externalIsOpen]);
@@ -145,7 +144,6 @@ function VideoDetailsContent({
         {/* Start Hero Section */}
         <div className="bg-black text-white relative z-11 -m-6 rounded-none">
           {/* Hero Section with Background */}
-          {/* Hero Section with Background */}
           <div className="relative h-[45vh] xs:h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] overflow-hidden rounded-none -m-1">
             {/* Background Image */}
             <div className="absolute inset-0 -m-1">
@@ -190,7 +188,11 @@ function VideoDetailsContent({
                 {/* Play Button and Controls Row */}
                 <div className="flex items-center gap-2 relative z-50 xs:gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <Link
-                    to={`/videos/${videoItem?.id}`}
+                    to={
+                      videoItem?.report_type
+                        ? `/events/video/${videoItem?.id}`
+                        : `/videos/${videoItem?.id}`
+                    }
                     className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -285,11 +287,15 @@ function VideoDetailsContent({
             {/* Left Column - Description */}
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
-              <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                {t("Season")} · {videoItem?.season}
-              </p>
+              {!videoData?.report_type && (
+                <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
+                  {t("Season")} · {videoItem?.season}
+                </p>
+              )}
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoItem?.description}
+                {videoItem?.report_type
+                  ? videoItem?.summary
+                  : videoItem?.description}
               </p>
             </div>
 
@@ -379,9 +385,11 @@ function VideoDetailsContent({
         {/* End Description && Top Cast */}
 
         {/* Start Episodes && User Reviews */}
-        <div className="px-0 xs:px-1 sm:px-2 md:px-2 lg:px-5 py-1 xs:py-2 sm:py-3 md:py-4">
-          <TabsSection />
-        </div>
+        {!videoItem?.report_type && (
+          <div className="px-0 xs:px-1 sm:px-2 md:px-2 lg:px-5 py-1 xs:py-2 sm:py-3 md:py-4">
+            <TabsSection videoData={videoItem} />
+          </div>
+        )}
         {/* End Episodes && User Reviews */}
       </div>
 

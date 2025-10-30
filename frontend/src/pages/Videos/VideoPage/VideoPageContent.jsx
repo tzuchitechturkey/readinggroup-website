@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import { useTranslation } from "react-i18next";
-
 import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/CustomyoutubeVideo/CustomyoutubeVideo";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -11,7 +9,6 @@ import { GetVideoById } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
 function VideoPageContent() {
-  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const videoId = window.location.pathname.split("/").pop();
   const [videoData, setVideoData] = useState(null);
@@ -30,7 +27,6 @@ function VideoPageContent() {
   useEffect(() => {
     getData();
   }, [videoId]);
-  console.log(videoData);
   return (
     <div className="bg-white">
       {isLoading && <Loader />}
@@ -46,7 +42,6 @@ function VideoPageContent() {
           data={mockVideos}
           isSlider={false}
           cardName={VideoCard}
-          viewMore={true}
           viewMoreUrl="/videos"
         />
       </div>

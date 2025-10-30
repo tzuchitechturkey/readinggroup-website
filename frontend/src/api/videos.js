@@ -68,26 +68,24 @@ export async function DeleteVideoCategory(id) {
   return await axios.delete(`/video-categories/${id}/`);
 }
 
+// Top Mix
+export async function GetTopMixVideos() {
+  return await axios.get(`/videos/top-mix/`);
+}
+
 // /top5-videos/
 export async function GetTop5Videos() {
-  return await axios.get(`/top5-videos/`);
+  return await axios.get(`/videos/top-viewed/?limit=5`);
 }
 
 // Top 5 videos by likes
-export async function GetTopViewedVideos() {
-  return await axios.get(`/top5-videos-by-likes/`);
+export async function GetTopLikedVideos() {
+  return await axios.get(`/videos/top-liked/?limit=5`);
 }
 
-// /top1-video/
-export async function GetTop1Video() {
-  return await axios.get(`/top1-video/`);
-}
-
-// /my-listed-videos/
-export async function GetMyListedVideos(limit, offset, search) {
-  return await axios.get(
-    `/my-listed-videos/?limit=${limit}&offset=${offset}&search=${search}`
-  );
+///my-listed-videos/
+export async function GetMyListedVideos(limit, offset) {
+  return await axios.get(`/videos/my-list/?limit=${limit}&offset=${offset}`);
 }
 
 // Like a video
@@ -162,4 +160,14 @@ export async function LikeReply(replyId) {
 
 export async function UnlikeReply(replyId) {
   return await axios.delete(`/replies/${replyId}/like/`);
+}
+
+// Add To list
+
+export async function GetMyList() {
+  return await axios.post(`/videos/my-list/`);
+}
+
+export async function AddToMyList(videoId) {
+  return await axios.post(`/videos/${videoId}/my-list/`);
 }

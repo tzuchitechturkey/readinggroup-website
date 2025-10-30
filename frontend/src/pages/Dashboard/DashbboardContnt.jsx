@@ -24,7 +24,7 @@ import VideosList from "@/components/ForPages/Dashboard/Videos/VideosList/Videos
 import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/CreateOrEditVideo";
 import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
 import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
-import History from "@/components/ForPages/Dashboard/AboutUs/History/History";
+import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
 import PositionsContent from "@/components/ForPages/Dashboard/AboutUs/Positions/PositionsContent";
 import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
@@ -244,7 +244,7 @@ export default function Page() {
       case "eventsSections":
         return <EventSectionsContent onSectionChange={handleSectionChange} />;
       case "history":
-        return <History onSectionChange={handleSectionChange} />;
+        return <HistoryList onSectionChange={handleSectionChange} />;
       case "team":
         return <OurTeam onSectionChange={handleSectionChange} />;
       case "positions":
@@ -253,6 +253,13 @@ export default function Page() {
         return <DashboardSections />;
     }
   };
+
+  useEffect(() => {
+    const user = localStorage.getItem("userType");
+    if (user !== "admin") {
+      window.location.href = "/";
+    }
+  }, []);
   return (
     <SidebarProvider>
       <Sidebar

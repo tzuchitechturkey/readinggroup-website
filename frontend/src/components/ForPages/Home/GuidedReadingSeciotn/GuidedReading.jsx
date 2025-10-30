@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
-import { readings } from "@/mock/reading";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import { TopLikedPosts, WeeklyReadingPosts } from "@/api/posts";
 
 const GuidedReading = () => {
   const { t } = useTranslation();
@@ -12,20 +12,21 @@ const GuidedReading = () => {
 
   const getWeeklyGuidData = async () => {
     try {
-      const res = await GetWeeklyGuidData();
-      setWeeklyGuidData(res.data);
+      const res = await TopLikedPosts();
+      setWeeklyGuidData(res.data?.reading);
     } catch (error) {
       console.error(error);
     }
   };
   useEffect(() => {
-    // getWeeklyGuidData();
+    getWeeklyGuidData();
   }, []);
+
   return (
     <div className="mt-12">
       <DynamicSection
         title={t("This Week's Guided Reading")}
-        data={readings}
+        data={weeklyGuidData}
         isSlider={true}
         cardName={GuidingReadingcard}
       />

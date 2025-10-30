@@ -12,6 +12,10 @@ export async function GetProfile() {
   return await axios.get(`/user/profile/`);
 }
 
+export async function GetUserProfile(userId) {
+  return await axios.get(`/user/profile/${userId}/`);
+}
+
 export async function UpdateProfile(data) {
   return await axios.put(`/user/profile/`, data);
 }
@@ -30,3 +34,16 @@ export async function ForgetPassword(email) {
 export async function SetPasswordFirst(data) {
   return await axios.post(`/user/reset-password/`, data);
 }
+
+// Send friend Request
+export async function SendFriendRequest(data) {
+  return await axios.post(`/user/friend-requests/`, data); //"to_user": 0,
+}
+
+// Change Request Status
+export async function ChangeFriendRequestStatus(requestId, action) {
+  return await axios.post(`/accounts/friend-requests/${requestId}/action/`, {
+    action,
+  });
+}
+// /accounts/friend-requests/{id}/action/

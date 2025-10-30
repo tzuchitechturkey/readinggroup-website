@@ -99,7 +99,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       const res = await GetVideoCategories(10, 0, searchVal);
       setCategoriesList(res.data.results);
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     }
   };
 
@@ -350,7 +350,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       );
       onSectionChange("videos");
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }

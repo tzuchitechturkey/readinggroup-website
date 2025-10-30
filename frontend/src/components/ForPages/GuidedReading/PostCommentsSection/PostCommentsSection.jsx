@@ -4,6 +4,7 @@ import Picker from "emoji-picker-react";
 import { useTranslation } from "react-i18next";
 import { ThumbsUp, Loader } from "lucide-react";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 import {
   GetPostComments,
@@ -19,6 +20,9 @@ import {
   UnlikeReply,
   EditCommentReply,
 } from "@/api/posts";
+import { SendFriendRequest } from "@/api/auth";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { BASE_URL } from "@/configs";
 
 function PostCommentsSection({ postId }) {
   const { t } = useTranslation();
@@ -46,6 +50,8 @@ function PostCommentsSection({ postId }) {
   const [editingReplyId, setEditingReplyId] = useState(null);
   const [editReplyText, setEditReplyText] = useState("");
   const [isEditingReply, setIsEditingReply] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [userImage, setUserImage] = useState();
 
   const commentsPerPage = 10;
 
@@ -376,19 +382,38 @@ function PostCommentsSection({ postId }) {
       setIsEditingReply(false);
     }
   };
-
+  const handleFollow = async (followUserId) => {
+    setIsLoading(true);
+    const payload = {
+      to_user: followUserId,
+    };
+    try {
+      await SendFriendRequest(payload);
+      toast.success(t("Friend request sent successfully"));
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleCancelEditReply = () => {
     setEditingReplyId(null);
     setEditReplyText("");
   };
-  console.log(comments);
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const userImage = localStorage.getItem("userImage");
+    setUserId(userId);
+    setUserImage(JSON.parse(userImage));
+  }, []);
+
   return (
     <div className="bg-white">
       {/* Start Comment Editor */}
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
-            src="/Beared Guy02-min 1.png"
+            src={`${BASE_URL}/${userImage}`}
             alt="me"
             className="w-7 h-7 rounded-full object-cover"
           />
@@ -465,11 +490,14 @@ function PostCommentsSection({ postId }) {
             {comments.map((c) => (
               <li key={c.id} className="relative py-6">
                 <div className="flex items-start gap-2">
-                  <img
-                    src={c.avatar || "/Beared Guy02-min 1.png"}
-                    alt={c.user?.display_name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  <Link to={`/profile/${c.user?.id}`}>
+                    <img
+                      src={c.avatar || "/Beared Guy02-min 1.png"}
+                      alt={c.user?.display_name}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  </Link>
+
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       {/* Start Writer Name */}
@@ -482,6 +510,17 @@ function PostCommentsSection({ postId }) {
                         {c.created_at.split("T")[0]}
                       </span>
                       {/* End Date */}
+
+                      {/* Start Follow Button */}
+                      {+userId !== c?.user?.id && !c?.user?.is_friend && (
+                        <button
+                          onClick={() => handleFollow(c.user?.id)}
+                          className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
+                        >
+                          <FiUserPlus size={18} />
+                        </button>
+                      )}
+                      {/* End Follow Button */}
                     </div>
 
                     {/* Start Comment Content */}
@@ -546,29 +585,31 @@ function PostCommentsSection({ postId }) {
                           {c.likes_count || 0}
                         </span>
                       </button>
+                      {+userId !== c?.user?.id && (
+                        <button
+                          className="text-xs hover:text-black"
+                          onClick={() => {
+                            if (!c.replies) {
+                              loadReplies(c.id);
+                            }
+                            setActiveReplyComment(
+                              activeReplyComment === c.id ? null : c.id
+                            );
+                          }}
+                        >
+                          {t("Reply")}
+                        </button>
+                      )}
+                      {+userId === c?.user?.id && (
+                        <button
+                          className="text-xs hover:text-red-500"
+                          onClick={() => handleDeleteComment(c.id)}
+                        >
+                          {t("Delete")}
+                        </button>
+                      )}
 
-                      <button
-                        className="text-xs hover:text-black"
-                        onClick={() => {
-                          if (!c.replies) {
-                            loadReplies(c.id);
-                          }
-                          setActiveReplyComment(
-                            activeReplyComment === c.id ? null : c.id
-                          );
-                        }}
-                      >
-                        {t("Reply")}
-                      </button>
-
-                      <button
-                        className="text-xs hover:text-red-500"
-                        onClick={() => handleDeleteComment(c.id)}
-                      >
-                        {t("Delete")}
-                      </button>
-
-                      {!editingCommentId && (
+                      {!editingCommentId && +userId === c?.user?.id && (
                         <button
                           className="text-xs hover:text-blue-500"
                           onClick={() => handleEditComment(c)}
@@ -704,7 +745,7 @@ function PostCommentsSection({ postId }) {
                     {activeReplyComment === c.id && (
                       <div className="mt-4 flex items-start gap-2 pl-4">
                         <img
-                          src="/Beared Guy02-min 1.png"
+                          src={`${BASE_URL}/${userImage}`}
                           alt="me"
                           className="w-6 h-6 rounded-full object-cover"
                         />

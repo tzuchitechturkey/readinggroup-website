@@ -53,13 +53,12 @@ function PostsList({ onSectionChange }) {
   const getPostData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * 10;
-    console.log(offset, "offset", page);
-    try {
+     try {
       const res = await GetPosts(limit, offset, { search: searchVal });
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +139,7 @@ function PostsList({ onSectionChange }) {
       setSelectedPost(null);
       setUpdate(!update);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +158,6 @@ function PostsList({ onSectionChange }) {
   useEffect(() => {
     getPostData(0);
   }, [update]);
-
   return (
     <div
       className="bg-white rounded-lg border border-gray-200"
@@ -257,7 +255,7 @@ function PostsList({ onSectionChange }) {
             </TableHead>
             <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                {t("Excerpt")}
+                {t("Date")}
               </div>
             </TableHead>
             <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
@@ -328,63 +326,79 @@ function PostsList({ onSectionChange }) {
             </TableRow>
           ) : (
             getSortedData().map((post) => (
-              <TableRow key={post.id} className="hover:bg-gray-50/60 border-b">
+              <TableRow key={post?.id} className="hover:bg-gray-50/60 border-b">
                 <TableCell className="text-center text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                  {post.id}
+                  {post?.id}
                 </TableCell>
                 <TableCell className="text-center py-4">
                   <div className="flex flex-col">
                     <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-1">
-                      {post.title}
+                      {post?.title}
                     </span>
                     <span className="text-[#9FA2AA] text-[10px]">
-                      {post.subtitle}
+                      {post?.subtitle}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                  <span className=" px-2 py-1 text-[12px]">{post.excerpt}</span>
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">
+                      {new Date(post?.created_at).toLocaleDateString("en-GB", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })}
+                    </span>
+                    <span className="text-[#9FA2AA] text-[10px]">
+                      {post?.created_at
+                        ? new Date(post?.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ""}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {post.category?.name}
+                    {post?.category?.name}
                   </span>
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {post.post_type}
+                    {post?.post_type}
                   </span>
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <div className="flex flex-col">
-                    <span className="font-medium">{post.writer}</span>
+                    <span className="font-medium">{post?.writer}</span>
                     <span className="text-[#9FA2AA] text-[10px]">
-                      {post.createdAt}
+                      {post?.createdAt}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E]  text-[11px] py-4">
-                  <span className="font-medium">{post.views}</span>
+                  <span className="font-medium">{post?.views}</span>
                 </TableCell>
                 <TableCell className="text-center py-4">
                   <div className="flex items-center justify-center gap-1">
                     <span
                       className={`px-2 py-1 rounded-full text-[10px] ${
-                        post.is_active
+                        post?.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {post.is_active ? t("Active") : t("Inactive")}
+                      {post?.is_active ? t("Active") : t("Inactive")}
                     </span>
                     <span
                       className={`px-2 py-1 rounded-full text-[10px] ${
-                        post.status === "Published"
+                        post?.status === "Published"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {t(post.status)}
+                      {t(post?.status)}
                     </span>
                   </div>
                 </TableCell>

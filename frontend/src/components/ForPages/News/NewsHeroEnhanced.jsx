@@ -8,9 +8,9 @@ import { useParams } from "react-router-dom";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
-import NewsCard from "@/components/ForPages/Events/NewsCard/NewsCard";
-import { GetEventById, LikeEvent, UnlikeEvent } from "@/api/events";
+import { GetEventById, PatchEventById } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 const NewsHero = ({
   mainArticle = null,
@@ -18,7 +18,6 @@ const NewsHero = ({
   className = "",
 }) => {
   const { t, i18n } = useTranslation();
-  const [isLiked, setIsLiked] = useState(false);
   const { id: paramId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -82,17 +81,23 @@ const NewsHero = ({
   };
   // دالة الإعجاب
   const handleLike = async () => {
+    console.log("asd111");
     try {
-      if (!isLiked) {
-        await LikeEvent({ user: userId, event: mainArticle?.id });
-        toast.success(t("Liked Added"));
-      } else {
-        await UnlikeEvent({ user: userId, event: mainArticle?.id });
-        toast.info(t("Like removed"));
-      }
-      setIsLiked(!isLiked);
-    } catch (error) {
-      setErrorFn(error);
+      const newLikedState = !data?.has_liked;
+
+      await PatchEventById(data.id, {
+        has_liked: newLikedState,
+      });
+      setData({
+        ...data,
+        has_liked: newLikedState,
+        likes_count: newLikedState
+          ? data?.likes_count + 1
+          : data?.likes_count - 1,
+      });
+      toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
+    } catch (err) {
+      setErrorFn(err, t);
     }
   };
   // دالة فتح الصورة في عرض مكبر
@@ -123,7 +128,6 @@ const NewsHero = ({
     try {
       const res = await GetEventById(paramId);
       setData(res.data);
-      console.log(res, "ddddddddddddddddd");
     } catch (err) {
       console.error("Failed to fetch event data:", err);
     } finally {
@@ -135,7 +139,6 @@ const NewsHero = ({
     setUserId(storedUserId);
     getData();
   }, [paramId]);
-  console.log(data, "aaaaaaaaaaaaa");
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
@@ -160,7 +163,7 @@ const NewsHero = ({
         {/* ENd Image */}
         {/* Start Description */}
         <p className="text-base md:text-lg text-text leading-relaxed">
-          {data.description}
+          {data.description || data.summary}
         </p>
         {/* End description */}
         {/* Start Article Info */}
@@ -181,7 +184,7 @@ const NewsHero = ({
             </span>
 
             <ImageControls
-              isLiked={isLiked}
+              has_liked={data?.has_liked}
               onLike={handleLike}
               onExpandImage={handleOpenImage}
               onDownloadImage={handleDownloadImage}

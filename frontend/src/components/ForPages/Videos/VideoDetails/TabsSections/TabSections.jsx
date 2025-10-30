@@ -6,10 +6,9 @@ import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCo
 
 import EpisodeCard from "./EpisodeCard";
 
-const TabsSection = () => {
+const TabsSection = ({ videoData }) => {
   const [activeTab, setActiveTab] = useState("episodes");
   const [showAllEpisodes, setShowAllEpisodes] = useState(false);
-  const [videoData, setVideoData] = useState(null);
   const tabs = [
     { id: "episodes", label: "Episodes" },
     { id: "reviews", label: "User Reviews" },
@@ -85,7 +84,6 @@ const TabsSection = () => {
   // عرض 3 فيديوهات فقط في البداية
   const videosToShow = showAllEpisodes ? allVideos : allVideos.slice(0, 3);
   const hasMoreVideos = allVideos.length > 3;
-
   return (
     <div className="w-full">
       {/* Tab Navigation */}

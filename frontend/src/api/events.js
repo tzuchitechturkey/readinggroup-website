@@ -31,8 +31,27 @@ export async function EditEventById(id, data) {
   return await axios.put(`/events/${id}/`, data);
 }
 
+export async function PatchEventById(id, data) {
+  return await axios.patch(`/events/${id}/`, data);
+}
+
 export async function DeleteEventById(id) {
   return await axios.delete(`/events/${id}/`);
+}
+
+// /top5-videos/
+export async function GetTop5Event() {
+  return await axios.get(`/events/top-viewed/?limit=5`);
+}
+
+export async function GetTopSections() {
+  return await axios.get(`/event-sections/top-with-events/`);
+}
+
+export async function GetTop5BySections() {
+  return await axios.get(
+    `/event-sections/top-with-top-liked/?limit=3&events_limit=5`
+  );
 }
 
 // Categories
@@ -83,13 +102,14 @@ export async function DeleteEventSection(id) {
 
 // /top5-events-sections/
 export async function GetTop5EventsBySectionId(sectionId) {
-  return await axios.get(`/top5-events/${sectionId}`);
+  return await axios.get(`event-sections/${sectionId}/events/`);
 }
 
 // Like Event
 export async function LikeEvent(data) {
   return await axios.post(`/likes/events/`, data);
 }
+
 export async function UnlikeEvent(data) {
   return await axios.delete(`/likes/events/`, { data });
 }

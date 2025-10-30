@@ -25,6 +25,8 @@ function EventsFilter({
   updateFilter,
   sectionsList,
   setOpenFilterModal,
+  hasActiveFilters,
+  handleClearFilters,
 }) {
   const { t } = useTranslation();
   const [dateOpen, setDateOpen] = useState(false);
@@ -47,17 +49,6 @@ function EventsFilter({
     } catch (error) {
       console.error(error);
     }
-  };
-
-  const clearAllFilters = () => {
-    updateFilter("search", "");
-    updateFilter("section", []);
-    updateFilter("report_type", []);
-    updateFilter("category", []);
-    updateFilter("country", []);
-    updateFilter("writer", "");
-    updateFilter("language", []);
-    updateFilter("happened_at", null);
   };
 
   useEffect(() => {
@@ -251,16 +242,18 @@ function EventsFilter({
 
         {/* Clear Filters Button */}
         <div className="mb-4 ">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 mt-7 md:mt-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-gray-600 text-xs sm:text-sm px-3 py-2"
-              onClick={clearAllFilters}
-            >
-              {t("Reset")}
-            </Button>
-            <Button
+          {hasActiveFilters && (
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="text-red-600 border-red-600 hover:bg-red-50"
+              >
+                {t("Clear All Filters")}
+              </Button>
+            </div>
+          )}
+          {/* <Button
               size="sm"
               className="bg-primary hover:bg-white text-white hover:text-primary text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none"
               onClick={() => {
@@ -269,8 +262,7 @@ function EventsFilter({
               }}
             >
               {t("Apply")}
-            </Button>
-          </div>
+            </Button> */}
         </div>
       </div>
     </div>

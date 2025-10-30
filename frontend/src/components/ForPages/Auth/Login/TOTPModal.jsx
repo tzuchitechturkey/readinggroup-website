@@ -42,7 +42,7 @@ const TOTPModal = ({
           </p>
           <p className="mt-2">
             <a
-              href="/totp-setup"
+              href="/auth/totp-setup"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 underline"

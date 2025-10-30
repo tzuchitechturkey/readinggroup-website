@@ -21,7 +21,7 @@ import Loader from "@/components/Global/Loader/Loader";
 
 import CreateOrEditHistory from "./CreateOrEditHistory";
 
-function History({ onSectionChange }) {
+function HistoryList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -45,7 +45,7 @@ function History({ onSectionChange }) {
       setTotalRecords(res.data?.count || 0);
       setHistoryData(res.data?.results);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLaoding(false);
     }
@@ -67,7 +67,7 @@ function History({ onSectionChange }) {
       );
       setShowDeleteModal(false);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLaoding(false);
     }
@@ -87,8 +87,13 @@ function History({ onSectionChange }) {
   useEffect(() => {
     getData(0);
   }, [update]);
+
+  console.log(historyData);
   return (
-    <div className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col" dir={i18n.dir()}>
+    <div
+      className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
+      dir={i18n.dir()}
+    >
       {isLaoding && <Loader />}
       {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">
@@ -107,7 +112,7 @@ function History({ onSectionChange }) {
         </div>
       </div>
       {/* End Breadcrumb */}
-      
+
       <div className="flex-1">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
@@ -267,10 +272,18 @@ function History({ onSectionChange }) {
                       </div>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4   ">
-                      <div className="flex justify-center gap-1">
-                        <span className="text-sm font-medium">
-                          {formatDate(item.story_date)}
+                      <div className="flex flex-col items-center ">
+                        <span className="font-medium">
+                          {new Date(item.story_date).toLocaleDateString(
+                            "en-GB",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )}
                         </span>
+                       
                       </div>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-sm">
@@ -284,7 +297,7 @@ function History({ onSectionChange }) {
                       </p>
                     </TableCell>
                     <TableCell className="py-4">
-                      <div className="flex items-center gap-2 text-[#5B6B79]">
+                      <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                         <button
                           title={t("Edit")}
                           onClick={() => {
@@ -370,4 +383,4 @@ function History({ onSectionChange }) {
   );
 }
 
-export default History;
+export default HistoryList;

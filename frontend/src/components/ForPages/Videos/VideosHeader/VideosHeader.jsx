@@ -5,16 +5,16 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 
-import { GetTop1Video, GetTop5Videos } from "@/api/videos";
+import { GetTop5Videos } from "@/api/videos";
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function VideosHeader() {
+function VideosHeader({ top1Video }) {
   const { t } = useTranslation();
   const [top5Videos, setTop5Videos] = useState([]);
-  const [top1Video, setTop1Video] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getTop5Videos = async () => {
@@ -22,20 +22,12 @@ function VideosHeader() {
       const res = await GetTop5Videos();
       setTop5Videos(res.data);
     } catch (err) {
-      console.error("Failed to fetch top 5 videos:", err);
+      setErrorFn(err, t);
     }
   };
-  const getTop1Video = async () => {
-    try {
-      const res = await GetTop1Video();
-      setTop1Video(res.data);
-    } catch (err) {
-      console.error("Failed to fetch top 1 video:", err);
-    }
-  };
+
   useEffect(() => {
     getTop5Videos();
-    getTop1Video();
   }, []);
   return (
     <div className="relative    min-h-screen   overflow-hidden">

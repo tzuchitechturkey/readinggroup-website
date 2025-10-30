@@ -51,7 +51,7 @@ const TVList = ({ onSectionChange }) => {
       setTotalRecords(res?.data?.count || 0);
       setNewsData(res?.data?.results || []);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +141,7 @@ const TVList = ({ onSectionChange }) => {
       setSelectedNews(null);
       setUpdate((prev) => !prev);
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }

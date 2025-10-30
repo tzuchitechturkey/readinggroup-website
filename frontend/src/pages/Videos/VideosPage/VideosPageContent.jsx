@@ -3,61 +3,67 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import VideosHeader from "@/components/ForPages/Videos/VideosHeader/VideosHeader";
-import FilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
+import VideoFilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import { mockVideos } from "@/mock/Viedeos";
-import { GetMyListedVideos, GetTopViewedVideos } from "@/api/videos";
+import {
+  GetMyListedVideos,
+  GetTopLikedVideos,
+  GetTopMixVideos,
+} from "@/api/videos";
 
 function VideosPageContent() {
   const { i18n } = useTranslation();
-  const [topViewedVideos, setTopViewedVideos] = useState([]);
+  const [topMixVideos, setTopMixVideos] = useState([]);
   const [myListedVideos, setMyListedVideos] = useState([]);
+  const [likedVideos, setLikedVideos] = useState([]);
   const getMyListedVideos = async () => {
     try {
-      const res = await GetMyListedVideos();
-      setMyListedVideos(res.data);
+      const res = await GetMyListedVideos(10, 0, "");
+      setMyListedVideos(res.data?.results || []);
     } catch (err) {
       console.error("Failed to fetch my listed videos:", err);
     }
   };
-  const getTopViewedVideos = async () => {
+  const getLikedVideos = async () => {
     try {
-      const res = await GetTopViewedVideos();
-      setTopViewedVideos(res.data);
+      const res = await GetTopLikedVideos();
+      setLikedVideos(res.data);
     } catch (err) {
-      console.error("Failed to fetch top viewed videos:", err);
+      console.error("Failed to fetch liked videos:", err);
     }
   };
+  const getTopMixVideos = async () => {
+    try {
+      const res = await GetTopMixVideos();
+      setTopMixVideos(res.data);
+    } catch (err) {
+      console.error("Failed to fetch top mix videos:", err);
+    }
+  };
+
   useEffect(() => {
-    getTopViewedVideos();
+    getTopMixVideos();
     getMyListedVideos();
+    getLikedVideos();
   }, []);
+
   return (
     <div
       className="min-h-screen bg-gray-100"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Hero Section */}
-      <VideosHeader />
+      <VideosHeader top1Video={topMixVideos?.top_1} />
 
       {/* Start Filter Secion */}
-      <FilterSections />
+      <VideoFilterSections
+        fullVideos={topMixVideos?.top_5_full || []}
+        unitVideos={topMixVideos?.top_5_unit || []}
+        likedVideos={likedVideos}
+      />
       {/* End Filter Secion */}
 
-      {/* Start TOP 5 */}
-      <div className="">
-        <DynamicSection
-          title="Top 5 in your like"
-          titleClassName="text-[30px] font-medium mb-2"
-          data={topViewedVideos}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMore={true}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End TOP 5 */}
       {/* Start My LIST */}
       <div className="my-3">
         <DynamicSection
@@ -65,9 +71,9 @@ function VideosPageContent() {
           titleClassName="text-[30px] font-medium mb-2"
           data={myListedVideos}
           isSlider={false}
-          cardName={VideoCard}
           viewMore={true}
-          viewMoreUrl="/videos"
+          cardName={VideoCard}
+          viewMoreUrl="/my-list"
         />
       </div>
       {/* End My LIST */}
@@ -76,23 +82,21 @@ function VideosPageContent() {
         <DynamicSection
           title="Full Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={mockVideos}
+          data={topMixVideos?.top_5_full}
           isSlider={false}
           cardName={VideoCard}
-          viewMore={true}
           viewMoreUrl="/videos"
         />
       </div>
       {/* End Full Video */}
       {/* Start Unit  Video */}
-      <div className="my-3">
+      <div className="my-3  pb-4">
         <DynamicSection
           title="Unit  Video"
           titleClassName="text-[30px] font-medium mb-2"
-          data={mockVideos}
+          data={topMixVideos?.top_5_unit}
           isSlider={false}
           cardName={VideoCard}
-          viewMore={true}
           viewMoreUrl="/videos"
         />
       </div>

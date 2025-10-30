@@ -3,14 +3,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import TopFiveSectionCard from "@/components/Global/TopFiveSectionCard/TopFiveSectionCard";
-import { mockVideos } from "@/mock/Viedeos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const TopFiveSection = () => {
+const TopFiveSection = ({ data }) => {
   const isMobile = useIsMobile(1224);
   const { t } = useTranslation();
-
   return (
     <div className="mt-12">
       <DynamicSection
@@ -19,12 +17,13 @@ const TopFiveSection = () => {
             {t("This Week’s Top 5")}
           </p>
         }
-        data={mockVideos}
+        data={data}
         isSlider={isMobile}
         cardName={TopFiveSectionCard}
         showArrows={isMobile}
         prevArrowClassname="-left-8"
         nextArrowClassname="-right-8"
+        stopslider={true}
       />
     </div>
   );

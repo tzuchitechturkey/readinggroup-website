@@ -204,7 +204,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       setUpdate((prev) => !prev);
       onClose();
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
