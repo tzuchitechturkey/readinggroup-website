@@ -264,7 +264,15 @@ class VideoViewSet(BaseContentViewSet):
 
         # get videos via MyListEntry, preserve ordering by created_at in MyListEntry
         entries = MyListEntry.objects.filter(user=user).select_related('video').order_by('-created_at')
+        # Extract videos preserving ordering from the MyListEntry records
         videos = [e.video for e in entries]
+
+        # Use the view's pagination if configured. paginate_queryset accepts lists as well as querysets.
+        page = self.paginate_queryset(videos)
+        if page is not None:
+            serializer = VideoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
         serializer = VideoSerializer(videos, many=True, context={"request": request})
         return Response(serializer.data)
 
