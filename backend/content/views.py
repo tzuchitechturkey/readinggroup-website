@@ -175,7 +175,7 @@ class BaseContentViewSet(viewsets.ModelViewSet):
 class VideoViewSet(BaseContentViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    search_fields = ("title", "category", "language")
+    search_fields = ("title",)
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
 
