@@ -47,6 +47,18 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
 
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
+    
+    def get_status(self, obj):
+        try:
+            pending_requests = FriendRequest.objects.filter(
+                to_user=obj,
+                status=FriendRequest.STATUS_PENDING
+            ).count()
+            if pending_requests > 0:
+                return f"You have {pending_requests} pending friend request(s)."
+            return "No pending friend requests."
+        except Exception:
+            return "Status unavailable."
 
     def get_profile_image_url(self, obj):
         request = self.context.get('request')
@@ -212,6 +224,18 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
                 return request.build_absolute_uri(obj.profile_image.url)
             return obj.profile_image.url
         return None
+    
+    def get_status(self, obj):
+        try:
+            pending_requests = FriendRequest.objects.filter(
+                to_user=obj,
+                status=FriendRequest.STATUS_PENDING
+            ).count()
+            if pending_requests > 0:
+                return f"You have {pending_requests} pending friend request(s)."
+            return "No pending friend requests."
+        except Exception:
+            return "Status unavailable."
 
     def get_posts_count(self, obj):
         # reuse same logic as UserSerializer
