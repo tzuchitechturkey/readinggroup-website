@@ -19,6 +19,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = (
@@ -35,8 +36,14 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "date_joined",
             "groups",
             "profile_image_url",
+            "status"
         )
-        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
+        read_only_fields = (
+            "id",
+            "is_staff",
+            "is_active",
+            "date_joined"
+        )
 
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
@@ -161,6 +168,7 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -187,9 +195,15 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "country",
             "mobile_number",
             "address_details",
-            "website_address" 
+            "website_address",
+            "status",
         )
-        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
+        read_only_fields = (
+            "id", 
+            "is_staff",
+            "is_active",
+            "date_joined"
+        )
 
     def get_profile_image_url(self, obj):
         request = self.context.get('request')
@@ -245,8 +259,22 @@ class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
 
     class Meta:
         model = FriendRequest
-        fields = ("id", "from_user", "to_user", "status", "message", "created_at", "updated_at")
-        read_only_fields = ("id", "from_user", "status", "created_at", "updated_at")
+        fields = (
+            "id",
+            "from_user",
+            "to_user",
+            "status",
+            "message",
+            "created_at",
+            "updated_at"
+        )
+        read_only_fields = (
+            "id",
+            "from_user",
+            "status",
+            "created_at",
+            "updated_at"
+        )
 
     def validate(self, attrs):
         request = self.context.get("request")
