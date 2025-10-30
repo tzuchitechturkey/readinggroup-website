@@ -295,6 +295,43 @@ class PostSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolute
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
+    
+    def get_average_rating(self, obj):
+        """Return average rating for the post (rounded to 2 decimals) or None."""
+        try:
+            avg = getattr(obj, 'annotated_rating_avg', None)
+            if avg is None:
+                from django.db.models import Avg
+                agg = PostRating.objects.filter(post=obj).aggregate(avg=Avg('rating'))
+                avg = agg.get('avg')
+            return round(avg, 2) if avg is not None else None
+        except Exception:
+            return None
+
+    def get_rating_count(self, obj):
+        """Return integer count of ratings for the post."""
+        try:
+            count = getattr(obj, 'annotated_rating_count', None)
+            if count is None:
+                from django.db.models import Count
+                agg = PostRating.objects.filter(post=obj).aggregate(count=Count('id'))
+                count = agg.get('count')
+            return int(count or 0)
+        except Exception:
+            return 0
+
+    def get_user_rating(self, obj):
+        """Return the requesting user's rating for the post, or None."""
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return None
+        try:
+            pr = PostRating.objects.filter(post=obj, user=user).first()
+            return pr.rating if pr else None
+        except Exception:
+            return None
+
 
 class EventSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
