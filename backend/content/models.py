@@ -155,6 +155,27 @@ class Post(LikableMixin, TimestampedModel):
             .order_by('-annotated_likes_count', '-created_at')[:limit]
         )
         return {"card_photo": card_photo_qs, "reading": reading_qs}
+
+    @classmethod
+    def top_viewed_grouped(cls, limit: int = 5):
+        """
+        Return top viewed posts grouped into two categories:
+        - 'card_photo': top `limit` posts where post_type is Card or Photo
+        - 'reading': top `limit` posts where post_type is Reading
+
+        The returned querysets are ordered by `-views` then `-created_at`.
+        The view will call `annotate_likes` on these querysets before serialization
+        so we intentionally do not annotate likes here.
+        """
+        card_photo_qs = (
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO])
+            .order_by('-views', '-created_at')[:limit]
+        )
+        reading_qs = (
+            cls.objects.filter(post_type=PostType.READING)
+            .order_by('-views', '-created_at')[:limit]
+        )
+        return {"card_photo": card_photo_qs, "reading": reading_qs}
     
     @classmethod
     def top_commented_by_types(cls, types: list, limit: int = 5):
