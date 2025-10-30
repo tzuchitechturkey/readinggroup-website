@@ -328,6 +328,7 @@ class PostViewSet(BaseContentViewSet):
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
     ordering_fields = ("views", "created_at")
+    filterset_fields = ("created_at", "writer", "category__name", "language", "post_type")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
@@ -496,7 +497,7 @@ class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    search_fields = ("title", "writer", "category", "section", "country")
+    search_fields = ("title",)
     ordering_fields = ("happened_at", "created_at")
     filterset_fields = ("section", "category", "country", "language", "report_type")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -595,7 +596,7 @@ class TeamMemberViewSet(BaseContentViewSet):
     ordering_fields = ("name", "created_at")
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    
+    filterset_fields = ("name", "job_title", "position__name")
     @swagger_auto_schema(
         manual_parameters=team_member_manual_parameters
     )
