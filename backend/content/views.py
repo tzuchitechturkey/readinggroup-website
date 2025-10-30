@@ -251,10 +251,11 @@ class VideoViewSet(BaseContentViewSet):
             MyListEntry.objects.get_or_create(user=user, video=video)
             serializer = self.get_serializer(video, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # DELETE
+        
+        # DELETE: remove if exists
         MyListEntry.objects.filter(user=user, video=video).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = self.get_serializer(video, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=("get",), url_path="my-list", url_name="my_list")
     def my_list(self, request):

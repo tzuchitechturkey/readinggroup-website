@@ -13,7 +13,7 @@ const WeekPhotos = () => {
   const getData = async () => {
     try {
       const res = await WeeklyCardPhotoPosts();
-      setData(res.data);
+      setData(res.data?.card_photo || []);
     } catch (error) {
       setErrorFn(error, t);
     }

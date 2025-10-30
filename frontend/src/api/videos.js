@@ -171,3 +171,7 @@ export async function GetMyList() {
 export async function AddToMyList(videoId) {
   return await axios.post(`/videos/${videoId}/my-list/`);
 }
+
+export async function RemoveFromMyList(videoId) {
+  return await axios.delete(`/videos/${videoId}/my-list/`);
+}

@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
-import { AddToMyList, PatchVideoById } from "@/api/videos";
+import { AddToMyList, RemoveFromMyList, PatchVideoById } from "@/api/videos";
 import { PatchEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
@@ -124,16 +124,21 @@ function CustomyoutubeVideo({ videoData }) {
 
   const handleAddToMyList = async () => {
     try {
-      await AddToMyList(videoItem.id);
-      if (videoData?.has_in_my_list === false) {
-        toast.success(t("Added to your list"));
-      } else {
+      const currentlySaved = Boolean(videoItem?.has_in_my_list);
+      if (currentlySaved) {
+        // currently saved -> remove
+        const res = await RemoveFromMyList(videoItem.id);
+        const serverHas = res && res.data && typeof res.data.has_in_my_list !== "undefined" ? res.data.has_in_my_list : false;
+        setVideoItem((prev) => ({ ...prev, has_in_my_list: Boolean(serverHas) }));
         toast.success(t("Removed from your list"));
+      } else {
+        // not saved -> add
+        const res = await AddToMyList(videoItem.id);
+        // server returns serialized video; prefer server value if present
+        const serverHas = res && res.data && typeof res.data.has_in_my_list !== "undefined" ? res.data.has_in_my_list : true;
+        setVideoItem((prev) => ({ ...prev, has_in_my_list: Boolean(serverHas) }));
+        toast.success(t("Added to your list"));
       }
-      setVideoItem((prev) => ({
-        ...prev,
-        has_in_my_list: !prev.has_in_my_list,
-      }));
     } catch (err) {
       setErrorFn(err, t);
     }
