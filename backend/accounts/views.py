@@ -305,6 +305,18 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         serializer.save()
         return Response(ProfileUpdateSerializer(instance).data)
 
+
+class PublicProfileView(generics.RetrieveAPIView):
+    """Retrieve a public profile for any user by id.
+
+    Example: GET /api/v1/user/profile/123/
+    Uses `UserSerializer` which exposes the public fields (id, username, display_name, profile_image_url, ...).
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # allow anonymous access for public profiles
+    permission_classes = [permissions.AllowAny]
+
 class ForgotPasswordView(APIView):
     """Allow users to reset their password via email."""
     permission_classes = [permissions.AllowAny]
