@@ -1011,14 +1011,7 @@ class TopStatsViewSet(viewsets.ViewSet):
     - top 1 liked post (photo)
     - top 1 liked event
     - top 1 liked weekly moment
-
-    and a combined top-N most viewed items across models (video, post, event, weeklymoment).
-
-    Response shape:
-    {
-      "top_liked": { "video": {...}, "post_reading": {...}, "post_card": {...}, "post_photo": {...}, "event": {...}, "weekly_moment": {...} },
-      "top_viewed": [ { "type": "video|post|event|weekly_moment", "data": {...}, "views": <int> }, ... ]
-    }
+    - top N posts by likes
     """
 
     def list(self, request):
@@ -1040,7 +1033,7 @@ class TopStatsViewSet(viewsets.ViewSet):
                     pass
             return qs.first()
 
-        # top liked single items
+    # top liked single items
         top_video = get_top_liked_for(Video.objects.all())
         top_event = get_top_liked_for(Event.objects.all())
         top_weekly = get_top_liked_for(WeeklyMoment.objects.all())
@@ -1048,6 +1041,18 @@ class TopStatsViewSet(viewsets.ViewSet):
         top_post_reading = get_top_liked_for(Post.objects.filter(post_type=PostType.READING))
         top_post_card = get_top_liked_for(Post.objects.filter(post_type=PostType.CARD))
         top_post_photo = get_top_liked_for(Post.objects.filter(post_type=PostType.PHOTO))
+
+        # top N posts by likes (new payload requested) - annotate and order by annotated likes
+        try:
+            posts_qs = annotate_likes_queryset(Post.objects.all(), request)
+            try:
+                posts_qs = posts_qs.order_by('-annotated_likes_count', '-created_at')[:limit]
+            except Exception:
+                posts_qs = posts_qs[:limit]
+        except Exception:
+            posts_qs = Post.objects.none()
+
+        top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
 
         def serialize_obj(obj):
             if obj is None:
@@ -1070,49 +1075,7 @@ class TopStatsViewSet(viewsets.ViewSet):
             "event": serialize_obj(top_event),
             "weekly_moment": serialize_obj(top_weekly),
         }
-
-        # Build combined candidate list for top viewed across types
-        candidates = []
-        candidate_limit = max(limit * 2, 10)
-
-        model_entries = [
-            (Video, "video", VideoSerializer),
-            (Post, "post", PostSerializer),
-            (Event, "event", EventSerializer),
-            (WeeklyMoment, "weekly_moment", WeeklyMomentSerializer),
-        ]
-
-        for model_cls, label, serializer_cls in model_entries:
-            try:
-                qs = model_cls.objects.all()
-                # Prefer ordering by views when available
-                try:
-                    qs = qs.order_by("-views")[:candidate_limit]
-                except Exception:
-                    qs = qs.order_by("-created_at")[:candidate_limit]
-
-                # annotate likes/has_liked so serializers can include those fields if needed
-                qs = annotate_likes_queryset(qs, request)
-
-                for item in qs:
-                    views = getattr(item, "views", 0) or 0
-                    candidates.append((int(views), label, serializer_cls, item))
-            except Exception:
-                # ignore model if anything unexpected occurs
-                continue
-
-        # sort candidates by views desc and pick top `limit`
-        candidates.sort(key=lambda t: t[0], reverse=True)
-        top_viewed_candidates = candidates[:limit]
-
-        top_viewed_payload = []
-        for views, label, serializer_cls, item in top_viewed_candidates:
-            top_viewed_payload.append({
-                "type": label,
-                "views": views,
-                "data": serializer_cls(item, context={"request": request}).data,
-            })
-
-        return Response({"top_liked": top_liked_payload, "top_viewed": top_viewed_payload})
+        top_liked_payload["top_posts"] = top_posts_data
+        return Response({"top_liked": top_liked_payload})
 
     
