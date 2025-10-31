@@ -580,6 +580,14 @@ class EventViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                  queryset =queryset.filter(tags__in=values)
+                 
+        category = params.get("category")
+        if category:
+            values = []
+            for item in category.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(category__name__in=values)
             
         return queryset
     

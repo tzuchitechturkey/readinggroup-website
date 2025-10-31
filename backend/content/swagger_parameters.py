@@ -117,6 +117,13 @@ event_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'category',
+        openapi.IN_QUERY,
+        description="Filter by Category (JSON object with 'name' field)",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 team_member_manual_parameters = [
