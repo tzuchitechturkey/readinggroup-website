@@ -27,6 +27,7 @@ from .models import (
     Reply,
     Like,
     MyListEntry,
+    SeasonTitle,
 )
 from .enums import VideoType, PostType
 from .serializers import (
@@ -43,6 +44,8 @@ from .serializers import (
     EventSectionSerializer,
     CommentsSerializer,
     ReplySerializer,
+    LikeSerializer,
+    SeasonTitleSerializer,
 )
 from .models import PostRating
 
@@ -818,8 +821,14 @@ class PositionTeamMemberViewSet(BaseContentViewSet):
     serializer_class = PositionTeamMemberSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    
-    
+
+class SeasonTitleViewSet(BaseContentViewSet):
+    """ViewSet for managing SeasonTitle content."""
+    queryset = SeasonTitle.objects.all()
+    serializer_class = SeasonTitleSerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+
 class EventSectionViewSet(BaseContentViewSet):
     """ViewSet for managing EventSection content."""
     queryset = EventSection.objects.all()

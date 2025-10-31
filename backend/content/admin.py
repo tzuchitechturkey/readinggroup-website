@@ -14,27 +14,45 @@ from .models import (
     Comments,
     Reply,
     MyListEntry,
+    SeasonTitle,
+    
 )
 
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "category", "language", "views", "featured")
-    list_filter = ("category", "language", "featured", "is_new")
-    search_fields = ("title", "category")
+    list_display = ("title", "category_name", "language", "views", "featured")
+    list_filter = ("category__name", "language", "featured", "is_new")
+    search_fields = ("title", "category__name")
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+    category_name.short_description = "category"
 
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("title", "writer", "category", "status", "is_active")
-    list_filter = ("status", "category", "is_active")
-    search_fields = ("title", "writer", "category")
+    list_display = ("title", "writer", "category_name", "status", "is_active")
+    list_filter = ("status", "category__name", "is_active")
+    search_fields = ("title", "writer", "category__name")
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+    category_name.short_description = "category"
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "section", "category", "language", "happened_at")
-    list_filter = ("section", "category", "language")
-    search_fields = ("title", "writer", "category")
+    list_display = ("title", "section_name", "category_name", "language", "happened_at")
+    list_filter = ("section__name", "category__name", "language")
+    search_fields = ("title", "writer", "category__name")
+
+    def section_name(self, obj):
+        return obj.section.name if obj.section else None
+    section_name.short_description = "section"
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+    category_name.short_description = "category"
 
 @admin.register(WeeklyMoment)
 class WeeklyMomentAdmin(admin.ModelAdmin):
@@ -98,3 +116,8 @@ class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
     list_display = ("user", "video", "created_at")
     search_fields = ("user__username", "video__title")
+    
+@admin.register(SeasonTitle)
+class SeasonTitleAdmin(admin.ModelAdmin):
+    list_display = ("name","description")
+    search_fields = ("name","description")

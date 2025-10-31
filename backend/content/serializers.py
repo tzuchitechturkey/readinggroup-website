@@ -5,14 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from accounts.serializers import UserSerializer
 from accounts.models import User as AccountUser
 from django.db.models import Q
-from .helpers import (
-    AbsoluteURLSerializer,
-    VideoCategorySerializer,
-    PostCategorySerializer,
-    EventCategorySerializer,
-    EventSectionSerializer,
-    PositionTeamMemberSerializer
-)
+from .helpers import AbsoluteURLSerializer
 from .models import (
     Event,
     HistoryEntry,
@@ -29,6 +22,8 @@ from .models import (
     PositionTeamMember,
     EventSection,
     PostRating,
+    Like,
+    SeasonTitle,
 )
 
 def _resolve_target_user(obj):
@@ -102,6 +97,56 @@ class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return obj.has_liked(user)
         return False
 
+class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
+    """Serializer for Like model used across views that expose likes info."""
+    user = UserSerializer(read_only=True)
+    content_type = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Like
+        fields = ("id", "user", "content_type", "object_id", "created_at")
+
+    def get_content_type(self, obj):
+        try:
+            return obj.content_type.model if obj.content_type else None
+        except Exception:
+            return None
+        
+class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = VideoCategory
+        fields = "__all__"
+        
+class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PostCategory
+        fields = "__all__"
+                
+class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventCategory
+        fields = "__all__"
+
+class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = EventSection
+        fields = "__all__"
+        
+class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = PositionTeamMember
+        fields = ["id", "name", "description"]
+        
+class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = SeasonTitle
+        fields = "__all__"
 
 class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
@@ -225,6 +270,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             data["has_in_my_list"] = False
         return data
+    
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -253,8 +299,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-
-
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
     datetime_fields = ("created_at", "updated_at")

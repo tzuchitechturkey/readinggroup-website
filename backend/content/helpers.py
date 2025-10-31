@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from .models import VideoCategory, PostCategory, EventCategory, EventSection, PositionTeamMember
-from readinggroup_backend.helpers import DateTimeFormattingMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Exists, OuterRef
 from content.models import Like
@@ -25,36 +23,6 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
             if file_value:
                 data[field_name] = self._build_absolute_uri(file_value.url)
         return data
-class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = VideoCategory
-        fields = "__all__"
-        
-class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = PostCategory
-        fields = "__all__"
-                
-class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = EventCategory
-        fields = "__all__"
-
-class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = EventSection
-        fields = "__all__"
-        
-class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = PositionTeamMember
-        fields = ["id", "name", "description"]
-        
         
 #for views.py use
 def annotate_likes_queryset(queryset, request=None):

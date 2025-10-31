@@ -82,6 +82,13 @@ class LikableMixin(models.Model):
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
     
+class SeasonTitle(models.Model):
+    """Season and Title mapping for Videos."""
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+    class Meta:
+        ordering = ("name",)
+        
 
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
@@ -99,7 +106,8 @@ class Video(LikableMixin, TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     cast = models.JSONField(default=list, blank=True)
-    season = models.CharField(max_length=32, blank=True)
+    season = models.ForeignKey(SeasonTitle, on_delete=models.SET_NULL, null=True, blank=True)
+    series = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')

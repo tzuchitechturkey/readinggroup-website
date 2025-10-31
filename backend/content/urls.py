@@ -15,6 +15,7 @@ from .views import (
     ReplyViewSet,
     CombinedTopLikedView,
     TopStatsViewSet,
+    SeasonTitleViewSet,
 )
 
 app_name = "content"
@@ -35,5 +36,6 @@ router.register(r"comments", CommentsViewSet, basename="comments")
 router.register(r"replies", ReplyViewSet, basename="reply")
 router.register(r"top-liked-combined", CombinedTopLikedView, basename="top-liked-combined")
 router.register(r"top-stats", TopStatsViewSet, basename="top-stats")
+router.register(r"season-titles", SeasonTitleViewSet, basename="season-title")
 
 urlpatterns = router.urls
