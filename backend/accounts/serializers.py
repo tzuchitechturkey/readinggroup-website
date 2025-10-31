@@ -21,6 +21,9 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     friend_request_status = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    posts_count = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = (
@@ -39,6 +42,9 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "profile_image_url",
             "status",
             "friend_request_status",
+            "posts_count",
+            "followers_count",
+            "following_count",
         )
         read_only_fields = (
             "id",
@@ -97,6 +103,44 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.profile_image.url)
             return obj.profile_image.url
         return None
+    
+    def get_posts_count(self, obj):
+        # reuse same logic as UserSerializer
+        if Post is None:
+            return 0
+        try:
+            names = set()
+            if obj.username:
+                names.add(obj.username.strip())
+            if obj.display_name:
+                names.add(obj.display_name.strip())
+            full = obj.get_full_name()
+            if full:
+                names.add(full.strip())
+
+            queries = Q()
+            for n in names:
+                if n:
+                    queries |= Q(writer__iexact=n)
+
+            if not queries:
+                return 0
+
+            return Post.objects.filter(queries).count()
+        except Exception:
+            return 0
+
+    def get_followers_count(self, obj):
+        try:
+            return FriendRequest.objects.filter(to_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+        except Exception:
+            return 0
+
+    def get_following_count(self, obj):
+        try:
+            return FriendRequest.objects.filter(from_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+        except Exception:
+            return 0
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Handle registration of a new user."""
