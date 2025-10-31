@@ -24,18 +24,20 @@ function RegisterContent() {
   }
   return (
     <div
-      className="w-full flex flex-col pt-200 relative border-0 outline-none min-h-screen"
+      className="w-full flex flex-col items-center justify-center pt-10 relative border-0 outline-none min-h-screen"
       style={{
         backgroundImage: "url(/authback.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
+
+      
       <div className="absolute inset-0 bg-cover bg-center w-full h-full opacity-60 z-0 bg-black" />
-      <div className="relative z-1 mt-2 md:mt-6 lg:mt-8">
+      <div className="relative z-1 mt-10 flex justify-center items-center">
         <RegisterForm />
       </div>
-      <div className="flex items-end h-full z-10 mt-6 flex-1">
+      <div className="flex items-end h-20 z-10 mt-6 flex-1 w-full">
         <Footer authPages={true} />
       </div>
     </div>
