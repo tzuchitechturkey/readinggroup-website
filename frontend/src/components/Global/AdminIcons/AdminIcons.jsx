@@ -33,6 +33,7 @@ export default function AdminIcons() {
 
         {/* Start Got TO Home */}
         <div
+          className="lg:mx-4 "
           onClick={() => {
             localStorage.removeItem("dashboardSelectedPost");
             localStorage.removeItem("dashboardSelectedVideo");
@@ -42,7 +43,7 @@ export default function AdminIcons() {
             localStorage.removeItem("dashboardActiveSection");
           }}
         >
-          <Link to="/" className="mx-3">
+          <Link to="/">
             <Home size={20} color="#999EAD" />
           </Link>
         </div>

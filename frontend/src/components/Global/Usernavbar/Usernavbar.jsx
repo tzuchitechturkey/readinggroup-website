@@ -90,13 +90,13 @@ function Usernavbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 mx-8">
-            <ul className="flex items-center space-x-8">
+            <ul className="flex items-center ">
               {linkList.map((link, idx) => (
                 <li key={idx}>
                   <NavLink
                     to={link.href}
                     className={({ isActive }) =>
-                      `hover:text-primary pb-1 transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-2 py-1 ${
+                      `hover:text-primary pb-1 mx-4 transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-2 py-1 ${
                         isActive
                           ? "border-b-2 border-primary text-primary"
                           : "text-gray-700 hover:text-primary"

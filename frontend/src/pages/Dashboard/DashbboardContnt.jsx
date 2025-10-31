@@ -3,14 +3,6 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import Sidebar from "@/components/Global/Sidebar/Sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -28,7 +20,6 @@ import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/History
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
 import PositionsContent from "@/components/ForPages/Dashboard/AboutUs/Positions/PositionsContent";
 import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
-import PhotosList from "@/components/ForPages/Dashboard/CardsOrPhotos/PhotosList/PhotosList";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
 import Tv from "@/components/ForPages/Dashboard/TV/TV";
 import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
@@ -182,7 +173,7 @@ export default function Page() {
   const renderContent = () => {
     switch (activeSection) {
       case "home":
-        return <DashboardSections />;
+        return <DashboardSections onSectionChange={handleSectionChange} />;
       case "settings":
         return <SettingsContent />;
       case "profile":

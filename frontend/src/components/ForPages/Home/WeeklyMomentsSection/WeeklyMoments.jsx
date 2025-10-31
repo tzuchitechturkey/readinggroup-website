@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
-import { weeklyMomentsPosts } from "@/api/posts";
+import { WeeklyReadingPosts } from "@/api/posts";
 
 const WeeklyMoments = () => {
   const { t } = useTranslation();
@@ -12,9 +12,8 @@ const WeeklyMoments = () => {
 
   const getWeeklyMomentData = async () => {
     try {
-      const res = await weeklyMomentsPosts();
-      setWeeklyMomentData(res.data);
-
+      const res = await WeeklyReadingPosts();
+      setWeeklyMomentData(res.data?.reading);
     } catch (error) {
       console.error(error);
     }

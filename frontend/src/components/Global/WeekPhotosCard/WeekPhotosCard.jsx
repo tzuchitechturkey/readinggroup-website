@@ -6,24 +6,25 @@ function WeekPhotosCard({ item }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/cards-photos/photos/${item.id}`);
+    console.log("Navigating to photos for card with ID:", item);
+    navigate(`/cards-photos/card/${item?.id}`);
   };
 
   return (
     <div className="mx-auto">
       <div
-        key={item.id}
+        key={item?.id}
         className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
         onClick={handleClick}
       >
         {/* البطاقة */}
         <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
           {/* Start Image - make it fill the card */}
-          <div className="relative w-full h-[320px] md:h-[360px]">
+          <div className="relative w-full h-[270px] md:h-[300px]">
             {/* Main photo sits on top and covers the container */}
             <img
-              src={item.image}
-              alt={item.title}
+              src={item?.image}
+              alt={item?.title}
               className="absolute inset-0 w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300 z-20"
             />
 
@@ -36,10 +37,12 @@ function WeekPhotosCard({ item }) {
 
             {/* Start Content - overlay text */}
             <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-center w-full z-30 pointer-events-none">
-              <p className="font-bold text-lg text-[#ffffffcf]">{item.title}</p>
-              {item.subtitle ? (
+              <p className="font-bold text-lg text-[#ffffffcf]">
+                {item?.title}
+              </p>
+              {item?.subtitle ? (
                 <p className="font-bold text-xs text-[#ffffffcf] mt-1">
-                  {item.subtitle}
+                  {item?.subtitle}
                 </p>
               ) : null}
             </div>

@@ -13,16 +13,32 @@ import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import PostCommentsSection from "@/components/ForPages/GuidedReading/PostCommentsSection/PostCommentsSection";
+import { GetPostById } from "@/api/posts";
+import Loader from "@/components/Global/Loader/Loader";
 
 function PhotoDetailsContent() {
   const { t, i18n } = useTranslation();
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [cardData, setCardData] = useState();
 
+  const getCardData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetPostById(paramId);
+      setCardData(res.data);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     const isRTL = i18n.language === "ar";
     document.dir = isRTL ? "rtl" : "ltr";
@@ -69,132 +85,14 @@ function PhotoDetailsContent() {
       toast.error(t("Failed to download image"));
     }
   };
-
-  // Mock data للصورة
-  const photoData = {
-    id: id || 1,
-    title: "Community Gathering Moments",
-    subtitle: "Weekly Photo Collection",
-    photographer: "Sarah Johnson",
-    location: "Damascus, Syria",
-    date: "Oct 15, 2024",
-    views: 1240,
-    rating: 4.7,
-    reviews: "3.2",
-    image: "/weekly-images.jpg",
-    description:
-      "A beautiful collection of moments captured during our weekly community gathering. These photos showcase the spirit of unity, compassion, and shared purpose that defines our community. From heartfelt conversations to collaborative activities, each image tells a story of human connection and positive impact.",
-    tags: ["Community", "Photography", "Humanitarian", "Social", "Cultural"],
-    camera: "Canon EOS R5",
-    settings: "f/2.8, 1/125s, ISO 400",
-    category: "Event Photography",
-  };
-
-  // بيانات التعليقات
-  const comments = [
-    {
-      id: "c1",
-      writer: "Ahmed Hassan",
-      avatar: "/icons/User 1.png",
-      timeAgo: "2 days ago",
-      edited: false,
-      text: "Beautiful capture of the community spirit! The lighting and composition are perfect.",
-      likes: 89,
-      repliesCount: 12,
-      replies: [
-        {
-          id: 1,
-          avatar: "/icons/User 1.png",
-          writer: "Maya Al-Zahra",
-          timeAgo: "1 day ago",
-          edited: false,
-          text: "I completely agree! The photographer really captured the essence of our community.",
-          likes: 15,
-        },
-        {
-          id: 2,
-          avatar: "/icons/User 1.png",
-          writer: "Omar Khalil",
-          timeAgo: "18h ago",
-          edited: true,
-          text: "These photos bring back such wonderful memories from that day 📸",
-          likes: 8,
-        },
-      ],
-    },
-    {
-      id: "c2",
-      writer: "Layla Ibrahim",
-      avatar: "/icons/User 1.png",
-      timeAgo: "1 day ago",
-      edited: false,
-      text: "What an amazing collection! Each photo tells a unique story of hope and togetherness.",
-      likes: 156,
-      repliesCount: 24,
-    },
-    {
-      id: "c3",
-      writer: "Khalid Mansour",
-      avatar: "/icons/User 1.png",
-      timeAgo: "1 day ago",
-      edited: true,
-      text: "The technical quality is outstanding. Love the depth of field and color grading.",
-      likes: 73,
-      repliesCount: 8,
-    },
-  ];
-
-  // صور مشابهة
-  const similarPhotos = [
-    {
-      id: 1,
-      title: "Morning Assembly",
-      image: "/1-top5.jpg",
-      photographer: "Alex Chen",
-      views: 890,
-      category: "Event Photography",
-    },
-    {
-      id: 2,
-      title: "Volunteer Activities",
-      image: "/2-top5.jpg",
-      photographer: "Maria Garcia",
-      views: 1150,
-      category: "Documentary",
-    },
-    {
-      id: 3,
-      title: "Cultural Exchange",
-      image: "/3-top5.jpg",
-      photographer: "David Kim",
-      views: 967,
-      category: "Cultural",
-    },
-    {
-      id: 4,
-      title: "Youth Workshop",
-      image: "/4-top5.jpg",
-      photographer: "Emma Wilson",
-      views: 1340,
-      category: "Educational",
-    },
-  ];
-
-  // صور هذا الأسبوع
-  const thisWeekPhotos = Array(3)
-    .fill(null)
-    .map((_, index) => ({
-      id: index + 1,
-      title: `Weekly Collection ${index + 1}`,
-      subtitle: "Community Moments",
-      image: `/${index + 1}-top5.jpg`,
-      photographer: "Community Team",
-      views: Math.floor(Math.random() * 1000) + 500,
-      date: "Oct 2024",
-    }));
+  useEffect(() => {
+    getCardData();
+  }, [paramId]);
 
   return (
     <div className={`min-h-screen bg-gray-50 ${isRTL ? "rtl" : "ltr"}`}>
+      {isLoading && <Loader />}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
@@ -236,7 +134,7 @@ function PhotoDetailsContent() {
             />
 
             {/* Similar Photos Section */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            {/* <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {t("Similar Photos")}
               </h3>
@@ -267,10 +165,10 @@ function PhotoDetailsContent() {
                   {t("Cultural")}
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Comments Section */}
-            <PostCommentsSection postId={photoData.id} />
+            {/* <PostCommentsSection postId={photoData.id} /> */}
           </div>
 
           {/* Sidebar - Right Side */}

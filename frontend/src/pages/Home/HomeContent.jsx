@@ -1,6 +1,5 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import HeroSlider from "@/components/ForPages/Home/HeroSliderSection/HeroSlider";
@@ -8,112 +7,59 @@ import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomen
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import authback from "@/assets/authback.jpg";
-import weeklyImages from "@/assets/weekly-images.jpg";
-
-function Band({ children, tone = "light" }) {
-  const toneClass =
-    tone === "blue"
-      ? "bg-gradient-to-b from-[#eef6ff] to-white"
-      : "bg-gradient-to-b from-slate-50 to-white";
-  return (
-    <section className={`${toneClass} py-12 md:py-16`}>
-      <div className="container mx-auto max-w-7xl px-6">{children}</div>
-    </section>
-  );
-}
-
-function HeadingBlock({ title, description, ctaLabel, to = "#" }) {
-  const { t } = useTranslation();
-  const label = ctaLabel ?? t("See more");
-  // HeadingBlock doesn't need to set document direction itself.
-  // Direction is handled at the page root (HomeContent).
-
-  return (
-    <div>
-      <h3 className="text-[40px] md:text-[56px] leading-[1.02] font-serif font-bold mb-4 md:mb-6">
-        {title}
-      </h3>
-      {description ? (
-        <p className="text-base md:text-lg mb-6 md:mb-8 max-w-xl text-slate-700">
-          {description}
-        </p>
-      ) : null}
-      <Link
-        to={to}
-        className="inline-flex items-center bg-[#0b63d6] hover:bg-[#0956b8] text-white px-5 md:px-6 py-2.5 md:py-3 rounded-lg shadow-md text-sm md:text-base font-semibold transition"
-        aria-label={label}
-      >
-        {label}
-      </Link>
-    </div>
-  );
-}
+import { HomeData } from "@/api/home";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import HeadingBlock from "@/components/ForPages/Home/HeadingBlock/HeadingBlock";
+import Band from "@/components/ForPages/Home/Band/Band";
+import { GetStatistics } from "@/api/dashboard";
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
   const direction = isRtl ? "rtl" : "ltr";
+  const [sliderData, setSliderData] = useState(null);
+  const [top1Data, setTop1Data] = useState(null);
 
-  const sampleMoment = {
-    image: authback,
-    title: t("Report: Community Gathering"),
-    startTime: t("6:00 AM"),
-    date: t("SEPT 02"),
-    type: t("News"),
-    source: t("Community"),
-    language: t("AR / EN"),
+  const getSliderData = async () => {
+    try {
+      const res = await HomeData();
+      setSliderData(res.data);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
   };
 
-  const samplePhoto = {
-    id: "photo-hero",
-    image: weeklyImages,
-    title: t("Alexander Bastian"),
-    subtitle: t("Session Photo"),
+  const getTop1Data = async () => {
+    try {
+      const res = await GetStatistics();
+      setTop1Data(res.data?.top_liked);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
   };
 
-  const sampleReading = {
-    id: "guide-1",
-    badge: t("New"),
-    title: t("Start with Small Steps, Inspire Big Change"),
-    writer: t("Anas Daas"),
-    rating: 4.6,
-    reviews: 1.2,
-  };
-
-  const sampleFullVideo = {
-    id: "vid-full",
-    image: authback,
-    title: t("This Week’s Full Highlight"),
-    duration: t("1:20"),
-    unit: t("Weekly Feature"),
-  };
-
-  const sampleUnitVideo = {
-    id: "vid-unit",
-    image: authback,
-    title: t("Community Activity"),
-    duration: t("25:00"),
-    unit: t("Unit Video"),
-  };
+  useEffect(() => {
+    getSliderData();
+    getTop1Data();
+  }, []);
 
   return (
     <div dir={direction} className="min-h-screen">
       {/* Hero Slider */}
       <div dir="ltr">
-        <HeroSlider />
+        <HeroSlider data={sliderData} />
       </div>
 
-      {/* 1) This Weekly Moments */}
+      {/* 1) This Weekly Card */}
       <Band tone="blue">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-1">
             <HeadingBlock
-              title={t("This Weekly Moments")}
+              title={t("This Weekly Card")}
               description={t(
-                "Stay updated with this week’s top moments, from community gatherings to global highlights."
+                "Stay updated with this week's top moments, from community gatherings to global highlights."
               )}
-              to="/weekly-moments"
+              to="/cards-photos"
               ctaLabel={t("See more")}
             />
           </div>
@@ -123,7 +69,7 @@ export default function HomeContent() {
               <div className="relative w-[92%] md:w-[460px]">
                 <div className="absolute -right-3 -top-3 w-full h-full rounded-[32px] bg-gradient-to-br from-[#eef6ff] to-[#e6f0ff] shadow-[0_40px_80px_rgba(40,80,160,0.12)]" />
                 <div className="relative z-10">
-                  <WeeklyMomentsCard item={sampleMoment} />
+                  <WeeklyMomentsCard item={top1Data?.post_card} />
                 </div>
               </div>
             </div>
@@ -131,21 +77,21 @@ export default function HomeContent() {
         </div>
       </Band>
 
-      {/* 2) This Week’s Photos */}
+      {/* 2) This Week's Photos */}
       <Band tone="light">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-2 md:order-1">
             <div className="relative w-full md:w-[440px]">
               <div className="absolute left-0 -top-3 w-full h-[95%] rounded-[32px] bg-gradient-to-br from-[#eef6ff] to-[#e6f0ff] shadow-[0_40px_80px_rgba(40,80,160,0.12)]" />
               <div className="relative z-10 -ml-3">
-                <WeekPhotosCard item={samplePhoto} />
+                <WeekPhotosCard item={top1Data?.post_photo} />
               </div>
             </div>
           </div>
 
           <div className="order-1 md:order-2">
             <HeadingBlock
-              title={t("This Week’s Photos")}
+              title={t("This Week's Photos")}
               description={t(
                 "A visual snapshot of the week — photos that highlight stories, people, and places."
               )}
@@ -156,14 +102,14 @@ export default function HomeContent() {
         </div>
       </Band>
 
-      {/* 3) This Week’s Guided Reading */}
+      {/* 3) This Week's Guided Reading */}
       <Band tone="blue">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-1">
             <HeadingBlock
-              title={t("This Week’s Guided Reading")}
+              title={t("This Week's Guided Reading")}
               description={t(
-                "Dive into this week’s guided readings — inspiring stories, thoughtful articles, and meaningful reflections curated for you."
+                "Dive into this week's guided readings — inspiring stories, thoughtful articles, and meaningful reflections curated for you."
               )}
               to="/guiding-reading"
               ctaLabel={t("See more")}
@@ -175,7 +121,7 @@ export default function HomeContent() {
               <div className="relative w-[92%] md:w-[420px]">
                 <div className="absolute -right-3 -top-3 w-full h-full rounded-[24px] bg-gradient-to-br from-[#eef6ff] to-[#f7fbff] shadow-[0_40px_80px_rgba(40,80,160,0.12)]" />
                 <div className="relative z-10">
-                  <GuidingReadingcard item={sampleReading} />
+                  <GuidingReadingcard item={top1Data?.post_reading} />
                 </div>
               </div>
             </div>
@@ -183,14 +129,14 @@ export default function HomeContent() {
         </div>
       </Band>
 
-      {/* 4) This Week’s Full Videos */}
+      {/* 4) This Week's Full Videos */}
       <Band tone="light">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-2 md:order-1">
             <div className="relative w-full md:w-[560px]">
               <div className="relative z-10 ml-3 md:ml-6">
                 <div className="rounded-[24px] overflow-hidden h-[320px] md:h-[360px]">
-                  <VideoCard className="h-full w-full" item={sampleFullVideo} />
+                  <VideoCard className="h-full w-full" item={top1Data?.video} />
                 </div>
               </div>
             </div>
@@ -198,7 +144,7 @@ export default function HomeContent() {
 
           <div className="order-1 md:order-2">
             <HeadingBlock
-              title={t("This Week’s Full Videos")}
+              title={t("This Week's Full Video")}
               description={t(
                 "Watch the full videos of the week — complete stories, in-depth talks, and powerful highlights brought to life on screen."
               )}
@@ -209,14 +155,14 @@ export default function HomeContent() {
         </div>
       </Band>
 
-      {/* 5) This Week’s Unit Videos */}
+      {/* 5) This Week's Unit Videos */}
       <Band tone="blue">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-1">
             <HeadingBlock
-              title={t("This Week’s Unit Videos")}
+              title={t("This Week's Event")}
               description={t(
-                "Watch this week’s featured videos — stories, reports, and highlights captured in motion."
+                "Watch this week's events and stay up-to-date on the most important happenings"
               )}
               to="/videos/unit"
               ctaLabel={t("See more")}
@@ -227,7 +173,7 @@ export default function HomeContent() {
             <div className="relative w-full md:w-[560px]">
               <div className="relative z-10 -mr-3 md:-mr-0">
                 <div className="rounded-[24px] overflow-hidden h-[320px] md:h-[360px]">
-                  <VideoCard className="h-full w-full" item={sampleUnitVideo} />
+                  <VideoCard className="h-full w-full" item={top1Data?.event} />
                 </div>
               </div>
             </div>

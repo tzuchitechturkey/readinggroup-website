@@ -28,8 +28,8 @@ const VideoCard = ({ item, className = "" }) => {
           <div className="relative h-full flex-shrink-0">
             {/* Start Image */}
             <img
-              src={item.thumbnail || item?.thumbnail_url}
-              alt={item.title}
+              src={item?.thumbnail || item?.thumbnail_url}
+              alt={item?.title}
               className="w-full h-[200px] object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
@@ -57,14 +57,14 @@ const VideoCard = ({ item, className = "" }) => {
                 {t(item?.category?.name)}
               </span>
               <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-                {item.duration} : 00 m
+                {item?.duration} : 00 m
               </span>
             </div>
 
             {/* Start Title */}
             <div className="absolute bottom-6 left-3">
               <h3 className="text-white font-semibold text-sm group-hover:text-blue-400 transition-colors">
-                {item.title}
+                {item?.title}
               </h3>
             </div>
 

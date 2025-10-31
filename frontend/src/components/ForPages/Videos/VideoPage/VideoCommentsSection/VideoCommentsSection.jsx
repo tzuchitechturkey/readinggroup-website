@@ -406,9 +406,9 @@ function VideoCommentsSection({ videoId }) {
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
-            src={`${BASE_URL}/${userImage}`}
+            src={userImage ? `${BASE_URL}/${userImage}` : "/fake-user.png"}
             alt="me"
-            className="p-[3px] border-[1px] border-gray-300 w-8 h-8 rounded-full object-cover"
+            className="w-7 h-7 rounded-full object-cover"
           />
           <div className="flex-1">
             <input
@@ -488,9 +488,9 @@ function VideoCommentsSection({ videoId }) {
                       src={
                         c.user?.profile_image_url ||
                         c.user?.profile_image ||
-                        "/icons/User 1.png"
+                        "/fake-user.png"
                       }
-                      alt={c.user?.display_name || "User"}
+                      alt={c.user?.display_name || "Usersss"}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   </Link>
@@ -498,16 +498,17 @@ function VideoCommentsSection({ videoId }) {
                     <div className="flex items-center gap-2">
                       {/* Start Writer Name */}
                       <span className="font-semibold text-sm text-gray-900">
-                        {c.user?.display_name || "User"}
+                        {c.user?.display_name || "Userss"}
                       </span>
+                      {/* End Writer Name */}
                       {/* Start Date */}
                       <span className="text-gray-400 text-xs">
                         {c.created_at.split("T")[0]}
                       </span>
-
+                      {/* End Date */}
                       {/* Start Follow Button */}
                       {+userId !== c?.user?.id &&
-                        !c?.user?.is_friend &&
+                        !c?.friend_request_status &&
                         !c?.user?.is_blocked && (
                           <button
                             onClick={() => handleFollow(c.user?.id)}
@@ -627,18 +628,38 @@ function VideoCommentsSection({ videoId }) {
                               className="flex items-start gap-2"
                             >
                               <img
-                                src={reply.avatar || "/Beared Guy02-min 1.png"}
+                                src={
+                                  reply?.user?.profile_image_url ||
+                                  reply?.user?.profile_image ||
+                                  "/fake-user.png"
+                                }
                                 alt={reply.user?.display_name || "User"}
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
+                                  {/* Start User */}
                                   <span className="font-semibold text-xs text-gray-900">
                                     {reply.user?.display_name || "User"}
                                   </span>
+                                  {/* End User */}
+                                  {/* Start Date */}
                                   <span className="text-gray-400 text-xs">
                                     {reply.created_at.split("T")[0]}
                                   </span>
+                                  {/* End Date */}
+                                  {/* Start Follow Button */}
+                                  {+userId !== reply?.user?.id &&
+                                    !reply?.friend_request_status &&
+                                    !reply?.user?.is_blocked && (
+                                      <button
+                                        onClick={() => handleFollow(c.user?.id)}
+                                        className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
+                                      >
+                                        <FiUserPlus size={18} />
+                                      </button>
+                                    )}
+                                  {/* End Follow Button */}
                                 </div>
                                 {editingReplyId === reply.id ? (
                                   <div className="mt-3 flex flex-col gap-2">
@@ -712,24 +733,25 @@ function VideoCommentsSection({ videoId }) {
                                       {reply.likes_count || 0}
                                     </span>
                                   </button>
-
-                                  <button
-                                    className="text-xs hover:text-red-500"
-                                    onClick={() =>
-                                      handleDeleteReply(reply.id, c.id)
-                                    }
-                                  >
-                                    {t("Delete")}
-                                  </button>
-
-                                  {!editingReplyId && (
+                                  {+userId === reply?.user?.id && (
                                     <button
-                                      className="text-xs hover:text-blue-500"
-                                      onClick={() => handleEditReply(reply)}
+                                      className="text-xs hover:text-red-500"
+                                      onClick={() =>
+                                        handleDeleteReply(reply.id, c.id)
+                                      }
                                     >
-                                      {t("Edit")}
+                                      {t("Delete")}
                                     </button>
                                   )}
+                                  {!editingReplyId &&
+                                    +userId === reply?.user?.id && (
+                                      <button
+                                        className="text-xs hover:text-blue-500"
+                                        onClick={() => handleEditReply(reply)}
+                                      >
+                                        {t("Edit")}
+                                      </button>
+                                    )}
                                 </div>
                               </div>
                             </li>
@@ -742,7 +764,11 @@ function VideoCommentsSection({ videoId }) {
                     {activeReplyComment === c.id && (
                       <div className="mt-4 flex items-start gap-2 pl-4">
                         <img
-                          src={`${BASE_URL}/${userImage}`}
+                          src={
+                            userImage
+                              ? `${BASE_URL}/${userImage}`
+                              : "/fake-user.png"
+                          }
                           alt="me"
                           className="w-6 h-6 rounded-full object-cover"
                         />

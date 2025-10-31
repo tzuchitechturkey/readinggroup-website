@@ -92,8 +92,8 @@ function EventsFilter({
             }
             onChange={(selected) => updateFilter("report_type", selected)}
             placeholder={t("Select Type")}
-            renderLabel={(item) => item?.name || item}
-            renderValue={(item) => item?.name || item}
+            renderLabel={(item) => t(item?.name)}
+            renderValue={(item) => item?.name}
             searchable={true}
           />
         </div>
@@ -247,7 +247,7 @@ function EventsFilter({
               <Button
                 variant="outline"
                 onClick={handleClearFilters}
-                className="text-red-600 border-red-600 hover:bg-red-50"
+                className="w-full text-red-600 border-red-600 hover:bg-red-50"
               >
                 {t("Clear All Filters")}
               </Button>

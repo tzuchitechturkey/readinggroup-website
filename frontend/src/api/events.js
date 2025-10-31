@@ -130,3 +130,17 @@ export async function EditCommentEvent(data) {
 export async function DeleteCommentEvent(data) {
   return await axios.delete(`/comments/events/`, data);
 }
+
+// top
+export async function GetTopEventsLiked() {
+  return await axios.get(`/events/top-liked/`);
+}
+export async function GetTopEventsViewed() {
+  return await axios.get(`/events/top-viewed/`);
+}
+export async function GetTopEventsLastPosted() {
+  return await axios.get(`/events/last-posted/`);
+}
+export async function GetTopEventsCommented() {
+  return await axios.get(`/events/top-commented/`);
+}

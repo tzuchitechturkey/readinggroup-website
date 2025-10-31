@@ -38,7 +38,7 @@ function SearchSecion({
             <Input
               type="text"
               placeholder={t("Search items, collections, and accounts")}
-              className="pl-8 sm:pl-10 pr-4 py-3 sm:py-4 lg:py-5 w-full border border-primary rounded-lg sm:rounded-xl lg:rounded-2xl outline-none text-sm sm:text-base"
+              className="pl-8 sm:px-10 pr-4 py-3 sm:py-4 lg:py-5 w-full border border-primary rounded-lg sm:rounded-xl lg:rounded-2xl outline-none text-sm sm:text-base"
               onChange={(e) => {
                 setSearchValueLocal(e.target.value);
                 setSearchValue(e.target.value);

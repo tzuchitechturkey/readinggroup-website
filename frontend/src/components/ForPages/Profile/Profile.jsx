@@ -34,6 +34,7 @@ function Profile({ myUserId, userId }) {
     about_me: "",
     website_address: "",
   });
+
   const getProfileData = async () => {
     setIsLoading(true);
     try {
@@ -130,7 +131,7 @@ function Profile({ myUserId, userId }) {
   useEffect(() => {
     getProfileData();
   }, [userId, update]);
-
+  console.log(data);
   return (
     <div
       className="space-y-6 my-5 p-1"
@@ -156,17 +157,17 @@ function Profile({ myUserId, userId }) {
                 </AvatarFallback>
               </Avatar>
               <div className="mt-4 text-xs border font-semibold">
-                <span>{data?.display_name || data?.username || "Unknown"}</span>
+                <span>{data?.display_name}</span>
               </div>
-              <div className="text-[11px] border text-[#5B6B79]">
+              <div className="text-[11px] border text-[#5B6B79] my-2">
                 {data?.profession_name || "Not specified"}
               </div>
-              {+userId !== myUserId && (
+              {+userId !== +myUserId && (
                 <button
                   onClick={() => handleFollow(userId)}
                   className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200 flex items-center gap-1 mt-3 border px-3 py-1 rounded-full hover:bg-blue-50"
                 >
-                  {data?.is_friend ? (
+                  {data?.friend_request_status ? (
                     <>
                       <FiUserX className="w-4 h-4" />
                       <span className="text-sm font-medium">

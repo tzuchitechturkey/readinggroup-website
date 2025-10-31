@@ -9,7 +9,6 @@ import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent
 function TopFiveSectionCard({ item, index }) {
   const isMobile = useIsMobile();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
-
   const navigate = useNavigate();
   return (
     <div
@@ -67,7 +66,7 @@ function TopFiveSectionCard({ item, index }) {
         <div className="relative w-full 2xl:w-[210px] h-40 lg:h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
           <img
             src={
-              item?.report_type === "videos"
+              item?.report_type === "videos" || item?.video_type
                 ? item?.thumbnail || item?.thumbnail_url
                 : item?.image || item?.image_url
             }

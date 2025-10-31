@@ -47,7 +47,6 @@ function VideosPageContent() {
     getMyListedVideos();
     getLikedVideos();
   }, []);
-
   return (
     <div
       className="min-h-screen bg-gray-100"

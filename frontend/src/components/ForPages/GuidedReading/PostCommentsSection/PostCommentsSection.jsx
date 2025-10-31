@@ -413,7 +413,7 @@ function PostCommentsSection({ postId }) {
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
           <img
-            src={`${BASE_URL}/${userImage}`}
+            src={userImage ? `${BASE_URL}/${userImage}` : "/fake-user.png"}
             alt="me"
             className="w-7 h-7 rounded-full object-cover"
           />
@@ -492,7 +492,11 @@ function PostCommentsSection({ postId }) {
                 <div className="flex items-start gap-2">
                   <Link to={`/profile/${c.user?.id}`}>
                     <img
-                      src={c.avatar || "/Beared Guy02-min 1.png"}
+                      src={
+                        c.user?.profile_image_url ||
+                        c.user?.profile_image ||
+                        "/fake-user.png"
+                      }
                       alt={c.user?.display_name}
                       className="w-8 h-8 rounded-full object-cover"
                     />
@@ -630,18 +634,37 @@ function PostCommentsSection({ postId }) {
                               className="flex items-start gap-2"
                             >
                               <img
-                                src={reply.avatar || "/Beared Guy02-min 1.png"}
+                                src={
+                                  reply?.user?.profile_image_url ||
+                                  "/fake-user.png"
+                                }
                                 alt={reply.user?.display_name}
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
+                                  {/* Start User Info */}
                                   <span className="font-semibold text-xs text-gray-900">
                                     {reply.user?.display_name}
                                   </span>
+                                  {/* End User Info */}
+                                  {/* Start Date */}
                                   <span className="text-gray-400 text-xs">
                                     {reply.created_at.split("T")[0]}
                                   </span>
+                                  {/* End Date */}
+                                  {/* Start Follow Button */}
+                                  {+userId !== reply?.user?.id &&
+                                    !reply?.friend_request_status &&
+                                    !reply?.user?.is_blocked && (
+                                      <button
+                                        onClick={() => handleFollow(c.user?.id)}
+                                        className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
+                                      >
+                                        <FiUserPlus size={18} />
+                                      </button>
+                                    )}
+                                  {/* End Follow Button */}
                                 </div>
                                 {editingReplyId === reply.id ? (
                                   <div className="mt-3 flex flex-col gap-2">
@@ -716,23 +739,26 @@ function PostCommentsSection({ postId }) {
                                     </span>
                                   </button>
 
-                                  <button
-                                    className="text-xs hover:text-red-500"
-                                    onClick={() =>
-                                      handleDeleteReply(reply.id, c.id)
-                                    }
-                                  >
-                                    {t("Delete")}
-                                  </button>
-
-                                  {!editingReplyId && (
+                                  {+userId === reply?.user?.id && (
                                     <button
-                                      className="text-xs hover:text-blue-500"
-                                      onClick={() => handleEditReply(reply)}
+                                      className="text-xs hover:text-red-500"
+                                      onClick={() =>
+                                        handleDeleteReply(reply.id, c.id)
+                                      }
                                     >
-                                      {t("Edit")}
+                                      {t("Delete")}
                                     </button>
                                   )}
+
+                                  {!editingReplyId &&
+                                    +userId === reply?.user?.id && (
+                                      <button
+                                        className="text-xs hover:text-blue-500"
+                                        onClick={() => handleEditReply(reply)}
+                                      >
+                                        {t("Edit")}
+                                      </button>
+                                    )}
                                 </div>
                               </div>
                             </li>
@@ -745,7 +771,11 @@ function PostCommentsSection({ postId }) {
                     {activeReplyComment === c.id && (
                       <div className="mt-4 flex items-start gap-2 pl-4">
                         <img
-                          src={`${BASE_URL}/${userImage}`}
+                          src={
+                            userImage
+                              ? `${BASE_URL}/${userImage}`
+                              : "/fake-user.png"
+                          }
                           alt="me"
                           className="w-6 h-6 rounded-full object-cover"
                         />

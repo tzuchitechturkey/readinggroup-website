@@ -1,79 +1,35 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Download, Share2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
-import { GetEventById, PatchEventById } from "@/api/events";
+import { GetEventById, GetTopEventsViewed, PatchEventById } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-const NewsHero = ({
-  mainArticle = null,
-  sideArticles = [],
-  className = "",
-}) => {
+import NewsCard from "../Events/NewsCard/NewsCard";
+
+const NewsHero = ({ className = "" }) => {
   const { t, i18n } = useTranslation();
   const { id: paramId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [userId, setUserId] = useState();
-  const [data, setData] = useState({});
-  // Default data if no props are provided
-  const defaultMainArticle = {
-    id: 1,
-    title: "Supporting Kiran's Path to Healing and Independence",
-    description:
-      "A young Nepali girl overcomes disability with community support, medical care, and encouragement on her journey to walk again.",
-    writer: "Ai Ping Teoh",
-    date: "Jan 23, 2025",
-    country: "Nepal",
-    image: "/testCard.png",
-    category: "Health",
+  const [sideEventData, setSideEventData] = useState([]);
+  const [eventData, setEventData] = useState({});
+  const getEventsData = async () => {
+    try {
+      const res = await GetTopEventsViewed();
+      setSideEventData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch side events data:", err);
+    }
   };
-
-  const defaultSideArticles = [
-    {
-      id: 2,
-      title: "AI Breakthrough: Machines Now Write Poetry?",
-      writer: "Alex Johnson",
-      date: "Jan 13, 2025",
-      image: "/1-top5.jpg",
-    },
-    {
-      id: 3,
-      title: "The Future of Remote Work in 2025",
-      writer: "Emily Carter",
-      date: "Jan 10, 2025",
-      image: "/2-top5.jpg",
-    },
-    {
-      id: 4,
-      title: "The Truth About Social Media Algorithms",
-      writer: "John Doe",
-      date: "Jan 13, 2025",
-      image: "/3-top5.jpg",
-    },
-    {
-      id: 5,
-      title: "The Truth About Social Media Algorithms",
-      writer: "John Doe",
-      date: "Jan 13, 2025",
-      image: "/4-top5.jpg",
-    },
-    {
-      id: 6,
-      title: "The Future of Work: Are Offices a Thing of the Past?",
-      writer: "Michael Torres",
-      date: "Jan 13, 2025",
-      image: "/testCard.png",
-    },
-  ];
 
   // Event handlers - يمكن تخصيصها حسب الحاجة
   const handleArticleClick = () => {
@@ -81,19 +37,18 @@ const NewsHero = ({
   };
   // دالة الإعجاب
   const handleLike = async () => {
-    console.log("asd111");
     try {
-      const newLikedState = !data?.has_liked;
+      const newLikedState = !eventData?.has_liked;
 
-      await PatchEventById(data.id, {
+      await PatchEventById(eventData?.id, {
         has_liked: newLikedState,
       });
-      setData({
-        ...data,
+      setEventData({
+        ...eventData,
         has_liked: newLikedState,
         likes_count: newLikedState
-          ? data?.likes_count + 1
-          : data?.likes_count - 1,
+          ? eventData?.likes_count + 1
+          : eventData?.likes_count - 1,
       });
       toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch (err) {
@@ -107,10 +62,10 @@ const NewsHero = ({
   // دالة تحميل الصورة
   const handleDownloadImage = () => {
     try {
-      const imageUrl = data.image;
+      const imageUrl = eventData?.image;
       const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `${data.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${eventData?.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -122,12 +77,11 @@ const NewsHero = ({
       toast.error(t("Failed to download image"));
     }
   };
-  const [isShareOpen, setIsShareOpen] = useState(false);
   const getData = async () => {
     setIsLoading(true);
     try {
       const res = await GetEventById(paramId);
-      setData(res.data);
+      setEventData(res.data);
     } catch (err) {
       console.error("Failed to fetch event data:", err);
     } finally {
@@ -139,6 +93,11 @@ const NewsHero = ({
     setUserId(storedUserId);
     getData();
   }, [paramId]);
+
+  useEffect(() => {
+    getEventsData();
+  }, []);
+  console.log(sideEventData);
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
@@ -148,14 +107,14 @@ const NewsHero = ({
       <div className="flex flex-col gap-6 flex-1 max-w-4xl news-hero-main">
         {/* Start TItle */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-text leading-tight tracking-tight">
-          {data.title}
+          {eventData?.title}
         </h1>
         {/* End Title */}
         {/* Start Image */}
         <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
           <img
-            src={data.image}
-            alt={data.title}
+            src={eventData?.image}
+            alt={eventData?.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
@@ -163,7 +122,7 @@ const NewsHero = ({
         {/* ENd Image */}
         {/* Start Description */}
         <p className="text-base md:text-lg text-text leading-relaxed">
-          {data.description || data.summary}
+          {eventData?.description || eventData?.summary}
         </p>
         {/* End description */}
         {/* Start Article Info */}
@@ -171,20 +130,20 @@ const NewsHero = ({
           {/* left: writer & date */}
           <div className="flex items-center gap-4">
             <span className="text-base md:text-lg">
-              {t("By")} {data.writer}
+              {t("By")} {eventData?.writer}
             </span>
             <div className="w-px h-6 bg-white opacity-50" />
-            <span className="text-base md:text-lg">{data.date}</span>
+            <span className="text-base md:text-lg">{eventData?.date}</span>
           </div>
 
           {/* right: country pill + image controls */}
           <div className="flex items-center gap-3">
             <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
-              {data.country}
+              {eventData?.country}
             </span>
 
             <ImageControls
-              has_liked={data?.has_liked}
+              has_liked={eventData?.has_liked}
               onLike={handleLike}
               onExpandImage={handleOpenImage}
               onDownloadImage={handleDownloadImage}
@@ -225,7 +184,7 @@ const NewsHero = ({
 
       {/* Start Side Articles */}
       <div className="flex flex-col gap-1 w-full lg:w-80 flex-shrink-0 news-hero-sidebar news-sidebar max-h-screen overflow-y-auto">
-        {/* {data?.map((sideArticle) => (
+        {sideEventData?.map((sideArticle) => (
           <NewsCard
             key={sideArticle.id}
             t={t}
@@ -233,7 +192,7 @@ const NewsHero = ({
             onClick={handleArticleClick}
             imgClassName="w-20 h-20"
           />
-        ))} */}
+        ))}
       </div>
       {/* End Side Articles */}
       {/* Start Share Modal */}
@@ -241,7 +200,7 @@ const NewsHero = ({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={data.title}
+        title={eventData?.title}
       />
       {/* End Share Modal */}
 
@@ -250,11 +209,11 @@ const NewsHero = ({
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: data.image,
-          title: data.title,
-          subtitle: data.category,
-          writer: data.writer,
-          details: `${data.date} • ${data.country}`,
+          image: eventData?.image,
+          title: eventData?.title,
+          subtitle: eventData?.category,
+          writer: eventData?.writer,
+          details: `${eventData?.date} • ${eventData?.country}`,
         }}
         onDownloadImage={handleDownloadImage}
         isRTL={i18n.language === "ar"}

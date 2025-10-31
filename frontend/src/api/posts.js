@@ -135,6 +135,7 @@ export async function TopCommentedPosts() {
   return await axios.get(`/posts/top-commented-card-photo/?limit=5`);
 }
 
+// xxx is is coming empty
 export async function weeklyMomentsPosts() {
   return await axios.get(`/weekly-moments/top-liked/?limit=5`);
 }
@@ -144,13 +145,10 @@ export async function TopLikedPosts() {
   return await axios.get(`/posts/top-liked-grouped/`);
 }
 
-// X X X X X
 export async function WeeklyCardPhotoPosts() {
   return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
 }
 
 export async function WeeklyReadingPosts() {
-  return await axios.get(`/posts/reading/`);
+  return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
 }
-//  /api/content/posts/card_photo/
-//  /api/content/posts/reading/

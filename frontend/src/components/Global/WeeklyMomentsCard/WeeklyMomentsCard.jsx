@@ -8,20 +8,21 @@ function WeeklyMomentsCard({ item }) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/guiding-reading/weekly-moments/${item.id}`);
+    console.log("Navigating to card with ID:", item?.id);
+    navigate(`/cards-photos/card/${item?.id}`);
   };
 
   return (
     <div
       onClick={handleCardClick}
-      className="bg-[#fff]   p-3 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  "
+      className="bg-[#fff] p-3 rounded-2xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-[0_0_5px_rgba(0,0,0,0.3)]  "
     >
       {/* Start Image */}
-      <div className="relative aspect-video overflow-hidden rounded-lg">
+      <div className="relative  aspect-video overflow-hidden rounded-lg">
         <img
-          src={item.image}
-          alt={item.title}
-          className="w-full h-full object-cover shadow-2xl"
+          src={item?.image}
+          alt={item?.title}
+          className="w-full   h-[250px] object-cover shadow-2xl"
           style={{
             filter:
               "drop-shadow(0 10px 25px rgba(255, 255, 255, 0.1)) drop-shadow(0 4px 15px rgba(255, 255, 255, 0.08))",
@@ -41,14 +42,14 @@ function WeeklyMomentsCard({ item }) {
         <div className="text-xs flex items-center gap-1">
           <span className="text-primary">SEPT 02</span>
           <span className="  text-xs">
-            {t("STARTING AT")} {item.startTime}
+            {t("STARTING AT")} {item?.startTime}
           </span>
         </div>
         {/* End Date */}
 
         {/* Start Title */}
         <h3 className="  font-semibold text-[16px] my-5 leading-tight">
-          {item.title}
+          {item?.title}
         </h3>
         {/* End Title */}
 
@@ -56,15 +57,15 @@ function WeeklyMomentsCard({ item }) {
         <div className="flex justify-around text-xs">
           <div>
             <div className="text-primary font-semibold mb-[6px]">Type</div>
-            <div className="text-text">{item.type}</div>
+            <div className="text-text">{item?.type}</div>
           </div>
           <div>
             <div className="text-primary font-semibold mb-[6px]">Source</div>
-            <div className="text-text">{item.source}</div>
+            <div className="text-text">{item?.source}</div>
           </div>
           <div>
             <div className="text-primary font-semibold mb-[6px]">Language</div>
-            <div className="text-text">{item.language}</div>
+            <div className="text-text">{item?.language}</div>
           </div>
         </div>
         {/* End Type, Source, Language */}

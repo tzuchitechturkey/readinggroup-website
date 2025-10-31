@@ -21,7 +21,6 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 function EventsFilterSections() {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [viewMode, setViewMode] = useState("grid");
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
   const [sectionsList, setSectionsList] = useState([]);

@@ -1,7 +1,16 @@
 import * as React from "react";
 
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Play, Info, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Info,
+  Plus,
+  FolderOpen,
+  Globe,
+  SquareDashedMousePointer,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
@@ -12,100 +21,94 @@ import {
 } from "@/components/ui/carousel";
 import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 
-function ArrowButton({ side, onClick, label }) {
-  const isLeft = side === "left";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className={[
-        "absolute top-1/2 -translate-y-1/2 z-20 transition",
-        isLeft ? "left-3 md:left-6" : "right-3 md:right-6",
-        "h-11 w-11 md:h-12 md:w-12 grid place-items-center rounded-full",
-        "bg-white/15 text-white backdrop-blur-sm shadow-lg",
-        "ring-1 ring-white/20 hover:bg-white/25 hover:ring-white/30",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0b63d6]",
-      ].join(" ")}
-    >
-      {isLeft ? (
-        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
-      ) : (
-        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
-      )}
-    </button>
-  );
-}
-
-export default function CarouselDemo({ newsPage = false }) {
+export default function HeroSlider({ newsPage = false, data = null }) {
   const { t } = useTranslation();
   const isMobile = useIsMobile(1024);
 
-  const homePageSlider = [
-    {
-      id: 1,
-      image: "/authback.jpg",
-      h1Line1: t("Discover Weekly Moments, Photos"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— all in one place."),
-      description: t(
-        "Stay connected with highlights, inspiring stories, and community updates every week."
-      ),
-      primaryTo: "/videos",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 2,
-      image: "/authback.jpg",
-      h1Line1: t("Explore Guided Reading"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— curated for you."),
-      description: t(
-        "Dive into inspiring readings and thoughtful insights every week."
-      ),
-      primaryTo: "/guiding-reading",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 3,
-      image: "/authback.jpg",
-      h1Line1: t("Browse Cards & Photos"),
-      h1Line2Prefix: "",
-      h1Line2Under: t("— captured weekly."),
-      description: t(
-        "Visual snapshots that highlight stories, people, and places."
-      ),
-      primaryTo: "/cards-photos",
-      secondaryTo: "/connect",
-    },
-  ];
-  const newsPageSlider = [
-    {
-      id: 1,
-      image: "/authback.jpg",
-      h1Line1: t("Warm discussion"),
-      description: t(
-        "Stay connected with highlights, inspiring stories, and community updates every week."
-      ),
-      primaryTo: "/videos",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 2,
-      image: "/authback.jpg",
-      h1Line1: t("Drama"),
-      primaryTo: "/guiding-reading",
-      secondaryTo: "/about/history",
-    },
-    {
-      id: 3,
-      image: "/authback.jpg",
-      h1Line1: t("Event Reports"),
-      primaryTo: "/cards-photos",
-      secondaryTo: "/connect",
-    },
-  ];
+  const homePageSlider = React.useMemo(() => {
+    if (!data) return [];
+
+    const slides = [];
+
+    // Slide 1: Videos
+    if (data?.videos && data?.videos.length > 0) {
+      const mainVideo = data?.videos[0];
+      slides.push({
+        id: "videos",
+        image: mainVideo.thumbnail || mainVideo.thumbnail_url,
+        h1Line1: mainVideo.title || t("This Week's Videos"),
+        h1Line2Prefix: "",
+        h1Line2Under: t("— watch now"),
+        description:
+          mainVideo.description ||
+          t(
+            "Watch this week's featured videos — stories, reports, and highlights captured in motion."
+          ),
+        primaryTo: `/videos/${mainVideo.id}`,
+        secondaryTo: "/videos",
+        allData: data?.videos,
+      });
+    }
+
+    // Slide 2: Guided Reading
+    if (data?.posts_reading && data?.posts_reading.length > 0) {
+      const mainReading = data?.posts_reading[0];
+      slides.push({
+        id: "reading",
+        image: mainReading.image || mainReading.image_url || "/authback.jpg",
+        h1Line1: mainReading.title || t("Guided Reading"),
+        h1Line2Prefix: "",
+        h1Line2Under: t("— Readings for you"),
+        description:
+          mainReading.description ||
+          t("Dive into inspiring readings and thoughtful insights every week."),
+        primaryTo: `/guiding-reading/card/${mainReading.id}`,
+        secondaryTo: "/guiding-reading",
+        allData: data?.posts_reading,
+      });
+    }
+
+    // Slide 3: Cards & Photos
+    if (data?.posts_card_photo && data?.posts_card_photo.length > 0) {
+      const mainCard = data?.posts_card_photo[0];
+      slides.push({
+        id: "cards",
+        image: mainCard.image || mainCard.image_url || "/authback.jpg",
+        h1Line1: mainCard.title || t("Cards & Photos"),
+        h1Line2Prefix: "",
+        h1Line2Under: t("— Cards & Photos weekly"),
+        description:
+          mainCard.description ||
+          t("Visual snapshots that highlight stories, people, and places."),
+        primaryTo: `/cards-photos/card/${mainCard.id}`,
+        secondaryTo: "/cards-photos",
+        allData: data?.posts_card_photo,
+      });
+    }
+    // Slide 4: Top Section Events
+    if (data?.top_section?.id && data?.top_section?.events?.length > 0) {
+      const mainCard = data?.top_section?.events[0];
+      slides.push({
+        id: "events",
+        image: mainCard.image || mainCard.image_url,
+        h1Line1: mainCard.title,
+        h1Line2Prefix: "",
+        h1Line2Under: t("— Events weekly"),
+        description: mainCard.description,
+        primaryTo:
+          mainCard?.report_type === "videos"
+            ? `/events/video/${mainCard.id}`
+            : `events/${mainCard.id}`,
+        secondaryTo: "/events",
+        allData: data?.top_section?.events,
+      });
+    }
+
+    return slides;
+  }, [data, t]);
+
   const sliders = newsPage ? newsPageSlider : homePageSlider;
   const [api, setApi] = React.useState(null);
   const timerRef = React.useRef(null);
@@ -137,10 +140,16 @@ export default function CarouselDemo({ newsPage = false }) {
   }, [startAuto, stopAuto]);
 
   React.useEffect(() => {
-    if (!api) return;
-    startAuto();
-    return () => stopAuto();
-  }, [api, startAuto, stopAuto]);
+    if (api) {
+      startAuto();
+    }
+    return () => {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [api, startAuto]);
 
   return (
     <div className="w-full lg:pt-8">
@@ -225,11 +234,17 @@ export default function CarouselDemo({ newsPage = false }) {
                                 className="inline-flex items-center gap-2 rounded-md bg-white text-black px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow hover:brightness-95"
                                 aria-label={t("Play")}
                               >
-                                <Play
-                                  className="h-4 w-4 md:h-5 md:w-5 fill-black text-black"
-                                  aria-hidden="true"
-                                />
-                                {t("Play")}
+                                {slide?.id === "videos" ? (
+                                  <Play
+                                    className="h-4 w-4 md:h-5 md:w-5 fill-black text-black"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <SquareDashedMousePointer className="h-4 w-4 md:h-5 md:w-5 text-black" />
+                                )}
+                                {slide?.id === "videos"
+                                  ? t("Play")
+                                  : t("Browse Now")}
                               </Link>
 
                               <Link
@@ -253,7 +268,7 @@ export default function CarouselDemo({ newsPage = false }) {
                   {/* End Title && Actions */}
 
                   <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-10 z-10">
-                    <TopFiveSection />
+                    <TopFiveSection data={slide.allData} />
                   </div>
                 </div>
               </CarouselItem>

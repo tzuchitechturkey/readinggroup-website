@@ -33,7 +33,7 @@ export const userRoutes = [
   { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
   { path: "/guiding-reading/card/:id", element: <CardDetailsContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
-  { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
+  // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   {
     path: "/guiding-reading/weekly-moments/:id",
     element: <CardDetailsContent />,

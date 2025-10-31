@@ -114,12 +114,15 @@ const buildKpis = (t) => [
 ];
 
 function ChartCards() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const kpis = buildKpis(t);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+    <div
+      className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {kpis.map((k, i) => (
         <div
           key={k.id}

@@ -1,74 +1,49 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import NewsCard from "@/components/ForPages/Events/NewsCard/NewsCard";
 import RecommendationNewsCard from "@/components/ForPages/Events/RecommendationNewsCard/RecommendationNewsCard";
 import CategoryTag from "@/components/ForPages/Events/EventsCategoryTag/CategoryTag";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import {
+  GetTopEventsCommented,
+  GetTopEventsLastPosted,
+  GetTopEventsViewed,
+} from "@/api/events";
 
 const EventstNewsSection = () => {
-  const { t } = useTranslation();
-  // Static data - يمكن استبدالها ببيانات ديناميكية
+  const { t, i18n } = useTranslation();
+  const [lastPosted, setLastPosted] = React.useState([]);
+  const [topViewed, setTopViewed] = React.useState([]);
+  const [SuggestedData, setSuggestedData] = React.useState([]);
+  const navigate = useNavigate();
+  const getSuggestedData = async () => {
+    try {
+      const res = await GetTopEventsCommented();
+      setSuggestedData(res.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+  const getLastPosted = async () => {
+    try {
+      const res = await GetTopEventsLastPosted();
+      setLastPosted(res.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+  const getTopViewed = async () => {
+    try {
+      const res = await GetTopEventsViewed();
+      setTopViewed(res.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
   const data = {
-    recommendationNews: [
-      {
-        id: 1,
-        title: "Fitness Trends That Will Dominate This Year!",
-        writer: "John Deep",
-        date: "Jan 13, 2025",
-        category: "Health & Wellness",
-      },
-      {
-        id: 2,
-        title: "How Gen Z is Changing the Workplace Forever",
-        writer: "Ryan Cooper",
-        date: "Jan 13, 2025",
-        category: "Business & Economy",
-      },
-      {
-        id: 3,
-        title: "Gaming Industry Shakeup: What's Next for Esports?",
-        writer: "Jake Wilson",
-        date: "Dec 28, 2024",
-        category: "Gaming",
-      },
-    ],
-
-    trendingNews: [
-      {
-        id: 4,
-        title: "Inside the World's Most Advanced Smart Cities",
-        writer: "Olivia Cartere",
-        date: "Nov 14, 2024",
-        image: "/1-top5.jpg",
-        category: "Tech & Innovation",
-      },
-      {
-        id: 5,
-        title: "How Streaming Services Are Changing Entertainment",
-        writer: "Jason Mitchell",
-        date: "Jan 13, 2025",
-        image: "/2-top5.jpg",
-        category: "Entertainment",
-      },
-      {
-        id: 6,
-        title: "The Rise of Sustainable Fashion",
-        writer: "Emily Thompson",
-        date: "Jan 16, 2025",
-        image: "/3-top5.jpg",
-        category: "Lifestyle",
-      },
-      {
-        id: 7,
-        title: "New Space Missions Set to Change Astronomy",
-        writer: "Robert Chen",
-        date: "Jan 16, 2025",
-        image: "/4-top5.jpg",
-        category: "Science",
-      },
-    ],
-
     breakingNews: [
       {
         id: 8,
@@ -196,28 +171,34 @@ const EventstNewsSection = () => {
     </div>
   );
 
-  // Event handlers - يمكن تخصيصها حسب الحاجة
-  const handleArticleClick = () => {
-    // يمكن إضافة منطق التنقل هنا
-  };
-
   const handleCategoryClick = () => {
     // يمكن إضافة منطق التصفية هنا
   };
-
+  useEffect(() => {
+    getLastPosted();
+    getTopViewed();
+    getSuggestedData();
+  }, []);
   return (
-    <div className="w-full text-text py-4 sm:py-6 lg:py-8 print:bg-white print:text-black">
+    <div
+      className="w-full text-text py-4 sm:py-6 lg:py-8 print:bg-white print:text-black"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Recommendation News Section */}
         <section className="mb-12">
-          <SectionHeader title="Recommendation News" />
+          <SectionHeader title={t("Suggested for you")} />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {data.recommendationNews.map((article) => (
+            {SuggestedData?.slice(0, 3)?.map((article) => (
               <RecommendationNewsCard
                 t={t}
-                key={article.id}
+                key={article?.id}
                 article={article}
-                onClick={handleArticleClick}
+                onClick={() => {
+                  article?.report_type === "videos"
+                    ? navigate(`/events/video/${article?.id}`)
+                    : navigate(`/events/${article?.id}`);
+                }}
               />
             ))}
           </div>
@@ -229,14 +210,18 @@ const EventstNewsSection = () => {
           <div className="lg:col-span-3 space-y-8 lg:space-y-16 order-1">
             {/* Trending Now */}
             <section>
-              <SectionHeader title="Trending Now" />
+              <SectionHeader title={t("Trending Now")} />
               <div className="  space-y-2 mt-5">
-                {data.trendingNews.map((article) => (
+                {topViewed?.map((article) => (
                   <NewsCard
                     t={t}
-                    key={article.id}
+                    key={article?.id}
                     article={article}
-                    onClick={handleArticleClick}
+                    onClick={() => {
+                      article?.report_type === "videos"
+                        ? navigate(`/events/video/${article?.id}`)
+                        : navigate(`/events/${article?.id}`);
+                    }}
                     imgClassName=" md:!w-40 md:!h-28 "
                   />
                 ))}
@@ -244,20 +229,20 @@ const EventstNewsSection = () => {
             </section>
 
             {/* Breaking News */}
-            <section>
+            {/* <section>
               <SectionHeader title="Breaking News" />
               <div className=" space-y-2 mt-5">
                 {data.breakingNews.map((article) => (
                   <NewsCard
                     imgClassName=" md:!w-40 md:!h-28 "
                     t={t}
-                    key={article.id}
+                    key={article?.id}
                     article={article}
-                    onClick={handleArticleClick}
+                    onClick={() => {}}
                   />
                 ))}
               </div>
-            </section>
+            </section> */}
           </div>
 
           {/* Right Column - Sidebar (2/5 width) */}
@@ -266,12 +251,12 @@ const EventstNewsSection = () => {
             <section>
               <SectionHeader title="Latest Updates" ornamentHeight="h-10" />
               <div className="   max-h-screen overflow-y-auto mt-5 scrollbar-thin">
-                {data.latestUpdates.map((article) => (
+                {lastPosted?.map((article) => (
                   <NewsCard
                     t={t}
-                    key={article.id}
+                    key={article?.id}
                     article={article}
-                    onClick={handleArticleClick}
+                    onClick={() => {}}
                   />
                 ))}
               </div>

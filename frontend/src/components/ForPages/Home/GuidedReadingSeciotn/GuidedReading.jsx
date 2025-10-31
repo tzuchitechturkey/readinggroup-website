@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import { TopLikedPosts, WeeklyReadingPosts } from "@/api/posts";
+import { TopLikedPosts,   } from "@/api/posts";
 
 const GuidedReading = () => {
   const { t } = useTranslation();

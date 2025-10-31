@@ -36,8 +36,8 @@ function CardsAndPhotosTabs() {
 
   // Mapping tabs to API functions
   const tabApiFunctions = {
-    "Suggested for you": weeklyMomentsPosts,
-    "Incentive Cards": TopCommentedPosts,
+    "Suggested for you": TopCommentedPosts,
+    "Incentive Cards": weeklyMomentsPosts,
     "Needlework Love": TopLikedPosts,
     "Weekly Posts": WeeklyCardPhotoPosts,
   };
@@ -49,7 +49,7 @@ function CardsAndPhotosTabs() {
       const apiFunction = tabApiFunctions[tabName];
       if (apiFunction) {
         const response = await apiFunction();
-        // console.log(`Data for ${tabName}:`, response);
+        console.log(`Data for ${tabName}:`, response);
         setTabData((prev) => ({
           ...prev,
           [tabName]: response?.data?.card_photo || response?.data,
@@ -183,10 +183,13 @@ function CardsAndPhotosTabs() {
         </TabsContent>
       </Tabs>
       {/* Start Dynamic Grid  */}
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
         {/* Start Image */}
-        <Link to={`/cards-photos/card/${tabData["Needlework Love"]?.[0]?.id}`} className="order-2 lg:order-1 mt-0 lg:mt-8">
+        <Link
+          to={`/cards-photos/card/${tabData["Needlework Love"]?.[0]?.id}`}
+          className="order-2 lg:order-1 mt-0 lg:mt-8"
+        >
           <img
             src={tabData["Needlework Love"]?.[0]?.image}
             alt="Weekly featured image"

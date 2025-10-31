@@ -7,11 +7,11 @@ import EventsFilterSections from "@/components/ForPages/Events/EventsFilterSecti
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import EventCard from "@/components/Global/EventCard/EventCard";
 import { EventsData } from "@/mock/events";
-import { GetTop5Event } from "@/api/events";
+import { GetTop5Event, GetTopEventsLiked } from "@/api/events";
 
 function EventsPageContent() {
   const { t, i18n } = useTranslation();
-  const [data, setData] = useState([]);
+  const [topLiked, setTopLiked] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const getSuggestionsData = async () => {
     try {
@@ -21,16 +21,16 @@ function EventsPageContent() {
       console.log("Error fetching data", err);
     }
   };
-  const getSuggestions = async () => {
+  const getTopLiked = async () => {
     try {
-      const res = await getSuggestions();
-      setData(res.data);
+      const res = await GetTopEventsLiked();
+      setTopLiked(res.data);
     } catch (err) {
       console.log("Error fetching data", err);
     }
   };
   useEffect(() => {
-    //   getSuggestions();
+    getTopLiked();
     getSuggestionsData();
   }, []);
   return (
@@ -56,9 +56,9 @@ function EventsPageContent() {
         viewMoreUrl="/guiding-reading"
       />
       <DynamicSection
-        title={t("Suggestions you might like")}
+        title={t("Most Liked events")}
         titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5 "
-        data={EventsData?.breakingNews}
+        data={topLiked}
         isSlider={true}
         cardName={EventCard}
         viewMore={false}
