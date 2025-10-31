@@ -4,13 +4,13 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthentic
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+from .helpers import annotate_likes_queryset
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
 )
-
 from .models import (
     Event,
     HistoryEntry,
@@ -87,28 +87,6 @@ class BaseContentViewSet(viewsets.ModelViewSet):
                 # fallback: ignore annotation if something fails
                 pass
         return queryset
-
-
-def annotate_likes_queryset(queryset, request=None):
-    """Module-level helper to annotate a queryset with likes count and (when request.user authenticated) has_liked.
-
-    This mirrors BaseContentViewSet.annotate_likes but is usable from function/class-based views.
-    """
-    try:
-        queryset = queryset.annotate(annotated_likes_count=Count('likes'))
-    except Exception:
-        return queryset
-
-    if request and getattr(request, 'user', None) and request.user.is_authenticated:
-        try:
-            ct = ContentType.objects.get_for_model(queryset.model)
-            likes_subq = Like.objects.filter(content_type=ct, object_id=OuterRef('pk'), user=request.user)
-            queryset = queryset.annotate(annotated_has_liked=Exists(likes_subq))
-        except Exception:
-            # ignore failures to annotate has_liked
-            pass
-    return queryset
-
     @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
     def top_liked(self, request):
         """Return top liked instances for this resource.
@@ -852,7 +830,6 @@ class EventSectionViewSet(BaseContentViewSet):
 
         return Response(result)
     
-
 class CombinedTopLikedView(viewsets.ViewSet):
     """Return a combined payload with several top-liked groups in a single response.
 
@@ -929,7 +906,11 @@ class CombinedTopLikedView(viewsets.ViewSet):
         total_reading = Post.objects.filter(post_type=PostType.READING).count()
         total_videos = Video.objects.count()
         total_events = Event.objects.count()
+        total_weekly_moments = WeeklyMoment.objects.count()
         total_posts = Post.objects.count()
+
+        # Aggregate posts_total as sum of Post, Video, Event and WeeklyMoment counts
+        total_all_content = total_posts + total_videos + total_events + total_weekly_moments
 
         return Response({
             "posts_card_photo": card_photo_data,
@@ -941,7 +922,8 @@ class CombinedTopLikedView(viewsets.ViewSet):
                 "posts_reading": total_reading,
                 "videos": total_videos,
                 "events": total_events,
-                "posts_total": total_posts,
+                "weekly_moments": total_weekly_moments,
+                "posts_total": total_all_content,
             }
         })
 
