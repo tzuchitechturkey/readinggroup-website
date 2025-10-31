@@ -137,8 +137,13 @@ class SeasonId(models.Model):
     class Meta:
         ordering = ("season_title__name",)
 
-    def __str__(self) -> str: 
-        return self.season_title.name
+    def __str__(self) -> str:
+        # Show the actual season_id string in admin selects and reprs so
+        # dropdowns display the id value instead of the SeasonTitle name.
+        try:
+            return self.season_id
+        except Exception:
+            return ""
     
     
 class Post(LikableMixin, TimestampedModel):

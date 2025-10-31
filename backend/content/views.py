@@ -832,6 +832,41 @@ class SeasonIdViewSet(BaseContentViewSet):
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     
+    @action(detail=False, methods=("get", "post"), url_path="for-title", url_name="for_title")
+    def for_title(self, request):
+        """Return SeasonId(s) associated with a given season_title.
+
+        Accepts either GET with ?season_title=... or POST with JSON { "season_title": "..." }.
+        Behavior:
+        - If `SeasonTitle` with that name doesn't exist, it will be created.
+        - If one or more `SeasonId` objects exist for that title, they are returned
+          (as a list).
+        - If none exist, a new SeasonId will be created with `season_id` equal to
+          the provided title and returned.
+        """
+        # Accept from query params (GET) or body (POST)
+        if request.method == "POST":
+            title = request.data.get("season_title")
+        else:
+            title = request.query_params.get("season_title")
+
+        if not title:
+            return Response({"detail": "season_title is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure SeasonTitle exists
+        season_title_obj, _ = SeasonTitle.objects.get_or_create(name=title)
+
+        # Find related SeasonId entries
+        related = SeasonId.objects.filter(season_title=season_title_obj)
+        if related.exists():
+            serializer = self.get_serializer(related, many=True, context={"request": request})
+            return Response(serializer.data)
+
+        # No SeasonId exists for this title -> create one using the title as season_id
+        created = SeasonId.objects.create(season_title=season_title_obj, season_id=title)
+        serializer = self.get_serializer(created, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
 class LikeViewSet(BaseContentViewSet):
     """ViewSet for managing Like content."""
     queryset = Like.objects.all()
