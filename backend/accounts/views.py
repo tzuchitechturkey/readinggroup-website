@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
 from rest_framework import generics, permissions, status , serializers, filters
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -87,6 +88,42 @@ class FriendRequestActionView(APIView):
             # allow both sides to block; create or update inverse request as BLOCKED too
             fr.block()
             return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+
+
+class UnfriendView(APIView):
+    """Remove an existing friendship (accepted FriendRequest) between the
+    authenticated user and the target user (by id).
+
+    DELETE /api/v1/friend-requests/unfriend/{user_id}/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, user_id):
+        try:
+            target = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if target == request.user:
+            return Response({"detail": "Cannot unfriend yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # find any accepted friend requests in either direction
+        qs = FriendRequest.objects.filter(
+            (Q(from_user=request.user, to_user=target) | Q(from_user=target, to_user=request.user)),
+            status=FriendRequest.STATUS_ACCEPTED,
+        )
+
+        # if none found, inform caller
+        if not qs.exists():
+            return Response({"detail": "Friendship not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # delete the accepted friendship records
+        try:
+            qs.delete()
+        except Exception:
+            return Response({"detail": "Failed to remove friendship."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"detail": "Friendship removed.", "user": UserSerializer(target, context={"request": request}).data}, status=status.HTTP_200_OK)
 
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
