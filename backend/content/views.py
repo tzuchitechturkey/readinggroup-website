@@ -817,6 +817,13 @@ class PositionTeamMemberViewSet(BaseContentViewSet):
     serializer_class = PositionTeamMemberSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    
+class SeasonIdViewSet(BaseContentViewSet):
+    """ViewSet for managing SeasonId content."""
+    queryset = SeasonId.objects.all()
+    serializer_class = SeasonIdSerializer
+    search_fields = ("identifier",)
+    ordering_fields = ("created_at",)
 
 class SeasonTitleViewSet(BaseContentViewSet):
     """ViewSet for managing SeasonTitle content."""
