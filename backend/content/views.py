@@ -511,7 +511,7 @@ class EventViewSet(BaseContentViewSet):
     serializer_class = EventSerializer
     search_fields = ("title",)
     ordering_fields = ("happened_at", "created_at")
-    filterset_fields = ("section", "category", "country", "language", "report_type")
+    filterset_fields = ("section", "category", "country", "language", "report_type", "tags")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
@@ -570,6 +570,14 @@ class EventViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                 queryset =queryset.filter(report_type__in=values)
+                
+        tags = params.get("tags")
+        if tags:
+            values = []
+            for item in tags.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(tags__in=values)
             
         return queryset
     
