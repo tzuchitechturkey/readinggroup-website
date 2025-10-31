@@ -18,6 +18,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serialize the public profile of a user."""
     datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
+    friend_request_status = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     class Meta:
@@ -36,7 +37,8 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "date_joined",
             "groups",
             "profile_image_url",
-            "status"
+            "status",
+            "friend_request_status",
         )
         read_only_fields = (
             "id",
@@ -59,6 +61,34 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return "No pending friend requests."
         except Exception:
             return "Status unavailable."
+
+    def get_friend_request_status(self, obj):
+        """Return the FriendRequest.status string between the requesting user and `obj`, or None.
+
+        This mirrors the behavior of `FriendRequestStatusMixin.get_friend_request_status` used
+        in `content` serializers: it returns the exact status string (e.g. "PENDING", "ACCEPTED")
+        when a FriendRequest exists in either direction, otherwise None. If the request user
+        is not authenticated or is the same as `obj`, return None.
+        """
+        request = self.context.get('request')
+        if not request or not getattr(request, 'user', None) or not request.user.is_authenticated:
+            return None
+
+        requester = request.user
+        # don't expose relationship to self
+        if requester == obj:
+            return None
+
+        try:
+            fr = FriendRequest.objects.filter(from_user=requester, to_user=obj).first()
+            if fr:
+                return fr.status
+            fr = FriendRequest.objects.filter(from_user=obj, to_user=requester).first()
+            if fr:
+                return fr.status
+        except Exception:
+            return None
+        return None
 
     def get_profile_image_url(self, obj):
         request = self.context.get('request')

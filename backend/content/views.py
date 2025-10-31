@@ -28,9 +28,6 @@ from .models import (
     Like,
     MyListEntry,
 )
-
-from django.db.models import Count, Exists, OuterRef
-from django.contrib.contenttypes.models import ContentType
 from .enums import VideoType, PostType
 from .serializers import (
     EventSerializer,

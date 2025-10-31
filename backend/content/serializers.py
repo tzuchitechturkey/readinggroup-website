@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from accounts.serializers import UserSerializer
 from .helpers import (
     AbsoluteURLSerializer,
-    FriendRequestStatusMixin,
     VideoCategorySerializer,
     PostCategorySerializer,
     EventCategorySerializer,
@@ -30,13 +29,12 @@ from .models import (
     PostRating,
 )
 
-class ReplySerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, serializers.ModelSerializer):
+class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
     user = UserSerializer(read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
     comment = serializers.PrimaryKeyRelatedField(queryset=Comments.objects.all(), required=False)
-    friend_request_status = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Reply
@@ -48,7 +46,6 @@ class ReplySerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, seriali
             "created_at",
             "likes_count",
             "has_liked",
-            "friend_request_status"
         )
 
     def validate(self, attrs):
@@ -82,14 +79,13 @@ class ReplySerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, seriali
         return False
 
 
-class CommentsSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, serializers.ModelSerializer):
+class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
     user = UserSerializer(read_only=True)
     replies = ReplySerializer(many=True, read_only=True)
     content_type = serializers.CharField(write_only=True, required=False)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
-    friend_request_status = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Comments
@@ -103,7 +99,6 @@ class CommentsSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, seri
             "object_id",
             "likes_count",
             "has_liked",
-            "friend_request_status"
         )
 
     def to_representation(self, instance):
@@ -175,15 +170,15 @@ class CommentsSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, seri
             validated_data["user"] = user
         return super().create(validated_data)
 
-class VideoSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
-    # nested comments info
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
     has_in_my_list = serializers.SerializerMethodField(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Video
         fields = "__all__"
@@ -205,12 +200,6 @@ class VideoSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolut
                 data["has_in_my_list"] = False
         except Exception:
             data["has_in_my_list"] = False
-        # include friend_request_status from mixin (if available)
-        try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
-        except Exception:
-            data["friend_request_status"] = None
-        return data
 
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
@@ -231,9 +220,18 @@ class VideoSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolut
             return MyListEntry.objects.filter(user=user, video=obj).exists()
         except Exception:
             return False
+        
+    def get_user(self, obj):
+        try:
+            target = self._resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
+        except Exception:
+            pass
+        return None
 
 
-class PostSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
     datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
@@ -243,6 +241,7 @@ class PostSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolute
     average_rating = serializers.SerializerMethodField(read_only=True)
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Post
         fields = "__all__"
@@ -279,12 +278,6 @@ class PostSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolute
                 data['user_rating'] = None
         except Exception:
             data['user_rating'] = None
-        # include friend_request_status from mixin (if available)
-        try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
-        except Exception:
-            data["friend_request_status"] = None
-        return data
 
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
@@ -332,14 +325,26 @@ class PostSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolute
         except Exception:
             return None
 
+    def get_user(self, obj):
+        """Return the user associated with the post, or None."""
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return None
+        try:
+            return UserSerializer(user, context=self.context).data
+        except Exception:
+            return None
 
-class EventSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+
+class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
     section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Event
         fields = "__all__"
@@ -359,12 +364,6 @@ class EventSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolut
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
         data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
-        # include friend_request_status from mixin (if available)
-        try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
-        except Exception:
-            data["friend_request_status"] = None
-        return data
 
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
@@ -376,23 +375,35 @@ class EventSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Absolut
             return obj.has_liked(user)
         return False
     
-class WeeklyMomentSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+    def get_user(self, obj):
+        try:
+            target = self._resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
+        except Exception:
+            pass
+        return None
+class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "created_at", "updated_at")
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = WeeklyMoment
         fields = "__all__"
         file_fields = ("image",)
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
+
+    def get_user(self, obj):
         try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
+            target = self._resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
         except Exception:
-            data["friend_request_status"] = None
-        return data
-        
-class TeamMemberSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+            pass
+        return None
+
+class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     position = serializers.PrimaryKeyRelatedField(queryset=PositionTeamMember.objects.all(), write_only=True, required=False)
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = TeamMember
         fields = "__all__"
@@ -400,24 +411,29 @@ class TeamMemberSerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, Ab
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["position"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
+    
+    def get_user(self, obj):
         try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
+            target = self._resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
         except Exception:
-            data["friend_request_status"] = None
-        return data
+            pass
+        return None
 
 
-class HistoryEntrySerializer(FriendRequestStatusMixin, DateTimeFormattingMixin, AbsoluteURLSerializer):
+class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("story_date", "created_at", "updated_at")
+    user = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = HistoryEntry
         fields = "__all__"
         file_fields = ("image",)
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
+    
+    def get_user(self, obj):
         try:
-            data["friend_request_status"] = self.get_friend_request_status(instance)
+            target = self._resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
         except Exception:
-            data["friend_request_status"] = None
-        return data
-        
+            pass
