@@ -125,12 +125,12 @@ class SeasonTitleAdmin(admin.ModelAdmin):
     
 @admin.register(SeasonId)
 class SeasonIdAdmin(admin.ModelAdmin):
-    list_display = ("season_title_name", "season_id")
-    search_fields = ("season_title__name", "season_id")
+    list_display = ("season_name", "season_id")
+    search_fields = ("season_name__name", "season_id")
 
-    def season_title_name(self, obj):
-        return obj.season_title.name if obj.season_title else None
-    season_title_name.short_description = "season_title"
+    def season_name(self, obj):
+        return obj.season_name.name if obj.season_name else None
+    season_name.short_description = "season_name"
     
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):

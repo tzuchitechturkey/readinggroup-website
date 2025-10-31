@@ -250,8 +250,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
-    season_name = serializers.PrimaryKeyRelatedField(queryset=SeasonTitle.objects.all(), write_only=True, required=False)
-    season_id = serializers.PrimaryKeyRelatedField(queryset=SeasonId.objects.all(), write_only=True, required=False)
+    season_name = serializers.PrimaryKeyRelatedField(queryset=SeasonId.objects.all(), write_only=True, required=False)
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
@@ -265,8 +264,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["season_title"] = SeasonTitleSerializer(instance.season_name, context=self.context).data if instance.season_name else None
-        data["season_id"] = SeasonIdSerializer(instance.season_id, context=self.context).data if instance.season_id else None
+        data["season_name"] = SeasonIdSerializer(instance.season_name, context=self.context).data if instance.season_name else None
         data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
         request = self.context.get("request")
         user = getattr(request, "user", None)
