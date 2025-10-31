@@ -599,7 +599,52 @@ class EventViewSet(BaseContentViewSet):
         qs = self.annotate_likes(qs)
 
         serializer = EventSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)    
+        return Response(serializer.data)
+    
+    #add new action for top 5 in viewed
+    @action(detail=False, methods=("get",), url_path="top-viewed", url_name="top_viewed")
+    def top_viewed(self, request):
+        """Return top viewed instances for this resource.
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = self.get_queryset()
+        # if model has 'views' field, order by it; fallback to created_at if not
+        try:
+            qs = qs.order_by('-views', '-created_at')[:limit]
+        except Exception:
+            qs = qs.order_by('-created_at')[:limit]
+
+        # annotate likes info as well so serializers can show likes_count/has_liked
+        qs = self.annotate_likes(qs)
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    #add new action last 5 posted for Event
+    @action(detail=False, methods=("get",), url_path="last-posted", url_name="last_posted")
+    def last_posted(self, request):
+        """Return last posted instances for this resource.
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = self.get_queryset()
+        qs = qs.order_by('-created_at')[:limit]
+
+        # annotate likes info as well so serializers can show likes_count/has_liked
+        qs = self.annotate_likes(qs)
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+    
 
 class WeeklyMomentViewSet(BaseContentViewSet):
     """ViewSet for managing WeeklyMoment content."""
