@@ -127,9 +127,9 @@ function RegisterForm() {
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
-        className="max-w-96 bg-white mx-auto flex-col gap-4 py-6 px-8  rounded-lg shadow-md"
+        className="max-w-80 max-h-[600px] overflow-auto bg-white mx-auto flex-col gap-4 py-6 px-8  rounded-lg shadow-md"
       >
-        <h1 className="text-2xl ">{t("Sign Up")}</h1>
+        <h1 className="text-xl ">{t("Sign Up")}</h1>
 
         <input
           type="text"
@@ -137,7 +137,7 @@ function RegisterForm() {
           value={form.username}
           onChange={handleChange}
           placeholder={t("Username")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-6 placeholder:text-black/50 text-sm ${
+          className={`outline-none rounded-lg bg-gray-100 p-2 w-full mt-4 placeholder:text-black/50 text-xs ${
             inputErrors.username ? "border border-red-500" : ""
           }`}
         />
@@ -169,7 +169,7 @@ function RegisterForm() {
           value={form.displayName}
           onChange={handleChange}
           placeholder={t("Display Name")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4 placeholder:text-black/50 text-sm ${
+          className={`outline-none rounded-lg bg-gray-100 p-2 w-full mt-3 placeholder:text-black/50 text-xs ${
             inputErrors.displayName ? "border border-red-500" : ""
           }`}
         />
@@ -180,19 +180,19 @@ function RegisterForm() {
           value={form.email}
           onChange={handleChange}
           placeholder={t("Email")}
-          className={`outline-none rounded-lg bg-gray-100 p-3 w-full mt-4 placeholder:text-black/50 text-sm ${
+          className={`outline-none rounded-lg bg-gray-100 p-2 w-full mt-3 placeholder:text-black/50 text-xs ${
             inputErrors.email ? "border border-red-500" : ""
           }`}
         />
         {/* Start Password */}
-        <div className=" relative mt-4">
+        <div className=" relative mt-3">
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             value={form.password}
             onChange={handleChange}
             placeholder={t("Password")}
-            className={`outline-none rounded-lg bg-gray-100 p-3 w-full  placeholder:text-black/50 text-sm  ${
+            className={`outline-none rounded-lg bg-gray-100 p-2 w-full  placeholder:text-black/50 text-xs  ${
               form.confirmPassword === form?.password && form.password
                 ? "border border-green-700"
                 : ""
@@ -239,15 +239,15 @@ function RegisterForm() {
           </span>
           {/* End Toggle show/hide password */}
           {form.password && (
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-gray-500">
+            <div className="flex items-center gap-1 mb-1">
+              <span className="text-[10px] text-gray-500">
                 {t("Security level")}
               </span>
-              <div className="flex gap-1">
+              <div className="flex gap-0.5">
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className={`block w-6 h-2 rounded ${
+                    className={`block w-4 h-1.5 rounded ${
                       passwordStrength > i
                         ? strengthColors[passwordStrength]
                         : "bg-gray-200"
@@ -261,14 +261,14 @@ function RegisterForm() {
         {/* End Password */}
 
         {/* Start Re-Type Password */}
-        <div className=" relative mt-4">
+        <div className=" relative mt-3">
           <input
             type={showReTypePassword ? "text" : "password"}
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}
             placeholder={t("Confirm Password")}
-            className={`outline-none rounded-lg bg-gray-100 p-3 w-full   placeholder:text-black/50 text-sm ${
+            className={`outline-none rounded-lg bg-gray-100 p-2 w-full   placeholder:text-black/50 text-xs ${
               form.confirmPassword === form?.password && form.password
                 ? "border border-green-700"
                 : ""
@@ -317,21 +317,21 @@ function RegisterForm() {
         </div>
         {/* End Re-Type Password */}
 
-        {error && <div style={{ color: "red", fontSize: 14 }}>{error}</div>}
+        {error && <div style={{ color: "red", fontSize: 12 }}>{error}</div>}
 
         <button
           type="submit"
-          className="bg-primary text-white w-full py-3 rounded-md mt-6 hover:opacity-90 transition-opacity"
+          className="bg-primary text-white w-full py-2 rounded-md mt-4 hover:opacity-90 transition-opacity text-xs"
         >
           {t("Sign Up")}
         </button>
-        <div className="flex flex-wrap gap-2 mt-5 mb-2">
+        <div className="flex flex-wrap gap-1 mt-3 mb-1">
           {requirements.map((req) => {
             const passed = req.test.test(form.password);
             return (
               <div
                 key={req.key}
-                className={`flex items-center gap-1 px-5 py-1 rounded text-xs font-medium ${
+                className={`flex items-center gap-0.5 px-3 py-0.5 rounded text-[10px] font-medium ${
                   passed
                     ? "bg-green-50 text-green-600"
                     : "bg-gray-100 text-gray-400"
@@ -364,11 +364,11 @@ function RegisterForm() {
             );
           })}
         </div>
-        <div className="flex items-center justify-center mt-8">
-          <span className="text-sm text-gray-400 mr-2">
+        <div className="flex items-center justify-center mt-5">
+          <span className="text-xs text-gray-400 mr-1">
             {t("Do you have an account?")}
           </span>
-          <Link to="/auth/login" className="text-sm text-primary font-semibold">
+          <Link to="/auth/login" className="text-xs text-primary font-semibold">
             {t("Sign In")}
           </Link>
         </div>

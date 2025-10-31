@@ -150,10 +150,10 @@ function LoginForm() {
       {isLoading && <Loader />}
       <form
         onSubmit={handleSubmit}
-        className="max-w-sm bg-white mx-auto flex flex-col gap-4 py-8 px-8 rounded-lg shadow-md"
+        className="max-w-80 max-h-[600px] overflow-auto bg-white mx-auto flex flex-col gap-3 py-6 px-6 rounded-lg shadow-md"
       >
         {/* Form Title */}
-        <h1 className="text-2xl font-semibold text-center mb-2">
+        <h1 className="text-xl font-semibold text-center mb-1">
           {isAdminLogin ? t("Admin Sign In") : t("Sign In")}
         </h1>
 
@@ -185,7 +185,7 @@ function LoginForm() {
         </div>
            */}
         {/* Username Input */}
-        <div className="space-y-2 mb-2">
+        <div className="space-y-1 mb-1">
           <input
             type="text"
             value={userName}
@@ -199,7 +199,7 @@ function LoginForm() {
               }
             }}
             placeholder={t("Email")}
-            className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
+            className={`outline-none rounded-lg bg-gray-100 p-2 w-full placeholder:text-black/50 text-xs transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
               inputErrors.userName ? "border border-red-500" : ""
             }`}
           />
@@ -211,7 +211,7 @@ function LoginForm() {
         </div>
 
         {/* Password Input */}
-        <div className="  relative">
+        <div className="relative">
           <div>
             <input
               type={showPassword ? "text" : "password"}
@@ -226,7 +226,7 @@ function LoginForm() {
                 }
               }}
               placeholder={t("Password")}
-              className={`outline-none rounded-lg bg-gray-100 p-3 w-full placeholder:text-black/50 text-sm transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
+              className={`outline-none rounded-lg bg-gray-100 p-2 w-full placeholder:text-black/50 text-xs transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
                 inputErrors.password ? "border border-red-500" : ""
               }`}
             />
@@ -281,17 +281,17 @@ function LoginForm() {
         {/* Submit Button */}
         <button
           type="submit"
-          className="bg-primary text-white w-full py-3 rounded-lg mt-4 hover:opacity-90 transition-opacity font-medium"
+          className="bg-primary text-white w-full py-2 rounded-md mt-3 hover:opacity-90 transition-opacity font-medium text-xs"
         >
           {t("Sign In")}
         </button>
 
         {/* forgot password */}
-        <div className="flex items-center justify-between mt-8">
+        <div className="flex items-center justify-between mt-5">
           <div className="">
             <button
               type="button"
-              className="text-sm text-primary focus:outline-none"
+              className="text-xs text-primary focus:outline-none"
               onClick={() => setShowResetModal(true)}
             >
               {t("forgot password ?")}
@@ -308,13 +308,13 @@ function LoginForm() {
         )}
 
         {/* Start Don't have an account? */}
-        <div className="flex items-center justify-center mt-4">
-          <span className="text-sm text-gray-400 mr-2">
+        <div className="flex items-center justify-center mt-3">
+          <span className="text-xs text-gray-400 mr-1">
             {t("Don't have an account?")}
           </span>
           <Link
             to="/auth/register"
-            className="text-sm text-primary font-semibold"
+            className="text-xs text-primary font-semibold"
           >
             {t("Sign Up")}
           </Link>
@@ -336,7 +336,7 @@ function LoginForm() {
               />
             </div>
           ) : (
-            <p className="text-center text-[11px] mt-3">
+            <p className="text-center text-[10px] mt-2">
               {t(
                 "This page is protected by Google reCAPTCHA to ensure you're not a bot."
               )}
