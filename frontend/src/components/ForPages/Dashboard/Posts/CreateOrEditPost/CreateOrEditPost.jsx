@@ -110,7 +110,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       setHasChanges(false);
     }
   }, [post]);
-
+  console.log(post);
   // Check for changes when formData changes
   useEffect(() => {
     if (post && initialFormData) {
@@ -430,7 +430,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             >
               {formData.image || formData.image_url ? (
                 <img
-                  src={formData.image}
+                  src={formData.image || formData.image_url}
                   alt="Preview"
                   className="w-full h-full object-cover rounded-lg"
                 />

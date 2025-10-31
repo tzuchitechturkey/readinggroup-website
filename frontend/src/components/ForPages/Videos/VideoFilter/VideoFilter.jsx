@@ -69,21 +69,20 @@ function VideoFilter({
               <h3 className="text-sm sm:text-base font-medium text-gray-900">
                 {t("Content Type")}
               </h3>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded">169</span>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="full-videos"
-                checked={contentType.includes("Full Videos")}
+                checked={contentType.includes("full_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "Full Videos"]);
+                    setContentType((prev) => [...prev, "full_video"]);
                   } else {
                     setContentType((prev) =>
-                      prev.filter((type) => type !== "Full Videos")
+                      prev.filter((type) => type !== "full_video")
                     );
                   }
                 }}
@@ -94,23 +93,20 @@ function VideoFilter({
               >
                 {t("Full Videos")}
               </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                111
-              </span>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="unit-video"
-                checked={contentType.includes("Unit Video")}
+                checked={contentType.includes("unit_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "Unit Video"]);
+                    setContentType((prev) => [...prev, "unit_video"]);
                   } else {
                     setContentType((prev) =>
-                      prev.filter((type) => type !== "Unit Video")
+                      prev.filter((type) => type !== "unit_video")
                     );
                   }
                 }}
@@ -121,9 +117,6 @@ function VideoFilter({
               >
                 {t("Unit Video")}
               </label>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                58
-              </span>
             </div>
           </div>
         </div>

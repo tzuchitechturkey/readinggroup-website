@@ -82,7 +82,7 @@ export default function AutoComplete({
           {selectedItem?.username ? (
             <>
               <img
-                src={selectedItem.profile_image}
+                src={selectedItem.profile_image || "/fake-user.png"}
                 alt={selectedItem.username}
                 className="w-8 h-8 rounded-full object-cover"
               />
@@ -153,7 +153,7 @@ export default function AutoComplete({
                     className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                   >
                     <img
-                      src={item.profile_image}
+                      src={item.profile_image ? item.profile_image : "/fake-user.png"}
                       alt={item.username}
                       className="w-8 h-8 rounded-full object-cover"
                     />

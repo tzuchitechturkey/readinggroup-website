@@ -18,8 +18,20 @@ export function UserSwitcher() {
 
     const newData = {};
 
-    if (username) newData.username = JSON.parse(username);
-    if (userImage) newData.profile_image_url = JSON.parse(userImage);
+    if (username) {
+      try {
+        newData.username = JSON.parse(username);
+      } catch {
+        newData.username = username;
+      }
+    }
+    if (userImage) {
+      try {
+        newData.profile_image_url = JSON.parse(userImage);
+      } catch {
+        newData.profile_image_url = userImage;
+      }
+    }
 
     if (Object.keys(newData).length > 0) {
       setData((prev) => ({ ...prev, ...newData }));
@@ -35,7 +47,11 @@ export function UserSwitcher() {
               {/* Start Avatar */}
               <div className=" flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                 <img
-                  src={`${BASE_URL}/${data?.profile_image_url}`}
+                  src={
+                    data?.profile_image_url
+                      ? `${BASE_URL}/${data?.profile_image_url}`
+                      : "/fake-user.png"
+                  }
                   alt="avatar"
                   className="h-8 w-8 rounded-full object-cover"
                 />
@@ -48,7 +64,7 @@ export function UserSwitcher() {
               >
                 {/* Start Name */}
                 <span className="truncate font-semibold mb-1">
-                  {data?.username}
+                  {data?.display_name || data?.username}
                 </span>
                 {/* End Name */}
               </div>

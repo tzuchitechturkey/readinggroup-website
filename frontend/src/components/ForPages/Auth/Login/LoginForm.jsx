@@ -66,7 +66,7 @@ function LoginForm() {
       const { data } = await Login({ username: userName, password });
       setTokens({ access: data?.access, refresh: data?.refresh });
       console.log(data);
-      toast.success("Login successful");
+      toast.success(t("Login successful"));
       if (data?.user?.is_first_login) {
         setShowFirstLoginModal(true);
       } else {
@@ -78,7 +78,7 @@ function LoginForm() {
         }
       }
     } catch (error) {
-      setErrorFn(error);
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +106,7 @@ function LoginForm() {
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         localStorage.setItem("userId", res?.data.user?.id);
         localStorage.setItem("userImage", res?.data.user?.profile_image_url);
+        localStorage.setItem("username", res?.data.user?.display_name);
 
         setShowTOTPModal(false);
         if (res?.data.user?.groups.includes("admin")) {
@@ -201,7 +202,7 @@ function LoginForm() {
                 });
               }
             }}
-            placeholder={t("Username Or Email")}
+            placeholder={t("Username or Email")}
             className={`outline-none rounded-lg bg-gray-100 p-2 w-full placeholder:text-black/50 text-xs transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
               inputErrors.userName ? "border border-red-500" : ""
             }`}

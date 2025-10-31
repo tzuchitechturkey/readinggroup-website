@@ -18,7 +18,13 @@ import { cn } from "@/lib/utils";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreateVideo, EditVideoById, GetVideoCategories } from "@/api/videos";
+import {
+  CreateVideo,
+  EditVideoById,
+  GetVideoCategories,
+  GetSeries,
+  GetSeasonsBySeriesId,
+} from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages } from "@/constants/constants";
 import {
@@ -34,6 +40,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [categoriesList, setCategoriesList] = useState([]);
+  const [seriesList, setSeriesList] = useState([]);
+  const [seasonsList, setSeasonsList] = useState([]);
+  const [selectedSeriesId, setSelectedSeriesId] = useState(null);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -56,7 +65,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     is_new: false,
     reference_code: "",
     video_url: "",
-    season: "",
+    season_name: "",
     happened_at: "",
     description: "",
     cast: [],
@@ -66,28 +75,37 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   useEffect(() => {
     if (video) {
       const initialData = {
-        title: video.title || "",
-        duration: video.duration || "",
-        category: video.category || "",
-        video_type: video.video_type || "",
-        language: video.language || "",
-        thumbnail: video.thumbnail, // Reset file input
-        thumbnail_url: video.thumbnail_url || "",
-        featured: video.featured || false,
-        is_new: video.is_new || false,
-        reference_code: video.reference_code || "",
-        video_url: video.video_url || "",
-        season: video.season || "",
-        happened_at: video.happened_at || "",
-        description: video.description || "",
-        cast: video.cast || [],
-        tags: video.tags || [],
+        title: video?.title || "",
+        duration: video?.duration || "",
+        category: video?.category || "",
+        video_type: video?.video_type || "",
+        language: video?.language || "",
+        thumbnail: video?.thumbnail, // Reset file input
+        thumbnail_url: video?.thumbnail_url || "",
+        featured: video?.featured || false,
+        is_new: video?.is_new || false,
+        reference_code: video?.reference_code || "",
+        video_url: video?.video_url || "",
+        season_name: video?.season_name?.id || "", // ID الـ season
+        happened_at: video?.happened_at || "",
+        description: video?.description || "",
+        cast: video?.cast || [],
+        tags: video?.tags || [],
       };
       setFormData(initialData);
       setInitialFormData(initialData);
       setHasChanges(false);
+
+      // Set series ID and fetch its seasons
+      const seriesId = video?.season_name?.season_title?.id;
+      if (seriesId) {
+        setSelectedSeriesId(seriesId);
+        // Fetch seasons for this series
+        fetchSeasonsBySeries(seriesId);
+      }
+
       // Set existing thumbnail preview
-      setImagePreview(video.thumbnail || null);
+      setImagePreview(video?.thumbnail || null);
     } else {
       setInitialFormData(null);
       setHasChanges(false);
@@ -100,6 +118,50 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setCategoriesList(res.data.results);
     } catch (err) {
       setErrorFn(err, t);
+    }
+  };
+
+  // Fetch Series
+  const fetchSeries = async () => {
+    try {
+      const res = await GetSeries();
+      setSeriesList(res?.data?.results || []);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+
+  // Fetch Seasons by Series ID
+  const fetchSeasonsBySeries = async (seriesId) => {
+    if (!seriesId) {
+      setSeasonsList([]);
+      return;
+    }
+    try {
+      const res = await GetSeasonsBySeriesId(seriesId);
+      setSeasonsList(res?.data?.results || []);
+    } catch (err) {
+      setErrorFn(err, t);
+      setSeasonsList([]);
+    }
+  };
+
+  // Handle Series Change
+  const handleSeriesChange = (e) => {
+    const seriesId = e.target.value;
+    setSelectedSeriesId(seriesId);
+    setFormData((prev) => ({
+      ...prev,
+      season_name: "", // Reset season when series changes
+    }));
+    fetchSeasonsBySeries(seriesId);
+
+    // Clear error if exists
+    if (errors.season_name) {
+      setErrors((prev) => ({
+        ...prev,
+        season_name: "",
+      }));
     }
   };
 
@@ -240,9 +302,10 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     if (!formData?.duration.trim()) {
       newErrors.duration = t("Duration is required");
     }
-
-    if (!formData?.season.trim()) {
-      newErrors.season = t("Season is required");
+    if (selectedSeriesId) {
+      if (!formData?.season_name) {
+        newErrors.season_name = t("Season is required");
+      }
     }
 
     if (!formData?.happened_at) {
@@ -316,7 +379,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formDataToSend.append("is_new", formData?.is_new);
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
-    formDataToSend.append("season", formData?.season);
+    formDataToSend.append("season_name", formData?.season_name);
     // Format happened_at to ISO 8601 format (YYYY-MM-DDThh:mm:ss)
     if (formData?.happened_at) {
       const formattedDate = format(
@@ -340,7 +403,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
     try {
       video?.id
-        ? await EditVideoById(video.id, formDataToSend)
+        ? await EditVideoById(video?.id, formDataToSend)
         : await CreateVideo(formDataToSend);
 
       toast.success(
@@ -377,6 +440,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
   useEffect(() => {
     getCategories();
+    fetchSeries();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -670,23 +734,76 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Type */}
-            {/* Start Season  */}
+            {/* Start Series Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Series")} *
+              </label>
+              <select
+                value={selectedSeriesId || ""}
+                onChange={handleSeriesChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  !selectedSeriesId ? "text-gray-400" : "text-black"
+                } border-gray-300`}
+              >
+                <option value="" disabled hidden>
+                  {t("Select Series")}
+                </option>
+                {seriesList.map((series) => (
+                  <option
+                    key={series.id}
+                    value={series.id}
+                    className="text-black"
+                  >
+                    {series.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* End Series Selection */}
+
+            {/* Start Season Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Season")} *
               </label>
-              <Input
-                name="season"
-                value={formData?.season}
+              <select
+                name="season_name"
+                value={formData?.season_name}
                 onChange={handleInputChange}
-                placeholder={t("Enter season number or name")}
-                className={errors.season ? "border-red-500" : ""}
-              />
-              {errors.season && (
-                <p className="text-red-500 text-xs mt-1">{errors.season}</p>
+                disabled={!selectedSeriesId || seasonsList.length === 0}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.season_name ? "border-red-500" : "border-gray-300"
+                } ${!formData?.season_name ? "text-gray-400" : "text-black"} ${
+                  !selectedSeriesId || seasonsList.length === 0
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                <option value="" disabled hidden>
+                  {!selectedSeriesId
+                    ? t("Select series first")
+                    : seasonsList.length === 0
+                    ? t("No seasons available")
+                    : t("Select Season")}
+                </option>
+                {seasonsList.map((season) => (
+                  <option
+                    key={season.id}
+                    value={season.id}
+                    className="text-black"
+                  >
+                    {season.season_id}
+                  </option>
+                ))}
+              </select>
+              {errors.season_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.season_name}
+                </p>
               )}
             </div>
-            {/* End Season  */}
+            {/* End Season Selection */}
             {/* Start Happened At */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

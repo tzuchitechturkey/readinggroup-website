@@ -9,9 +9,7 @@ function AdminNavbar() {
     <div className="grid grid-cols-[auto_1fr] items-center shadow-md p-4 px-16 bg-bg relative">
       {/* Start Search  */}
       <div className="flex items-center justify-start">
-        <div className="relative -ml-6 z-20">
-          <SearchInput />
-        </div>
+        <div className="relative -ml-6 z-20">{/* <SearchInput /> */}</div>
       </div>
       {/* End Search  */}
       {/* Start User Icons */}

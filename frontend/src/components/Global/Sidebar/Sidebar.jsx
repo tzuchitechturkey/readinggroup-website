@@ -52,11 +52,11 @@ export default function AppSidebar({
   // This is sample data.
   const data = {
     footer: [
-      {
-        title: "Help",
-        icon: Help,
-        onClick: handleHelp,
-      },
+      // {
+      //   title: "Help",
+      //   icon: Help,
+      //   onClick: handleHelp,
+      // },
       {
         title: "Logout Account",
         icon: LogOut,
@@ -129,6 +129,10 @@ export default function AppSidebar({
           {
             title: "Videos Categories",
             onClick: () => onSectionChange("videosCategories"),
+          },
+          {
+            title: "Series & Seasons",
+            onClick: () => onSectionChange("seriesAndSeasons"),
           },
         ],
       },

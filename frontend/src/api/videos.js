@@ -175,3 +175,56 @@ export async function AddToMyList(videoId) {
 export async function RemoveFromMyList(videoId) {
   return await axios.delete(`/videos/${videoId}/my-list/`);
 }
+
+// Series
+export async function GetSeries() {
+  return await axios.get(`/season-titles/`);
+}
+
+export async function GetSeasonsBySeriesId(seriesId) {
+  return await axios.get(`/season-titles/${seriesId}/season-ids/`);
+}
+
+export async function CreateSeries(data) {
+  return await axios.post(`/season-titles/`, data);
+}
+
+export async function GetSeriesById(id) {
+  return await axios.get(`/season-titles/${id}/`);
+}
+
+export async function EditSeriesById(id, data) {
+  return await axios.put(`/season-titles/${id}/`, data);
+}
+
+export async function PatchSeriesById(id, data) {
+  return await axios.patch(`/season-titles/${id}/`, data);
+}
+
+export async function DeleteSeriesById(id) {
+  return await axios.delete(`/season-titles/${id}/`);
+}
+
+// Season
+export async function GetSeasons() {
+  return await axios.get(`/season-ids/`);
+}
+export async function CreateSeason(data) {
+  return await axios.post(`/season-ids/`, data);
+}
+
+export async function GetSeasonById(id) {
+  return await axios.get(`/season-ids/${id}/`);
+}
+
+export async function EditSeasonById(id, data) {
+  return await axios.put(`/season-ids/${id}/`, data);
+}
+
+export async function PatchSeasonById(id, data) {
+  return await axios.patch(`/season-ids/${id}/`, data);
+}
+
+export async function DeleteSeasonById(id) {
+  return await axios.delete(`/season-ids/${id}/`);
+}

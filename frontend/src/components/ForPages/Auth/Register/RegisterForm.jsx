@@ -117,7 +117,7 @@ function RegisterForm() {
       toast.success(t("Registration successful"));
       navigate("/auth/login");
     } catch (err) {
-      setErrorFn(err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }

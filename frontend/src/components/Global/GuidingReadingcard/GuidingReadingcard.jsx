@@ -45,7 +45,7 @@ function GuidingReadingcard({ item }) {
 
       <div className="text-center relative">
         <img
-          src={item?.image}
+          src={item?.image || item?.image_url}
           alt="Chinese Text"
           className="  w-full h-[200px] rounded-lg object-cover"
         />

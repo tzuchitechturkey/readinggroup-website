@@ -45,6 +45,11 @@ export async function SendUnFollowRequest(userId) {
   return await axios.post(`accounts/friend-requests/unfriend/${userId}/`); //"to_user": 0,
 }
 
+// Get Friend Requests
+export async function GetFriendRequests(userId) {
+  return await axios.get(`user/friend-requests/user/${userId}/`);
+}
+
 // Change Request Status
 export async function ChangeFriendRequestStatus(requestId, action) {
   return await axios.post(`/accounts/friend-requests/${requestId}/action/`, {

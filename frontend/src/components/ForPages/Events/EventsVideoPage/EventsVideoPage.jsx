@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+import { useTranslation } from "react-i18next";
+
 import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/CustomyoutubeVideo/CustomyoutubeVideo";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -9,6 +11,7 @@ import { GetEventById } from "@/api/events";
 import { GetTop5ViewedVideos } from "@/api/videos";
 
 function EventsVideoPage() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const videoId = window.location.pathname.split("/").pop();
   const [videoData, setVideoData] = useState(null);

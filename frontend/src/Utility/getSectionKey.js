@@ -10,6 +10,8 @@ export const getSectionKey = (title) => {
     Videos: "videos",
     "Videos Categories": "videosCategories",
     "Add New Video": "createOrEditVideo",
+    "Series & Seasons": "seriesAndSeasons",
+    "Videos Seasons": "videosSeasons",
     History: "history",
     "Our Team": "team",
     "Health Posts": "healthPosts",

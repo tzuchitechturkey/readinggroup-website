@@ -14,6 +14,7 @@ import DashboardFooter from "@/components/ForPages/Dashboard/DashboardFooter/Das
 import DashboardSections from "@/components/ForPages/Dashboard/DashboardSections/DashboardSections";
 import VideosList from "@/components/ForPages/Dashboard/Videos/VideosList/VideosList";
 import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/CreateOrEditVideo";
+import SeriesAndSeasonsList from "@/components/ForPages/Dashboard/Videos/SeriesAndSeasons/SeriesAndSeasonsList";
 import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
 import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
@@ -153,6 +154,7 @@ export default function Page() {
         videos: "Videos",
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
+        seriesAndSeasons: "Videos",
         newsList: "Tv",
         createOrEditNews: "Tv",
         newsCategories: "Tv",
@@ -193,6 +195,8 @@ export default function Page() {
         return (
           <VideosCategoriesContent onSectionChange={handleSectionChange} />
         );
+      case "seriesAndSeasons":
+        return <SeriesAndSeasonsList onSectionChange={handleSectionChange} />;
       case "createOrEditVideo":
         return (
           <CreateOrEditVideo
