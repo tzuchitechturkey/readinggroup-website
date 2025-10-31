@@ -5,12 +5,13 @@ import { useTranslation } from "react-i18next";
 import { ThumbsUp, Loader } from "lucide-react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import { FiUserPlus } from "react-icons/fi";
 
 import {
-  GetPostComments,
-  CreatePostComment,
-  DeletePostComment,
-  EditPostComment,
+  GetVideoComments,
+  CreateVideoComment,
+  DeleteVideoComment,
+  EditVideoComment,
   LikeComment,
   UnlikeComment,
   CreateCommentReply,
@@ -19,17 +20,17 @@ import {
   LikeReply,
   UnlikeReply,
   EditCommentReply,
-} from "@/api/posts";
-import { SendFriendRequest } from "@/api/auth";
+} from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { BASE_URL } from "@/configs";
+import { SendFriendRequest, SendUnFollowRequest } from "@/api/auth";
 
-function PostCommentsSection({ postId }) {
+function VideoCommentsSection({ itemId, type }) {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [comment, setComment] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
-
   // Comments state
   const [comments, setComments] = useState([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
@@ -51,10 +52,9 @@ function PostCommentsSection({ postId }) {
   const [editReplyText, setEditReplyText] = useState("");
   const [isEditingReply, setIsEditingReply] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [userImage, setUserImage] = useState();
-
   const commentsPerPage = 10;
-
+  const [userImage, setUserImage] = useState();
+  
   // 🌟 الاستماع للنقر خارج المكون
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -71,18 +71,18 @@ function PostCommentsSection({ postId }) {
 
   // Load comments
   useEffect(() => {
-    if (postId) {
+    if (itemId) {
       loadComments(0);
     }
-  }, [postId]);
-
+  }, [itemId]);
   const loadComments = async (page = 0) => {
     setIsLoadingComments(true);
     try {
-      const res = await GetPostComments(
+      const res = await GetVideoComments(
+        itemId,
         commentsPerPage,
         page * commentsPerPage,
-        postId
+        type
       );
       if (page === 0) {
         setComments(res.data?.results || []);
@@ -109,18 +109,9 @@ function PostCommentsSection({ postId }) {
       return;
     }
 
-    // تحقق من postId وحوله إلى رقم
-    if (!postId) {
-      console.error("postId is missing:", postId);
-      toast.error("Post ID is missing");
-      return;
-    }
-
     setIsSubmittingComment(true);
     try {
-      // تحويل postId إلى رقم
-      const commentPostId = parseInt(postId) || postId;
-      await CreatePostComment(commentPostId, comment.trim());
+      await CreateVideoComment(itemId, comment.trim(), type);
       setComment("");
       setShowPicker(false);
       toast.success(t("Comment added successfully"));
@@ -136,9 +127,9 @@ function PostCommentsSection({ postId }) {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      await DeletePostComment(commentId);
+      await DeleteVideoComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
-      toast.success(t("Comment deleted successfully1111"));
+      toast.success(t("Comment deleted successfully"));
     } catch (error) {
       console.error("Failed to delete comment:", error);
       toast.error(t("Failed to delete comment"));
@@ -159,7 +150,7 @@ function PostCommentsSection({ postId }) {
 
     setIsEditingComment(true);
     try {
-      await EditPostComment(commentId, editCommentText.trim());
+      await EditVideoComment(commentId, editCommentText.trim());
       setComments((prev) =>
         prev.map((c) => {
           if (c.id === commentId) {
@@ -214,45 +205,6 @@ function PostCommentsSection({ postId }) {
       );
     } catch (error) {
       console.error("Failed to like comment:", error);
-      toast.error(t("Failed to update like"));
-    }
-  };
-
-  // Like/unlike reply
-  const handleLikeReply = async (replyId, commentId, isLiked) => {
-    try {
-      if (isLiked) {
-        await UnlikeReply(replyId);
-      } else {
-        await LikeReply(replyId);
-      }
-
-      // Update local state
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c.id === commentId) {
-            return {
-              ...c,
-              replies:
-                c.replies?.map((r) => {
-                  if (r.id === replyId) {
-                    return {
-                      ...r,
-                      has_liked: !r.has_liked,
-                      likes_count: isLiked
-                        ? r.likes_count - 1
-                        : r.likes_count + 1,
-                    };
-                  }
-                  return r;
-                }) || [],
-            };
-          }
-          return c;
-        })
-      );
-    } catch (error) {
-      console.error("Failed to like reply:", error);
       toast.error(t("Failed to update like"));
     }
   };
@@ -337,6 +289,45 @@ function PostCommentsSection({ postId }) {
     }
   };
 
+  // Like/unlike reply
+  const handleLikeReply = async (replyId, commentId, isLiked) => {
+    try {
+      if (isLiked) {
+        await UnlikeReply(replyId);
+      } else {
+        await LikeReply(replyId);
+      }
+
+      // Update local state
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              replies:
+                c.replies?.map((r) => {
+                  if (r.id === replyId) {
+                    return {
+                      ...r,
+                      has_liked: !r.has_liked,
+                      likes_count: isLiked
+                        ? r.likes_count - 1
+                        : r.likes_count + 1,
+                    };
+                  }
+                  return r;
+                }) || [],
+            };
+          }
+          return c;
+        })
+      );
+    } catch (error) {
+      console.error("Failed to like reply:", error);
+      toast.error(t("Failed to update like"));
+    }
+  };
+
   // Edit reply
   const handleEditReply = (reply) => {
     setEditingReplyId(reply.id);
@@ -382,33 +373,49 @@ function PostCommentsSection({ postId }) {
       setIsEditingReply(false);
     }
   };
-  const handleFollow = async (followUserId) => {
+
+  const handleCancelEditReply = () => {
+    setEditingReplyId(null);
+    setEditReplyText("");
+  };
+  const handleFollow = async (followUserId, commentId) => {
     setIsLoading(true);
-    const payload = {
-      to_user: followUserId,
-    };
     try {
-      await SendFriendRequest(payload);
+      await SendFriendRequest({ to_user: followUserId });
       toast.success(t("Friend request sent successfully"));
+      
+      // تحديث حالة التعليق لإظهار أن طلب الصداقة تم إرساله
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return {
+              ...c,
+              user: {
+                ...c.user,
+                friend_request_status: true,
+              },
+            };
+          }
+          return c;
+        })
+      );
     } catch (error) {
       setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
-  const handleCancelEditReply = () => {
-    setEditingReplyId(null);
-    setEditReplyText("");
-  };
+
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const userImage = localStorage.getItem("userImage");
-    setUserId(userId);
-    setUserImage(JSON.parse(userImage));
+    if (userId) setUserId(userId);
+    if (userImage) setUserImage(JSON.parse(userImage));
   }, []);
 
   return (
     <div className="bg-white">
+      {isLoading && <Loader />}
       {/* Start Comment Editor */}
       <div className="w-full px-4 sm:px-6 lg:px-12 py-6">
         <div className="flex items-start gap-3 relative">
@@ -432,7 +439,7 @@ function PostCommentsSection({ postId }) {
               }}
             />
 
-            <div className="flex items-center justify-between mt-3 relative">
+            <div className="flex items-center  gap-2 mt-3 relative">
               {/* Start Emoju Button */}
               <button
                 className="text-gray-500 hover:text-gray-700"
@@ -454,14 +461,14 @@ function PostCommentsSection({ postId }) {
 
               {/* Start Emoji Picker */}
               {showPicker && (
-                <div ref={pickerRef} className="absolute top-10 left-0 z-50">
+                <div ref={pickerRef} className="absolute top-10 left-auto z-50">
                   <Picker onEmojiClick={handleEmojiClick} />
                 </div>
               )}
               {/* End Emojy Picker */}
 
               {/* Start Buttons */}
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-2  ">
                 <button
                   onClick={handleSubmitComment}
                   disabled={isSubmittingComment || !comment.trim()}
@@ -497,16 +504,15 @@ function PostCommentsSection({ postId }) {
                         c.user?.profile_image ||
                         "/fake-user.png"
                       }
-                      alt={c.user?.display_name}
+                      alt={c.user?.display_name || "Usersss"}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   </Link>
-
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       {/* Start Writer Name */}
                       <span className="font-semibold text-sm text-gray-900">
-                        {c.user?.display_name}
+                        {c.user?.display_name || "Userss"}
                       </span>
                       {/* End Writer Name */}
                       {/* Start Date */}
@@ -514,16 +520,17 @@ function PostCommentsSection({ postId }) {
                         {c.created_at.split("T")[0]}
                       </span>
                       {/* End Date */}
-
                       {/* Start Follow Button */}
-                      {+userId !== c?.user?.id && !c?.user?.is_friend && (
-                        <button
-                          onClick={() => handleFollow(c.user?.id)}
-                          className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
-                        >
-                          <FiUserPlus size={18} />
-                        </button>
-                      )}
+                      {Number(userId) !== c?.user?.id &&
+                        !c?.user?.friend_request_status &&
+                        !c?.user?.is_blocked && (
+                          <button
+                            onClick={() => handleFollow(c.user?.id, c.id)}
+                            className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
+                          >
+                            <FiUserPlus size={18} />
+                          </button>
+                        )}
                       {/* End Follow Button */}
                     </div>
 
@@ -589,7 +596,7 @@ function PostCommentsSection({ postId }) {
                           {c.likes_count || 0}
                         </span>
                       </button>
-                      {+userId !== c?.user?.id && (
+                      {Number(userId) !== c?.user?.id && (
                         <button
                           className="text-xs hover:text-black"
                           onClick={() => {
@@ -604,7 +611,8 @@ function PostCommentsSection({ postId }) {
                           {t("Reply")}
                         </button>
                       )}
-                      {+userId === c?.user?.id && (
+
+                      {Number(userId) === c?.user?.id && (
                         <button
                           className="text-xs hover:text-red-500"
                           onClick={() => handleDeleteComment(c.id)}
@@ -613,7 +621,7 @@ function PostCommentsSection({ postId }) {
                         </button>
                       )}
 
-                      {!editingCommentId && +userId === c?.user?.id && (
+                      {!editingCommentId && Number(userId) === c?.user?.id && (
                         <button
                           className="text-xs hover:text-blue-500"
                           onClick={() => handleEditComment(c)}
@@ -636,29 +644,32 @@ function PostCommentsSection({ postId }) {
                               <img
                                 src={
                                   reply?.user?.profile_image_url ||
+                                  reply?.user?.profile_image ||
                                   "/fake-user.png"
                                 }
-                                alt={reply.user?.display_name}
+                                alt={reply.user?.display_name || "User"}
                                 className="w-6 h-6 rounded-full object-cover"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  {/* Start User Info */}
+                                  {/* Start User */}
                                   <span className="font-semibold text-xs text-gray-900">
-                                    {reply.user?.display_name}
+                                    {reply.user?.display_name || "User"}
                                   </span>
-                                  {/* End User Info */}
+                                  {/* End User */}
                                   {/* Start Date */}
                                   <span className="text-gray-400 text-xs">
                                     {reply.created_at.split("T")[0]}
                                   </span>
                                   {/* End Date */}
                                   {/* Start Follow Button */}
-                                  {+userId !== reply?.user?.id &&
-                                    !reply?.friend_request_status &&
+                                  {Number(userId) !== reply?.user?.id &&
+                                    !reply?.user?.friend_request_status &&
                                     !reply?.user?.is_blocked && (
                                       <button
-                                        onClick={() => handleFollow(c.user?.id)}
+                                        onClick={() =>
+                                          handleFollow(reply.user?.id, c.id)
+                                        }
                                         className="text-blue-400 hover:text-blue-700 mx-6 transition-all duration-200"
                                       >
                                         <FiUserPlus size={18} />
@@ -738,8 +749,7 @@ function PostCommentsSection({ postId }) {
                                       {reply.likes_count || 0}
                                     </span>
                                   </button>
-
-                                  {+userId === reply?.user?.id && (
+                                  {Number(userId) === reply?.user?.id && (
                                     <button
                                       className="text-xs hover:text-red-500"
                                       onClick={() =>
@@ -749,9 +759,8 @@ function PostCommentsSection({ postId }) {
                                       {t("Delete")}
                                     </button>
                                   )}
-
                                   {!editingReplyId &&
-                                    +userId === reply?.user?.id && (
+                                    Number(userId) === reply?.user?.id && (
                                       <button
                                         className="text-xs hover:text-blue-500"
                                         onClick={() => handleEditReply(reply)}
@@ -853,4 +862,4 @@ function PostCommentsSection({ postId }) {
   );
 }
 
-export default PostCommentsSection;
+export default VideoCommentsSection;

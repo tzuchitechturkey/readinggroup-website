@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -27,20 +29,28 @@ export function DynamicNav({
   title,
 }) {
   const { state } = useSidebar(); // 'expanded' | 'collapsed'
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [openItem, setOpenItem] = useState(activeParent || null);
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      <SidebarGroupLabel style={{ padding: 0 }}>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {data.map((item) => {
-          // تحديد ما إذا كان يجب فتح العنصر تلقائياً
-          const shouldOpen = item.isActive || activeParent === item.title;
+          const isOpen = openItem === item.title;
 
           return (
             <Collapsible
               key={item.title}
               asChild
-              defaultOpen={shouldOpen}
+              open={isOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  setOpenItem(item.title);
+                } else if (openItem === item.title) {
+                  setOpenItem(null);
+                }
+              }}
               className="group/collapsible"
             >
               <SidebarMenuItem className="">
@@ -88,11 +98,15 @@ export function DynamicNav({
                     )}
                     <span>{t(item.title)}</span>
                     {item.items && item.items.length > 0 && (
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <ChevronRight
+                        className={`${
+                          i18n?.language === "ar" ? " mr-auto" : " ml-auto"
+                        } transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90`}
+                      />
                     )}
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => {
                       const key = getSectionKey(subItem.title);

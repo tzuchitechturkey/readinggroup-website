@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
+
+import { useTranslation } from "react-i18next";
 
 import CustomyoutubeVideo from "@/components/ForPages/Videos/VideoPage/CustomyoutubeVideo/CustomyoutubeVideo";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import { mockVideos } from "@/mock/Viedeos";
-import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCommentsSection/VideoCommentsSection";
-import { GetVideoById } from "@/api/videos";
+import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
+import { GetTop5ViewedVideos, GetVideoById } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
 function VideoPageContent() {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const videoId = window.location.pathname.split("/").pop();
   const [videoData, setVideoData] = useState(null);
+  const [top5VideoData, setTop5VideoData] = useState(null);
+
   const getData = async () => {
     setIsLoading(true);
     try {
@@ -23,9 +27,20 @@ function VideoPageContent() {
       setIsLoading(false);
     }
   };
-
+  const getTopViewed = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetTop5ViewedVideos();
+      setTop5VideoData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch video data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     getData();
+    getTopViewed();
   }, [videoId]);
   return (
     <div className="bg-white">
@@ -37,9 +52,9 @@ function VideoPageContent() {
       {/* Start Content of a similar type */}
       <div className="bg-white">
         <DynamicSection
-          title="Similar Content"
+          title={t("Similar Content")}
           titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium  "
-          data={mockVideos}
+          data={top5VideoData}
           isSlider={false}
           cardName={VideoCard}
           viewMoreUrl="/videos"
@@ -50,7 +65,7 @@ function VideoPageContent() {
       {/* Start Comments Section */}
       <div className="w-full">
         <div className="w-full lg:w-3/4 lg:pl-8">
-          <VideoCommentsSection videoId={videoId} />
+          <CommentsSection itemId={videoId} type={"video"} />
         </div>
       </div>
       {/* End Comments Section */}

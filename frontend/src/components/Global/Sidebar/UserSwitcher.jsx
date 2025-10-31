@@ -11,7 +11,7 @@ import { BASE_URL } from "@/configs";
 
 export function UserSwitcher() {
   const [data, setData] = useState();
-
+  const { i18n } = useTranslation();
   useEffect(() => {
     const username = localStorage.getItem("username");
     const userImage = localStorage.getItem("userImage");
@@ -41,7 +41,11 @@ export function UserSwitcher() {
                 />
               </div>
               {/* End Avatar */}
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div
+                className={`grid flex-1 ${
+                  i18n.language === "ar" ? "text-right" : "text-left"
+                }  text-sm leading-tight`}
+              >
                 {/* Start Name */}
                 <span className="truncate font-semibold mb-1">
                   {data?.username}

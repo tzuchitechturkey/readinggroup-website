@@ -74,7 +74,7 @@ export async function GetTopMixVideos() {
 }
 
 // /top5-videos/
-export async function GetTop5Videos() {
+export async function GetTop5ViewedVideos() {
   return await axios.get(`/videos/top-viewed/?limit=5`);
 }
 
@@ -98,17 +98,17 @@ export async function UnlikeVideo(data) {
 }
 
 // Comments management for videos
-export async function GetVideoComments(videoId, limit = 10, offset = 0) {
+export async function GetVideoComments(videoId, limit = 10, offset = 0, type) {
   return await axios.get(
-    `/comments/?limit=${limit}&offset=${offset}&object_id=${videoId}&content_type=video`
+    `/comments/?limit=${limit}&offset=${offset}&object_id=${videoId}&content_type=${type}`
   );
 }
 
-export async function CreateVideoComment(videoId, text) {
+export async function CreateVideoComment(videoId, text, type) {
   const userId = localStorage.getItem("userId");
   return await axios.post(`/comments/`, {
     object_id: videoId,
-    content_type: "video",
+    content_type: type,
     text,
     user: userId,
   });

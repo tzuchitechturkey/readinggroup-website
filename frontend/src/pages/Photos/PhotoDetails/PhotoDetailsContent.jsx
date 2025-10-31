@@ -12,7 +12,6 @@ import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
-import PostCommentsSection from "@/components/ForPages/GuidedReading/PostCommentsSection/PostCommentsSection";
 import { GetPostById } from "@/api/posts";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -168,7 +167,7 @@ function PhotoDetailsContent() {
             </div> */}
 
             {/* Comments Section */}
-            {/* <PostCommentsSection postId={photoData.id} /> */}
+            {/* <CommentsSection postId={photoData.id} /> */}
           </div>
 
           {/* Sidebar - Right Side */}

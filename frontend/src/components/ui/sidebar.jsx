@@ -230,7 +230,7 @@ const Sidebar = React.forwardRef(
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col p-3 group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+            className="flex h-full w-full flex-col p-2 group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
             {children}
           </div>
@@ -401,7 +401,7 @@ const SidebarGroupLabel = React.forwardRef(
         data-sidebar="group-label"
         className={cn(
           state === "expanded" ? "text-right " : "text-center mx-auto",
-          "text-[#000000] dark:text-[#FFFFFF80]  flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+          "text-[#000000] dark:text-[#FFFFFF80]  flex h-8 shrink-0 items-center rounded-md text-[12px] font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
           className
         )}
         {...props}

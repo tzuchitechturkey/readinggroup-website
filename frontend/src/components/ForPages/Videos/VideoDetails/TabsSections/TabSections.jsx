@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { ChevronDown } from "lucide-react";
 
-import VideoCommentsSection from "@/components/ForPages/Videos/VideoPage/VideoCommentsSection/VideoCommentsSection";
+import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
 
 import EpisodeCard from "./EpisodeCard";
 
@@ -140,7 +140,7 @@ const TabsSection = ({ videoData }) => {
         )}
 
         {activeTab === "reviews" && (
-          <VideoCommentsSection videoId={videoData?.id} />
+          <CommentsSection itemId={videoData?.id} type={"video"} />
         )}
       </div>
     </div>

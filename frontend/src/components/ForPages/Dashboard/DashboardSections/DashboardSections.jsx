@@ -10,7 +10,7 @@ import { GetStatistics } from "@/api/dashboard";
 import Loader from "@/components/Global/Loader/Loader";
 
 export default function DashboardSections({ onSectionChange }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState();
   const getData = async () => {

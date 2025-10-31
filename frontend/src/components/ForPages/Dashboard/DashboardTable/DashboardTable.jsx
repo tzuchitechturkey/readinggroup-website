@@ -253,7 +253,7 @@ function DashboardTable({ data, onSectionChange }) {
         </TableHeader>
         <TableBody className=" text-sm" style={{ padding: "10px" }}>
           {sortedRows.length === 0 ? (
-            <TableRow>
+            <TableRow >
               <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                 {t("No data available")}
               </TableCell>

@@ -35,7 +35,10 @@ import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
 
 export default function Page() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
+  const direction = isRtl ? "rtl" : "ltr";
+
   const [activeSection, setActiveSection] = useState(() => {
     // استرجاع الصفحة المحفوظة من localStorage عند التحميل
     return localStorage.getItem("dashboardActiveSection") || "home";
@@ -252,36 +255,46 @@ export default function Page() {
     }
   }, []);
   return (
-    <SidebarProvider>
-      <Sidebar
-        onSectionChange={handleSectionChange}
-        activeSection={activeSection}
-        activeParent={activeParent}
-      />
-      <SidebarInset>
-        <header className="z-0 flex  h-16  shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="w-full mt-7 ">
-            <AdminNavbar />
-            <div className="absolute top-8 -left-0  h-px w-full z-10">
-              <SidebarTrigger className="" />
+    <div dir={direction} className="min-h-screen">
+      <SidebarProvider>
+        <Sidebar
+          onSectionChange={handleSectionChange}
+          activeSection={activeSection}
+          activeParent={activeParent}
+        />
+        <SidebarInset>
+          <header className="z-0 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <div className="w-full mt-7">
+              <AdminNavbar />
+              <div
+                className={`absolute top-8 h-px w-full z-10 ${
+                  isRtl ? "-right-0" : "-left-0"
+                }`}
+              >
+                <SidebarTrigger className="" />
+              </div>
+              <div
+                className={`flex items-center gap-2 px-4 ${
+                  isRtl ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
+                <Separator
+                  orientation="vertical"
+                  className="mr-2 data-[orientation=vertical]:h-4"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-4 ">
-              <Separator
-                orientation="vertical"
-                className="mr-2 data-[orientation=vertical]:h-4"
-              />
-            </div>
+          </header>
+          <div className="border min-h-screen bg-[#F8F9FA] p-3 pt-10">
+            {renderContent()}
           </div>
-        </header>
-        <div className="border min-h-screen bg-[#F8F9FA] p-3 pt-10">
-          {renderContent()}
-        </div>
-        {/* Start Footer small note */}
-        <div className=" ">
-          <DashboardFooter />
-        </div>
-        {/* Start Footer small note */}
-      </SidebarInset>
-    </SidebarProvider>
+          {/* Start Footer small note */}
+          <div className="">
+            <DashboardFooter />
+          </div>
+          {/* Start Footer small note */}
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }

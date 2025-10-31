@@ -20,7 +20,7 @@ import EditableField from "./EditableField/EditableField";
 import Labeled from "./Labeled/Labeled";
 import Stat from "./Stat/Stat";
 
-function Profile({ myUserId, userId }) {
+function Profile({ userId, myUserId }) {
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +36,7 @@ function Profile({ myUserId, userId }) {
   });
 
   const getProfileData = async () => {
+    if (!userId) return;
     setIsLoading(true);
     try {
       const res = await GetUserProfile(userId);
@@ -48,6 +49,7 @@ function Profile({ myUserId, userId }) {
       });
       setHasUnsavedChanges(false);
     } catch (error) {
+      // console.log(error);
       setErrorFn(error, t);
     } finally {
       setIsLoading(false);
@@ -116,12 +118,14 @@ function Profile({ myUserId, userId }) {
   };
   const handleFollow = async (followUserId) => {
     setIsLoading(true);
-    const payload = {
-      to_user: followUserId,
-    };
     try {
-      await SendFriendRequest(payload);
-      toast.success(t("Friend request sent successfully"));
+      if (data?.friend_request_status) {
+        await SendUnFollowRequest({ to_user: followUserId });
+        toast.success(t("Unfollowed successfully"));
+      } else {
+        await SendFriendRequest({ to_user: followUserId });
+        toast.success(t("Friend request sent successfully"));
+      }
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -132,6 +136,7 @@ function Profile({ myUserId, userId }) {
     getProfileData();
   }, [userId, update]);
   console.log(data);
+  console.log(+userId, +myUserId);
   return (
     <div
       className="space-y-6 my-5 p-1"

@@ -37,7 +37,8 @@ export default function AppSidebar({
   activeParent,
   ...props
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
 
   const handleLogout = () => {
@@ -45,7 +46,7 @@ export default function AppSidebar({
   };
 
   const handleHelp = () => {
-    console.log("Help clicked");
+    // Help functionality to be implemented
   };
 
   // This is sample data.
@@ -70,22 +71,6 @@ export default function AppSidebar({
         icon: DashboardIcon,
       },
 
-      // {
-      //   title: "Cards Or Photos",
-      //   onClick: "#",
-      //   icon: CardsOrPhotos,
-      //   items: [
-      //     {
-      //       title: "All Cards",
-      //       onClick: () => onSectionChange("cards"),
-      //     },
-      //     // {
-      //     //   title: "All Photos",
-      //     //   onClick: () => onSectionChange("photos"),
-      //     // },
-      //   ],
-      // },
-
       {
         title: "Posts",
         onClick: "#",
@@ -105,31 +90,6 @@ export default function AppSidebar({
           },
         ],
       },
-
-      // {
-      //   title: "Health Posts",
-      //   onClick: () => onSectionChange("healthPosts"),
-      //   icon: VaadinHealth,
-      // },
-      // {
-      //   title: "Tv",
-      //   onClick: "#",
-      //   icon: TV,
-      //   items: [
-      //     {
-      //       title: "News List",
-      //       onClick: () => onSectionChange("newsList"),
-      //     },
-      //     {
-      //       title: "Add/Edit News",
-      //       onClick: () => onSectionChange("createOrEditNews"),
-      //     },
-      //     {
-      //       title: "News Categories",
-      //       onClick: () => onSectionChange("newsCategories"),
-      //     },
-      //   ],
-      // },
       {
         title: "Events",
         onClick: "#",
@@ -212,7 +172,12 @@ export default function AppSidebar({
     ],
   };
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar
+      style={{ direction: isRtl ? "rtl" : "ltr" }}
+      collapsible="icon"
+      side={isRtl ? "right" : "left"}
+      {...props}
+    >
       <SidebarHeader>
         <UserSwitcher />
       </SidebarHeader>

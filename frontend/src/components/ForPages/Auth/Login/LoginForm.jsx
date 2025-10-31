@@ -104,6 +104,9 @@ function LoginForm() {
         const res = await Login({ username, password, totp });
         console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
+        localStorage.setItem("userId", res?.data.user?.id);
+        localStorage.setItem("userImage", res?.data.user?.profile_image_url);
+
         setShowTOTPModal(false);
         if (res?.data.user?.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");
@@ -232,7 +235,9 @@ function LoginForm() {
             />
             {/* Start Toggle show/hide password */}
             <span
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+              className={`absolute ${
+                i18n?.language === "ar" ? "left-3" : "right-3"
+              } top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer`}
               onClick={() => setShowPassword((prev) => !prev)}
               tabIndex={0}
               role="button"
@@ -346,7 +351,6 @@ function LoginForm() {
         {/* End Recaptch */}
       </form>
 
-      
       {/* Start First Login Reset Password Modal */}
       <Modal
         isOpen={showFirstLoginModal}

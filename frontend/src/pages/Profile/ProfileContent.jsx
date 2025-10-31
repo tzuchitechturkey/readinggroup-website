@@ -18,7 +18,7 @@ function ProfileContent() {
     const user = localStorage.getItem("userId");
     setUserId(user);
   }, [paramId]);
-
+  console.log(userId);
   return (
     <div>
       <div
@@ -44,7 +44,7 @@ function ProfileContent() {
               />
               <span className="text-sm">{t("Profile")}</span>
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="archives"
               className="gap-2 pb-3 rounded-none data-[state=active]:text-[#4680FF] data-[state=active]:border-b-2 data-[state=active]:border-b-[#4680FF] data-[state=active]:shadow-none"
             >
@@ -61,18 +61,18 @@ function ProfileContent() {
                 className="w-3 h-3"
               />
               <span className="text-sm">{t("Interactions")}</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="profile">
             <Profile userId={paramId || userId} myUserId={userId} />
           </TabsContent>
-          <TabsContent value="archives">
+          {/* <TabsContent value="archives">
             <Archives />
           </TabsContent>
           <TabsContent value="interactions">
             <Interactions />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
         {/* End Tabs */}
       </div>

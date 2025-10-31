@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 
-import { GetTop5Videos } from "@/api/videos";
+import { GetTop5ViewedVideos } from "@/api/videos";
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -19,7 +19,7 @@ function VideosHeader({ top1Video }) {
 
   const getTop5Videos = async () => {
     try {
-      const res = await GetTop5Videos();
+      const res = await GetTop5ViewedVideos();
       setTop5Videos(res.data);
     } catch (err) {
       setErrorFn(err, t);

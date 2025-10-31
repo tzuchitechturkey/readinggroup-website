@@ -14,11 +14,12 @@ import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import {
   GetPostById,
   PatchPostById,
+  TopCommentedPosts,
   // LikePost, UnlikePost
 } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
-import PostCommentsSection from "@/components/ForPages/GuidedReading/PostCommentsSection/PostCommentsSection";
+import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
 
 function CardDetailsPageContent() {
   const { t, i18n } = useTranslation();
@@ -29,6 +30,7 @@ function CardDetailsPageContent() {
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [cardData, setCardData] = useState();
+  const [topCommentedData, setTopCommentedData] = useState();
 
   const getCardData = async () => {
     setIsLoading(true);
@@ -39,6 +41,15 @@ function CardDetailsPageContent() {
       setErrorFn(error, t);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getTopCommentedPosts = async () => {
+    try {
+      const res = await TopCommentedPosts();
+      setTopCommentedData(res?.data);
+    } catch (err) {
+      setErrorFn(err, t);
     }
   };
   // تطبيق RTL عند تغيير اللغة
@@ -99,23 +110,10 @@ function CardDetailsPageContent() {
     }
   };
 
-  // تنسيق البيانات لتتماشى مع مكون CommentsSection
-  const thisWeekCards = Array(3)
-    .fill(null)
-    .map((_, index) => ({
-      id: index + 1,
-      title: "Report - Community Gathering",
-      badge: "STARTING 16:00 PM",
-      writer: "Source",
-      rating: 4.8,
-      reviews: "2.1",
-      type: "Community",
-      date: "Apr 18",
-    }));
-
   useEffect(() => {
     getCardData();
   }, [paramId]);
+
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -164,7 +162,7 @@ function CardDetailsPageContent() {
             />
 
             {/* Start Comments Section */}
-            <PostCommentsSection postId={cardData?.id} />
+            <CommentsSection itemId={cardData?.id} type={"post"} />
             {/* End Comments Section */}
           </div>
 
@@ -183,7 +181,7 @@ function CardDetailsPageContent() {
                 {t("This Week's Cards")}
               </h3>
               <div className="space-y-4">
-                {thisWeekCards.map((card) => (
+                {topCommentedData?.map((card) => (
                   <div key={card.id} className="bg-gray-50 rounded-lg p-3">
                     <GuidingReadingcard item={card} />
                   </div>
