@@ -607,7 +607,33 @@ class WeeklyMomentViewSet(BaseContentViewSet):
     serializer_class = WeeklyMomentSerializer
     search_fields = ("title", "source", "language", "content_type")
     ordering_fields = ("created_at", "title")
+    
+    #add action for top 5 Liked
+    @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
+    def top_liked(self, request):
+        """Return top liked instances for this resource.
 
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        # annotate queryset with likes info then order by annotated_likes_count
+        qs = self.get_queryset()
+        qs = self.annotate_likes(qs)
+        # prefer annotated_likes_count (annotate_likes uses Count('likes'))
+        try:
+            qs = qs.order_by('-annotated_likes_count', '-created_at')[:limit]
+        except Exception:
+            # fallback: try ordering by annotated field name or likes_count
+            qs = qs[:limit]
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+    
 class TeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing TeamMember content."""
     queryset = TeamMember.objects.all()
