@@ -3,6 +3,8 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from accounts.serializers import UserSerializer
+from accounts.models import User as AccountUser
+from django.db.models import Q
 from .helpers import (
     AbsoluteURLSerializer,
     VideoCategorySerializer,
@@ -28,6 +30,28 @@ from .models import (
     EventSection,
     PostRating,
 )
+
+def _resolve_target_user(obj):
+    """Resolve a User instance from common attributes on `obj`.
+
+    Tries attributes like 'user', 'to_user', 'from_user', 'uploader', 'author',
+    'owner', 'created_by', 'writer'. If the attribute is a string, attempts to
+    find a matching User by username or display_name (case-insensitive).
+    """
+    attrs = ("user", "to_user", "from_user", "uploader", "author", "owner", "created_by", "writer")
+    for a in attrs:
+        if hasattr(obj, a):
+            val = getattr(obj, a)
+            if isinstance(val, AccountUser):
+                return val
+            if isinstance(val, str) and val.strip():
+                try:
+                    u = AccountUser.objects.filter(Q(username__iexact=val) | Q(display_name__iexact=val)).first()
+                    if u:
+                        return u
+                except Exception:
+                    pass
+    return None
 
 class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
@@ -200,7 +224,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
                 data["has_in_my_list"] = False
         except Exception:
             data["has_in_my_list"] = False
-
+        return data
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -223,7 +247,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         
     def get_user(self, obj):
         try:
-            target = self._resolve_target_user(obj)
+            target = _resolve_target_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -278,7 +302,7 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
                 data['user_rating'] = None
         except Exception:
             data['user_rating'] = None
-
+        return data
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -364,7 +388,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
         data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
-
+        return data
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -377,7 +401,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def get_user(self, obj):
         try:
-            target = self._resolve_target_user(obj)
+            target = _resolve_target_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -393,7 +417,7 @@ class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def get_user(self, obj):
         try:
-            target = self._resolve_target_user(obj)
+            target = _resolve_target_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -411,10 +435,10 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["position"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
-    
+        return data
     def get_user(self, obj):
         try:
-            target = self._resolve_target_user(obj)
+            target = _resolve_target_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -432,8 +456,18 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def get_user(self, obj):
         try:
-            target = self._resolve_target_user(obj)
+            target = _resolve_target_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
             pass
+        return None
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # include resolved user representation (if present)
+        try:
+            data["user"] = self.get_user(instance)
+        except Exception:
+            data["user"] = None
+        return data

@@ -239,6 +239,20 @@ class Event(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
+    
+    @classmethod
+    def top_commented(cls, limit: int = 5):
+        """Return top `limit` Event instances ordered by number of comments.
+
+        Annotates queryset with `annotated_comments_count` then orders by
+        `-annotated_comments_count` and `-created_at` as a tiebreaker.
+        """
+        try:
+            qs = cls.objects.annotate(annotated_comments_count=Count('comments')).order_by('-annotated_comments_count', '-created_at')[:limit]
+            return qs
+        except Exception:
+            # Fallback: return most recent events if annotation fails
+            return cls.objects.order_by('-created_at')[:limit]
 
 
 class PostRating(TimestampedModel):
