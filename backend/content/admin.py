@@ -15,7 +15,8 @@ from .models import (
     Reply,
     MyListEntry,
     SeasonTitle,
-    
+    Like,
+    SeasonId,
 )
 
 
@@ -121,3 +122,17 @@ class MyListEntryAdmin(admin.ModelAdmin):
 class SeasonTitleAdmin(admin.ModelAdmin):
     list_display = ("name","description")
     search_fields = ("name","description")
+    
+@admin.register(SeasonId)
+class SeasonIdAdmin(admin.ModelAdmin):
+    list_display = ("season_title_name", "season_id")
+    search_fields = ("season_title__name", "season_id")
+
+    def season_title_name(self, obj):
+        return obj.season_title.name if obj.season_title else None
+    season_title_name.short_description = "season_title"
+    
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ("user",)
+    search_fields = ("user__username", "content_type__model")
