@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .helpers import annotate_likes_queryset
 from .swagger_parameters import(
@@ -244,7 +245,11 @@ class VideoViewSet(BaseContentViewSet):
 
         happened_at = params.get('happened_at')
         if happened_at:
-            queryset = queryset.filter(happened_at__date=happened_at)
+            try:
+                parsed = date.fromisoformat(happened_at)
+                queryset = queryset.filter(happened_at=parsed)
+            except Exception:
+                queryset = queryset.filter(happened_at=happened_at)
         
         return queryset
 
@@ -563,7 +568,11 @@ class EventViewSet(BaseContentViewSet):
         
         happened_at = params.get('happened_at')
         if happened_at:
-            queryset = queryset.filter(happened_at__date=happened_at)
+            try:
+                parsed = date.fromisoformat(happened_at)
+                queryset = queryset.filter(happened_at=parsed)
+            except Exception:
+                queryset = queryset.filter(happened_at=happened_at)
             
         report_type = params.get('report_type')
         if report_type:
