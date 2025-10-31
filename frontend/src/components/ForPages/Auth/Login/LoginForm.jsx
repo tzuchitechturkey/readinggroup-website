@@ -198,7 +198,7 @@ function LoginForm() {
                 });
               }
             }}
-            placeholder={t("Email")}
+            placeholder={t("Username Or Email")}
             className={`outline-none rounded-lg bg-gray-100 p-2 w-full placeholder:text-black/50 text-xs transition-colors focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 ${
               inputErrors.userName ? "border border-red-500" : ""
             }`}
