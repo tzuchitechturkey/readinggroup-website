@@ -125,6 +125,37 @@ class UnfriendView(APIView):
 
         return Response({"detail": "Friendship removed.", "user": UserSerializer(target, context={"request": request}).data}, status=status.HTTP_200_OK)
 
+
+class FriendRequestsForUserView(APIView):
+    """Return incoming and outgoing friend requests for a given user id.
+
+    Access control: only staff users or the user themself may view this.
+    Response format:
+    {
+      "incoming": [<FriendRequestSerializer>],
+      "outgoing": [<FriendRequestSerializer>]
+    }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        # Only staff or the target user may access
+        if not (request.user.is_staff or request.user.id == int(user_id)):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            target = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        incoming_qs = FriendRequest.objects.filter(to_user=target).order_by('-created_at')
+        outgoing_qs = FriendRequest.objects.filter(from_user=target).order_by('-created_at')
+
+        incoming = FriendRequestSerializer(incoming_qs, many=True, context={"request": request}).data
+        outgoing = FriendRequestSerializer(outgoing_qs, many=True, context={"request": request}).data
+
+        return Response({"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK)
+
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
     Read-only access is allowed for anonymous users; write actions require authentication.
