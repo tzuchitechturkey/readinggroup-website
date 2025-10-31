@@ -78,9 +78,9 @@ class LikableMixin(models.Model):
         """Return top `limit` instances of this model ordered by number of likes.
 
         Uses an aggregate Count on the related `likes` GenericRelation and orders
-        by `-likes_count` then `-created_at` as a tiebreaker.
+        by `-annotated_likes_count` then `-created_at` as a tiebreaker.
         """
-        return cls.objects.annotate(likes_count=Count('likes')).order_by('-likes_count', '-created_at')[:limit]
+        return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
     
 
 class Video(LikableMixin, TimestampedModel):

@@ -28,6 +28,9 @@ from .models import (
     Like,
     MyListEntry,
 )
+
+from django.db.models import Count, Exists, OuterRef
+from django.contrib.contenttypes.models import ContentType
 from .enums import VideoType, PostType
 from .serializers import (
     EventSerializer,
@@ -84,6 +87,27 @@ class BaseContentViewSet(viewsets.ModelViewSet):
                 # fallback: ignore annotation if something fails
                 pass
         return queryset
+
+
+def annotate_likes_queryset(queryset, request=None):
+    """Module-level helper to annotate a queryset with likes count and (when request.user authenticated) has_liked.
+
+    This mirrors BaseContentViewSet.annotate_likes but is usable from function/class-based views.
+    """
+    try:
+        queryset = queryset.annotate(annotated_likes_count=Count('likes'))
+    except Exception:
+        return queryset
+
+    if request and getattr(request, 'user', None) and request.user.is_authenticated:
+        try:
+            ct = ContentType.objects.get_for_model(queryset.model)
+            likes_subq = Like.objects.filter(content_type=ct, object_id=OuterRef('pk'), user=request.user)
+            queryset = queryset.annotate(annotated_has_liked=Exists(likes_subq))
+        except Exception:
+            # ignore failures to annotate has_liked
+            pass
+    return queryset
 
     @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
     def top_liked(self, request):
@@ -482,13 +506,9 @@ class PostViewSet(BaseContentViewSet):
         except Exception:
             limit = 5
 
-        # Use the model helper to get grouped querysets
         groups = Post.top_viewed_grouped(limit=limit)
-
-        # Ensure annotated fields and has_liked are present using annotate_likes
         card_photo_queryset = self.annotate_likes(groups.get('card_photo') or Post.objects.none())
         reading_queryset = self.annotate_likes(groups.get('reading') or Post.objects.none())
-
         card_photo_data = PostSerializer(card_photo_queryset, many=True, context={"request": request}).data
         reading_data = PostSerializer(reading_queryset, many=True, context={"request": request}).data
 
@@ -831,4 +851,98 @@ class EventSectionViewSet(BaseContentViewSet):
             })
 
         return Response(result)
+    
+
+class CombinedTopLikedView(viewsets.ViewSet):
+    """Return a combined payload with several top-liked groups in a single response.
+
+    Response shape:
+    {
+      "posts_card_photo": [...],
+      "posts_reading": [...],
+      "videos": [...],
+      "top_section": { "id": <id>, "name": <name>, "events": [...] }
+    }
+
+    Query params:
+    - limit: int default 5 (number of items per group)
+    - events_limit: int default 5 (number of events inside the top section)
+    """
+
+    def list(self, request):
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        try:
+            events_limit = int(request.query_params.get('events_limit', 5))
+        except Exception:
+            events_limit = 5
+
+        # Posts: use model helper to get grouped querysets (already ordered)
+        groups = Post.top_liked_grouped(limit=limit)
+        card_photo_qs = groups.get('card_photo') or Post.objects.none()
+        reading_qs = groups.get('reading') or Post.objects.none()
+
+        # Videos: use LikableMixin.top_liked via Video.top_liked
+        videos_qs = Video.top_liked(limit=limit)
+
+        # Top section by number of events, then its top liked events
+        top_section = None
+        events_in_top_section = []
+        from django.db.models import Count as DjCount
+
+        section = EventSection.objects.annotate(events_count=DjCount('event')).order_by('-events_count').first()
+        if section:
+            top_section = section
+            events_qs = Event.objects.filter(section=section)
+            # annotate and order by likes similar to other uses
+            events_qs = annotate_likes_queryset(events_qs, request)
+            try:
+                events_qs = events_qs.order_by('-annotated_likes_count', '-created_at')[:events_limit]
+            except Exception:
+                events_qs = events_qs[:events_limit]
+            events_in_top_section = events_qs
+
+        # Annotate likes/has_liked for posts & videos
+        card_photo_qs = annotate_likes_queryset(card_photo_qs, request)
+        reading_qs = annotate_likes_queryset(reading_qs, request)
+        videos_qs = annotate_likes_queryset(videos_qs, request)
+
+        # Serialize
+        card_photo_data = PostSerializer(card_photo_qs, many=True, context={"request": request}).data
+        reading_data = PostSerializer(reading_qs, many=True, context={"request": request}).data
+        videos_data = VideoSerializer(videos_qs, many=True, context={"request": request}).data
+
+        top_section_data = None
+        if top_section:
+            events_data = EventSerializer(events_in_top_section, many=True, context={"request": request}).data
+            top_section_data = {
+                "id": top_section.pk,
+                "name": top_section.name,
+                "events": events_data,
+            }
+
+        # totals
+        total_card_photo = Post.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO]).count()
+        total_reading = Post.objects.filter(post_type=PostType.READING).count()
+        total_videos = Video.objects.count()
+        total_events = Event.objects.count()
+        total_posts = Post.objects.count()
+
+        return Response({
+            "posts_card_photo": card_photo_data,
+            "posts_reading": reading_data,
+            "videos": videos_data,
+            "top_section": top_section_data,
+            "totals": {
+                "posts_card_photo": total_card_photo,
+                "posts_reading": total_reading,
+                "videos": total_videos,
+                "events": total_events,
+                "posts_total": total_posts,
+            }
+        })
+
     

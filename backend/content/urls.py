@@ -13,6 +13,7 @@ from .views import (
     EventSectionViewSet,
     CommentsViewSet,
     ReplyViewSet,
+    CombinedTopLikedView,
 )
 
 app_name = "content"
@@ -31,5 +32,6 @@ router.register(r"position-team-members", PositionTeamMemberViewSet, basename="p
 router.register(r"event-sections", EventSectionViewSet, basename="event-section")
 router.register(r"comments", CommentsViewSet, basename="comments")
 router.register(r"replies", ReplyViewSet, basename="reply")
+router.register(r"top-liked-combined", CombinedTopLikedView, basename="top-liked-combined")
 
 urlpatterns = router.urls
