@@ -31,6 +31,8 @@ function RegisterContent() {
         backgroundPosition: "center",
       }}
     >
+
+      
       <div className="absolute inset-0 bg-cover bg-center w-full h-full opacity-60 z-0 bg-black" />
       <div className="relative z-1 mt-10 flex justify-center items-center">
         <RegisterForm />
