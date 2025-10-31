@@ -28,6 +28,7 @@ from .models import (
     Like,
     MyListEntry,
     SeasonTitle,
+    SeasonId,
 )
 from .enums import VideoType, PostType
 from .serializers import (
@@ -46,6 +47,7 @@ from .serializers import (
     ReplySerializer,
     LikeSerializer,
     SeasonTitleSerializer,
+    SeasonIdSerializer,
 )
 from .models import PostRating
 
@@ -794,12 +796,6 @@ class HistoryEntryViewSet(BaseContentViewSet):
     
     
 #This endpoint is passed inside the main endpoint.
-class VideoCategoryViewSet(BaseContentViewSet):
-    """ViewSet for managing VideoCategory content."""
-    queryset = VideoCategory.objects.all()
-    serializer_class = VideoCategorySerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
     
 class PostCategoryViewSet(BaseContentViewSet):
     """ViewSet for managing PostCategory content."""
@@ -826,6 +822,27 @@ class SeasonTitleViewSet(BaseContentViewSet):
     """ViewSet for managing SeasonTitle content."""
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+
+class SeasonIdViewSet(BaseContentViewSet):
+    """ViewSet for managing SeasonId content."""
+    queryset = SeasonId.objects.all()
+    serializer_class = SeasonIdSerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
+class LikeViewSet(BaseContentViewSet):
+    """ViewSet for managing Like content."""
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    search_fields = ("user__username", "content_type", "object_id")
+    ordering_fields = ("created_at",)
+    
+class VideoCategoryViewSet(BaseContentViewSet):
+    """ViewSet for managing VideoCategory content."""
+    queryset = VideoCategory.objects.all()
+    serializer_class = VideoCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
 

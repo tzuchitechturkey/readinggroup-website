@@ -81,15 +81,7 @@ class LikableMixin(models.Model):
         by `-annotated_likes_count` then `-created_at` as a tiebreaker.
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
-    
-class SeasonTitle(models.Model):
-    """Season and Title mapping for Videos."""
-    name = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True)
-    class Meta:
-        ordering = ("name",)
-        
-
+            
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
     title = models.CharField(max_length=255)
@@ -106,8 +98,8 @@ class Video(LikableMixin, TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     cast = models.JSONField(default=list, blank=True)
-    season = models.ForeignKey(SeasonTitle, on_delete=models.SET_NULL, null=True, blank=True)
-    series = models.CharField(max_length=255, blank=True)
+    season_name = models.ForeignKey('SeasonTitle', on_delete=models.SET_NULL, null=True, blank=True)
+    season_id = models.ForeignKey('SeasonId', on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
@@ -117,7 +109,38 @@ class Video(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
+    
+class VideoCategory(TimestampedModel):
+    """Categories for organizing videos."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    class Meta:
+        ordering = ("name",)
 
+    def __str__(self) -> str: 
+        return self.name
+    
+class SeasonTitle(models.Model):
+    """Season and Title mapping for Videos."""
+    name = models.CharField(max_length=255, blank=True, unique=True)
+    description = models.TextField(blank=True)
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str: 
+        return self.name
+    
+class SeasonId(models.Model):
+    """Season ID mapping for Videos."""
+    season_title = models.ForeignKey("SeasonTitle", on_delete=models.CASCADE, related_name="season_ids")
+    season_id = models.CharField(max_length=100)
+    class Meta:
+        ordering = ("season_title__name",)
+
+    def __str__(self) -> str: 
+        return self.season_title.name
+    
+    
 class Post(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
     title = models.CharField(max_length=255)
@@ -329,18 +352,6 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
     
-    
-#Category Fot Videos
-class VideoCategory(TimestampedModel):
-    """Categories for organizing videos."""
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str: 
-        return self.name
 
 #Category for Posts
 class PostCategory(TimestampedModel):
