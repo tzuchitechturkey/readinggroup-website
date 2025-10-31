@@ -1,6 +1,6 @@
 from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -63,6 +63,20 @@ class BaseContentViewSet(viewsets.ModelViewSet):
     """Common configuration shared across content viewsets."""
     permission_classes = [IsStaffOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    def get_permissions(self):
+        """Allow certain actions for any authenticated user (likes, my-list, partial_update toggles).
+
+        Default behavior remains IsStaffOrReadOnly for write operations. For actions that should be
+        available to any logged-in user (like, partial_update toggle of has_liked, and per-view
+        my-list endpoints), return IsAuthenticated permission instead.
+        """
+        # action may be None outside of request handling
+        action = getattr(self, 'action', None)
+        auth_actions = ('like', 'partial_update', 'my_list', 'my_list_item')
+        if action in auth_actions:
+            return [IsAuthenticated()]
+        return [perm() for perm in self.permission_classes]
 
     def annotate_likes(self, queryset):
         """Annotate a queryset with likes_count and (when request.user authenticated) has_liked."""
