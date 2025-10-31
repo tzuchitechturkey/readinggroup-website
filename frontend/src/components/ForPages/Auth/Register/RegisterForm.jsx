@@ -118,6 +118,7 @@ function RegisterForm() {
         username: form.username,
         email: form.email,
         password: form.password,
+        display_name: form.displayName,
       };
       const { data } = await Register(payload);
       // setTokens({ access: data?.access, refresh: data?.refresh });
