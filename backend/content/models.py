@@ -162,7 +162,7 @@ class Post(LikableMixin, TimestampedModel):
     post_type = models.CharField(max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD)
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(max_length=1000, blank=True)
     metadata = models.CharField(max_length=255, blank=True)
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
@@ -254,7 +254,7 @@ class Event(LikableMixin, TimestampedModel):
     writer = models.CharField(max_length=255)
     happened_at = models.DateField()
     image = models.ImageField(upload_to="events/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(max_length=1000, blank=True)
     category = models.ForeignKey('EventCategory', on_delete=models.SET_NULL, null=True, blank=True)
     report_type = models.CharField(max_length=50, choices=ReportType.choices, default=ReportType.NEWS)
     country = models.CharField(max_length=100, blank=True)
@@ -314,7 +314,7 @@ class WeeklyMoment(LikableMixin, TimestampedModel):
     source = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="weekly/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(max_length=1000, blank=True)
     views = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -347,7 +347,7 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     description = models.TextField(blank=True)
     story_date = models.DateField()
     image = models.ImageField(upload_to="history/images/", blank=True, null=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(max_length=1000, blank=True)
     views = models.PositiveIntegerField(default=0)
 
     class Meta:
