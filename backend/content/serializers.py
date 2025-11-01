@@ -151,14 +151,15 @@ class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
-    # represent the related SeasonTitle as a small object { id, name }
-    season_title = serializers.SerializerMethodField(read_only=True)
+    # provide a read-only detailed representation of the related SeasonTitle
+    # while preserving the model field `season_title` as the writable FK.
+    season_title_detail = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = SeasonId
         fields = "__all__"
 
-    def get_season_title(self, obj):
+    def get_season_title_detail(self, obj):
         try:
             st = obj.season_title
             if st is None:
