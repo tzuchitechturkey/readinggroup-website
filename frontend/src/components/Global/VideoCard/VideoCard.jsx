@@ -18,7 +18,6 @@ const VideoCard = ({ item, className = "" }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  console.log("VideoCard item:", item);
   return (
     <>
       <div

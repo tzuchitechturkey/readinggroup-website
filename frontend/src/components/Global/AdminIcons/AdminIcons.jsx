@@ -2,12 +2,14 @@ import React from "react";
 
 import { Link } from "react-router-dom";
 import { Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import Notification from "../Notifications/Notifications";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
 export default function AdminIcons() {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="flex justify-end items-center lg:gap-4">
@@ -43,8 +45,11 @@ export default function AdminIcons() {
             localStorage.removeItem("dashboardActiveSection");
           }}
         >
-          <Link to="/">
-            <Home size={20} color="#999EAD" />
+          <Link
+            to="/"
+            className="p-1 px-3 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+          >
+            {t("Home")}
           </Link>
         </div>
         {/* End Got TO Home */}
