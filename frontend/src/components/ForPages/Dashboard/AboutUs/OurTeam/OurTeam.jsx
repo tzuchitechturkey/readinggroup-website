@@ -304,7 +304,7 @@ function OurTeam({ onSectionChange }) {
                               ))
                           ) : (
                             <span className="text-xs text-gray-400">
-                              لا يوجد
+                              {t("No content")}
                             </span>
                           )}
                           {member.social && member?.social_links.length > 2 && (

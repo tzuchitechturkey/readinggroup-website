@@ -188,15 +188,6 @@ function HistoryList({ onSectionChange }) {
             <p className="text-gray-600 mb-6">
               {t("Start by adding your first event in the company's history")}
             </p>
-            <button
-              onClick={() => {
-                setSelectedHistoryItem(null);
-                setShowCreateOrEditModal(true);
-              }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
-            >
-              {t("Add Your First Event")}
-            </button>
           </div>
         ) : historyData.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center shadow-sm">
@@ -283,7 +274,6 @@ function HistoryList({ onSectionChange }) {
                             }
                           )}
                         </span>
-                       
                       </div>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-sm">

@@ -23,7 +23,6 @@ import {
   DeleteSeasonById,
 } from "@/api/videos";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 import DeleteSeriesConfirmation from "../VideosSeries/DeleteSeriesConfirmation";
 import CreateOrEditSeries from "../VideosSeries/CreateOrEditSeries";
@@ -299,14 +298,38 @@ function SeriesAndSeasonsList() {
       </div>
 
       {/* Search Bar */}
-      <div className="flex items-center gap-4 mb-4">
-        <Input
-          type="text"
-          placeholder={t("Search by series name...")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
+      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+        <div className="relative max-w-md flex">
+          <input
+            type="text"
+            placeholder={t("Search by series name...")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+          />
+
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+              }}
+              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              if (searchTerm.trim()) {
+                // Search is already reactive, so this is optional
+              }
+            }}
+            className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+          >
+            {t("Search")}
+          </button>
+        </div>
       </div>
 
       {/* Table */}

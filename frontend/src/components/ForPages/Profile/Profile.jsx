@@ -8,6 +8,7 @@ import { FiUserPlus, FiUserX } from "react-icons/fi";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
+  GetFriendRequests,
   GetUserProfile,
   SendFriendRequest,
   UpdatePatchProfile,
@@ -26,6 +27,7 @@ function Profile({ userId, myUserId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [friendRequests, setFriendRequests] = useState([]);
   const [editingFields, setEditingFields] = useState({
     about_me: false,
     website_address: false,
@@ -55,6 +57,16 @@ function Profile({ userId, myUserId }) {
       setIsLoading(false);
     }
   };
+  const getRequestsData = async () => {
+    if (!userId) return;
+    try {
+      const res = await GetFriendRequests(userId);
+      setFriendRequests(res?.data || { incoming: [], outgoing: [] });
+    } catch (error) {
+      setErrorFn(error, t);
+    }
+  };
+
   // Toggle edit mode for a field
   const toggleEdit = (fieldName) => {
     setEditingFields((prev) => ({
@@ -134,8 +146,9 @@ function Profile({ userId, myUserId }) {
   };
   useEffect(() => {
     getProfileData();
+    getRequestsData();
   }, [userId, update]);
-  console.log(data);
+  console.log(friendRequests);
   return (
     <div
       className="space-y-6 my-5 p-1"
@@ -217,8 +230,6 @@ function Profile({ userId, myUserId }) {
                 </dd>
               </div>
 
-             
-
               <div className="flex items-start justify-between gap-4">
                 <dt className="flex items-center gap-2 text-[#5B6B79]">
                   <MapPin className="h-4 w-4" /> {t("Location")}
@@ -266,9 +277,7 @@ function Profile({ userId, myUserId }) {
             <div className="px-6 py-5">
               <div className="grid grid-cols-12 gap-6">
                 <div className="col-span-12 space-y-5">
-                  <Labeled label={t("Full Name")}>
-                    {data?.display_name || data?.username}
-                  </Labeled>
+                  <Labeled label={t("User Name")}>{data?.username}</Labeled>
                   <Separator />
 
                   <Labeled label={t("Phone")}>{data?.mobile_number}</Labeled>
@@ -336,6 +345,142 @@ function Profile({ userId, myUserId }) {
               {isLoading ? "Updating..." : t("Update Profile")}
             </button>
           )}
+          {/* Start Friend Requests Section - Only show for own profile */}
+          {+userId === +myUserId &&
+            (friendRequests?.incoming?.length > 0 ||
+              friendRequests?.outgoing?.length > 0) && (
+              <div className="rounded-xl border bg-card mt-6">
+                <div className="border-b px-6 py-4 font-semibold">
+                  {t("Friend Requests")}
+                </div>
+                <div className="px-6 py-5 space-y-6">
+                  {/* Incoming Requests */}
+                  {friendRequests?.incoming?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        {t("Incoming Requests")} (
+                        {friendRequests.incoming.length})
+                      </h4>
+                      <div className="space-y-3">
+                        {friendRequests.incoming.map((request) => (
+                          <div
+                            key={request.id}
+                            className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage
+                                  src={
+                                    request.from_user?.profile_image
+                                      ? `${BASE_URL}/${request.from_user.profile_image}`
+                                      : request.from_user?.profile_image_url ||
+                                        "/fake-user.png"
+                                  }
+                                  alt={
+                                    request.from_user?.display_name ||
+                                    request.from_user?.username
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {(
+                                    request.from_user?.display_name ||
+                                    request.from_user?.username
+                                  )
+                                    ?.slice(0, 2)
+                                    ?.toUpperCase() || "NA"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {request.from_user?.display_name ||
+                                    request.from_user?.first_name ||
+                                    request.from_user?.username}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  @{request.from_user?.username}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  /* TODO: Accept function */
+                                }}
+                                className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                              >
+                                {t("Accept")}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  /* TODO: Reject function */
+                                }}
+                                className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                              >
+                                {t("Reject")}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  /* TODO: Block function */
+                                }}
+                                className="px-3 py-1.5 bg-gray-700 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                              >
+                                {t("Block")}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Outgoing Requests */}
+                  {friendRequests?.outgoing?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                        {t("Sent Requests")} ({friendRequests.outgoing.length})
+                      </h4>
+                      <div className="space-y-3">
+                        {friendRequests.outgoing.map((request) => (
+                          <div
+                            key={request.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src="/fake-user.png" alt="User" />
+                                <AvatarFallback>
+                                  {t("User")?.slice(0, 2)?.toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {t("User")} #{request.to_user}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {t("Status")}:{" "}
+                                  <span className="font-medium text-yellow-600">
+                                    {request.status}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                /* TODO: Cancel function */
+                              }}
+                              className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                              {t("Cancel")}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          {/* End Friend Requests Section - Only show for own profile */}
         </section>
       </div>
     </div>

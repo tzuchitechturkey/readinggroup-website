@@ -166,22 +166,22 @@ function EditProfile() {
             onChange={handleInputChange}
           />
           {/* First Name */}
-          <FormInput
+          {/* <FormInput
             label={t("First Name")}
             name="first_name"
             placeholder="John"
             value={formData.first_name}
             onChange={handleInputChange}
-          />
+          /> */}
 
           {/* Last Name */}
-          <FormInput
+          {/* <FormInput
             label={t("Last Name")}
             name="last_name"
             placeholder="Smith"
             value={formData.last_name}
             onChange={handleInputChange}
-          />
+          /> */}
 
           {/* Display Name */}
           <FormInput

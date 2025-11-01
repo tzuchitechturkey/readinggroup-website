@@ -173,7 +173,7 @@ export default function PositionsContent({ onSectionChange }) {
         </div>
 
         {/* Start Search */}
-        {/* <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
           <div className="relative max-w-md flex">
             <input
               type="text"
@@ -206,7 +206,7 @@ export default function PositionsContent({ onSectionChange }) {
               {t("Search")}
             </button>
           </div>
-        </div> */}
+        </div>
         {/* End Search */}
 
         {/* Start Table */}
@@ -229,9 +229,13 @@ export default function PositionsContent({ onSectionChange }) {
                   >
                     {t("Description")}
                   </th>
-                  <th className={`py-2 px-3   ${
+                  <th
+                    className={`py-2 px-3   ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } w-[160px]`}>{t("Actions")}</th>
+                    } w-[160px]`}
+                  >
+                    {t("Actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody>

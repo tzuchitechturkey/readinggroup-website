@@ -66,7 +66,7 @@ export async function GetPositionById(id) {
 }
 
 export async function EditPositionById(id, data) {
-  return await axios.put(`/position-team-members/${id}`, data);
+  return await axios.put(`/position-team-members/${id}/`, data);
 }
 
 export async function DeletePositionsById(id) {
