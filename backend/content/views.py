@@ -842,37 +842,41 @@ class SeasonIdViewSet(BaseContentViewSet):
     search_fields = ("identifier",)
     ordering_fields = ("created_at",)
 
+    @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
+    def videos(self, request, pk=None):
+        """Return all Video objects associated with this SeasonId.
+
+        URL: /.../seasonid/{id}/videos/
+        Videos are ordered by happened_at (newest first) then created_at.
+        Supports pagination if the viewset/router has pagination configured.
+        """
+        try:
+            season = self.get_object()
+        except Exception:
+            return Response({"detail": "SeasonId not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Videos point to SeasonId via Video.season_name
+        qs = Video.objects.filter(season_name=season).order_by('-happened_at', '-created_at')
+
+        # annotate likes info so serializers can show likes_count/has_liked
+        qs = self.annotate_likes(qs)
+
+        # paginate if pagination is configured on the view
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = VideoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = VideoSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 class SeasonTitleViewSet(BaseContentViewSet):
     """ViewSet for managing SeasonTitle content."""
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-
-    @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
-    def season_ids(self, request, pk=None):
-        """Return all SeasonId objects associated with this SeasonTitle.
-
-        URL: /.../seasontitle/{id}/season-ids/
-        Supports pagination if the viewset/router has pagination configured.
-        """
-        try:
-            season_title = self.get_object()
-        except Exception:
-            return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # assuming SeasonId has FK named `season_title`
-        qs = SeasonId.objects.filter(season_title=season_title).order_by('id')
-
-        # paginate if pagination is configured on the view
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = SeasonIdSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = SeasonIdSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
+    
 class LikeViewSet(BaseContentViewSet):
     """ViewSet for managing Like content."""
     queryset = Like.objects.all()
