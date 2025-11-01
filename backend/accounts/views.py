@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 
 from rest_framework import generics, permissions, status , serializers, filters
 from django.db.models import Q
@@ -24,8 +23,6 @@ import pyotp
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .utils import generate_totp_secret, get_totp_uri, generate_qr_code_base64
-from email.mime.image import MIMEImage
-import base64
 
 
 User = get_user_model()

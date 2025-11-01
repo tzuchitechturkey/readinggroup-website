@@ -839,7 +839,7 @@ class SeasonIdViewSet(BaseContentViewSet):
     """ViewSet for managing SeasonId content."""
     queryset = SeasonId.objects.all()
     serializer_class = SeasonIdSerializer
-    search_fields = ("identifier",)
+    search_fields = ("season_title__name",)
     ordering_fields = ("created_at",)
 
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
@@ -876,6 +876,27 @@ class SeasonTitleViewSet(BaseContentViewSet):
     serializer_class = SeasonTitleSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    
+    @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
+    def season_ids(self, request, pk=None):
+        """Return SeasonId objects linked to this SeasonTitle.
+
+        GET /api/v1/season-titles/{pk}/season-ids/
+        """
+        try:
+            season_title = self.get_object()
+        except Exception:
+            return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = SeasonId.objects.filter(season_title=season_title).order_by('id')
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = SeasonIdSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = SeasonIdSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
     
 class LikeViewSet(BaseContentViewSet):
     """ViewSet for managing Like content."""
