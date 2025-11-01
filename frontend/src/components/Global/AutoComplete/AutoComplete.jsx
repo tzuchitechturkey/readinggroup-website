@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
 import { Search, X, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function AutoComplete({
   label,
@@ -19,6 +20,7 @@ export default function AutoComplete({
   customStyle = "",
   showWriterAvatar = true,
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);

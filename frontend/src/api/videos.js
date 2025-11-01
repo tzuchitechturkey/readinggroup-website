@@ -177,8 +177,8 @@ export async function RemoveFromMyList(videoId) {
 }
 
 // Series
-export async function GetSeries() {
-  return await axios.get(`/season-titles/`);
+export async function GetSeries(search = "") {
+  return await axios.get(`/season-titles/?search=${search}`);
 }
 
 export async function GetSeasonsBySeriesId(seriesId) {
@@ -229,6 +229,8 @@ export async function DeleteSeasonById(id) {
   return await axios.delete(`/season-ids/${id}/`);
 }
 
-export async function GetVideosBySeasonId(limit , offset ,seasonId) {
-  return await axios.get(`/season-ids/${seasonId}/videos/?limit=${limit}&offset=${offset}`);
+export async function GetVideosBySeasonId(limit, offset, seasonId) {
+  return await axios.get(
+    `/season-ids/${seasonId}/videos/?limit=${limit}&offset=${offset}`
+  );
 }

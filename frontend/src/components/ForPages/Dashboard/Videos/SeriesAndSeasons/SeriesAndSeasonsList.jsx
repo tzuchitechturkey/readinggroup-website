@@ -54,10 +54,10 @@ function SeriesAndSeasonsList() {
   const [update, setUpdate] = useState(false);
 
   // Fetch Series Data
-  const getSeriesData = async () => {
+  const getSeriesData = async (searchValue = "") => {
     setIsLoading(true);
     try {
-      const res = await GetSeries();
+      const res = await GetSeries(searchValue);
       setSeriesData(res?.data?.results || []);
     } catch (error) {
       setErrorFn(error, t);
@@ -111,15 +111,26 @@ function SeriesAndSeasonsList() {
     setSortConfig({ key, direction });
   };
 
-  // Filter and Sort Series
-  const getFilteredAndSortedSeries = () => {
-    const filtered = seriesData.filter((series) =>
-      series.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  // Handle Search
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      getSeriesData(searchTerm);
+    } else {
+      getSeriesData("");
+    }
+  };
 
-    if (!sortConfig.key) return filtered;
+  // Clear Search
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    getSeriesData("");
+  };
 
-    return [...filtered].sort((a, b) => {
+  // Sort Series
+  const getSortedSeries = () => {
+    if (!sortConfig.key) return seriesData;
+
+    return [...seriesData].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -305,14 +316,17 @@ function SeriesAndSeasonsList() {
             placeholder={t("Search by series name...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
           />
 
           {searchTerm && (
             <button
-              onClick={() => {
-                setSearchTerm("");
-              }}
+              onClick={handleClearSearch}
               className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
               ✕
@@ -320,11 +334,7 @@ function SeriesAndSeasonsList() {
           )}
 
           <button
-            onClick={() => {
-              if (searchTerm.trim()) {
-                // Search is already reactive, so this is optional
-              }
-            }}
+            onClick={handleSearch}
             className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
           >
             {t("Search")}
@@ -355,8 +365,8 @@ function SeriesAndSeasonsList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {getFilteredAndSortedSeries().length > 0 ? (
-                getFilteredAndSortedSeries().map((series, index) => (
+              {getSortedSeries().length > 0 ? (
+                getSortedSeries().map((series, index) => (
                   <React.Fragment key={series.id}>
                     {/* Series Row */}
                     <TableRow
@@ -466,6 +476,14 @@ function SeriesAndSeasonsList() {
                           ? t("Try adjusting your search")
                           : t("Start by adding a new series")}
                       </p>
+                      {searchTerm && (
+                        <button
+                          onClick={handleClearSearch}
+                          className="mt-3 text-blue-500 hover:text-blue-600 underline text-sm"
+                        >
+                          {t("Clear Search")}
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
