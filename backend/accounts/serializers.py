@@ -45,6 +45,13 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "posts_count",
             "followers_count",
             "following_count",
+            "profession_name",
+            "about_me",
+            "country",
+            "mobile_number",
+            "address_details",
+            "website_address",
+            "status",
         )
         read_only_fields = (
             "id",
