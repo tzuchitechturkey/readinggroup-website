@@ -110,7 +110,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       setHasChanges(false);
     }
   }, [post]);
-  console.log(post);
+
   // Check for changes when formData changes
   useEffect(() => {
     if (post && initialFormData) {
@@ -228,6 +228,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
+
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -419,6 +420,17 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Start Image Upload Section */}
         <div>
+          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+            <p className="text-sm text-blue-800">
+              <strong>{t("Important")}:</strong>{" "}
+              {t(
+                "Please select an image with minimum dimensions of 1920x1080 pixels for best quality."
+              )}
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
+            </p>
+          </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Post Image")} *
           </label>
@@ -483,6 +495,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Image URL")} ({t("Alternative to file upload")})
           </label>
+
           <Input
             name="image_url"
             value={formData.image_url}

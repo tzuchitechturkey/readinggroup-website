@@ -13,6 +13,7 @@ function SearchSecion({
   searchValue,
   handleSortData,
   onSearch,
+  hasActiveFilters,
 }) {
   const { t, i18n } = useTranslation();
   const [searchValueLocale, setSearchValueLocal] = React.useState("");
@@ -82,17 +83,19 @@ function SearchSecion({
 
         {/* Start Sort && View Options */}
         <div className="w-full lg:col-span-2 flex  sm:flex-row lg:flex-row items-start sm:items-center lg:items-center gap-3 sm:gap-4 lg:gap-8">
-          <button
-            onClick={() => {
-              handleSortData();
-            }}
-            className="hidden lg:flex outline-none  items-center gap-2 px-3 lg:px-2 py-2 sm:py-[6px] border border-primary rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-sm sm:text-base lg:text-xl text-primary font-medium">
-              {t("Sort by")}
-            </span>
-            <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={() => {
+                handleSortData();
+              }}
+              className="hidden lg:flex outline-none  items-center gap-2 px-3 lg:px-2 py-2 sm:py-[6px] border border-primary rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-sm sm:text-base lg:text-xl text-primary font-medium">
+                {t("Sort by")}
+              </span>
+              <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            </button>
+          )}
 
           {/* View Mode Toggle */}
           {/* <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">

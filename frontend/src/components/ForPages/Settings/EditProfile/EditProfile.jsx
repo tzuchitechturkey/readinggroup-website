@@ -164,6 +164,7 @@ function EditProfile() {
             placeholder="JohnDoe"
             value={formData.username}
             onChange={handleInputChange}
+            disabled
           />
           {/* First Name */}
           {/* <FormInput
@@ -252,6 +253,7 @@ function EditProfile() {
             placeholder="john@gmail.com"
             value={formData.email}
             onChange={handleInputChange}
+            disabled
           />
 
           {/* Submit Button */}
@@ -285,6 +287,7 @@ const FormInput = ({
   fullWidth = false,
   className = "",
   inputClassName = "",
+  disabled,
   ...rest
 }) => {
   const inputId = id || (name ? `input-${name}` : undefined);
@@ -304,6 +307,7 @@ const FormInput = ({
         defaultValue={defaultValue}
         onChange={onChange}
         className={`w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-lg text-slate-700 placeholder:text-[#9FA2AA] focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 ${inputClassName}`}
+        disabled={disabled}
         {...rest}
       />
     </div>

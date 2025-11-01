@@ -116,7 +116,6 @@ function CustomyoutubeVideo({ videoData }) {
           ? videoItem?.likes_count + 1
           : videoItem?.likes_count - 1,
       });
-      toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch {
       toast.error(t("Failed to update like status"));
     }
@@ -136,7 +135,6 @@ function CustomyoutubeVideo({ videoData }) {
           ...prev,
           has_in_my_list: Boolean(serverHas),
         }));
-        toast.success(t("Removed from your list"));
       } else {
         // not saved -> add
         const res = await AddToMyList(videoItem.id);
@@ -149,7 +147,6 @@ function CustomyoutubeVideo({ videoData }) {
           ...prev,
           has_in_my_list: Boolean(serverHas),
         }));
-        toast.success(t("Added to your list"));
       }
     } catch (err) {
       setErrorFn(err, t);
@@ -158,7 +155,7 @@ function CustomyoutubeVideo({ videoData }) {
   return (
     <div className="bg-gray-100 px-4 sm:px-0  ">
       <div className="  ">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-lg  overflow-hidden">
           <div
             className="relative bg-black"
             onMouseEnter={() => setShowControls(true)}
@@ -278,11 +275,6 @@ function CustomyoutubeVideo({ videoData }) {
                       {t}
                     </span>
                   ))}
-                  {videoData?.durationText && (
-                    <span className="px-2 sm:px-3 py-1 bg-transparent text-xs sm:text-sm rounded-full">
-                      {videoData?.durationText}
-                    </span>
-                  )}
                 </div>
               )}
               {/* End Tags */}
@@ -314,6 +306,7 @@ function CustomyoutubeVideo({ videoData }) {
             {/* Start Views */}
             {(videoData?.views || videoData?.timeAgo) && (
               <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
+                {t("Views")}:
                 {videoData?.views && <span>{videoData?.views}</span>}
                 {videoData?.views && videoData?.timeAgo && <span>•</span>}
                 {videoData?.timeAgo && <span>{videoData?.timeAgo}</span>}
@@ -324,13 +317,13 @@ function CustomyoutubeVideo({ videoData }) {
             {/* Start Description */}
             {videoData?.description && (
               <div className="pt-4 sm:pt-6 md:pt-8 max-w-5xl">
-                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                <span className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   <ShowHideText
                     text={videoData?.description}
                     t={t}
                     count={210}
                   />
-                </p>
+                </span>
               </div>
             )}
             {/* End Description */}

@@ -55,7 +55,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [tagsInput, setTagsInput] = useState("");
   const [formData, setFormData] = useState({
     title: "",
-    duration: "",
+    // duration: "",
     category: "",
     video_type: "",
     language: "",
@@ -76,7 +76,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     if (video) {
       const initialData = {
         title: video?.title || "",
-        duration: video?.duration || "",
+        // duration: video?.duration || "",
         category: video?.category || "",
         video_type: video?.video_type || "",
         language: video?.language || "",
@@ -299,9 +299,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       newErrors.video_url = t("Please enter a valid YouTube URL");
     }
 
-    if (!formData?.duration.trim()) {
-      newErrors.duration = t("Duration is required");
-    }
+    // if (!formData?.duration.trim()) {
+    //   newErrors.duration = t("Duration is required");
+    // }
     // Series and Season are optional
     if (selectedSeriesId && !formData?.season_name) {
       newErrors.season_name = t("Season is required when Series is selected");
@@ -367,7 +367,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     // });
 
     formDataToSend.append("title", formData?.title);
-    formDataToSend.append("duration", formData?.duration);
+    // formDataToSend.append("duration", formData?.duration);
     formDataToSend.append(
       "category",
       formData?.category?.id || formData?.category
@@ -490,6 +490,17 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Start Image Upload Section */}
         <div>
+            <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+            <p className="text-sm text-blue-800">
+              <strong>{t("Important")}:</strong>{" "}
+              {t(
+                "Please select an image with minimum dimensions of 300x200 pixels for best quality."
+              )}
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
+            </p>
+          </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Video Thumbnail")} *
           </label>
@@ -965,7 +976,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* End Language */}
 
             {/* Start Duration */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Duration")} *
               </label>
@@ -979,7 +990,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               {errors.duration && (
                 <p className="text-red-500 text-xs mt-1">{errors.duration}</p>
               )}
-            </div>
+            </div> */}
             {/* End Duration */}
 
             {/* Start Video URL */}

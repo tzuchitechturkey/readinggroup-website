@@ -6,6 +6,8 @@ import { createPortal } from "react-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
+import Modal from "../Modal/Modal";
+
 function TopFiveSectionCard({ item, index }) {
   const isMobile = useIsMobile();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
@@ -17,9 +19,7 @@ function TopFiveSectionCard({ item, index }) {
           setOpenDetailsVideoModal(true);
           return;
         }
-
         let router = "";
-
         if (item.report_type === "videos") {
           router = `/events/video/${item.id}`;
         } else if (item.report_type === "reports") {
@@ -31,17 +31,16 @@ function TopFiveSectionCard({ item, index }) {
         } else {
           router = `/cards-photos/card/${item.id}`;
         }
-
         navigate(router);
       }}
       key={item?.id}
-      className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300 flex items-center gap-1"
+      className="  group cursor-pointer transform hover:scale-105 transition-all duration-300 flex items-center gap-1"
     >
       {/* Start Number */}
-      <div className="relative z-20 flex-shrink-0 -mr-6">
+      <div className="relative z-20 flex-shrink-0 -mr-4">
         <div className="relative">
           <span
-            className=" text-7xl md:text-9xl font-black leading-none  "
+            className={` text-7xl md:text-8xl font-black leading-none  `}
             style={{
               WebkitTextStroke: "3px white",
               WebkitTextFillColor: "transparent",
@@ -62,8 +61,9 @@ function TopFiveSectionCard({ item, index }) {
         </div>
       </div>
       {/* End Number */}
+
       <div className="flex-1 relative z-10">
-        <div className="relative w-full 2xl:w-[210px] h-40 lg:h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
+        <div className="relative w-full 2xl:w-[200px] h-40 lg:h-[180px] rounded-lg overflow-hidden shadow-2xl bg-gray-900">
           <img
             src={
               item?.report_type === "videos" || item?.video_type
@@ -116,7 +116,7 @@ function TopFiveSectionCard({ item, index }) {
       </div>
       {openDetailsVideoModal &&
         createPortal(
-          <VideoDetailsContent
+          <Modal
             isOpen={openDetailsVideoModal}
             onClose={() => setOpenDetailsVideoModal(false)}
             videoData={item}

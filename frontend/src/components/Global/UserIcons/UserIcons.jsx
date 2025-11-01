@@ -106,7 +106,12 @@ function UserIcons() {
             localStorage.removeItem("dashboardActiveSection");
           }}
         >
-          <Link to="/dashboard">{t("Dashboard")}</Link>
+          <Link
+            className="p-1 px-3 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+            to="/dashboard"
+          >
+            {t("Dashboard")}
+          </Link>
         </div>
       )}
     </div>

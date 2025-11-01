@@ -58,8 +58,16 @@ function GuindReadingFilterSction() {
     if (customFilters.searchDate)
       apiFilters.created_at = customFilters.searchDate;
 
-    // Add writer filter - send writer ID
-    if (customFilters.writer?.id) apiFilters.writer = customFilters.writer.id;
+    // Add writer filter - send writer username(s)
+    if (Array.isArray(customFilters.writer) && customFilters.writer.length > 0) {
+      const writerNames = customFilters.writer
+        .map((w) => w?.username)
+        .filter(Boolean)
+        .join(",");
+      if (writerNames) apiFilters.writer = writerNames;
+    } else if (customFilters.writer?.username) {
+      apiFilters.writer = customFilters.writer.username;
+    }
 
     // Add category filter - category is stored as string directly
     if (customFilters.category) apiFilters.category = customFilters.category;

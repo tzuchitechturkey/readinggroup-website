@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import RecommendationNewsCard from "@/components/ForPages/Events/RecommendationN
 import CategoryTag from "@/components/ForPages/Events/EventsCategoryTag/CategoryTag";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
+  GetEventCategories,
   GetTopEventsCommented,
   GetTopEventsLastPosted,
   GetTopEventsViewed,
@@ -15,9 +16,10 @@ import {
 
 const EventstNewsSection = () => {
   const { t, i18n } = useTranslation();
-  const [lastPosted, setLastPosted] = React.useState([]);
-  const [topViewed, setTopViewed] = React.useState([]);
-  const [SuggestedData, setSuggestedData] = React.useState([]);
+  const [lastPosted, setLastPosted] = useState([]);
+  const [topViewed, setTopViewed] = useState([]);
+  const [SuggestedData, setSuggestedData] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([]);
   const navigate = useNavigate();
   const getSuggestedData = async () => {
     try {
@@ -43,123 +45,14 @@ const EventstNewsSection = () => {
       setErrorFn(err, t);
     }
   };
-  const data = {
-    breakingNews: [
-      {
-        id: 8,
-        title: "The Dark Side of AI: Ethical Concerns & Risks",
-        writer: "Anthony Rivera",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-        category: "Tech & Innovation",
-      },
-      {
-        id: 9,
-        title: "How Minimalism is Changing Interior Design",
-        writer: "Rachel Stevens",
-        date: "Jan 13, 2025",
-        image: "/1-top5.jpg",
-        category: "Lifestyle",
-      },
-      {
-        id: 10,
-        title: "Hollywood's Biggest Movie Releases This Year",
-        writer: "Alex Johnson",
-        date: "Jan 15, 2025",
-        image: "/2-top5.jpg",
-        category: "Entertainment",
-      },
-      {
-        id: 11,
-        title: "Is Cloud Gaming the Future of Play?",
-        writer: "John Doe",
-        date: "Jan 13, 2025",
-        image: "/3-top5.jpg",
-        category: "Gaming",
-      },
-      {
-        id: 12,
-        title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-        writer: "Shin tae yong",
-        date: "Jan 13, 2025",
-        image: "/4-top5.jpg",
-        category: "Entertainment",
-      },
-      {
-        id: 13,
-        title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-        writer: "Jim corry",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-        category: "Business",
-      },
-    ],
 
-    latestUpdates: [
-      {
-        id: 14,
-        title: "Is Cloud Gaming the Future of Play?",
-        writer: "John Doe",
-        date: "Jan 13, 2025",
-        image: "/3-top5.jpg",
-      },
-      {
-        id: 15,
-        title: "Trends You Need to Try This Year",
-        writer: "John Doe",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-      },
-      {
-        id: 16,
-        title: "The Rise of K-Pop: What's Next for the Global Phenomenon?",
-        writer: "Shin tae yong",
-        date: "Jan 13, 2025",
-        image: "/4-top5.jpg",
-      },
-      {
-        id: 17,
-        title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-        writer: "Jim corry",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-      },
-      {
-        id: 18,
-        title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-        writer: "Jim corry",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-      },
-      {
-        id: 19,
-        title: "The Future of Work: Remote, Hybrid, or Back to Office?",
-        writer: "Jim corry",
-        date: "Jan 13, 2025",
-        image: "/testCard.png",
-      },
-    ],
-
-    categories: [
-      "Tech & Innovation",
-      "Business & Economy",
-      "Entertainment & Pop Culture",
-      "Science & Discovery",
-      "Health & Wellness",
-      "Sports",
-      "Gaming",
-      "Esport",
-      "Virtual Worlds",
-      "Travel & Adventure",
-      "Politics & Global Affairs",
-      "Finance",
-      "Cryptocurrency",
-      "Lifestyle & Trends",
-      "Social Media & Influencers",
-      "Education",
-      "Environment & Sustainability",
-      "More",
-    ],
+  const getCategories = async () => {
+    try {
+      const res = await GetEventCategories(100, 0, "");
+      setCategoriesList(res.data?.results || []);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
   };
 
   const SectionHeader = ({ title, ornamentHeight = "h-12" }) => (
@@ -172,12 +65,13 @@ const EventstNewsSection = () => {
   );
 
   const handleCategoryClick = () => {
-    // يمكن إضافة منطق التصفية هنا
+  
   };
   useEffect(() => {
     getLastPosted();
     getTopViewed();
     getSuggestedData();
+    getCategories();
   }, []);
   return (
     <div
@@ -266,7 +160,7 @@ const EventstNewsSection = () => {
             <section className="pt-3">
               <SectionHeader title="Tags Category" ornamentHeight="h-10" />
               <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 mt-5 justify-center lg:justify-start">
-                {data.categories.map((category, index) => (
+                {categoriesList.map((category, index) => (
                   <CategoryTag
                     key={index}
                     category={category}

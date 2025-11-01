@@ -112,9 +112,8 @@ function RegisterForm() {
         password: form.password,
         display_name: form.displayName,
       };
-      const { data } = await Register(payload);
-      // setTokens({ access: data?.access, refresh: data?.refresh });
-      toast.success(t("Registration successful"));
+      await Register(payload);
+      toast.success(t("An account has been created and a verification email has been sent to your email address."));
       navigate("/auth/login");
     } catch (err) {
       setErrorFn(err, t);

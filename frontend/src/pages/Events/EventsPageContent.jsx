@@ -44,26 +44,27 @@ function EventsPageContent() {
       {/* Start Filter Section */}
       <EventsFilterSections />
       {/* End Filter Section */}
-
-      {/* Start Suggestions you might like */}
-      <DynamicSection
-        title={t("Suggestions you might like")}
-        titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5"
-        data={suggestions}
-        isSlider={true}
-        cardName={EventCard}
-        viewMore={false}
-        viewMoreUrl="/guiding-reading"
-      />
-      <DynamicSection
-        title={t("Most Liked events")}
-        titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5 "
-        data={topLiked}
-        isSlider={true}
-        cardName={EventCard}
-        viewMore={false}
-      />
-      {/* End Suggestions you might like */}
+      <div className="max-w-7xl mx-auto">
+        {/* Start Suggestions you might like */}
+        <DynamicSection
+          title={t("Suggestions you might like")}
+          titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5"
+          data={suggestions}
+          isSlider={true}
+          cardName={EventCard}
+          viewMore={false}
+          viewMoreUrl="/guiding-reading"
+        />
+        <DynamicSection
+          title={t("Most Liked events")}
+          titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5 "
+          data={topLiked}
+          isSlider={true}
+          cardName={EventCard}
+          viewMore={false}
+        />
+        {/* End Suggestions you might like */}
+      </div>
     </div>
   );
 }

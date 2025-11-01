@@ -62,44 +62,47 @@ function VideosPageContent() {
         likedVideos={likedVideos}
       />
       {/* End Filter Secion */}
-
-      {/* Start My LIST */}
-      <div className="my-3">
-        <DynamicSection
-          title="My LIST"
-          titleClassName="text-[30px] font-medium mb-2"
-          data={myListedVideos}
-          isSlider={false}
-          viewMore={true}
-          cardName={VideoCard}
-          viewMoreUrl="/my-list"
-        />
+      <div className="max-w-7xl mx-auto">
+        {/* Start My LIST */}
+        {myListedVideos?.length > 0 && (
+          <div className="my-3">
+            <DynamicSection
+              title="My LIST"
+              titleClassName="text-[30px] font-medium mb-2"
+              data={myListedVideos}
+              isSlider={false}
+              viewMore={true}
+              cardName={VideoCard}
+              viewMoreUrl="/my-list"
+            />
+          </div>
+        )}
+        {/* End My LIST */}
+        {/* Start Full Video */}
+        <div className="my-3">
+          <DynamicSection
+            title="Full Video"
+            titleClassName="text-[30px] font-medium mb-2"
+            data={topMixVideos?.top_5_full}
+            isSlider={false}
+            cardName={VideoCard}
+            viewMoreUrl="/videos"
+          />
+        </div>
+        {/* End Full Video */}
+        {/* Start Unit  Video */}
+        <div className="my-3  pb-4">
+          <DynamicSection
+            title="Unit  Video"
+            titleClassName="text-[30px] font-medium mb-2"
+            data={topMixVideos?.top_5_unit}
+            isSlider={false}
+            cardName={VideoCard}
+            viewMoreUrl="/videos"
+          />
+        </div>
+        {/* End Unit  Video */}
       </div>
-      {/* End My LIST */}
-      {/* Start Full Video */}
-      <div className="my-3">
-        <DynamicSection
-          title="Full Video"
-          titleClassName="text-[30px] font-medium mb-2"
-          data={topMixVideos?.top_5_full}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End Full Video */}
-      {/* Start Unit  Video */}
-      <div className="my-3  pb-4">
-        <DynamicSection
-          title="Unit  Video"
-          titleClassName="text-[30px] font-medium mb-2"
-          data={topMixVideos?.top_5_unit}
-          isSlider={false}
-          cardName={VideoCard}
-          viewMoreUrl="/videos"
-        />
-      </div>
-      {/* End Unit  Video */}
     </div>
   );
 }

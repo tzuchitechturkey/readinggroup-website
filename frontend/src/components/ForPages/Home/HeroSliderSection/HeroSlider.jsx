@@ -267,7 +267,7 @@ export default function HeroSlider({ newsPage = false, data = null }) {
                   </div>
                   {/* End Title && Actions */}
 
-                  <div className="pointer-events-auto absolute left-6 right-6 bottom-3 md:bottom-10 z-10">
+                  <div className="pointer-events-auto absolute left-1 right-1 bottom-3 md:bottom-10 z-10">
                     <TopFiveSection data={slide.allData} />
                   </div>
                 </div>

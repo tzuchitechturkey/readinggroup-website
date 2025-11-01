@@ -54,7 +54,7 @@ function VideoCommentsSection({ itemId, type }) {
   const [userId, setUserId] = useState(null);
   const commentsPerPage = 10;
   const [userImage, setUserImage] = useState();
-  
+
   // 🌟 الاستماع للنقر خارج المكون
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -114,7 +114,7 @@ function VideoCommentsSection({ itemId, type }) {
       await CreateVideoComment(itemId, comment.trim(), type);
       setComment("");
       setShowPicker(false);
-      toast.success(t("Comment added successfully"));
+      // toast.success(t("Comment added successfully"));
       // Reload comments
       loadComments(0);
     } catch (error) {
@@ -129,7 +129,7 @@ function VideoCommentsSection({ itemId, type }) {
     try {
       await DeleteVideoComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
-      toast.success(t("Comment deleted successfully"));
+      // toast.success(t("Comment deleted successfully"));
     } catch (error) {
       console.error("Failed to delete comment:", error);
       toast.error(t("Failed to delete comment"));
@@ -164,7 +164,7 @@ function VideoCommentsSection({ itemId, type }) {
       );
       setEditingCommentId(null);
       setEditCommentText("");
-      toast.success(t("Comment updated successfully"));
+      // toast.success(t("Comment updated successfully"));
     } catch (error) {
       console.error("Failed to edit comment:", error);
       toast.error(t("Failed to edit comment"));
@@ -185,11 +185,11 @@ function VideoCommentsSection({ itemId, type }) {
       } else {
         await LikeComment(commentId);
       }
-      if (isLiked) {
-        toast.success(t("Like Removed"));
-      } else {
-        toast.success(t("Like Added"));
-      }
+      // if (isLiked) {
+      //   toast.success(t("Like Removed"));
+      // } else {
+      //   toast.success(t("Like Added"));
+      // }
       // Update local state
       setComments((prev) =>
         prev.map((c) => {
@@ -256,7 +256,7 @@ function VideoCommentsSection({ itemId, type }) {
       await CreateCommentReply(commentId, text.trim());
       setReplyText((prev) => ({ ...prev, [commentId]: "" }));
       setActiveReplyComment(null);
-      toast.success(t("Reply added successfully"));
+      // toast.success(t("Reply added successfully"));
       // Reload replies
       await loadReplies(commentId);
     } catch (error) {
@@ -282,7 +282,7 @@ function VideoCommentsSection({ itemId, type }) {
           return c;
         })
       );
-      toast.success(t("Reply deleted successfully"));
+      // toast.success(t("Reply deleted successfully"));
     } catch (error) {
       console.error("Failed to delete reply:", error);
       toast.error(t("Failed to delete reply"));
@@ -365,7 +365,7 @@ function VideoCommentsSection({ itemId, type }) {
       );
       setEditingReplyId(null);
       setEditReplyText("");
-      toast.success(t("Reply updated successfully"));
+      // toast.success(t("Reply updated successfully"));
     } catch (error) {
       console.error("Failed to edit reply:", error);
       toast.error(t("Failed to edit reply"));
@@ -382,8 +382,8 @@ function VideoCommentsSection({ itemId, type }) {
     setIsLoading(true);
     try {
       await SendFriendRequest({ to_user: followUserId });
-      toast.success(t("Friend request sent successfully"));
-      
+      // toast.success(t("Friend request sent successfully"));
+
       // تحديث حالة التعليق لإظهار أن طلب الصداقة تم إرساله
       setComments((prev) =>
         prev.map((c) => {

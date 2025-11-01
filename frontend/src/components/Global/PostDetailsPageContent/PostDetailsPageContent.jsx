@@ -73,7 +73,7 @@ function PostDetailsPageContent() {
         has_liked: newLikedState,
       });
 
-      toast.success(newLikedState ? t("Like Added") : t("Like removed"));
+      // toast.success(newLikedState ? t("Like Added") : t("Like removed"));
     } catch (error) {
       setErrorFn(error, t);
       toast.error(t("Failed to update like status"));

@@ -160,6 +160,7 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
           searchValue={searchValue}
           handleSortData={handleSortData}
           onSearch={onSearch}
+          hasActiveFilters={hasActiveFilters}
         />
       </div>
       {/* End Search Header */}

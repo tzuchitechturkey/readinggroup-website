@@ -49,11 +49,11 @@ function PhotoDetailsContent() {
   // دالة الإعجاب
   const handleLike = () => {
     setIsLiked(!isLiked);
-    if (!isLiked) {
-      toast.success(t("Like Added"));
-    } else {
-      toast.info(t("Like Removed"));
-    }
+    // if (!isLiked) {
+    //   toast.success(t("Like Added"));
+    // } else {
+    //   toast.info(t("Like Removed"));
+    // }
   };
 
   // دالة تقييم النجوم

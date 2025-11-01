@@ -16,6 +16,7 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
+import VideoDurationCell from "@/components/ForPages/Dashboard/Videos/VideoDurationCell/VideoDurationCell";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { DeleteVideoById, GetVideos } from "@/api/videos";
 
@@ -368,7 +369,7 @@ function VideosList({ onSectionChange }) {
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <span className="font-medium">{video.duration}</span>
+                <VideoDurationCell videoUrl={video.video_url} />
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
@@ -389,14 +390,7 @@ function VideosList({ onSectionChange }) {
                       day: "2-digit",
                     })}
                   </span>
-                  <span className="text-[#9FA2AA] text-[10px]">
-                    {video.happened_at
-                      ? new Date(video.happened_at).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : ""}
-                  </span>
+                   
                 </div>
               </TableCell>
               <TableCell className="py-4">

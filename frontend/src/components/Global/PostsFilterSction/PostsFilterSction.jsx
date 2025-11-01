@@ -57,8 +57,14 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       apiFilters.created_at = filter.searchDate;
     }
 
-    // Add writer filter - send username (string)
-    if (filter.writer?.username) {
+    // Add writer filter - send writer username(s)
+    if (Array.isArray(filter.writer) && filter.writer.length > 0) {
+      const writerNames = filter.writer
+        .map((w) => w?.username)
+        .filter(Boolean)
+        .join(",");
+      if (writerNames) apiFilters.writer = writerNames;
+    } else if (filter.writer?.username) {
       apiFilters.writer = filter.writer.username;
     }
 
@@ -89,7 +95,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
           apiFilters.post_type = filter.type;
         }
       } else {
-        apiFilters.post_type = "card";
+        apiFilters.post_type = ["card", "photo"].join(",");
       }
     } else {
       // For guided reading page: always filter by 'reading'

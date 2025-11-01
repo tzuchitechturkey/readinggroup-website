@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 
 import Modal from "@/components/Global/Modal/Modal";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
@@ -20,6 +21,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function EventsFilterSections() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
 
@@ -246,6 +248,15 @@ function EventsFilterSections() {
   useEffect(() => {
     loadDefaultSections();
     loadSectionsList();
+
+    // Check if there's a selected category from navigation state
+    if (location.state?.selectedCategory) {
+      const selectedCategory = location.state.selectedCategory;
+      setFilters((prev) => ({
+        ...prev,
+        category: [selectedCategory],
+      }));
+    }
   }, []);
 
   return (
@@ -260,6 +271,7 @@ function EventsFilterSections() {
           handleSortData={handleSortData}
           setMakingSearch={setMakingSearch}
           onSearch={onSearch}
+          hasActiveFilters={hasActiveFilters}
         />
       </div>
 

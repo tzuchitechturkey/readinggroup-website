@@ -134,10 +134,10 @@ function Profile({ userId, myUserId }) {
     try {
       if (data?.friend_request_status) {
         await SendUnFollowRequest({ to_user: followUserId });
-        toast.success(t("Unfollowed successfully"));
+        // toast.success(t("Unfollowed successfully"));
       } else {
         await SendFriendRequest({ to_user: followUserId });
-        toast.success(t("Friend request sent successfully"));
+        // toast.success(t("Friend request sent successfully"));
       }
     } catch (error) {
       setErrorFn(error, t);
@@ -369,34 +369,21 @@ function Profile({ userId, myUserId }) {
           )}
           {/* Start Friend Requests Section - Only show for own profile */}
           {+userId === +myUserId &&
-            (friendRequests?.incoming?.filter((req) => req.status === "PENDING")
-              .length > 0 ||
-              friendRequests?.outgoing?.filter(
-                (req) => req.status === "PENDING"
-              ).length > 0) && (
+            (friendRequests?.incoming?.length > 0 ||
+              friendRequests?.outgoing?.length > 0) && (
               <div className="rounded-xl border bg-card mt-6">
                 <div className="border-b px-6 py-4 font-semibold">
                   {t("Friend Requests")}
                 </div>
                 <div className="px-6 py-5 space-y-6">
                   {/* Incoming Requests */}
-                  {friendRequests?.incoming?.filter(
-                    (req) => req.status === "PENDING"
-                  ).length > 0 && (
+                  {friendRequests?.incoming?.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                        {t("Incoming Requests")} (
-                        {
-                          friendRequests.incoming.filter(
-                            (req) => req.status === "PENDING"
-                          ).length
-                        }
-                        )
+                        {t("Incoming Requests")} ({friendRequests.incoming.length})
                       </h4>
                       <div className="space-y-3">
-                        {friendRequests.incoming
-                          .filter((request) => request.status === "PENDING")
-                          .map((request) => (
+                        {friendRequests.incoming.map((request) => (
                             <div
                               key={request.id}
                               className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
@@ -434,32 +421,43 @@ function Profile({ userId, myUserId }) {
                                   <p className="text-xs text-gray-500">
                                     @{request.from_user?.username}
                                   </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {t("Status")}: <span className={`font-medium ${
+                                      request.status === "ACCEPTED" ? "text-green-600" :
+                                      request.status === "REJECTED" ? "text-red-600" :
+                                      "text-yellow-600"
+                                    }`}>
+                                      {request.status}
+                                    </span>
+                                  </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleFriendRequestAction(
-                                      request.id,
-                                      "accept"
-                                    )
-                                  }
-                                  className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
-                                >
-                                  {t("Accept")}
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleFriendRequestAction(
-                                      request.id,
-                                      "reject"
-                                    )
-                                  }
-                                  className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
-                                >
-                                  {t("Reject")}
-                                </button>
-                              </div>
+                              {request.status === "PENDING" && (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() =>
+                                      handleFriendRequestAction(
+                                        request.id,
+                                        "accept"
+                                      )
+                                    }
+                                    className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                                  >
+                                    {t("Accept")}
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleFriendRequestAction(
+                                        request.id,
+                                        "reject"
+                                      )
+                                    }
+                                    className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                                  >
+                                    {t("Reject")}
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ))}
                       </div>

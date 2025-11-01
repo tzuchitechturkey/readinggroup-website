@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
+import VideoDuration from "./VideoDuration";
+
 const VideoCard = ({ item, className = "" }) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +64,7 @@ const VideoCard = ({ item, className = "" }) => {
                 {t(item?.category?.name)}
               </span>
               <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
-                {item?.duration} : 00 m
+                <VideoDuration videoUrl={item?.video_url} />
               </span>
             </div>
 

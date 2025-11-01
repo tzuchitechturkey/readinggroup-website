@@ -1,19 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import { Calendar, Search, ChevronDown, X, Filter } from "lucide-react";
-import { format } from "date-fns";
+import { Search, ChevronDown, X, Filter } from "lucide-react";
 
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetAllUsers, GetPostCategories } from "@/api/posts";
 import { languages } from "@/constants/constants";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 
 import Loader from "../Loader/Loader";
 import AutoComplete from "../AutoComplete/AutoComplete";
@@ -30,15 +21,11 @@ function PostsFilter({
 }) {
   // Destructure filters for easier access
   const { searchDate, writer, category, type, language, titleQuery } = filters;
-  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [happenedAt, setHappenedAt] = useState();
   const [categoriesList, setCategoriesList] = useState([]);
   const [writersList, setWritersList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef(null);
-  const [dateOpen, setDateOpen] = useState(false);
-
   const getWriters = async (searchVal = "") => {
     try {
       const res = await GetAllUsers(searchVal);
@@ -63,25 +50,12 @@ function PostsFilter({
     if (searchInputRef.current) searchInputRef.current.focus();
   }, []);
 
-  const clearDateFilter = () => {
-    setHappenedAt(null);
-    updateFilter("searchDate", "");
-  };
-
   const clearAllFilters = () => {
     if (onResetFilters) {
       onResetFilters();
     }
-    setHappenedAt("");
     onSearch(true);
     setClearFilterResult(false);
-  };
-
-  const handleDateSelection = (data) => {
-    const dateText = data.toISOString().split("T")[0]; // yyyy-mm-dd
-
-    updateFilter("searchDate", dateText);
-    setIsDateModalOpen(false);
   };
 
   const handleKeyPress = (e) => {
@@ -92,12 +66,22 @@ function PostsFilter({
     const filters = [];
     if (searchDate)
       filters.push({ type: "date", label: t("Date"), value: searchDate });
-    if (writer?.username)
+    if (Array.isArray(writer) && writer.length > 0) {
+      writer.forEach((w) => {
+        filters.push({
+          type: "writer",
+          label: t("writer"),
+          value: w?.username || w,
+          writerItem: w,
+        });
+      });
+    } else if (writer && typeof writer === "object" && writer.username) {
       filters.push({
         type: "writer",
         label: t("writer"),
         value: writer?.username,
       });
+    }
     if (Array.isArray(category) && category.length > 0) {
       category.forEach((cat) => {
         filters.push({
@@ -131,12 +115,14 @@ function PostsFilter({
     const updatedFilters = { ...filters };
 
     switch (filterType) {
-      case "date":
-        updatedFilters.searchDate = "";
-        setHappenedAt(null);
-        break;
       case "writer":
-        updatedFilters.writer = "";
+        if (Array.isArray(updatedFilters.writer)) {
+          updatedFilters.writer = updatedFilters.writer.filter(
+            (w) => (w?.username || w) !== filterValue
+          );
+        } else {
+          updatedFilters.writer = [];
+        }
         break;
       case "category":
         // If it's an array of categories, remove the specific one
@@ -171,7 +157,14 @@ function PostsFilter({
           updateFilter("searchDate", "");
           break;
         case "writer":
-          updateFilter("writer", "");
+          if (Array.isArray(writer)) {
+            updateFilter(
+              "writer",
+              writer.filter((w) => (w?.username || w) !== filterValue)
+            );
+          } else {
+            updateFilter("writer", []);
+          }
           break;
         case "category":
           if (Array.isArray(category)) {
@@ -201,7 +194,9 @@ function PostsFilter({
 
     const hasAnyFilter =
       updatedFilters.searchDate ||
-      updatedFilters.writer ||
+      (Array.isArray(updatedFilters.writer)
+        ? updatedFilters.writer.length > 0
+        : updatedFilters.writer) ||
       (Array.isArray(updatedFilters.category)
         ? updatedFilters.category.length > 0
         : updatedFilters.category) ||
@@ -291,12 +286,15 @@ function PostsFilter({
                     <AutoComplete
                       placeholder={t("Select Writer")}
                       customStyle="bg-white"
-                      selectedItem={writer}
-                      onSelect={(item) => {
-                        updateFilter("writer", item);
+                      multiple={true}
+                      selectedItems={
+                        Array.isArray(writer) ? writer : writer ? [writer] : []
+                      }
+                      onSelect={(items) => {
+                        updateFilter("writer", items);
                       }}
                       onClear={() => {
-                        updateFilter("writer", null);
+                        updateFilter("writer", []);
                       }}
                       searchMethod={getWriters}
                       searchApi={true}
@@ -304,10 +302,9 @@ function PostsFilter({
                       searchPlaceholder={t("Search writers...")}
                       required={false}
                       renderItemLabel={(item) => {
-                        console.log(item, "ssssssssssssssssssssssss");
                         return item.username;
                       }}
-                      renderItemSubLabel={(item) => item.groups?.[0]}
+                      // renderItemSubLabel={(item) => item.groups?.[0]}
                       showWriterAvatar={false}
                     />
                     {/* End writer */}

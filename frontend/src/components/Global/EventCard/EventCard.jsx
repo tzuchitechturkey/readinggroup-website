@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
+import Modal from "../Modal/Modal";
+
 function EventCard({ className = "", item }) {
   const { t } = useTranslation();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
@@ -23,7 +25,7 @@ function EventCard({ className = "", item }) {
       className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}
     >
       <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg h-full">
-        <div className="w-[300px] h-[200px]  relative  flex-shrink-0">
+        <div className="w-full h-[200px]  relative  flex-shrink-0">
           {/* Start Image */}
           <img
             src={item.image}

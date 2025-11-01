@@ -310,6 +310,17 @@ const CreateOrEditHistory = ({
 
         {/* Start Image Upload */}
         <div>
+          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+            <p className="text-sm text-blue-800">
+              <strong>{t("Important")}:</strong>{" "}
+              {t(
+                "Please select an image with minimum dimensions of 1920x1080 pixels for best quality."
+              )}
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
+            </p>
+          </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Event Image")} *
           </label>

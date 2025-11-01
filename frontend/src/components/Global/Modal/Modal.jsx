@@ -41,8 +41,8 @@ const Modal = ({ isOpen, onClose, title, children, width }) => {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 45 ,
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+            zIndex: 145,
           }}
         >
           <motion.div

@@ -144,3 +144,8 @@ export async function GetTopEventsLastPosted() {
 export async function GetTopEventsCommented() {
   return await axios.get(`/events/top-commented/`);
 }
+
+// Gettags
+export async function GetEventTags() {
+  return await axios.get(`/events/tags/`);
+}

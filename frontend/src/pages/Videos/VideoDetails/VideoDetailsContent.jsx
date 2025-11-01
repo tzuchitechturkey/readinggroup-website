@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from "react";
 
 import { Play, Heart, Download, Share2, X } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/TabSections";
-import Modal from "@/components/Global/Modal/Modal";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
-import {
-  GetVideoById,
-  LikeVideo,
-  PatchVideoById,
-  UnlikeVideo,
-} from "@/api/videos";
+import { PatchVideoById } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import Modal from "@/components/Global/Modal/Modal";
 
 function VideoDetailsContent({
   isOpen: externalIsOpen = true,
@@ -38,23 +33,49 @@ function VideoDetailsContent({
 
   // State to control download button clicked status
   const [isDownloadClicked, setIsDownloadClicked] = useState(false);
-  // const getVideoData = async ( ) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const res = await GetVideoById(videoId);
-  //     setVideoData(res.data?.data);
-  //   } catch (err) {
-  //     setErrorFn(err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-  //   useEffect(() => {
-  //   getVideoData(videoId);
-  // }, [videoId]);
-  // Sync with external isOpen prop when it changes
 
-  // دالة الإعجاب
+  // Download image function
+  const handleDownloadImage = async () => {
+    try {
+      setIsDownloadClicked(true);
+
+      const imageUrl = videoItem?.thumbnail || videoItem?.thumbnail_url;
+      if (!imageUrl) {
+        toast.error(t("No image available to download"));
+        return;
+      }
+
+      // Fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${videoItem?.title || "video"}-thumbnail.jpg`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      t("Image downloaded successfully");
+
+      // Reset button state after 2 seconds
+      setTimeout(() => {
+        setIsDownloadClicked(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+      toast.error(t("Failed to download image"));
+      setIsDownloadClicked(false);
+    }
+  };
+
   const handleLike = async () => {
     try {
       const newLikedState = !videoItem?.has_liked;
@@ -67,24 +88,12 @@ function VideoDetailsContent({
         ...videoItem,
         has_liked: newLikedState,
       });
-      toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch (error) {
       setErrorFn(error, t);
       toast.error(t("Failed to update like status"));
     }
   };
-  useEffect(() => {
-    setInternalIsOpen(externalIsOpen);
-  }, [externalIsOpen]);
 
-  // Keep modal open on route/location changes
-  useEffect(() => {
-    setInternalIsOpen(true);
-  }, [location.pathname, location.search]);
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    setUserId(storedUserId);
-  }, []);
   useEffect(() => {
     setVideoItem(videoData);
   }, [videoData]);
@@ -103,6 +112,7 @@ function VideoDetailsContent({
       navigate(-1);
     }, 300); // Match animation duration in Modal component
   };
+
   return (
     <Modal
       isOpen={internalIsOpen}
@@ -231,16 +241,15 @@ function VideoDetailsContent({
                     />
                   </button>
 
-                  {/* <button
+                  <button
                     className={`p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
                       isDownloadClicked
                         ? "bg-green-500/20 border-green-400/60 hover:bg-green-500/30 hover:border-green-400/80"
                         : "bg-black/40 border-white/50 hover:bg-black/60 hover:border-white/70"
                     }`}
                     title="Download"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsDownloadClicked(true);
+                    onClick={() => {
+                      handleDownloadImage();
                     }}
                     style={{ touchAction: "manipulation" }}
                   >
@@ -251,7 +260,7 @@ function VideoDetailsContent({
                           : "text-white group-hover:text-white"
                       }`}
                     />
-                  </button> */}
+                  </button>
 
                   <button
                     className="p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border-2 border-white/50 hover:bg-black/60 transition-all duration-200 group cursor-pointer"
@@ -382,7 +391,6 @@ function VideoDetailsContent({
 
           {/* Top Cast Section removed as it's now in the right info column */}
         </div>
-
         {/* End Description && Top Cast */}
 
         {/* Start Episodes && User Reviews */}

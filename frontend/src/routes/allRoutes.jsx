@@ -13,7 +13,7 @@ import PostDetailsPageContent from "@/components/Global/PostDetailsPageContent/P
 import EventsContent from "@/pages/Events/EventsPageContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
-import EventContent from "@/pages/Events/EventContent";
+import EventPageContent from "@/pages/Events/EventPageContent";
 import Pages404 from "@/pages/NotFound/NotFound";
 import SearchContent from "@/pages/Search/SearchPageContent";
 import EventsVideoPage from "@/components/ForPages/Events/EventsVideoPage/EventsVideoPage";
@@ -38,7 +38,7 @@ export const userRoutes = [
     element: <PostDetailsPageContent />,
   },
   { path: "/events", element: <EventsContent /> },
-  { path: "/events/:id", element: <EventContent /> },
+  { path: "/events/:id", element: <EventPageContent /> },
   { path: "/events/video/:id", element: <EventsVideoPage /> },
   { path: "/profile/:id", element: <UserProfileContent /> },
   { path: "/my-list", element: <MyListContent /> },
