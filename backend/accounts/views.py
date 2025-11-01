@@ -157,6 +157,25 @@ class FriendRequestsForUserView(APIView):
 
         return Response({"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK)
 
+
+class PendingFriendRequestsView(generics.ListAPIView):
+    """List pending friend requests for the authenticated user.
+
+    Query params:
+    - direction=incoming|outgoing (default incoming)
+
+    Returns FriendRequestSerializer list filtered by status=STATUS_PENDING.
+    """
+    serializer_class = FriendRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        direction = self.request.query_params.get("direction", "incoming").lower()
+        if direction == "outgoing":
+            return FriendRequest.objects.filter(from_user=user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
+        return FriendRequest.objects.filter(to_user=user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
+
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
     Read-only access is allowed for anonymous users; write actions require authentication.

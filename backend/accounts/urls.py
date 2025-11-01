@@ -16,6 +16,7 @@ from .views import (
     FriendRequestActionView,
     UnfriendView,
     FriendRequestsForUserView,
+    PendingFriendRequestsView,
 )
 
 app_name = "accounts"
@@ -36,5 +37,6 @@ urlpatterns = [
     path("friend-requests/<int:pk>/action/", FriendRequestActionView.as_view(), name="friend-requests-action"),
     path("friend-requests/unfriend/<int:user_id>/", UnfriendView.as_view(), name="friend-requests-unfriend"),
     path("friend-requests/user/<int:user_id>/", FriendRequestsForUserView.as_view(), name="friend-requests-for-user"),
+    path("friend-requests/pending/", PendingFriendRequestsView.as_view(), name="friend-requests-pending"),
     path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
 ]
