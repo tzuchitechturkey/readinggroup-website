@@ -94,12 +94,15 @@ function SeriesAndSeasonsList({ onSectionChange }) {
 
     if (!isCurrentlyExpanded) {
       await fetchSeasonsBySeries(seriesId);
+      // Close all other series and open only this one
+      setExpandedSeries({ [seriesId]: true });
+    } else {
+      // Close the current series
+      setExpandedSeries((prev) => ({
+        ...prev,
+        [seriesId]: false,
+      }));
     }
-
-    setExpandedSeries((prev) => ({
-      ...prev,
-      [seriesId]: !isCurrentlyExpanded,
-    }));
   };
 
   // Sort Data

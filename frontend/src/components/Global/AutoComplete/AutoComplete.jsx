@@ -140,7 +140,7 @@ export default function AutoComplete({
                       }
                     }}
                     placeholder={searchPlaceholder}
-                    className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-3 py-1.5 pr-8 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                   {search && (
                     <button
@@ -166,7 +166,6 @@ export default function AutoComplete({
             <div className="max-h-60 overflow-y-auto">
               {searchList?.length > 0 ? (
                 searchList.map((item) => {
-                  console.log("Rendering item:", item);
                   return (
                     <button
                       key={item.id}
@@ -184,10 +183,10 @@ export default function AutoComplete({
                             : "/fake-user.png"
                         }
                         alt={item.username}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-8 h-8 rounded-full object-cover  text-black"
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-sm">
+                        <div className=" text-sm  text-black">
                           {renderItemLabel(item)}
                         </div>
                         {renderItemSubLabel && (

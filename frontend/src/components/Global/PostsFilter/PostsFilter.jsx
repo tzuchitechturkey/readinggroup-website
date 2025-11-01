@@ -282,67 +282,11 @@ function PostsFilter({
               {isAdvancedOpen && (
                 <div className="mt-4 space-y-4">
                   {/* Start  Date && writer */}
-                  <div className="grid lg:grid-cols-2 gap-4">
-                    {/* Start Date */}
-                    <div>
-                      <div className="relative">
-                        <Popover open={dateOpen} onOpenChange={setDateOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full text-left  text-black font-normal flex items-center justify-start  ",
-                                !happenedAt && "text-muted-foreground"
-                              )}
-                            >
-                              <Calendar className=" mr-2 h-4 w-4" />
-                              {happenedAt ? (
-                                format(happenedAt, "dd-MM-yyyy")
-                              ) : (
-                                <span className="">
-                                  {t("Pick Happened Date")}
-                                </span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
+                  <div className="grid lg:grid-cols-2 gap-4" />
+                  {/* End Date && writer */}
 
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={
-                                happenedAt ? new Date(happenedAt) : undefined
-                              }
-                              onSelect={(date) => {
-                                if (!date) return;
-                                date.setHours(12);
-                                setHappenedAt(format(date, "yyyy-MM-dd"));
-                                handleDateSelection(date);
-                                setDateOpen(false);
-                              }}
-                              disabled={(date) =>
-                                date > new Date() ||
-                                date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-
-                        {happenedAt && (
-                          <button
-                            onClick={() => {
-                              clearDateFilter();
-                            }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
-                            type="button"
-                          >
-                            <X className="h-4 w-4 text-red-500" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    {/* End Date */}
-
+                  {/* Start Category && type && Language,   */}
+                  <div className="grid lg:grid-cols-4 gap-4">
                     {/* Start Writer */}
                     <AutoComplete
                       placeholder={t("Select Writer")}
@@ -359,16 +303,14 @@ function PostsFilter({
                       list={writersList}
                       searchPlaceholder={t("Search writers...")}
                       required={false}
-                      renderItemLabel={(item) => item.username}
+                      renderItemLabel={(item) => {
+                        console.log(item, "ssssssssssssssssssssssss");
+                        return item.username;
+                      }}
                       renderItemSubLabel={(item) => item.groups?.[0]}
                       showWriterAvatar={false}
                     />
                     {/* End writer */}
-                  </div>
-                  {/* End Date && writer */}
-
-                  {/* Start Category && type && Language,   */}
-                  <div className="grid lg:grid-cols-4 gap-4">
                     {/* Start Category */}
                     <MultiSelect
                       items={categoriesList}
