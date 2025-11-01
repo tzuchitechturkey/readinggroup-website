@@ -11,7 +11,7 @@ function WeeklyMomentsCard({ item }) {
     console.log("Navigating to card with ID:", item?.id);
     navigate(`/cards-photos/card/${item?.id}`);
   };
-
+  console.log("WeeklyMomentsCard item:", item);
   return (
     <div
       onClick={handleCardClick}
@@ -39,12 +39,12 @@ function WeeklyMomentsCard({ item }) {
 
       <div className="mb-4 mt-5">
         {/* Start Date */}
-        <div className="text-xs flex items-center gap-1">
+        {/* <div className="text-xs flex items-center gap-1">
           <span className="text-primary">SEPT 02</span>
           <span className="  text-xs">
-            {t("STARTING AT")} {item?.startTime}
+            {t("STARTING AT")} {item?.happend_at}
           </span>
-        </div>
+        </div> */}
         {/* End Date */}
 
         {/* Start Title */}
@@ -54,16 +54,15 @@ function WeeklyMomentsCard({ item }) {
         {/* End Title */}
 
         {/* Start Type, Source, Language */}
-        <div className="flex justify-around text-xs">
-          <div>
-            <div className="text-primary font-semibold mb-[6px]">Type</div>
-            <div className="text-text">{item?.type}</div>
+        <div className="flex justify-between gap-10 text-xs px-4">
+          <div className="text-left ">
+            <div className="text-primary text-start font-semibold mb-[6px]">
+              Type
+            </div>
+            <div className="text-text ">{item?.post_type}</div>
           </div>
-          <div>
-            <div className="text-primary font-semibold mb-[6px]">Source</div>
-            <div className="text-text">{item?.source}</div>
-          </div>
-          <div>
+
+          <div className="text-left ">
             <div className="text-primary font-semibold mb-[6px]">Language</div>
             <div className="text-text">{item?.language}</div>
           </div>

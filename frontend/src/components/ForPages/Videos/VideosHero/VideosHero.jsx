@@ -12,7 +12,7 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function VideosHeader({ top1Video }) {
+function VideosHero({ top1Video }) {
   const { t } = useTranslation();
   const [top5Videos, setTop5Videos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,7 +97,7 @@ function VideosHeader({ top1Video }) {
         </div>
         {/* End Text */}
         {/* Start Weekly Videos Carousel */}
-        <div className="mt-12 w-full -mb-2  pr-2 ">
+        <div className="mt-12 w-full mb-1  pr-2 ">
           <BrokenCarousel
             data={top5Videos}
             title={t("This Week's Videos")}
@@ -124,4 +124,4 @@ function VideosHeader({ top1Video }) {
   );
 }
 
-export default VideosHeader;
+export default VideosHero;

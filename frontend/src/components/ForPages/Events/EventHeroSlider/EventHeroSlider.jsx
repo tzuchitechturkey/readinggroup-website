@@ -104,8 +104,14 @@ export default function HeroSlider({ newsPage = false }) {
           h1Line2Under: "",
           description: item.section.description || "",
           image: item.top_5[0]?.image || "/authback.jpg", // Use first event image
-          primaryTo: `/events/${item.section.id}`,
-          secondaryTo: `/events/${item.section.id}`,
+          primaryTo:
+            item?.video_type === "videos"
+              ? `/events/video/${item.section.id}`
+              : `/events/${item.section.id}`,
+          secondaryTo:
+            item?.video_type === "videos"
+              ? `/events/video/${item.section.id}`
+              : `/events/${item.section.id}`,
           topFive: item.top_5 || [],
         })) || [];
 
@@ -192,13 +198,13 @@ export default function HeroSlider({ newsPage = false }) {
                               >
                                 {t("WATCH NOW")}
                               </Link>
-                              <button
+                              {/* <button
                                 className="border-[1px] border-white rounded-full px-3 py-1 transition-all duration-200 bg-white/10 hover:bg-white/30 hover:scale-110 shadow hover:shadow-lg"
                                 style={{ backdropFilter: "blur(2px)" }}
                                 aria-label={t("Add")}
                               >
                                 <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 group-hover:text-white transition-colors duration-200" />
-                              </button>
+                              </button> */}
                             </div>
                           ) : (
                             <div className="flex items-center gap-3">

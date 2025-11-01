@@ -29,7 +29,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
       console.error("Failed to fetch side events data:", err);
     }
   };
-
+  console.log(sideEventData, "aaaaaaaaaaaaaaaaa");
   // Event handlers - يمكن تخصيصها حسب الحاجة
   const handleArticleClick = () => {
     // يمكن إضافة منطق التنقل هنا

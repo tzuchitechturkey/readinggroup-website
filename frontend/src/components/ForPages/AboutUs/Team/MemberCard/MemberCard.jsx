@@ -3,9 +3,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function MemberCard({ member }) {
+  const handleClick = () => {
+    // حفظ التاب الرئيسي (our_team)
+    localStorage.setItem("aboutUsMainTab", "our_team");
+    // حفظ التاب الفرعي النشط الحالي (مثل "All" أو اسم المنصب)
+    const currentTab = localStorage.getItem("teamActiveTab") || "All";
+    localStorage.setItem("teamActiveTab", currentTab);
+  };
+
   return (
     <Link
       to={`/about/team/${member.id}`}
+      onClick={handleClick}
       className="flex flex-col items-center p-2 sm:p-3 w-40 sm:w-48 md:w-56 hover:transform hover:scale-105 transition-all duration-200"
     >
       {/* Start Image */}

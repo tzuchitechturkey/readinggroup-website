@@ -17,7 +17,7 @@ function GuidingReadingcard({ item }) {
     <div
       key={item?.id}
       onClick={handleCardClick}
-      className="rounded-xl group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-lg border border-gray-100 relative"
+      className="rounded-xl group cursor-pointer border border-gray-100 relative"
     >
       {/* Start Tag" */}
       <div className="absolute z-50 top-3 left-3">
@@ -42,7 +42,7 @@ function GuidingReadingcard({ item }) {
       </div>
       {/* Start Tag" */}
 
-      <div className="text-center relative">
+      <div className="text-center relative  transform hover:scale-105 transition-all duration-300    ">
         <img
           src={item?.image || item?.image_url}
           alt="Chinese Text"
@@ -55,7 +55,7 @@ function GuidingReadingcard({ item }) {
       </div>
 
       {/* Start Title */}
-      <h3 className="font-semibold text-gray-800 text-sm mb-3 leading-tight my-1">
+      <h3 className=" px-2 font-semibold text-gray-800 text-sm mb-3 leading-tight my-1">
         {item?.title?.length > 25
           ? item?.title?.slice(0, 25) + "..."
           : item?.title}
@@ -63,7 +63,7 @@ function GuidingReadingcard({ item }) {
       {/* End Title */}
 
       {/* Start Rating && Writer */}
-      <div className="flex items-end justify-between pb-3">
+      <div className="flex items-end justify-between pb-3 px-2">
         {/* Start Writer */}
         <div className="flex items-center justify-center gap-1 text-xs text-teal-600">
           <User className="w-3 h-3" />

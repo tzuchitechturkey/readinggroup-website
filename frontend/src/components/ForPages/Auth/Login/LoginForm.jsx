@@ -65,7 +65,6 @@ function LoginForm() {
     try {
       const { data } = await Login({ username: userName, password });
       setTokens({ access: data?.access, refresh: data?.refresh });
-      console.log(data);
       toast.success(t("Login successful"));
       if (data?.user?.is_first_login) {
         setShowFirstLoginModal(true);
@@ -78,6 +77,11 @@ function LoginForm() {
         }
       }
     } catch (error) {
+      if (error.response && error.response.status === 403) {
+        toast.error(
+          t("Your account is not confirmed, please check your email")
+        );
+      }
       setErrorFn(error, t);
     } finally {
       setIsLoading(false);

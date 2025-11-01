@@ -77,7 +77,11 @@ function TopFiveSectionCard({ item, index }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
 
           <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white/10 to-transparent" />
-
+          <div className="absolute top-2 left-2 ">
+            <h3 className="font-bold text-lg md:text-xl line-clamp-2 leading-tight mb-2 text-white">
+              {item?.title}
+            </h3>
+          </div>
           {/* Start Content */}
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="text-white">
@@ -86,13 +90,9 @@ function TopFiveSectionCard({ item, index }) {
                   {item?.category?.name}
                 </div>
               )}
-              <h3 className="font-bold text-lg md:text-xl line-clamp-2 leading-tight mb-2 text-white">
-                {item?.title} {item?.report_type}
-              </h3>
+
               <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed opacity-90">
-                {item?.report_type === "videos"
-                  ? item?.summary
-                  : item?.description}
+                {item?.language}
               </p>
             </div>
           </div>
@@ -101,7 +101,7 @@ function TopFiveSectionCard({ item, index }) {
           {/* Start Play Icon */}
           {item?.report_type === "videos" || item?.video_type ? (
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transform scale-50 group-hover:scale-100 transition-all duration-500">
+              <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transform scale-50 group-hover:scale-100 transition-all duration-500">
                 <div className="w-0 h-0 border-l-[18px] border-l-white border-t-[11px] border-t-transparent border-b-[11px] border-b-transparent ml-1" />
               </div>
             </div>
@@ -116,7 +116,7 @@ function TopFiveSectionCard({ item, index }) {
       </div>
       {openDetailsVideoModal &&
         createPortal(
-          <Modal
+          <VideoDetailsContent
             isOpen={openDetailsVideoModal}
             onClose={() => setOpenDetailsVideoModal(false)}
             videoData={item}

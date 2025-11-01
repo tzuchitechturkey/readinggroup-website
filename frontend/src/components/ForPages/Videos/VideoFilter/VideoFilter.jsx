@@ -134,7 +134,7 @@ function VideoFilter({
             items={categoriesList || []}
             selected={Array.isArray(indexCategory) ? indexCategory : []}
             onChange={(selected) => setIndexCategory(selected)}
-            placeholder={t("Select Categories")}
+            placeholder={t("Select Category")}
             renderLabel={(item) => t(item?.name || item)}
             renderValue={(item) => item?.name || item}
             searchable={true}
@@ -154,7 +154,7 @@ function VideoFilter({
             items={languages?.map((lang) => ({ name: lang })) || []}
             selected={Array.isArray(languageContent) ? languageContent : []}
             onChange={(selected) => setLanguageContent(selected)}
-            placeholder={t("Select Languages")}
+            placeholder={t("Select Language")}
             renderLabel={(item) => t(item?.name || item)}
             renderValue={(item) => item?.name || item}
             searchable={true}

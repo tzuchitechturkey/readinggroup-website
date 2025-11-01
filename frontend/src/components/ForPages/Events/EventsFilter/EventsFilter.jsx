@@ -127,12 +127,13 @@ function EventsFilter({
           <AutoComplete
             placeholder={t("Select Writer")}
             customStyle="bg-white"
-            selectedItem={filters.writer}
+            selectedItems={Array.isArray(filters.writer) ? filters.writer : []}
+            multiple={true}
             onSelect={(item) => {
               updateFilter("writer", item);
             }}
             onClear={() => {
-              updateFilter("writer", null);
+              updateFilter("writer", []);
             }}
             searchMethod={getWriters}
             searchApi={true}

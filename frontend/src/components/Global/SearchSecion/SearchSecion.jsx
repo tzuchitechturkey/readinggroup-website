@@ -91,7 +91,7 @@ function SearchSecion({
               className="hidden lg:flex outline-none  items-center gap-2 px-3 lg:px-2 py-2 sm:py-[6px] border border-primary rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <span className="text-sm sm:text-base lg:text-xl text-primary font-medium">
-                {t("Sort by")}
+                {t("Sort by Name")}
               </span>
               <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             </button>

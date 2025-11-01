@@ -8,10 +8,12 @@ import Loader from "@/components/Global/Loader/Loader";
 import MemberCard from "@/components/ForPages/AboutUs/Team/MemberCard/MemberCard";
 
 function AboutTeamContent() {
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeTab, setActiveTab] = useState(() => {
+    // استرجاع التاب المحفوظ من localStorage
+    return localStorage.getItem("teamActiveTab") || "All";
+  });
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
-  const [teamData, setTeamData] = useState([]);
   const [groupedData, setGroupedData] = useState({});
 
   const groupByPosition = (data) => {
@@ -34,7 +36,6 @@ function AboutTeamContent() {
         const res = await GetTeam(100, 0);
         const results = res.data.results || [];
 
-        setTeamData(results);
         setGroupedData(groupByPosition(results));
         setIsLoading(false);
         return;
@@ -43,7 +44,6 @@ function AboutTeamContent() {
       const res = await filterPositions(activeTab);
       const results = res.data || [];
 
-      setTeamData(results);
       setGroupedData(groupByPosition(results));
     } catch (err) {
       console.error(err);
@@ -53,6 +53,8 @@ function AboutTeamContent() {
   };
 
   useEffect(() => {
+    // حفظ التاب النشط في localStorage عند التغيير
+    localStorage.setItem("teamActiveTab", activeTab);
     getTeamData();
   }, [activeTab]);
 

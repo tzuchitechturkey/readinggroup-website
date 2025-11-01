@@ -280,7 +280,9 @@ const EventsList = ({ onSectionChange }) => {
                   </button>
                 </div>
               </TableHead>
-              <TableHead className="text-center w-[100px]">{t("Actions")}</TableHead>
+              <TableHead className="text-center w-[100px]">
+                {t("Actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -309,7 +311,7 @@ const EventsList = ({ onSectionChange }) => {
                   <TableCell>
                     <div className="flex items-center justify-center gap-3">
                       <img
-                        src={event?.image}
+                        src={event?.image || event?.image_url}
                         alt={event?.title}
                         className="w-12 h-12 rounded-lg object-cover"
                         onError={(e) => {
@@ -338,18 +340,12 @@ const EventsList = ({ onSectionChange }) => {
                           }
                         )}
                       </span>
-                      <span className="text-[#9FA2AA] text-[10px]">
-                        {event.happened_at
-                          ? new Date(event.happened_at).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : ""}
-                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
-                    <span className="text-gray-600 ">{t(event?.report_type)}</span>
+                    <span className="text-gray-600 ">
+                      {t(event?.report_type)}
+                    </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

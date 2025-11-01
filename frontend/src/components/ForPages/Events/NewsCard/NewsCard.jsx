@@ -24,9 +24,12 @@ const NewsCard = ({ t, article, onClick, imgClassName }) => (
       <div
         className={`flex items-center gap-3 sm:gap-6 text-xs sm:text-sm text-text/80 `}
       >
-        <span className="truncate max-w-[120px] sm:max-w-none" />
-        <div className={`w-px bg-text h-4 sm:h-6 flex-shrink-0`} />
-        <span className="whitespace-nowrap">{article.date}</span>
+        <span className="truncate max-w-[120px] sm:max-w-none">
+          {article.country} 
+        </span>
+        <span className="whitespace-nowrap">
+          {article.created_at.split(" ")[0]}
+        </span>
       </div>
       {/* End ArticleMetadata */}
     </div>

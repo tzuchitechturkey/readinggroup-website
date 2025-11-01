@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   FaFacebookF,
   FaInstagram,
@@ -21,26 +22,6 @@ import {
 
 import Loader from "@/components/Global/Loader/Loader";
 import { GetTeamById } from "@/api/aboutUs";
-
-// مكوّن أيقونة السهم
-const ArrowIcon = ({ direction = "right" }) => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={direction === "left" ? "rotate-180" : ""}
-  >
-    <path
-      d="M9 18L15 12L9 6"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // خريطة أيقونات وسائل التواصل الاجتماعي
 const socialMediaIcons = {
@@ -76,57 +57,13 @@ const socialColors = {
   pinterest: "#E60023",
 };
 
-const NavigationButtons = ({ t, previousMember, nextMember, onNavigate }) => {
-  return (
-    <div className="border-t border-gray-300 pt-8">
-      <div className="flex justify-between items-center">
-        {/* Start Previous Member Button */}
-        <div className="flex flex-col items-start">
-          <button
-            onClick={() => onNavigate(previousMember?.id)}
-            className="flex items-center  border border-primary text-primary px-3 pl-6 py-3 rounded hover:bg-primary  hover:text-white transition-colors duration-200 mb-3"
-            style={{ fontFamily: "Lato, sans-serif" }}
-          >
-            <ArrowIcon direction="right" />
-            {t("Previous")}
-          </button>
-          <span
-            className="text-text font-light"
-            style={{ fontFamily: "Lato, sans-serif" }}
-          >
-            {previousMember?.name}
-          </span>
-        </div>
-        {/* End Previous Member Button */}
-
-        {/* Start Next Member Button */}
-        <div className="flex flex-col items-end">
-          <button
-            onClick={() => onNavigate(nextMember?.id)}
-            className="flex items-center gap-1 border border-primary text-primary px-3 pr-6 py-3 rounded hover:bg-primary hover:text-white transition-colors duration-200 mb-3"
-            style={{ fontFamily: "Lato, sans-serif" }}
-          >
-            {t("Next")}
-            <ArrowIcon direction="left" />
-          </button>
-          <span
-            className="text-text font-light text-right"
-            style={{ fontFamily: "Lato, sans-serif" }}
-          >
-            {nextMember?.name}
-          </span>
-        </div>
-        {/* End Next Member Button */}
-      </div>
-    </div>
-  );
-};
-
-function AboutMemberContent() {
-  const { t, i18n } = useTranslation();
+function MemberContent() {
+  const { i18n, t } = useTranslation();
   const { id: paramId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [memberData, setMemberData] = useState({});
+  const navigate = useNavigate();
+
   const getData = async () => {
     setIsLoading(true);
     try {
@@ -138,11 +75,15 @@ function AboutMemberContent() {
       setIsLoading(false);
     }
   };
-  const handleNavigation = (newMemberId) => {
-    if (onMemberChange) {
-      onMemberChange(newMemberId);
-    }
+
+  const handleGoBack = () => {
+    // تعيين التاب الرئيسي إلى "our_team"
+    localStorage.setItem("aboutUsMainTab", "our_team");
+    // التاب الفرعي للفريق محفوظ بالفعل في "teamActiveTab"
+    // العودة إلى صفحة About Us
+    navigate("/about");
   };
+
   useEffect(() => {
     getData();
   }, [paramId]);
@@ -152,7 +93,14 @@ function AboutMemberContent() {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      <div className="max-w-4xl mx-auto pb-80">
+      <div className="max-w-4xl mx-auto pb-32">
+        {/* Start Position */}
+        <div className="">
+          <p className="w-fit mx-auto text-2xl font-semibold mb-10 mt-5">
+            {memberData?.position?.name}
+          </p>
+        </div>
+        {/* End Position */}
         {/* بطاقة العضو */}
         <div className="flex flex-col items-center mb-8">
           {/* Start Img */}
@@ -215,17 +163,21 @@ function AboutMemberContent() {
         </div>
         {/* End Description */}
 
-        {/* Start Navigation Buttons */}
-        {/* <NavigationButtons
-          t={t}
-          previousMember={memberData?.previousMember}
-          nextMember={memberData?.nextMember}
-          onNavigate={handleNavigation}
-        /> */}
-        {/* End Navigation Buttons */}
+        {/* Start Back Button */}
+        <div className="border-t border-gray-300 pt-8">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center gap-2 border border-primary text-primary px-6 py-3 rounded hover:bg-primary hover:text-white transition-colors duration-200"
+            style={{ fontFamily: "Lato, sans-serif" }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t("Go Back")}
+          </button>
+        </div>
+        {/* End Back Button */}
       </div>
     </div>
   );
 }
 
-export default AboutMemberContent;
+export default MemberContent;

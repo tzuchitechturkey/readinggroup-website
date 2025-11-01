@@ -20,10 +20,10 @@ function WeekPhotosCard({ item }) {
         {/* البطاقة */}
         <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
           {/* Start Image - make it fill the card */}
-          <div className="relative w-full h-[270px] md:h-[300px]">
+          <div className="relative w-full h-[270px]  ">
             {/* Main photo sits on top and covers the container */}
             <img
-              src={item?.image}
+              src={item?.image || item?.image_url}
               alt={item?.title}
               className="absolute inset-0 w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300 z-20"
             />

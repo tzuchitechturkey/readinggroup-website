@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,12 +7,20 @@ import AboutHistoryContent from "./History/HistoryContent";
 
 function AboutUsContent() {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState("history");
+  const [activeTab, setActiveTab] = useState(() => {
+    // استرجاع التاب الرئيسي المحفوظ من localStorage
+    return localStorage.getItem("aboutUsMainTab") || "history";
+  });
 
   const tabs = [
     { id: "history", label: "History" },
     { id: "our_team", label: "Our Team" },
   ];
+
+  // حفظ التاب الرئيسي النشط في localStorage عند التغيير
+  useEffect(() => {
+    localStorage.setItem("aboutUsMainTab", activeTab);
+  }, [activeTab]);
 
   return (
     <div

@@ -8,7 +8,7 @@ import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent
 
 import VideoDuration from "./VideoDuration";
 
-const VideoCard = ({ item, className = "" }) => {
+const VideoCard = ({ item, bigCart, className = "" }) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,10 +24,14 @@ const VideoCard = ({ item, className = "" }) => {
     <>
       <div
         onClick={handleCardClick}
-        className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}
+        className={`group cursor-pointer transform hover:scale-105   transition-all duration-300 h-full ${className}`}
       >
         <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg h-full">
-          <div className="relative h-full flex-shrink-0">
+          <div
+            className={` relative ${
+               bigCart ? "h-[360px]" : "h-[240px]"
+            }  flex-shrink-0`}
+          >
             {/* Start Image */}
             <img
               src={
@@ -37,7 +41,7 @@ const VideoCard = ({ item, className = "" }) => {
                 item?.image_url
               }
               alt={item?.title}
-              className="w-full  object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
 
@@ -69,7 +73,7 @@ const VideoCard = ({ item, className = "" }) => {
             </div>
 
             {/* Start Title */}
-            <div className="absolute bottom-6 left-3">
+            <div className="absolute bottom-6 left-5">
               <h3 className="text-white font-semibold text-sm group-hover:text-blue-400 transition-colors">
                 {item?.title}
               </h3>

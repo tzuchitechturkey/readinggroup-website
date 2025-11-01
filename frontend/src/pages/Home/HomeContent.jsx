@@ -44,10 +44,11 @@ export default function HomeContent() {
   }, []);
   return (
     <div dir={direction} className="min-h-screen">
-      {/* Hero Slider */}
+      {/* Start Hero Slider */}
       <div dir="ltr">
         <HeroSlider data={sliderData} />
       </div>
+      {/* End Hero Slider */}
 
       {/* 1) This Weekly Card */}
       <Band tone="blue">
@@ -135,7 +136,11 @@ export default function HomeContent() {
             <div className="relative w-full md:w-[560px]">
               <div className="relative z-10 ml-3 md:ml-6">
                 <div className="rounded-[24px] overflow-hidden h-[320px] md:h-[360px]">
-                  <VideoCard className="h-full w-full" item={top1Data?.video} />
+                  <VideoCard
+                    className="h-full w-full"
+                    item={top1Data?.video}
+                    VideoCard={true}
+                  />
                 </div>
               </div>
             </div>

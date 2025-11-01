@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import VideosHeader from "@/components/ForPages/Videos/VideosHeader/VideosHeader";
+import VideosHero from "@/components/ForPages/Videos/VideosHero/VideosHero";
 import VideoFilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -53,7 +53,7 @@ function VideosPageContent() {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Hero Section */}
-      <VideosHeader top1Video={topMixVideos?.top_1} />
+      <VideosHero top1Video={topMixVideos?.top_1} />
 
       {/* Start Filter Secion */}
       <VideoFilterSections

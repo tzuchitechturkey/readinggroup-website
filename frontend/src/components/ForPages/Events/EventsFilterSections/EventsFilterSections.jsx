@@ -37,7 +37,7 @@ function EventsFilterSections() {
     report_type: [],
     category: [],
     country: [],
-    writer: "",
+    writer: [],
     language: [],
     happened_at: null,
   });
@@ -53,7 +53,7 @@ function EventsFilterSections() {
     (Array.isArray(filters.report_type) && filters.report_type.length > 0) ||
     (Array.isArray(filters.category) && filters.category.length > 0) ||
     (Array.isArray(filters.country) && filters.country.length > 0) ||
-    (filters.writer && Object.keys(filters.writer).length > 0) ||
+    (Array.isArray(filters.writer) && filters.writer.length > 0) ||
     (Array.isArray(filters.language) && filters.language.length > 0) ||
     filters.happened_at !== null;
 
@@ -149,12 +149,14 @@ function EventsFilterSections() {
           .join(",");
       }
 
-      // Handle writer (can be object with username or string)
-      if (filters.writer) {
-        if (typeof filters.writer === "object" && filters.writer.username) {
-          params.writer = filters.writer.username;
-        } else if (typeof filters.writer === "string") {
-          params.writer = filters.writer;
+      // Handle writer array - convert to comma-separated usernames
+      if (Array.isArray(filters.writer) && filters.writer.length > 0) {
+        const writerNames = filters.writer
+          .map((w) => w?.username)
+          .filter(Boolean)
+          .join(",");
+        if (writerNames) {
+          params.writer = writerNames;
         }
       }
 
@@ -238,7 +240,7 @@ function EventsFilterSections() {
       report_type: [],
       category: [],
       country: [],
-      writer: "",
+      writer: [],
       language: [],
       happened_at: null,
     });

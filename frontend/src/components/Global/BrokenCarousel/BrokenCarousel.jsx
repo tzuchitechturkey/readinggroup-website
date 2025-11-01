@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useTranslation } from "react-i18next";
+
 import {
   Carousel,
   CarouselContent,
@@ -17,7 +19,9 @@ function BrokenCarousel({
   nextArrowClassname = "",
   prevArrowClassname = "",
 }) {
+  const { i18n } = useTranslation();
   const Card = cardName;
+  const isRTL = i18n?.language === "ar";
 
   // التحقق من صحة البيانات
   if (cardName && typeof cardName !== "function") {
@@ -48,7 +52,13 @@ function BrokenCarousel({
           {title}
         </p>
       )}
-      <Carousel className="w-full overflow-visible ">
+      <Carousel
+        className="w-full overflow-visible"
+        opts={{
+          direction: isRTL ? "rtl" : "ltr",
+          align: "start",
+        }}
+      >
         <CarouselContent className="px-1">
           {data?.map((item) => (
             <CarouselItem
