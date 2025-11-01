@@ -85,7 +85,7 @@ class LikableMixin(models.Model):
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
     title = models.CharField(max_length=255)
-    duration = models.CharField(max_length=64)
+    duration = models.CharField(max_length=64, blank=True, null=True)
     category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
     video_type = models.CharField(max_length=100, choices=VideoType.choices, default=VideoType.FULL_VIDEO)
     language = models.CharField(max_length=50)
