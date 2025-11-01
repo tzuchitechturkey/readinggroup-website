@@ -613,6 +613,50 @@ class EventViewSet(BaseContentViewSet):
                  queryset =queryset.filter(category__name__in=values)
             
         return queryset
+
+    @action(detail=False, methods=("get",), url_path="tags", url_name="tags")
+    def tags(self, request):
+        """Return a list of unique tags used by Event objects.
+        Optional query params:
+        - q: substring to filter tags (case-insensitive)
+        - limit: integer to limit number of returned tags
+        """
+        q = request.query_params.get('q')
+        try:
+            limit = int(request.query_params.get('limit')) if request.query_params.get('limit') else None
+        except Exception:
+            limit = None
+
+        # Gather all tags (stored as JSON list on the Event model)
+        all_tag_lists = Event.objects.values_list('tags', flat=True)
+        unique_tags = set()
+        for tag_list in all_tag_lists:
+            if not tag_list:
+                continue
+            # tags stored as list; defensive handling if stored otherwise
+            if isinstance(tag_list, (list, tuple)):
+                for t in tag_list:
+                    if t is None:
+                        continue
+                    s = str(t).strip()
+                    if s:
+                        unique_tags.add(s)
+            else:
+                # fallback: if someone stored a comma-separated string
+                for t in str(tag_list).split(','):
+                    s = t.strip()
+                    if s:
+                        unique_tags.add(s)
+
+        tags = sorted(unique_tags, key=lambda x: x.lower())
+        if q:
+            ql = q.lower()
+            tags = [t for t in tags if ql in t.lower()]
+
+        if limit is not None:
+            tags = tags[:limit]
+
+        return Response({"tags": tags})
     
     #add new action for top 5 in commented
     @action(detail=False, methods=("get",), url_path="top-commented", url_name="top_commented")
