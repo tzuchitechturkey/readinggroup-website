@@ -149,7 +149,9 @@ function HistoryList({ onSectionChange }) {
               placeholder={t("Search Historical Events")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+              className={`flex-1 px-4 py-2 border border-gray-300 ${
+                i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
+              } text-sm pr-8`}
             />
 
             {searchTerm && (
@@ -158,7 +160,9 @@ function HistoryList({ onSectionChange }) {
                   setSearchTerm("");
                   getData(0, "");
                 }}
-                className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className={` absolute ${
+                  i18n?.language === "ar" ? " left-20" : " right-20"
+                } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
               >
                 ✕
               </button>
@@ -170,7 +174,9 @@ function HistoryList({ onSectionChange }) {
                   getData(0);
                 }
               }}
-              className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+              className={`px-4 py-2 bg-[#4680ff] text-white ${
+                i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
+              }  text-sm font-semibold hover:bg-blue-600`}
             >
               {t("Search")}
             </button>

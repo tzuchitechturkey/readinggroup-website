@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { FiUserPlus, FiUserX } from "react-icons/fi";
@@ -8,6 +8,7 @@ import { FiUserPlus, FiUserX } from "react-icons/fi";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
+  ChangeFriendRequestStatus,
   GetFriendRequests,
   GetUserProfile,
   SendFriendRequest,
@@ -144,11 +145,32 @@ function Profile({ userId, myUserId }) {
       setIsLoading(false);
     }
   };
+
+  // Handle Friend Request Action (Accept or Reject)
+  const handleFriendRequestAction = async (requestId, action) => {
+    setIsLoading(true);
+    try {
+      await ChangeFriendRequestStatus(requestId, action);
+
+      if (action === "accept") {
+        toast.success(t("Friend request accepted"));
+      } else if (action === "reject") {
+        toast.success(t("Friend request rejected"));
+      }
+
+      // Refresh friend requests data
+      await getRequestsData();
+      setUpdate(!update);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     getProfileData();
     getRequestsData();
   }, [userId, update]);
-  console.log(friendRequests);
   return (
     <div
       className="space-y-6 my-5 p-1"
@@ -347,94 +369,105 @@ function Profile({ userId, myUserId }) {
           )}
           {/* Start Friend Requests Section - Only show for own profile */}
           {+userId === +myUserId &&
-            (friendRequests?.incoming?.length > 0 ||
-              friendRequests?.outgoing?.length > 0) && (
+            (friendRequests?.incoming?.filter((req) => req.status === "PENDING")
+              .length > 0 ||
+              friendRequests?.outgoing?.filter(
+                (req) => req.status === "PENDING"
+              ).length > 0) && (
               <div className="rounded-xl border bg-card mt-6">
                 <div className="border-b px-6 py-4 font-semibold">
                   {t("Friend Requests")}
                 </div>
                 <div className="px-6 py-5 space-y-6">
                   {/* Incoming Requests */}
-                  {friendRequests?.incoming?.length > 0 && (
+                  {friendRequests?.incoming?.filter(
+                    (req) => req.status === "PENDING"
+                  ).length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-3">
                         {t("Incoming Requests")} (
-                        {friendRequests.incoming.length})
+                        {
+                          friendRequests.incoming.filter(
+                            (req) => req.status === "PENDING"
+                          ).length
+                        }
+                        )
                       </h4>
                       <div className="space-y-3">
-                        {friendRequests.incoming.map((request) => (
-                          <div
-                            key={request.id}
-                            className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                  src={
-                                    request.from_user?.profile_image
-                                      ? `${BASE_URL}/${request.from_user.profile_image}`
-                                      : request.from_user?.profile_image_url ||
-                                        "/fake-user.png"
+                        {friendRequests.incoming
+                          .filter((request) => request.status === "PENDING")
+                          .map((request) => (
+                            <div
+                              key={request.id}
+                              className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage
+                                    src={
+                                      request.from_user?.profile_image
+                                        ? `${BASE_URL}/${request.from_user.profile_image}`
+                                        : request.from_user
+                                            ?.profile_image_url ||
+                                          "/fake-user.png"
+                                    }
+                                    alt={
+                                      request.from_user?.display_name ||
+                                      request.from_user?.username
+                                    }
+                                  />
+                                  <AvatarFallback>
+                                    {(
+                                      request.from_user?.display_name ||
+                                      request.from_user?.username
+                                    )
+                                      ?.slice(0, 2)
+                                      ?.toUpperCase() || "NA"}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    {request.from_user?.display_name ||
+                                      request.from_user?.first_name ||
+                                      request.from_user?.username}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    @{request.from_user?.username}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleFriendRequestAction(
+                                      request.id,
+                                      "accept"
+                                    )
                                   }
-                                  alt={
-                                    request.from_user?.display_name ||
-                                    request.from_user?.username
+                                  className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                                >
+                                  {t("Accept")}
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleFriendRequestAction(
+                                      request.id,
+                                      "reject"
+                                    )
                                   }
-                                />
-                                <AvatarFallback>
-                                  {(
-                                    request.from_user?.display_name ||
-                                    request.from_user?.username
-                                  )
-                                    ?.slice(0, 2)
-                                    ?.toUpperCase() || "NA"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {request.from_user?.display_name ||
-                                    request.from_user?.first_name ||
-                                    request.from_user?.username}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  @{request.from_user?.username}
-                                </p>
+                                  className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                  {t("Reject")}
+                                </button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => {
-                                  /* TODO: Accept function */
-                                }}
-                                className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
-                              >
-                                {t("Accept")}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  /* TODO: Reject function */
-                                }}
-                                className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
-                              >
-                                {t("Reject")}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  /* TODO: Block function */
-                                }}
-                                className="px-3 py-1.5 bg-gray-700 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                              >
-                                {t("Block")}
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </div>
                   )}
 
                   {/* Outgoing Requests */}
-                  {friendRequests?.outgoing?.length > 0 && (
+                  {/* {friendRequests?.outgoing?.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-3">
                         {t("Sent Requests")} ({friendRequests.outgoing.length})
@@ -466,7 +499,6 @@ function Profile({ userId, myUserId }) {
                             </div>
                             <button
                               onClick={() => {
-                                /* TODO: Cancel function */
                               }}
                               className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
                             >
@@ -476,7 +508,7 @@ function Profile({ userId, myUserId }) {
                         ))}
                       </div>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             )}

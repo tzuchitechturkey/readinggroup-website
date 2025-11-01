@@ -90,6 +90,8 @@
   "Accept": "Accept",
   "Reject": "Reject",
   "Block": "Block",
+  "Friend request accepted": "Friend request accepted",
+  "Friend request rejected": "Friend request rejected",
   "Add Event": "Add Event",
   "Name": "Name",
   "User Name": "User Name",

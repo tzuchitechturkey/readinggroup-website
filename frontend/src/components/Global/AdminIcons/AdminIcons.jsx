@@ -17,7 +17,7 @@ export default function AdminIcons() {
         </div> */}
         {/* End Toggle Theme */}
         {/* Start Notification */}
-        <Notification />
+        {/* <Notification /> */}
         <div className=" ">{/* End Notification */}</div>
 
         {/* Start Messages */}
