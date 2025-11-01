@@ -12,6 +12,7 @@ export default function AutoComplete({
   list = [],
   searchMethod = () => {},
   searchApi = true,
+  searchParam = "username",
   searchPlaceholder,
   error,
   required = false,
@@ -27,13 +28,22 @@ export default function AutoComplete({
   const [searchList, setSearchList] = useState(list);
 
   const handleSearch = async () => {
-    if (searchApi) {
-      searchMethod(tempSearchInput);
-    } else {
-      const filteredList = list.filter((item) =>
-        item[searchParam].toLowerCase().includes(tempSearchInput.toLowerCase())
-      );
-      setSearchList(filteredList);
+    try {
+      const q = (search || "").trim();
+      if (searchApi) {
+        // let the parent fetch results via provided method
+        await searchMethod(q);
+      } else {
+        const filteredList = list.filter((item) =>
+          (String(item[searchParam] || "") || "")
+            .toLowerCase()
+            .includes(q.toLowerCase())
+        );
+        setSearchList(filteredList);
+      }
+    } catch {
+      // swallow errors to avoid breaking UI
+      setSearchList([]);
     }
   };
   const clearSearch = () => {

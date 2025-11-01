@@ -5,6 +5,7 @@ from .views import (
     ProfileView, 
     PublicProfileView,
     RegisterView,
+    ConfirmEmailView,
     ForgotPasswordView,
     ResetPasswordView,
     PasswordChangeView,
@@ -35,4 +36,5 @@ urlpatterns = [
     path("friend-requests/<int:pk>/action/", FriendRequestActionView.as_view(), name="friend-requests-action"),
     path("friend-requests/unfriend/<int:user_id>/", UnfriendView.as_view(), name="friend-requests-unfriend"),
     path("friend-requests/user/<int:user_id>/", FriendRequestsForUserView.as_view(), name="friend-requests-for-user"),
+    path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
 ]
