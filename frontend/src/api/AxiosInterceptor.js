@@ -17,7 +17,7 @@ export function AxiosInterceptor() {
           // Prevent infinite loops if already on auth pages
           const isOnAuth = window.location.pathname.startsWith("/auth");
           if (!isOnAuth) {
-            // window.location.href = "/auth/login";
+            window.location.href = "/auth/login";
           }
         }
         return Promise.reject(error);

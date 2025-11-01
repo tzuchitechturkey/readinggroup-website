@@ -73,6 +73,9 @@ function EditProfile() {
       // Only append profile_image if a new file was selected
       if (profileImageFile instanceof File) {
         data.append("profile_image", profileImageFile);
+      } else if (profileImageFile === null && formData.profile_image === null) {
+        // If profile_image was deleted, send empty file to clear it
+        data.append("profile_image", "");
       }
 
       await UpdateProfile(data);
@@ -114,11 +117,16 @@ function EditProfile() {
               src={
                 profileImageFile
                   ? formData.profile_image
-                  : `${BASE_URL}/${formData.profile_image}`
+                  : formData.profile_image && formData.profile_image !== ""
+                  ? `${BASE_URL}/${formData.profile_image}`
+                  : "/fake-user.png"
               }
               alt="avatar"
               className="w-24 h-24 rounded-full object-cover shadow-md border-2 border-gray-200 cursor-pointer hover:scale-105 transition-transform"
               onClick={() => fileInputRef.current.click()}
+              onError={(e) => {
+                e.target.src = "/fake-user.png";
+              }}
             />
 
             {profileImageFile || formData.profile_image ? (

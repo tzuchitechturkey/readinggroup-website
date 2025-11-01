@@ -9,7 +9,7 @@ import {
 import { SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
 import { BASE_URL } from "@/configs";
 
-export function UserSwitcher() {
+export function UserSwitcher({ onSectionChange }) {
   const [data, setData] = useState();
   const { i18n } = useTranslation();
   useEffect(() => {
@@ -43,7 +43,10 @@ export function UserSwitcher() {
       <SidebarMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg">
+            <SidebarMenuButton
+              onClick={() => onSectionChange("profile")}
+              size="lg"
+            >
               {/* Start Avatar */}
               <div className=" flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                 <img

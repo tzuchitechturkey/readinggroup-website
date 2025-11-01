@@ -53,7 +53,7 @@ function PostsList({ onSectionChange }) {
   const getPostData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * 10;
-     try {
+    try {
       const res = await GetPosts(limit, offset, { search: searchVal });
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
@@ -255,6 +255,11 @@ function PostsList({ onSectionChange }) {
             </TableHead>
             <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                {t("Image")}
+              </div>
+            </TableHead>
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
                 {t("Date")}
               </div>
             </TableHead>
@@ -339,6 +344,13 @@ function PostsList({ onSectionChange }) {
                       {post?.subtitle}
                     </span>
                   </div>
+                </TableCell>
+                <TableCell className="text-center py-4">
+                  <img
+                    src={post?.image || post?.image_url}
+                    alt={post?.title}
+                    className="w-12 h-8 object-cover rounded-md mx-auto"
+                  />
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                   <div className="flex flex-col items-center">

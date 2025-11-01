@@ -136,7 +136,6 @@ function Profile({ userId, myUserId }) {
     getProfileData();
   }, [userId, update]);
   console.log(data);
-  console.log(+userId, +myUserId);
   return (
     <div
       className="space-y-6 my-5 p-1"
@@ -218,14 +217,7 @@ function Profile({ userId, myUserId }) {
                 </dd>
               </div>
 
-              <div className="flex items-start justify-between gap-4">
-                <dt className="flex items-center gap-2 text-[#5B6B79]">
-                  <Phone className="h-4 w-4" /> {t("Phone no")}
-                </dt>
-                <dd className="text-[11px] text-[#1D2630] truncate text-right">
-                  {data?.mobile_number}
-                </dd>
-              </div>
+             
 
               <div className="flex items-start justify-between gap-4">
                 <dt className="flex items-center gap-2 text-[#5B6B79]">

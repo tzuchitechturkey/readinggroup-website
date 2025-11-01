@@ -16,7 +16,6 @@ import {
   PatchPostById,
   RatingPosts,
   TopCommentedPosts,
-  // LikePost, UnlikePost
 } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";

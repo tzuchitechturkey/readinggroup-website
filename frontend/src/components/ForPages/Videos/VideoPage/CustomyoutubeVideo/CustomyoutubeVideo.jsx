@@ -128,15 +128,27 @@ function CustomyoutubeVideo({ videoData }) {
       if (currentlySaved) {
         // currently saved -> remove
         const res = await RemoveFromMyList(videoItem.id);
-        const serverHas = res && res.data && typeof res.data.has_in_my_list !== "undefined" ? res.data.has_in_my_list : false;
-        setVideoItem((prev) => ({ ...prev, has_in_my_list: Boolean(serverHas) }));
+        const serverHas =
+          res && res.data && typeof res.data.has_in_my_list !== "undefined"
+            ? res.data.has_in_my_list
+            : false;
+        setVideoItem((prev) => ({
+          ...prev,
+          has_in_my_list: Boolean(serverHas),
+        }));
         toast.success(t("Removed from your list"));
       } else {
         // not saved -> add
         const res = await AddToMyList(videoItem.id);
         // server returns serialized video; prefer server value if present
-        const serverHas = res && res.data && typeof res.data.has_in_my_list !== "undefined" ? res.data.has_in_my_list : true;
-        setVideoItem((prev) => ({ ...prev, has_in_my_list: Boolean(serverHas) }));
+        const serverHas =
+          res && res.data && typeof res.data.has_in_my_list !== "undefined"
+            ? res.data.has_in_my_list
+            : true;
+        setVideoItem((prev) => ({
+          ...prev,
+          has_in_my_list: Boolean(serverHas),
+        }));
         toast.success(t("Added to your list"));
       }
     } catch (err) {
@@ -387,8 +399,8 @@ function CustomyoutubeVideo({ videoData }) {
               title={videoData?.title}
             />
             {/* Start channel info */}
-            <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-              {/* Start Image && Name && Subscribers */}
+            {/* <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+            
               <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                 <img
                   src={videoData?.channelAvatar}
@@ -396,7 +408,7 @@ function CustomyoutubeVideo({ videoData }) {
                   className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover"
                 />
                 <div>
-                  {/* Start Name && Verify Icon */}
+              
                   <div className="flex items-center gap-1 sm:gap-2">
                     <span className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
                       {videoData?.channelName}
@@ -409,22 +421,19 @@ function CustomyoutubeVideo({ videoData }) {
                       />
                     )}
                   </div>
-                  {/* End Name && Verify Icon */}
-                  {/* Start Subscribers */}
+               
                   <div className="mt-1 text-gray-500 text-xs sm:text-sm md:text-base">
                     {videoData?.channelSubscribers}
                   </div>
-                  {/* End Subscribers */}
+                
                 </div>
               </div>
-              {/* End Image && Name && Subscribers */}
-              {/* Start Followers Buttons */}
+            
               <button className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary text-gray-900 hover:bg-primary hover:text-white transition-all duration-200 text-sm sm:text-base whitespace-nowrap">
                 {t("Followers")}
               </button>
-              {/* End Followers Buttons */}
-            </div>
-            {/* End channel info */}
+            
+            </div> */}
           </div>
           {/* End Video Info */}
         </div>

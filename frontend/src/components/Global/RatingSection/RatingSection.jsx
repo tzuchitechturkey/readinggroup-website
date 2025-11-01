@@ -78,10 +78,12 @@ function RatingSection({
                 }`}
               />
             ))}
+            <span
+              className={`text-sm text-gray-600 ${isRTL ? "mr-2" : "ml-2"}`}
+            >
+              ({contentData?.rating_count || 0}) {t("ratings")}
+            </span>
           </div>
-          <span className="text-sm text-gray-600">
-            {contentData?.rating_count} ( {t("reviews")})
-          </span>
         </div>
       </div>
     </div>

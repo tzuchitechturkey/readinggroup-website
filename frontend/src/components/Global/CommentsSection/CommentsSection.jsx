@@ -410,7 +410,16 @@ function VideoCommentsSection({ itemId, type }) {
     const userId = localStorage.getItem("userId");
     const userImage = localStorage.getItem("userImage");
     if (userId) setUserId(userId);
-    if (userImage) setUserImage(JSON.parse(userImage));
+    if (userImage) {
+      try {
+        // محاولة parse كـ JSON
+        const parsedImage = JSON.parse(userImage);
+        setUserImage(parsedImage);
+      } catch {
+        // إذا فشل، استخدم القيمة مباشرة كنص
+        setUserImage(userImage);
+      }
+    }
   }, []);
 
   return (

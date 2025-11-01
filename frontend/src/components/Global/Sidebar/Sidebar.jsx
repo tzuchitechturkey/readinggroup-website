@@ -183,7 +183,7 @@ export default function AppSidebar({
       {...props}
     >
       <SidebarHeader>
-        <UserSwitcher />
+        <UserSwitcher onSectionChange={onSectionChange} />
       </SidebarHeader>
 
       <SidebarContent>
