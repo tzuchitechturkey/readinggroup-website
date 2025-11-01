@@ -883,7 +883,9 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                   {formData?.writer ? (
                     <>
                       <img
-                        src={formData?.writer?.profile_image}
+                        src={
+                          formData?.writer?.profile_image || "/fake-user.png"
+                        }
                         alt={formData?.writer}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -956,7 +958,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                             className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                           >
                             <img
-                              src={writer.profile_image}
+                              src={writer.profile_image || "/fake-user.png"}
                               alt={writer.username}
                               className="w-8 h-8 rounded-full object-cover"
                             />

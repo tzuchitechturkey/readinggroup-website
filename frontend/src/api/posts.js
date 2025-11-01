@@ -152,3 +152,8 @@ export async function WeeklyCardPhotoPosts() {
 export async function WeeklyReadingPosts() {
   return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
 }
+
+// Rating
+export async function RatingPosts(postId, rating) {
+  return await axios.post(`/posts/${postId}/rating/`, rating);
+}

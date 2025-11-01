@@ -3,7 +3,7 @@ import React from "react";
 import NewsHeroEnhanced from "@/components/ForPages/News/NewsHeroEnhanced";
 import ConnectNewsSection from "@/components/ForPages/Events/EventstNewsSection/EventstNewsSection";
 
-function NewsContent() {
+function EventContent() {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Start Hero */}
@@ -16,4 +16,4 @@ function NewsContent() {
   );
 }
 
-export default NewsContent;
+export default EventContent;

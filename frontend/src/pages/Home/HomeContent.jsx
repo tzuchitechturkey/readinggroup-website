@@ -42,7 +42,6 @@ export default function HomeContent() {
     getSliderData();
     getTop1Data();
   }, []);
-
   return (
     <div dir={direction} className="min-h-screen">
       {/* Hero Slider */}

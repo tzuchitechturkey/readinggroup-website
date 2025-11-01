@@ -230,7 +230,7 @@ function VideoDetailsContent({
                     />
                   </button>
 
-                  <button
+                  {/* <button
                     className={`p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full backdrop-blur-sm border-2 transition-all duration-200 group cursor-pointer ${
                       isDownloadClicked
                         ? "bg-green-500/20 border-green-400/60 hover:bg-green-500/30 hover:border-green-400/80"
@@ -250,7 +250,7 @@ function VideoDetailsContent({
                           : "text-white group-hover:text-white"
                       }`}
                     />
-                  </button>
+                  </button> */}
 
                   <button
                     className="p-2 xs:p-3 min-w-[36px] xs:min-w-[44px] min-h-[36px] xs:min-h-[44px] flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border-2 border-white/50 hover:bg-black/60 transition-all duration-200 group cursor-pointer"
@@ -287,9 +287,9 @@ function VideoDetailsContent({
             {/* Left Column - Description */}
             <div className="lg:col-span-2">
               {/* Seasons and Year on left side below description */}
-              {!videoData?.report_type && (
+              {!videoData?.report_type && videoItem?.season_name && (
                 <p className="text-gray-400 text-xs xs:text-sm font-light mb-2">
-                  {t("Season")} · {videoItem?.season}
+                  {t("Season")} · {videoItem?.season_name?.season_id}
                 </p>
               )}
               <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">

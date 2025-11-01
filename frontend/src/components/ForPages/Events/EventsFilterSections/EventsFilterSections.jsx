@@ -242,7 +242,6 @@ function EventsFilterSections() {
     });
     setCurrentPage(1);
     setFilteredData({ count: 0, results: [] });
-    toast.success(t("Filters cleared"));
   };
   useEffect(() => {
     loadDefaultSections();

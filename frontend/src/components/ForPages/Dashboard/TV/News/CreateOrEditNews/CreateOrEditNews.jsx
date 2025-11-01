@@ -735,6 +735,12 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
                     });
                     setOpenAirDate(false);
                   }}
+                  disabled={(date) => {
+                    // Disable dates after today
+                    const today = new Date();
+                    today.setHours(23, 59, 59, 999);
+                    return date > today;
+                  }}
                   initialFocus
                 />
               </PopoverContent>

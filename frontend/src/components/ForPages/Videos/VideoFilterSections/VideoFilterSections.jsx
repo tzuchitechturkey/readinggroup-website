@@ -119,25 +119,16 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
     if (hasActiveFilters) {
       setFilteredData((prevData) => ({
         ...prevData,
-        results: [...prevData.results].reverse(),
+        results: [...prevData.results].sort((a, b) => {
+          const titleA = a.title?.toLowerCase() || "";
+          const titleB = b.title?.toLowerCase() || "";
+          return titleA.localeCompare(titleB, i18n.language, {
+            sensitivity: "base",
+            numeric: true,
+          });
+        }),
       }));
-    } else {
-      // setDefaultVideos((prev) => ({
-      //   videoTypeData: {
-      //     ...prev.videoTypeData,
-      //     results: [...prev.videoTypeData.results].reverse(),
-      //   },
-      //   videoCategoryData: {
-      //     ...prev.videoCategoryData,
-      //     results: [...prev.videoCategoryData.results].reverse(),
-      //   },
-      //   videoLanguageData: {
-      //     ...prev.videoLanguageData,
-      //     results: [...prev.videoLanguageData.results].reverse(),
-      //   },
-      // }));
     }
-    toast.success(t("Data Sorted!"));
   };
   const onSearch = (searchVal) => {
     setCurrentPage(1);

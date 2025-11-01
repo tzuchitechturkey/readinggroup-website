@@ -60,15 +60,27 @@ const NewsHero = ({ className = "" }) => {
     setIsImageModalOpen(true);
   };
   // دالة تحميل الصورة
-  const handleDownloadImage = () => {
+  const handleDownloadImage = async () => {
     try {
-      const imageUrl = eventData?.image;
+      const imageUrl = eventData?.image || eventData?.image_url;
+      
+      // جلب الصورة كـ blob
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // إنشاء URL للـ blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // إنشاء رابط التحميل
       const link = document.createElement("a");
-      link.href = imageUrl;
+      link.href = blobUrl;
       link.download = `${eventData?.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
+      
+      // تنظيف الموارد
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
 
       // إظهار رسالة نجاح التحميل
       toast.success(t("Image downloaded successfully!"));
@@ -97,7 +109,6 @@ const NewsHero = ({ className = "" }) => {
   useEffect(() => {
     getEventsData();
   }, []);
-  console.log(sideEventData);
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
@@ -113,7 +124,7 @@ const NewsHero = ({ className = "" }) => {
         {/* Start Image */}
         <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
           <img
-            src={eventData?.image}
+            src={eventData?.image || eventData?.image_url}
             alt={eventData?.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"

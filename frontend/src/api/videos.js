@@ -228,3 +228,7 @@ export async function PatchSeasonById(id, data) {
 export async function DeleteSeasonById(id) {
   return await axios.delete(`/season-ids/${id}/`);
 }
+
+export async function GetVideosBySeasonId(limit , offset ,seasonId) {
+  return await axios.get(`/season-ids/${seasonId}/videos/?limit=${limit}&offset=${offset}`);
+}

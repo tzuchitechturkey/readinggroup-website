@@ -15,7 +15,7 @@ const EpisodeCard = ({ episode, index }) => {
       <div className="flex-shrink-0 relative">
         <div className="w-24 h-16 sm:w-32 sm:h-20 md:w-40 md:h-24 rounded-lg overflow-hidden bg-gray-200">
           <img
-            src={episode.image}
+            src={episode.thumbnail || episode.thumbnail_url}
             alt={episode.title}
             className="w-full h-full object-cover"
           />

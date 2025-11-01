@@ -302,10 +302,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     if (!formData?.duration.trim()) {
       newErrors.duration = t("Duration is required");
     }
-    if (selectedSeriesId) {
-      if (!formData?.season_name) {
-        newErrors.season_name = t("Season is required");
-      }
+    // Series and Season are optional
+    if (selectedSeriesId && !formData?.season_name) {
+      newErrors.season_name = t("Season is required when Series is selected");
     }
 
     if (!formData?.happened_at) {
@@ -737,66 +736,104 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* Start Series Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Series")} *
+                {t("Series")}
               </label>
-              <select
-                value={selectedSeriesId || ""}
-                onChange={handleSeriesChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  !selectedSeriesId ? "text-gray-400" : "text-black"
-                } border-gray-300`}
-              >
-                <option value="" disabled hidden>
-                  {t("Select Series")}
-                </option>
-                {seriesList.map((series) => (
-                  <option
-                    key={series.id}
-                    value={series.id}
-                    className="text-black"
-                  >
-                    {series.name}
+              <div className="flex gap-2">
+                <select
+                  value={selectedSeriesId || ""}
+                  onChange={handleSeriesChange}
+                  className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    !selectedSeriesId ? "text-gray-400" : "text-black"
+                  } border-gray-300`}
+                >
+                  <option value="" disabled hidden>
+                    {t("Select Series")}
                   </option>
-                ))}
-              </select>
+                  {seriesList.map((series) => (
+                    <option
+                      key={series.id}
+                      value={series.id}
+                      className="text-black"
+                    >
+                      {series.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedSeriesId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSeriesId(null);
+                      setSeasonsList([]);
+                      setFormData((prev) => ({
+                        ...prev,
+                        season_name: "",
+                      }));
+                    }}
+                    className="px-3 py-2 bg-red-100 text-red-600 border border-red-300 rounded-md hover:bg-red-200 transition-colors"
+                    title={t("Clear selection")}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
             {/* End Series Selection */}
 
             {/* Start Season Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Season")} *
+                {t("Season")}
               </label>
-              <select
-                name="season_name"
-                value={formData?.season_name}
-                onChange={handleInputChange}
-                disabled={!selectedSeriesId || seasonsList.length === 0}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.season_name ? "border-red-500" : "border-gray-300"
-                } ${!formData?.season_name ? "text-gray-400" : "text-black"} ${
-                  !selectedSeriesId || seasonsList.length === 0
-                    ? "bg-gray-100 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                <option value="" disabled hidden>
-                  {!selectedSeriesId
-                    ? t("Select series first")
-                    : seasonsList.length === 0
-                    ? t("No seasons available")
-                    : t("Select Season")}
-                </option>
-                {seasonsList.map((season) => (
-                  <option
-                    key={season.id}
-                    value={season.id}
-                    className="text-black"
-                  >
-                    {season.season_id}
+              <div className="flex gap-2">
+                <select
+                  name="season_name"
+                  value={formData?.season_name}
+                  onChange={handleInputChange}
+                  disabled={!selectedSeriesId || seasonsList.length === 0}
+                  className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.season_name ? "border-red-500" : "border-gray-300"
+                  } ${
+                    !formData?.season_name ? "text-gray-400" : "text-black"
+                  } ${
+                    !selectedSeriesId || seasonsList.length === 0
+                      ? "bg-gray-100 cursor-not-allowed"
+                      : ""
+                  }`}
+                >
+                  <option value="" disabled hidden>
+                    {!selectedSeriesId
+                      ? t("Select series first")
+                      : seasonsList.length === 0
+                      ? t("No seasons available")
+                      : t("Select Season")}
                   </option>
-                ))}
-              </select>
+                  {seasonsList.map((season) => (
+                    <option
+                      key={season.id}
+                      value={season.id}
+                      className="text-black"
+                    >
+                      {season.season_id}
+                    </option>
+                  ))}
+                </select>
+                {formData?.season_name && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        season_name: "",
+                      }));
+                    }}
+                    className="px-3 py-2 bg-red-100 text-red-600 border border-red-300 rounded-md hover:bg-red-200 transition-colors"
+                    title={t("Clear selection")}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               {errors.season_name && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.season_name}
@@ -842,6 +879,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                         target: { name: "happened_at", value: date },
                       });
                       setOpenHappendAt(false);
+                    }}
+                    disabled={(date) => {
+                      // Disable dates after today
+                      const today = new Date();
+                      today.setHours(23, 59, 59, 999);
+                      return date > today;
                     }}
                     initialFocus
                   />

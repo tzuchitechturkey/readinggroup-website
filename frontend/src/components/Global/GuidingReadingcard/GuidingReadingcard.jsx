@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 function GuidingReadingcard({ item }) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const handleCardClick = () => {
     navigate(
       `/${
@@ -78,14 +77,14 @@ function GuidingReadingcard({ item }) {
               <Star
                 key={i}
                 className={`w-3 h-3 ${
-                  i < Math.floor(item?.rating)
+                  i < Math.floor(item?.average_rating)
                     ? "fill-yellow-400 text-yellow-400"
                     : "text-gray-300"
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs text-gray-600">({item?.reviews}k)</span>
+          <span className="text-xs text-gray-600">({item?.rating_count}k)</span>
         </div>
         {/* Start Rating  */}
       </div>

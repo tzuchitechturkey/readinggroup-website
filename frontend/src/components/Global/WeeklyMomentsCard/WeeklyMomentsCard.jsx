@@ -20,7 +20,7 @@ function WeeklyMomentsCard({ item }) {
       {/* Start Image */}
       <div className="relative  aspect-video overflow-hidden rounded-lg">
         <img
-          src={item?.image}
+          src={item?.image || item?.image_url}
           alt={item?.title}
           className="w-full   h-[250px] object-cover shadow-2xl"
           style={{

@@ -64,7 +64,7 @@ const CreateOrEditHistory = ({
       ...prev,
       [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
@@ -78,7 +78,7 @@ const CreateOrEditHistory = ({
     const file = e.target.files?.[0];
     if (file) {
       setFormData((prev) => ({ ...prev, image: file }));
-      
+
       // Clear image error if exists
       if (errors.image) {
         setErrors((prev) => ({
@@ -92,7 +92,7 @@ const CreateOrEditHistory = ({
   const handleDateChange = (date) => {
     setOpenStory(false);
     setFormData((prev) => ({ ...prev, story_date: date }));
-    
+
     // Clear date error if exists
     if (errors.story_date) {
       setErrors((prev) => ({
@@ -127,11 +127,11 @@ const CreateOrEditHistory = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsLaoding(true);
     try {
       // إنشاء FormData لإرسال الصورة بشكل صحيح
@@ -237,6 +237,12 @@ const CreateOrEditHistory = ({
                     : undefined
                 }
                 onSelect={handleDateChange}
+                disabled={(date) => {
+                  // Disable dates after today
+                  const today = new Date();
+                  today.setHours(23, 59, 59, 999);
+                  return date > today;
+                }}
                 initialFocus
               />
             </PopoverContent>

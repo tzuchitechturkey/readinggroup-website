@@ -15,7 +15,7 @@ function ImageModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-90 z-[99999999] flex items-center justify-center p-4">
       <div className="relative max-w-7xl max-h-full w-full h-full flex items-center justify-center">
         {/* Close Button */}
         <button
@@ -39,7 +39,7 @@ function ImageModal({
         <img
           src={imageData.image}
           alt={imageData.title}
-          className="max-w-full max-h-full object-contain rounded-lg"
+          className=" w-full  h-full object-contain rounded-lg"
           onClick={onClose}
         />
 
@@ -53,7 +53,6 @@ function ImageModal({
             } justify-between text-sm`}
           >
             <span>{imageData.writer}</span>
-            <span>{imageData.details}</span>
           </div>
         </div>
       </div>

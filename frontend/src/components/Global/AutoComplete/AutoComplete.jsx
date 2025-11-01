@@ -7,6 +7,7 @@ export default function AutoComplete({
   placeholder,
   selectedItem,
   onSelect,
+  onClear,
   list = [],
   searchMethod = () => {},
   searchApi = true,
@@ -72,33 +73,53 @@ export default function AutoComplete({
       )}
 
       <div className="relative" ref={dropdownRef}>
-        <button
-          type="button"
-          onClick={() => setOpen(!open)}
-          className={`w-full px-3 py-[6px] border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
-            error ? "border-red-500" : "border-gray-300"
-          } ${customStyle}`}
-        >
-          {selectedItem?.username ? (
-            <>
-              <img
-                src={selectedItem.profile_image || "/fake-user.png"}
-                alt={selectedItem.username}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-black/60 text-sm">
-                  {renderItemLabel(selectedItem)}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            className={`flex-1 px-3 py-[6px] border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+              error ? "border-red-500" : "border-gray-300"
+            } ${customStyle}`}
+          >
+            {selectedItem?.username ? (
+              <>
+                <img
+                  src={
+                    selectedItem.profile_image
+                      ? selectedItem.profile_image
+                      : "/fake-user.png"
+                  }
+                  alt={selectedItem.username}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-black/60 text-sm">
+                    {renderItemLabel(selectedItem)}
+                  </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {showWriterAvatar && <User className="w-8 h-8 text-gray-400" />}
-              <span className="text-gray-500">{placeholder}</span>
-            </>
+              </>
+            ) : (
+              <>
+                {showWriterAvatar && <User className="w-8 h-8 text-gray-400" />}
+                <span className="text-gray-500">{placeholder}</span>
+              </>
+            )}
+          </button>
+
+          {selectedItem && onClear && (
+            <button
+              type="button"
+              onClick={() => {
+                onClear();
+                setOpen(false);
+              }}
+              className="px-3 py-[6px] bg-red-100 text-red-600 border border-red-300 rounded-md hover:bg-red-200 transition-colors"
+              title={t("Delete Selection")}
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-        </button>
+        </div>
 
         {open && (
           <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
@@ -142,36 +163,43 @@ export default function AutoComplete({
             {/* List */}
             <div className="max-h-60 overflow-y-auto">
               {searchList?.length > 0 ? (
-                searchList.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      onSelect(item);
-                      setOpen(false);
-                    }}
-                    className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                  >
-                    <img
-                      src={item.profile_image ? item.profile_image : "/fake-user.png"}
-                      alt={item.username}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {renderItemLabel(item)}
-                      </div>
-                      {renderItemSubLabel && (
-                        <div className="text-xs text-gray-500">
-                          {renderItemSubLabel(item)}
+                searchList.map((item) => {
+                  console.log("Rendering item:", item);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        onSelect(item);
+                        setOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <img
+                        src={
+                          item.profile_image
+                            ? item.profile_image
+                            : "/fake-user.png"
+                        }
+                        alt={item.username}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          {renderItemLabel(item)}
                         </div>
-                      )}
-                    </div>
-                  </button>
-                ))
+                        {renderItemSubLabel && (
+                          <div className="text-xs text-gray-500">
+                            {renderItemSubLabel(item)}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
               ) : (
                 <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                  لا توجد نتائج
+                  {t("No results found")}
                 </div>
               )}
             </div>

@@ -21,6 +21,7 @@ const WeeklyMoments = () => {
   useEffect(() => {
     getWeeklyMomentData();
   }, []);
+  console.log(weeklyMomentData);
   return (
     <div className="mt-6 md:mt-9 lg:mt-12">
       <DynamicSection

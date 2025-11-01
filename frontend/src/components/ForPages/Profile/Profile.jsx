@@ -153,7 +153,7 @@ function Profile({ userId, myUserId }) {
                   src={
                     data?.profile_image
                       ? `${BASE_URL}/${data.profile_image}`
-                      : data?.profile_image_url
+                      : data?.profile_image_url || "/fake-user.png"
                   }
                   alt="avatar"
                 />

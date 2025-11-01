@@ -9,12 +9,11 @@ import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingPageContent";
-import CardDetailsContent from "@/pages/GuidedReading/CardDetails/CardDetailsPageContent";
-import PhotoDetailsContent from "@/pages/Photos/PhotoDetails/PhotoDetailsContent";
+import PostDetailsPageContent from "@/components/Global/PostDetailsPageContent/PostDetailsPageContent";
 import EventsContent from "@/pages/Events/EventsPageContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
-import NewsContent from "@/pages/Events/News/NewsContent";
+import EventContent from "@/pages/Events/EventContent";
 import Pages404 from "@/pages/NotFound/NotFound";
 import SearchContent from "@/pages/Search/SearchPageContent";
 import EventsVideoPage from "@/components/ForPages/Events/EventsVideoPage/EventsVideoPage";
@@ -30,16 +29,16 @@ export const userRoutes = [
   { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/guiding-reading", element: <GuidedReadingContent /> },
-  { path: "/cards-photos/card/:id", element: <CardDetailsContent /> },
-  { path: "/guiding-reading/card/:id", element: <CardDetailsContent /> },
+  { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
+  { path: "/guiding-reading/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
   {
     path: "/guiding-reading/weekly-moments/:id",
-    element: <CardDetailsContent />,
+    element: <PostDetailsPageContent />,
   },
   { path: "/events", element: <EventsContent /> },
-  { path: "/events/:id", element: <NewsContent /> },
+  { path: "/events/:id", element: <EventContent /> },
   { path: "/events/video/:id", element: <EventsVideoPage /> },
   { path: "/profile/:id", element: <UserProfileContent /> },
   { path: "/my-list", element: <MyListContent /> },

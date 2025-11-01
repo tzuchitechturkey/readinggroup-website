@@ -14,6 +14,7 @@ import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import {
   GetPostById,
   PatchPostById,
+  RatingPosts,
   TopCommentedPosts,
   // LikePost, UnlikePost
 } from "@/api/posts";
@@ -21,7 +22,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
 
-function CardDetailsPageContent() {
+function PostDetailsPageContent() {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
@@ -31,7 +32,7 @@ function CardDetailsPageContent() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [cardData, setCardData] = useState();
   const [topCommentedData, setTopCommentedData] = useState();
-
+  const [update, setUpdate] = useState(false);
   const getCardData = async () => {
     setIsLoading(true);
     try {
@@ -86,9 +87,14 @@ function CardDetailsPageContent() {
   };
 
   // دالة تقييم النجوم
-  const handleStarRating = (rating) => {
-    setUserRating(rating);
-    toast.success(t(`You rated this content ${rating} stars!`));
+  const handleStarRating = async (rating) => {
+    try {
+      await RatingPosts(cardData.id, { rating });
+      toast.success(t("Rating submitted successfully"));
+      setUpdate(!update);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
   };
 
   // دالة تحميل الصورة
@@ -112,8 +118,8 @@ function CardDetailsPageContent() {
 
   useEffect(() => {
     getCardData();
-  }, [paramId]);
-
+    getTopCommentedPosts();
+  }, [paramId, update]);
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -131,7 +137,7 @@ function CardDetailsPageContent() {
                 <div className="aspect-video bg-black rounded-t-xl flex items-center justify-center">
                   <div className="relative w-full h-full">
                     <img
-                      src={cardData?.image}
+                      src={cardData?.image || cardData?.image_url}
                       alt="Video Thumbnail"
                       className="w-full h-full object-contain"
                     />
@@ -205,7 +211,7 @@ function CardDetailsPageContent() {
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: "/azem.png",
+          image: cardData?.iamge || cardData?.image_url,
           title: cardData?.title,
           subtitle: cardData?.badge,
           writer: cardData?.writer,
@@ -218,4 +224,4 @@ function CardDetailsPageContent() {
   );
 }
 
-export default CardDetailsPageContent;
+export default PostDetailsPageContent;

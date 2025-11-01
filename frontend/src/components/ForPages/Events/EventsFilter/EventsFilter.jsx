@@ -131,6 +131,9 @@ function EventsFilter({
             onSelect={(item) => {
               updateFilter("writer", item);
             }}
+            onClear={() => {
+              updateFilter("writer", null);
+            }}
             searchMethod={getWriters}
             searchApi={true}
             list={writersList}

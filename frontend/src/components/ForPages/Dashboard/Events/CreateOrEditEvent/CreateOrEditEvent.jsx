@@ -589,7 +589,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             >
               {imagePreview ? (
                 <img
-                  src={imagePreview}
+                  src={imagePreview || "/fake-user.png"}
                   alt="Preview"
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -841,7 +841,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                           className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                         >
                           <img
-                            src={writer.profile_image}
+                            src={writer.profile_image || "/fake-user.png"}
                             alt={writer.username}
                             className="w-8 h-8 rounded-full object-cover"
                           />
@@ -1154,6 +1154,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                       target: { name: "happened_at", value: date },
                     });
                     setOpenHappendAt(false);
+                  }}
+                  disabled={(date) => {
+                    // Disable dates after today
+                    const today = new Date();
+                    today.setHours(23, 59, 59, 999);
+                    return date > today;
                   }}
                   initialFocus
                 />
