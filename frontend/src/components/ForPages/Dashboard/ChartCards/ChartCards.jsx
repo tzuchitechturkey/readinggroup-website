@@ -145,7 +145,7 @@ function ChartCards() {
             <p className="text-primary text-sm font-medium">{k.title}</p>
 
             {/* Menu */}
-            <div className="ml-auto">
+            {/* <div className="ml-auto">
               {Array.isArray(k.items) && k.items.length > 0 && (
                 <SubMenu
                   isOpen={openMenuIndex === i}
@@ -153,7 +153,7 @@ function ChartCards() {
                   items={k.items}
                 />
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Bottom Section */}
