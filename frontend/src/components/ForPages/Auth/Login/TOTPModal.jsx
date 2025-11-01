@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,14 @@ const TOTPModal = ({
 }) => {
   const { t } = useTranslation();
   const [inputError, setInputError] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    // Focus on input when modal opens
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (otpCode.length !== 6) {
@@ -56,6 +64,7 @@ const TOTPModal = ({
       {/* النموذج */}
       <form onSubmit={handleSubmit} className="text-center">
         <input
+          ref={inputRef}
           type="text"
           maxLength={6}
           value={otpCode}

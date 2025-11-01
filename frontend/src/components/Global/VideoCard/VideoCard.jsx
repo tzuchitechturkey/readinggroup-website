@@ -18,6 +18,7 @@ const VideoCard = ({ item, className = "" }) => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+  console.log("VideoCard item:", item);
   return (
     <>
       <div
@@ -28,9 +29,14 @@ const VideoCard = ({ item, className = "" }) => {
           <div className="relative h-full flex-shrink-0">
             {/* Start Image */}
             <img
-              src={item?.thumbnail || item?.thumbnail_url}
+              src={
+                item?.thumbnail ||
+                item?.thumbnail_url ||
+                item?.image ||
+                item?.image_url
+              }
               alt={item?.title}
-              className="w-full h-[200px] object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full  object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
 

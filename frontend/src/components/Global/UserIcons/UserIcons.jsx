@@ -3,11 +3,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { CiSearch, CiLogin } from "react-icons/ci";
 import { Link, useNavigate } from "react-router-dom";
 import { X, LayoutDashboard } from "lucide-react";
+import { CgProfile } from "react-icons/cg";
+import { useTranslation } from "react-i18next";
 
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import UserProfileDropdown from "@/components/Global/UserProfileDropdown/UserProfileDropdown";
 
 function UserIcons() {
+  const { t } = useTranslation();
   const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,15 +82,17 @@ function UserIcons() {
           className="cursor-pointer text-4xl sm:text-xl hover:text-primary transition-all duration-200 p-1 mx-2 sm:p-0 rounded-full hover:bg-gray-100"
         />
       </div> */}
-      {/* End Search Section */}
 
       <LanguageDropdown />
 
       {isLoggedIn ? (
         <UserProfileDropdown />
       ) : (
-        <Link to="/auth/login">
-          <CiLogin className="text-xl" />
+        <Link
+          to="/auth/login"
+          className="p-1 px-3 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+        >
+          {t("Login")}
         </Link>
       )}
       {isLoggedIn && userType === "admin" && (
@@ -101,9 +106,7 @@ function UserIcons() {
             localStorage.removeItem("dashboardActiveSection");
           }}
         >
-          <Link to="/dashboard">
-            <LayoutDashboard className="text-xl" />
-          </Link>
+          <Link to="/dashboard">{t("Dashboard")}</Link>
         </div>
       )}
     </div>

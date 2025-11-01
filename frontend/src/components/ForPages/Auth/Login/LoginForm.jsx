@@ -115,20 +115,8 @@ function LoginForm() {
           localStorage.setItem("userType", res?.data.user?.groups[0]);
         }
 
-        // if (isAdminLogin) {
-        //   if (res?.data?.user?.groups[0] === "admin") {
-        //     // if (data?.user?.is_staff) {
-        //     navigate("/dashboard");
-        //   } else {
-        //     toast.error("This account is not an admin");
-        //   }
-        // } else {
-        if (res?.data?.user?.groups.includes("admin")) {
-          navigate("/dashboard");
-        } else {
-          navigate("/");
-          // toast.error("This account is not a user");
-        }
+        navigate("/");
+
         // }
       } catch (err) {
         setTotpError(t("TOTP verification failed"));

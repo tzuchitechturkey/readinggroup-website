@@ -34,7 +34,7 @@ function DashboardTable({ data, onSectionChange }) {
         writer: castNames || t("No cast"),
         category: data?.video.category?.name,
         date: data?.video.created_at || data?.video.published_at || "",
-        views: data?.video.views_count || 0,
+        views: data?.video.views || 0,
         likes_count: data?.video.likes_count || 0,
         comment: data?.video.comments || [],
         originData: data?.video,
@@ -52,7 +52,7 @@ function DashboardTable({ data, onSectionChange }) {
           data?.post_card.writer || data?.post_card.author || t("Unknown"),
         category: data?.post_card.category?.name,
         date: data?.post_card.created_at || data?.post_card.published_at || "",
-        views: data?.post_card.views_count || 0,
+        views: data?.post_card.views || 0,
         likes_count: data?.post_card.likes_count || 0,
         comment: data?.post_card.comments || [],
         originData: data?.post_card,
@@ -71,7 +71,7 @@ function DashboardTable({ data, onSectionChange }) {
         category: data?.post_photo.category?.name,
         date:
           data?.post_photo.created_at || data?.post_photo.published_at || "",
-        views: data?.post_photo.views_count || 0,
+        views: data?.post_photo.views || 0,
         likes_count: data?.post_photo.likes_count || 0,
         comment: data?.post_photo.comments || [],
         originData: data?.post_photo,
@@ -94,7 +94,7 @@ function DashboardTable({ data, onSectionChange }) {
           data?.post_reading.created_at ||
           data?.post_reading.published_at ||
           "",
-        views: data?.post_reading.views_count || 0,
+        views: data?.post_reading.views || 0,
         likes_count: data?.post_reading.likes_count || 0,
         comment: data?.post_reading.comments || [],
         originData: data?.post_reading,
@@ -111,7 +111,7 @@ function DashboardTable({ data, onSectionChange }) {
         writer: data?.event.writer || data?.event.author || t("Unknown"),
         category: data?.event.category?.name,
         date: data?.event.created_at || data?.event.published_at || "",
-        views: data?.event.views_count || 0,
+        views: data?.event.views || 0,
         likes_count: data?.event.likes_count || 0,
         comment: data?.event.comments || [],
         originData: data?.event,
@@ -122,6 +122,7 @@ function DashboardTable({ data, onSectionChange }) {
     return items;
   }, [data, t]);
 
+  console.log("DashboardTable data:", data);
   // Sort function
   const sortData = (key) => {
     let direction = "asc";
@@ -253,7 +254,7 @@ function DashboardTable({ data, onSectionChange }) {
         </TableHeader>
         <TableBody className=" text-sm" style={{ padding: "10px" }}>
           {sortedRows.length === 0 ? (
-            <TableRow >
+            <TableRow>
               <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                 {t("No data available")}
               </TableCell>
