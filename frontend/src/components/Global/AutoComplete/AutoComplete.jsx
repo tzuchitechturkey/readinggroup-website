@@ -12,14 +12,15 @@ export default function AutoComplete({
   list = [],
   searchMethod = () => {},
   searchApi = true,
-  searchParam = "username",
   searchPlaceholder,
   error,
   required = false,
   renderItemLabel,
-  renderItemSubLabel,
+  // renderItemSubLabel,
   customStyle = "",
   showWriterAvatar = true,
+  multiple = false,
+  selectedItems = [],
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -28,22 +29,13 @@ export default function AutoComplete({
   const [searchList, setSearchList] = useState(list);
 
   const handleSearch = async () => {
-    try {
-      const q = (search || "").trim();
-      if (searchApi) {
-        // let the parent fetch results via provided method
-        await searchMethod(q);
-      } else {
-        const filteredList = list.filter((item) =>
-          (String(item[searchParam] || "") || "")
-            .toLowerCase()
-            .includes(q.toLowerCase())
-        );
-        setSearchList(filteredList);
-      }
-    } catch {
-      // swallow errors to avoid breaking UI
-      setSearchList([]);
+    if (searchApi) {
+      searchMethod(tempSearchInput);
+    } else {
+      const filteredList = list.filter((item) =>
+        item[searchParam].toLowerCase().includes(tempSearchInput.toLowerCase())
+      );
+      setSearchList(filteredList);
     }
   };
   const clearSearch = () => {
@@ -93,7 +85,31 @@ export default function AutoComplete({
               error ? "border-red-500" : "border-gray-300"
             } ${customStyle}`}
           >
-            {selectedItem?.username ? (
+            {multiple && selectedItems?.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {selectedItems.map((item, index) => (
+                  <span
+                    key={item.id || index}
+                    className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                  >
+                    {renderItemLabel(item)}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newItems = selectedItems.filter(
+                          (i) => i.id !== item.id
+                        );
+                        onSelect(newItems);
+                      }}
+                      className="hover:bg-blue-200 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : !multiple && selectedItem?.username ? (
               <>
                 <img
                   src={
@@ -118,19 +134,21 @@ export default function AutoComplete({
             )}
           </button>
 
-          {selectedItem && onClear && (
-            <button
-              type="button"
-              onClick={() => {
-                onClear();
-                setOpen(false);
-              }}
-              className="px-3 py-[6px] bg-red-100 text-red-600 border border-red-300 rounded-md hover:bg-red-200 transition-colors"
-              title={t("Delete Selection")}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          {((multiple && selectedItems?.length > 0) ||
+            (!multiple && selectedItem)) &&
+            onClear && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClear();
+                  setOpen(false);
+                }}
+                className="px-3 py-[6px] bg-red-100 text-red-600 border border-red-300 rounded-md hover:bg-red-200 transition-colors"
+                title={t("Delete Selection")}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
         </div>
 
         {open && (
@@ -176,16 +194,44 @@ export default function AutoComplete({
             <div className="max-h-60 overflow-y-auto">
               {searchList?.length > 0 ? (
                 searchList.map((item) => {
+                  const isSelected = multiple
+                    ? selectedItems?.some((i) => i.id === item.id)
+                    : selectedItem?.id === item.id;
+
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => {
-                        onSelect(item);
-                        setOpen(false);
+                        if (multiple) {
+                          const isAlreadySelected = selectedItems?.some(
+                            (i) => i.id === item.id
+                          );
+                          if (isAlreadySelected) {
+                            const newItems = selectedItems.filter(
+                              (i) => i.id !== item.id
+                            );
+                            onSelect(newItems);
+                          } else {
+                            onSelect([...selectedItems, item]);
+                          }
+                        } else {
+                          onSelect(item);
+                          setOpen(false);
+                        }
                       }}
-                      className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3 ${
+                        isSelected ? "bg-blue-50" : ""
+                      }`}
                     >
+                      {multiple && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          readOnly
+                          className="w-4 h-4 text-blue-600 rounded"
+                        />
+                      )}
                       <img
                         src={
                           item.profile_image
@@ -199,11 +245,11 @@ export default function AutoComplete({
                         <div className=" text-sm  text-black">
                           {renderItemLabel(item)}
                         </div>
-                        {renderItemSubLabel && (
+                        {/* {renderItemSubLabel && (
                           <div className="text-xs text-gray-500">
                             {renderItemSubLabel(item)}
                           </div>
-                        )}
+                        )} */}
                       </div>
                     </button>
                   );

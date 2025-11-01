@@ -38,5 +38,7 @@ urlpatterns = [
     path("friend-requests/unfriend/<int:user_id>/", UnfriendView.as_view(), name="friend-requests-unfriend"),
     path("friend-requests/user/<int:user_id>/", FriendRequestsForUserView.as_view(), name="friend-requests-for-user"),
     path("friend-requests/pending/", PendingFriendRequestsView.as_view(), name="friend-requests-pending"),
+    # Allow fetching pending requests for a specific user via path param (shows as path param in Swagger)
+    path("friend-requests/pending/<int:user_id>/", PendingFriendRequestsView.as_view(), name="friend-requests-pending-user"),
     path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
 ]

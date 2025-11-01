@@ -170,11 +170,33 @@ class PendingFriendRequestsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
+        request_user = self.request.user
+        # allow an optional user_id query param so admins (or the user themself) can fetch pending for another user
+    # allow user_id either as query param or as URL kwarg (path param)
+        user_id = self.request.query_params.get("user_id") or self.kwargs.get("user_id")
         direction = self.request.query_params.get("direction", "incoming").lower()
+
+        target_user = None
+        if user_id:
+            try:
+                uid = int(user_id)
+                # only allow if the requester is staff or requesting their own data
+                if not (request_user.is_staff or request_user.id == uid):
+                    # don't leak data
+                    return FriendRequest.objects.none()
+                from django.contrib.auth import get_user_model
+                UserModel = get_user_model()
+                target_user = UserModel.objects.filter(pk=uid).first()
+                if not target_user:
+                    return FriendRequest.objects.none()
+            except Exception:
+                return FriendRequest.objects.none()
+        else:
+            target_user = request_user
+
         if direction == "outgoing":
-            return FriendRequest.objects.filter(from_user=user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
-        return FriendRequest.objects.filter(to_user=user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
+            return FriendRequest.objects.filter(from_user=target_user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
+        return FriendRequest.objects.filter(to_user=target_user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
 
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
