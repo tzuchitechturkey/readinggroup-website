@@ -13,7 +13,7 @@ import {
 } from "@/api/videos";
 
 function VideosPageContent() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [topMixVideos, setTopMixVideos] = useState([]);
   const [myListedVideos, setMyListedVideos] = useState([]);
   const [likedVideos, setLikedVideos] = useState([]);
@@ -67,7 +67,7 @@ function VideosPageContent() {
         {myListedVideos?.length > 0 && (
           <div className="my-3">
             <DynamicSection
-              title="My LIST"
+              title={t("My List")}
               titleClassName="text-[30px] font-medium mb-2"
               data={myListedVideos}
               isSlider={false}
@@ -81,7 +81,7 @@ function VideosPageContent() {
         {/* Start Full Video */}
         <div className="my-3">
           <DynamicSection
-            title="Full Video"
+            title={t("Full Video")}
             titleClassName="text-[30px] font-medium mb-2"
             data={topMixVideos?.top_5_full}
             isSlider={false}
@@ -93,7 +93,7 @@ function VideosPageContent() {
         {/* Start Unit  Video */}
         <div className="my-3  pb-4">
           <DynamicSection
-            title="Unit  Video"
+            title={t("Unit Video")}
             titleClassName="text-[30px] font-medium mb-2"
             data={topMixVideos?.top_5_unit}
             isSlider={false}

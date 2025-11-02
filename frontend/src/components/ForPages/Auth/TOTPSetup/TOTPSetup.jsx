@@ -13,7 +13,10 @@ import qrFakeImg from "../../../../assets/qr_fake.png";
 import enterTotpImg from "../../../../assets/enter-tottp-code.png";
 
 const TOTPSetup = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = Boolean(i18n && /^ar(\b|-)/i.test(i18n.language || ""));
+
+  // set document title (include site name as translatable in future)
   document.title = t("Setup Authenticator") + " | Charity Portal";
 
   const QR_URL =
@@ -286,11 +289,15 @@ const TOTPSetup = () => {
       <style>{CUSTOM_STYLES}</style>
 
       <div
-        className="min-h-screen flex items-center animate-fade-in-up relative overflow-hidden"
+        dir={isRTL ? "rtl" : "ltr"}
+        className={`min-h-screen flex items-center animate-fade-in-up relative overflow-hidden ${
+          isRTL ? "rtl" : "ltr"
+        }`}
         style={{
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           fontFamily:
             "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          direction: isRTL ? "rtl" : "ltr",
         }}
       >
         {/* Background Decorations */}
@@ -351,13 +358,8 @@ const TOTPSetup = () => {
                 }}
               />
             </div>
-            <h1
-              className="text-white font-bold mb-6 text-4xl"
-            >
-              <i
-                className="fas fa-shield-alt mr-3"
-                style={{ color: "#ffd700" }}
-              />
+            <h1 className="text-white font-bold mb-6 text-4xl">
+              <i className={`fas fa-shield-alt ${isRTL ? "ml-3" : "mr-3"}`} style={{ color: "#ffd700" }} />
               {t("Secure Your Account with Two-Factor Authentication")}
             </h1>
             <p
@@ -423,13 +425,13 @@ const TOTPSetup = () => {
                         </div>
 
                         {/* Step Label */}
-                        <div className="ml-4">
+                        <div className={isRTL ? "mr-4" : "ml-4"}>
                           {/* Progress Dots */}
                           <div className="flex mt-2">
                             {[1, 2, 3, 4, 5].map((dot) => (
                               <div
                                 key={dot}
-                                className="mr-1 w-2 h-2 rounded-full transition-all duration-300"
+                                className={`${isRTL ? "ml-1" : "mr-1"} w-2 h-2 rounded-full transition-all duration-300`}
                                 style={{
                                   background:
                                     dot <= step.step
@@ -447,6 +449,8 @@ const TOTPSetup = () => {
                           </div>
                         </div>
                       </div>
+
+          
 
                       {/* Step Status Icon */}
                       <div>
@@ -599,7 +603,15 @@ const TOTPSetup = () => {
           {/* Footer */}
           <div className="text-center mt-12">
             <p className="text-white/75 mb-0 text-base">
-              {t("ZeroWait - Crafted with love")} ❤️ {t("by TzuChi Turkiye")}
+              {isRTL ? (
+                <>
+                  {t("by TzuChi Turkiye")} ❤️ {t("Reading Project - Crafted with love")}
+                </>
+              ) : (
+                <>
+                  {t("Reading Project - Crafted with love")} ❤️ {t("by TzuChi Turkiye")}
+                </>
+              )}
             </p>
           </div>
         </div>
