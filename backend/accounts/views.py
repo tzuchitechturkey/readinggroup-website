@@ -268,7 +268,7 @@ class RegisterView(generics.CreateAPIView):
 
         # Inform the client that email confirmation is required
         return Response({
-            "detail": "تم إنشاء الحساب بنجاح. يرجى تأكيد حسابك عبر الرابط المرسل إلى بريدك الإلكتروني.",
+            "detail": "User registered successfully. Please confirm your email to activate your account.",
             "needs_confirmation": True,
         }, status=status.HTTP_201_CREATED)
 
