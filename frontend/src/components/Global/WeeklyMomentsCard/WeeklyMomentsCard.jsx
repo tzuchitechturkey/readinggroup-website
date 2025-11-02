@@ -57,14 +57,16 @@ function WeeklyMomentsCard({ item }) {
         <div className="flex justify-between gap-10 text-xs px-4">
           <div className="text-left ">
             <div className="text-primary text-start font-semibold mb-[6px]">
-              Type
+              {t("Type")}
             </div>
-            <div className="text-text ">{item?.post_type}</div>
+            <div className="text-text ">{t(item?.post_type)}</div>
           </div>
 
           <div className="text-left ">
-            <div className="text-primary font-semibold mb-[6px]">Language</div>
-            <div className="text-text">{item?.language}</div>
+            <div className="text-primary font-semibold mb-[6px]">
+              {t("Language")}
+            </div>
+            <div className="text-text">{t(item?.language)}</div>
           </div>
         </div>
         {/* End Type, Source, Language */}

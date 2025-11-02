@@ -29,7 +29,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
         <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg h-full">
           <div
             className={` relative ${
-               bigCart ? "h-[360px]" : "h-[240px]"
+              bigCart ? "h-[360px]" : "h-[240px]"
             }  flex-shrink-0`}
           >
             {/* Start Image */}

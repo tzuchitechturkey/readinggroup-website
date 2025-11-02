@@ -27,7 +27,7 @@ const WeeklyMoments = () => {
         title={t("This Weekly Moments")}
         data={weeklyMomentData}
         cardName={WeeklyMomentsCard}
-        isSlider={true} // ✅ تأكيد أنه carousel وليس grid
+        isSlider={true}
       />
     </div>
   );

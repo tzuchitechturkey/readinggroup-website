@@ -71,8 +71,8 @@ function EventsFilter({
             selected={Array.isArray(filters.section) ? filters.section : []}
             onChange={(selected) => updateFilter("section", selected)}
             placeholder={t("Select Sections")}
-            renderLabel={(item) => item?.name || item}
-            renderValue={(item) => item?.name || item}
+            renderLabel={(item) => t(item?.name) || item}
+            renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
         </div>
@@ -93,7 +93,7 @@ function EventsFilter({
             onChange={(selected) => updateFilter("report_type", selected)}
             placeholder={t("Select Type")}
             renderLabel={(item) => t(item?.name)}
-            renderValue={(item) => item?.name}
+            renderValue={(item) => t(item?.name)}
             searchable={true}
           />
         </div>
@@ -110,8 +110,8 @@ function EventsFilter({
             selected={Array.isArray(filters.category) ? filters.category : []}
             onChange={(selected) => updateFilter("category", selected)}
             placeholder={t("Select Category")}
-            renderLabel={(item) => item?.name || item}
-            renderValue={(item) => item?.name || item}
+            renderLabel={(item) => t(item?.name) || item}
+            renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
         </div>
@@ -159,8 +159,8 @@ function EventsFilter({
             selected={Array.isArray(filters.country) ? filters.country : []}
             onChange={(selected) => updateFilter("country", selected)}
             placeholder={t("Select Country")}
-            renderLabel={(item) => item?.name || item}
-            renderValue={(item) => item?.name || item}
+            renderLabel={(item) => t(item?.name) || item}
+            renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
         </div>
@@ -179,7 +179,7 @@ function EventsFilter({
             onChange={(selected) => updateFilter("language", selected)}
             placeholder={t("Select Language")}
             renderLabel={(item) => t(item)}
-            renderValue={(item) => item}
+            renderValue={(item) => t(item)}
             searchable={true}
           />
         </div>

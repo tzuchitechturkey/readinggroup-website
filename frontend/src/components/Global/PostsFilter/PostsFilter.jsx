@@ -323,7 +323,7 @@ function PostsFilter({
                       }
                       placeholder={t("Category")}
                       renderLabel={(item) => t(item?.name || item)}
-                      renderValue={(item) => item?.name || item}
+                      renderValue={(item) => t(item?.name) || item}
                       searchable={true}
                     />
                     {/* End Category */}
@@ -337,7 +337,7 @@ function PostsFilter({
                       }
                       placeholder={t("Language")}
                       renderLabel={(item) => t(item)}
-                      renderValue={(item) => item}
+                      renderValue={(item) => t(item)}
                       searchable={true}
                     />
                     {/* End Language */}
@@ -355,7 +355,7 @@ function PostsFilter({
                         onChange={(selected) => updateFilter("type", selected)}
                         placeholder={t("Type")}
                         renderLabel={(item) => t(item?.name || item)}
-                        renderValue={(item) => item?.name || item}
+                        renderValue={(item) => t(item?.name) || item}
                         searchable={true}
                       />
                     )}

@@ -77,19 +77,19 @@ function TopFiveSectionCard({ item, index }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
 
           <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white/10 to-transparent" />
-          <div className="absolute top-2 left-2 ">
+          <div className={`absolute bottom-2 left-2 `}>
             <h3 className="font-bold text-lg md:text-xl line-clamp-2 leading-tight mb-2 text-white">
               {item?.title}
             </h3>
           </div>
           {/* Start Content */}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="absolute bottom-7 left-0 right-0 p-4">
             <div className="text-white">
-              {item?.category?.id && (
+              {/* {item?.category?.id && (
                 <div className="text-xs font-medium text-gray-300 mb-1 uppercase tracking-wide opacity-80">
                   {item?.category?.name}
                 </div>
-              )}
+              )} */}
 
               <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed opacity-90">
                 {item?.language}

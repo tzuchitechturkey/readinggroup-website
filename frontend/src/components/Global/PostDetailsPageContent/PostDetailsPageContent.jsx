@@ -89,7 +89,6 @@ function PostDetailsPageContent() {
   const handleStarRating = async (rating) => {
     try {
       await RatingPosts(cardData.id, { rating });
-      toast.success(t("Rating submitted successfully"));
       setUpdate(!update);
     } catch (error) {
       setErrorFn(error, t);

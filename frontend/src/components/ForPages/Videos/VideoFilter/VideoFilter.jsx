@@ -136,7 +136,7 @@ function VideoFilter({
             onChange={(selected) => setIndexCategory(selected)}
             placeholder={t("Select Category")}
             renderLabel={(item) => t(item?.name || item)}
-            renderValue={(item) => item?.name || item}
+            renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
         </div>
@@ -156,7 +156,7 @@ function VideoFilter({
             onChange={(selected) => setLanguageContent(selected)}
             placeholder={t("Select Language")}
             renderLabel={(item) => t(item?.name || item)}
-            renderValue={(item) => item?.name || item}
+            renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
         </div>
