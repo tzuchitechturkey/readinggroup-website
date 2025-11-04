@@ -357,6 +357,17 @@ class HistoryEntry(LikableMixin, TimestampedModel):
         return f"{self.title} ({self.story_date} - present)"
     
 
+class SocialMedia(TimestampedModel):
+    """Social media links for content."""
+    platform = models.CharField(max_length=100)
+    url = models.URLField(max_length=1000)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"{self.platform}: {self.url}"
+
 #Category for Posts
 class PostCategory(TimestampedModel):
     """Categories for organizing posts."""

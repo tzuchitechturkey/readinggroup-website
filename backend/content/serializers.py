@@ -25,6 +25,7 @@ from .models import (
     Like,
     SeasonTitle,
     SeasonId,
+    SocialMedia,
 )
 
 def _resolve_target_user(obj):
@@ -535,3 +536,9 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             data["user"] = None
         return data
+    
+class SocialMediaSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = SocialMedia
+        fields = "__all__"

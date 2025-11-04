@@ -30,6 +30,7 @@ from .models import (
     MyListEntry,
     SeasonTitle,
     SeasonId,
+    SocialMedia,
 )
 from .enums import VideoType, PostType
 from .serializers import (
@@ -49,6 +50,7 @@ from .serializers import (
     LikeSerializer,
     SeasonTitleSerializer,
     SeasonIdSerializer,
+    SocialMediaSerializer,
 )
 from .models import PostRating
 
@@ -1225,4 +1227,9 @@ class TopStatsViewSet(viewsets.ViewSet):
         top_liked_payload["top_posts"] = top_posts_data
         return Response({"top_liked": top_liked_payload})
 
-    
+class SocialMediaViewSet(BaseContentViewSet):
+    """ViewSet for managing SocialMedia content."""
+    queryset = SocialMedia.objects.all()
+    serializer_class = SocialMediaSerializer
+    search_fields = ("platform", "url", "description")
+    ordering_fields = ("created_at", "platform")

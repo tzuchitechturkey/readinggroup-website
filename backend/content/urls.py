@@ -18,6 +18,7 @@ from .views import (
     SeasonTitleViewSet,
     LikeViewSet,
     SeasonIdViewSet,
+    SocialMediaViewSet,
 )
 
 app_name = "content"
@@ -41,4 +42,5 @@ router.register(r"top-stats", TopStatsViewSet, basename="top-stats")
 router.register(r"season-titles", SeasonTitleViewSet, basename="season-title")
 router.register(r"likes", LikeViewSet, basename="like")
 router.register(r"season-ids", SeasonIdViewSet, basename="season-id")
+router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 urlpatterns = router.urls
