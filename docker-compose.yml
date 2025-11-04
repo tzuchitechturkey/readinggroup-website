@@ -5,28 +5,25 @@ services:
     build:
       context: ./backend
     image: readinggroup-backend:latest
-    command: gunicorn readinggroup_backend.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn readinggroup_backend.wsgi:application --bind 0.0.0.0:8001
     entrypoint: ["./entrypoint.sh"]
     volumes:
-      - backend_media:/app/media
-      - backend_static:/app/staticfiles
+      - ./backend/media:/app/media
+      - ./backend/staticfiles:/app/staticfiles
     environment:
       DJANGO_DEBUG: "false"
       DJANGO_ALLOWED_HOSTS: "backend,localhost,127.0.0.1"
       DJANGO_SECRET_KEY: "change-me"
       DJANGO_TIME_ZONE: "UTC"
     ports:
-      - "8000:8000"
+      - "8001:8001"
 
   frontend:
     build:
       context: ./frontend
     image: readinggroup-frontend:latest
     ports:
-      - "3000:80"
+      - "3001:80"
     depends_on:
       - backend
 
-volumes:
-  backend_media:
-  backend_static:
