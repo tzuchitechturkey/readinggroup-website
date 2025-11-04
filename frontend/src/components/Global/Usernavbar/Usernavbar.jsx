@@ -231,15 +231,23 @@ function Usernavbar() {
                 <li key={idx} className="relative group">
                   {item.hasDropdown ? (
                     <>
-                      <Link
+                      <NavLink
                         to={item.href}
                         onClick={(e) => {
                           if (item.href === "/about") {
                             localStorage.removeItem("aboutUsMainTab");
                           }
-                          item.scrollToId && handleNavClick(e, item);
+                          if (item.scrollToId) {
+                            handleNavClick(e, item);
+                          }
                         }}
-                        className="hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex items-center text-gray-700"
+                        className={({ isActive }) =>
+                          `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex items-center ${
+                            isActive
+                              ? "border-b-2 border-primary text-primary"
+                              : "text-gray-700"
+                          }`
+                        }
                       >
                         {item.name}
                         <svg
@@ -255,7 +263,7 @@ function Usernavbar() {
                             d="M19 9l-7 7-7-7"
                           />
                         </svg>
-                      </Link>
+                      </NavLink>
                       {/* Dropdown Menu */}
                       <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <div className="min-w-[240px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">

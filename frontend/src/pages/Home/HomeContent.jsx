@@ -41,7 +41,9 @@ export default function HomeContent() {
   useEffect(() => {
     getSliderData();
     getTop1Data();
+    localStorage.removeItem("redirectAfterLogin");
   }, []);
+
   return (
     <div dir={direction} className="min-h-screen">
       {/* Start Hero Slider */}
