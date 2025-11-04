@@ -88,12 +88,14 @@ function UserIcons() {
       {isLoggedIn ? (
         <UserProfileDropdown />
       ) : (
-        <Link
-          to="/auth/login"
+        <button
+          onClick={() => {
+            navigate("/auth/login");
+          }}
           className="p-1 px-3 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
         >
           {t("Login")}
-        </Link>
+        </button>
       )}
       {isLoggedIn && userType === "admin" && (
         <div

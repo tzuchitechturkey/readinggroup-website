@@ -10,8 +10,8 @@ const NonAuthLayout = ({ children }) => {
   };
 
   useEffect(() => {
-    const currentage = capitalizeFirstLetter(location.pathname);
-    document.title = `${currentage} | Reading`;
+    // const currentage = capitalizeFirstLetter(location.pathname);
+    document.title = `Reading group`;
   }, [location.pathname]);
 
   return <>{children}</>;

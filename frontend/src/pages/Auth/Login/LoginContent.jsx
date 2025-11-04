@@ -23,6 +23,7 @@ function LoginContent() {
     }
     return <Navigate to="/" replace={true} />;
   }
+
   return (
     <div
       className="w-full flex flex-col items-center justify-center pt-10 relative border-0 outline-none min-h-screen"
@@ -42,8 +43,5 @@ function LoginContent() {
     </div>
   );
 }
-
-
-
 
 export default LoginContent;
