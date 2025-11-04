@@ -8,6 +8,7 @@ import { CreateTeam, EditTeamById, GetPositions } from "@/api/aboutUs";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import { socialPlatforms } from "@/constants/constants";
+import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
 
 const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
@@ -81,22 +82,30 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Store the file object for upload
-      setFormData((prev) => ({
-        ...prev,
-        avatar: file,
-        avatar_url: "", // Clear URL when file is selected
-      }));
+      try {
+        // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
+        const { file: processedFile } = await processImageFile(file);
 
-      // Clear avatar error if exists
-      if (errors.avatar) {
-        setErrors((prev) => ({
+        // Store the file object for upload
+        setFormData((prev) => ({
           ...prev,
-          avatar: "",
+          avatar: processedFile,
+          avatar_url: "", // Clear URL when file is selected
         }));
+
+        // Clear avatar error if exists
+        if (errors.avatar) {
+          setErrors((prev) => ({
+            ...prev,
+            avatar: "",
+          }));
+        }
+      } catch (error) {
+        console.error("Error processing image:", error);
+        toast.error(t("Failed to process image"));
       }
     }
   };
@@ -419,7 +428,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           <input
             type="file"
             name="avatar"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             onChange={handleFileChange}
             className={`w-full p-3 border rounded-lg outline-none ${
               errors.avatar ? "border-red-500" : "border-gray-300"

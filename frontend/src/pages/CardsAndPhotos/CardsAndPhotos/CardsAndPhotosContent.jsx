@@ -1,9 +1,8 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
-import { readings } from "@/mock/reading";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
 import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
 import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
@@ -12,6 +11,8 @@ import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilter
 
 function CardsAndPhotosContent() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const activeTabFromNav = location.state?.activeTab;
 
   return (
     <div
@@ -40,7 +41,9 @@ function CardsAndPhotosContent() {
         </div>
 
         {/* Start Tabs */}
-        <CardsAndPhotosTabs />
+        <div id="cards-tabs-section">
+          <CardsAndPhotosTabs initialTab={activeTabFromNav} />
+        </div>
         {/* End Tabs */}
 
         {/* Start Weekly Moments */}

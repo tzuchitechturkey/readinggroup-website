@@ -3,59 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaTwitter,
-  FaLinkedinIn,
-  FaYoutube,
-  FaTiktok,
-  FaSnapchatGhost,
-  FaWhatsapp,
-  FaTelegramPlane,
-  FaDiscord,
-  FaGithub,
-  FaBehance,
-  FaDribbble,
-  FaPinterestP,
-} from "react-icons/fa";
 
+import { socialMediaIcons, socialColors } from "@/constants/constants";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetTeamById } from "@/api/aboutUs";
-
-// خريطة أيقونات وسائل التواصل الاجتماعي
-const socialMediaIcons = {
-  facebook: FaFacebookF,
-  instagram: FaInstagram,
-  twitter: FaTwitter,
-  linkedin: FaLinkedinIn,
-  youtube: FaYoutube,
-  tiktok: FaTiktok,
-  snapchat: FaSnapchatGhost,
-  whatsapp: FaWhatsapp,
-  telegram: FaTelegramPlane,
-  discord: FaDiscord,
-  github: FaGithub,
-  behance: FaBehance,
-  dribbble: FaDribbble,
-  pinterest: FaPinterestP,
-};
-const socialColors = {
-  facebook: "#4267B2",
-  instagram: "#E1306C",
-  twitter: "#1DA1F2",
-  linkedin: "#0077B5",
-  youtube: "#FF0000",
-  tiktok: "#000000",
-  snapchat: "#FFFC00",
-  whatsapp: "#25D366",
-  telegram: "#0088cc",
-  discord: "#5865F2",
-  github: "#171515",
-  behance: "#1769ff",
-  dribbble: "#ea4c89",
-  pinterest: "#E60023",
-};
 
 function MemberContent() {
   const { i18n, t } = useTranslation();
@@ -77,10 +28,7 @@ function MemberContent() {
   };
 
   const handleGoBack = () => {
-    // تعيين التاب الرئيسي إلى "our_team"
     localStorage.setItem("aboutUsMainTab", "our_team");
-    // التاب الفرعي للفريق محفوظ بالفعل في "teamActiveTab"
-    // العودة إلى صفحة About Us
     navigate("/about");
   };
 

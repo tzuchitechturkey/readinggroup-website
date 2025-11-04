@@ -40,11 +40,30 @@ function GuidedReadingPageContent() {
       {/* Main Content Container */}
       <div className="max-w-7xl mx-auto">
         {/* Guided Reading */}
-        <section className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+        <section
+          id="week-topic-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
           <GuidedReading />
         </section>
+
         {/* Weekly Moments */}
-        <section className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+        <section
+          id="week-moments-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <WeeklyMoments />
+        </section>
+        <section
+          id="week-health-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <WeeklyMoments />
+        </section>
+        <section
+          id="week-other-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
           <WeeklyMoments />
         </section>
       </div>

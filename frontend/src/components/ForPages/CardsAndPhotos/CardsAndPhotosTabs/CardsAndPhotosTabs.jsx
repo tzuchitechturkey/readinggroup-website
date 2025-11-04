@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -14,7 +15,7 @@ import {
   WeeklyCardPhotoPosts,
 } from "@/api/posts";
 
-function CardsAndPhotosTabs() {
+function CardsAndPhotosTabs({ initialTab }) {
   const isMobile = useIsMobile(1024);
   const { t, i18n } = useTranslation();
 
@@ -25,7 +26,9 @@ function CardsAndPhotosTabs() {
     "Weekly Posts",
   ];
 
-  const [activeTab, setActiveTab] = useState("Suggested for you");
+  const [activeTab, setActiveTab] = useState(
+    initialTab || "Suggested for you"
+  );
   const [loading, setLoading] = useState(false);
   const [tabData, setTabData] = useState({
     "Suggested for you": [],
@@ -49,7 +52,6 @@ function CardsAndPhotosTabs() {
       const apiFunction = tabApiFunctions[tabName];
       if (apiFunction) {
         const response = await apiFunction();
-        console.log(`Data for ${tabName}:`, response);
         setTabData((prev) => ({
           ...prev,
           [tabName]: response?.data?.card_photo || response?.data,
@@ -77,17 +79,28 @@ function CardsAndPhotosTabs() {
 
   useEffect(() => {
     // Fetch data for the first tab on component mount
-    fetchTabData("Suggested for you");
+    const firstTab = initialTab || "Suggested for you";
+    fetchTabData(firstTab);
     // Also fetch data for "Needlework Love" tab which is used in the featured section
     fetchTabData("Needlework Love");
   }, []);
+
+  // Update active tab when initialTab changes from navigation
+  useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+      if (!tabData[initialTab] || tabData[initialTab].length === 0) {
+        fetchTabData(initialTab);
+      }
+    }
+  }, [initialTab]);
   return (
     <div
       className="border-b-[1px] md:border-0 mb-2 pb-2 md:mb-2 md:pb-2 border-gray-200"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       <Tabs
-        defaultValue="Suggested for you"
+        value={activeTab}
         className="w-full"
         onValueChange={handleTabChange}
       >
@@ -225,5 +238,9 @@ function CardsAndPhotosTabs() {
     </div>
   );
 }
+
+CardsAndPhotosTabs.propTypes = {
+  initialTab: PropTypes.string,
+};
 
 export default CardsAndPhotosTabs;

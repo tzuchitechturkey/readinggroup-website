@@ -122,7 +122,6 @@ function DashboardTable({ data, onSectionChange }) {
     return items;
   }, [data, t]);
 
-  console.log("DashboardTable data:", data);
   // Sort function
   const sortData = (key) => {
     let direction = "asc";

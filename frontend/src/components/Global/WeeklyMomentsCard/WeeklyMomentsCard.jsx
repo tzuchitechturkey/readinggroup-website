@@ -22,7 +22,7 @@ function WeeklyMomentsCard({ item }) {
         <img
           src={item?.image || item?.image_url}
           alt={item?.title}
-          className="w-full   h-[250px] object-cover shadow-2xl"
+          className="w-full h-[250px] object-cover shadow-2xl"
           style={{
             filter:
               "drop-shadow(0 10px 25px rgba(255, 255, 255, 0.1)) drop-shadow(0 4px 15px rgba(255, 255, 255, 0.08))",

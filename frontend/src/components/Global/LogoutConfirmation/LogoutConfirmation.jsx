@@ -18,6 +18,7 @@ function LogoutConfirmation({ onCancel }) {
     localStorage.removeItem("dashboardSelectedPost");
     localStorage.removeItem("dashboardSelectedVideo");
     localStorage.removeItem("dashboardSelectedNews");
+    localStorage.removeItem("userType");
 
     toast.success(t("You have been logged out successfully."));
 

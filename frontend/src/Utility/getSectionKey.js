@@ -22,13 +22,12 @@ export const getSectionKey = (title) => {
     "Add/Edit Event": "createOrEditEvent",
     "Events Categories": "eventsCategories",
     "Events Sections": "eventsSections",
-    Settings: "settings",
+    "Profile Settings": "profileSettings",
     profile: "profile",
+    "Social Media": "socialMedia",
+    "Sort Section": "sortSection",
     team: "team",
     positions: "positions",
-    Refunds: "refunds",
-    Declines: "declines",
-    Payouts: "payouts",
   };
   return titleMap[title] || title.toLowerCase();
 };

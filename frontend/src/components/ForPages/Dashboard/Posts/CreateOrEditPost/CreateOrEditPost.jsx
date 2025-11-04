@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
 import {
   CreatePost,
   EditPostById,
@@ -393,6 +394,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   return (
     <div
       className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto"
@@ -453,17 +455,26 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             <div>
               <input
                 type="file"
-                accept="image/*"
-                onChange={(e) => {
+                accept="image/*,.heic,.heif"
+                onChange={async (e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    const url = URL.createObjectURL(file);
-                    setImageFile(file);
-                    setFormData((prev) => ({ ...prev, image: url }));
+                    try {
+                     
 
-                    // Clear error when uploading
-                    if (errors.image) {
-                      setErrors((prev) => ({ ...prev, image: "" }));
+                      // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
+                      const { file: processedFile, url } = await processImageFile(file);
+
+                      setImageFile(processedFile);
+                      setFormData((prev) => ({ ...prev, image: url }));
+
+                      // Clear error when uploading
+                      if (errors.image) {
+                        setErrors((prev) => ({ ...prev, image: "" }));
+                      }
+                    } catch (error) {
+                      console.error("Error processing image:", error);
+                      toast.error(t("Failed to process image"));
                     }
                   }
                 }}

@@ -1,4 +1,4 @@
-import Dashboard from "@/pages/Dashboard/DashbboardContnt";
+import Dashboard from "@/pages/Dashboard/DashboardContent";
 import Login from "@/pages/Auth/Login/LoginContent";
 import Register from "@/pages/Auth/Register/RegisterContent";
 import Home from "@/pages/Home/HomeContent";

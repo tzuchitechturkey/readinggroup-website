@@ -31,6 +31,8 @@ import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/Events
 import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
 import EventCategoriesContent from "@/components/ForPages/Dashboard/Events/EventsCategories/EventCategoriesContent";
 import EventSectionsContent from "@/components/ForPages/Dashboard/Events/EventsSections/EventSectionsContent";
+import SocialMediaContent from "@/components/ForPages/Dashboard/SocialMedya/SocialMediaContent";
+import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -166,8 +168,10 @@ export default function Page() {
         history: "About Us",
         team: "About Us",
         positions: "About Us",
-        settings: "Settings",
+        profileSettings: "Settings",
         profile: "Settings",
+        socialMedia: "Settings",
+        sortSection: "Settings",
       };
       autoParent = parentMap[section] || null;
     }
@@ -179,10 +183,14 @@ export default function Page() {
     switch (activeSection) {
       case "home":
         return <DashboardSections onSectionChange={handleSectionChange} />;
-      case "settings":
+      case "profileSettings":
         return <SettingsContent />;
       case "profile":
         return <ProfileContent />;
+      case "socialMedia":
+        return <SocialMediaContent />;
+      case "sortSection":
+        return <SortSectionContent />;
 
       case "cards":
         return <CardsList onSectionChange={handleSectionChange} />;
@@ -254,9 +262,9 @@ export default function Page() {
 
   useEffect(() => {
     const user = localStorage.getItem("userType");
-    if (user !== "admin") {
+    if (!user || user !== "admin") {
       window.location.href = "/";
-    }
+    }  
   }, []);
   return (
     <div dir={direction} className="min-h-screen">

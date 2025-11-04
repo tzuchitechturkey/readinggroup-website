@@ -25,7 +25,6 @@ import {
 import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
-import Help from "@/assets/icons/Help.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
@@ -45,18 +44,9 @@ export default function AppSidebar({
     setOpenLogoutModal(true);
   };
 
-  const handleHelp = () => {
-    // Help functionality to be implemented
-  };
-
   // This is sample data.
   const data = {
     footer: [
-      // {
-      //   title: "Help",
-      //   icon: Help,
-      //   onClick: handleHelp,
-      // },
       {
         title: "Logout Account",
         icon: LogOut,
@@ -164,12 +154,16 @@ export default function AppSidebar({
         icon: Settings,
         items: [
           {
-            title: "Settings",
-            onClick: "#",
+            title: "Sort Section",
+            onClick: () => onSectionChange("sortSection"),
           },
           {
-            title: "Profile",
-            onClick: "#",
+            title: "Social Media",
+            onClick: () => onSectionChange("socialMedia"),
+          },
+          {
+            title: "Profile Settings",
+            onClick: () => onSectionChange("settings"),
           },
         ],
       },

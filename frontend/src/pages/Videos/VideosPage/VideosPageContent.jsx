@@ -79,7 +79,7 @@ function VideosPageContent() {
         )}
         {/* End My LIST */}
         {/* Start Full Video */}
-        <div className="my-3">
+        <div className="my-3" id="full-videos">
           <DynamicSection
             title={t("Full Video")}
             titleClassName="text-[30px] font-medium mb-2"
@@ -91,7 +91,7 @@ function VideosPageContent() {
         </div>
         {/* End Full Video */}
         {/* Start Unit  Video */}
-        <div className="my-3  pb-4">
+        <div className="my-3  pb-4" id="unit-videos">
           <DynamicSection
             title={t("Unit Video")}
             titleClassName="text-[30px] font-medium mb-2"

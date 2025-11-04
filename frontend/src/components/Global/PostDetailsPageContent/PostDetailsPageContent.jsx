@@ -118,6 +118,7 @@ function PostDetailsPageContent() {
     getCardData();
     getTopCommentedPosts();
   }, [paramId, update]);
+  console.log(cardData, "ddddddd");
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -209,7 +210,7 @@ function PostDetailsPageContent() {
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: cardData?.iamge || cardData?.image_url,
+          image: cardData?.image || cardData?.image_url,
           title: cardData?.title,
           subtitle: cardData?.badge,
           writer: cardData?.writer,

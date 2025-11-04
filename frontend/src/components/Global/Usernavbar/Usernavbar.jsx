@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 import logo from "@/assets/logo.png";
@@ -10,8 +10,8 @@ import UserIcons from "../UserIcons/UserIcons";
 
 function Usernavbar() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const linkList = [
     { name: t("Home"), href: "/" },
     { name: t("Guided Reading"), href: "/guiding-reading" },
@@ -21,12 +21,148 @@ function Usernavbar() {
     { name: t("About Us"), href: "/about" },
   ];
 
+  // Navigation items with dropdowns
+  const navigationItems = [
+    {
+      name: t("Home"),
+      href: "/",
+      hasDropdown: false,
+    },
+    {
+      name: t("Guided Reading"),
+      href: "/guiding-reading",
+      hasDropdown: true,
+      subItems: [
+        {
+          name: t("Week's Topic"),
+          href: "/guiding-reading",
+          scrollToId: "week-topic-section",
+        },
+        {
+          name: t("Project Guide to Excellence"),
+          href: "/guiding-reading",
+          scrollToId: "week-moments-section",
+        },
+        {
+          name: t("Health"),
+          href: "/guiding-reading",
+          scrollToId: "week-health-section",
+        },
+        {
+          name: t("Others Sessions"),
+          href: "/guiding-reading",
+          scrollToId: "week-other-section",
+        },
+      ],
+    },
+    {
+      name: t("Videos"),
+      scrollToId: "",
+      href: "/videos",
+      hasDropdown: true,
+      subItems: [
+        { name: t("Unit Videos"), scrollToId: "unit-videos", href: "/videos" },
+        { name: t("Full Videos"), scrollToId: "full-videos", href: "/videos" },
+      ],
+    },
+    {
+      name: t("Cards & Photos"),
+      scrollToId: "",
+      href: "/cards-photos",
+      hasDropdown: true,
+      subItems: [
+        {
+          name: t("Good effects"),
+          tab: "Suggested for you",
+          scrollToId: "cards-tabs-section",
+          href: "/cards-photos",
+        },
+        {
+          name: t("Incentive Card"),
+          tab: "Incentive Cards",
+          scrollToId: "cards-tabs-section",
+          href: "/cards-photos",
+        },
+        {
+          name: t("Needlework connects love"),
+          tab: "Needlework Love",
+          scrollToId: "cards-tabs-section",
+          href: "/cards-photos",
+        },
+        {
+          name: t("Week's Photos"),
+          tab: "Weekly Posts",
+          scrollToId: "cards-tabs-section",
+          href: "/cards-photos",
+        },
+      ],
+    },
+    {
+      name: t("Events & Community"),
+      scrollToId: "",
+      href: "/events",
+      hasDropdown: true,
+      subItems: [
+        { name: t("News"), scrollToId: "", href: "/events" },
+        { name: t("DAAI TV"), scrollToId: "", href: "/events" },
+        { name: t("Community Area"), scrollToId: "", href: "/events" },
+      ],
+    },
+    {
+      name: t("About Us"),
+      scrollToId: "",
+      href: "/about",
+      hasDropdown: true,
+      subItems: [
+        {
+          name: t("History"),
+          tab: "history",
+          scrollToId: "about-tabs-section",
+          href: "/about",
+        },
+        {
+          name: t("Team Function"),
+          tab: "our_team",
+          scrollToId: "about-tabs-section",
+          href: "/about",
+        },
+        {
+          name: t("Special book for ten years"),
+          tab: "history",
+          scrollToId: "about-tabs-section",
+          href: "/about",
+        },
+      ],
+    },
+  ];
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleNavClick = (e, item) => {
+    e.preventDefault();
+
+    // Navigate to the page with tab parameter if exists
+    if (item.tab) {
+      navigate(item.href, { state: { activeTab: item.tab } });
+    } else {
+      navigate(item.href);
+    }
+
+    // Scroll to element after navigation
+    if (item.scrollToId) {
+      setTimeout(() => {
+        const el = document.getElementById(item.scrollToId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 300);
+    }
   };
 
   // إغلاق القائمة عند تغيير حجم الشاشة إلى أكبر من lg
@@ -90,21 +226,71 @@ function Usernavbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 mx-8">
-            <ul className="flex items-center ">
-              {linkList.map((link, idx) => (
-                <li key={idx}>
-                  <NavLink
-                    to={link.href}
-                    className={({ isActive }) =>
-                      `hover:text-primary pb-1 mx-4 transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-2 py-1 ${
-                        isActive
-                          ? "border-b-2 border-primary text-primary"
-                          : "text-gray-700 hover:text-primary"
-                      }`
-                    }
-                  >
-                    {link.name}
-                  </NavLink>
+            <ul className="flex items-center space-x-1">
+              {navigationItems.map((item, idx) => (
+                <li key={idx} className="relative group">
+                  {item.hasDropdown ? (
+                    <>
+                      <Link
+                        to={item.href}
+                        onClick={(e) => {
+                          if (item.href === "/about") {
+                            localStorage.removeItem("aboutUsMainTab");
+                          }
+                          item.scrollToId && handleNavClick(e, item);
+                        }}
+                        className="hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex items-center text-gray-700"
+                      >
+                        {item.name}
+                        <svg
+                          className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </Link>
+                      {/* Dropdown Menu */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div className="min-w-[240px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">
+                          <ul className="space-y-1">
+                            {item.subItems.map((subItem, subIdx) => (
+                              <li key={subIdx}>
+                                <Link
+                                  to={subItem.href}
+                                  onClick={(e) => handleNavClick(e, subItem)}
+                                  className="block px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200 group/item relative"
+                                >
+                                  <span className="flex items-center">
+                                    {subItem.name}
+                                  </span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <NavLink
+                      to={item.href}
+                      className={({ isActive }) =>
+                        `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
+                          isActive
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-gray-700 hover:text-primary"
+                        }`
+                      }
+                    >
+                      {item.name}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>

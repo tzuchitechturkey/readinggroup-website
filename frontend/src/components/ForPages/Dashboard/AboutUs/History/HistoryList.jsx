@@ -88,7 +88,6 @@ function HistoryList({ onSectionChange }) {
     getData(0);
   }, [update]);
 
-  console.log(historyData);
   return (
     <div
       className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
@@ -114,7 +113,7 @@ function HistoryList({ onSectionChange }) {
       {/* End Breadcrumb */}
 
       <div className="flex-1">
-        {/* Header */}
+        {/* Start Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
           <div>
             <h2 className="text-lg font-medium text-[#1D2630]">
@@ -140,7 +139,7 @@ function HistoryList({ onSectionChange }) {
             </button>
           </div>
         </div>
-
+        {/* End Header */}
         {/* Start Search */}
         <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
           <div className="relative max-w-md flex">

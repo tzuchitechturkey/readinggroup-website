@@ -7,6 +7,7 @@ import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
 import {
   CreateEvent,
   EditEventById,
@@ -268,32 +269,34 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   };
 
   // Handle file upload and preview
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
 
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        toast.error(t("Please select a valid image file"));
-        return;
-      }
+      try {
+     
+        // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
+        const { file: processedFile, url } = await processImageFile(file);
 
-      // Update form data with file
-      setFormData((prev) => ({
-        ...prev,
-        image: file,
-      }));
-
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-
-      // Clear image error if exists
-      if (errors.image) {
-        setErrors((prev) => ({
+        // Update form data with file
+        setFormData((prev) => ({
           ...prev,
-          image: "",
+          image: processedFile,
         }));
+
+        // Set preview URL
+        setImagePreview(url);
+
+        // Clear image error if exists
+        if (errors.image) {
+          setErrors((prev) => ({
+            ...prev,
+            image: "",
+          }));
+        }
+      } catch (error) {
+        console.error("Error processing image:", error);
+        toast.error(t("Failed to process image"));
       }
     }
   };
@@ -349,7 +352,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       }
     }
   };
-  console.log(formData);
 
   // Remove tag
   const removeTag = (tagToRemove) => {
@@ -611,7 +613,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             <div>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 onChange={handleFileChange}
                 className="hidden"
                 id="image-upload"

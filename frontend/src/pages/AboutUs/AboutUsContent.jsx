@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 import AboutTeamContent from "./Team/TeamContent";
 import AboutHistoryContent from "./History/HistoryContent";
 
 function AboutUsContent() {
   const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const tabFromNav = location.state?.activeTab;
+
   const [activeTab, setActiveTab] = useState(() => {
-    // استرجاع التاب الرئيسي المحفوظ من localStorage
+    // أولاً: تحقق من وجود تاب من الـ navigation
+    if (tabFromNav) {
+      return tabFromNav;
+    }
+    // ثانياً: استرجاع التاب الرئيسي المحفوظ من localStorage
     return localStorage.getItem("aboutUsMainTab") || "history";
   });
 
@@ -22,13 +30,20 @@ function AboutUsContent() {
     localStorage.setItem("aboutUsMainTab", activeTab);
   }, [activeTab]);
 
+  // Update active tab when navigation state changes
+  useEffect(() => {
+    if (tabFromNav && tabFromNav !== activeTab) {
+      setActiveTab(tabFromNav);
+    }
+  }, [tabFromNav]);
+
   return (
     <div
       className="max-w-7xl mx-auto p-6"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Start Tabs */}
-      <div className="mb-8">
+      <div className="mb-8" id="about-tabs-section">
         <div className="flex flex-wrap border-b border-gray-200">
           {tabs.map((tab) => (
             <button

@@ -27,6 +27,7 @@ import {
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages } from "@/constants/constants";
+import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
 import {
   Popover,
   PopoverContent,
@@ -490,7 +491,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Start Image Upload Section */}
         <div>
-            <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
             <p className="text-sm text-blue-800">
               <strong>{t("Important")}:</strong>{" "}
               {t(
@@ -522,18 +523,25 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             <div>
               <input
                 type="file"
-                accept="image/*"
-                // onChange={handleImageUpload}
-                onChange={(e) => {
+                accept="image/*,.heic,.heif"
+                onChange={async (e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    const url = URL.createObjectURL(file);
-                    setImagePreview(file); // Store the actual file
-                    setFormData((prev) => ({ ...prev, thumbnail: url }));
-                    setErrors((prev) => ({
-                      ...prev,
-                      thumbnail: "",
-                    }));
+                    try {
+                      // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
+                      const { file: processedFile, url } =
+                        await processImageFile(file);
+
+                      setImagePreview(processedFile);
+                      setFormData((prev) => ({ ...prev, thumbnail: url }));
+                      setErrors((prev) => ({
+                        ...prev,
+                        thumbnail: "",
+                      }));
+                    } catch (error) {
+                      console.error("Error processing image:", error);
+                      toast.error(t("Failed to process image"));
+                    }
                   }
                 }}
                 className="hidden"
