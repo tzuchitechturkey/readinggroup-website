@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-import { FaFacebookF, FaXTwitter, FaInstagram } from "react-icons/fa6";
 
+import { socialMediaIcons, socialColors } from "@/constants/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
+import { GetSocialLinks } from "@/api/social";
 
 function Footer({ authPages }) {
   // تحديد إذا كانت اللغة الحالية RTL
   const isMobile = useIsMobile(1224);
+  const [socialLinks, setSocialLinks] = useState([]);
 
   const { t, i18n } = useTranslation();
   const linkList = [
@@ -18,24 +20,18 @@ function Footer({ authPages }) {
     { name: t("Events & Community"), href: "/events" },
     { name: t("DA AI TV"), href: "/da-ai-tv" },
   ];
-  // dashboard Color : 999EAD
-  const socialLinks = [
-    {
-      name: "Facebook",
-      href: "https://www.facebook.com",
-      icon: FaFacebookF,
-    },
-    {
-      name: "Twitter",
-      href: "https://www.twitter.com",
-      icon: FaXTwitter,
-    },
-    {
-      name: "Instagram",
-      href: "https://www.instagram.com",
-      icon: FaInstagram,
-    },
-  ];
+  const fetchSocialLinks = async () => {
+    try {
+      const response = await GetSocialLinks(100, 0);
+      setSocialLinks(response.data?.results || []);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
+  };
+
+  useEffect(() => {
+    fetchSocialLinks();
+  }, [t]);
 
   return (
     <div
@@ -76,23 +72,20 @@ function Footer({ authPages }) {
         </ul>
         {/* Start Social Links and Language Dropdown */}
         <div className="flex items-center gap-3 sm:gap-4">
-          {socialLinks.map((link, index) => {
-            const Icon = link.icon;
+          {socialLinks?.map((link, index) => {
+            const platform = link.platform.toLowerCase();
+            const Icon = socialMediaIcons[platform];
+            if (!Icon) return null;
+
             return (
               <a
                 key={index}
-                href={link.href}
+                href={link.url}
                 className="text-white group"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon
-                  size={22}
-                  className={`${
-                    authPages ? "text-white" : "text-text"
-                  } transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5`}
-                  aria-label={link.name}
-                />
+                <Icon size={20} color={socialColors[platform]} />
               </a>
             );
           })}

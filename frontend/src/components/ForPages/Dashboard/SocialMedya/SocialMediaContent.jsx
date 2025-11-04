@@ -15,6 +15,7 @@ import {
   EditSocialLink,
   DeleteSocialLink,
 } from "@/api/social";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function SocialMediaContent() {
   const { t, i18n } = useTranslation();
@@ -33,8 +34,7 @@ function SocialMediaContent() {
         const response = await GetSocialLinks(100, 0);
         setSocialLinks(response.data?.results || []);
       } catch (error) {
-        toast.error(t("Failed to load social links"));
-        console.error("Error fetching social links:", error);
+        setErrorFn(error, t);
       } finally {
         setLoading(false);
       }
