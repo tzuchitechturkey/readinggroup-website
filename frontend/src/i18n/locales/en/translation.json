@@ -1185,5 +1185,10 @@
   "Sections reordered successfully": "Sections reordered successfully",
   "Drag sections to reorder them": "Drag sections to reorder them",
   "Converting HEIC image...": "Converting HEIC image...",
-  "Failed to process image": "Failed to process image"
+  "Failed to process image": "Failed to process image",
+  "video": "Video",
+  "post_reading": "Post Reading",
+  "post_card": "Post Card",
+  "post_photo": "Post Photo",
+  "event": "Event"
 }
