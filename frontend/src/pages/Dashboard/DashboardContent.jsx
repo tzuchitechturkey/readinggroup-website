@@ -263,9 +263,11 @@ export default function Page() {
   useEffect(() => {
     const user = localStorage.getItem("userType");
     if (!user || user !== "admin") {
-      window.location.href = "/";
-    }  
+      localStorage.setItem("redirectAfterLogin", "/dashboard");
+      window.location.href = "/auth/login";
+    }
   }, []);
+
   return (
     <div dir={direction} className="min-h-screen">
       <SidebarProvider>

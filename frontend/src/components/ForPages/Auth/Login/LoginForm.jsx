@@ -65,16 +65,43 @@ function LoginForm() {
     try {
       const { data } = await Login({ username: userName, password });
       setTokens({ access: data?.access, refresh: data?.refresh });
+
+      // حفظ بيانات المستخدم
+      if (data?.user) {
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("userImage", data.user.profile_image_url);
+        localStorage.setItem("username", data.user.display_name);
+
+        if (data.user.groups.includes("admin")) {
+          localStorage.setItem("userType", "admin");
+        } else {
+          localStorage.setItem("userType", data.user.groups[0]);
+        }
+      }
+
       toast.success(t("Login successful"));
+
       if (data?.user?.is_first_login) {
         setShowFirstLoginModal(true);
-      } else {
-        if (data?.requires_totp) {
-          setShowTOTPModal(true);
-          if (data?.show_qr) {
-            setQr(data?.qr);
-          }
+      } else if (data?.requires_totp) {
+        setShowTOTPModal(true);
+        if (data?.show_qr) {
+          setQr(data?.qr);
         }
+      } else {
+        const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
+
+        if (
+          data?.user?.groups.includes("admin") &&
+          redirectAfterLogin === "/dashboard"
+        ) {
+          navigate("/dashboard");
+        } else if (redirectAfterLogin && redirectAfterLogin !== "/dashboard") {
+          navigate(redirectAfterLogin);
+        } else {
+          navigate("/");
+        }
+        localStorage.removeItem("redirectAfterLogin");
       }
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -106,7 +133,6 @@ function LoginForm() {
       setIsLoading(true);
       try {
         const res = await Login({ username, password, totp });
-        console.log(res?.data);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         localStorage.setItem("userId", res?.data.user?.id);
         localStorage.setItem("userImage", res?.data.user?.profile_image_url);
@@ -119,7 +145,12 @@ function LoginForm() {
           localStorage.setItem("userType", res?.data.user?.groups[0]);
         }
 
-        navigate("/");
+        const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
+        if (redirectAfterLogin && res?.data.user?.groups.includes("admin")) {
+          navigate("/dashboard");
+        } else {
+          navigate("/");
+        }
 
         // }
       } catch (err) {
