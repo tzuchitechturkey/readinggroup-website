@@ -5,7 +5,7 @@ from .views import (
     ProfileView, 
     PublicProfileView,
     RegisterView,
-    ConfirmEmailView,
+    # ConfirmEmailView,
     ForgotPasswordView,
     ResetPasswordView,
     PasswordChangeView,
@@ -40,5 +40,5 @@ urlpatterns = [
     path("friend-requests/pending/", PendingFriendRequestsView.as_view(), name="friend-requests-pending"),
     # Allow fetching pending requests for a specific user via path param (shows as path param in Swagger)
     path("friend-requests/pending/<int:user_id>/", PendingFriendRequestsView.as_view(), name="friend-requests-pending-user"),
-    path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
+    # path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
 ]

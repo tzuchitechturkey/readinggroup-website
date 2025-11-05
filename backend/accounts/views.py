@@ -237,89 +237,93 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Deactivate the user until they confirm their email
-        try:
-            # Only set is_active if the field exists on the user model
-            if hasattr(user, 'is_active'):
-                user.is_active = False
-                user.save(update_fields=['is_active'])
-        except Exception:
-            # ignore if the model doesn't have is_active or save fails
-            pass
+        # NOTE: Email confirmation / deactivation flow is disabled.
+        # The following block previously deactivated the user until they
+        # confirmed their email; it has been commented out so registration
+        # completes without requiring email confirmation.
+        # try:
+        #     # Only set is_active if the field exists on the user model
+        #     if hasattr(user, 'is_active'):
+        #         user.is_active = False
+        #         user.save(update_fields=['is_active'])
+        # except Exception:
+        #     # ignore if the model doesn't have is_active or save fails
+        #     pass
 
-        # create a time-limited signed token and send confirmation email
-        try:
-            token = signing.dumps({"user_id": user.pk}, salt="email-confirm")
-            # build confirmation URL using request host if SITE_URL not configured
-            site_root = getattr(settings, 'SITE_URL', None) or f"{request.scheme}://{request.get_host()}"
-            confirm_url = f"{site_root.rstrip('/')}/api/v1/accounts/confirm-email/{token}/"
-            subject = "Confirm your account"
-            message = (
-                f"Hi {getattr(user, 'username', '')},\n\n"
-                "Please confirm your account by clicking the link below:\n\n"
-                f"{confirm_url}\n\n"
-                "If you didn't sign up, you can ignore this email.\n"
-            )
-            from django.core.mail import send_mail
-            send_mail(subject, message, getattr(settings, 'DEFAULT_FROM_EMAIL', None), [getattr(user, 'email', None)], fail_silently=True)
-        except Exception:
-            # don't block registration if email sending fails
-            pass
+        # NOTE: The email confirmation sending flow has been disabled.
+        # The code below previously generated a signed token and sent a
+        # confirmation email; it is intentionally commented out.
+        # try:
+        #     token = signing.dumps({"user_id": user.pk}, salt="email-confirm")
+        #     # build confirmation URL using request host if SITE_URL not configured
+        #     site_root = getattr(settings, 'SITE_URL', None) or f"{request.scheme}://{request.get_host()}"
+        #     confirm_url = f"{site_root.rstrip('/')}/api/v1/accounts/confirm-email/{token}/"
+        #     subject = "Confirm your account"
+        #     message = (
+        #         f"Hi {getattr(user, 'username', '')},\n\n"
+        #         "Please confirm your account by clicking the link below:\n\n"
+        #         f"{confirm_url}\n\n"
+        #         "If you didn't sign up, you can ignore this email.\n"
+        #     )
+        #     from django.core.mail import send_mail
+        #     send_mail(subject, message, getattr(settings, 'DEFAULT_FROM_EMAIL', None), [getattr(user, 'email', None)], fail_silently=True)
+        # except Exception:
+        #     # don't block registration if email sending fails
+        #     pass
 
-        # Inform the client that email confirmation is required
+        # Inform the client that registration succeeded (no email confirmation required)
         return Response({
-            "detail": "User registered successfully. Please confirm your email to activate your account.",
-            "needs_confirmation": True,
+            "detail": "User registered successfully.",
         }, status=status.HTTP_201_CREATED)
 
 
-class ConfirmEmailView(APIView):
-    """Activate a user account given a signed token sent by email.
+# class ConfirmEmailView(APIView):
+#     """Activate a user account given a signed token sent by email.
 
-    GET /api/v1/accounts/confirm-email/{token}/
-    """
-    permission_classes = [permissions.AllowAny]
+#     GET /api/v1/accounts/confirm-email/{token}/
+#     """
+#     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, token=None):
-        try:
-            data = signing.loads(token, salt="email-confirm", max_age=getattr(settings, 'EMAIL_CONFIRMATION_MAX_AGE', 60 * 60 * 24))
-        except SignatureExpired:
-            return Response({"detail": "Confirmation link expired."}, status=status.HTTP_400_BAD_REQUEST)
-        except BadSignature:
-            return Response({"detail": "Invalid confirmation token."}, status=status.HTTP_400_BAD_REQUEST)
+#     def get(self, request, token=None):
+#         try:
+#             data = signing.loads(token, salt="email-confirm", max_age=getattr(settings, 'EMAIL_CONFIRMATION_MAX_AGE', 60 * 60 * 24))
+#         except SignatureExpired:
+#             return Response({"detail": "Confirmation link expired."}, status=status.HTTP_400_BAD_REQUEST)
+#         except BadSignature:
+#             return Response({"detail": "Invalid confirmation token."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_id = data.get("user_id")
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        # Activate the user
-        if hasattr(user, 'is_active'):
-            user.is_active = True
-            user.save(update_fields=['is_active'])
+#         user_id = data.get("user_id")
+#         try:
+#             user = User.objects.get(pk=user_id)
+#         except User.DoesNotExist:
+#             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+#         # Activate the user
+#         if hasattr(user, 'is_active'):
+#             user.is_active = True
+#             user.save(update_fields=['is_active'])
 
-        # If the client expects HTML (clicked in a browser), return a small HTML page with Arabic confirmation
-        accepts = request.META.get('HTTP_ACCEPT', '')
-        if 'text/html' in accepts:
-            html = """
-            <!doctype html>
-            <html lang="ar">
-            <head>
-              <meta charset="utf-8" />
-              <meta name="viewport" content="width=device-width, initial-scale=1" />
-              <title>Confirm account</title>
-              <style>body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;direction: rtl; text-align: right; padding: 2rem;}</style>
-            </head>
-            <body>
-              <h1>Confirm account</h1>
-              <p>Your account has been confirmed. You can now log in.</p>
-            </body>
-            </html>
-            """
-            return HttpResponse(html, content_type='text/html; charset=utf-8')
+#         # If the client expects HTML (clicked in a browser), return a small HTML page with Arabic confirmation
+#         accepts = request.META.get('HTTP_ACCEPT', '')
+#         if 'text/html' in accepts:
+#             html = """
+#             <!doctype html>
+#             <html lang="ar">
+#             <head>
+#               <meta charset="utf-8" />
+#               <meta name="viewport" content="width=device-width, initial-scale=1" />
+#               <title>Confirm account</title>
+#               <style>body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;direction: rtl; text-align: right; padding: 2rem;}</style>
+#             </head>
+#             <body>
+#               <h1>Confirm account</h1>
+#               <p>Your account has been confirmed. You can now log in.</p>
+#             </body>
+#             </html>
+#             """
+#             return HttpResponse(html, content_type='text/html; charset=utf-8')
 
-        # Fallback: return a JSON response for API clients
-        return Response({"detail": "Email confirmed. You can now log in."}, status=status.HTTP_200_OK)
+#         # Fallback: return a JSON response for API clients
+#         return Response({"detail": "Email confirmed. You can now log in."}, status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):
@@ -361,8 +365,8 @@ class LoginView(APIView):
 
         user = User.objects.filter(username=username).first() or User.objects.filter(email=username).first()
         # if the account exists but is not active (email not confirmed), refuse login
-        if user and hasattr(user, 'is_active') and not user.is_active:
-            return Response({"detail": "Please confirm your account via the confirmation email."}, status=403)
+        # if user and hasattr(user, 'is_active') and not user.is_active:
+        #     return Response({"detail": "Please confirm your account via the confirmation email."}, status=403)
         if not user:
             return Response({"error": "Incorrect Username Or Password"}, status=400)
 
