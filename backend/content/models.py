@@ -338,7 +338,6 @@ class PostRating(TimestampedModel):
 
 class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
-
     title = models.CharField(max_length=255)
     start_time = models.CharField(max_length=32)
     status_label = models.CharField(max_length=32)

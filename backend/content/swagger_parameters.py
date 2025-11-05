@@ -148,3 +148,13 @@ team_member_manual_parameters = [
         type=openapi.TYPE_STRING
     ),
 ]
+
+
+global_search_manual_parameters = [
+    openapi.Parameter(
+        'q',
+        openapi.IN_QUERY,
+        description="Search term",
+        type=openapi.TYPE_STRING
+    ),
+]

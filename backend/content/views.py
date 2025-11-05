@@ -12,6 +12,7 @@ from .swagger_parameters import(
     post_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
+    global_search_manual_parameters
 )
 from .models import (
     Event,
@@ -1259,8 +1260,8 @@ class TopStatsViewSet(viewsets.ViewSet):
     def _persist_order_if_staff(self, request, order_by_key: Dict[str, int], all_keys: List[str]) -> None:
         """
         if the request user is staff, persist the given order_by_key into SectionOrder model.
-        يقوم أولًا بتخزين المفاتيح التي أعطاها الفرونت، ثم يكمل بقية المفاتيح غير المذكورة بمراتب لاحقة.
-        
+        order_by_key: {'video': 1, 'post_card': 2, ...}
+        all_keys: list of all possible keys to complete the order.        
         """
         user = getattr(request, "user", None)
         if not (user and user.is_authenticated and user.is_staff):
@@ -1382,6 +1383,67 @@ class TopStatsViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK,
         )
+
+class GlobalSearchViewSet(viewsets.ViewSet):
+    """
+    ViewSet for searching across multiple content models by title.
+    Query parameters:
+    - q: search term (required)
+    - limit: per-type result limit (optional, default is 5)
+    Returns a JSON object with keys:
+    - videos
+    - posts
+    - events
+    - weekly_moments
+    Each key contains a list of serialized objects.
+    """
+    @swagger_auto_schema(
+        description="Search across Videos, Posts, Events, and Weekly Moments by title.",
+        manual_parameters=global_search_manual_parameters 
+    )
+    def list(self, request):
+        search_term = request.query_params.get("q", "")
+        if not search_term:
+            return Response(
+                {"detail": "Query parameter 'q' is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            result_limit = int(request.query_params.get("limit", 5))
+        except ValueError:
+            result_limit = 5
+
+        def get_search_results(model, serializer_class):
+            """Helper function to perform search, annotation, and serialization."""
+            try:
+                queryset = annotate_likes_queryset(
+                    model.objects.filter(title__icontains=search_term),
+                    request
+                )
+                try:
+                    queryset = queryset.order_by("-annotated_likes_count", "-created_at")[:result_limit]
+                except Exception:
+                    queryset = queryset.order_by("-created_at")[:result_limit]
+
+                return serializer_class(queryset, many=True, context={"request": request}).data
+            except Exception:
+                return []
+
+        videos = get_search_results(Video, VideoSerializer)
+        posts = get_search_results(Post, PostSerializer)
+        events = get_search_results(Event, EventSerializer)
+        weekly_moments = get_search_results(WeeklyMoment, WeeklyMomentSerializer)
+
+        response_data = {
+            "videos": videos,
+            "posts": posts,
+            "events": events,
+            "weekly_moments": weekly_moments,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
 class InfoWebSiteViewSet(BaseContentViewSet):
     """ViewSet for managing InfoWebSite content."""
     queryset = InfoWebSite.objects.all()
