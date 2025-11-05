@@ -41,7 +41,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
                 item?.image_url
               }
               alt={item?.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full border border-red-900 object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
 

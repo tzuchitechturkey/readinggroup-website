@@ -184,13 +184,13 @@ export default function Page() {
       case "home":
         return <DashboardSections onSectionChange={handleSectionChange} />;
       case "profileSettings":
-        return <SettingsContent />;
+        return <SettingsContent onSectionChange={handleSectionChange} />;
       case "profile":
-        return <ProfileContent />;
+        return <ProfileContent onSectionChange={handleSectionChange} />;
       case "socialMedia":
-        return <SocialMediaContent />;
+        return <SocialMediaContent onSectionChange={handleSectionChange} />;
       case "sortSection":
-        return <SortSectionContent />;
+        return <SortSectionContent onSectionChange={handleSectionChange} />;
 
       case "cards":
         return <CardsList onSectionChange={handleSectionChange} />;

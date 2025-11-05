@@ -17,7 +17,7 @@ import {
 } from "@/api/social";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function SocialMediaContent() {
+function SocialMediaContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [socialLinks, setSocialLinks] = useState([]);
   const [loading, setLoading] = useState(false);

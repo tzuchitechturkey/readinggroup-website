@@ -142,6 +142,7 @@ export default function HomeContent() {
                     className="h-full w-full"
                     item={top1Data?.video}
                     VideoCard={true}
+                    bigCart={true}
                   />
                 </div>
               </div>
@@ -170,7 +171,7 @@ export default function HomeContent() {
               description={t(
                 "Watch this week's events and stay up-to-date on the most important happenings"
               )}
-              to="/videos/unit"
+              to="/events"
               ctaLabel={t("See more")}
             />
           </div>
@@ -179,7 +180,11 @@ export default function HomeContent() {
             <div className="relative w-full md:w-[560px]">
               <div className="relative z-10 -mr-3 md:-mr-0">
                 <div className="rounded-[24px] overflow-hidden h-[320px] md:h-[360px]">
-                  <VideoCard className="h-full w-full" item={top1Data?.event} />
+                  <VideoCard
+                    className="h-full w-full"
+                    item={top1Data?.event}
+                    bigCart={true}
+                  />
                 </div>
               </div>
             </div>

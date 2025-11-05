@@ -24,10 +24,11 @@ const DynamicSection = ({
   prevArrowClassname = "",
   nextArrowClassname = "",
   stopslider = false,
+  propsToCard = {},
 }) => {
   const { t, i18n } = useTranslation();
   const Card = cardName;
-
+  console.log("DynamicSection data:", title, propsToCard);
   // إذا لم يتم تمرير data، عرض رسالة
   if (!data || data.length === 0) {
     return (
@@ -109,7 +110,7 @@ const DynamicSection = ({
                       className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 overflow-visible"
                     >
                       {Card && typeof Card === "function" ? (
-                        <Card item={item} index={ind} />
+                        <Card item={item} index={ind} {...propsToCard} />
                       ) : (
                         // Default Card - تصميم افتراضي إذا لم يتم تمرير cardName صحيح
                         <div className="bg-white p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">

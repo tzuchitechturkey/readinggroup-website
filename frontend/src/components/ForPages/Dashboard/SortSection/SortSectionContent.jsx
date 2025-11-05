@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { GripVertical, Save, X, Loader2 } from "lucide-react";
+import { GripVertical, Save, X } from "lucide-react";
 
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics, ReorderSections } from "@/api/dashboard";
 
-function SortSectionContent() {
+function SortSectionContent({ onSectionChange }) {
   const { t } = useTranslation();
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [isModified, setIsModified] = useState(false);
   const [draggedItem, setDraggedItem] = useState(null);
   const [draggedOverItem, setDraggedOverItem] = useState(null);
@@ -95,14 +94,14 @@ function SortSectionContent() {
 
   // حفظ الترتيب الجديد
   const handleSave = async () => {
-    setIsSaving(true);
+    setIsLoading(true);
+    // إنشاء مصفوفة من الـ IDs بالترتيب الجديد
+    const orderedIds = sections.map((section, index) => ({
+      sectionName: section.sectionName,
+      order: index+1,
+    }));
     try {
-      // إنشاء مصفوفة من الـ IDs بالترتيب الجديد
-      const orderedIds = sections.map((section, index) => ({
-        id: section.id,
-        order: index,
-      }));
-
+      console.log(orderedIds);
       // إرسال الترتيب الجديد للـ API
       await ReorderSections(orderedIds);
       toast.success(t("Sections reordered successfully"));
@@ -110,7 +109,7 @@ function SortSectionContent() {
     } catch (error) {
       setErrorFn(error, t);
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   };
 
@@ -125,6 +124,7 @@ function SortSectionContent() {
 
   return (
     <div className="w-full mx-auto ">
+      {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -256,9 +256,9 @@ function SortSectionContent() {
             <div className="mt-6 flex gap-3 justify-end animate-in fade-in-0 duration-200">
               <button
                 onClick={handleCancel}
-                disabled={isSaving}
+                disabled={isLoading}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  isSaving
+                  isLoading
                     ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                 }`}
@@ -269,24 +269,15 @@ function SortSectionContent() {
 
               <button
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isLoading}
                 className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium text-white transition-all duration-200 ${
-                  isSaving
+                  isLoading
                     ? "bg-blue-400 cursor-not-allowed"
                     : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
                 }`}
               >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t("Saving...")}
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    {t("Save Changes")}
-                  </>
-                )}
+                <Save className="w-4 h-4" />
+                {t("Save Changes")}
               </button>
             </div>
           )}

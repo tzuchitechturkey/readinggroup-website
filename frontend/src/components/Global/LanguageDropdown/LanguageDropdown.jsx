@@ -27,7 +27,7 @@ export default function LanguageDropdown({ iconColor }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="px-3 py-2 border-none outline-none rounded-md  ">
+      <DropdownMenuTrigger className="px-2 py-2 border-none outline-none rounded-md  ">
         <GrLanguage
           className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
           style={{ color: iconColor || undefined }}
