@@ -1163,6 +1163,11 @@ class TopStatsViewSet(viewsets.ViewSet):
     - top N posts by likes
     
     ordered by a manual order via query param `posts_order` (optional).
+    Query params:
+    - limit: int default 5 (number of top posts to return)
+    example: /api/v1/top-stats/?limit=10&posts_order=3,1,2
+    example: /api/v1/top-stats/?limit=3
+    example: /api/v1/top-stats/
     """
 
     def list(self, request):
