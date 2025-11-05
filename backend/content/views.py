@@ -31,7 +31,7 @@ from .models import (
     MyListEntry,
     SeasonTitle,
     SeasonId,
-    SocialMedia,
+    InfoWebSite,
     SectionOrder,
 )
 from .enums import VideoType, PostType
@@ -52,7 +52,7 @@ from .serializers import (
     LikeSerializer,
     SeasonTitleSerializer,
     SeasonIdSerializer,
-    SocialMediaSerializer,
+    InfoWebSiteSerializer,
 )
 from .models import PostRating
 
@@ -1382,9 +1382,9 @@ class TopStatsViewSet(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK,
         )
-class SocialMediaViewSet(BaseContentViewSet):
-    """ViewSet for managing SocialMedia content."""
-    queryset = SocialMedia.objects.all()
-    serializer_class = SocialMediaSerializer
-    search_fields = ("platform", "url", "description")
+class InfoWebSiteViewSet(BaseContentViewSet):
+    """ViewSet for managing InfoWebSite content."""
+    queryset = InfoWebSite.objects.all()
+    serializer_class = InfoWebSiteSerializer
+    search_fields = ("platform", "url")
     ordering_fields = ("created_at", "platform")

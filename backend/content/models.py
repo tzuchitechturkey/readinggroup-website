@@ -390,10 +390,11 @@ class HistoryEntry(LikableMixin, TimestampedModel):
         return f"{self.title} ({self.story_date} - present)"
     
 
-class SocialMedia(TimestampedModel):
+class InfoWebSite(TimestampedModel):
     """Social media links for content."""
     platform = models.CharField(max_length=100)
     url = models.URLField(max_length=1000)
+    logo = models.ImageField(upload_to="social_media/logos/", blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)
