@@ -29,6 +29,13 @@ video_manual_parameters = [
         description="Filter by happened date",
         type=openapi.TYPE_STRING
     ),  
+    openapi.Parameter(
+        'is_new',
+        openapi.IN_QUERY,
+        description="Filter by is_new status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 post_manual_parameters = [

@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
+from datetime import timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -103,11 +104,43 @@ class Video(LikableMixin, TimestampedModel):
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
 
+    @property
+    def is_new_computed(self) -> bool:
+        """Is the video considered 'new' within 24 hours of creation.
+        This is a computed property and does NOT replace the DB boolean field
+        `is_new`. Keeping the DB field allows admin filters and writes to work
+        as before while the API exposes the computed value.
+        """
+        if not self.created_at:
+            return False
+        try:
+            return timezone.now() - self.created_at <= timedelta(hours=24)
+        except Exception:
+            return False
+        
     class Meta:
         ordering = ("-happened_at", "-created_at")
 
     def __str__(self) -> str:
         return self.title
+
+    def save(self, *args, **kwargs):
+        """Ensure `is_new` is set to True on creation if within 24 hours of `created_at`.
+        We need to call super().save() first so `created_at` (auto_now_add) is
+        populated by the database. After the initial save we check the creation
+        time and update `is_new` if appropriate. We avoid infinite recursion by
+        using update_fields on the follow-up save.
+        """
+        is_create = self.pk is None
+        super().save(*args, **kwargs)
+        if is_create:
+            try:
+                if self.created_at and (timezone.now() - self.created_at) <= timedelta(hours=24):
+                    if not self.is_new:
+                        self.is_new = True
+                        super().save(update_fields=["is_new"])
+            except Exception:
+                pass
     
 class VideoCategory(TimestampedModel):
     """Categories for organizing videos."""

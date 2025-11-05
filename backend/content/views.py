@@ -254,8 +254,15 @@ class VideoViewSet(BaseContentViewSet):
                 queryset = queryset.filter(happened_at=parsed)
             except Exception:
                 queryset = queryset.filter(happened_at=happened_at)
+                
+        is_new = params.get('is_new')
+        if is_new is not None:
+            if is_new.lower() in ('true'):
+                queryset = queryset.filter(is_new=True)
+            elif is_new.lower() in ('false'):
+                queryset = queryset.filter(is_new=False)
         
-        return queryset
+        return queryset.order_by('-created_at')
 
     @action(detail=True, methods=("post", "delete"), url_path="my-list", url_name="my_list_item")
     def my_list_item(self, request, pk=None):
