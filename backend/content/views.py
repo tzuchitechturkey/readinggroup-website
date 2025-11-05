@@ -1170,12 +1170,10 @@ class TopStatsViewSet(viewsets.ViewSet):
     example: /api/v1/top-stats/
     """
 
-    def list(self, request):
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
+    def _build_top_liked_payload(self, request, limit=5, posts_order_list=None):
+        """Internal helper: build the top_liked payload dict. If posts_order_list is provided
+        it's a list of post IDs used to reorder the `top_posts` section. This does not persist.
+        """
         # helper to get the top-liked single instance for a queryset
         def get_top_liked_for(qs):
             qs = annotate_likes_queryset(qs, request)
@@ -1189,7 +1187,7 @@ class TopStatsViewSet(viewsets.ViewSet):
                     pass
             return qs.first()
 
-    # top liked single items
+        # top liked single items
         top_video = get_top_liked_for(Video.objects.all())
         top_event = get_top_liked_for(Event.objects.all())
         top_weekly = get_top_liked_for(WeeklyMoment.objects.all())
@@ -1208,39 +1206,28 @@ class TopStatsViewSet(viewsets.ViewSet):
         except Exception:
             posts_qs = Post.objects.none()
 
-        # Allow client to pass a manual order for posts via query param `posts_order`
-        # Example: ?posts_order=3,1,2  (comma separated post IDs)
-        posts_order_param = request.query_params.get('posts_order')
-        if posts_order_param and posts_qs is not None:
-            try:
-                # parse ints, ignore invalid entries
-                ordered_ids = [int(x) for x in posts_order_param.split(',') if x.strip().isdigit()]
-            except Exception:
-                ordered_ids = []
-
+        # If a manual posts_order_list is provided, reorder accordingly
+        if posts_order_list and posts_qs is not None:
+            # filter and coerce ints, ignore invalid ids
+            ordered_ids = [int(x) for x in posts_order_list if isinstance(x, int) or (isinstance(x, str) and x.isdigit())]
             if ordered_ids:
-                # ensure we operate on a list (qs may be sliced)
                 posts_list = list(posts_qs)
                 id_to_obj = {getattr(p, 'pk', None): p for p in posts_list}
-
                 ordered_posts = []
                 seen = set()
                 for oid in ordered_ids:
-                    obj = id_to_obj.get(oid)
+                    obj = id_to_obj.get(int(oid))
                     if obj is not None:
                         ordered_posts.append(obj)
-                        seen.add(oid)
-
-                # append any remaining posts that were in the original queryset but not in ordered_ids
+                        seen.add(int(oid))
                 for p in posts_list:
                     if getattr(p, 'pk', None) not in seen:
                         ordered_posts.append(p)
-
-                top_posts_data = PostSerializer(ordered_posts, many=True, context={"request": request}).data
+                top_posts_serialized = PostSerializer(ordered_posts, many=True, context={"request": request}).data
             else:
-                top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
+                top_posts_serialized = PostSerializer(posts_qs, many=True, context={"request": request}).data
         else:
-            top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
+            top_posts_serialized = PostSerializer(posts_qs, many=True, context={"request": request}).data
 
         def serialize_obj(obj):
             if obj is None:
@@ -1255,16 +1242,56 @@ class TopStatsViewSet(viewsets.ViewSet):
                 return WeeklyMomentSerializer(obj, context={"request": request}).data
             return None
 
-        top_liked_payload = {
+        payload = {
             "video": serialize_obj(top_video),
             "post_reading": serialize_obj(top_post_reading),
             "post_card": serialize_obj(top_post_card),
             "post_photo": serialize_obj(top_post_photo),
             "event": serialize_obj(top_event),
             "weekly_moment": serialize_obj(top_weekly),
+            "top_posts": top_posts_serialized,
         }
-        top_liked_payload["top_posts"] = top_posts_data
-        return Response({"top_liked": top_liked_payload})
+        return payload
+
+    def list(self, request):
+        try:
+            limit = int(request.query_params.get("limit", 5))
+        except Exception:
+            limit = 5
+
+        # Support GET param `posts_order` as comma separated ids for backward compatibility
+        posts_order_param = request.query_params.get('posts_order')
+        posts_order_list = None
+        if posts_order_param:
+            posts_order_list = [x.strip() for x in posts_order_param.split(',') if x.strip()]
+
+        payload = self._build_top_liked_payload(request, limit=limit, posts_order_list=posts_order_list)
+        return Response({"top_liked": payload})
+
+    @action(detail=False, methods=("patch",), url_path="order", url_name="order")
+    def order(self, request):
+        """Accept a PATCH to reorder `top_posts`.
+
+        Body may be JSON with key `posts_order` as either a list of ids or a comma-separated string.
+        Example JSON bodies:
+          { "posts_order": [3,1,2] }
+          { "posts_order": "3,1,2" }
+        This does not persist the order; it only returns the same payload with `top_posts` reordered.
+        """
+        try:
+            limit = int(request.query_params.get("limit", 5))
+        except Exception:
+            limit = 5
+
+        posts_order = request.data.get('posts_order')
+        posts_order_list = None
+        if isinstance(posts_order, list):
+            posts_order_list = posts_order
+        elif isinstance(posts_order, str):
+            posts_order_list = [x.strip() for x in posts_order.split(',') if x.strip()]
+
+        payload = self._build_top_liked_payload(request, limit=limit, posts_order_list=posts_order_list)
+        return Response({"top_liked": payload})
 
 class SocialMediaViewSet(BaseContentViewSet):
     """ViewSet for managing SocialMedia content."""
