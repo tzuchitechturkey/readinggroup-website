@@ -368,6 +368,22 @@ class SocialMedia(TimestampedModel):
     def __str__(self) -> str:
         return f"{self.platform}: {self.url}"
 
+
+class SectionOrder(models.Model):
+    """Persist global ordering for dashboard/top-stats sections.
+
+    Each row stores a section key (e.g. 'video', 'post_card') and a
+    numeric position. Lower numbers appear earlier.
+    """
+    key = models.CharField(max_length=100, unique=True)
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("position",)
+
+    def __str__(self) -> str:
+        return f"SectionOrder<{self.key}:{self.position}>"
+
 #Category for Posts
 class PostCategory(TimestampedModel):
     """Categories for organizing posts."""

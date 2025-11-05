@@ -31,6 +31,7 @@ from .models import (
     SeasonTitle,
     SeasonId,
     SocialMedia,
+    SectionOrder,
 )
 from .enums import VideoType, PostType
 from .serializers import (
@@ -1225,6 +1226,65 @@ class TopStatsViewSet(viewsets.ViewSet):
             "weekly_moment": serialize_obj(top_weekly),
         }
         top_liked_payload["top_posts"] = top_posts_data
+
+        # Support manual ordering via GET query param `order` formatted like:
+        #   order=video=1,post_card=2,post_reading=3
+        # Frontend sends this when user reorders sections. We'll parse it and
+        # return the `top_liked` object with keys in the requested insertion order
+        order_param = request.query_params.get('order')
+
+        def parse_order_string(s):
+            parts = [p for p in s.split(',') if p]
+            order_map = {}
+            for part in parts:
+                if '=' in part:
+                    k, v = part.split('=', 1)
+                    try:
+                        order_map[k.strip()] = int(v)
+                    except Exception:
+                        # ignore invalid integers
+                        continue
+            return order_map
+
+        order_map = {}
+        # 1) If an explicit order param was provided in the request, parse it
+        if order_param:
+            try:
+                order_map = parse_order_string(order_param)
+
+                # If the requester is staff, persist the ordering into SectionOrder
+                if getattr(request, 'user', None) and request.user.is_authenticated and request.user.is_staff:
+                    # Upsert provided keys
+                    for k, pos in order_map.items():
+                        if k in top_liked_payload:
+                            SectionOrder.objects.update_or_create(key=k, defaults={"position": int(pos)})
+                    # Optionally set a default high position for other keys not provided
+                    remaining_keys = [k for k in top_liked_payload.keys() if k not in order_map]
+                    high = max(order_map.values()) + 1 if order_map else 1000
+                    for i, k in enumerate(remaining_keys, start=high):
+                        SectionOrder.objects.update_or_create(key=k, defaults={"position": int(i)})
+            except Exception:
+                order_map = {}
+
+        # 2) If no explicit order in request, try to load persisted order from DB
+        if not order_map:
+            try:
+                stored = SectionOrder.objects.all()
+                if stored.exists():
+                    order_map = {so.key: so.position for so in stored}
+            except Exception:
+                order_map = {}
+
+        # Build ordered list of keys: keys present in order_map sorted by value,
+        # then any remaining keys in original order.
+        if order_map:
+            ordered_keys = [k for k, _ in sorted(order_map.items(), key=lambda kv: kv[1]) if k in top_liked_payload]
+            for k in top_liked_payload.keys():
+                if k not in ordered_keys:
+                    ordered_keys.append(k)
+            ordered_payload = {k: top_liked_payload[k] for k in ordered_keys}
+            return Response({"top_liked": ordered_payload})
+
         return Response({"top_liked": top_liked_payload})
 
 class SocialMediaViewSet(BaseContentViewSet):
