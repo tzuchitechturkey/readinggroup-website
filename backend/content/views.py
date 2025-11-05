@@ -1151,112 +1151,51 @@ class CombinedTopLikedView(viewsets.ViewSet):
         })
 
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-
 class TopStatsViewSet(viewsets.ViewSet):
-    DEFAULT_ORDER = [
-        "video", "post_reading", "post_card", "post_photo", "event", "weekly_moment"
-    ]
-    ALIASES = {
-        "reading": "post_reading", "card": "post_card", "photo": "post_photo",
-        "weekly": "weekly_moment", "weeklymoment": "weekly_moment",
-        "moment": "weekly_moment", "events": "event", "videos": "video",
-    }
+    """Standalone endpoint returning:
 
-    def _normalize_key(self, k: str) -> str:
-        k = (k or "").strip().lower()
-        return self.ALIASES.get(k, k)
-
-    def _parse_order_param(self, raw_order: str) -> list[str]:
-        default_order = list(self.DEFAULT_ORDER)
-        allowed = set(default_order)
-        raw_order = (raw_order or "").strip()
-        if not raw_order:
-            return default_order
-
-        parts = [p.strip() for p in raw_order.split(",") if p.strip()]
-
-        # صيغة key=rank
-        if any("=" in p for p in parts):
-            pairs, seen = [], set()
-            for p in parts:
-                if "=" not in p:
-                    continue
-                k, v = p.split("=", 1)
-                k = self._normalize_key(k)
-                try:
-                    r = int((v or "").strip())
-                except Exception:
-                    continue
-                if k in allowed and k not in seen:
-                    seen.add(k)
-                    pairs.append((k, r))
-            pairs.sort(key=lambda x: x[1])  # حسب الرقم تصاعدي
-            ordered = [k for k, _ in pairs]
-            ordered += [k for k in default_order if k not in ordered]
-            return ordered
-
-        # صيغة قائمة مفصولة بفواصل
-        requested, seen = [], set()
-        for p in parts:
-            k = self._normalize_key(p)
-            if k in allowed and k not in seen:
-                seen.add(k)
-                requested.append(k)
-        return requested + [k for k in default_order if k not in requested]
-
-    def _load_persisted_order(self, request) -> list[str] | None:
-        # لو محفوظه بالسيشن
-        session_key = "topstats_order_v1"
-        saved = request.session.get(session_key)
-        if isinstance(saved, list) and all(isinstance(x, str) for x in saved):
-            # تحقّق من الصحة مع الافتراضي
-            allowed = set(self.DEFAULT_ORDER)
-            saved = [x for x in saved if x in allowed]
-            if saved:
-                return saved + [k for k in self.DEFAULT_ORDER if k not in saved]
-        return None
-
-    def _maybe_persist_order(self, request, final_order: list[str]) -> None:
-        # احفظ في السيشن لو persist=1|true
-        persist = (request.query_params.get("persist") or "").lower()
-        if persist in ("1", "true", "yes"):
-            request.session["topstats_order_v1"] = final_order
-            request.session.modified = True  # تأكيد الحفظ
+    - top 1 liked video
+    - top 1 liked post (reading)
+    - top 1 liked post (card)
+    - top 1 liked post (photo)
+    - top 1 liked event
+    - top 1 liked weekly moment
+    - top N posts by likes
+    """
 
     def list(self, request):
-        # ---- limit ----
         try:
             limit = int(request.query_params.get("limit", 5))
         except Exception:
             limit = 5
 
-        # ---- helper: top-liked object for a queryset ----
+        # helper to get the top-liked single instance for a queryset
         def get_top_liked_for(qs):
             qs = annotate_likes_queryset(qs, request)
             try:
                 qs = qs.order_by("-annotated_likes_count", "-created_at")
             except Exception:
+                # if ordering by annotated field fails, fall back to created_at
                 try:
                     qs = qs.order_by("-created_at")
                 except Exception:
                     pass
             return qs.first()
 
-        # ---- fetch singles ----
+    # top liked single items
         top_video = get_top_liked_for(Video.objects.all())
         top_event = get_top_liked_for(Event.objects.all())
         top_weekly = get_top_liked_for(WeeklyMoment.objects.all())
+
         top_post_reading = get_top_liked_for(Post.objects.filter(post_type=PostType.READING))
         top_post_card = get_top_liked_for(Post.objects.filter(post_type=PostType.CARD))
         top_post_photo = get_top_liked_for(Post.objects.filter(post_type=PostType.PHOTO))
 
-        # ---- fetch top-N posts ----
+        # top N posts by likes (new payload requested) - annotate and order by annotated likes
         try:
             posts_qs = annotate_likes_queryset(Post.objects.all(), request)
             try:
-                posts_qs = posts_qs.order_by("-annotated_likes_count", "-created_at")[:limit]
+                posts_qs = posts_qs.order_by('-annotated_likes_count', '-created_at')[:limit]
             except Exception:
                 posts_qs = posts_qs[:limit]
         except Exception:
@@ -1264,15 +1203,6 @@ class TopStatsViewSet(viewsets.ViewSet):
 
         top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
 
-        # ---- compute order ----
-        raw_order = request.query_params.get("order", "")
-        if raw_order:
-            final_order = self._parse_order_param(raw_order)
-            self._maybe_persist_order(request, final_order)  # ← حفظ بالسيشن عند الطلب
-        else:
-            final_order = self._load_persisted_order(request) or list(self.DEFAULT_ORDER)
-
-        # ---- build payload ----
         def serialize_obj(obj):
             if obj is None:
                 return None
@@ -1293,19 +1223,10 @@ class TopStatsViewSet(viewsets.ViewSet):
             "post_photo": serialize_obj(top_post_photo),
             "event": serialize_obj(top_event),
             "weekly_moment": serialize_obj(top_weekly),
-            "top_posts": top_posts_data,  # للتوافق
         }
+        top_liked_payload["top_posts"] = top_posts_data
+        return Response({"top_liked": top_liked_payload})
 
-        ordered_items = [{"type": key, "data": top_liked_payload.get(key)} for key in final_order]
-
-        return Response({
-            "top_liked": top_liked_payload,
-            "top_liked_items": ordered_items,
-            "order_used": final_order,
-            "order_used_str": ",".join(final_order),
-            "limit": limit,
-            "persisted": raw_order == "" and (self._load_persisted_order(request) is not None),
-        })
 class SocialMediaViewSet(BaseContentViewSet):
     """ViewSet for managing SocialMedia content."""
     queryset = SocialMedia.objects.all()
