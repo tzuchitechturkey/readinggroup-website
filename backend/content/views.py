@@ -1,4 +1,5 @@
 from rest_framework import filters, viewsets, status
+from typing import Dict, List, Optional
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
@@ -1151,142 +1152,222 @@ class CombinedTopLikedView(viewsets.ViewSet):
             "top_section": top_section_data,
         })
 
-
 class TopStatsViewSet(viewsets.ViewSet):
-    """Standalone endpoint returning:
-
-    - top 1 liked video
-    - top 1 liked post (reading)
-    - top 1 liked post (card)
-    - top 1 liked post (photo)
-    - top 1 liked event
-    - top 1 liked weekly moment
-    - top N posts by likes
+    """
+    Endpoints:
+    - GET /api/v1/top-stats/?order=video=1,post_card=2,post_reading=3,...
+      Returns top-liked objects per type in the requested order.
+      If no 'order' param, uses default order.
+      If user is staff, persists the order for future requests.
     """
 
+    DEFAULT_KEYS: List[str] = [
+        "video",
+        "post_reading",
+        "post_card",
+        "post_photo",
+        "event",
+        "weekly_moment",
+    ]
+
+    # -----------------------
+    # Helpers: Query building
+    # -----------------------
+    def _get_top_liked_object(self, queryset, request):
+        """أرجع أعلى عنصر معجب به من queryset (بناءً على annotated_likes_count ثم created_at)."""
+        qs = annotate_likes_queryset(queryset, request)
+        try:
+            qs = qs.order_by("-annotated_likes_count", "-created_at")
+        except Exception:
+            try:
+                qs = qs.order_by("-created_at")
+            except Exception:
+                pass
+        return qs.first()
+
+    def _get_top_posts_queryset(self, request, limit: int):
+        """return queryset of top liked Posts limited to 'limit'."""
+        try:
+            qs = annotate_likes_queryset(Post.objects.all(), request)
+            try:
+                return qs.order_by("-annotated_likes_count", "-created_at")[:limit]
+            except Exception:
+                return qs[:limit]
+        except Exception:
+            return Post.objects.none()
+
+    # -----------------------
+    # Helpers: Serialization
+    # -----------------------
+    def _serialize_any(self, obj, request):
+        """return serialized data for any supported object type, or None if unsupported."""
+        if obj is None:
+            return None
+        if isinstance(obj, Video):
+            return VideoSerializer(obj, context={"request": request}).data
+        if isinstance(obj, Post):
+            return PostSerializer(obj, context={"request": request}).data
+        if isinstance(obj, Event):
+            return EventSerializer(obj, context={"request": request}).data
+        if isinstance(obj, WeeklyMoment):
+            return WeeklyMomentSerializer(obj, context={"request": request}).data
+        return None
+
+    # -----------------------
+    # Helpers: Ordering
+    # -----------------------
+    def _parse_order_query(self, order_query: Optional[str]) -> Dict[str, int]:
+        """
+        check if order_query is like 'video=1,post_card=2,...' and parse it into a dict.
+        returns {'video': 1, 'post_card': 2, ...} or {} if invalid.
+        """
+        if not order_query:
+            return {}
+
+        order_pairs: Dict[str, int] = {}
+        parts = [part.strip() for part in order_query.split(",") if part.strip()]
+
+        for part in parts:
+            if "=" not in part:
+                continue
+
+            key_text, position_text = part.split("=", 1)
+            key = key_text.strip()
+            try:
+                position = int(position_text.strip())
+            except Exception:
+                continue
+
+            order_pairs[key] = position
+
+        return order_pairs
+
+    def _persist_order_if_staff(self, request, order_by_key: Dict[str, int], all_keys: List[str]) -> None:
+        """
+        if the request user is staff, persist the given order_by_key into SectionOrder model.
+        يقوم أولًا بتخزين المفاتيح التي أعطاها الفرونت، ثم يكمل بقية المفاتيح غير المذكورة بمراتب لاحقة.
+        
+        """
+        user = getattr(request, "user", None)
+        if not (user and user.is_authenticated and user.is_staff):
+            return
+        
+        # order_by_key: {'video': 1, 'post_card': 2, ...}
+        for key, position in order_by_key.items():
+            if key in all_keys:
+                SectionOrder.objects.update_or_create(
+                    key=key,
+                    defaults={"position": int(position)},
+                )
+
+        #complete with remaining keys
+        remaining_keys = [key for key in all_keys if key not in order_by_key]
+        start_position = (max(order_by_key.values()) + 1) if order_by_key else 1000
+        for offset, key in enumerate(remaining_keys, start=start_position):
+            SectionOrder.objects.update_or_create(
+                key=key,
+                defaults={"position": int(offset)},
+            )
+
+    def _load_persisted_order(self) -> Dict[str, int]:
+        """
+        read persisted order from SectionOrder model.
+        returns dict like {'video': 1, 'post_card': 2, ...} or {} if none found.
+        """
+        try:
+            stored = SectionOrder.objects.all()
+            if stored.exists():
+                return {row.key: row.position for row in stored}
+        except Exception:
+            pass
+        return {}
+
+    def _build_final_key_order(self, base_keys: List[str], order_by_key: Dict[str, int]) -> List[str]:
+        """
+        order base_keys according to order_by_key dict.
+        any keys in base_keys not in order_by_key are appended at the end in original order
+        returns ordered list of keys.
+        """
+        if not order_by_key:
+            return list(base_keys)
+
+        # filter and sort keys present in order_by_key
+        sorted_by_position = sorted(order_by_key.items(), key=lambda item: item[1])
+        ordered_keys = [key for key, _ in sorted_by_position if key in base_keys]
+
+        # append any missing keys from base_keys
+        for key in base_keys:
+            if key not in ordered_keys:
+                ordered_keys.append(key)
+
+        return ordered_keys
+
+    # -----------------------
+    # Main endpoint
+    # -----------------------
     def list(self, request):
+        # 1) limit
         try:
             limit = int(request.query_params.get("limit", 5))
         except Exception:
             limit = 5
 
-        # helper to get the top-liked single instance for a queryset
-        def get_top_liked_for(qs):
-            qs = annotate_likes_queryset(qs, request)
-            try:
-                qs = qs.order_by("-annotated_likes_count", "-created_at")
-            except Exception:
-                # if ordering by annotated field fails, fall back to created_at
-                try:
-                    qs = qs.order_by("-created_at")
-                except Exception:
-                    pass
-            return qs.first()
+        # 2) maximized liked objects per type
+        top_video = self._get_top_liked_object(Video.objects.all(), request)
+        top_event = self._get_top_liked_object(Event.objects.all(), request)
+        top_weekly_moment = self._get_top_liked_object(WeeklyMoment.objects.all(), request)
 
-    # top liked single items
-        top_video = get_top_liked_for(Video.objects.all())
-        top_event = get_top_liked_for(Event.objects.all())
-        top_weekly = get_top_liked_for(WeeklyMoment.objects.all())
+        top_post_reading = self._get_top_liked_object(
+            Post.objects.filter(post_type=PostType.READING), request
+        )
+        top_post_card = self._get_top_liked_object(
+            Post.objects.filter(post_type=PostType.CARD), request
+        )
+        top_post_photo = self._get_top_liked_object(
+            Post.objects.filter(post_type=PostType.PHOTO), request
+        )
 
-        top_post_reading = get_top_liked_for(Post.objects.filter(post_type=PostType.READING))
-        top_post_card = get_top_liked_for(Post.objects.filter(post_type=PostType.CARD))
-        top_post_photo = get_top_liked_for(Post.objects.filter(post_type=PostType.PHOTO))
+        # 3) maximized liked posts queryset
+        top_posts_qs = self._get_top_posts_queryset(request, limit)
+        top_posts_data = PostSerializer(top_posts_qs, many=True, context={"request": request}).data
 
-        # top N posts by likes (new payload requested) - annotate and order by annotated likes
-        try:
-            posts_qs = annotate_likes_queryset(Post.objects.all(), request)
-            try:
-                posts_qs = posts_qs.order_by('-annotated_likes_count', '-created_at')[:limit]
-            except Exception:
-                posts_qs = posts_qs[:limit]
-        except Exception:
-            posts_qs = Post.objects.none()
-
-        top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
-
-        def serialize_obj(obj):
-            if obj is None:
-                return None
-            if isinstance(obj, Video):
-                return VideoSerializer(obj, context={"request": request}).data
-            if isinstance(obj, Post):
-                return PostSerializer(obj, context={"request": request}).data
-            if isinstance(obj, Event):
-                return EventSerializer(obj, context={"request": request}).data
-            if isinstance(obj, WeeklyMoment):
-                return WeeklyMomentSerializer(obj, context={"request": request}).data
-            return None
-
-        top_liked_payload = {
-            "video": serialize_obj(top_video),
-            "post_reading": serialize_obj(top_post_reading),
-            "post_card": serialize_obj(top_post_card),
-            "post_photo": serialize_obj(top_post_photo),
-            "event": serialize_obj(top_event),
-            "weekly_moment": serialize_obj(top_weekly),
+        # 4) assemble base payload
+        base_payload: Dict[str, object] = {
+            "video": self._serialize_any(top_video, request),
+            "post_reading": self._serialize_any(top_post_reading, request),
+            "post_card": self._serialize_any(top_post_card, request),
+            "post_photo": self._serialize_any(top_post_photo, request),
+            "event": self._serialize_any(top_event, request),
+            "weekly_moment": self._serialize_any(top_weekly_moment, request),
+            "top_posts": top_posts_data,
         }
-        top_liked_payload["top_posts"] = top_posts_data
 
-        # Support manual ordering via GET query param `order` formatted like:
-        #   order=video=1,post_card=2,post_reading=3
-        # Frontend sends this when user reorders sections. We'll parse it and
-        # return the `top_liked` object with keys in the requested insertion order
-        order_param = request.query_params.get('order')
+        # 5) ordering
+        order_query_text = request.query_params.get("order")
+        order_pairs_from_query = self._parse_order_query(order_query_text)
 
-        def parse_order_string(s):
-            parts = [p for p in s.split(',') if p]
-            order_map = {}
-            for part in parts:
-                if '=' in part:
-                    k, v = part.split('=', 1)
-                    try:
-                        order_map[k.strip()] = int(v)
-                    except Exception:
-                        # ignore invalid integers
-                        continue
-            return order_map
+        if order_pairs_from_query:
+            # request has order → save it if staff
+            self._persist_order_if_staff(request, order_pairs_from_query, self.DEFAULT_KEYS)
+            final_key_order = self._build_final_key_order(self.DEFAULT_KEYS, order_pairs_from_query)
+        else:
+            # no order in request → load persisted order
+            order_pairs_from_db = self._load_persisted_order()
+            final_key_order = self._build_final_key_order(self.DEFAULT_KEYS, order_pairs_from_db)
 
-        order_map = {}
-        # 1) If an explicit order param was provided in the request, parse it
-        if order_param:
-            try:
-                order_map = parse_order_string(order_param)
+        # 6) reorder base_payload according to final_key_order
+        ordered_section_keys = [key for key in final_key_order if key in base_payload and key != "top_posts"]
+        ordered_payload = {key: base_payload[key] for key in ordered_section_keys}
+        ordered_payload["top_posts"] = base_payload["top_posts"]
 
-                # If the requester is staff, persist the ordering into SectionOrder
-                if getattr(request, 'user', None) and request.user.is_authenticated and request.user.is_staff:
-                    # Upsert provided keys
-                    for k, pos in order_map.items():
-                        if k in top_liked_payload:
-                            SectionOrder.objects.update_or_create(key=k, defaults={"position": int(pos)})
-                    # Optionally set a default high position for other keys not provided
-                    remaining_keys = [k for k in top_liked_payload.keys() if k not in order_map]
-                    high = max(order_map.values()) + 1 if order_map else 1000
-                    for i, k in enumerate(remaining_keys, start=high):
-                        SectionOrder.objects.update_or_create(key=k, defaults={"position": int(i)})
-            except Exception:
-                order_map = {}
-
-        # 2) If no explicit order in request, try to load persisted order from DB
-        if not order_map:
-            try:
-                stored = SectionOrder.objects.all()
-                if stored.exists():
-                    order_map = {so.key: so.position for so in stored}
-            except Exception:
-                order_map = {}
-
-        # Build ordered list of keys: keys present in order_map sorted by value,
-        # then any remaining keys in original order.
-        if order_map:
-            ordered_keys = [k for k, _ in sorted(order_map.items(), key=lambda kv: kv[1]) if k in top_liked_payload]
-            for k in top_liked_payload.keys():
-                if k not in ordered_keys:
-                    ordered_keys.append(k)
-            ordered_payload = {k: top_liked_payload[k] for k in ordered_keys}
-            return Response({"top_liked": ordered_payload})
-
-        return Response({"top_liked": top_liked_payload})
-
+        return Response(
+            {
+                "top_liked": ordered_payload,
+                "order_used": ordered_section_keys,
+                "limit": limit,
+            },
+            status=status.HTTP_200_OK,
+        )
 class SocialMediaViewSet(BaseContentViewSet):
     """ViewSet for managing SocialMedia content."""
     queryset = SocialMedia.objects.all()
