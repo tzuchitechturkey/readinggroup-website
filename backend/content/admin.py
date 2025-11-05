@@ -23,8 +23,8 @@ from .models import (
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "category_name", "language", "views", "featured")
-    list_filter = ("category__name", "language", "featured", "is_new")
+    list_display = ("title", "category_name", "language", "views", "is_featured")
+    list_filter = ("category__name", "language", "is_featured", "is_new")
     search_fields = ("title", "category__name")
 
     def category_name(self, obj):

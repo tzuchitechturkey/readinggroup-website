@@ -36,6 +36,13 @@ video_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'is_featured',
+        openapi.IN_QUERY,
+        description="Filter by is_featured status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 post_manual_parameters = [

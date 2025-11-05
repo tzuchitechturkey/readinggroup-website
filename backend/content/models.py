@@ -94,7 +94,7 @@ class Video(LikableMixin, TimestampedModel):
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
     happened_at = models.DateTimeField(blank=True, null=True)
-    featured = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()

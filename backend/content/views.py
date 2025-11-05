@@ -262,6 +262,13 @@ class VideoViewSet(BaseContentViewSet):
             elif is_new.lower() in ('false'):
                 queryset = queryset.filter(is_new=False)
         
+        is_featured = params.get('is_featured')
+        if is_featured is not None:
+            if is_featured.lower() in ('true'):
+                queryset =queryset.filter(is_featured=True)
+            elif is_featured.lower() in ('false'):
+                queryset =queryset.filter(is_featured=False)
+        
         return queryset.order_by('-created_at')
 
     @action(detail=True, methods=("post", "delete"), url_path="my-list", url_name="my_list_item")
