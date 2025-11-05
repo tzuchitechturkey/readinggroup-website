@@ -1161,6 +1161,8 @@ class TopStatsViewSet(viewsets.ViewSet):
     - top 1 liked event
     - top 1 liked weekly moment
     - top N posts by likes
+    
+    ordered by a manual order via query param `posts_order` (optional).
     """
 
     def list(self, request):
@@ -1201,7 +1203,39 @@ class TopStatsViewSet(viewsets.ViewSet):
         except Exception:
             posts_qs = Post.objects.none()
 
-        top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
+        # Allow client to pass a manual order for posts via query param `posts_order`
+        # Example: ?posts_order=3,1,2  (comma separated post IDs)
+        posts_order_param = request.query_params.get('posts_order')
+        if posts_order_param and posts_qs is not None:
+            try:
+                # parse ints, ignore invalid entries
+                ordered_ids = [int(x) for x in posts_order_param.split(',') if x.strip().isdigit()]
+            except Exception:
+                ordered_ids = []
+
+            if ordered_ids:
+                # ensure we operate on a list (qs may be sliced)
+                posts_list = list(posts_qs)
+                id_to_obj = {getattr(p, 'pk', None): p for p in posts_list}
+
+                ordered_posts = []
+                seen = set()
+                for oid in ordered_ids:
+                    obj = id_to_obj.get(oid)
+                    if obj is not None:
+                        ordered_posts.append(obj)
+                        seen.add(oid)
+
+                # append any remaining posts that were in the original queryset but not in ordered_ids
+                for p in posts_list:
+                    if getattr(p, 'pk', None) not in seen:
+                        ordered_posts.append(p)
+
+                top_posts_data = PostSerializer(ordered_posts, many=True, context={"request": request}).data
+            else:
+                top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
+        else:
+            top_posts_data = PostSerializer(posts_qs, many=True, context={"request": request}).data
 
         def serialize_obj(obj):
             if obj is None:

@@ -197,7 +197,7 @@ function EditProfile() {
           <FormInput
             label={t("Profession")}
             name="profession_name"
-            placeholder="Project Manager"
+            placeholder={t("Project Manager")}
             value={formData.profession_name}
             onChange={handleInputChange}
           />
@@ -230,7 +230,7 @@ function EditProfile() {
           <FormInput
             label={t("Address Details")}
             name="address_details"
-            placeholder="123 Main St, City, State"
+            placeholder={t("123 Main St, City, State")}
             value={formData.address_details}
             onChange={handleInputChange}
           />
