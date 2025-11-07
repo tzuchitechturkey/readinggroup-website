@@ -80,6 +80,13 @@ post_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'status',
+        openapi.IN_QUERY,
+        description="Filter by status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 event_manual_parameters = [

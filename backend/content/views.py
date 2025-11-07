@@ -373,7 +373,7 @@ class PostViewSet(BaseContentViewSet):
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
     ordering_fields = ("views", "created_at")
-    filterset_fields = ("created_at", "writer", "category__name", "language", "post_type")
+    filterset_fields = ("created_at", "writer", "category__name", "language", "post_type", "status")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
@@ -432,6 +432,14 @@ class PostViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                 queryset =queryset.filter(post_type__in=values)
+                
+        status = params.get("status")
+        if status:
+            values = []
+            for item in status.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(status__in=values)
                                 
         return queryset
 
