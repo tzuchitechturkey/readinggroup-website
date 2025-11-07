@@ -19,7 +19,6 @@ from .views import (
     SeasonTitleViewSet,
     LikeViewSet,
     SeasonIdViewSet,
-    InfoWebSiteViewSet,
 )
 
 app_name = "content"
@@ -44,5 +43,4 @@ router.register(r"global-search", GlobalSearchViewSet, basename="global-search")
 router.register(r"season-titles", SeasonTitleViewSet, basename="season-title")
 router.register(r"likes", LikeViewSet, basename="like")
 router.register(r"season-ids", SeasonIdViewSet, basename="season-id")
-router.register(r"info-websites", InfoWebSiteViewSet, basename="info-website")
 urlpatterns = router.urls

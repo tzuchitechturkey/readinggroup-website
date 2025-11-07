@@ -17,7 +17,6 @@ from .models import (
     SeasonTitle,
     Like,
     SeasonId,
-    InfoWebSite,
 )
 
 
@@ -138,7 +137,3 @@ class LikeAdmin(admin.ModelAdmin):
     list_display = ("user",)
     search_fields = ("user__username", "content_type__model")
     
-@admin.register(InfoWebSite)
-class InfoWebSiteAdmin(admin.ModelAdmin):
-    list_display = ("platform", "created_at")
-    search_fields = ("platform", "url")

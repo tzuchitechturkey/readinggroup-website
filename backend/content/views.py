@@ -32,7 +32,6 @@ from .models import (
     MyListEntry,
     SeasonTitle,
     SeasonId,
-    InfoWebSite,
     SectionOrder,
 )
 from .enums import VideoType, PostType
@@ -53,7 +52,6 @@ from .serializers import (
     LikeSerializer,
     SeasonTitleSerializer,
     SeasonIdSerializer,
-    InfoWebSiteSerializer,
 )
 from .models import PostRating
 
@@ -1450,10 +1448,3 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
-class InfoWebSiteViewSet(BaseContentViewSet):
-    """ViewSet for managing InfoWebSite content."""
-    queryset = InfoWebSite.objects.all()
-    serializer_class = InfoWebSiteSerializer
-    search_fields = ("platform", "url")
-    ordering_fields = ("created_at", "platform")

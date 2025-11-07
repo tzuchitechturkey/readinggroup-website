@@ -388,20 +388,6 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
     
-
-class InfoWebSite(TimestampedModel):
-    """Social media links for content."""
-    platform = models.CharField(max_length=100)
-    url = models.URLField(max_length=1000)
-    logo = models.ImageField(upload_to="social_media/logos/", blank=True, null=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"{self.platform}: {self.url}"
-
-
 class SectionOrder(models.Model):
     """Persist global ordering for dashboard/top-stats sections.
 

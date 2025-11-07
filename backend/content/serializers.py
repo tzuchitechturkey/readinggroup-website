@@ -25,7 +25,6 @@ from .models import (
     Like,
     SeasonTitle,
     SeasonId,
-    InfoWebSite,
 )
 
 def _resolve_target_user(obj):
@@ -536,9 +535,3 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             data["user"] = None
         return data
-    
-class InfoWebSiteSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = InfoWebSite
-        fields = "__all__"
