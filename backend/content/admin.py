@@ -17,6 +17,8 @@ from .models import (
     SeasonTitle,
     Like,
     SeasonId,
+    SocialMedia,
+    NavbarLogo,
 )
 
 
@@ -137,3 +139,12 @@ class LikeAdmin(admin.ModelAdmin):
     list_display = ("user",)
     search_fields = ("user__username", "content_type__model")
     
+@admin.register(SocialMedia)
+class SocialMediaAdmin(admin.ModelAdmin):
+    list_display = ("platform", "url")
+    search_fields = ("platform", "url")
+
+@admin.register(NavbarLogo)
+class NavbarLogoAdmin(admin.ModelAdmin):
+    list_display = ("logo",)
+    search_fields = ("logo",)

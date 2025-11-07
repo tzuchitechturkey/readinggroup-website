@@ -33,6 +33,8 @@ from .models import (
     SeasonTitle,
     SeasonId,
     SectionOrder,
+    SocialMedia,
+    NavbarLogo,
 )
 from .enums import VideoType, PostType
 from .serializers import (
@@ -52,6 +54,8 @@ from .serializers import (
     LikeSerializer,
     SeasonTitleSerializer,
     SeasonIdSerializer,
+    SocialMediaSerializer,
+    NavbarLogoSerializer,
 )
 from .models import PostRating
 
@@ -1448,3 +1452,152 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+class NavbarLogoViewSet(viewsets.ViewSet):
+    """ViewSet for retrieving the NavbarLogo."""
+    queryset = NavbarLogo.objects.all()
+    serializer_class = NavbarLogoSerializer
+    def list(self, request):
+        """Return the NavbarLogo instance."""
+        try:
+            logo = self.get_queryset().first()
+            if not logo:
+                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = self.serializer_class(logo, context={"request": request})
+            return Response(serializer.data)
+        except Exception:
+            return Response({"detail": "Error retrieving NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    #update method to update the logo
+    def update(self, request, pk=None):
+        """Update the NavbarLogo instance."""
+        try:
+            logo = self.get_queryset().first()
+            if not logo:
+                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = self.serializer_class(logo, data=request.data, partial=True, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except Exception:
+            return Response({"detail": "Error updating NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #delete method to delete the logo
+    def destroy(self, request, pk=None):
+        """Delete the NavbarLogo instance."""
+        try:
+            logo = self.get_queryset().first()
+            if not logo:
+                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            logo.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception:
+            return Response({"detail": "Error deleting NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class SocialMediaViewSet(viewsets.ViewSet):
+    """ViewSet for retrieving SocialMedia links."""
+    queryset = SocialMedia.objects.all()
+    serializer_class = SocialMediaSerializer
+    search_fields = ("platform",)
+    ordering_fields = ("platform", "created_at")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ("platform",)
+    def list(self, request):
+        """Return all SocialMedia instances."""
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.serializer_class(queryset, many=True, context={"request": request})
+            return Response(serializer.data)
+        except Exception:
+            return Response({"detail": "Error retrieving SocialMedia links."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def update(self, request, pk=None):
+        """Update a SocialMedia instance."""
+        try:
+            social_media = self.get_queryset().filter(pk=pk).first()
+            if not social_media:
+                return Response({"detail": "SocialMedia not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = self.serializer_class(social_media, data=request.data, partial=True, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except Exception:
+            return Response({"detail": "Error updating SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+
+    def destroy(self, request, pk=None):
+        """Delete a SocialMedia instance."""
+        try:
+            social_media = self.get_queryset().filter(pk=pk).first()
+            if not social_media:
+                return Response({"detail": "SocialMedia not found."}, status=status.HTTP_404_NOT_FOUND)
+
+            social_media.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception:
+            return Response({"detail": "Error deleting SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class SiteInfoViewSet(viewsets.ViewSet):
+    """Combined endpoint returning/accepting site info: latest navbar logo and social media links.
+
+    GET  /api/v1/site-info/ -> { logo: <NavbarLogo|null>, socialmedia: [ ... ] }
+    POST /api/v1/site-info/ -> accept payload { logo: "...", socialmedia: [ {id?, platform, url}, ... ] }
+
+    POST semantics: upsert socialmedia items (create if no id, update if id present) and create a new NavbarLogo row when `logo` is provided.
+    By default POST will also remove SocialMedia rows not present in the payload (synchronize). If you want to avoid deletions send `?replace=false`.
+    """
+    permission_classes = [IsStaffOrReadOnly]
+
+    def list(self, request):
+        # latest logo
+        logo = NavbarLogo.objects.order_by('-created_at').first()
+        logo_data = NavbarLogoSerializer(logo, context={"request": request}).data if logo else None
+
+        # all social media links
+        socials = SocialMedia.objects.all().order_by('-created_at')
+        socials_data = SocialMediaSerializer(socials, many=True, context={"request": request}).data
+
+        return Response({"logo": logo_data, "socialmedia": socials_data})
+
+    def create(self, request):
+        payload = request.data or {}
+        logo_val = payload.get('logo', None)
+        social_list = payload.get('socialmedia', []) or []
+
+        created_logo = None
+        if logo_val is not None:
+            # create a new NavbarLogo; accept a string path/URL and store it in the ImageField value
+            nl = NavbarLogo.objects.create(logo=logo_val)
+            created_logo = NavbarLogoSerializer(nl, context={"request": request}).data
+
+        processed_ids = []
+        result_socials = []
+        for item in social_list:
+            if not isinstance(item, dict):
+                continue
+            sid = item.get('id')
+            platform = item.get('platform', '')
+            url = item.get('url', '')
+            if sid:
+                try:
+                    sm = SocialMedia.objects.get(pk=sid)
+                    sm.platform = platform or sm.platform
+                    sm.url = url or sm.url
+                    sm.save()
+                except SocialMedia.DoesNotExist:
+                    sm = SocialMedia.objects.create(platform=platform, url=url)
+            else:
+                sm = SocialMedia.objects.create(platform=platform, url=url)
+
+            processed_ids.append(sm.pk)
+            result_socials.append(SocialMediaSerializer(sm, context={"request": request}).data)
+
+        # By default synchronize: remove social rows not present in payload unless replace=false is passed
+        replace = request.query_params.get('replace', 'true').lower() not in ('0', 'false', 'no')
+        if replace and processed_ids:
+            SocialMedia.objects.exclude(pk__in=processed_ids).delete()
+
+        return Response({"logo": created_logo, "socialmedia": result_socials}, status=status.HTTP_201_CREATED)

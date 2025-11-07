@@ -471,3 +471,22 @@ class Reply(LikableMixin, TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
+        
+class NavbarLogo(TimestampedModel):
+    logo = models.ImageField(upload_to="infowebsite/logos/", blank=True, null=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"NavbarLogo<{self.pk}>"
+
+class SocialMedia(TimestampedModel):
+    platform = models.CharField(max_length=100)
+    url = models.URLField(max_length=1000)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"{self.platform}: {self.url}"
