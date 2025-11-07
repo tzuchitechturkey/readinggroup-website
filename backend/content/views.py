@@ -81,7 +81,8 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         """
         # action may be None outside of request handling
         action = getattr(self, 'action', None)
-        auth_actions = ('like', 'partial_update', 'my_list', 'my_list_item')
+        # include 'rating' so any authenticated user can rate posts (not only staff)
+        auth_actions = ('like', 'partial_update', 'my_list', 'my_list_item', 'rating')
         if action in auth_actions:
             return [IsAuthenticated()]
         return [perm() for perm in self.permission_classes]
@@ -448,9 +449,15 @@ class PostViewSet(BaseContentViewSet):
             return Response({"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
 
         if request.method == "POST":
+            # Accept either a JSON object { "rating": X } or a primitive body containing the number.
+            raw = None
             try:
-                # coerce to int and validate range
-                raw = request.data.get('rating')
+                if isinstance(request.data, dict):
+                    raw = request.data.get("rating")
+                else:
+                    # request.data may be a primitive (int/str) when the client sends a bare value
+                    raw = request.data
+
                 rating_value = int(raw)
                 if rating_value < 1 or rating_value > 5:
                     raise ValueError()
