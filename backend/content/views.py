@@ -1477,6 +1477,16 @@ class NavbarLogoViewSet(viewsets.ViewSet):
         except Exception:
             return Response({"detail": "Error retrieving NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+    def create(self, request):
+        """Create a new NavbarLogo instance."""
+        try:
+            serializer = self.serializer_class(data=request.data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception:
+            return Response({"detail": "Error creating NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     #update method to update the logo
     def update(self, request, pk=None):
         """Update the NavbarLogo instance."""
@@ -1520,6 +1530,16 @@ class SocialMediaViewSet(viewsets.ViewSet):
             return Response(serializer.data)
         except Exception:
             return Response({"detail": "Error retrieving SocialMedia links."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def create(self, request):
+        """Create a new SocialMedia instance."""
+        try:
+            serializer = self.serializer_class(data=request.data, context={"request": request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception:
+            return Response({"detail": "Error creating SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     def update(self, request, pk=None):
         """Update a SocialMedia instance."""
