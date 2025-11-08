@@ -1461,60 +1461,12 @@ class GlobalSearchViewSet(viewsets.ViewSet):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-class NavbarLogoViewSet(viewsets.ViewSet):
+class NavbarLogoViewSet(BaseContentViewSet):
     """ViewSet for retrieving the NavbarLogo."""
     queryset = NavbarLogo.objects.all()
     serializer_class = NavbarLogoSerializer
-    def list(self, request):
-        """Return the NavbarLogo instance."""
-        try:
-            logo = self.get_queryset().first()
-            if not logo:
-                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = self.serializer_class(logo, context={"request": request})
-            return Response(serializer.data)
-        except Exception:
-            return Response({"detail": "Error retrieving NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    def create(self, request):
-        """Create a new NavbarLogo instance."""
-        try:
-            serializer = self.serializer_class(data=request.data, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception:
-            return Response({"detail": "Error creating NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    #update method to update the logo
-    def update(self, request, pk=None):
-        """Update the NavbarLogo instance."""
-        try:
-            logo = self.get_queryset().first()
-            if not logo:
-                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
-
-            serializer = self.serializer_class(logo, data=request.data, partial=True, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except Exception:
-            return Response({"detail": "Error updating NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    #delete method to delete the logo
-    def destroy(self, request, pk=None):
-        """Delete the NavbarLogo instance."""
-        try:
-            logo = self.get_queryset().first()
-            if not logo:
-                return Response({"detail": "NavbarLogo not found."}, status=status.HTTP_404_NOT_FOUND)
-
-            logo.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            return Response({"detail": "Error deleting NavbarLogo."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-class SocialMediaViewSet(viewsets.ViewSet):
+class SocialMediaViewSet(BaseContentViewSet):
     """ViewSet for retrieving SocialMedia links."""
     queryset = SocialMedia.objects.all()
     serializer_class = SocialMediaSerializer
@@ -1522,51 +1474,6 @@ class SocialMediaViewSet(viewsets.ViewSet):
     ordering_fields = ("platform", "created_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ("platform",)
-    def list(self, request):
-        """Return all SocialMedia instances."""
-        try:
-            queryset = self.filter_queryset(self.get_queryset())
-            serializer = self.serializer_class(queryset, many=True, context={"request": request})
-            return Response(serializer.data)
-        except Exception:
-            return Response({"detail": "Error retrieving SocialMedia links."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def create(self, request):
-        """Create a new SocialMedia instance."""
-        try:
-            serializer = self.serializer_class(data=request.data, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception:
-            return Response({"detail": "Error creating SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    def update(self, request, pk=None):
-        """Update a SocialMedia instance."""
-        try:
-            social_media = self.get_queryset().filter(pk=pk).first()
-            if not social_media:
-                return Response({"detail": "SocialMedia not found."}, status=status.HTTP_404_NOT_FOUND)
-
-            serializer = self.serializer_class(social_media, data=request.data, partial=True, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except Exception:
-            return Response({"detail": "Error updating SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
-
-    def destroy(self, request, pk=None):
-        """Delete a SocialMedia instance."""
-        try:
-            social_media = self.get_queryset().filter(pk=pk).first()
-            if not social_media:
-                return Response({"detail": "SocialMedia not found."}, status=status.HTTP_404_NOT_FOUND)
-
-            social_media.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            return Response({"detail": "Error deleting SocialMedia."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
 
 class SiteInfoViewSet(viewsets.ViewSet):
     """Combined endpoint returning/accepting site info: latest navbar logo and social media links.
