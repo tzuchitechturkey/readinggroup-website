@@ -67,6 +67,33 @@ class IsStaffOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user.is_authenticated and request.user.is_staff
+    
+class BaseCRUDViewSet(viewsets.ModelViewSet):
+    """
+    A base ViewSet that provides standard CRUD actions:
+    - create
+    - update / partial_update
+    - destroy
+    - list
+    It does not include any additional actions such as like or top-liked.
+    """
+    permission_classes = [IsStaffOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        """Create a new item"""
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        """Update an existing item"""
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete an item"""
+        return super().destroy(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """List all items"""
+        return super().list(request, *args, **kwargs)
 
 
 class BaseContentViewSet(viewsets.ModelViewSet):
@@ -159,7 +186,30 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         qs = self.annotate_likes(qs)
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
-    
+
+    @action(detail=False, methods=("get",), url_path="top-commented", url_name="top_commented")
+    def top_commented(self, request):
+        """Return top commented instances for this resource.
+        Query params:
+        - limit: int (default 5)
+        """
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = self.get_queryset()
+        # if model has 'comments' field, order by it; fallback to created_at if not
+        try:
+            qs = qs.order_by('-comments_count', '-created_at')[:limit]
+        except Exception:
+            qs = qs.order_by('-created_at')[:limit]
+
+        # annotate likes info as well so serializers can show likes_count/has_liked
+        qs = self.annotate_likes(qs)
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
     @action(detail=True, methods=("post", "delete"), url_path="like", url_name="like")
     def like(self, request, pk=None):
         """POST to like, DELETE to unlike. Accessible to authenticated users."""
@@ -207,7 +257,7 @@ class VideoViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter]
 
     @swagger_auto_schema(
-        operation_summary="List videos",
+        operation_summary="all List videos",
         operation_description="Retrieve a list of videos with optional filtering by video_type, language, category, and happened_at date.",
         manual_parameters=video_manual_parameters
     )
@@ -368,7 +418,6 @@ class VideoViewSet(BaseContentViewSet):
         })
 
 class PostViewSet(BaseContentViewSet):
-    """ViewSet for managing Post content."""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
@@ -377,6 +426,8 @@ class PostViewSet(BaseContentViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
+        operation_summary="List all posts",
+        operation_description="Retrieve a list of posts with optional filtering by created_at, writer, category, language, post_type, and status.",
         manual_parameters=post_manual_parameters
     )
     
@@ -393,7 +444,6 @@ class PostViewSet(BaseContentViewSet):
     def get_queryset(self):
         
         queryset = super().get_queryset()
-        # annotate likes info
         queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
@@ -446,7 +496,6 @@ class PostViewSet(BaseContentViewSet):
     @action(detail=True, methods=("post", "delete"), url_path="rating", url_name="rating")
     def rating(self, request, pk=None):
         """POST to set/update rating (body: { "rating": 1-5 }), DELETE to remove user's rating.
-
         Returns the serialized Post (with updated average/count/user_rating).
         """
         user = request.user
@@ -484,77 +533,7 @@ class PostViewSet(BaseContentViewSet):
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=("get",), url_path="top-liked-grouped", url_name="top_liked_grouped")
-    def top_liked_grouped(self, request):
-        """Return grouped top liked posts:
-
-        - card_photo: top N posts where post_type is CARD or PHOTO
-        - reading: top N posts where post_type is READING
-
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        # Use the model helper to get grouped querysets
-        groups = Post.top_liked_grouped(limit=limit)
-
-        # Ensure annotated fields and has_liked are present using annotate_likes
-        card_photo_qs = self.annotate_likes(groups.get('card_photo') or Post.objects.none())
-        reading_qs = self.annotate_likes(groups.get('reading') or Post.objects.none())
-
-        card_photo_data = PostSerializer(card_photo_qs, many=True, context={"request": request}).data
-        reading_data = PostSerializer(reading_qs, many=True, context={"request": request}).data
-
-        return Response({"card_photo": card_photo_data, "reading": reading_data})
     
-    @action(detail=False, methods=("get",), url_path="top-commented-card-photo", url_name="top_commented_card_photo")
-    def top_commented_card_photo(self, request):
-        """Return top N posts by number of comments for post_type in (CARD, PHOTO).
-
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        types = [PostType.CARD, PostType.PHOTO]
-
-        qs = Post.top_commented_by_types(types=types, limit=limit)
-
-        # annotate likes info (and has_liked for authenticated user)
-        qs = self.annotate_likes(qs)
-
-        serializer = PostSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-    
-    #add new action for top 5 in is_viewed for group card_photo and reading
-    @action(detail=False, methods=("get",), url_path="top-viewed-grouped", url_name="top_viewed_grouped")
-    def top_viewed_grouped(self, request):
-        """Return grouped top viewed posts:
-        - card_photo: top N posts where post_type is CARD or PHOTO
-        - reading: top N posts where post_type is READING
-
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        groups = Post.top_viewed_grouped(limit=limit)
-        card_photo_queryset = self.annotate_likes(groups.get('card_photo') or Post.objects.none())
-        reading_queryset = self.annotate_likes(groups.get('reading') or Post.objects.none())
-        card_photo_data = PostSerializer(card_photo_queryset, many=True, context={"request": request}).data
-        reading_data = PostSerializer(reading_queryset, many=True, context={"request": request}).data
-
-        return Response({"card_photo": card_photo_data, "reading": reading_data})
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
@@ -908,28 +887,28 @@ class HistoryEntryViewSet(BaseContentViewSet):
     
 #This endpoint is passed inside the main endpoint.
     
-class PostCategoryViewSet(BaseContentViewSet):
+class PostCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing PostCategory content."""
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     
-class EventCategoryViewSet(BaseContentViewSet):
+class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    
-class PositionTeamMemberViewSet(BaseContentViewSet):
+
+class PositionTeamMemberViewSet(BaseCRUDViewSet):
     """ViewSet for managing PositionTeamMember content."""
     queryset = PositionTeamMember.objects.all()
     serializer_class = PositionTeamMemberSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     
-class SeasonIdViewSet(BaseContentViewSet):
+class SeasonIdViewSet(BaseCRUDViewSet):
     """ViewSet for managing SeasonId content."""
     queryset = SeasonId.objects.all()
     serializer_class = SeasonIdSerializer
@@ -964,7 +943,7 @@ class SeasonIdViewSet(BaseContentViewSet):
         serializer = VideoSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
 
-class SeasonTitleViewSet(BaseContentViewSet):
+class SeasonTitleViewSet(BaseCRUDViewSet):
     """ViewSet for managing SeasonTitle content."""
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
@@ -1006,7 +985,7 @@ class VideoCategoryViewSet(BaseContentViewSet):
     search_fields = ("name",)
     ordering_fields = ("created_at",)
 
-class EventSectionViewSet(BaseContentViewSet):
+class EventSectionViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventSection content."""
     queryset = EventSection.objects.all()
     serializer_class = EventSectionSerializer
@@ -1112,7 +1091,6 @@ class CombinedTopLikedView(viewsets.ViewSet):
     Response shape:
     {
       "posts_card_photo": [...],
-      "posts_reading": [...],
       "videos": [...],
       "top_section": { "id": <id>, "name": <name>, "events": [...] }
     }
@@ -1134,9 +1112,8 @@ class CombinedTopLikedView(viewsets.ViewSet):
             events_limit = 5
 
         # Posts: use model helper to get grouped querysets (already ordered)
-        groups = Post.top_liked_grouped(limit=limit)
+        groups = Post.top_liked(limit=limit)
         card_photo_qs = groups.get('card_photo') or Post.objects.none()
-        reading_qs = groups.get('reading') or Post.objects.none()
 
         # Videos: use LikableMixin.top_liked via Video.top_liked
         videos_qs = Video.top_liked(limit=limit)
@@ -1160,12 +1137,10 @@ class CombinedTopLikedView(viewsets.ViewSet):
 
         # Annotate likes/has_liked for posts & videos
         card_photo_qs = annotate_likes_queryset(card_photo_qs, request)
-        reading_qs = annotate_likes_queryset(reading_qs, request)
         videos_qs = annotate_likes_queryset(videos_qs, request)
 
         # Serialize
         card_photo_data = PostSerializer(card_photo_qs, many=True, context={"request": request}).data
-        reading_data = PostSerializer(reading_qs, many=True, context={"request": request}).data
         videos_data = VideoSerializer(videos_qs, many=True, context={"request": request}).data
 
         top_section_data = None
@@ -1179,7 +1154,6 @@ class CombinedTopLikedView(viewsets.ViewSet):
 
         return Response({
             "posts_card_photo": card_photo_data,
-            "posts_reading": reading_data,
             "videos": videos_data,
             "top_section": top_section_data,
         })
@@ -1187,7 +1161,6 @@ class CombinedTopLikedView(viewsets.ViewSet):
 class TopStatsViewSet(viewsets.ViewSet):
     """
     Endpoints:
-    - GET /api/v1/top-stats/?order=video=1,post_card=2,post_reading=3,...
       Returns top-liked objects per type in the requested order.
       If no 'order' param, uses default order.
       If user is staff, persists the order for future requests.
@@ -1195,7 +1168,6 @@ class TopStatsViewSet(viewsets.ViewSet):
 
     DEFAULT_KEYS: List[str] = [
         "video",
-        "post_reading",
         "post_card",
         "post_photo",
         "event",
@@ -1349,9 +1321,7 @@ class TopStatsViewSet(viewsets.ViewSet):
         top_event = self._get_top_liked_object(Event.objects.all(), request)
         top_weekly_moment = self._get_top_liked_object(WeeklyMoment.objects.all(), request)
 
-        top_post_reading = self._get_top_liked_object(
-            Post.objects.filter(post_type=PostType.READING), request
-        )
+
         top_post_card = self._get_top_liked_object(
             Post.objects.filter(post_type=PostType.CARD), request
         )
@@ -1366,7 +1336,6 @@ class TopStatsViewSet(viewsets.ViewSet):
         # 4) assemble base payload
         base_payload: Dict[str, object] = {
             "video": self._serialize_any(top_video, request),
-            "post_reading": self._serialize_any(top_post_reading, request),
             "post_card": self._serialize_any(top_post_card, request),
             "post_photo": self._serialize_any(top_post_photo, request),
             "event": self._serialize_any(top_event, request),

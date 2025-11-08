@@ -25,7 +25,6 @@ class ReportType(models.TextChoices):
 class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
-    READING = "reading", "Reading"
 
 #In Video model
 class VideoType(models.TextChoices):
