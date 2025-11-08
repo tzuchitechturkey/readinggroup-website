@@ -878,12 +878,10 @@ class CombinedTopLikedView(viewsets.ViewSet):
         except Exception:
             events_limit = 5
 
-        # Posts: use model helper to get grouped querysets (already ordered)
         groups = Post.top_liked(limit=limit)
         card_photo_qs = groups.get('card_photo') or Post.objects.none()
 
-        # Videos: use LikableMixin.top_liked via Video.top_liked
-        videos_qs = Video.top_liked(limit=limit)
+        videos_qs = Video.objects.all()
 
         # Top section by number of events, then its top liked events
         top_section = None
@@ -901,9 +899,18 @@ class CombinedTopLikedView(viewsets.ViewSet):
                 events_qs = events_qs[:events_limit]
             events_in_top_section = events_qs
 
-        # Annotate likes/has_liked for posts & videos
+        # Annotate likes/has_liked for posts & videos, then order & slice to respect limit
         card_photo_qs = annotate_likes_queryset(card_photo_qs, request)
+        try:
+            card_photo_qs = card_photo_qs.order_by('-annotated_likes_count', '-created_at')[:limit]
+        except Exception:
+            card_photo_qs = card_photo_qs[:limit]
+
         videos_qs = annotate_likes_queryset(videos_qs, request)
+        try:
+            videos_qs = videos_qs.order_by('-annotated_likes_count', '-created_at')[:limit]
+        except Exception:
+            videos_qs = videos_qs[:limit]
 
         # Serialize
         card_photo_data = PostSerializer(card_photo_qs, many=True, context={"request": request}).data

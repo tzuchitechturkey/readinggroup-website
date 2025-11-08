@@ -210,9 +210,10 @@ class Post(LikableMixin, TimestampedModel):
         qs = (
             cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
             .annotate(annotated_likes_count=Count('likes'))
-            .order_by('-annotated_likes_count', '-created_at')[:limit]
+            .order_by('-annotated_likes_count', '-created_at')
         )
-        return qs
+        # Return grouped shape to match callers that expect a dict with 'card_photo'
+        return {"card_photo": qs}
     
     @classmethod
     def top_viewed(cls, limit: int = 5):
@@ -223,7 +224,7 @@ class Post(LikableMixin, TimestampedModel):
             """
         card_photo_qs = (
             cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
-            .order_by('-views', '-created_at')[:limit]
+            .order_by('-views', '-created_at')
         )
         return {"card_photo": card_photo_qs}
     
@@ -239,7 +240,7 @@ class Post(LikableMixin, TimestampedModel):
         qs = (
             cls.objects.filter(post_type__in=types, status=PostStatus.PUBLISHED)
             .annotate(annotated_comments_count=Count('comments'))
-            .order_by('-annotated_comments_count', '-created_at')[:limit]
+            .order_by('-annotated_comments_count', '-created_at')
         )
         return qs
     
