@@ -454,13 +454,15 @@ class ContentViewSet(BaseContentViewSet):
             except Exception:
                 return Response({"detail": "Invalid rating. Must be integer 1-5."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # create or update rating
-            PostRating.objects.update_or_create(user=user, content=content, defaults={"rating": rating_value})
+            # create or update rating (ContentRating)
+            from .models import ContentRating
+            ContentRating.objects.update_or_create(user=user, content=content, defaults={"rating": rating_value})
             serializer = ContentSerializer(content, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         # DELETE: remove user's rating if exists
-        PostRating.objects.filter(user=user, content=content).delete()
+        from .models import ContentRating
+        ContentRating.objects.filter(user=user, content=content).delete()
         serializer = ContentSerializer(content, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 

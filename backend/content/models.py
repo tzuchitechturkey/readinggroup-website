@@ -346,6 +346,20 @@ class PostRating(TimestampedModel):
     def __str__(self) -> str: 
         return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
 
+
+class ContentRating(TimestampedModel):
+    """User rating for a Content instance (1-5 stars). Each user may rate a content once."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="content_ratings")
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='ratings')
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = (('user', 'content'),)
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"ContentRating<{self.user_id}:{self.content_id}:{self.rating}>"
+
 class SectionOrder(models.Model):
     """Persist global ordering for dashboard/top-stats sections.
     Each row stores a section key (e.g. 'video', 'post_card') and a

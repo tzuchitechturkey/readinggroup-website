@@ -24,6 +24,7 @@ from .models import (
     PositionTeamMember,
     EventSection,
     PostRating,
+    ContentRating,
     Like,
     SeasonTitle,
     SeasonId,
@@ -442,6 +443,9 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
+    average_rating = serializers.SerializerMethodField(read_only=True)
+    rating_count = serializers.SerializerMethodField(read_only=True)
+    user_rating = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Content
         fields = "__all__"
@@ -460,7 +464,63 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
         data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        # ratings: average, count, and user's rating (if any)
+        try:
+            avg = getattr(instance, 'annotated_rating_avg', None)
+            count = getattr(instance, 'annotated_rating_count', None)
+            if avg is None or count is None:
+                from django.db.models import Avg, Count
+                agg = ContentRating.objects.filter(content=instance).aggregate(avg=Avg('rating'), count=Count('id'))
+                avg = agg.get('avg')
+                count = agg.get('count')
+            data['average_rating'] = round(avg, 2) if avg is not None else None
+            data['rating_count'] = int(count or 0)
+        except Exception:
+            data['average_rating'] = None
+            data['rating_count'] = 0
+
+        try:
+            if user and user.is_authenticated:
+                cr = ContentRating.objects.filter(content=instance, user=user).first()
+                data['user_rating'] = cr.rating if cr else None
+            else:
+                data['user_rating'] = None
+        except Exception:
+            data['user_rating'] = None
         return data
+
+    def get_average_rating(self, obj):
+        try:
+            avg = getattr(obj, 'annotated_rating_avg', None)
+            if avg is None:
+                from django.db.models import Avg
+                agg = ContentRating.objects.filter(content=obj).aggregate(avg=Avg('rating'))
+                avg = agg.get('avg')
+            return round(avg, 2) if avg is not None else None
+        except Exception:
+            return None
+
+    def get_rating_count(self, obj):
+        try:
+            count = getattr(obj, 'annotated_rating_count', None)
+            if count is None:
+                from django.db.models import Count
+                agg = ContentRating.objects.filter(content=obj).aggregate(count=Count('id'))
+                count = agg.get('count')
+            return int(count or 0)
+        except Exception:
+            return 0
+
+    def get_user_rating(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return None
+        try:
+            cr = ContentRating.objects.filter(content=obj, user=user).first()
+            return cr.rating if cr else None
+        except Exception:
+            return None
 
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
