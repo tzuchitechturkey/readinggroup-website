@@ -1,12 +1,15 @@
-from rest_framework import filters, viewsets, status
+from django.db.models import Count as DjCount
+from django.db.models import Count
+from django.contrib.contenttypes.models import ContentType
 from typing import Dict, List, Optional
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from rest_framework import filters, viewsets, status
+from .enums import VideoType, PostType
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
-from .helpers import annotate_likes_queryset
 from .swagger_parameters import(
     video_manual_parameters,
     post_manual_parameters,
@@ -35,8 +38,8 @@ from .models import (
     SectionOrder,
     SocialMedia,
     NavbarLogo,
+    PostRating,
 )
-from .enums import VideoType, PostType
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
@@ -57,196 +60,12 @@ from .serializers import (
     SocialMediaSerializer,
     NavbarLogoSerializer,
 )
-from .models import PostRating
-
-
-class IsStaffOrReadOnly(BasePermission):
-    """Allow read access to everyone but limit writes to staff members."""
-
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        return request.user.is_authenticated and request.user.is_staff
-    
-class BaseCRUDViewSet(viewsets.ModelViewSet):
-    """
-    A base ViewSet that provides standard CRUD actions:
-    - create
-    - update / partial_update
-    - destroy
-    - list
-    It does not include any additional actions such as like or top-liked.
-    """
-    permission_classes = [IsStaffOrReadOnly]
-
-    def create(self, request, *args, **kwargs):
-        """Create a new item"""
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """Update an existing item"""
-        return super().update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        """Delete an item"""
-        return super().destroy(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        """List all items"""
-        return super().list(request, *args, **kwargs)
-
-
-class BaseContentViewSet(viewsets.ModelViewSet):
-    """Common configuration shared across content viewsets."""
-    permission_classes = [IsStaffOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-
-    def get_permissions(self):
-        """Allow certain actions for any authenticated user (likes, my-list, partial_update toggles).
-
-        Default behavior remains IsStaffOrReadOnly for write operations. For actions that should be
-        available to any logged-in user (like, partial_update toggle of has_liked, and per-view
-        my-list endpoints), return IsAuthenticated permission instead.
-        """
-        # action may be None outside of request handling
-        action = getattr(self, 'action', None)
-        # include 'rating' so any authenticated user can rate posts (not only staff)
-        auth_actions = ('like', 'partial_update', 'my_list', 'my_list_item', 'rating')
-        if action in auth_actions:
-            return [IsAuthenticated()]
-        return [perm() for perm in self.permission_classes]
-
-    def annotate_likes(self, queryset):
-        """Annotate a queryset with likes_count and (when request.user authenticated) has_liked."""
-        from django.db.models import Count, Exists, OuterRef
-        from django.contrib.contenttypes.models import ContentType
-
-        request = getattr(self, 'request', None)
-        # annotate total likes into a non-conflicting name to avoid model property collisions
-        try:
-            queryset = queryset.annotate(annotated_likes_count=Count('likes'))
-        except Exception:
-            # if model doesn't have 'likes' relation, skip
-            return queryset
-
-        # annotate whether the current user has liked each item into a non-conflicting name
-        if request and getattr(request, 'user', None) and request.user.is_authenticated:
-            ct = ContentType.objects.get_for_model(queryset.model)
-            likes_subq = Like.objects.filter(content_type=ct, object_id=OuterRef('pk'), user=request.user)
-            try:
-                queryset = queryset.annotate(annotated_has_liked=Exists(likes_subq))
-            except Exception:
-                # fallback: ignore annotation if something fails
-                pass
-        return queryset
-    @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
-    def top_liked(self, request):
-        """Return top liked instances for this resource.
-
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        # annotate queryset with likes info then order by annotated_likes_count
-        qs = self.get_queryset()
-        qs = self.annotate_likes(qs)
-        # prefer annotated_likes_count (annotate_likes uses Count('likes'))
-        try:
-            qs = qs.order_by('-annotated_likes_count', '-created_at')[:limit]
-        except Exception:
-            # fallback: try ordering by annotated field name or likes_count
-            qs = qs[:limit]
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("get",), url_path="top-viewed", url_name="top_viewed")
-    def top_viewed(self, request):
-        """Return top viewed instances for this resource.
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        qs = self.get_queryset()
-        # if model has 'views' field, order by it; fallback to created_at if not
-        try:
-            qs = qs.order_by('-views', '-created_at')[:limit]
-        except Exception:
-            qs = qs.order_by('-created_at')[:limit]
-
-        # annotate likes info as well so serializers can show likes_count/has_liked
-        qs = self.annotate_likes(qs)
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("get",), url_path="top-commented", url_name="top_commented")
-    def top_commented(self, request):
-        """Return top commented instances for this resource.
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        qs = self.get_queryset()
-        # if model has 'comments' field, order by it; fallback to created_at if not
-        try:
-            qs = qs.order_by('-comments_count', '-created_at')[:limit]
-        except Exception:
-            qs = qs.order_by('-created_at')[:limit]
-
-        # annotate likes info as well so serializers can show likes_count/has_liked
-        qs = self.annotate_likes(qs)
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @action(detail=True, methods=("post", "delete"), url_path="like", url_name="like")
-    def like(self, request, pk=None):
-        """POST to like, DELETE to unlike. Accessible to authenticated users."""
-        instance = self.get_object()
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
-
-        if request.method == "POST":
-            instance.add_like(user)
-        else:
-            instance.remove_like(user)
-
-        serializer = self.get_serializer(instance, context={"request": request})
-        return Response(serializer.data)
-
-    def partial_update(self, request, *args, **kwargs):
-        """Allow toggling `has_liked` via PATCH with { has_liked: true/false } for authenticated users.
-        This keeps compatibility with the frontend which PATCHes `has_liked` on posts.
-        """
-        instance = self.get_object()
-        user = request.user
-        if "has_liked" in request.data:
-            if not user or not user.is_authenticated:
-                return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
-            try:
-                want = bool(request.data.get("has_liked"))
-            except Exception:
-                want = False
-            if want:
-                instance.add_like(user)
-            else:
-                instance.remove_like(user)
-            serializer = self.get_serializer(instance, context={"request": request})
-            return Response(serializer.data)
-
-        return super().partial_update(request, *args, **kwargs)
+from .views_helpers import(
+    BaseContentViewSet,
+    BaseCRUDViewSet,
+    IsStaffOrReadOnly,
+    annotate_likes_queryset
+)
 
 
 class VideoViewSet(BaseContentViewSet):
@@ -273,7 +92,6 @@ class VideoViewSet(BaseContentViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # annotate likes info
         queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
@@ -673,50 +491,6 @@ class EventViewSet(BaseContentViewSet):
 
         return Response({"tags": tags})
     
-    #add new action for top 5 in commented
-    @action(detail=False, methods=("get",), url_path="top-commented", url_name="top_commented")
-    def top_commented(self, request):
-        """Return top N events by number of comments.
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        qs = Event.top_commented(limit=limit)
-
-        # annotate likes info (and has_liked for authenticated user)
-        qs = self.annotate_likes(qs)
-
-        serializer = EventSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-    
-    #add new action for top 5 in viewed
-    @action(detail=False, methods=("get",), url_path="top-viewed", url_name="top_viewed")
-    def top_viewed(self, request):
-        """Return top viewed instances for this resource.
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        qs = self.get_queryset()
-        # if model has 'views' field, order by it; fallback to created_at if not
-        try:
-            qs = qs.order_by('-views', '-created_at')[:limit]
-        except Exception:
-            qs = qs.order_by('-created_at')[:limit]
-
-        # annotate likes info as well so serializers can show likes_count/has_liked
-        qs = self.annotate_likes(qs)
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
     #add new action last 5 posted for Event
     @action(detail=False, methods=("get",), url_path="last-posted", url_name="last_posted")
     def last_posted(self, request):
@@ -777,10 +551,13 @@ class TeamMemberViewSet(BaseContentViewSet):
     serializer_class = TeamMemberSerializer
     search_fields = ("name", "job_title", "position__name")
     ordering_fields = ("name", "created_at")
+    filterset_fields = ("name", "job_title", "position__name")
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ("name", "job_title", "position__name")
+    
     @swagger_auto_schema(
+        operation_summary="List all team members",
+        operation_description="Retrieve a list of team members with optional filtering by name, job title, and position.",
         manual_parameters=team_member_manual_parameters
     )
 
@@ -813,8 +590,6 @@ class CommentsViewSet(BaseContentViewSet):
 
     def get_queryset(self):
         """Filter comments by object_id and content_type if provided, then annotate likes."""
-        from django.contrib.contenttypes.models import ContentType
-
         queryset = super().get_queryset()
         object_id = self.request.query_params.get('object_id')
         content_type_name = self.request.query_params.get('content_type')
@@ -882,11 +657,8 @@ class HistoryEntryViewSet(BaseContentViewSet):
     queryset = HistoryEntry.objects.all()
     serializer_class = HistoryEntrySerializer
     search_fields = ("title", "description")
-    ordering_fields = ("story_date")
-    
-    
-#This endpoint is passed inside the main endpoint.
-    
+    ordering_fields = ("story_date", "created_at")
+
 class PostCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing PostCategory content."""
     queryset = PostCategory.objects.all()
@@ -918,7 +690,6 @@ class SeasonIdViewSet(BaseCRUDViewSet):
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
     def videos(self, request, pk=None):
         """Return all Video objects associated with this SeasonId.
-
         URL: /.../seasonid/{id}/videos/
         Videos are ordered by happened_at (newest first) then created_at.
         Supports pagination if the viewset/router has pagination configured.
@@ -1011,8 +782,6 @@ class EventSectionViewSet(BaseCRUDViewSet):
         except Exception:
             events_limit = None
 
-        from django.db.models import Count
-
         # annotate sections by number of related Event objects and pick top N
         sections_qs = EventSection.objects.annotate(events_count=Count("event")).order_by("-events_count")[:limit]
 
@@ -1055,8 +824,6 @@ class EventSectionViewSet(BaseCRUDViewSet):
             events_limit = int(events_limit) if events_limit is not None else 5
         except Exception:
             events_limit = 5
-
-        from django.db.models import Count
 
         # pick top sections by number of related Event objects (same as top_with_events)
         sections_qs = EventSection.objects.annotate(events_count=Count("event")).order_by("-events_count")[:limit]
@@ -1121,7 +888,6 @@ class CombinedTopLikedView(viewsets.ViewSet):
         # Top section by number of events, then its top liked events
         top_section = None
         events_in_top_section = []
-        from django.db.models import Count as DjCount
 
         section = EventSection.objects.annotate(events_count=DjCount('event')).order_by('-events_count').first()
         if section:

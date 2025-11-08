@@ -208,7 +208,7 @@ class Post(LikableMixin, TimestampedModel):
         ordered by number of likes (descending) then created_at as tiebreaker.
         """
         qs = (
-            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO])
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
             .annotate(annotated_likes_count=Count('likes'))
             .order_by('-annotated_likes_count', '-created_at')[:limit]
         )
@@ -222,7 +222,7 @@ class Post(LikableMixin, TimestampedModel):
         so we intentionally do not annotate likes here.
             """
         card_photo_qs = (
-            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO])
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
             .order_by('-views', '-created_at')[:limit]
         )
         return {"card_photo": card_photo_qs}
@@ -237,7 +237,7 @@ class Post(LikableMixin, TimestampedModel):
         match the annotate_* naming convention used elsewhere.
         """
         qs = (
-            cls.objects.filter(post_type__in=types)
+            cls.objects.filter(post_type__in=types, status=PostStatus.PUBLISHED)
             .annotate(annotated_comments_count=Count('comments'))
             .order_by('-annotated_comments_count', '-created_at')[:limit]
         )

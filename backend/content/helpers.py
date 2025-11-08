@@ -24,23 +24,3 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
                 data[field_name] = self._build_absolute_uri(file_value.url)
         return data
         
-#for views.py use
-def annotate_likes_queryset(queryset, request=None):
-    """Module-level helper to annotate a queryset with likes count and (when request.user authenticated) has_liked.
-
-    This mirrors BaseContentViewSet.annotate_likes but is usable from function/class-based views.
-    """
-    try:
-        queryset = queryset.annotate(annotated_likes_count=Count('likes'))
-    except Exception:
-        return queryset
-
-    if request and getattr(request, 'user', None) and request.user.is_authenticated:
-        try:
-            ct = ContentType.objects.get_for_model(queryset.model)
-            likes_subq = Like.objects.filter(content_type=ct, object_id=OuterRef('pk'), user=request.user)
-            queryset = queryset.annotate(annotated_has_liked=Exists(likes_subq))
-        except Exception:
-            # ignore failures to annotate has_liked
-            pass
-    return queryset
