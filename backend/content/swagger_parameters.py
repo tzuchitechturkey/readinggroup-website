@@ -202,3 +202,37 @@ content_manual_parameters = [
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
 ]
+
+content_category_manual_parameters = [
+    openapi.Parameter(
+        'is_active',
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING
+    ),
+]
+
+post_category_manual_parameters = [
+    openapi.Parameter(
+        'is_active',
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING
+    ),
+]
+event_category_manual_parameters = [
+    openapi.Parameter(
+        'is_active',
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING
+    ),
+]
+video_category_manual_parameters = [
+    openapi.Parameter(
+        'is_active',
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING
+    ),
+]

@@ -16,7 +16,11 @@ from .swagger_parameters import(
     event_manual_parameters,
     team_member_manual_parameters,
     global_search_manual_parameters,
-    content_manual_parameters
+    content_manual_parameters,
+    post_category_manual_parameters,
+    content_category_manual_parameters,
+    event_category_manual_parameters,
+    video_category_manual_parameters,
 )
 from .models import (
     Event,
@@ -779,6 +783,23 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     serializer_class = PostCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    queryset = PostCategory.objects.all()
+    
+    @swagger_auto_schema(
+        operation_summary="List all post categories",
+        operation_description="Retrieve a list of post categories with optional filtering by is_active status.",
+        manual_parameters=post_category_manual_parameters
+    )
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        return queryset
     
 class ContentCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing ContentCategory content."""
@@ -786,12 +807,47 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     serializer_class = ContentCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    queryset = ContentCategory.objects.all()
+
+    @swagger_auto_schema(
+        operation_summary="List all content categories",
+        operation_description="Retrieve a list of content categories with optional filtering by is_active status.",
+        manual_parameters=content_category_manual_parameters
+    )
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        return queryset
+    
 class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    queryset = EventCategory.objects.all()
+
+    @swagger_auto_schema(
+        operation_summary="List all event categories",
+        operation_description="Retrieve a list of event categories with optional filtering by is_active status.",
+        manual_parameters=event_category_manual_parameters
+    )
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        return queryset
 
 class PositionTeamMemberViewSet(BaseCRUDViewSet):
     """ViewSet for managing PositionTeamMember content."""
@@ -875,6 +931,23 @@ class VideoCategoryViewSet(BaseContentViewSet):
     serializer_class = VideoCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+    queryset = VideoCategory.objects.all()
+
+    @swagger_auto_schema(
+        operation_summary="List all video categories",
+        operation_description="Retrieve a list of video categories with optional filtering by is_active status.",
+        manual_parameters=video_category_manual_parameters
+    )
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        return queryset
 
 class EventSectionViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventSection content."""
