@@ -3,11 +3,13 @@ from .models import (
     Event,
     HistoryEntry,
     Post,
+    Content,
     TeamMember,
     Video,
     WeeklyMoment,
     PostCategory,
     VideoCategory,
+    ContentCategory,
     EventCategory,
     PositionTeamMember,
     EventSection,
@@ -148,3 +150,18 @@ class SocialMediaAdmin(admin.ModelAdmin):
 class NavbarLogoAdmin(admin.ModelAdmin):
     list_display = ("logo",)
     search_fields = ("logo",)
+    
+@admin.register(ContentCategory)
+class ContentCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    
+@admin.register(Content)
+class ContentAdmin(admin.ModelAdmin):
+    list_display = ("title", "category_name", "language", "writer", "created_at")
+    list_filter = ("category__name", "language", "writer")
+    search_fields = ("title", "category__name", "writer")
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+    category_name.short_description = "category"

@@ -1,18 +1,18 @@
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
-from datetime import timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
+from datetime import timedelta
 from .enums import (
     PostStatus,
     PostType,
     VideoType,
     ReportType,
+    ContentStatus,
 )
-
 
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""
@@ -21,7 +21,6 @@ class TimestampedModel(models.Model):
 
     class Meta:
         abstract = True
-        
         
 class Like(models.Model):
     """Generic like model for any entity (Video/Post/Event/...)"""
@@ -142,42 +141,6 @@ class Video(LikableMixin, TimestampedModel):
             except Exception:
                 pass
     
-class VideoCategory(TimestampedModel):
-    """Categories for organizing videos."""
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str: 
-        return self.name
-    
-class SeasonTitle(models.Model):
-    """Season and Title mapping for Videos."""
-    name = models.CharField(max_length=255, blank=True, unique=True)
-    description = models.TextField(blank=True)
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str: 
-        return self.name
-    
-class SeasonId(models.Model):
-    """Season ID mapping for Videos."""
-    season_title = models.ForeignKey("SeasonTitle", on_delete=models.CASCADE, related_name="season_ids")
-    season_id = models.CharField(max_length=100)
-    class Meta:
-        ordering = ("season_title__name",)
-
-    def __str__(self) -> str:
-        # Show the actual season_id string in admin selects and reprs so
-        # dropdowns display the id value instead of the SeasonTitle name.
-        try:
-            return self.season_id
-        except Exception:
-            return ""
-    
-    
 class Post(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
     title = models.CharField(max_length=255)
@@ -249,20 +212,6 @@ class Post(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
-
-
-class MyListEntry(TimestampedModel):
-    """User saved videos for later viewing."""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_list")
-    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='saved_by')
-
-    class Meta:
-        unique_together = (('user', 'video'),)
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return f"MyListEntry<{self.user_id}:{self.video_id}>"
-    
     
 class Event(LikableMixin, TimestampedModel):
     """Represent events and news items grouped by section."""
@@ -304,20 +253,32 @@ class Event(LikableMixin, TimestampedModel):
         except Exception:
             # Fallback: return most recent events if annotation fails
             return cls.objects.order_by('-created_at')[:limit]
-
-
-class PostRating(TimestampedModel):
-    """User rating for a Post (1-5 stars). Each user may rate a post once."""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_ratings")
-    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='ratings')
-    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-
+        
+class Content(LikableMixin, TimestampedModel):
+    """Landing posts that appear across the application."""
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True)
+    excerpt = models.TextField(blank=True)
+    body = models.TextField(blank=True)
+    writer = models.CharField(max_length=255)
+    writer_avatar = models.URLField(blank=True)
+    category = models.ForeignKey('ContentCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=16, choices=ContentStatus.choices, default=ContentStatus.DRAFT)
+    is_active = models.BooleanField(default=True)
+    views = models.PositiveIntegerField(default=0)
+    read_time = models.CharField(max_length=32, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    language = models.CharField(max_length=50, blank=True)
+    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
+    image_url = models.URLField(max_length=1000, blank=True)
+    metadata = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    
     class Meta:
-        unique_together = (('user', 'post'),)
         ordering = ("-created_at",)
-
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
+    def __str__(self) -> str:
+        return self.title
 
 class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
@@ -371,9 +332,22 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
     
+    
+#=====================================================Auxiliary classes========================================================
+class PostRating(TimestampedModel):
+    """User rating for a Post (1-5 stars). Each user may rate a post once."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_ratings")
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='ratings')
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    class Meta:
+        unique_together = (('user', 'post'),)
+        ordering = ("-created_at",)
+    def __str__(self) -> str: 
+        return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
+
 class SectionOrder(models.Model):
     """Persist global ordering for dashboard/top-stats sections.
-
     Each row stores a section key (e.g. 'video', 'post_card') and a
     numeric position. Lower numbers appear earlier.
     """
@@ -382,33 +356,83 @@ class SectionOrder(models.Model):
 
     class Meta:
         ordering = ("position",)
-
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
 
-#Category for Posts
 class PostCategory(TimestampedModel):
     """Categories for organizing posts."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ("name",)
+    def __str__(self) -> str: 
+        return self.name
+    
+class EventCategory(TimestampedModel):
+    """Categories for organizing events."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("name",)
+    def __str__(self) -> str: 
+        return self.name
+    
+class ContentCategory(TimestampedModel):
+    """Categories for organizing content."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("name",)
+    def __str__(self) -> str: 
+        return self.name
+
+class VideoCategory(TimestampedModel):
+    """Categories for organizing videos."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ("name",)
+    def __str__(self) -> str: 
+        return self.name
+    
+class SeasonTitle(models.Model):
+    """Season and Title mapping for Videos."""
+    name = models.CharField(max_length=255, blank=True, unique=True)
+    description = models.TextField(blank=True)
     class Meta:
         ordering = ("name",)
 
     def __str__(self) -> str: 
         return self.name
     
-#Category for Events
-class EventCategory(TimestampedModel):
-    """Categories for organizing events."""
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
+class SeasonId(models.Model):
+    """Season ID mapping for Videos."""
+    season_title = models.ForeignKey("SeasonTitle", on_delete=models.CASCADE, related_name="season_ids")
+    season_id = models.CharField(max_length=100)
+    
+    class Meta:
+        ordering = ("season_title__name",)
+    def __str__(self) -> str:
+        return self.season_id
+
+class MyListEntry(TimestampedModel):
+    """User saved videos for later viewing."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_list")
+    video = models.ForeignKey('Video', on_delete=models.CASCADE, related_name='saved_by')
 
     class Meta:
-        ordering = ("name",)
-
+        unique_together = (('user', 'video'),)
+        ordering = ("-created_at",)
     def __str__(self) -> str: 
-        return self.name
+        return f"MyListEntry<{self.user_id}:{self.video_id}>"
     
 class PositionTeamMember(TimestampedModel):
     """Positions for Team Members."""
@@ -417,7 +441,6 @@ class PositionTeamMember(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
-
     def __str__(self) -> str: 
         return self.name
 
@@ -428,11 +451,9 @@ class EventSection(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
-    
     def events(self):
         """Return a queryset of Event objects that belong to this section."""
         return self.event_set.all()
-
     def __str__(self) -> str:
         return self.name
 
@@ -445,6 +466,8 @@ class Comments(LikableMixin, TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
+    def __str__(self):
+        return f"Comment<{self.user_id}:{self.object_id}>"
 
 class Reply(LikableMixin, TimestampedModel):
     """Replies to comments."""
@@ -454,13 +477,14 @@ class Reply(LikableMixin, TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
+    def __str__(self):
+        return f"Reply<{self.user_id}:{self.comment_id}>"
         
 class NavbarLogo(TimestampedModel):
     logo = models.ImageField(upload_to="infowebsite/logos/", blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)
-
     def __str__(self):
         return f"NavbarLogo<{self.pk}>"
 
@@ -470,6 +494,5 @@ class SocialMedia(TimestampedModel):
 
     class Meta:
         ordering = ("-created_at",)
-
     def __str__(self):
         return f"{self.platform}: {self.url}"

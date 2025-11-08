@@ -10,6 +10,7 @@ from .models import (
     Event,
     HistoryEntry,
     Post,
+    Content,
     TeamMember,
     Comments,
     Reply,
@@ -19,6 +20,7 @@ from .models import (
     VideoCategory,
     PostCategory,
     EventCategory,
+    ContentCategory,
     PositionTeamMember,
     EventSection,
     PostRating,
@@ -131,6 +133,12 @@ class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = EventCategory
+        fields = "__all__"
+        
+class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = ContentCategory
         fields = "__all__"
 
 class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -426,7 +434,53 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             return None
 
+class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for Content model with absolute URL handling for file fields."""
+    datetime_fields = ("created_at", "updated_at")
+    category = serializers.PrimaryKeyRelatedField(queryset=ContentCategory.objects.all(), write_only=True, required=False)
+    comments = CommentsSerializer(many=True, read_only=True)
+    likes_count = serializers.SerializerMethodField(read_only=True)
+    has_liked = serializers.SerializerMethodField(read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = Content
+        fields = "__all__"
+        file_fields = ("image",)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category"] = ContentCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        # include comments for models that have GenericRelation
+        try:
+            data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
+        except Exception:
+            data["comments"] = []
+        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        annotated = getattr(instance, "annotated_has_liked", None)
+        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        return data
+
+    def get_likes_count(self, obj):
+        return getattr(obj, "likes_count", 0)
+
+    def get_has_liked(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            return obj.has_liked(user)
+        return False
+    
+    def get_user(self, obj):
+        try:
+            target = _resolve_target_user(obj)
+            if target:
+                return UserSerializer(target, context=self.context).data
+        except Exception:
+            pass
+        return None
+    
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)

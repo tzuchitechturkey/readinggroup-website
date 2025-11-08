@@ -15,7 +15,8 @@ from .swagger_parameters import(
     post_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
-    global_search_manual_parameters
+    global_search_manual_parameters,
+    content_manual_parameters
 )
 from .models import (
     Event,
@@ -23,10 +24,12 @@ from .models import (
     Post,
     TeamMember,
     Video,
+    Content,
     WeeklyMoment,
     PostCategory,
     VideoCategory,
     EventCategory,
+    ContentCategory,
     PositionTeamMember,
     EventSection,
     Comments,
@@ -44,12 +47,14 @@ from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
     PostSerializer,
+    ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
     WeeklyMomentSerializer,
     PostCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
+    ContentCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
     CommentsSerializer,
@@ -351,7 +356,114 @@ class PostViewSet(BaseContentViewSet):
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class ContentViewSet(BaseContentViewSet):
+    queryset = Content.objects.all()
+    serializer_class = ContentSerializer
+    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
+    ordering_fields = ("views", "created_at")
+    filterset_fields = ("created_at", "writer", "category__name", "language", "post_type", "status")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
+    @swagger_auto_schema(
+        operation_summary="List all contents",
+        operation_description="Retrieve a list of contents with optional filtering by created_at, writer, category, language, post_type, and status.",
+        manual_parameters=content_manual_parameters
+    )
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
+    def get_queryset(self):
+        
+        queryset = super().get_queryset()
+        queryset = self.annotate_likes(queryset)
+        params = self.request.query_params
+
+        created_at = params.get("created_at")
+        if created_at:
+            queryset = queryset.filter(created_at__date=created_at)
+
+        writer = params.get("writer")
+        if writer:
+            values = []
+            for item in writer.split(","):
+                values.append(item.strip())
+            if values:
+                queryset = queryset.filter(writer__in=values)
+                
+        Category = params.get("category")
+        if Category:
+            values = []
+            for item in Category.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(category__name__in=values)
+                
+        language = params.get("language")
+        if language:
+            values = []
+            for item in language.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(language__in=values)
+                
+        status = params.get("status")
+        if status:
+            values = []
+            for item in status.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(status__in=values)
+                 
+        return queryset
+    
+    @action(detail=True, methods=("post", "delete"), url_path="rating", url_name="rating")
+    def rating(self, request, pk=None):
+        """POST to set/update rating (body: { "rating": 1-5 }), DELETE to remove user's rating.
+        Returns the serialized Content (with updated average/count/user_rating).
+        """
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            content = Content.objects.get(pk=pk)
+        except Content.DoesNotExist:
+            return Response({"detail": "Content not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == "POST":
+            # Accept either a JSON object { "rating": X } or a primitive body containing the number.
+            raw = None
+            try:
+                if isinstance(request.data, dict):
+                    raw = request.data.get("rating")
+                else:
+                    # request.data may be a primitive (int/str) when the client sends a bare value
+                    raw = request.data
+
+                rating_value = int(raw)
+                if rating_value < 1 or rating_value > 5:
+                    raise ValueError()
+            except Exception:
+                return Response({"detail": "Invalid rating. Must be integer 1-5."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # create or update rating
+            PostRating.objects.update_or_create(user=user, content=content, defaults={"rating": rating_value})
+            serializer = ContentSerializer(content, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # DELETE: remove user's rating if exists
+        PostRating.objects.filter(user=user, content=content).delete()
+        serializer = ContentSerializer(content, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
@@ -666,6 +778,12 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     
+class ContentCategoryViewSet(BaseCRUDViewSet):
+    """ViewSet for managing ContentCategory content."""
+    queryset = ContentCategory.objects.all()
+    serializer_class = ContentCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
 class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()

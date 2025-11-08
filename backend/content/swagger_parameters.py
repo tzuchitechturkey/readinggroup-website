@@ -165,3 +165,40 @@ global_search_manual_parameters = [
         type=openapi.TYPE_STRING
     ),
 ]
+
+content_manual_parameters = [
+    openapi.Parameter(
+        'created_at',
+        openapi.IN_QUERY,
+        description="Filter by created date",
+        type=openapi.TYPE_STRING
+    ),
+    openapi.Parameter(
+        'category',
+        openapi.IN_QUERY,
+        description="Filter by category (JSON object with 'name' field)",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'language',
+        openapi.IN_QUERY,
+        description="Filter by language",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'writer',
+        openapi.IN_QUERY,
+        description="Filter by writer",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'status',
+        openapi.IN_QUERY,
+        description="Filter by status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+]
