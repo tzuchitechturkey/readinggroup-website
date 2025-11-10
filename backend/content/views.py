@@ -1347,6 +1347,7 @@ class GlobalSearchViewSet(viewsets.ViewSet):
     - posts
     - events
     - weekly_moments
+    - contents
     Each key contains a list of serialized objects.
     """
     @swagger_auto_schema(
@@ -1356,45 +1357,55 @@ class GlobalSearchViewSet(viewsets.ViewSet):
     def list(self, request):
         search_term = request.query_params.get("q", "")
         if not search_term:
-            return Response(
-                {"detail": "Query parameter 'q' is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "Query parameter 'q' is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # safety cap per model to avoid huge queries; page size is controlled by paginator
         try:
-            result_limit = int(request.query_params.get("limit", 5))
-        except ValueError:
-            result_limit = 5
+            per_model_cap = int(request.query_params.get("per_model", 50))
+        except Exception:
+            per_model_cap = 50
 
-        def get_search_results(model, serializer_class):
-            """Helper function to perform search, annotation, and serialization."""
-            try:
-                queryset = annotate_likes_queryset(
-                    model.objects.filter(title__icontains=search_term),
-                    request
-                )
-                try:
-                    queryset = queryset.order_by("-annotated_likes_count", "-created_at")[:result_limit]
-                except Exception:
-                    queryset = queryset.order_by("-created_at")[:result_limit]
+        video_queryset = annotate_likes_queryset(Video.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
+        post_queryset = annotate_likes_queryset(Post.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
+        event_queryset = annotate_likes_queryset(Event.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
+        weekly_queryset = annotate_likes_queryset(WeeklyMoment.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
+        content_queryset = annotate_likes_queryset(Content.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
 
-                return serializer_class(queryset, many=True, context={"request": request}).data
-            except Exception:
-                return []
+        combined = []
+        combined += [(obj, "video") for obj in video_queryset]
+        combined += [(obj, "post") for obj in post_queryset]
+        combined += [(obj, "event") for obj in event_queryset]
+        combined += [(obj, "weekly_moment") for obj in weekly_queryset]
+        combined += [(obj, "content") for obj in content_queryset]
 
-        videos = get_search_results(Video, VideoSerializer)
-        posts = get_search_results(Post, PostSerializer)
-        events = get_search_results(Event, EventSerializer)
-        weekly_moments = get_search_results(WeeklyMoment, WeeklyMomentSerializer)
+        # sort by created_at (newest first)
+        combined.sort(key=lambda t: getattr(t[0], "created_at", None) or 0, reverse=True)
 
-        response_data = {
-            "videos": videos,
-            "posts": posts,
-            "events": events,
-            "weekly_moments": weekly_moments,
-        }
+        # paginate combined list using LimitOffsetPagination; default page size = 10
+        paginator = LimitOffsetPagination()
+        paginator.default_limit = 10
+        page = paginator.paginate_queryset(combined, request, view=self)
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        results = []
+        for item in page or []:
+            obj, kind = item
+            if kind == "video":
+                data = VideoSerializer(obj, context={"request": request}).data
+            elif kind == "post":
+                data = PostSerializer(obj, context={"request": request}).data
+            elif kind == "event":
+                data = EventSerializer(obj, context={"request": request}).data
+            elif kind == "weekly_moment":
+                data = WeeklyMomentSerializer(obj, context={"request": request}).data
+            elif kind == "content":
+                data = ContentSerializer(obj, context={"request": request}).data
+            else:
+                continue
+
+            data["_type"] = kind
+            results.append(data)
+
+        return paginator.get_paginated_response(results)
 
 class NavbarLogoViewSet(BaseContentViewSet):
     """ViewSet for retrieving the NavbarLogo."""
