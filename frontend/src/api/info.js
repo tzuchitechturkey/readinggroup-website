@@ -30,8 +30,10 @@ export async function DeleteSocialMedia(id) {
   return await axios.delete(`/social-media/${id}/`);
 }
 
-export async function GlobalSearch(query) {
-  return await axios.get(`/global-search/?q=${query}`);
+export async function GlobalSearch(limit, offset, query) {
+  return await axios.get(
+    `/global-search/?limit=${limit}&offset=${offset}&q=${query}`
+  );
 }
 
 export async function GetAllUsers(search) {

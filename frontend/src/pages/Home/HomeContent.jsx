@@ -58,7 +58,7 @@ export default function HomeContent() {
             key !== "top_posts" && key !== "weekly_moment" && key !== "event"
         )
         .map(([key, sec], index) => (
-          <div key={sec.id}>
+          <div key={sec?.id}>
             <DynamicHomeCard
               index={index}
               title={

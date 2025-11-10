@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { socialMediaIcons, socialColors } from "@/constants/constants";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import { GetWebSiteInfo } from "@/api/info";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function Footer({ authPages }) {
   const [socialLinks, setSocialLinks] = useState([]);

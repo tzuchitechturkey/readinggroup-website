@@ -2,14 +2,22 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { CiSearch } from "react-icons/ci";
 import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 import { GlobalSearch } from "@/api/info";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import Loader from "@/components/Global/Loader/Loader";
 
 export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef(null);
+  const [currentOffset, setCurrentOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const dropdownRef = useRef(null);
+  const limit = 10;
+
   // Focus input when search opens
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -17,13 +25,65 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
     }
   }, [isSearchOpen]);
 
+  // Handle close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        if (
+          searchInputRef.current &&
+          !searchInputRef.current.contains(event.target)
+        ) {
+          setIsSearchOpen(false);
+        }
+      }
+    };
+
+    if (isSearchOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+    return () => {};
+  }, [isSearchOpen, setIsSearchOpen]);
+
   // Handle search submission
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsSearchOpen(false);
-      setSearchQuery("");
+  const handleSearch = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!searchQuery || searchQuery.trim().length === 0) return;
+    setIsLoading(true);
+    setCurrentOffset(0);
+    try {
+      const response = await GlobalSearch(limit, 0, searchQuery);
+      setData(response.data?.results || []);
+      setTotalRecords(response.data?.count || 0);
+      // results stored in state
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle load more
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !searchQuery) return;
+
+    const newOffset = currentOffset + limit;
+
+    // Check if we've reached the end
+    if (newOffset >= totalRecords) return;
+
+    setIsLoadingMore(true);
+    try {
+      const response = await GlobalSearch(limit, newOffset, searchQuery);
+      const newResults = response.data?.results || [];
+      setData((prevData) => [...prevData, ...newResults]);
+      setCurrentOffset(newOffset);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -31,27 +91,25 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const handleCloseSearch = () => {
     setIsSearchOpen(false);
     setSearchQuery("");
+    setData([]);
+    setCurrentOffset(0);
   };
 
-    const getData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await GlobalSearch(searchQuery);
-        setDataResult(response.data?.results || []);
-        setTotalRecords(response.data?.count || 0);
-        console.log("Search results:", response.data?.results);
-      } catch (error) {
-        setErrorFn(error, t);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
+  const getItemImage = (item) => {
+    return (
+      item?.image ||
+      item?.image_url ||
+      item?.thumbnail ||
+      item?.thumbnail_url ||
+      null
+    );
+  };
+
   return (
     <div className="flex items-center">
       <div
-        className={`flex items-center transition-all duration-300 ease-in-out overflow-hidden ${
-          isSearchOpen ? "w-44 md:w-52" : "w-0"
+        className={`flex items-center transition-all duration-300 ease-in-out ${
+          !isSearchOpen ? "w-44 md:w-52" : "w-0"
         }`}
       >
         <form onSubmit={handleSearch} className="relative w-full">
@@ -71,6 +129,92 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
             >
               <X className="w-4 h-4" />
             </button>
+          )}
+
+          {/* Results dropdown */}
+          {!isSearchOpen && data?.length > 0 && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-50 -left-10 mt-2 w-[20rem] max-h-96 max-w-[90vw] bg-white shadow-lg rounded-md overflow-hidden flex flex-col"
+            >
+              {isLoading ? (
+                <div className="p-4">
+                  <Loader />
+                </div>
+              ) : (
+                <div className="flex flex-col h-full">
+                  <ul className="overflow-y-auto flex-1">
+                    {data.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          // try to navigate to item's url if present, otherwise go to detailed search page
+                          if (item?.url) {
+                            window.location.href = item.url;
+                          } else if (item?.detail_url) {
+                            window.location.href = item.detail_url;
+                          } else {
+                            navigate(
+                              `/search?q=${encodeURIComponent(searchQuery)}`
+                            );
+                            setIsSearchOpen(false);
+                          }
+                        }}
+                      >
+                        <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                          {getItemImage(item) ? (
+                            <img
+                              src={getItemImage(item)}
+                              alt={item?.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              —
+                            </div>
+                          )}
+                        </div>
+                        <div className="">
+                          <p className="flex-1 text-sm text-gray-800">
+                            {item?.title}
+                          </p>
+                          <p className="flex-1 text-sm text-gray-800">
+                            {item?.post_type
+                              ? item.post_type === "card"
+                                ? t("Card")
+                                : t("Photo")
+                              : item?.video_type
+                              ? t("Video")
+                              : item?.report_type
+                              ? item?.report_type === "videos"
+                                ? t("Event Video")
+                                : t("Report")
+                              : t("Content")}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {totalRecords > data?.length && (
+                    <div className="px-3 py-2 border-t text-center">
+                      {isLoadingMore ? (
+                        <Loader />
+                      ) : (
+                        <button
+                          onClick={handleLoadMore}
+                          className="text-sm text-primary hover:underline"
+                          type="button"
+                        >
+                          {t("Show more")}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </form>
       </div>

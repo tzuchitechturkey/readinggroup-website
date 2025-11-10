@@ -48,7 +48,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     image_url: "",
     metadata: "",
     country: "",
-    camera_name: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -94,7 +93,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         image_url: content?.image_url || "",
         metadata: content?.metadata || "",
         country: content?.country || "",
-        camera_name: content?.camera_name || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -306,7 +304,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     contentData.append("tags", JSON.stringify(formData.tags));
     contentData.append("language", formData.language);
     contentData.append("country", formData.country);
-    contentData.append("camera_name", formData.camera_name);
 
     // Add image if selected
     // if (formData.image) {
