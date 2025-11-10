@@ -9,14 +9,18 @@ import { Input } from "@/components/ui/input";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { processImageFile } from "@/Utility/imageConverter";
-import { CreatePost, EditPostById, GetPostCategories } from "@/api/posts";
+import {
+  CreateContent,
+  EditContentById,
+  GetContentCategories,
+} from "@/api/contents";
 import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages, postStatusOptions } from "@/constants/constants";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
-function CreateOrEditPost({ onSectionChange, post = null }) {
+function CreateOrEditContent({ onSectionChange, content = null }) {
   const { t, i18n } = useTranslation();
   const writerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
@@ -40,7 +44,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     read_time: "",
     tags: "",
     language: "",
-    post_type: "",
     image: null,
     image_url: "",
     metadata: "",
@@ -51,7 +54,8 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
-  const [imageFile, setImageFile] = useState(null); // Store the actual file
+  const [imageFiles, setImageFiles] = useState([]); // Store multiple image files
+  const [imagePreviews, setImagePreviews] = useState([]); // Store image previews
 
   const getWriters = async (searchVal = "") => {
     try {
@@ -63,42 +67,34 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   };
   const getCategories = async (searchVal = "") => {
     try {
-      const res = await GetPostCategories(10, 0, searchVal);
+      const res = await GetContentCategories(10, 0, searchVal);
       setCategoriesList(res?.data?.results);
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Type options
-  const typeOptions = [
-    { value: "card", label: "Card" },
-    { value: "photo", label: "Photo" },
-    { value: "reading", label: "Reading" },
-  ];
-
   // Initialize form data when editing
   useEffect(() => {
-    if (post) {
+    if (content) {
       const initialData = {
-        title: post.title || "",
-        subtitle: post.subtitle || "",
-        excerpt: post.excerpt || "",
-        body: post.body || "",
-        writer: post.writer || "",
-        writer_avatar: post.writer_avatar || "",
-        category: post.category || "",
-        status: post.status || "draft",
-        is_active: post.is_active !== undefined ? post.is_active : true,
-        read_time: post.read_time || "",
-        tags: post.tags || "",
-        language: post.language || "",
-        post_type: post.post_type || "",
-        image: post.image || null,
-        image_url: post.image_url || "",
-        metadata: post.metadata || "",
-        country: post.country || "",
-        camera_name: post.camera_name || "",
+        title: content?.title || "",
+        subtitle: content?.subtitle || "",
+        excerpt: content?.excerpt || "",
+        body: content?.body || "",
+        writer: content?.writer || "",
+        writer_avatar: content?.writer_avatar || "",
+        category: content?.category || "",
+        status: content?.status || "draft",
+        is_active: content?.is_active !== undefined ? content?.is_active : true,
+        read_time: content?.read_time || "",
+        tags: content?.tags || "",
+        language: content?.language || "",
+        image: content?.image || null,
+        image_url: content?.image_url || "",
+        metadata: content?.metadata || "",
+        country: content?.country || "",
+        camera_name: content?.camera_name || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -107,11 +103,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       setInitialFormData(null);
       setHasChanges(false);
     }
-  }, [post]);
+  }, [content]);
 
   // Check for changes when formData changes
   useEffect(() => {
-    if (post && initialFormData) {
+    if (content && initialFormData) {
       // Compare all fields
       const hasTextChanges = Object.keys(initialFormData).some((key) => {
         // Special handling for tags array
@@ -126,7 +122,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
       setHasChanges(hasTextChanges);
     }
-  }, [formData, post, initialFormData]);
+  }, [formData, content, initialFormData]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -271,15 +267,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       newErrors.language = t("Language is required");
     }
 
-    if (!formData.post_type) {
-      newErrors.post_type = t("Type is required");
-    }
-
     if (!formData.country) {
       newErrors.country = t("Country is required");
     }
 
-    if (!formData.image && !formData.image_url && !post) {
+    if (!formData.image && !formData.image_url && !content && imageFiles.length === 0) {
       newErrors.image = t("Image is required");
     }
 
@@ -296,61 +288,69 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     }
 
     // Create FormData for file upload
-    const postData = new FormData();
+    const contentData = new FormData();
 
     // Add all text fields
-    postData.append("title", formData.title);
-    postData.append("subtitle", formData.subtitle);
-    postData.append("excerpt", formData.excerpt);
-    postData.append("body", formData.body);
-    postData.append("writer", formData.writer);
-    postData.append("category", formData?.category?.id || formData?.category);
-    postData.append("status", formData.status);
-    postData.append("is_active", formData.is_active);
-    postData.append("read_time", formData.read_time);
-    postData.append("tags", JSON.stringify(formData.tags));
-    postData.append("language", formData.language);
-    postData.append("post_type", formData.post_type);
-    postData.append("country", formData.country);
-    postData.append("camera_name", formData.camera_name);
+    contentData.append("title", formData.title);
+    contentData.append("subtitle", formData.subtitle);
+    contentData.append("excerpt", formData.excerpt);
+    contentData.append("body", formData.body);
+    contentData.append("writer", formData.writer);
+    contentData.append(
+      "category",
+      formData?.category?.id || formData?.category
+    );
+    contentData.append("status", formData.status);
+    contentData.append("is_active", formData.is_active);
+    contentData.append("read_time", formData.read_time);
+    contentData.append("tags", JSON.stringify(formData.tags));
+    contentData.append("language", formData.language);
+    contentData.append("country", formData.country);
+    contentData.append("camera_name", formData.camera_name);
 
     // Add image if selected
     // if (formData.image) {
-    //   postData.append("image", formData.image);
+    //   contentData.append("image", formData.image);
     // }
-    // Only append image if a new file was selected
-    if (imageFile instanceof File) {
-      postData.append("image", imageFile);
+    // Only append images if new files were selected
+    if (imageFiles.length > 0) {
+      imageFiles.forEach((file, index) => {
+        if (file instanceof File) {
+          contentData.append(`image_${index}`, file);
+        }
+      });
+      // Also store the count of images
+      contentData.append("image_count", imageFiles.length);
     }
     // Add image_url if provided
     if (formData.image_url) {
-      postData.append("image_url", formData.image_url);
+      contentData.append("image_url", formData.image_url);
     }
 
     // Add metadata if provided
     if (formData.metadata) {
-      postData.append("metadata", formData.metadata);
+      contentData.append("metadata", formData.metadata);
     }
 
     // Add timestamps
-    if (post) {
-      postData.append("created_at", post.created_at);
-      postData.append("views", post.views || 0);
+    if (content) {
+      contentData.append("created_at", content?.created_at);
+      contentData.append("views", content?.views || 0);
     }
-    postData.append("updated_at", new Date().toISOString());
+    contentData.append("updated_at", new Date().toISOString());
 
     setIsLoading(true);
     try {
-      post?.id
-        ? await EditPostById(post.id, postData)
-        : await CreatePost(postData);
+      content?.id
+        ? await EditContentById(content?.id, contentData)
+        : await CreateContent(contentData);
 
       toast.success(
-        post?.id
-          ? t("Post updated successfully")
-          : t("Post created successfully")
+        content?.id
+          ? t("Content updated successfully")
+          : t("Content created successfully")
       );
-      onSectionChange("posts");
+      onSectionChange("contents");
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -394,17 +394,17 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
   return (
     <div
-      className="bg-white rounded-lg p-6 l mx-4 overflow-y-auto"
+      className="bg-white rounded-lg p-4 l mx-4 overflow-y-auto"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <CustomBreadcrumb
-        backTitle={t("Back to Posts List")}
+        backTitle={t("Back to Contents List")}
         onBack={() => {
-          onSectionChange("posts");
+          onSectionChange("contents");
         }}
-        page={post ? t("Edit Post") : t("Create New Post")}
+        page={content ? t("Edit Content") : t("Create New Content")}
       />
       {/* End Breadcrumb */}
 
@@ -415,76 +415,108 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             <p className="text-sm text-blue-800">
               <strong>{t("Important")}:</strong>{" "}
               {t(
-                "Please select an image with minimum dimensions of 1920x1080 pixels for best quality."
+                "Please select images with minimum dimensions of 1920x1080 pixels for best quality."
               )}
             </p>
             <p className="text-xs text-blue-600 mt-1">
               {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
             </p>
           </div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Post Image")} *
+          <label className="block text-sm font-medium text-gray-700 my-2">
+            {t("Content Images")} * ({t("You can upload multiple images")})
           </label>
-          <div className="flex items-center gap-4">
-            <div
-              className={`w-32 h-24 border-2 border-dashed rounded-lg flex items-center justify-center ${
+
+          {/* Image Previews Grid */}
+          {imagePreviews.length > 0 && (
+            <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {imagePreviews.map((preview, index) => (
+                <div
+                  key={index}
+                  className="relative group w-full aspect-video bg-gray-100 rounded-lg overflow-hidden"
+                >
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newPreviews = imagePreviews.filter(
+                        (_, i) => i !== index
+                      );
+                      const newFiles = imageFiles.filter((_, i) => i !== index);
+                      setImagePreviews(newPreviews);
+                      setImageFiles(newFiles);
+                    }}
+                    className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </button>
+                  <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                    {index + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Upload Area */}
+          <div>
+            <input
+              type="file"
+              accept="image/*,.heic,.heif"
+              onChange={async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length > 0) {
+                  try {
+                    const processedFiles = [];
+                    const newPreviews = [];
+
+                    for (const file of files) {
+                      const { file: processedFile, url } =
+                        await processImageFile(file);
+                      processedFiles.push(processedFile);
+                      newPreviews.push(url);
+                    }
+
+                    setImageFiles((prev) => [...prev, ...processedFiles]);
+                    setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+                    // Clear error when uploading
+                    if (errors.image) {
+                      setErrors((prev) => ({ ...prev, image: "" }));
+                    }
+                  } catch (error) {
+                    console.error("Error processing images:", error);
+                    toast.error(t("Failed to process some images"));
+                  }
+                }
+              }}
+              className="hidden"
+              id="image-upload"
+              multiple
+            />
+            <label
+              htmlFor="image-upload"
+              className={`cursor-pointer flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 hover:border-primary hover:bg-gray-50 transition-colors ${
                 errors.image ? "border-red-500" : "border-gray-300"
               }`}
             >
-              {formData.image || formData.image_url ? (
-                <img
-                  src={formData.image || formData.image_url}
-                  alt="Preview"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              ) : (
-                <Upload className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <div>
-              <input
-                type="file"
-                accept="image/*,.heic,.heif"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    try {
-                      // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
-                      const { file: processedFile, url } =
-                        await processImageFile(file);
-
-                      setImageFile(processedFile);
-                      setFormData((prev) => ({ ...prev, image: url }));
-
-                      // Clear error when uploading
-                      if (errors.image) {
-                        setErrors((prev) => ({ ...prev, image: "" }));
-                      }
-                    } catch (error) {
-                      console.error("Error processing image:", error);
-                      toast.error(t("Failed to process image"));
-                    }
-                  }
-                }}
-                className="hidden"
-                id="image-upload"
-              />
-              <label
-                htmlFor="image-upload"
-                className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 border ${
-                  errors.image ? "border-red-500" : "border-gray-300"
-                } rounded-md hover:bg-gray-50`}
-              >
-                <Upload className="h-4 w-4" />
-                {t("Upload Image")}
-              </label>
-              <p className="text-xs text-gray-500 mt-1">
-                {t("Recommended: 16:9 aspect ratio")}
+              <Upload className="h-12 w-12 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-600 mb-1">
+                {t("Click to upload images or drag and drop")}
               </p>
-              {errors.image && (
-                <p className="text-red-500 text-xs mt-1">{errors.image}</p>
-              )}
-            </div>
+              <p className="text-xs text-gray-500">
+                {t("PNG, JPG, SVG, WEBP (max 5MB each)")}
+              </p>
+            </label>
+            <p className="text-xs text-gray-500 mt-2">
+              {t("Total images selected")}: {imagePreviews.length}
+            </p>
+            {errors.image && (
+              <p className="text-red-500 text-xs mt-2">{errors.image}</p>
+            )}
           </div>
         </div>
         {/* End Image Upload Section */}
@@ -518,7 +550,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                placeholder={t("Enter post title")}
+                placeholder={t("Enter content title")}
                 className={errors.title ? "border-red-500" : ""}
               />
               {errors.title && (
@@ -535,7 +567,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                 name="subtitle"
                 value={formData.subtitle}
                 onChange={handleInputChange}
-                placeholder={t("Enter post subtitle")}
+                placeholder={t("Enter content subtitle")}
                 className={errors.subtitle ? "border-red-500" : ""}
               />
               {errors.subtitle && (
@@ -596,22 +628,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             </div>
             {/* End Read Time */}
 
-            {/* Start Camera */}
-            {formData.post_type === "photo" && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("Camera Model")}
-                </label>
-                <Input
-                  name="camera_name"
-                  value={formData.camera_name}
-                  onChange={handleInputChange}
-                  placeholder={t("Enter camera model")}
-                  className={errors.camera_name ? "border-red-500" : ""}
-                />
-              </div>
-            )}
-            {/* End Camera */}
             {/* Start Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -655,46 +671,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
           {/* Right Column */}
           <div className="space-y-4">
-            {/* Start Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Type")} *
-              </label>
-              <select
-                name="post_type"
-                value={formData.post_type}
-                onChange={(e) => {
-                  handleInputChange(e);
-                  setFormData((prev) => ({
-                    ...prev,
-                    writer: "",
-                  }));
-                }}
-                className={`w-full px-3 py-2 border rounded-md  outline-none ${
-                  errors.post_type ? "border-red-500" : "border-gray-300"
-                } ${!formData.post_type ? "text-gray-400" : "text-black"}`}
-              >
-                <option value="" hidden disabled>
-                  {t("Select Type")}
-                </option>
-
-                {typeOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    className="text-black"
-                    value={option.value}
-                  >
-                    {t(option.label)}
-                  </option>
-                ))}
-              </select>
-
-              {errors.post_type && (
-                <p className="text-red-500 text-xs mt-1">{errors.post_type}</p>
-              )}
-            </div>
-            {/* End Type */}
-
             {/* Start Language */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -879,10 +855,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             {/* Start Writer Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {formData?.post_type === "photo"
-                  ? t("Camera Man")
-                  : t("Writer")}
-                *
+                {t("Writer")}
               </label>
               <div className="relative" ref={writerDropdownRef}>
                 <button
@@ -998,21 +971,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               )}
             </div>
             {/* End Writer Selection */}
-
-            {/* Start Active Status */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={formData.is_active}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 text-sm text-gray-700">
-                {t("Active Post")}
-              </label>
-            </div>
-            {/* End Active Status */}
           </div>
         </div>
 
@@ -1026,7 +984,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             value={formData.excerpt}
             onChange={handleInputChange}
             rows={4}
-            placeholder={t("Enter post excerpt or summary")}
+            placeholder={t("Enter content excerpt or summary")}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.excerpt ? "border-red-500" : "border-gray-300"
             }`}
@@ -1051,7 +1009,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             value={formData.body}
             onChange={handleInputChange}
             rows={8}
-            placeholder={t("Enter the full content of the post")}
+            placeholder={t("Enter the full content of the content")}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.body ? "border-red-500" : "border-gray-300"
             }`}
@@ -1089,7 +1047,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             type="button"
             variant="outline"
             onClick={() => {
-              onSectionChange("posts");
+              onSectionChange("contents");
             }}
           >
             {t("Cancel")}
@@ -1097,14 +1055,14 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           <Button
             type="submit"
             className="flex items-center gap-2"
-            disabled={post && !hasChanges}
+            disabled={content && !hasChanges}
           >
             <Save className="h-4 w-4" />
             {isLoading
               ? t("Saving...")
-              : post
-              ? t("Update Post")
-              : t("Create Post")}
+              : content
+              ? t("Update Content")
+              : t("Create Content")}
           </Button>
         </div>
       </form>
@@ -1112,4 +1070,4 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   );
 }
 
-export default CreateOrEditPost;
+export default CreateOrEditContent;

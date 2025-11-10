@@ -59,7 +59,10 @@ function GuindReadingFilterSction() {
       apiFilters.created_at = customFilters.searchDate;
 
     // Add writer filter - send writer username(s)
-    if (Array.isArray(customFilters.writer) && customFilters.writer.length > 0) {
+    if (
+      Array.isArray(customFilters.writer) &&
+      customFilters.writer.length > 0
+    ) {
       const writerNames = customFilters.writer
         .map((w) => w?.username)
         .filter(Boolean)
@@ -92,7 +95,7 @@ function GuindReadingFilterSction() {
     try {
       const apiFilters =
         clearFilter === true ? {} : buildFilters(customFilters);
-      const res = await GetPosts(limit, offset, apiFilters);
+      const res = await GetPosts(limit, offset, "published", apiFilters);
 
       const newResults = res.data?.results || [];
       const totalCount = res.data?.count || 0;

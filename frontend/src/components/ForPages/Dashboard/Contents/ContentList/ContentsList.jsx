@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { LuArrowUpDown, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
-import { Search, X } from "lucide-react";
+import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 import {
@@ -17,16 +16,16 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetEvents, DeleteEventById } from "@/api/events";
+import { GetContents, DeleteContentById } from "@/api/contents";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
-const EventsList = ({ onSectionChange }) => {
+const ContentsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
   // State management
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedContent, setSelectedContent] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -35,9 +34,9 @@ const EventsList = ({ onSectionChange }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [eventsData, setEventsData] = useState([]);
-  // Fetch Event from API
-  const getEventsData = async (page = 0, searchVal = search) => {
+  const [ContentsData, setContentsData] = useState([]);
+  // Fetch Content from API
+  const getContentsData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * limit;
 
@@ -45,10 +44,10 @@ const EventsList = ({ onSectionChange }) => {
     const params = searchVal ? { search: searchVal } : {};
 
     try {
-      const res = await GetEvents(limit, offset, params);
+      const res = await GetContents(limit, offset, "published", params);
 
       setTotalRecords(res?.data?.count || 0);
-      setEventsData(res?.data?.results || []);
+      setContentsData(res?.data?.results || []);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -58,9 +57,9 @@ const EventsList = ({ onSectionChange }) => {
 
   // Local sorting for displayed data
   const getSortedData = () => {
-    if (!eventsData || !sortConfig.key) return eventsData || [];
+    if (!ContentsData || !sortConfig.key) return ContentsData || [];
 
-    const sorted = [...eventsData].sort((a, b) => {
+    const sorted = [...ContentsData].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -94,7 +93,7 @@ const EventsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getEventsData(0);
+    getContentsData(0);
   }, [update]);
 
   // Sorting functionality
@@ -126,7 +125,7 @@ const EventsList = ({ onSectionChange }) => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-      getEventsData(newPage - 1, search);
+      getContentsData(newPage - 1, search);
     }
   };
 
@@ -134,18 +133,18 @@ const EventsList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getEventsData(0, "");
+    getContentsData(0, "");
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedEvent?.id) return;
+    if (!selectedContent?.id) return;
 
     setIsLoading(true);
     try {
-      await DeleteEventById(selectedEvent.id);
-      toast.success(t("Event deleted successfully"));
+      await DeleteContentById(selectedContent.id);
+      toast.success(t("Content deleted successfully"));
       setShowDeleteModal(false);
-      setSelectedEvent(null);
+      setSelectedContent(null);
       setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
@@ -153,12 +152,15 @@ const EventsList = ({ onSectionChange }) => {
       setIsLoading(false);
     }
   };
-
+  console.log("data", ContentsData);
   // Pagination
   const totalPages = Math.ceil(totalRecords / limit);
-
   return (
-    <div className="p-3" dir={i18n.dir()}>
+    <div
+      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
+      {" "}
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <CustomBreadcrumb
@@ -166,23 +168,25 @@ const EventsList = ({ onSectionChange }) => {
         onBack={() => {
           onSectionChange("dashboard");
         }}
-        page={t("Events List")}
+        page={t("Contents List")}
       />
       {/* End Breadcrumb */}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">{t("Events")}</h2>
+        <h2 className="text-lg font-medium text-[#1D2630]">
+          {t("Contents List")}
+        </h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
-            {t("Total")}: {totalRecords} {t("events")}
+            {t("Total")}: {totalRecords} {t("contents")}
           </span>
 
           {/* Start Add Button */}
           <div>
             <button
               onClick={() => {
-                setSelectedEvent(null);
-                onSectionChange("createOrEditEvent", null);
+                setSelectedContent(null);
+                onSectionChange("createOrEditContent", null);
               }}
               className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
             >
@@ -198,7 +202,7 @@ const EventsList = ({ onSectionChange }) => {
         <div className="relative max-w-md flex">
           <input
             type="text"
-            placeholder={t("Search events...")}
+            placeholder={t("Search contents...")}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -222,7 +226,7 @@ const EventsList = ({ onSectionChange }) => {
           )}
 
           <button
-            onClick={() => getEventsData(0, search)}
+            onClick={() => getContentsData(0, search)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -232,25 +236,10 @@ const EventsList = ({ onSectionChange }) => {
         </div>
       </div>
       {/* End Search */}
-
-      {/* Stats */}
-      <div className="mb-4 text-sm text-gray-600">
-        {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-            {t("Loading...")}
-          </div>
-        ) : (
-          `${t("Total")}: ${totalRecords} ${t("programs")} | ${t(
-            "Page"
-          )} ${currentPage} ${t("of")} ${totalPages}`
-        )}
-      </div>
-
-      {/* Table */}
+      {/* Start Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-[#FAFAFA] h-14">
             <TableRow>
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
                 <button
@@ -277,7 +266,7 @@ const EventsList = ({ onSectionChange }) => {
                     onClick={() => sortData("title")}
                     className="flex items-center gap-1 font-medium"
                   >
-                    {t("Image")}
+                    {t("Images")}
                   </button>
                 </div>
               </TableHead>
@@ -332,28 +321,28 @@ const EventsList = ({ onSectionChange }) => {
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-                    {t("Loading Event...")}
+                    {t("Loading Content...")}
                   </div>
                 </TableCell>
               </TableRow>
             ) : getSortedData().length > 0 ? (
-              getSortedData().map((event) => (
-                <TableRow key={event?.id} className="hover:bg-gray-50">
+              getSortedData().map((content) => (
+                <TableRow key={content?.id} className="hover:bg-gray-50">
                   <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                    {event?.id}
+                    {content?.id}
                   </TableCell>
                   <TableCell>
                     <div className="min-w-0 text-center ">
                       <p className="font-medium text-gray-900 truncate">
-                        {event?.title}
+                        {content?.title}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-3">
                       <img
-                        src={event?.image || event?.image_url}
-                        alt={event?.title}
+                        src={content?.image || content?.image_url}
+                        alt={content?.title}
                         className="w-12 h-12 rounded-lg object-cover"
                         onError={(e) => {
                           e.target.src = "/placeholder-image.png";
@@ -364,15 +353,15 @@ const EventsList = ({ onSectionChange }) => {
                   <TableCell className="hidden md:table-cell">
                     <p
                       className="text-gray-600 max-w-xs truncate text-center"
-                      title={event?.section?.name}
+                      title={content?.section?.name}
                     >
-                      {event?.section?.name}
+                      {content?.section?.name}
                     </p>
                   </TableCell>
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <div className="flex flex-col items-center ">
                       <span className="font-medium">
-                        {new Date(event.happened_at).toLocaleDateString(
+                        {new Date(content.happened_at).toLocaleDateString(
                           "en-GB",
                           {
                             year: "numeric",
@@ -385,20 +374,20 @@ const EventsList = ({ onSectionChange }) => {
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
                     <span className="text-gray-600 ">
-                      {t(event?.report_type)}
+                      {t(content?.report_type)}
                     </span>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-center">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {event?.category?.name}
+                      {content?.category?.name}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          setSelectedEvent(event);
-                          onSectionChange("createOrEditEvent", event);
+                          setSelectedContent(content);
+                          onSectionChange("createOrEditContent", content);
                         }}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
@@ -407,7 +396,7 @@ const EventsList = ({ onSectionChange }) => {
                       </button>
                       <button
                         onClick={() => {
-                          setSelectedEvent(event);
+                          setSelectedContent(content);
                           setShowDeleteModal(true);
                         }}
                         className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
@@ -426,16 +415,15 @@ const EventsList = ({ onSectionChange }) => {
                   className="text-center py-8 text-gray-500"
                 >
                   {search
-                    ? t("No Event found matching your search.")
-                    : t("No Event available.")}
+                    ? t("No Content found matching your search.")
+                    : t("No Content available.")}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
+      {/* Start Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
           <div className="text-sm text-gray-600">
@@ -499,32 +487,32 @@ const EventsList = ({ onSectionChange }) => {
           </div>
         </div>
       )}
-
+      {/* End Pagination */}
       {/* Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
-          setSelectedEvent(null);
+          setSelectedContent(null);
         }}
       >
         <DeleteConfirmation
           isOpen={showDeleteModal}
           onClose={() => {
             setShowDeleteModal(false);
-            setSelectedEvent(null);
+            setSelectedContent(null);
           }}
           onConfirm={handleConfirmDelete}
           title={t("Delete Post")}
           message={t(
             "Are you sure you want to delete this Post? This action cannot be undone."
           )}
-          itemName={selectedEvent?.title}
+          itemName={selectedContent?.title}
         />
       </Modal>
     </div>
   );
 };
 
-export default EventsList;
+export default ContentsList;

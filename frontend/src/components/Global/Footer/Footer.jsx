@@ -3,26 +3,23 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { socialMediaIcons, socialColors } from "@/constants/constants";
-import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
-import { GetSocialLinks } from "@/api/social";
+import { GetWebSiteInfo } from "@/api/info";
 
 function Footer({ authPages }) {
-  // تحديد إذا كانت اللغة الحالية RTL
-  const isMobile = useIsMobile(1224);
   const [socialLinks, setSocialLinks] = useState([]);
 
   const { t, i18n } = useTranslation();
   const linkList = [
-    { name: t("Guided Reading"), href: "/guided-reading" },
+    { name: t("Contents"), href: "/contents" },
     { name: t("Videos"), href: "/videos" },
-    { name: t("Cards & Photos"), href: "/cards-photos" },
+    { name: t("Cards"), href: "/cards-photos" },
     { name: t("Events & Community"), href: "/events" },
     { name: t("DA AI TV"), href: "/da-ai-tv" },
   ];
   const fetchSocialLinks = async () => {
     try {
-      const response = await GetSocialLinks(100, 0);
+      const response = await GetWebSiteInfo(100, 0);
       setSocialLinks(response.data?.results || []);
     } catch (error) {
       setErrorFn(error, t);

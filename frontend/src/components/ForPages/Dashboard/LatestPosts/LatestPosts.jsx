@@ -11,7 +11,7 @@ function LatestPosts({ data, onSectionChange }) {
   };
   return (
     <aside
-      className="bg-white rounded-lg border   border-gray-200 w-80 md:w-full"
+      className="bg-white rounded-lg border   border-gray-200 w-80 w-full"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       <div className="px-4 sm:px-6 py-4 border-b">

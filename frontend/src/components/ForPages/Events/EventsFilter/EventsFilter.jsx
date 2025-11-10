@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { languages } from "@/constants/constants";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
-import { GetAllUsers } from "@/api/posts";
+import { GetAllUsers } from "@/api/info";
 import { GetEventCategories } from "@/api/events";
 
 function EventsFilter({

@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-export async function GetPosts(limit, offset = 0, filters = {}) {
+export async function GetPosts(limit, offset = 0, status, filters = {}) {
   // Build query string from filters
   const params = new URLSearchParams();
   // Add pagination
@@ -16,7 +16,7 @@ export async function GetPosts(limit, offset = 0, filters = {}) {
   if (filters.category) params.append("category", filters.category);
   if (filters.post_type) params.append("post_type", filters.post_type);
   if (filters.language) params.append("language", filters.language);
-  return await axios.get(`/posts/?${params.toString()}`);
+  return await axios.get(`/posts/?status=${status}&${params.toString()}`);
 }
 
 export async function CreatePost(data) {
@@ -39,9 +39,6 @@ export async function DeletePostById(id) {
   return await axios.delete(`/posts/${id}/`);
 }
 
-export async function GetAllUsers(search) {
-  return await axios.get(`/user/users/?search=${search}`);
-}
 
 export async function GetPostCategories(limit, offset, search = "") {
   return await axios.get(
@@ -132,7 +129,7 @@ export async function UnlikeReply(replyId) {
 
 // TOP
 export async function TopCommentedPosts() {
-  return await axios.get(`/posts/top-commented-card-photo/?limit=5`);
+  return await axios.get(`/posts/top-commented/?limit=5`);
 }
 
 // xxx is is coming empty
@@ -142,15 +139,15 @@ export async function weeklyMomentsPosts() {
 
 // it Gieves to data card_photo And reading
 export async function TopLikedPosts() {
-  return await axios.get(`/posts/top-liked-grouped/`);
+  return await axios.get(`/posts/top-liked/`);
 }
 
 export async function WeeklyCardPhotoPosts() {
-  return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
+  return await axios.get(`/posts/top-viewed/?limit=5`);
 }
 
 export async function WeeklyReadingPosts() {
-  return await axios.get(`/posts/top-viewed-grouped/?limit=5`);
+  return await axios.get(`/posts/top-viewed/?limit=5`);
 }
 
 // Rating

@@ -15,7 +15,7 @@ import {
   GetEventSections,
 } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetAllUsers } from "@/api/posts";
+import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages } from "@/constants/constants";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
@@ -274,7 +276,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
 
     if (file) {
       try {
-     
         // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
         const { file: processedFile, url } = await processImageFile(file);
 
@@ -502,7 +503,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         toast.success(t("Event created successfully"));
       }
 
-      onSectionChange("eventsList");
+      onSectionChange("events");
       resetForm();
     } catch (error) {
       setErrorFn(error, t);
@@ -557,28 +558,20 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     <div className="bg-white rounded-lg p-3  ">
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Events List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {event?.id ? t("Edit Event") : t("Create New Event")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Events List")}
+        onBack={() => {
+          onSectionChange("events");
+        }}
+        page={event?.id ? t("Edit Event") : t("Create New Event")}
+      />
       {/* End Breadcrumb */}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Start Image Upload Section */}
         <div>
-            <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-            <p className="text-sm text-blue-800">
+          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
+            <p className="text-xs md:text-sm text-blue-800">
               <strong>{t("Important")}:</strong>{" "}
               {t(
                 "Please select an image with minimum dimensions of 1920x1080 pixels for best quality."

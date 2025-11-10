@@ -15,6 +15,8 @@ import {
 } from "@/api/tvPrograms";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
+import CustomBreadcrumb from "../../../CustomBreadcrumb/CustomBreadcrumb";
+
 function NewsCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -135,21 +137,13 @@ function NewsCategoriesContent({ onSectionChange }) {
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("news")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Go to News List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("News Categories")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to news List")}
+        onBack={() => {
+          onSectionChange("news");
+        }}
+        page={t("News Categories")}
+      />
       {/* End Breadcrumb */}
 
       <div className="flex-1">

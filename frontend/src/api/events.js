@@ -31,7 +31,7 @@ export async function EditEventById(id, data) {
   return await axios.put(`/events/${id}/`, data);
 }
 
-export async function PatchEventById(id, data) {
+export async function PatchWebSiteInfo(id, data) {
   return await axios.patch(`/events/${id}/`, data);
 }
 

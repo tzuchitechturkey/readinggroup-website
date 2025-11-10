@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
-import logo from "@/assets/logo.png";
+import { GetWebSiteInfo } from "@/api/info";
 
 import UserIcons from "../UserIcons/UserIcons";
 
@@ -12,14 +12,24 @@ function Usernavbar() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logo, setlogo] = useState({});
+
   const linkList = [
     { name: t("Home"), href: "/" },
-    { name: t("Guided Reading"), href: "/guiding-reading" },
+    { name: t("Contents"), href: "/contents" },
     { name: t("Videos"), href: "/videos" },
-    { name: t("Cards & Photos"), href: "/cards-photos" },
+    { name: t("Cards"), href: "/cards-photos" },
     { name: t("Events & Community"), href: "/events" },
     { name: t("About Us"), href: "/about" },
   ];
+  const fetchWebSiteInfo = async () => {
+    try {
+      const response = await GetWebSiteInfo();
+      setlogo(response.data?.logo?.logo);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
+  };
 
   // Navigation items with dropdowns
   const navigationItems = [
@@ -29,28 +39,41 @@ function Usernavbar() {
       hasDropdown: false,
     },
     {
-      name: t("Guided Reading"),
-      href: "/guiding-reading",
+      name: t("Contents"),
+      href: "/contents",
       hasDropdown: true,
       subItems: [
         {
-          name: t("Week's Topic"),
+          name: t("Guidning Reading"),
           href: "/guiding-reading",
-          scrollToId: "week-topic-section",
+          hasSubmenu: true,
+          submenu: [
+            {
+              name: t("Week's Topic"),
+              href: "/contents",
+              scrollToId: "week-topic-section",
+            },
+            {
+              name: t("Project Guide to Excellence"),
+              href: "/contents",
+              scrollToId: "week-moments-section",
+            },
+          ],
         },
+
         {
-          name: t("Project Guide to Excellence"),
-          href: "/guiding-reading",
-          scrollToId: "week-moments-section",
+          name: t("Janet & Victor Great Love"),
+          href: "/contents",
+          scrollToId: "week-health-section",
         },
         {
           name: t("Health"),
-          href: "/guiding-reading",
+          href: "/contents",
           scrollToId: "week-health-section",
         },
         {
           name: t("Others Sessions"),
-          href: "/guiding-reading",
+          href: "/contents",
           scrollToId: "week-other-section",
         },
       ],
@@ -209,6 +232,9 @@ function Usernavbar() {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    fetchWebSiteInfo();
+  }, []);
   return (
     <nav className="relative bg-white shadow-sm" dir={i18n.dir()}>
       <div className="  mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,16 +243,16 @@ function Usernavbar() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img
-                src={logo}
+                src={logo?.logo || logo}
                 alt="logo"
-                className="w-28 h-10 sm:w-32 sm:h-12 object-contain"
+                className="w-28 h-10 sm:w-36 sm:h-12 object-cover"
               />
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 mx-8">
-            <ul className="flex items-center space-x-1">
+            <ul className="flex items-center ">
               {navigationItems.map((item, idx) => (
                 <li key={idx} className="relative group">
                   {item.hasDropdown ? (
@@ -269,16 +295,61 @@ function Usernavbar() {
                         <div className="min-w-[240px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">
                           <ul className="space-y-1">
                             {item.subItems.map((subItem, subIdx) => (
-                              <li key={subIdx}>
+                              <li
+                                key={subIdx}
+                                className={`relative group/submenu ${
+                                  subItem.hasSubmenu ? "group/submenu" : ""
+                                }`}
+                              >
                                 <Link
                                   to={subItem.href}
                                   onClick={(e) => handleNavClick(e, subItem)}
-                                  className="block px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200 group/item relative"
+                                  className="px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200 group/item relative flex items-center justify-between"
                                 >
                                   <span className="flex items-center">
                                     {subItem.name}
                                   </span>
+                                  {subItem.hasSubmenu && (
+                                    <svg
+                                      className="w-3 h-3 text-gray-400 group-hover/item:text-primary transition-all group-hover/submenu:rotate-90"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                      />
+                                    </svg>
+                                  )}
                                 </Link>
+
+                                {/* SubMenu */}
+                                {subItem.hasSubmenu && (
+                                  <div className="absolute left-full top-0 ml-2 opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200">
+                                    <div className="min-w-[220px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">
+                                      <ul className="space-y-1">
+                                        {subItem.submenu.map(
+                                          (menuItem, menuIdx) => (
+                                            <li key={menuIdx}>
+                                              <Link
+                                                to={menuItem.href}
+                                                onClick={(e) =>
+                                                  handleNavClick(e, menuItem)
+                                                }
+                                                className="block px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200"
+                                              >
+                                                {menuItem.name}
+                                              </Link>
+                                            </li>
+                                          )
+                                        )}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -318,7 +389,7 @@ function Usernavbar() {
 
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
+              className="inline-flex items-center justify-center rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
               aria-expanded="false"
             >
               <span className="sr-only">{t("Open main menu")}</span>

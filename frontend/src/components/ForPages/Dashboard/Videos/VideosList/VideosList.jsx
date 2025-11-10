@@ -22,6 +22,7 @@ import { DeleteVideoById, GetVideos } from "@/api/videos";
 
 import ShowVideoDetails from "../ShowVideoDetails/ShowVideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 function VideosList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -175,10 +176,19 @@ function VideosList({ onSectionChange }) {
   }, [update]);
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 "
+      className="bg-white rounded-lg border  border-gray-200 pt-3 px-3"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
+      {/* Start Breadcrumb */}
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Videos List")}
+      />
+      {/* End Breadcrumb */}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">
@@ -390,7 +400,6 @@ function VideosList({ onSectionChange }) {
                       day: "2-digit",
                     })}
                   </span>
-                   
                 </div>
               </TableCell>
               <TableCell className="py-4">

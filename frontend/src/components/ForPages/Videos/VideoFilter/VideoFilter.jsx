@@ -5,8 +5,6 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import Modal from "@/components/Global/Modal/Modal";
-import FilterDatePickerModal from "@/components/ForPages/Videos/FilterDatePickerModal/FilterDatePickerModal";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { Button } from "@/components/ui/button";
 import { languages } from "@/constants/constants";
@@ -19,20 +17,12 @@ import {
 import { cn } from "@/lib/utils";
 
 function VideoFilter({
-  happenedAt,
-  setHappenedAt,
-  setContentType,
-  setIndexCategory,
-  setLanguageContent,
+  filters,
+  updateFilter,
   setOpenFilterModal,
-  contentType = [],
-  indexCategory = [],
-  languageContent = [],
   categoriesList,
   hasActiveFilters,
-  setSearchValue,
   setCurrentPage,
-  setMakingSearch,
   setFilteredData,
 }) {
   const { t } = useTranslation();
@@ -40,15 +30,16 @@ function VideoFilter({
 
   // Clear all filters and reset to default view
   const handleClearFilters = () => {
-    setSearchValue("");
-    setMakingSearch(false);
-    setContentType([]);
-    setIndexCategory([]);
-    setLanguageContent([]);
-    setHappenedAt(null);
+    updateFilter("searchValue", "");
+    updateFilter("makingSearch", false);
+    updateFilter("contentType", []);
+    updateFilter("indexCategory", []);
+    updateFilter("languageContent", []);
+    updateFilter("happenedAt", null);
+    updateFilter("isFeatured", null);
+    updateFilter("isNew", null);
     setCurrentPage(1);
     setFilteredData({ count: 0, results: [] });
-    toast.success(t("Filters cleared"));
   };
 
   return (
@@ -70,19 +61,25 @@ function VideoFilter({
                 {t("Content Type")}
               </h3>
             </div>
-
+            {/* Start Full Video */}
             <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="full-videos"
-                checked={contentType.includes("full_video")}
+                checked={filters.contentType.includes("full_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "full_video"]);
+                    updateFilter("contentType", [
+                      ...filters.contentType,
+                      "full_video",
+                    ]);
                   } else {
-                    setContentType((prev) =>
-                      prev.filter((type) => type !== "full_video")
+                    updateFilter(
+                      "contentType",
+                      filters.contentType.filter(
+                        (type) => type !== "full_video"
+                      )
                     );
                   }
                 }}
@@ -94,19 +91,27 @@ function VideoFilter({
                 {t("Full Videos")}
               </label>
             </div>
+            {/* End Full Video */}
 
+            {/* Start Unit Video */}
             <div className="flex items-center gap-2 sm:gap-3">
               <input
                 type="checkbox"
                 id="unit-video"
-                checked={contentType.includes("unit_video")}
+                checked={filters.contentType.includes("unit_video")}
                 className="rounded border-gray-300 w-4 h-4"
                 onChange={(e) => {
                   if (e.target.checked) {
-                    setContentType((prev) => [...prev, "unit_video"]);
+                    updateFilter("contentType", [
+                      ...filters.contentType,
+                      "unit_video",
+                    ]);
                   } else {
-                    setContentType((prev) =>
-                      prev.filter((type) => type !== "unit_video")
+                    updateFilter(
+                      "contentType",
+                      filters.contentType.filter(
+                        (type) => type !== "unit_video"
+                      )
                     );
                   }
                 }}
@@ -118,6 +123,47 @@ function VideoFilter({
                 {t("Unit Video")}
               </label>
             </div>
+            {/* End Unit Video */}
+
+            {/* Start Is Featured */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <input
+                type="checkbox"
+                id="is_featured"
+                checked={filters.isFeatured === true}
+                className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  updateFilter("isFeatured", e.target.checked ? true : null);
+                }}
+              />
+              <label
+                htmlFor="is_featured"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
+              >
+                {t("Is Featured")}
+              </label>
+            </div>
+            {/* End Is Featured */}
+
+            {/* Start Is New */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <input
+                type="checkbox"
+                id="is_new"
+                checked={filters.isNew === true}
+                className="rounded border-gray-300 w-4 h-4"
+                onChange={(e) => {
+                  updateFilter("isNew", e.target.checked ? true : null);
+                }}
+              />
+              <label
+                htmlFor="is_new"
+                className="text-xs sm:text-sm text-gray-700 flex-1"
+              >
+                {t("Is New")}
+              </label>
+            </div>
+            {/* End Is New */}
           </div>
         </div>
 
@@ -132,8 +178,10 @@ function VideoFilter({
 
           <MultiSelect
             items={categoriesList || []}
-            selected={Array.isArray(indexCategory) ? indexCategory : []}
-            onChange={(selected) => setIndexCategory(selected)}
+            selected={
+              Array.isArray(filters.indexCategory) ? filters.indexCategory : []
+            }
+            onChange={(selected) => updateFilter("indexCategory", selected)}
             placeholder={t("Select Category")}
             renderLabel={(item) => t(item?.name || item)}
             renderValue={(item) => t(item?.name) || item}
@@ -152,8 +200,12 @@ function VideoFilter({
 
           <MultiSelect
             items={languages?.map((lang) => ({ name: lang })) || []}
-            selected={Array.isArray(languageContent) ? languageContent : []}
-            onChange={(selected) => setLanguageContent(selected)}
+            selected={
+              Array.isArray(filters.languageContent)
+                ? filters.languageContent
+                : []
+            }
+            onChange={(selected) => updateFilter("languageContent", selected)}
             placeholder={t("Select Language")}
             renderLabel={(item) => t(item?.name || item)}
             renderValue={(item) => t(item?.name) || item}
@@ -172,12 +224,12 @@ function VideoFilter({
                   variant="outline"
                   className={cn(
                     "w-full text-left font-normal flex items-center",
-                    !happenedAt && "text-muted-foreground"
+                    !filters.happenedAt && "text-muted-foreground"
                   )}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
-                  {happenedAt ? (
-                    format(happenedAt, "dd-MM-yyyy")
+                  {filters.happenedAt ? (
+                    format(filters.happenedAt, "dd-MM-yyyy")
                   ) : (
                     <span>{t("Pick Happened Date")}</span>
                   )}
@@ -187,11 +239,15 @@ function VideoFilter({
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
-                  selected={happenedAt ? new Date(happenedAt) : undefined}
+                  selected={
+                    filters.happenedAt
+                      ? new Date(filters.happenedAt)
+                      : undefined
+                  }
                   onSelect={(date) => {
                     if (!date) return;
                     date.setHours(12);
-                    setHappenedAt(format(date, "yyyy-MM-dd"));
+                    updateFilter("happenedAt", format(date, "yyyy-MM-dd"));
                     setDateOpen(false);
                   }}
                   disabled={(date) =>
@@ -202,9 +258,9 @@ function VideoFilter({
               </PopoverContent>
             </Popover>
 
-            {happenedAt && (
+            {filters.happenedAt && (
               <button
-                onClick={() => setHappenedAt(null)}
+                onClick={() => updateFilter("happenedAt", null)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
                 type="button"
               >

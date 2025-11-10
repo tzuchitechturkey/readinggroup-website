@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
-import { GetEventById, GetTopEventsViewed, PatchEventById } from "@/api/events";
+import { GetEventById, GetTopEventsViewed, PatchWebSiteInfo } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
@@ -39,7 +39,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
     try {
       const newLikedState = !eventData?.has_liked;
 
-      await PatchEventById(eventData?.id, {
+      await PatchWebSiteInfo(eventData?.id, {
         has_liked: newLikedState,
       });
       setEventData({

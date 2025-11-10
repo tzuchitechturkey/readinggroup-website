@@ -21,18 +21,16 @@ function CardsAndPhotosTabs({ initialTab }) {
 
   const tabs = [
     "Suggested for you",
-    "Incentive Cards",
+    // "Incentive Cards",
     "Needlework Love",
     "Weekly Posts",
   ];
 
-  const [activeTab, setActiveTab] = useState(
-    initialTab || "Suggested for you"
-  );
+  const [activeTab, setActiveTab] = useState(initialTab || "Suggested for you");
   const [loading, setLoading] = useState(false);
   const [tabData, setTabData] = useState({
     "Suggested for you": [],
-    "Incentive Cards": [],
+    // "Incentive Cards": [],
     "Needlework Love": [],
     "Weekly Posts": [],
   });
@@ -40,7 +38,7 @@ function CardsAndPhotosTabs({ initialTab }) {
   // Mapping tabs to API functions
   const tabApiFunctions = {
     "Suggested for you": TopCommentedPosts,
-    "Incentive Cards": weeklyMomentsPosts,
+    // "Incentive Cards": weeklyMomentsPosts,
     "Needlework Love": TopLikedPosts,
     "Weekly Posts": WeeklyCardPhotoPosts,
   };
@@ -54,7 +52,7 @@ function CardsAndPhotosTabs({ initialTab }) {
         const response = await apiFunction();
         setTabData((prev) => ({
           ...prev,
-          [tabName]: response?.data?.card_photo || response?.data,
+          [tabName]: response?.data,
         }));
       }
     } catch {
@@ -155,7 +153,7 @@ function CardsAndPhotosTabs({ initialTab }) {
             loading={loading && activeTab === "Suggested for you"}
           />
         </TabsContent>
-
+        {/* 
         <TabsContent value="Incentive Cards">
           <DynamicSection
             title={t("This Week's Incentive Cards")}
@@ -167,7 +165,7 @@ function CardsAndPhotosTabs({ initialTab }) {
             viewMoreUrl="/guiding-reading"
             loading={loading && activeTab === "Incentive Cards"}
           />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="Needlework Love">
           <DynamicSection

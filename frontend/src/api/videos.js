@@ -17,6 +17,8 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
   if (params.language) queryParams.append("language", params.language);
   if (params.category) queryParams.append("category", params.category);
   if (params.happened_at) queryParams.append("happened_at", params.happened_at);
+  if (params.is_featured) queryParams.append("is_featured", params.is_featured);
+  if (params.is_new) queryParams.append("is_new", params.is_new);
 
   return await axios.get(`/videos/?${queryParams.toString()}`);
 }

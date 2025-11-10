@@ -1,16 +1,7 @@
 import * as React from "react";
 
 import { Link } from "react-router-dom";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Play,
-  Info,
-  Plus,
-  FolderOpen,
-  Globe,
-  SquareDashedMousePointer,
-} from "lucide-react";
+import { Play, Info, Plus, SquareDashedMousePointer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
@@ -177,7 +168,6 @@ export default function HeroSlider({ newsPage = false, data = null }) {
                   <div className="absolute inset-0 bg-black/70" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
-
                   {/* Start Title && Actions */}
                   <div className="absolute inset-0 flex items-center">
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
@@ -267,9 +257,11 @@ export default function HeroSlider({ newsPage = false, data = null }) {
                   </div>
                   {/* End Title && Actions */}
 
+                  {/* Start Top Five Section */}
                   <div className="pointer-events-auto absolute left-1 right-1 bottom-3 md:bottom-10 z-10">
                     <TopFiveSection data={slide.allData} />
                   </div>
+                  {/* End Top Five Section */}
                 </div>
               </CarouselItem>
             ))}

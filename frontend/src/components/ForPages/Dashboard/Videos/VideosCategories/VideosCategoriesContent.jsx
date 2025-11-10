@@ -15,6 +15,8 @@ import {
 } from "@/api/videos";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
 function VideosCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -135,41 +137,29 @@ function VideosCategoriesContent({ onSectionChange }) {
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("videos")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Go to Videos List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Videos Categories")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Videos List")}
+        onBack={() => {
+          onSectionChange("videos");
+        }}
+        page={t("Videos Categories")}
+      />
       {/* End Breadcrumb */}
 
       <div className="flex-1">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-          <div>
-            <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Videos Categories")}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {t("Manage videos categories and classifications")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+          <h2 className="text-lg font-medium text-[#1D2630]">
+            {t("Videos Categories")}
+          </h2>
+
+          <div className="flex items-center justify-end gap-1">
             <span className="text-sm text-gray-500">
               {t("Total")}: {categories.length} {t("categories")}
             </span>
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
+              className="flex items-center gap-2 text-xs md:text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
               {t("Add Category")}

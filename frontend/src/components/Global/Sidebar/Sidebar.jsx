@@ -29,6 +29,7 @@ import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
 import TV from "@/assets/icons/tv.png";
+import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
   onSectionChange,
@@ -60,7 +61,25 @@ export default function AppSidebar({
         onClick: () => onSectionChange("Home"),
         icon: DashboardIcon,
       },
-
+      {
+        title: "Contents",
+        onClick: () => onSectionChange("contents"),
+        icon: Video,
+        items: [
+          {
+            title: "All Contents",
+            onClick: () => onSectionChange("contents"),
+          },
+          {
+            title: "Add/Edit Content",
+            onClick: () => onSectionChange("createOrEditContent"),
+          },
+          {
+            title: "Contents Categories",
+            onClick: () => onSectionChange("contentsCategories"),
+          },
+        ],
+      },
       {
         title: "Posts",
         onClick: "#",
@@ -80,29 +99,7 @@ export default function AppSidebar({
           },
         ],
       },
-      {
-        title: "Events",
-        onClick: "#",
-        icon: TV,
-        items: [
-          {
-            title: "Events List",
-            onClick: () => onSectionChange("eventsList"),
-          },
-          {
-            title: "Add/Edit Event",
-            onClick: () => onSectionChange("createOrEditEvent"),
-          },
-          {
-            title: "Events Categories",
-            onClick: () => onSectionChange("eventsCategories"),
-          },
-          {
-            title: "Events Sections",
-            onClick: () => onSectionChange("eventsSections"),
-          },
-        ],
-      },
+    
       {
         title: "Videos",
         onClick: () => onSectionChange("videos"),
@@ -123,6 +120,29 @@ export default function AppSidebar({
           {
             title: "Series & Seasons",
             onClick: () => onSectionChange("seriesAndSeasons"),
+          },
+        ],
+      },
+  {
+        title: "Events",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "All Events",
+            onClick: () => onSectionChange("events"),
+          },
+          {
+            title: "Add/Edit Event",
+            onClick: () => onSectionChange("createOrEditEvent"),
+          },
+          {
+            title: "Events Categories",
+            onClick: () => onSectionChange("eventsCategories"),
+          },
+          {
+            title: "Events Sections",
+            onClick: () => onSectionChange("eventsSections"),
           },
         ],
       },
@@ -158,8 +178,8 @@ export default function AppSidebar({
             onClick: () => onSectionChange("sortSection"),
           },
           {
-            title: "Social Media",
-            onClick: () => onSectionChange("socialMedia"),
+            title: "Website Info",
+            onClick: () => onSectionChange("websiteInfo"),
           },
           {
             title: "Profile Settings",
@@ -261,7 +281,7 @@ export default function AppSidebar({
                     align="start"
                     className="w-40"
                   >
-                    {LANGUAGES.map((lang) => (
+                    {languages.map((lang) => (
                       <DropdownMenuItem
                         key={lang.code}
                         onClick={() => handleLangChange(lang.code)}

@@ -28,6 +28,7 @@ import DeleteSeriesConfirmation from "../VideosSeries/DeleteSeriesConfirmation";
 import CreateOrEditSeries from "../VideosSeries/CreateOrEditSeries";
 import DeleteSeasonConfirmation from "../VideosSeasons/DeleteSeasonConfirmation";
 import CreateOrEditSeason from "../VideosSeasons/CreateOrEditSeason";
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 function SeriesAndSeasonsList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -292,32 +293,20 @@ function SeriesAndSeasonsList({ onSectionChange }) {
     <div className="w-full space-y-4">
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Dashboard")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Season & Series Management")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Videos List")}
+        onBack={() => {
+          onSectionChange("videos");
+        }}
+        page={t("Season & Series Management")}
+      />
       {/* End Breadcrumb */}
       {/* Header Section */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t("Videos Series & Seasons")}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {t("Manage your video series and their seasons")}
-          </p>
-        </div>
+      <div className="flex items-center justify-between px-3 lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          {t("Videos Series & Seasons")}
+        </h1>
+
         <Button
           onClick={handleAddSeries}
           className="bg-blue-600 hover:bg-blue-700 text-white"

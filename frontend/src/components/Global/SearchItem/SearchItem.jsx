@@ -2,10 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { CiSearch } from "react-icons/ci";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function SearchItem({ t }) {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+import { GlobalSearch } from "@/api/info";
+
+export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   const searchInputRef = useRef(null);
   // Focus input when search opens
   useEffect(() => {
@@ -29,11 +32,26 @@ export default function SearchItem({ t }) {
     setIsSearchOpen(false);
     setSearchQuery("");
   };
+
+    const getData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await GlobalSearch(searchQuery);
+        setDataResult(response.data?.results || []);
+        setTotalRecords(response.data?.count || 0);
+        console.log("Search results:", response.data?.results);
+      } catch (error) {
+        setErrorFn(error, t);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
   return (
     <div className="flex items-center">
       <div
         className={`flex items-center transition-all duration-300 ease-in-out overflow-hidden ${
-          isSearchOpen ? "w-48 sm:w-56" : "w-0"
+          isSearchOpen ? "w-44 md:w-52" : "w-0"
         }`}
       >
         <form onSubmit={handleSearch} className="relative w-full">

@@ -20,19 +20,19 @@ import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEdit
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
 import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
 import PositionsContent from "@/components/ForPages/Dashboard/AboutUs/Positions/PositionsContent";
-import CardsList from "@/components/ForPages/Dashboard/CardsOrPhotos/CardsList/CardsList";
 import HealthPosts from "@/components/ForPages/Dashboard/HealthPosts/HealthPosts";
-import Tv from "@/components/ForPages/Dashboard/TV/TV";
 import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
-import NewsCategoriesContent from "@/components/ForPages/Dashboard/TV/News/NewsCategories/NewsCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
-import CreateOrEditNews from "@/components/ForPages/Dashboard/TV/News/CreateOrEditNews/CreateOrEditNews";
 import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
 import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
 import EventCategoriesContent from "@/components/ForPages/Dashboard/Events/EventsCategories/EventCategoriesContent";
 import EventSectionsContent from "@/components/ForPages/Dashboard/Events/EventsSections/EventSectionsContent";
-import SocialMediaContent from "@/components/ForPages/Dashboard/SocialMedya/SocialMediaContent";
 import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
+import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
+import ContentCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
+import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
+import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
+import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -63,6 +63,11 @@ export default function Page() {
   const [selectedNews, setSelectedNews] = useState(() => {
     // استرجاع الأخبار المحفوظة إن وجدت
     const saved = localStorage.getItem("dashboardSelectedNews");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedContent, setSelectedContent] = useState(() => {
+    // استرجاع المحتوى المحفوظ إن وجد
+    const saved = localStorage.getItem("dashboardSelectedContent");
     return saved ? JSON.parse(saved) : null;
   });
   const [selectedEvent, setSelectedEvent] = useState(() => {
@@ -126,11 +131,11 @@ export default function Page() {
     if (section === "home" || section === "Home") {
       localStorage.removeItem("dashboardSelectedPost");
       localStorage.removeItem("dashboardSelectedVideo");
-      localStorage.removeItem("dashboardSelectedNews");
+      localStorage.removeItem("dashboardSelectedContent");
       localStorage.removeItem("dashboardSelectedEvent");
       setSelectedPost(null);
       setSelectedVideo(null);
-      setSelectedNews(null);
+      setSelectedContent(null);
       setSelectedEvent(null);
     }
 
@@ -139,38 +144,45 @@ export default function Page() {
       setSelectedPost(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
-    } else if (section === "createOrEditNews") {
-      setSelectedNews(data);
+    } else if (section === "createOrEditContent") {
+      setSelectedContent(data);
     } else if (section === "createOrEditEvent") {
       setSelectedEvent(data);
     }
 
     let autoParent = data;
     if (typeof data === "object" || !autoParent) {
+      console.log("Determining parent for section:", section);
       const parentMap = {
+        // Posts
         cards: "Cards Or Photos",
         // photos: "Cards Or Photos",
         posts: "Posts",
         createOrEditPost: "Posts",
         postsCategories: "Posts",
+        // Videos
         videos: "Videos",
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
         seriesAndSeasons: "Videos",
-        newsList: "Tv",
-        createOrEditNews: "Tv",
-        newsCategories: "Tv",
+        // Contents
+        contents: "Contents",
+        createOrEditContent: "Contents",
+        ContentsCategories: "Contents",
+        // Events
         events: "Events",
-        eventsList: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
         eventsSections: "Events",
+        // About Us
         history: "About Us",
         team: "About Us",
         positions: "About Us",
+        // Settings && Profile
         profileSettings: "Settings",
         profile: "Settings",
-        socialMedia: "Settings",
+        // Website Info
+        websiteInfo: "Settings",
         sortSection: "Settings",
       };
       autoParent = parentMap[section] || null;
@@ -183,20 +195,20 @@ export default function Page() {
     switch (activeSection) {
       case "home":
         return <DashboardSections onSectionChange={handleSectionChange} />;
-      case "profileSettings":
-        return <SettingsContent onSectionChange={handleSectionChange} />;
-      case "profile":
-        return <ProfileContent onSectionChange={handleSectionChange} />;
-      case "socialMedia":
-        return <SocialMediaContent onSectionChange={handleSectionChange} />;
-      case "sortSection":
-        return <SortSectionContent onSectionChange={handleSectionChange} />;
+      // posts
+      case "posts":
+        return <PostsList onSectionChange={handleSectionChange} />;
+      case "createOrEditPost":
+        return (
+          <CreateOrEditPost
+            onSectionChange={handleSectionChange}
+            post={selectedPost}
+          />
+        );
+      case "postsCategories":
+        return <PostsCategoriesContent onSectionChange={handleSectionChange} />;
 
-      case "cards":
-        return <CardsList onSectionChange={handleSectionChange} />;
-      // case "photos":
-      //   return <PhotosList onSectionChange={handleSectionChange} />;
-
+      // Videos
       case "videos":
         return <VideosList onSectionChange={handleSectionChange} />;
       case "videosCategories":
@@ -212,31 +224,22 @@ export default function Page() {
             video={selectedVideo}
           />
         );
-      case "posts":
-        return <PostsList onSectionChange={handleSectionChange} />;
-      case "createOrEditPost":
+      // contents
+      case "contents":
+        return <ContentsList onSectionChange={handleSectionChange} />;
+      case "contentsCategories":
         return (
-          <CreateOrEditPost
-            onSectionChange={handleSectionChange}
-            post={selectedPost}
-          />
+          <ContentsCategoriesContent onSectionChange={handleSectionChange} />
         );
-      case "postsCategories":
-        return <PostsCategoriesContent onSectionChange={handleSectionChange} />;
-      case "healthPosts":
-        return <HealthPosts onSectionChange={handleSectionChange} />;
-      case "newsList":
-        return <Tv onSectionChange={handleSectionChange} />;
-      case "newsCategories":
-        return <NewsCategoriesContent onSectionChange={handleSectionChange} />;
-      case "createOrEditNews":
+      case "createOrEditContent":
         return (
-          <CreateOrEditNews
-            news={selectedNews}
+          <CreateOrEditContent
+            content={selectedContent}
             onSectionChange={handleSectionChange}
           />
         );
-      case "eventsList":
+      // Events
+      case "events":
         return <EventsList onSectionChange={handleSectionChange} />;
       case "createOrEditEvent":
         return (
@@ -249,6 +252,7 @@ export default function Page() {
         return <EventCategoriesContent onSectionChange={handleSectionChange} />;
       case "eventsSections":
         return <EventSectionsContent onSectionChange={handleSectionChange} />;
+      // About Us
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
       case "team":
@@ -257,6 +261,16 @@ export default function Page() {
         return <PositionsContent onSectionChange={handleSectionChange} />;
       default:
         return <DashboardSections />;
+      // Profile && Settings
+      case "profileSettings":
+        return <SettingsContent onSectionChange={handleSectionChange} />;
+      case "profile":
+        return <ProfileContent onSectionChange={handleSectionChange} />;
+      // Website Info
+      case "websiteInfo":
+        return <WebSiteInfoContent onSectionChange={handleSectionChange} />;
+      case "sortSection":
+        return <SortSectionContent onSectionChange={handleSectionChange} />;
     }
   };
 
@@ -277,12 +291,12 @@ export default function Page() {
           activeParent={activeParent}
         />
         <SidebarInset>
-          <header className="z-0 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <header className="  z-0 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="w-full mt-7">
               <AdminNavbar />
               <div
-                className={`absolute top-8 h-px w-full z-10 ${
-                  isRtl ? "-right-0" : "-left-0"
+                className={`absolute top-6 lg:top-8 h-px  z-10 ${
+                  isRtl ? "right-0" : "left-0"
                 }`}
               >
                 <SidebarTrigger className="" />
@@ -299,11 +313,11 @@ export default function Page() {
               </div>
             </div>
           </header>
-          <div className="border min-h-screen bg-[#F8F9FA] p-3 pt-10">
+          <div className="  min-h-screen bg-[#F8F9FA] lg:p-3 py-5 lg:pt-10">
             {renderContent()}
           </div>
           {/* Start Footer small note */}
-          <div className="">
+          <div className=" ">
             <DashboardFooter />
           </div>
           {/* Start Footer small note */}

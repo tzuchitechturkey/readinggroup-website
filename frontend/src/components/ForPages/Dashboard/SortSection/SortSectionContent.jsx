@@ -8,6 +8,8 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics, ReorderSections } from "@/api/dashboard";
 
+import CustomBreadcrumb from "../CustomBreadcrumb/CustomBreadcrumb";
+
 function SortSectionContent({ onSectionChange }) {
   const { t } = useTranslation();
   const [sections, setSections] = useState([]);
@@ -98,7 +100,7 @@ function SortSectionContent({ onSectionChange }) {
     // إنشاء مصفوفة من الـ IDs بالترتيب الجديد
     const orderedIds = sections.map((section, index) => ({
       sectionName: section.sectionName,
-      order: index+1,
+      order: index + 1,
     }));
     try {
       console.log(orderedIds);
@@ -126,21 +128,13 @@ function SortSectionContent({ onSectionChange }) {
     <div className="w-full mx-auto ">
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Dashboard")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("History")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Sort Sections")}
+      />
       {/* End Breadcrumb */}
 
       {/* Start Header */}

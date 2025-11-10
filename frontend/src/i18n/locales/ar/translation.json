@@ -248,7 +248,6 @@
   "e.g., 1h 28min or 15:30": "مثال: ١ ساعة ٢٨ دقيقة أو ١٥:٣٠",
   "YouTube URL": "رابط يوتيوب",
   "Featured Video": "فيديو مميز",
-  "Mark as New": "وضع علامة كجديد",
   "Update Video": "تحديث الفيديو",
   "Create Video": "إنشاء فيديو",
   "This action cannot be undone. This will permanently delete the selected item.": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر المحدد نهائيًا.",
@@ -1225,5 +1224,12 @@
   "Reddit": "ريديت",
   "WhatsApp": "واتساب",
   "Manage Sections": "إدارة الأقسام",
-  "Drag and drop to reorder sections": "اسحب وأفلت لإعادة ترتيب الأقسام"
+  "Drag and drop to reorder sections": "اسحب وأفلت لإعادة ترتيب الأقسام",
+  "no cards available": "لا توجد بطاقات متاحة",
+  "Master Cheng Yen's Daily Journal": "مذكرات الأستاذ تشنغ ين اليومية",
+  "Images": " الصور",
+  "": "",
+  "": "",
+  "": "",
+  "": ""
 }

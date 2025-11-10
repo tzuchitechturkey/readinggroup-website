@@ -8,16 +8,16 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import {
-  GetEventCategories,
-  AddEventCategory,
-  EditEventCategoryById,
-  DeleteEventCategory,
-} from "@/api/events";
+  GetContentCategories,
+  AddContentCategory,
+  EditContentCategoryById,
+  DeleteContentCategory,
+} from "@/api/contents";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
-function EventCategoriesContent({ onSectionChange }) {
+function ContentsCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -37,8 +37,8 @@ function EventCategoriesContent({ onSectionChange }) {
 
     try {
       const res = searchValue
-        ? await GetEventCategories(limit, offset, searchValue)
-        : await GetEventCategories(limit, offset);
+        ? await GetContentCategories(limit, offset, searchValue)
+        : await GetContentCategories(limit, offset);
       setCategories(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
@@ -98,10 +98,10 @@ function EventCategoriesContent({ onSectionChange }) {
 
     try {
       if (editingCategory && editingCategory.id) {
-        await EditEventCategoryById(editingCategory.id, form);
+        await EditContentCategoryById(editingCategory.id, form);
         toast.success(t("Category updated"));
       } else {
-        await AddEventCategory(form);
+        await AddContentCategory(form);
         toast.success(t("Category created"));
       }
       setShowModal(false);
@@ -115,7 +115,7 @@ function EventCategoriesContent({ onSectionChange }) {
   const handleConfirmDelete = async () => {
     if (!selectedCategory?.id) return;
     try {
-      await DeleteEventCategory(selectedCategory.id);
+      await DeleteContentCategory(selectedCategory.id);
       toast.success(t("Category deleted"));
       setShowDeleteModal(false);
       setSelectedCategory(null);
@@ -138,11 +138,11 @@ function EventCategoriesContent({ onSectionChange }) {
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <CustomBreadcrumb
-        backTitle={t("Back to Events List")}
+        backTitle={t("Back to Contents List")}
         onBack={() => {
-          onSectionChange("events");
+          onSectionChange("contents");
         }}
-        page={t("Events Categories")}
+        page={t("Contents Categories")}
       />
       {/* End Breadcrumb */}
 
@@ -150,7 +150,7 @@ function EventCategoriesContent({ onSectionChange }) {
         {/* Start Header */}
         <div className="flex items-center justify-between lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
           <h2 className="text-lg font-medium text-[#1D2630]">
-            {t("Events Categories")}
+            {t("Contents Categories")}
           </h2>
 
           <div className="flex justify-end items-center gap-1">
@@ -354,4 +354,4 @@ function EventCategoriesContent({ onSectionChange }) {
   );
 }
 
-export default EventCategoriesContent;
+export default ContentsCategoriesContent;

@@ -29,6 +29,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 import ShowPostDetails from "../ShowPostDetails/ShowPostDetails";
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 function PostsList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -54,7 +55,9 @@ function PostsList({ onSectionChange }) {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetPosts(limit, offset, { search: searchVal });
+      const res = await GetPosts(limit, offset, "published", {
+        search: searchVal,
+      });
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {
@@ -160,10 +163,19 @@ function PostsList({ onSectionChange }) {
   }, [update]);
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200"
+      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
+      {/* Start Breadcrumb */}
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Posts List")}
+      />
+      {/* End Breadcrumb */}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">

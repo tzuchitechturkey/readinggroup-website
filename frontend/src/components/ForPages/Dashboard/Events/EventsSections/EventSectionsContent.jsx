@@ -15,6 +15,8 @@ import {
 } from "@/api/events";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
 function EventSectionsContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -135,35 +137,23 @@ function EventSectionsContent({ onSectionChange }) {
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("eventsList")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Go to Events List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Events Sections")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Events List")}
+        onBack={() => {
+          onSectionChange("events");
+        }}
+        page={t("Events Sections")}
+      />
       {/* End Breadcrumb */}
 
       <div className="flex-1">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-          <div>
-            <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Events Sections")}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {t("Manage events sections and classifications")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+        {/* Start Header */}
+        <div className="flex items-center justify-between lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+          <h2 className="text-lg font-medium text-[#1D2630]">
+            {t("Events Sections")}
+          </h2>
+
+          <div className="flex items-center justify-end gap-2">
             <span className="text-sm text-gray-500">
               {t("Total")}: {sections.length} {t("sections")}
             </span>
@@ -176,6 +166,7 @@ function EventSectionsContent({ onSectionChange }) {
             </button>
           </div>
         </div>
+        {/* End Header */}
 
         {/* Start Search */}
         <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">

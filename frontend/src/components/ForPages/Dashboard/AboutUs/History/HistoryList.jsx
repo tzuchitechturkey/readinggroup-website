@@ -18,6 +18,7 @@ import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteCon
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 import CreateOrEditHistory from "./CreateOrEditHistory";
 
@@ -95,26 +96,19 @@ function HistoryList({ onSectionChange }) {
     >
       {isLaoding && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Dashboard")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("History")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        backTitle={t("Back to Dashboard")}
+        page={t("History")}
+      />
       {/* End Breadcrumb */}
 
       <div className="flex-1">
         {/* Start Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+        <div className="lg:flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
+          {/* Start Text */}
           <div>
             <h2 className="text-lg font-medium text-[#1D2630]">
               {t("Company History")}
@@ -123,7 +117,9 @@ function HistoryList({ onSectionChange }) {
               {t("Manage your company's historical events and milestones")}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          {/* End Text */}
+          {/* Start Button && Total */}
+          <div className="flex items-center justify-end gap-2 mt-4">
             <span className="text-sm text-gray-500">
               {t("Total")}: {historyData.length} {t("events")}
             </span>
@@ -138,6 +134,7 @@ function HistoryList({ onSectionChange }) {
               {t("Add New Event")}
             </button>
           </div>
+          {/* End Button && Total */}
         </div>
         {/* End Header */}
         {/* Start Search */}

@@ -10,12 +10,14 @@ import {
   socialPlatforms,
 } from "@/constants/constants";
 import {
-  GetSocialLinks,
-  CreateSocialLink,
-  EditSocialLink,
-  DeleteSocialLink,
-} from "@/api/social";
+  GetWebSiteInfo,
+  AddWebSiteInfo,
+  EditWebSiteInfo,
+  DeleteWebSiteInfo,
+} from "@/api/info";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 function SocialMediaContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -27,20 +29,17 @@ function SocialMediaContent({ onSectionChange }) {
   const [formData, setFormData] = useState({ platform: "", url: "" });
 
   // محاكاة جلب البيانات من الباك - استبدلها بـ API الفعلي
-  useEffect(() => {
-    const fetchSocialLinks = async () => {
-      try {
-        setLoading(true);
-        const response = await GetSocialLinks(100, 0);
-        setSocialLinks(response.data?.results || []);
-      } catch (error) {
-        setErrorFn(error, t);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSocialLinks();
-  }, [t]);
+  const fetchSocialLinks = async () => {
+    try {
+      setLoading(true);
+      const response = await GetWebSiteInfo(100, 0);
+      setSocialLinks(response.data?.results || []);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // التعامل مع إضافة رابط جديد
   const handleAdd = async () => {
@@ -49,15 +48,22 @@ function SocialMediaContent({ onSectionChange }) {
       return;
     }
 
+    // التحقق من وجود منصة مكررة
+    if (socialLinks?.some((link) => link.platform === formData.platform)) {
+      toast.error(t("This social media platform is already added"));
+      return;
+    }
+
     // التحقق من صيغة الـ URL
     try {
       new URL(formData.url);
     } catch {
       toast.error(t("Invalid URL format"));
+      return;
     }
 
     try {
-      const response = await CreateSocialLink(formData);
+      const response = await AddWebSiteInfo(formData);
       setSocialLinks([...socialLinks, response.data]);
       toast.success(t("Social link added successfully"));
       setFormData({ platform: "", url: "" });
@@ -75,14 +81,25 @@ function SocialMediaContent({ onSectionChange }) {
       return;
     }
 
+    // التحقق من وجود منصة مكررة (ما عدا المنصة الحالية المراد تعديلها)
+    if (
+      socialLinks?.some(
+        (link) => link.platform === formData.platform && link.id !== id
+      )
+    ) {
+      toast.error(t("This social media platform is already added"));
+      return;
+    }
+
     try {
       new URL(formData.url);
     } catch {
       toast.error(t("Invalid URL format"));
+      return;
     }
 
     try {
-      const response = await EditSocialLink(id, formData);
+      const response = await EditWebSiteInfo(id, formData);
       setSocialLinks(
         socialLinks?.map((link) => (link.id === id ? response.data : link))
       );
@@ -98,7 +115,7 @@ function SocialMediaContent({ onSectionChange }) {
   // التعامل مع حذف رابط
   const handleDelete = async (id) => {
     try {
-      await DeleteSocialLink(id);
+      await DeleteWebSiteInfo(id);
       setSocialLinks(socialLinks?.filter((link) => link.id !== id));
       toast.success(t("Social link deleted successfully"));
       setDeletingId(null);
@@ -123,14 +140,22 @@ function SocialMediaContent({ onSectionChange }) {
 
   // تصفية الأنظمة المستخدمة بالفعل
   const getAvailablePlatforms = () => {
-    return socialPlatforms.filter(
-      (platform) =>
-        !socialLinks?.some((link) => link.platform === platform) ||
-        editingId ||
-        formData.platform === platform
-    );
+    return socialPlatforms.filter((platform) => {
+      // إذا كان هناك منصة مستخدمة بالفعل
+      const isUsed = socialLinks?.some((link) => link.platform === platform);
+
+      // إذا كان قيد التعديل والمنصة نفسها
+      const isCurrentEditingPlatform =
+        editingId && formData.platform === platform;
+
+      // نسمح بالمنصة إذا لم تكن مستخدمة أو كانت هي المنصة الحالية تحت التعديل
+      return !isUsed || isCurrentEditingPlatform;
+    });
   };
-  console.log(socialLinks);
+  useEffect(() => {
+    fetchSocialLinks();
+  }, [t]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -142,21 +167,13 @@ function SocialMediaContent({ onSectionChange }) {
   return (
     <div className="w-full" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Dashboard")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("History")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Social Media")}
+      />
       {/* End Breadcrumb */}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">

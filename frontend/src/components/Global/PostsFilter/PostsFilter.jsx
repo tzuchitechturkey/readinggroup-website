@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown, X, Filter } from "lucide-react";
 
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
-import { GetAllUsers, GetPostCategories } from "@/api/posts";
+import { GetPostCategories } from "@/api/posts";
 import { languages } from "@/constants/constants";
+import { GetAllUsers } from "@/api/info";
 
 import Loader from "../Loader/Loader";
 import AutoComplete from "../AutoComplete/AutoComplete";

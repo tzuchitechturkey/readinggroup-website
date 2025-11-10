@@ -21,8 +21,8 @@ const TopFiveSection = ({ data }) => {
         isSlider={isMobile}
         cardName={TopFiveSectionCard}
         showArrows={isMobile}
-        prevArrowClassname="-left-8"
-        nextArrowClassname="-right-8"
+        prevArrowClassname="-left-5"
+        nextArrowClassname="-right-5"
         stopslider={true}
       />
     </div>

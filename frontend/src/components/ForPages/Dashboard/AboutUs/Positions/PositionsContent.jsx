@@ -14,6 +14,8 @@ import {
   DeletePositionsById,
 } from "@/api/aboutUs";
 
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
 export default function PositionsContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -130,41 +132,29 @@ export default function PositionsContent({ onSectionChange }) {
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Dashboard")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Positions")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Positions")}
+      />
+
       {/* End Breadcrumb */}
 
       <div className="flex-1">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-          <div>
-            <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Positions Management")}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {t("Manage team positions and roles")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
+          <h2 className="text-lg font-medium text-[#1D2630]">
+            {t("Positions Management")}
+          </h2>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs md:text-sm text-gray-500">
               {t("Total")}: {positions.length} {t("positions")}
             </span>
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
+              className="flex items-center gap-2 text-xs md:text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
               {t("Add Position")}

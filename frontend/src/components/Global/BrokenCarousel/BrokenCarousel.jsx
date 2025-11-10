@@ -63,7 +63,7 @@ function BrokenCarousel({
           {data?.map((item) => (
             <CarouselItem
               key={item.id}
-              className={`py-2 ${getItemBasisClass()} overflow-visible h-52`}
+              className={`py-2 ${getItemBasisClass()} overflow-visible  `}
             >
               <Card item={item} />
             </CarouselItem>

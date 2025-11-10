@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
 import { AddToMyList, RemoveFromMyList, PatchVideoById } from "@/api/videos";
-import { PatchEventById } from "@/api/events";
+import { PatchWebSiteInfo } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CustomyoutubeVideo({ videoData }) {
@@ -100,7 +100,7 @@ function CustomyoutubeVideo({ videoData }) {
     try {
       const newLikedState = !videoItem?.has_liked;
       if (videoData?.report_type) {
-        await PatchEventById(videoItem.id, {
+        await PatchWebSiteInfo(videoItem.id, {
           has_liked: newLikedState,
         });
       } else {
@@ -262,22 +262,36 @@ function CustomyoutubeVideo({ videoData }) {
 
             {/* Start Tags && Watch on YouTube Button */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-              {/* Start Tags */}
-              {Array.isArray(videoData?.tags) && videoData?.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {videoData?.tags.map((t, i) => (
-                    <span
-                      key={`${t}-${i}`}
-                      className={`px-2 sm:px-3 py-1 bg-transparent ${
-                        i === 0 ? "border-[1px] border-text" : ""
-                      } text-xs sm:text-sm rounded-full`}
-                    >
-                      {t}
-                    </span>
-                  ))}
+              <div className="flex items-center gap-2 ">
+                {/* Start Tags */}
+                {Array.isArray(videoData?.tags) &&
+                  videoData?.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {videoData?.tags.map((t, i) => (
+                        <span
+                          key={`${t}-${i}`}
+                          className={`px-2 sm:px-3 py-1 bg-transparent  border-[1px] border-text 
+                        text-xs sm:text-sm rounded-full`}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                {/* End Tags */}
+
+                {/* Start Duration */}
+                <div className="">
+                  <span
+                    className={`px-2 sm:px-3 py-1 bg-transparent  border-[1px] border-text 
+                    text-xs sm:text-sm rounded-full`}
+                  >
+                    {videoData?.duration}
+                  </span>
                 </div>
-              )}
-              {/* End Tags */}
+                {/* End Duration */}
+              </div>
+
               {/* Start Watch on YouTube Button */}
               <button
                 onClick={() => window.open(videoData?.video_url, "_blank")}
@@ -290,7 +304,6 @@ function CustomyoutubeVideo({ videoData }) {
                   className="w-4 h-4 sm:w-5 sm:h-5"
                 />
               </button>
-
               {/* End Watch on YouTube Button */}
             </div>
             {/* End Tags && Watch on YouTube Button */}

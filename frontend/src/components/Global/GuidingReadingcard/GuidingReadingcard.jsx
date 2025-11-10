@@ -1,10 +1,9 @@
 import React from "react";
 
 import { useNavigate } from "react-router-dom";
-import { Star, User, Tag } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Star, User } from "lucide-react";
 
-function GuidingReadingcard({ item }) {
+function GuidingReadingcard({ item, showTags = true }) {
   const navigate = useNavigate();
   const handleCardClick = () => {
     navigate(
@@ -17,16 +16,12 @@ function GuidingReadingcard({ item }) {
     <div
       key={item?.id}
       onClick={handleCardClick}
-      className="rounded-xl group cursor-pointer border border-gray-100 relative"
+      className="rounded-xl max-w-[40 0px]  group cursor-pointer border border-gray-100 relative"
     >
       {/* Start Tag" */}
       <div className="absolute z-50 top-3 left-3">
-        {item?.tags && item?.tags.length > 0 && (
+        {showTags && item?.tags && item?.tags.length > 0 && (
           <div>
-            {/* <h4 className="font-semibold text-[#1D2630] mb-3 flex items-center gap-2">
-              <Tag className="w-4 h-4" />
-              {t("Tags")}
-            </h4> */}
             <div className="flex flex-wrap gap-2">
               {item?.tags.map((tag, index) => (
                 <span
@@ -42,11 +37,11 @@ function GuidingReadingcard({ item }) {
       </div>
       {/* Start Tag" */}
 
-      <div className="text-center relative  transform hover:scale-105 transition-all duration-300    ">
+      <div className="text-center relative transform hover:scale-105 transition-all duration-300">
         <img
           src={item?.image || item?.image_url}
           alt="Chinese Text"
-          className="  w-full h-[200px] rounded-lg object-cover"
+          className=" w-full h-[220px] rounded-lg "
         />
 
         <div className="absolute bottom-3 right-3">

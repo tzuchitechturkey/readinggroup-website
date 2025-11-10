@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
@@ -16,6 +16,8 @@ import {
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
 function PostsCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +28,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", description: "" });
+  const [form, setForm] = useState({ name: "", description: "", is_active: true });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -53,14 +55,18 @@ function PostsCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "" });
+    setForm({ name: "", description: "", is_active: true });
     setErrors({});
     setShowModal(true);
   };
 
   const openEditModal = (cat) => {
     setEditingCategory(cat);
-    setForm({ name: cat.name || "", description: cat.description || "" });
+    setForm({
+      name: cat.name || "",
+      description: cat.description || "",
+      is_active: cat.is_active !== undefined ? cat.is_active : true,
+    });
     setErrors({});
     setShowModal(true);
   };
@@ -68,7 +74,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    
+
     // إزالة الخطأ عند الإدخال
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -77,22 +83,22 @@ function PostsCategoriesContent({ onSectionChange }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!form.name || !form.name.trim()) {
       newErrors.name = t("Name is required");
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsLoading(true);
     try {
       if (editingCategory && editingCategory.id) {
@@ -141,41 +147,29 @@ function PostsCategoriesContent({ onSectionChange }) {
     >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("posts")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Go to Posts List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {t("Posts Categories")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Posts List")}
+        onBack={() => {
+          onSectionChange("posts");
+        }}
+        page={t("Posts Categories")}
+      />
       {/* End Breadcrumb */}
 
       <div className="flex-1">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-          <div>
-            <h2 className="text-lg font-medium text-[#1D2630]">
-              {t("Posts Categories")}
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {t("Manage posts categories and classifications")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
+        <div className="flex items-center justify-between px-2 lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-3 md:mb-6">
+          <h2 className="text-lg font-medium text-[#1D2630]">
+            {t("Posts Categories")}
+          </h2>
+
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs md:text-sm text-gray-500">
               {t("Total")}: {categories.length} {t("categories")}
             </span>
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
+              className="flex items-center gap-2 text-xs md:text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
               {t("Add Category")}
@@ -184,7 +178,7 @@ function PostsCategoriesContent({ onSectionChange }) {
         </div>
 
         {/* Start Search */}
-        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+        <div className="bg-white rounded-lg p-4  mb-3 md:mb-6 shadow-sm">
           <div className="relative max-w-md flex">
             <input
               type="text"
@@ -250,6 +244,13 @@ function PostsCategoriesContent({ onSectionChange }) {
                     {t("Description")}
                   </th>
                   <th
+                    className={`${
+                      i18n?.language === "ar" ? "text-right " : "  text-left"
+                    } py-2 px-3`}
+                  >
+                    {t("Status")}
+                  </th>
+                  <th
                     className={` ${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
                     } py-2 px-3 w-[160px]`}
@@ -262,7 +263,43 @@ function PostsCategoriesContent({ onSectionChange }) {
                 {categories?.map((cat) => (
                   <tr key={cat.id} className="border-t">
                     <td className="py-3 px-3">{cat.name}</td>
-                    <td className="py-3 px-3">{cat.description}</td>
+                    <td className="py-3 px-3">{cat.description || "-"}</td>
+                    <td className="py-3 px-3">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await EditPostCategoryById(cat.id, {
+                              ...cat,
+                              is_active: !cat.is_active,
+                            });
+                            toast.success(
+                              cat.is_active
+                                ? t("Category disabled")
+                                : t("Category enabled")
+                            );
+                            getCategoriesData(currentPage - 1);
+                          } catch (err) {
+                            setErrorFn(err, t);
+                          }
+                        }}
+                        className={`p-1 rounded-lg transition-all duration-200 ${
+                          cat.is_active
+                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
+                        title={
+                          cat.is_active
+                            ? t("Click to disable")
+                            : t("Click to enable")
+                        }
+                      >
+                        {cat.is_active ? (
+                          <ToggleRight className="h-8 w-12" />
+                        ) : (
+                          <ToggleLeft className="h-8 w-12" />
+                        )}
+                      </button>
+                    </td>
                     <td className="py-3 px-3">
                       <div className="flex gap-2">
                         <button
@@ -332,6 +369,35 @@ function PostsCategoriesContent({ onSectionChange }) {
                 className="w-full p-2 border border-gray-300 rounded"
                 rows={4}
               />
+            </div>
+
+            {/* Is Active Toggle */}
+            <div>
+              <label className="block text-sm font-medium mb-3">
+                {t("Status")}
+              </label>
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }))
+                }
+                className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
+                  form.is_active
+                    ? "bg-green-100 text-green-600 hover:bg-green-200"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                }`}
+              >
+                {form.is_active ? (
+                  <ToggleRight className="h-8 w-12" />
+                ) : (
+                  <ToggleLeft className="h-8 w-12" />
+                )}
+                <span className="text-base font-medium">
+                  {form.is_active
+                    ? t("Active")
+                    : t("Inactive")}
+                </span>
+              </button>
             </div>
 
             <div className="flex justify-end gap-2">

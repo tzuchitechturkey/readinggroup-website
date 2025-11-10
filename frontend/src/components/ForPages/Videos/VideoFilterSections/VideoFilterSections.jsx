@@ -17,13 +17,19 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   const [isLoading, setIsLoading] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
-  // Filter states
-  const [contentType, setContentType] = useState([]);
-  const [indexCategory, setIndexCategory] = useState([]);
-  const [languageContent, setLanguageContent] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [happenedAt, setHappenedAt] = useState(null);
-  const [makingSearch, setMakingSearch] = useState(false);
+  
+  // Unified filter state object
+  const [filters, setFilters] = useState({
+    contentType: [],
+    indexCategory: [],
+    languageContent: [],
+    searchValue: "",
+    happenedAt: null,
+    isFeatured: null,
+    isNew: null,
+    makingSearch: false,
+  });
+
   // Data states
   const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
 
@@ -32,11 +38,18 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
 
   // Check if any filter is active
   const hasActiveFilters =
-    makingSearch ||
-    contentType.length > 0 ||
-    indexCategory.length > 0 ||
-    languageContent.length > 0 ||
-    happenedAt !== null;
+    filters.makingSearch ||
+    filters.contentType.length > 0 ||
+    filters.indexCategory.length > 0 ||
+    filters.languageContent.length > 0 ||
+    filters.happenedAt !== null ||
+    filters.isFeatured !== null ||
+    filters.isNew !== null;
+
+  // Helper function to update filters
+  const updateFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
 
   const setErrorFn = (error) => {
     const errorMessage =
@@ -61,36 +74,37 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   };
 
   // Fetch filtered videos based on all active filters
-  const fetchFilteredVideos = async (page = 1, searchVal = searchValue) => {
-    // setIsLoading(true);
+  const fetchFilteredVideos = async (page = 1, searchVal = filters.searchValue) => {
     const offset = (page - 1) * limit;
     const params = {};
 
     if (searchVal) {
       params.search = searchVal;
-      setMakingSearch(true);
+      updateFilter("makingSearch", true);
     }
-    if (contentType.length > 0) params.video_type = contentType.join(",");
+    if (filters.contentType.length > 0) params.video_type = filters.contentType.join(",");
 
     // Extract category names from objects
-    if (indexCategory.length > 0) {
-      const categoryNames = indexCategory
+    if (filters.indexCategory.length > 0) {
+      const categoryNames = filters.indexCategory
         .map((cat) => (typeof cat === "object" ? cat.name : cat))
         .filter(Boolean);
       params.category = categoryNames.join(",");
     }
 
     // Extract language names from objects
-    if (languageContent.length > 0) {
-      const languageNames = languageContent
+    if (filters.languageContent.length > 0) {
+      const languageNames = filters.languageContent
         .map((lang) => (typeof lang === "object" ? lang.name : lang))
         .filter(Boolean);
       params.language = languageNames.join(",");
     }
 
-    if (happenedAt) params.happened_at = happenedAt;
+    if (filters.happenedAt) params.happened_at = filters.happenedAt;
+    if (filters.isFeatured !== null) params.is_featured = filters.isFeatured;
+    if (filters.isNew !== null) params.is_new = filters.isNew;
+    
     try {
-      // console.log("Fetching videos with params:", params)
       const res = await GetVideosByFilter(limit, offset, params);
 
       if (page === 1) {
@@ -104,11 +118,8 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
       }
     } catch (error) {
       setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
     }
   };
-
   const handleLoadMore = () => {
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
@@ -116,20 +127,32 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   };
 
   const handleSortData = () => {
-    if (hasActiveFilters) {
-      setFilteredData((prevData) => ({
+    if (!hasActiveFilters) return;
+
+    setFilteredData((prevData) => {
+      const { results } = prevData;
+      if (!results?.length) return prevData;
+
+      const sorted = [...results].sort((a, b) => {
+        const titleA = a.title?.toLowerCase() || "";
+        const titleB = b.title?.toLowerCase() || "";
+        return titleA.localeCompare(titleB, i18n.language, {
+          sensitivity: "base",
+          numeric: true,
+        });
+      });
+
+      // مقارنة أول عنصر لمعرفة هل هي مرتبة أصلاً
+      const isAlreadyAsc =
+        results[0]?.title?.toLowerCase() === sorted[0]?.title?.toLowerCase();
+
+      return {
         ...prevData,
-        results: [...prevData.results].sort((a, b) => {
-          const titleA = a.title?.toLowerCase() || "";
-          const titleB = b.title?.toLowerCase() || "";
-          return titleA.localeCompare(titleB, i18n.language, {
-            sensitivity: "base",
-            numeric: true,
-          });
-        }),
-      }));
-    }
+        results: isAlreadyAsc ? sorted.reverse() : sorted,
+      };
+    });
   };
+
   const onSearch = (searchVal) => {
     setCurrentPage(1);
     fetchFilteredVideos(1, searchVal);
@@ -137,15 +160,19 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
 
   // Trigger fetch when filters change
   useEffect(() => {
-    // if (hasActiveFilters) {
     setCurrentPage(1);
     fetchFilteredVideos(1);
-    // }
-  }, [contentType, indexCategory, languageContent, happenedAt]);
+  }, [
+    filters.contentType,
+    filters.indexCategory,
+    filters.languageContent,
+    filters.happenedAt,
+    filters.isFeatured,
+    filters.isNew,
+  ]);
 
   // Load default videos on mount
   useEffect(() => {
-    // loadDefaultVideos();
     getCategoriesList();
   }, []);
   return (
@@ -155,9 +182,9 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
       <div className="px-4 sm:px-6 md:px-8 lg:px-10 py-5 ">
         <SearchSecion
           setOpenFilterModal={setOpenFilterModal}
-          setSearchValue={setSearchValue}
-          setMakingSearch={setMakingSearch}
-          searchValue={searchValue}
+          setSearchValue={(value) => updateFilter("searchValue", value)}
+          setMakingSearch={(value) => updateFilter("makingSearch", value)}
+          searchValue={filters.searchValue}
           handleSortData={handleSortData}
           onSearch={onSearch}
           hasActiveFilters={hasActiveFilters}
@@ -171,19 +198,11 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
 
           <div className="hidden lg:flex w-full lg:w-80 ">
             <VideoFilter
-              happenedAt={happenedAt}
-              setHappenedAt={setHappenedAt}
-              setContentType={setContentType}
-              setIndexCategory={setIndexCategory}
-              setLanguageContent={setLanguageContent}
-              contentType={contentType}
-              indexCategory={indexCategory}
-              languageContent={languageContent}
+              filters={filters}
+              updateFilter={updateFilter}
               categoriesList={categoriesList}
               hasActiveFilters={hasActiveFilters}
-              setSearchValue={setSearchValue}
               setCurrentPage={setCurrentPage}
-              setMakingSearch={setMakingSearch}
               setFilteredData={setFilteredData}
             />
           </div>
@@ -274,16 +293,13 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
             title={t("Filter")}
           >
             <VideoFilter
-              happenedAt={happenedAt}
-              setHappenedAt={setHappenedAt}
-              setContentType={setContentType}
-              setIndexCategory={setIndexCategory}
-              setLanguageContent={setLanguageContent}
+              filters={filters}
+              updateFilter={updateFilter}
               setOpenFilterModal={setOpenFilterModal}
-              contentType={contentType}
-              indexCategory={indexCategory}
-              languageContent={languageContent}
               categoriesList={categoriesList}
+              hasActiveFilters={hasActiveFilters}
+              setCurrentPage={setCurrentPage}
+              setFilteredData={setFilteredData}
             />
           </Modal>
           {/* End Mobile Modal  */}

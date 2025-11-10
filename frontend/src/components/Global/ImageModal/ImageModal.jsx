@@ -12,7 +12,6 @@ function ImageModal({
 }) {
   const { t } = useTranslation();
 
-  console.log(imageData, "ssssssssssss");
   if (!isOpen) return null;
 
   return (

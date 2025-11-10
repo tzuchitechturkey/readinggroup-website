@@ -34,6 +34,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
 const videoTypes = ["full_video", "unit_video"];
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
@@ -62,8 +64,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     language: "",
     thumbnail: null,
     thumbnail_url: "",
-    featured: false,
-    is_new: false,
+    is_featured: false,
     reference_code: "",
     video_url: "",
     season_name: "",
@@ -83,8 +84,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         language: video?.language || "",
         thumbnail: video?.thumbnail, // Reset file input
         thumbnail_url: video?.thumbnail_url || "",
-        featured: video?.featured || false,
-        is_new: video?.is_new || false,
+        is_featured: video?.is_featured || false,
         reference_code: video?.reference_code || "",
         video_url: video?.video_url || "",
         season_name: video?.season_name?.id || "", // ID الـ season
@@ -345,38 +345,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     // Create FormData for file upload
     const formDataToSend = new FormData();
 
-    // Add all form fields to FormData
-    // Object.keys(formData).forEach((key) => {
-    //   if (key === "thumbnail" && formData[key] instanceof File) {
-    //     // Add file if it's actually a file
-    //     formDataToSend.append(key, formData[key]);
-    //   } else if (key !== "thumbnail") {
-    //     // Add all other fields except empty thumbnail
-    //     if (
-    //       formData[key] !== null &&
-    //       formData[key] !== "" &&
-    //       formData[key] !== undefined
-    //     ) {
-    //       // Convert boolean values to string for FormData
-    //       if (typeof formData[key] === "boolean") {
-    //         formDataToSend.append(key, formData[key].toString());
-    //       } else {
-    //         formDataToSend.append(key, formData[key]);
-    //       }
-    //     }
-    //   }
-    // });
-
     formDataToSend.append("title", formData?.title);
-    // formDataToSend.append("duration", formData?.duration);
     formDataToSend.append(
       "category",
       formData?.category?.id || formData?.category
     );
     formDataToSend.append("video_type", formData?.video_type);
     formDataToSend.append("language", formData?.language);
-    formDataToSend.append("featured", formData?.featured);
-    formDataToSend.append("is_new", formData?.is_new);
+    formDataToSend.append("is_featured", formData?.is_featured);
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
     formDataToSend.append("season_name", formData?.season_name);
@@ -446,8 +422,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close writer dropdown if clicked outside
-
       // Close category dropdown if clicked outside
       if (
         categoryDropdownRef.current &&
@@ -467,32 +441,24 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   }, []);
   return (
     <div
-      className="bg-white rounded-lg p-6   w-full mx-4  overflow-y-auto"
+      className="bg-white rounded-lg p-3 lg:p-6   w-full mx-4  overflow-y-auto"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("videos")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Videos List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {video ? t("Edit Video") : t("Create New Video")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Video List")}
+        onBack={() => {
+          onSectionChange("videos");
+        }}
+        page={video ? t("Edit Video") : t("Create New Video")}
+      />
       {/* End Breadcrumb */}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Start Image Upload Section */}
         <div>
           <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-            <p className="text-sm text-blue-800">
+            <p className="text-xs md:text-sm text-blue-800">
               <strong>{t("Important")}:</strong>{" "}
               {t(
                 "Please select an image with minimum dimensions of 300x200 pixels for best quality."
@@ -922,25 +888,13 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  name="featured"
-                  checked={formData?.featured}
+                  name="is_featured"
+                  checked={formData?.is_featured}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label className="ml-2 text-sm text-gray-700">
                   {t("Featured Video")}
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="is_new"
-                  checked={formData?.is_new}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">
-                  {t("Mark as New")}
                 </label>
               </div>
             </div>

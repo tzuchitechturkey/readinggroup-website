@@ -49,7 +49,7 @@ export default function DashboardSections({ onSectionChange }) {
           {/* End Table */}
 
           {/* Start Latest Posts */}
-          <div className="xl:col-span-2">
+          <div className="  xl:col-span-2">
             <LatestPosts
               data={data?.top_liked?.top_posts}
               onSectionChange={onSectionChange}

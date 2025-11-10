@@ -121,7 +121,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
 
     try {
       const apiFilters = clearFilter === true ? {} : buildFilters({ filter });
-      const res = await GetPosts(limit, offset, apiFilters);
+      const res = await GetPosts(limit, offset, "published", apiFilters);
 
       const newResults = res.data?.results || [];
       const totalCount = res.data?.count || 0;

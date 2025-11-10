@@ -59,7 +59,6 @@
   "SHOW MORE": "展开更多",
   "Not available": "不可用",
   "Home": "首页",
-  "Videos": "视频",
   "Cards & Photos": "卡片和照片",
   "Connect": "联系",
   "About Us": "关于我们",
@@ -209,7 +208,6 @@
   "e.g., 1h 28min or 15:30": "例如：1小時28分 或 15:30",
   "YouTube URL": "YouTube 連結",
   "Featured Video": "精選影片",
-  "Mark as New": "標記為新",
   "Update Video": "更新影片",
   "Create Video": "建立影片",
   "This action cannot be undone. This will permanently delete the selected item.": "此操作無法復原，將永久刪除所選項目。",
@@ -538,7 +536,6 @@
   "Last Month": "上個月",
   "Last Year": "去年",
   "Side Filtration": "側邊篩選",
-  "Events & Community": "事件與社區",
   "Source": "來源",
   "Personal Growth": "個人成長",
   "Nature": "自然",
@@ -1189,5 +1186,9 @@
   "Team Function": "團隊功能",
   "Special book for ten years": "特別的十年書籍",
   "Converting HEIC image...": "正在轉換 HEIC 圖像...",
-  "Failed to process image": "處理圖像失敗"
+  "Failed to process image": "處理圖像失敗",
+  "Contents": "閱",
+  "Videos": "上",
+  "Cards": "雲",
+  "Events & Community": "端"
 }

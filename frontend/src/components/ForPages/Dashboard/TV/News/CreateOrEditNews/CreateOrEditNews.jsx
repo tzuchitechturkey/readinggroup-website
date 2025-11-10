@@ -16,12 +16,14 @@ import {
   GetNewsCategories,
 } from "@/api/tvPrograms";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetAllUsers } from "@/api/posts";
+import { GetAllUsers } from "@/api/info";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+import CustomBreadcrumb from "../../../CustomBreadcrumb/CustomBreadcrumb";
 
 const CreateOrEditNews = ({ onSectionChange, news = null }) => {
   const { t } = useTranslation();
@@ -345,21 +347,13 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
     <div className="bg-white rounded-lg p-3  ">
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => onSectionChange("dashboard")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            ← {t("Back to Video List")}
-          </button>
-          <div className="h-4 w-px bg-gray-300" />
-          <h2 className="text-xl font-semibold text-[#1D2630]">
-            {news?.id ? t("Edit News") : t("Create New News")}
-          </h2>
-        </div>
-      </div>
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={news?.id ? t("Edit News") : t("Create New News")}
+      />
       {/* End Breadcrumb */}
 
       <form onSubmit={handleSubmit} className="space-y-4">
