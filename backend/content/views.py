@@ -923,6 +923,28 @@ class PostCategoryViewSet(BaseCRUDViewSet):
             queryset = queryset.filter(is_active=is_active)
         return queryset
     
+    @action(detail=True, methods=("get",), url_path="posts", url_name="posts")
+    def posts(self, request, pk=None):
+        """Return posts belonging to this PostCategory.
+
+        Supports pagination and annotates likes so serializers can include likes_count/has_liked.
+        """
+        try:
+            category = self.get_object()
+        except Exception:
+            return Response({"detail": "PostCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = Post.objects.filter(category=category).order_by('-created_at')
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = PostSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = PostSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+    
 class ContentCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing ContentCategory content."""
     queryset = ContentCategory.objects.all()
@@ -947,6 +969,26 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
             queryset = queryset.filter(is_active=is_active)
         return queryset
     
+    @action(detail=True, methods=("get",), url_path="contents", url_name="contents")
+    def contents(self, request, pk=None):
+        """Return Content objects belonging to this ContentCategory."""
+        try:
+            category = self.get_object()
+        except Exception:
+            return Response({"detail": "ContentCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = Content.objects.filter(category=category).order_by('-created_at')
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = ContentSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ContentSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+    
+    
 class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
@@ -970,6 +1012,26 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
         return queryset
+    
+    @action(detail=True, methods=("get",), url_path="events", url_name="events")
+    def events(self, request, pk=None):
+        """Return Event objects belonging to this EventCategory."""
+        try:
+            category = self.get_object()
+        except Exception:
+            return Response({"detail": "EventCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = Event.objects.filter(category=category).order_by('-happened_at', '-created_at')
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = EventSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = EventSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 
 class PositionTeamMemberViewSet(BaseCRUDViewSet):
     """ViewSet for managing PositionTeamMember content."""
@@ -1070,6 +1132,25 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
         return queryset
+    
+    @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
+    def videos(self, request, pk=None):
+        """Return Video objects belonging to this VideoCategory."""
+        try:
+            category = self.get_object()
+        except Exception:
+            return Response({"detail": "VideoCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = Video.objects.filter(category=category).order_by('-happened_at', '-created_at')
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = VideoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = VideoSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
 
 class EventSectionViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventSection content."""
