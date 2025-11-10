@@ -1,33 +1,37 @@
 export const getSectionKey = (title) => {
   const titleMap = {
     Home: "home",
-    Read: "read",
+    // Posts
     "All Posts": "posts",
     "Add/Edit Post": "createOrEditPost",
     "Posts Categories": "postsCategories",
-    "All Videos": "videos",
     "All Cards": "cards",
+    // Videos
+    "All Videos": "videos",
     Videos: "videos",
     "Videos Categories": "videosCategories",
-    "Add New Video": "createOrEditVideo",
+    "Add/Edit Video": "createOrEditVideo",
     "Series & Seasons": "seriesAndSeasons",
     "Videos Seasons": "videosSeasons",
-    History: "history",
-    "Our Team": "team",
-    "Health Posts": "healthPosts",
-    "News List": "newsList",
-    "Add/Edit News": "createOrEditNews",
-    "News Categories": "newsCategories",
-    "Events List": "eventsList",
+    // contents
+    "All Contents": "contents",
+    "Add/Edit Content": "createOrEditContent",
+    "Contents Categories": "contentsCategories",
+    // Events
+    "All Events": "events",
     "Add/Edit Event": "createOrEditEvent",
     "Events Categories": "eventsCategories",
     "Events Sections": "eventsSections",
+    // Profile && Setting
     "Profile Settings": "profileSettings",
     profile: "profile",
-    "Social Media": "socialMedia",
-    "Sort Section": "sortSection",
-    team: "team",
+    // About Us
+    History: "history",
     positions: "positions",
+    "Our Team": "team",
+    // Web site info
+    "Website Info": "websiteInfo",
+    "Sort Section": "sortSection",
   };
   return titleMap[title] || title.toLowerCase();
 };

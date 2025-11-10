@@ -63,21 +63,6 @@ function VideosPageContent() {
       />
       {/* End Filter Secion */}
       <div className="max-w-7xl mx-auto">
-        {/* Start My LIST */}
-        {myListedVideos?.length > 0 && (
-          <div className="my-3">
-            <DynamicSection
-              title={t("My List")}
-              titleClassName="text-[30px] font-medium mb-2"
-              data={myListedVideos}
-              isSlider={false}
-              viewMore={true}
-              cardName={VideoCard}
-              viewMoreUrl="/my-list"
-            />
-          </div>
-        )}
-        {/* End My LIST */}
         {/* Start Full Video */}
         <div className="my-3" id="full-videos">
           <DynamicSection
@@ -102,6 +87,21 @@ function VideosPageContent() {
           />
         </div>
         {/* End Unit  Video */}
+        {/* Start My LIST */}
+        {myListedVideos?.length > 0 && (
+          <div className="my-3">
+            <DynamicSection
+              title={t("My List")}
+              titleClassName="text-[30px] font-medium mb-2"
+              data={myListedVideos}
+              isSlider={false}
+              viewMore={true}
+              cardName={VideoCard}
+              viewMoreUrl="/my-list"
+            />
+          </div>
+        )}
+        {/* End My LIST */}
       </div>
     </div>
   );
