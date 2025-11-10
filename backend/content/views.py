@@ -903,6 +903,7 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing PostCategory content."""
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     queryset = PostCategory.objects.all()
@@ -949,6 +950,7 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing ContentCategory content."""
     queryset = ContentCategory.objects.all()
     serializer_class = ContentCategorySerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     queryset = ContentCategory.objects.all()
@@ -993,6 +995,7 @@ class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     queryset = EventCategory.objects.all()
@@ -1113,6 +1116,7 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing VideoCategory content."""
     queryset = VideoCategory.objects.all()
     serializer_class = VideoCategorySerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
     queryset = VideoCategory.objects.all()
