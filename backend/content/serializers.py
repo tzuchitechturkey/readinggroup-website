@@ -2,6 +2,7 @@ from rest_framework import serializers
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
+from .models import ContentImage
 from accounts.serializers import UserSerializer
 from accounts.models import User as AccountUser
 from django.db.models import Q
@@ -147,6 +148,16 @@ class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     class Meta:
         model = EventSection
         fields = "__all__"
+
+
+class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for the per-Content image rows (file + url + caption)."""
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = ContentImage
+        fields = ("id", "image", "image_url", "caption", "created_at", "updated_at")
+        file_fields = ("image",)
         
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -446,6 +457,7 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     average_rating = serializers.SerializerMethodField(read_only=True)
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
+    images = ContentImageSerializer(many=True, read_only=True)
     class Meta:
         model = Content
         fields = "__all__"
@@ -487,6 +499,12 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
                 data['user_rating'] = None
         except Exception:
             data['user_rating'] = None
+        # include associated ContentImage rows as `images` for slider support
+        try:
+            data["images"] = ContentImageSerializer(instance.images.all(), many=True, context=self.context).data
+        except Exception:
+            # fall back to empty list if anything goes wrong
+            data["images"] = []
         return data
 
     def get_average_rating(self, obj):

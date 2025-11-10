@@ -280,6 +280,25 @@ class Content(LikableMixin, TimestampedModel):
     def __str__(self) -> str:
         return self.title
 
+
+class ContentImage(TimestampedModel):
+    """Multiple images / image urls attached to a Content instance.
+    This model allows Content to have zero or more images (file uploads)
+    and/or image URLs. Keeping a separate table preserves backward
+    compatibility with the single `Content.image` / `Content.image_url`
+    fields while enabling multi-image support used by a frontend slider.
+    """
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
+    image_url = models.URLField(max_length=1000, blank=True)
+    caption = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"ContentImage<{self.content_id}:{self.pk}>"
+
 class WeeklyMoment(LikableMixin, TimestampedModel):
     """Weekly highlighted items displayed on the home page."""
     title = models.CharField(max_length=255)

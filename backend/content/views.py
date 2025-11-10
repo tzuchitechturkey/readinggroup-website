@@ -29,6 +29,7 @@ from .models import (
     TeamMember,
     Video,
     Content,
+    ContentImage,
     WeeklyMoment,
     PostCategory,
     VideoCategory,
@@ -374,8 +375,133 @@ class ContentViewSet(BaseContentViewSet):
         manual_parameters=content_manual_parameters
     )
 
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        """Create Content and attach uploaded images/urls as ContentImage rows."""
+        data = request.data.copy() if hasattr(request, 'data') else {}
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        content = serializer.save()
+
+        # handle file uploads and image urls
+        try:
+            # collect uploaded files: support images[] or repeated images key
+            uploaded = []
+            if hasattr(request.FILES, 'getlist'):
+                uploaded = list(request.FILES.getlist('images') or request.FILES.getlist('images[]') or [])
+            # fallback numbered keys image_0..image_n
+            if not uploaded and 'image_count' in data:
+                try:
+                    cnt = int(data.get('image_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'image_{i}'
+                    if key in request.FILES:
+                        uploaded.append(request.FILES[key])
+
+            # also accept any request.FILES keys that start with image_
+            if not uploaded:
+                for k, v in request.FILES.items():
+                    if k.startswith('image_') or k in ('image',):
+                        uploaded.append(v)
+
+            for f in uploaded:
+                try:
+                    ContentImage.objects.create(content=content, image=f)
+                except Exception:
+                    pass
+
+            # collect image_url_* fields
+            url_items = []
+            for k, v in data.items():
+                if isinstance(k, str) and k.startswith('image_url_') and v:
+                    url_items.append(v)
+
+            # also support image_urls as json/list
+            if not url_items and 'image_urls' in data:
+                try:
+                    import json
+                    maybe = data.get('image_urls')
+                    if isinstance(maybe, str):
+                        parsed = json.loads(maybe)
+                        if isinstance(parsed, (list, tuple)):
+                            url_items = parsed
+                    elif isinstance(maybe, (list, tuple)):
+                        url_items = list(maybe)
+                except Exception:
+                    url_items = []
+
+            for url in url_items:
+                if url:
+                    try:
+                        ContentImage.objects.create(content=content, image_url=url)
+                    except Exception:
+                        pass
+        except Exception:
+            # don't break creation if image handling fails
+            pass
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(self.get_serializer(content, context={'request': request}).data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        """Update Content and optionally attach new uploaded images/urls as ContentImage rows."""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        data = request.data.copy() if hasattr(request, 'data') else {}
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        content = serializer.save()
+
+        # Attach any new uploaded images (do not delete existing by default)
+        try:
+            uploaded = []
+            if hasattr(request.FILES, 'getlist'):
+                uploaded = list(request.FILES.getlist('images') or request.FILES.getlist('images[]') or [])
+            if not uploaded and 'image_count' in data:
+                try:
+                    cnt = int(data.get('image_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'image_{i}'
+                    if key in request.FILES:
+                        uploaded.append(request.FILES[key])
+
+            for f in uploaded:
+                try:
+                    ContentImage.objects.create(content=content, image=f)
+                except Exception:
+                    pass
+
+            url_items = []
+            for k, v in data.items():
+                if isinstance(k, str) and k.startswith('image_url_') and v:
+                    url_items.append(v)
+            if not url_items and 'image_urls' in data:
+                try:
+                    import json
+                    maybe = data.get('image_urls')
+                    if isinstance(maybe, str):
+                        parsed = json.loads(maybe)
+                        if isinstance(parsed, (list, tuple)):
+                            url_items = parsed
+                    elif isinstance(maybe, (list, tuple)):
+                        url_items = list(maybe)
+                except Exception:
+                    url_items = []
+
+            for url in url_items:
+                if url:
+                    try:
+                        ContentImage.objects.create(content=content, image_url=url)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        return Response(self.get_serializer(content, context={'request': request}).data)
     
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
