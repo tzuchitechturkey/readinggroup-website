@@ -192,6 +192,55 @@ class VideoViewSet(BaseContentViewSet):
         serializer = VideoSerializer(videos, many=True, context={"request": request})
         return Response(serializer.data)
 
+    @action(detail=False, methods=("get",), url_path="top-rated", url_name="top_rated")
+    def top_rated(self, request):
+        """Return top N videos ordered by average user rating (if ratings exist).
+
+        Query params:
+        - limit: int default 5
+
+        Behavior:
+        - If a related `ratings` relation exists on Video (e.g. a VideoRating or similar
+          with related_name='ratings'), the view will compute average rating and return
+          videos ordered by average rating desc, then by number of ratings, then created_at.
+        - If no ratings relation is present, falls back to ordering by likes (annotated)
+          and then by views/created_at.
+        """
+        try:
+            limit = int(request.query_params.get("limit", 5))
+        except Exception:
+            limit = 5
+
+        from django.db.models import Avg, Count
+
+        qs = Video.objects.all()
+
+        try:
+            # Annotate average rating and ratings count if a related `ratings` exists
+            qs = qs.annotate(avg_rating=Avg('ratings__rating'), ratings_count=Count('ratings'))
+            # Prefer items that actually have ratings
+            rated_qs = qs.filter(ratings_count__gt=0).order_by('-avg_rating', '-ratings_count', '-created_at')[:limit]
+
+            if rated_qs and len(rated_qs) > 0:
+                # annotate likes so serializer can include likes_count/has_liked
+                rated_qs = self.annotate_likes(rated_qs)
+                serializer = self.get_serializer(rated_qs, many=True, context={"request": request})
+                return Response(serializer.data)
+        except Exception:
+            # If annotation fails (no related ratings or other DB error), fall back
+            pass
+
+        # Fallback: order by likes (and views) if no rating system is available
+        try:
+            qs = qs.annotate(annotated_likes_count=Count('likes'))
+            qs = qs.order_by('-annotated_likes_count', '-views', '-created_at')[:limit]
+            qs = self.annotate_likes(qs)
+        except Exception:
+            qs = Video.objects.order_by('-views', '-created_at')[:limit]
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 class PostViewSet(BaseContentViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
