@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
-from .enums import VideoType, PostType
+from .enums import PostType
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import(

@@ -30,9 +30,3 @@ class ReportType(models.TextChoices):
 class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
-
-class VideoType(models.TextChoices):
-    INTERVIEW = "interview", "Interview"
-    DOCUMENTARY = "documentary", "Documentary"
-    TUTORIAL = "tutorial", "Tutorial"
-    ENTERTAINMENT = "entertainment", "Entertainment"
