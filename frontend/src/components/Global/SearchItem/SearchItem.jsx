@@ -17,7 +17,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const dropdownRef = useRef(null);
   const limit = 10;
-
+  
   // Focus input when search opens
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -68,9 +68,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   // Handle load more
   const handleLoadMore = async () => {
     if (isLoadingMore || !searchQuery) return;
-
     const newOffset = currentOffset + limit;
-
     // Check if we've reached the end
     if (newOffset >= totalRecords) return;
 
@@ -89,7 +87,11 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
 
   // Handle close search
   const handleCloseSearch = () => {
-    setIsSearchOpen(false);
+    if (isSearchOpen || searchQuery) {
+      setIsSearchOpen(false);
+    } else if (!isSearchOpen) {
+      setIsSearchOpen(true);
+    }
     setSearchQuery("");
     setData([]);
     setCurrentOffset(0);
@@ -109,7 +111,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
     <div className="flex items-center">
       <div
         className={`flex items-center transition-all duration-300 ease-in-out ${
-          !isSearchOpen ? "w-44 md:w-52" : "w-0"
+          isSearchOpen ? "w-44 md:w-52" : "w-0 overflow-hidden"
         }`}
       >
         <form onSubmit={handleSearch} className="relative w-full">
@@ -132,7 +134,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
           )}
 
           {/* Results dropdown */}
-          {!isSearchOpen && data?.length > 0 && (
+          {isSearchOpen && data?.length > 0 && (
             <div
               ref={dropdownRef}
               className="absolute z-50 -left-10 mt-2 w-[20rem] max-h-96 max-w-[90vw] bg-white shadow-lg rounded-md overflow-hidden flex flex-col"
@@ -142,8 +144,8 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
                   <Loader />
                 </div>
               ) : (
-                <div className="flex flex-col h-full">
-                  <ul className="overflow-y-auto flex-1">
+                <div className="flex flex-col h-">
+                  <ul className="overflow-y-auto custom-scroll max-h-96 ">
                     {data.map((item, idx) => (
                       <li
                         key={idx}
@@ -220,7 +222,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
       </div>
 
       <CiSearch
-        onClick={() => setIsSearchOpen(!isSearchOpen)}
+        onClick={() => handleCloseSearch()}
         className="cursor-pointer text-4xl sm:text-xl hover:text-primary transition-all duration-200 p-1 mx-2 sm:p-0 rounded-full hover:bg-gray-100"
       />
     </div>

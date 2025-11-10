@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 import VideosHero from "@/components/ForPages/Videos/VideosHero/VideosHero";
 import VideoFilterSections from "@/components/ForPages/Videos/VideoFilterSections/VideoFilterSections";
@@ -9,14 +10,22 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import {
   GetMyListedVideos,
   GetTopLikedVideos,
-  GetTopMixVideos,
+  GetTopRatingVideos,
+  GetVideos,
+  GetVideoCategories,
+  GetItemsByCategoryId,
 } from "@/api/videos";
 
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
-  const [topMixVideos, setTopMixVideos] = useState([]);
+  const location = useLocation();
+  const [mixVideos, setMixVideos] = useState([]);
+  const [ratingVideos, setRatingVideos] = useState([]);
   const [myListedVideos, setMyListedVideos] = useState([]);
   const [likedVideos, setLikedVideos] = useState([]);
+  const [activeCategories, setActiveCategories] = useState([]);
+  const [categoriesData, setCategoriesData] = useState({});
+  const [targetCategoryId, setTargetCategoryId] = useState(null);
   const getMyListedVideos = async () => {
     try {
       const res = await GetMyListedVideos(10, 0, "");
@@ -33,19 +42,79 @@ function VideosPageContent() {
       console.error("Failed to fetch liked videos:", err);
     }
   };
-  const getTopMixVideos = async () => {
+  const getMixVideos = async () => {
     try {
-      const res = await GetTopMixVideos();
-      setTopMixVideos(res.data);
+      const res = await GetVideos(10, 0, "");
+      setMixVideos(res.data?.results);
     } catch (err) {
       console.error("Failed to fetch top mix videos:", err);
     }
   };
 
+  const getRatingVideos = async () => {
+    try {
+      const res = await GetTopRatingVideos();
+      setRatingVideos(res.data?.results);
+    } catch (err) {
+      console.error("Failed to fetch top mix videos:", err);
+    }
+  };
+
+  const getActiveVideoCategories = async () => {
+    try {
+      const res = await GetVideoCategories();
+      const allCategories = res.data?.results || res.data || [];
+      const active = allCategories.filter((cat) => cat.is_active === true);
+      setActiveCategories(active);
+
+      // Fetch items for each active category
+      for (const category of active) {
+        try {
+          const itemsRes = await GetItemsByCategoryId(category.id);
+          setCategoriesData((prev) => ({
+            ...prev,
+            [category.id]: itemsRes.data?.results || itemsRes.data || [],
+          }));
+        } catch (err) {
+          console.error(
+            `Failed to fetch items for category ${category.id}:`,
+            err
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch video categories:", err);
+    }
+  };
+
   useEffect(() => {
-    getTopMixVideos();
-    getMyListedVideos();
+    if (location.state?.targetCategoryId) {
+      setTargetCategoryId(location.state.targetCategoryId);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (targetCategoryId && activeCategories.length > 0) {
+      const categoryExists = activeCategories.some(
+        (cat) => cat.id === targetCategoryId
+      );
+      if (categoryExists) {
+        setTimeout(() => {
+          const el = document.getElementById(`category-${targetCategoryId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 500);
+      }
+    }
+  }, [targetCategoryId, activeCategories]);
+
+  useEffect(() => {
+    getMixVideos();
     getLikedVideos();
+    getMyListedVideos();
+    getRatingVideos();
+    getActiveVideoCategories();
   }, []);
   return (
     <div
@@ -53,39 +122,39 @@ function VideosPageContent() {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Hero Section */}
-      <VideosHero top1Video={topMixVideos?.top_1} />
+      <VideosHero top1Video={mixVideos?.top_1} />
 
       {/* Start Filter Secion */}
-      <VideoFilterSections
-        fullVideos={topMixVideos?.top_5_full || []}
-        unitVideos={topMixVideos?.top_5_unit || []}
-        likedVideos={likedVideos}
-      />
+      <VideoFilterSections mixVideos={mixVideos} likedVideos={likedVideos} />
       {/* End Filter Secion */}
-      <div className="max-w-7xl mx-auto">
-        {/* Start Full Video */}
-        <div className="my-3" id="full-videos">
-          <DynamicSection
-            title={t("Full Video")}
-            titleClassName="text-[30px] font-medium mb-2"
-            data={topMixVideos?.top_5_full}
-            isSlider={false}
-            cardName={VideoCard}
-            viewMoreUrl="/videos"
-          />
-        </div>
-        {/* End Full Video */}
+      <div className="max-w-7xl mx-auto pb-2">
+        {/* Start Rating Video */}
+        {ratingVideos?.length ? (
+          <div className="my-3" id="full-videos">
+            <DynamicSection
+              title={t("Top Rating")}
+              titleClassName="text-[30px] font-medium mb-2"
+              data={ratingVideos}
+              isSlider={false}
+              cardName={VideoCard}
+              viewMoreUrl="/videos"
+            />
+          </div>
+        ) : (
+          ""
+        )}
+        {/* End Rating Video */}
         {/* Start Unit  Video */}
-        <div className="my-3  pb-4" id="unit-videos">
+        {/* <div className="my-3  pb-4" id="unit-videos">
           <DynamicSection
             title={t("Unit Video")}
             titleClassName="text-[30px] font-medium mb-2"
-            data={topMixVideos?.top_5_unit}
+            data={mixVideos?.top_5_unit}
             isSlider={false}
             cardName={VideoCard}
             viewMoreUrl="/videos"
           />
-        </div>
+        </div> */}
         {/* End Unit  Video */}
         {/* Start My LIST */}
         {myListedVideos?.length > 0 && (
@@ -102,6 +171,26 @@ function VideosPageContent() {
           </div>
         )}
         {/* End My LIST */}
+
+        {/* Start Show Active Categories */}
+
+        {activeCategories.map((category) => (
+          <div
+            key={category.id}
+            id={`category-${category.id}`}
+            className="mt-12"
+          >
+            <DynamicSection
+              title={category.name}
+              titleClassName="text-[30px] font-medium mb-2"
+              data={categoriesData[category.id] || []}
+              isSlider={false}
+              cardName={VideoCard}
+            />
+          </div>
+        ))}
+
+        {/* End Show Active Categories */}
       </div>
     </div>
   );

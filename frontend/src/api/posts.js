@@ -39,7 +39,7 @@ export async function DeletePostById(id) {
   return await axios.delete(`/posts/${id}/`);
 }
 
-
+// Categories
 export async function GetPostCategories(limit, offset, search = "") {
   return await axios.get(
     `/post-categories/?limit=${limit}&offset=${offset}&search=${search}`
@@ -60,6 +60,13 @@ export async function GetPostCategoryById(id) {
 
 export async function DeletePostCategory(id) {
   return await axios.delete(`/post-categories/${id}/`);
+}
+
+// Get All Item By cAteogir Id
+export async function GetItemsByCategoryId(categoryId, limit, offset) {
+  return await axios.get(
+    `/post-categories/${categoryId}/posts/?limit=${limit}&offset=${offset}`
+  );
 }
 
 // Comments management for posts

@@ -32,7 +32,6 @@ function VideoFilter({
   const handleClearFilters = () => {
     updateFilter("searchValue", "");
     updateFilter("makingSearch", false);
-    updateFilter("contentType", []);
     updateFilter("indexCategory", []);
     updateFilter("languageContent", []);
     updateFilter("happenedAt", null);
@@ -61,69 +60,6 @@ function VideoFilter({
                 {t("Content Type")}
               </h3>
             </div>
-            {/* Start Full Video */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="full-videos"
-                checked={filters.contentType.includes("full_video")}
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    updateFilter("contentType", [
-                      ...filters.contentType,
-                      "full_video",
-                    ]);
-                  } else {
-                    updateFilter(
-                      "contentType",
-                      filters.contentType.filter(
-                        (type) => type !== "full_video"
-                      )
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="full-videos"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Full Videos")}
-              </label>
-            </div>
-            {/* End Full Video */}
-
-            {/* Start Unit Video */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <input
-                type="checkbox"
-                id="unit-video"
-                checked={filters.contentType.includes("unit_video")}
-                className="rounded border-gray-300 w-4 h-4"
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    updateFilter("contentType", [
-                      ...filters.contentType,
-                      "unit_video",
-                    ]);
-                  } else {
-                    updateFilter(
-                      "contentType",
-                      filters.contentType.filter(
-                        (type) => type !== "unit_video"
-                      )
-                    );
-                  }
-                }}
-              />
-              <label
-                htmlFor="unit-video"
-                className="text-xs sm:text-sm text-gray-700 flex-1"
-              >
-                {t("Unit Video")}
-              </label>
-            </div>
-            {/* End Unit Video */}
 
             {/* Start Is Featured */}
             <div className="flex items-center gap-2 sm:gap-3">

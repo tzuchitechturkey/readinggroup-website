@@ -12,15 +12,14 @@ import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import { GetVideosByFilter, GetVideoCategories } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
-function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
+function VideoFilterSections({ mixVideos, likedVideos }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
-  
+
   // Unified filter state object
   const [filters, setFilters] = useState({
-    contentType: [],
     indexCategory: [],
     languageContent: [],
     searchValue: "",
@@ -39,7 +38,6 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   // Check if any filter is active
   const hasActiveFilters =
     filters.makingSearch ||
-    filters.contentType.length > 0 ||
     filters.indexCategory.length > 0 ||
     filters.languageContent.length > 0 ||
     filters.happenedAt !== null ||
@@ -74,7 +72,10 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
   };
 
   // Fetch filtered videos based on all active filters
-  const fetchFilteredVideos = async (page = 1, searchVal = filters.searchValue) => {
+  const fetchFilteredVideos = async (
+    page = 1,
+    searchVal = filters.searchValue
+  ) => {
     const offset = (page - 1) * limit;
     const params = {};
 
@@ -82,7 +83,6 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
       params.search = searchVal;
       updateFilter("makingSearch", true);
     }
-    if (filters.contentType.length > 0) params.video_type = filters.contentType.join(",");
 
     // Extract category names from objects
     if (filters.indexCategory.length > 0) {
@@ -103,7 +103,7 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
     if (filters.happenedAt) params.happened_at = filters.happenedAt;
     if (filters.isFeatured !== null) params.is_featured = filters.isFeatured;
     if (filters.isNew !== null) params.is_new = filters.isNew;
-    
+
     try {
       const res = await GetVideosByFilter(limit, offset, params);
 
@@ -163,7 +163,6 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
     setCurrentPage(1);
     fetchFilteredVideos(1);
   }, [
-    filters.contentType,
     filters.indexCategory,
     filters.languageContent,
     filters.happenedAt,
@@ -246,7 +245,7 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
               /* Start Default Carousels */
               <div className="flex-1 min-w-0 space-y-2">
                 {/* Full Videos Section */}
-                {[...fullVideos, ...unitVideos]?.length > 0 && (
+                {mixVideos?.length > 0 && (
                   <div>
                     <div className="mb-2">
                       <h2 className="text-2xl font-bold text-text">
@@ -254,8 +253,8 @@ function VideoFilterSections({ fullVideos, unitVideos, likedVideos }) {
                       </h2>
                     </div>
                     <BrokenCarousel
-                      data={[...fullVideos, ...unitVideos]}
-                      showArrows={[...fullVideos, ...unitVideos]?.length > 4}
+                      data={mixVideos}
+                      showArrows={mixVideos?.length > 4}
                       cardName={VideoCard}
                       nextArrowClassname={"-right-5"}
                       prevArrowClassname={"-left-5"}

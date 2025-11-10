@@ -341,7 +341,7 @@ const ContentsList = ({ onSectionChange }) => {
                   <TableCell>
                     <div className="flex items-center justify-center gap-3">
                       <img
-                        src={content?.image || content?.image_url}
+                        src={content?.images[0]?.image || content?.image_url[0]}
                         alt={content?.title}
                         className="w-12 h-12 rounded-lg object-cover"
                         onError={(e) => {

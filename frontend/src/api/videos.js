@@ -70,9 +70,14 @@ export async function DeleteVideoCategory(id) {
   return await axios.delete(`/video-categories/${id}/`);
 }
 
-// Top Mix
-export async function GetTopMixVideos() {
-  return await axios.get(`/videos/top-mix/`);
+// Get All Item By cAteogir Id
+export async function GetItemsByCategoryId(categoryId) {
+  return await axios.get(`/video-categories/${categoryId}/videos/`);
+}
+
+// Top Rating
+export async function GetTopRatingVideos() {
+  return await axios.get(`/videos/top-rating/`);
 }
 
 // /top5-videos/

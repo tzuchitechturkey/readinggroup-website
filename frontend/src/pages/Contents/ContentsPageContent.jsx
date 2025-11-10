@@ -1,0 +1,203 @@
+import React, { useEffect, useState } from "react";
+
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+
+import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
+import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
+import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { 
+  GetContentCategories, 
+  TopLikedContents, 
+  TopViewedContents,
+  GetItemsByCategoryId 
+} from "@/api/contents";
+import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+
+function ContentsPageContent() {
+  const { t, i18n } = useTranslation();
+  const location = useLocation();
+  const [activeCategories, setActiveCategories] = useState([]);
+  const [categoriesData, setCategoriesData] = useState({});
+  const [topViewedData, setTopViewedData] = useState();
+  const [topLikedData, setTopLikedData] = useState();
+  const [targetCategoryId, setTargetCategoryId] = useState(null);
+
+  // Check if we need to scroll to a specific category
+  useEffect(() => {
+    if (location.state?.targetCategoryId) {
+      setTargetCategoryId(location.state.targetCategoryId);
+    }
+  }, [location.state]);
+
+  // Fetch all active categories and their items
+  const getActiveCategories = async () => {
+    try {
+      const res = await GetContentCategories(100, 0);
+      // Filter only active categories
+      const active = (res?.data?.results || []).filter(cat => cat.is_active === true);
+      setActiveCategories(active);
+
+      // Fetch items for each active category
+      const itemsMap = {};
+      for (const category of active) {
+        try {
+          const itemsRes = await GetItemsByCategoryId(category.id);
+          itemsMap[category.id] = itemsRes?.data?.results || [];
+        } catch (error) {
+          console.error(`Error fetching items for category ${category.id}:`, error);
+          itemsMap[category.id] = [];
+        }
+      }
+      setCategoriesData(itemsMap);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+
+  const getTopViewed = async () => {
+    try {
+      const res = await TopViewedContents();
+      setTopViewedData(res?.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+
+  const getTopLiked = async () => {
+    try {
+      const res = await TopLikedContents();
+      setTopLikedData(res?.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+
+  useEffect(() => {
+    getActiveCategories();
+    getTopViewed();
+    getTopLiked();
+  }, []);
+
+  // Scroll to target category after data is loaded
+  useEffect(() => {
+    if (targetCategoryId && activeCategories.length > 0) {
+      const categoryExists = activeCategories.some(cat => cat.id === targetCategoryId);
+      if (categoryExists) {
+        setTimeout(() => {
+          const el = document.getElementById(`category-${targetCategoryId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 500);
+      }
+    }
+  }, [targetCategoryId, activeCategories]);
+  return (
+    <div className="min-h-screen bg-gray-50" dir={i18n.dir()}>
+      {/* Start Header */}
+      <div
+        className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
+        style={{
+          backgroundImage: `url(/book.gif)`,
+        }}
+      >
+        {/* Start Texts */}
+        <div className="text-white flex flex-col items-center justify-center h-full pt-16 sm:pt-20 md:pt-24 lg:pt-32 max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center">
+            {t("Guided Reading")}
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-medium sm:font-semibold lg:font-bold mt-4 sm:mt-6 md:mt-8 text-center leading-relaxed sm:leading-loose px-4 sm:px-0">
+            {t(
+              "Explore inspirational stories, picture cards, and photo albums that connect hearts across the world"
+            )}
+          </p>
+        </div>
+        {/* End Texts */}
+      </div>
+      {/* End Header */}
+
+      {/* Start Filter */}
+      <PostsFilterSction />
+      {/* End Filter */}
+
+      {/* Main Content Container */}
+      <div className="max-w-7xl mx-auto">
+        {/* Start Top Viewed Section */}
+        <section
+          id="week-topic-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          {/* <GuidedReading data={topViewedData} /> */}
+          <div className="mt-12">
+            <DynamicSection
+              title={t("Top Viewed Contents")}
+              data={topViewedData}
+              isSlider={true}
+              cardName={GuidingReadingcard}
+            />
+          </div>
+        </section>
+        {/* End Top Viewed Section */}
+
+        {/* Start Top Liked Section */}
+        <section
+          id="week-topic-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <div className="mt-12">
+            <DynamicSection
+              title={t("Top Liked Contents")}
+              data={topLikedData}
+              isSlider={true}
+              cardName={GuidingReadingcard}
+            />
+          </div>
+        </section>
+        {/* End Top liked Section */}
+
+        {/* Start Show Active Categories */}
+        <section
+          id="week-topic-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          {activeCategories.map((category) => (
+            <div key={category.id} id={`category-${category.id}`} className="mt-12">
+              <DynamicSection
+                title={category.name}
+                data={categoriesData[category.id] || []}
+                isSlider={true}
+                cardName={GuidingReadingcard}
+              />
+            </div>
+          ))}
+        </section>
+        {/* End Show Active Categories */}
+
+        {/* Weekly Moments */}
+        {/* <section
+          id="week-moments-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <WeeklyMoments />
+        </section> */}
+        {/* <section
+          id="week-health-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <WeeklyMoments />
+        </section>
+        <section
+          id="week-other-section"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+        >
+          <WeeklyMoments />
+        </section> */}
+      </div>
+    </div>
+  );
+}
+
+export default ContentsPageContent;

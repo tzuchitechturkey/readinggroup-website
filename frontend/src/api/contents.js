@@ -38,13 +38,14 @@ export async function DeleteContentById(id) {
   return await axios.delete(`/contents/${id}/`);
 }
 
+
+// Category
 export async function GetContentCategories(limit, offset, search = "") {
   return await axios.get(
     `/content-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
 
-// Category
 export async function AddContentCategory(data) {
   return await axios.post(`/content-categories/`, data);
 }
@@ -59,6 +60,11 @@ export async function GetContentCategoryById(id) {
 
 export async function DeleteContentCategory(id) {
   return await axios.delete(`/content-categories/${id}/`);
+}
+
+// Get All Item By cAteogir Id
+export async function GetItemsByCategoryId(categoryId) {
+  return await axios.get(`/content-categories/${categoryId}/contents/`);
 }
 
 // Comments management for posts

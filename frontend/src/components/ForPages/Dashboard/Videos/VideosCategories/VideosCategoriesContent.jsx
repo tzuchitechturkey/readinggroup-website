@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
@@ -27,7 +27,7 @@ function VideosCategoriesContent({ onSectionChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", description: "" });
+  const [form, setForm] = useState({ name: "", description: "", is_active: true });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -56,14 +56,18 @@ function VideosCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "" });
+    setForm({ name: "", description: "", is_active: true });
     setErrors({});
     setShowModal(true);
   };
 
   const openEditModal = (cat) => {
     setEditingCategory(cat);
-    setForm({ name: cat.name || "", description: cat.description || "" });
+    setForm({
+      name: cat.name || "",
+      description: cat.description || "",
+      is_active: cat.is_active !== undefined ? cat.is_active : true,
+    });
     setErrors({});
     setShowModal(true);
   };
@@ -236,6 +240,13 @@ function VideosCategoriesContent({ onSectionChange }) {
                   <th
                     className={`${
                       i18n?.language === "ar" ? "text-right " : "  text-left"
+                    } py-2 px-3`}
+                  >
+                    {t("Status")}
+                  </th>
+                  <th
+                    className={`${
+                      i18n?.language === "ar" ? "text-right " : "  text-left"
                     } py-2 px-3 w-[160px]`}
                   >
                     {t("Actions")}
@@ -247,6 +258,43 @@ function VideosCategoriesContent({ onSectionChange }) {
                   <tr key={cat.id} className="border-t">
                     <td className="py-3 px-3">{cat.name}</td>
                     <td className="py-3 px-3">{cat.description}</td>
+                    <td className="py-3 px-3">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await EditVideoCategoryById(cat.id, {
+                              ...cat,
+                              is_active: !cat.is_active,
+                            });
+                            toast.success(
+                              cat.is_active
+                                ? t("Category disabled")
+                                : t("Category enabled")
+                            );
+                            getCategoriesData(currentPage - 1);
+                          } catch (err) {
+                            console.error(err);
+                            toast.error(t("Update failed"));
+                          }
+                        }}
+                        className={`p-1 rounded-lg transition-all duration-200 ${
+                          cat.is_active
+                            ? "bg-green-100 text-green-600 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
+                        title={
+                          cat.is_active
+                            ? t("Click to disable")
+                            : t("Click to enable")
+                        }
+                      >
+                        {cat.is_active ? (
+                          <ToggleRight className="h-8 w-12" />
+                        ) : (
+                          <ToggleLeft className="h-8 w-12" />
+                        )}
+                      </button>
+                    </td>
                     <td className="py-3 px-3">
                       <div className="flex gap-2">
                         <button
@@ -316,6 +364,35 @@ function VideosCategoriesContent({ onSectionChange }) {
                 className="w-full p-2 border border-gray-300 rounded"
                 rows={4}
               />
+            </div>
+
+            {/* Is Active Toggle */}
+            <div>
+              <label className="block text-sm font-medium mb-3">
+                {t("Status")}
+              </label>
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }))
+                }
+                className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
+                  form.is_active
+                    ? "bg-green-100 text-green-600 hover:bg-green-200"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                }`}
+              >
+                {form.is_active ? (
+                  <ToggleRight className="h-8 w-12" />
+                ) : (
+                  <ToggleLeft className="h-8 w-12" />
+                )}
+                <span className="text-base font-medium">
+                  {form.is_active
+                    ? t("Active")
+                    : t("Inactive")}
+                </span>
+              </button>
             </div>
 
             <div className="flex justify-end gap-2">

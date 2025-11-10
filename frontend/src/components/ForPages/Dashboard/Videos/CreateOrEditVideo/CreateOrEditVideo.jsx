@@ -350,7 +350,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       "category",
       formData?.category?.id || formData?.category
     );
-    formDataToSend.append("video_type", formData?.video_type);
+    formDataToSend.append("video_type", "video");
     formDataToSend.append("language", formData?.language);
     formDataToSend.append("is_featured", formData?.is_featured);
     formDataToSend.append("reference_code", formData?.reference_code);

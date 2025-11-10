@@ -8,7 +8,7 @@ import VideosPageContent from "@/pages/Videos/VideosPage/VideosPageContent";
 import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
-import GuidedReadingContent from "@/pages/GuidedReading/GuidedReadingPageContent";
+import ContentsContent from "@/pages/Contents/ContentsPageContent";
 import PostDetailsPageContent from "@/components/Global/PostDetailsPageContent/PostDetailsPageContent";
 import EventsContent from "@/pages/Events/EventsPageContent";
 import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
@@ -28,7 +28,7 @@ export const userRoutes = [
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },
-  { path: "/contents", element: <GuidedReadingContent /> },
+  { path: "/contents", element: <ContentsContent /> },
   { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
   { path: "/contents/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },

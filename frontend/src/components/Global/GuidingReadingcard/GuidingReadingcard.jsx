@@ -19,7 +19,7 @@ function GuidingReadingcard({ item, showTags = true }) {
       className="rounded-xl max-w-[40 0px]  group cursor-pointer border border-gray-100 relative"
     >
       {/* Start Tag" */}
-      <div className="absolute z-50 top-3 left-3">
+      <div className="absolute z-10 top-3 left-3">
         {showTags && item?.tags && item?.tags.length > 0 && (
           <div>
             <div className="flex flex-wrap gap-2">
@@ -39,7 +39,7 @@ function GuidingReadingcard({ item, showTags = true }) {
 
       <div className="text-center relative transform hover:scale-105 transition-all duration-300">
         <img
-          src={item?.image || item?.image_url}
+          src={item?.post_type ? item?.image || item?.image_url : item?.images[0]?.image || item?.image_url}
           alt="Chinese Text"
           className=" w-full h-[220px] rounded-lg "
         />

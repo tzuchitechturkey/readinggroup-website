@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import PostsFilter from "@/components/Global/PostsFilter/PostsFilter";
-import FilteredResults from "@/components/ForPages/GuidedReading/FilteredResults/FilteredResults";
+import FilteredResults from "@/components/ForPages/Contents/FilteredResults/FilteredResults";
 import { GetPosts } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function GuindReadingFilterSction() {
+function ContentsFilterSction() {
   const { t, i18n } = useTranslation();
 
   // Filter states - all in one object
@@ -163,4 +163,4 @@ function GuindReadingFilterSction() {
   );
 }
 
-export default GuindReadingFilterSction;
+export default ContentsFilterSction;

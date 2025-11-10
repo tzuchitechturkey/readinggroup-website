@@ -45,7 +45,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     tags: "",
     language: "",
     image: null,
-    image_url: "",
+    images: [],
+    images_url: [],
     metadata: "",
     country: "",
   });
@@ -53,6 +54,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [imageUrlsInput, setImageUrlsInput] = useState("");
   const [imageFiles, setImageFiles] = useState([]); // Store multiple image files
   const [imagePreviews, setImagePreviews] = useState([]); // Store image previews
 
@@ -90,7 +93,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         tags: content?.tags || "",
         language: content?.language || "",
         image: content?.image || null,
-        image_url: content?.image_url || "",
+        images: content?.images || [],
+        images_url: content?.images_url || [],
         metadata: content?.metadata || "",
         country: content?.country || "",
       };
@@ -269,8 +273,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       newErrors.country = t("Country is required");
     }
 
-    if (!formData.image && !formData.image_url && !content && imageFiles.length === 0) {
-      newErrors.image = t("Image is required");
+    if (!formData.image && !formData.images?.length && !content && imageFiles.length === 0) {
+      newErrors.images = t("At least one image is required");
     }
 
     setErrors(newErrors);
@@ -309,19 +313,22 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     // if (formData.image) {
     //   contentData.append("image", formData.image);
     // }
-    // Only append images if new files were selected
+    // Only append images (file uploads) if new files were selected
     if (imageFiles.length > 0) {
-      imageFiles.forEach((file, index) => {
+      imageFiles.forEach((file) => {
         if (file instanceof File) {
-          contentData.append(`image_${index}`, file);
+          contentData.append(`images`, file);
         }
       });
-      // Also store the count of images
-      contentData.append("image_count", imageFiles.length);
     }
-    // Add image_url if provided
-    if (formData.image_url) {
-      contentData.append("image_url", formData.image_url);
+    
+    // Add image URLs (روابط الصور) if provided
+    if (Array.isArray(formData.images_url) && formData.images_url.length > 0) {
+      formData.images_url.forEach((imgUrl) => {
+        if (typeof imgUrl === "string") {
+          contentData.append("images_url", imgUrl);
+        }
+      });
     }
 
     // Add metadata if provided
@@ -458,6 +465,52 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             </div>
           )}
 
+          {/* Existing Images from Backend */}
+          {formData.images.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                {t("Existing Images")}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {formData.images.map((image, index) => {
+                  // Handle both string URLs and image objects from backend
+                  const imageUrl = typeof image === "string" ? image : image?.image;
+                  
+                  // Only show if we have an image URL
+                  if (!imageUrl) return null;
+                  
+                  return (
+                    <div
+                      key={`existing-${index}`}
+                      className="relative group w-full aspect-video bg-gray-100 rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Existing ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            images: prev.images.filter((_, i) => i !== index),
+                          }));
+                        }}
+                        className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
+                      >
+                        <X className="h-6 w-6 text-white" />
+                      </button>
+                      <div className="absolute top-1 right-1 bg-green-600 text-white text-xs px-2 py-1 rounded">
+                        {index + 1}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Upload Area */}
           <div>
             <input
@@ -511,30 +564,154 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             <p className="text-xs text-gray-500 mt-2">
               {t("Total images selected")}: {imagePreviews.length}
             </p>
-            {errors.image && (
-              <p className="text-red-500 text-xs mt-2">{errors.image}</p>
+            {errors.images && (
+              <p className="text-red-500 text-xs mt-2">{errors.images}</p>
             )}
           </div>
         </div>
         {/* End Image Upload Section */}
 
-        {/* Start Image URL Section */}
+        {/* Start Image URL Section - Only show if image field is empty and image_url has value */}
+        {formData.images.length > 0 && formData.images.some(img => {
+          // Check if any image has empty 'image' field but has 'image_url'
+          return typeof img === "object" && !img?.image && img?.image_url;
+        }) && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Image URLs")} ({t("Add multiple images as URLs")})
+            </label>
+
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  placeholder={t("Enter image URL and press Enter")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && imageUrlInput.trim()) {
+                      e.preventDefault();
+                      // Add as string URL
+                      const newImage = imageUrlInput.trim();
+                      setFormData((prev) => ({
+                        ...prev,
+                        images: [...prev.images, newImage],
+                      }));
+                      setImageUrlInput("");
+                      setErrors((prev) => ({
+                        ...prev,
+                        images: "",
+                      }));
+                    }
+                  }}
+                />
+              </div>
+              
+              {formData.images.some(img => typeof img === "string") && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 font-medium">
+                    {t("URLs only")}:
+                  </p>
+                  {formData.images.map((image, index) => {
+                    // Only show string URLs in this section
+                    if (typeof image !== "string") return null;
+                    
+                    return (
+                      <div
+                        key={`url-${index}`}
+                        className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
+                      >
+                        <div className="flex-1 truncate">
+                          <p className="text-sm text-gray-600 truncate">{image}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              images: prev.images.filter((_, i) => i !== index),
+                            }));
+                          }}
+                          className="ml-2 text-red-600 hover:text-red-800"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            <p className="text-xs text-gray-500 mt-1">
+              {t("Add image URLs for pictures without an image field")}
+            </p>
+          </div>
+        )}
+
+        {/* Start Image URLs Section - Separate field for image URLs */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Image URL")} ({t("Alternative to file upload")})
+            {t("Image URLs")} ({t("Add image URLs as alternative")})
           </label>
 
-          <Input
-            name="image_url"
-            value={formData.image_url}
-            onChange={handleInputChange}
-            placeholder={t("Enter image URL as alternative to file upload")}
-          />
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={imageUrlsInput}
+                onChange={(e) => setImageUrlsInput(e.target.value)}
+                placeholder={t("Enter image URL and press Enter")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && imageUrlsInput.trim()) {
+                    e.preventDefault();
+                    if (!formData.images_url.includes(imageUrlsInput.trim())) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        images_url: [...prev.images_url, imageUrlsInput.trim()],
+                      }));
+                    }
+                    setImageUrlsInput("");
+                    setErrors((prev) => ({
+                      ...prev,
+                      images_url: "",
+                    }));
+                  }
+                }}
+              />
+            </div>
+            
+            {formData.images_url.length > 0 && (
+              <div className="space-y-2">
+                {formData.images_url.map((url, index) => (
+                  <div
+                    key={`url-${index}`}
+                    className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
+                  >
+                    <div className="flex-1 truncate">
+                      <p className="text-sm text-gray-600 truncate">{url}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          images_url: prev.images_url.filter((_, i) => i !== index),
+                        }));
+                      }}
+                      className="ml-2 text-red-600 hover:text-red-800"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
           <p className="text-xs text-gray-500 mt-1">
-            {t("You can either upload a file above or provide a URL here")}
+            {t("Add image URLs here. These will be sent as images_url")}
           </p>
         </div>
-        {/* End Image URL Section */}
+        {/* End Image URLs Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-4">
