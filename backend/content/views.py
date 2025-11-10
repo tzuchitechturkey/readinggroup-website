@@ -373,7 +373,21 @@ class ContentViewSet(BaseContentViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create Content and attach uploaded images/urls as ContentImage rows."""
-        data = request.data.copy() if hasattr(request, 'data') else {}
+        # Avoid copying request.data when files are uploaded: copying/memoizing
+        # multipart file objects can trigger deepcopy/pickle on underlying
+        # file buffers (BufferedRandom) which is not supported and raises
+        # "cannot pickle 'BufferedRandom' instances". Use the original
+        # request.data when request.FILES is present.
+        if hasattr(request, 'data'):
+            if getattr(request, 'FILES', None):
+                data = request.data
+            else:
+                try:
+                    data = request.data.copy()
+                except Exception:
+                    data = request.data
+        else:
+            data = {}
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         content = serializer.save()
@@ -445,7 +459,17 @@ class ContentViewSet(BaseContentViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
 
-        data = request.data.copy() if hasattr(request, 'data') else {}
+        # same defensive copy logic as in create(): avoid copying when files present
+        if hasattr(request, 'data'):
+            if getattr(request, 'FILES', None):
+                data = request.data
+            else:
+                try:
+                    data = request.data.copy()
+                except Exception:
+                    data = request.data
+        else:
+            data = {}
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid(raise_exception=True)
         content = serializer.save()
