@@ -31,7 +31,8 @@ class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
 
-#In Video model
 class VideoType(models.TextChoices):
-    FULL_VIDEO = "full_video", "Full Video"
-    UNIT_VIDEO = "unit_video", "Unit Video"
+    INTERVIEW = "interview", "Interview"
+    DOCUMENTARY = "documentary", "Documentary"
+    TUTORIAL = "tutorial", "Tutorial"
+    ENTERTAINMENT = "entertainment", "Entertainment"

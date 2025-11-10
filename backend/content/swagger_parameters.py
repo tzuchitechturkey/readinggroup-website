@@ -1,14 +1,6 @@
 from drf_yasg import openapi
 
 video_manual_parameters = [
-    
-    openapi.Parameter(
-        'video_type',
-        openapi.IN_QUERY,
-        description="Filter by video type",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING)
-    ),
     openapi.Parameter(
         'language',
         openapi.IN_QUERY,

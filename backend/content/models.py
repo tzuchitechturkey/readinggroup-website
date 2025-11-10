@@ -9,7 +9,6 @@ from datetime import timedelta
 from .enums import (
     PostStatus,
     PostType,
-    VideoType,
     ReportType,
     ContentStatus,
 )
@@ -87,7 +86,7 @@ class Video(LikableMixin, TimestampedModel):
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64, blank=True, null=True)
     category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    video_type = models.CharField(max_length=100, choices=VideoType.choices, default=VideoType.FULL_VIDEO)
+    video_type = models.CharField(max_length=100, blank=True, null=True)
     language = models.CharField(max_length=50)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)

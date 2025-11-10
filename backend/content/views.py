@@ -87,7 +87,7 @@ class VideoViewSet(BaseContentViewSet):
 
     @swagger_auto_schema(
         operation_summary="all List videos",
-        operation_description="Retrieve a list of videos with optional filtering by video_type, language, category, and happened_at date.",
+        operation_description="Retrieve a list of videos with optional filtering by language, category, and happened_at date.",
         manual_parameters=video_manual_parameters
     )
     def list(self, request, *args, **kwargs):
@@ -104,14 +104,6 @@ class VideoViewSet(BaseContentViewSet):
         queryset = super().get_queryset()
         queryset = self.annotate_likes(queryset)
         params = self.request.query_params
-
-        video_type = params.getlist('video_type')
-        if video_type:
-            values = []
-            for item in video_type:
-                values.extend([v.strip() for v in item.split(",") if v.strip()])
-            if values:
-                queryset = queryset.filter(video_type__in=values)
 
         language = params.getlist("language")
         if language:
@@ -199,51 +191,6 @@ class VideoViewSet(BaseContentViewSet):
 
         serializer = VideoSerializer(videos, many=True, context={"request": request})
         return Response(serializer.data)
-
-    @action(detail=False, methods=("get",), url_path="top-mix", url_name="top_mix")
-    def top_mix(self, request):
-        """Return a combined payload with:
-        - top_1: single top liked video overall
-        - top_5_full: top 5 liked videos of type FULL_VIDEO
-        - top_5_unit: top 5 liked videos of type UNIT_VIDEO
-        """
-
-        # overall queryset annotated with likes info (and has_liked when user present)
-        base_queryset = self.annotate_likes(Video.objects.all())
-
-        # overall top 1 by likes
-        try:
-            overall_qs = base_queryset.order_by('-annotated_likes_count', '-created_at')
-        except Exception:
-            overall_qs = base_queryset
-        top1 = overall_qs.first()
-
-        # top 5 for full videos
-        queryset_full = Video.objects.filter(video_type=VideoType.FULL_VIDEO)
-        queryset_full = self.annotate_likes(queryset_full)
-        try:
-            queryset_full = queryset_full.order_by('-annotated_likes_count', '-created_at')[:5]
-        except Exception:
-            queryset_full = queryset_full[:5]
-
-        # top 5 for unit videos
-        queryset_unit = Video.objects.filter(video_type=VideoType.UNIT_VIDEO)
-        queryset_unit = self.annotate_likes(queryset_unit)
-        try:
-            queryset_unit = queryset_unit.order_by('-annotated_likes_count', '-created_at')[:5]
-        except Exception:
-            queryset_unit = queryset_unit[:5]
-
-        # serialize results
-        top1_data = VideoSerializer(top1, context={"request": request}).data if top1 else None
-        top_full_data = VideoSerializer(queryset_full, many=True, context={"request": request}).data
-        top_unit_data = VideoSerializer(queryset_unit, many=True, context={"request": request}).data
-
-        return Response({
-            "top_1": top1_data,
-            "top_5_full": top_full_data,
-            "top_5_unit": top_unit_data,
-        })
 
 class PostViewSet(BaseContentViewSet):
     queryset = Post.objects.all()
@@ -1051,7 +998,7 @@ class LikeViewSet(BaseContentViewSet):
     search_fields = ("user__username", "content_type", "object_id")
     ordering_fields = ("created_at",)
     
-class VideoCategoryViewSet(BaseContentViewSet):
+class VideoCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing VideoCategory content."""
     queryset = VideoCategory.objects.all()
     serializer_class = VideoCategorySerializer
