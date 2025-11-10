@@ -1,11 +1,9 @@
 from django.urls import path
-
 from .views import (
     LoginView,
     ProfileView, 
     PublicProfileView,
     RegisterView,
-    # ConfirmEmailView,
     ForgotPasswordView,
     ResetPasswordView,
     PasswordChangeView,

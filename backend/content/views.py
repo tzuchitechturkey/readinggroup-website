@@ -1429,8 +1429,25 @@ class SiteInfoViewSet(viewsets.ViewSet):
         # all social media links
         socials = SocialMedia.objects.all().order_by('-created_at')
         socials_data = SocialMediaSerializer(socials, many=True, context={"request": request}).data
+        # only include categories that are active (is_active == True)
+        post_categories = PostCategory.objects.filter(is_active=True).order_by('name')
+        video_categories = VideoCategory.objects.filter(is_active=True).order_by('name')
+        event_categories = EventCategory.objects.filter(is_active=True).order_by('name')
+        content_categories = ContentCategory.objects.filter(is_active=True).order_by('name')
+        # serialize categories
+        post_categories_data = PostCategorySerializer(post_categories, many=True, context={"request": request}).data
+        video_categories_data = VideoCategorySerializer(video_categories, many=True, context={"request": request}).data
+        event_categories_data = EventCategorySerializer(event_categories, many=True, context={"request": request}).data
+        content_categories_data = ContentCategorySerializer(content_categories, many=True, context={"request": request}).data
 
-        return Response({"logo": logo_data, "socialmedia": socials_data})
+        return Response({
+            "logo": logo_data,
+            "socialmedia": socials_data,
+            "post_categories": post_categories_data,
+            "video_categories": video_categories_data,
+            "event_categories": event_categories_data,
+            "content_categories": content_categories_data,
+        })
 
     def create(self, request):
         payload = request.data or {}
