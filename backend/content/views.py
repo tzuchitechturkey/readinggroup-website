@@ -73,6 +73,7 @@ from .views_helpers import(
     BaseCRUDViewSet,
     IsStaffOrReadOnly,
     annotate_likes_queryset,
+    _filter_published,
 )
 
 class VideoViewSet(BaseContentViewSet):
@@ -227,6 +228,11 @@ class VideoViewSet(BaseContentViewSet):
         from django.db.models import Avg, Count
 
         qs = Video.objects.all()
+        # only consider published videos for top-rated computation
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            pass
 
         try:
             # Annotate average rating and ratings count if a related `ratings` exists
@@ -1166,7 +1172,7 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = VideoCategory.objects.all()
+    queryset = VideoCategory.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all video categories",
@@ -1236,6 +1242,10 @@ class EventSectionViewSet(BaseCRUDViewSet):
         for section in sections_qs:
             # get events for this section; use section.events() helper
             events_qs = section.events().order_by("-happened_at", "-created_at")
+            try:
+                events_qs = _filter_published(events_qs)
+            except Exception:
+                pass
             if events_limit is not None:
                 events_qs = events_qs[:events_limit]
 
@@ -1279,6 +1289,10 @@ class EventSectionViewSet(BaseCRUDViewSet):
         for section in sections_qs:
             # get events for this section
             events_qs = section.events().all()
+            try:
+                events_qs = _filter_published(events_qs)
+            except Exception:
+                pass
 
             # annotate likes info so EventSerializer can include likes_count/has_liked
             events_qs = annotate_likes_queryset(events_qs, request)
@@ -1329,6 +1343,10 @@ class CombinedTopLikedView(viewsets.ViewSet):
         card_photo_qs = groups.get('card_photo') or Post.objects.none()
 
         videos_qs = Video.objects.all()
+        try:
+            videos_qs = _filter_published(videos_qs)
+        except Exception:
+            pass
 
         # Top section by number of events, then its top liked events
         top_section = None
@@ -1338,6 +1356,10 @@ class CombinedTopLikedView(viewsets.ViewSet):
         if section:
             top_section = section
             events_qs = Event.objects.filter(section=section)
+            try:
+                events_qs = _filter_published(events_qs)
+            except Exception:
+                pass
             # annotate and order by likes similar to other uses
             events_qs = annotate_likes_queryset(events_qs, request)
             try:
@@ -1399,7 +1421,13 @@ class TopStatsViewSet(viewsets.ViewSet):
     # -----------------------
     def _get_top_liked_object(self, queryset, request):
         """return single top liked object from the given queryset."""
-        qs = annotate_likes_queryset(queryset, request)
+        # ensure we only consider published items when the model supports it
+        try:
+            qs = _filter_published(queryset)
+        except Exception:
+            qs = queryset
+
+        qs = annotate_likes_queryset(qs, request)
         try:
             qs = qs.order_by("-annotated_likes_count", "-created_at")
         except Exception:
@@ -1412,7 +1440,13 @@ class TopStatsViewSet(viewsets.ViewSet):
     def _get_top_posts_queryset(self, request, limit: int):
         """return queryset of top liked Posts limited to 'limit'."""
         try:
-            qs = annotate_likes_queryset(Post.objects.all(), request)
+            qs = Post.objects.all()
+            try:
+                qs = _filter_published(qs)
+            except Exception:
+                pass
+
+            qs = annotate_likes_queryset(qs, request)
             try:
                 return qs.order_by("-annotated_likes_count", "-created_at")[:limit]
             except Exception:
@@ -1618,10 +1652,34 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         except Exception:
             per_model_cap = 50
 
-        video_queryset = annotate_likes_queryset(Video.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
-        post_queryset = annotate_likes_queryset(Post.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
-        event_queryset = annotate_likes_queryset(Event.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
-        content_queryset = annotate_likes_queryset(Content.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
+        # build per-model querysets and ensure only published items are considered
+        video_q = Video.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
+        try:
+            video_q = _filter_published(video_q)
+        except Exception:
+            pass
+        video_queryset = annotate_likes_queryset(video_q, request)
+
+        post_q = Post.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
+        try:
+            post_q = _filter_published(post_q)
+        except Exception:
+            pass
+        post_queryset = annotate_likes_queryset(post_q, request)
+
+        event_q = Event.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
+        try:
+            event_q = _filter_published(event_q)
+        except Exception:
+            pass
+        event_queryset = annotate_likes_queryset(event_q, request)
+
+        content_q = Content.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
+        try:
+            content_q = _filter_published(content_q)
+        except Exception:
+            pass
+        content_queryset = annotate_likes_queryset(content_q, request)
 
         combined = []
         combined += [(obj, "video") for obj in video_queryset]
