@@ -1412,7 +1412,7 @@ class TopStatsViewSet(viewsets.ViewSet):
         "post_photo",
         "event",
         "weekly_moment",
-        "Content",
+        "content",
     ]
 
     # -----------------------
