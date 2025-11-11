@@ -107,8 +107,13 @@ function PostsFilter({
     } else if (type && typeof type === "string") {
       filters.push({ type: "type", label: t("Type"), value: type });
     }
-    if (language)
-      filters.push({ type: "language", label: t("Language"), value: language });
+    if (language) {
+      // Translate dynamic language values so the active filter chip shows localized names
+      const languageValue = Array.isArray(language)
+        ? language.map((l) => t(l)).join(", ")
+        : t(language);
+      filters.push({ type: "language", label: t("Language"), value: languageValue });
+    }
     return filters;
   };
 
