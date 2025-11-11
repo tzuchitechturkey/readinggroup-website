@@ -16,8 +16,8 @@ export async function GetEvents(limit, offset, status, params = {}) {
   if (params.writer) queryParams.append("writer", params.writer);
   if (params.language) queryParams.append("language", params.language);
   if (params.happened_at) queryParams.append("happened_at", params.happened_at);
-  if (params.is_weekly_moment !== undefined) queryParams.append("is_weekly_moment", params.is_weekly_moment);
-
+  if (params.is_weekly_moment !== undefined)
+    queryParams.append("is_weekly_moment", params.is_weekly_moment);
   return await axios.get(`/events/?${queryParams.toString()}`);
 }
 

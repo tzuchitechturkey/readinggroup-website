@@ -2,19 +2,15 @@ import React from "react";
 
 import { useNavigate } from "react-router-dom";
 
-const CategoryTag = ({ category, isActive = false, onClick }) => {
+const CategoryTag = ({ category, isActive = false }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    // If there's a custom onClick handler, use it
-    
-      // Otherwise, navigate to events page with category filter
-      navigate("/events", {
-        state: {
-          selectedCategory: category,
-        },
-      });
- 
+    navigate("/events", {
+      state: {
+        selectedCategory: category,
+      },
+    });
   };
 
   return (

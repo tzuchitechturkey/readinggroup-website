@@ -121,6 +121,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
       {/* Start Main Article */}
@@ -159,7 +160,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
           {/* right: country pill + image controls */}
           <div className="flex items-center gap-3">
             <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
-              {eventData?.country}
+              {t(eventData?.country)}
             </span>
 
             <ImageControls

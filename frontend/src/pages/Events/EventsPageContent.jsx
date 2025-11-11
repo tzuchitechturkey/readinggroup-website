@@ -104,6 +104,7 @@ function EventsPageContent() {
       {/* Start Filter Section */}
       <EventsFilterSections />
       {/* End Filter Section */}
+      
       <div className="max-w-7xl mx-auto">
         {/* Start Suggestions you might like */}
         <DynamicSection

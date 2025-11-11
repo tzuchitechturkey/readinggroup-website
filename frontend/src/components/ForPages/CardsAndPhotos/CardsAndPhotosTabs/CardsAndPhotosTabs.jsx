@@ -228,7 +228,7 @@ function CardsAndPhotosTabs({ initialTab }) {
         {/* Start Grid Cards */}
         <div className="order-1 lg:order-2 px-0 sm:px-3 md:px-5 lg:px-7">
           {/* Start Title */}
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
+          <h2 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center ${i18n?.language  === "ar" ? "lg:text-right" : "lg:text-left" } `}>
             {t("This Week's Top Cards")}
           </h2>
           {/* End Title */}

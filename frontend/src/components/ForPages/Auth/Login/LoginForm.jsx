@@ -55,7 +55,9 @@ function LoginForm() {
     const redirectUrl = localStorage.getItem("redirectAfterLogin");
     if (redirectUrl && redirectUrl !== "/" && redirectUrl !== "/auth/login") {
       toast.info(
-        t("You were redirected to login. You will be returned to your previous page after successful login.")
+        t(
+          "Please register and you will be automatically redirected to the previous page."
+        )
       );
     }
   }, [t]);

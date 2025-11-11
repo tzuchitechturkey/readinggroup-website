@@ -16,7 +16,7 @@ function Footer({ authPages }) {
     { name: t("Videos"), href: "/videos" },
     { name: t("Cards & Photos"), href: "/cards-photos" },
     { name: t("Events & Community"), href: "/events" },
-    { name: t("DA AI TV"), href: "/da-ai-tv" },
+    { name: t("DA AI TV"), href: "https://tzuchiculture.org/EN/da-ai-tv/" },
   ];
   const fetchSocialLinks = async () => {
     try {

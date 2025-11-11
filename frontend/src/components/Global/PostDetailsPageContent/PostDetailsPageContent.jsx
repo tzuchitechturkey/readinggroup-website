@@ -12,11 +12,23 @@ import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
 import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
+import {
   GetPostById,
   PatchPostById,
   RatingPosts,
   TopCommentedPosts,
 } from "@/api/posts";
+import {
+  GetContentById,
+  PatchContentById,
+  RatingContent,
+  TopLikedContents,
+} from "@/api/contents";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
@@ -28,16 +40,19 @@ function PostDetailsPageContent() {
   const location = useLocation();
   const fromContent = location.pathname.includes("contents/content");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [userRating, setUserRating] = useState(0); // تقييم المستخدم
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [cardData, setCardData] = useState();
   const [topCommentedData, setTopCommentedData] = useState();
   const [update, setUpdate] = useState(false);
+  const [api, setApi] = useState(null);
+  const [current, setCurrent] = useState(0);
   const getCardData = async () => {
     setIsLoading(true);
     try {
-      const res = await GetPostById(paramId);
+      const res = fromContent
+        ? await GetContentById(paramId)
+        : await GetPostById(paramId);
       setCardData(res.data);
     } catch (error) {
       setErrorFn(error, t);
@@ -48,7 +63,9 @@ function PostDetailsPageContent() {
 
   const getTopCommentedPosts = async () => {
     try {
-      const res = await TopCommentedPosts();
+      const res = fromContent
+        ? await TopLikedContents()
+        : await TopCommentedPosts();
       setTopCommentedData(res?.data);
     } catch (err) {
       setErrorFn(err, t);
@@ -66,7 +83,8 @@ function PostDetailsPageContent() {
     try {
       const newLikedState = !cardData?.has_liked;
 
-      await PatchPostById(cardData.id, {
+      const patchFn = fromContent ? PatchContentById : PatchPostById;
+      await patchFn(cardData.id, {
         has_liked: newLikedState,
       });
 
@@ -90,7 +108,8 @@ function PostDetailsPageContent() {
   // دالة تقييم النجوم
   const handleStarRating = async (rating) => {
     try {
-      await RatingPosts(cardData.id, { rating });
+      const ratingFn = fromContent ? RatingContent : RatingPosts;
+      await ratingFn(cardData.id, { rating });
       setUpdate(!update);
     } catch (error) {
       setErrorFn(error, t);
@@ -120,7 +139,23 @@ function PostDetailsPageContent() {
     getCardData();
     getTopCommentedPosts();
   }, [paramId, update]);
-  console.log(cardData, "ddddddd");
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!api) return;
+
+    const handleSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+
+    api.on("select", handleSelect);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      api.off("select", handleSelect);
+    };
+  }, [api]);
+
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -133,17 +168,80 @@ function PostDetailsPageContent() {
           {/* Main Content - Left Side */}
           <div className="lg:col-span-2">
             {/* Cart Section */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-              <div className="relative">
-                <div className="aspect-video bg-black rounded-t-xl flex items-center justify-center">
-                  <div className="relative w-full h-full">
-                    <img
-                      src={cardData?.image || cardData?.image_url}
-                      alt="Video Thumbnail"
-                      className="w-full h-full object-contain"
-                    />
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+              <div className="relative group" dir={"ltr"}>
+                {fromContent &&
+                Array.isArray(cardData?.images) &&
+                cardData?.images.length > 0 ? (
+                  // Carousel for multiple images (Content)
+                  <Carousel
+                    className="w-full"
+                    opts={{ align: "center", loop: true }}
+                    setApi={setApi}
+                  >
+                    <div className="relative    rounded-t-xl">
+                      <CarouselContent className="-ml-0 h-full">
+                        {cardData?.images.map((imageItem, index) => (
+                          <CarouselItem key={index} className="pl-0 basis-full">
+                            <div className="h-full w-full flex items-center justify-center ">
+                              <img
+                                src={imageItem.image}
+                                alt={`Image ${index + 1}`}
+                                className="w-full h-full object-contain"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+
+                      {cardData?.images.length > 1 && (
+                        <>
+                          <ArrowButton
+                            side="left"
+                            label="Previous image"
+                            onClick={() => api?.scrollPrev()}
+                          />
+                          <ArrowButton
+                            side="right"
+                            label="Next image"
+                            onClick={() => api?.scrollNext()}
+                          />
+                        </>
+                      )}
+
+                      {/* Pagination Dots */}
+                      {cardData?.images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+                          {cardData?.images.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => api?.scrollTo(index)}
+                              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                index === current
+                                  ? "bg-white w-6"
+                                  : "bg-white/50 hover:bg-white/75"
+                              }`}
+                              aria-label={`Go to image ${index + 1}`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Carousel>
+                ) : (
+                  // Single image (Post)
+                  <div className="aspect-video bg-black rounded-t-xl flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-full">
+                      <img
+                        src={cardData?.image || cardData?.image_url}
+                        alt="Thumbnail"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Cart Controls */}
                 <ImageControls
@@ -159,7 +257,6 @@ function PostDetailsPageContent() {
 
             {/* Rating Section */}
             <RatingSection
-              userRating={userRating}
               hoveredRating={hoveredRating}
               onStarRating={handleStarRating}
               onStarHover={setHoveredRating}

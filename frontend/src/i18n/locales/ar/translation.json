@@ -1158,7 +1158,7 @@
   "Enter a valid email address.": "يرجى إدخال عنوان بريد إلكتروني صالح.",
   "selected": "تم الاختيار",
   "Load More Comments": "تحميل المزيد من التعليقات",
-  "Mix Videos": "خلط الفيديوهات",
+  "Mix Videos": " الفيديوهات منوعة",
   "Top 5 in your like": "أفضل 5 في إعجابك",
   "Search items, collections...": "بحث عن العناصر والمجموعات...",
   "My List": "قائمتي",
@@ -1293,5 +1293,7 @@
   "Enter card type (e.g., featured, regular, special)": "أدخل نوع البطاقة (مثل مميز، عادي، خاص)",
   "Mark as New": "تمييز كجديد",
   "-------------------------------------------------------------": "-------------------------------------------------------------",
-  "No events found": "لا توجد أحداث"
+  "No events found": "لا توجد أحداث",
+  "This Week's Contents": "محتويات هذا الأسبوع",
+  "Please register and you will be automatically redirected to the previous page.": "يرجى التسجيل وسيتم إعادة توجيهك تلقائيًا إلى الصفحة السابقة."
 }

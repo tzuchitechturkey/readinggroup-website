@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
-import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/WeeklyMoments";
+import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
 import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
@@ -106,18 +106,15 @@ function CardsAndPhotosContent() {
         {/* End Tabs */}
 
         {/* Start Weekly Moments */}
-        <WeeklyMoments />
+        <WeeklyList title={t("This Week's Cards")} type="card" />
         {/* End Weekly Moments */}
 
         {/* Start Week's Photos */}
-        <WeekPhotos />
+        <WeeklyList title={t("This Week's Photos")} type="photo" />
         {/* End Week's Photos */}
 
         {/* Start Show Active Categories */}
-        <section
-          id="week-topic-section"
-          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
-        >
+        <section id="week-topic-section">
           {activeCategories.map((category) => (
             <div
               key={category.id}
