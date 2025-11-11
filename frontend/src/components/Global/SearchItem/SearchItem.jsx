@@ -17,7 +17,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const dropdownRef = useRef(null);
   const limit = 10;
-  
+
   // Focus input when search opens
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -151,17 +151,15 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
                         key={idx}
                         className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
-                          // try to navigate to item's url if present, otherwise go to detailed search page
-                          if (item?.url) {
-                            window.location.href = item.url;
-                          } else if (item?.detail_url) {
-                            window.location.href = item.detail_url;
-                          } else {
-                            navigate(
-                              `/search?q=${encodeURIComponent(searchQuery)}`
-                            );
-                            setIsSearchOpen(false);
-                          }
+                          item?.post_type
+                            ? `/cards-photos/card/${item?.id}`
+                            : item?.video_type
+                            ? `/videos/${item?.id}`
+                            : item?.report_type
+                            ? item?.report_type === "videos"
+                              ? `/events/video/${item?.id}`
+                              : `/events/report/${item?.id}`
+                            : `/contents/content/${item?.id}`;
                         }}
                       >
                         <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">

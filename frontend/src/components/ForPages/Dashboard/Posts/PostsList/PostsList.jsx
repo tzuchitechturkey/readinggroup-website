@@ -9,6 +9,8 @@ import {
   Plus,
   Search,
   X,
+  ToggleRight,
+  ToggleLeft,
 } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
@@ -23,8 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
-import { DeletePostById, GetPosts } from "@/api/posts";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
+import { DeletePostById, GetPosts, PatchPostById } from "@/api/posts";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
@@ -44,18 +46,19 @@ function PostsList({ onSectionChange }) {
   const [postData, setPostData] = useState([]);
   const [search, setSearch] = useState("");
   const [update, setUpdate] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
 
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getPostData(newPage - 1, search);
+    getPostData(newPage - 1, search, statusFilter);
   };
 
-  const getPostData = async (page = 0, searchVal = search) => {
+  const getPostData = async (page = 0, searchVal = search, status = statusFilter) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetPosts(limit, offset, "published", {
+      const res = await GetPosts(limit, offset, status, {
         search: searchVal,
       });
       setPostData(res?.data?.results || []);
@@ -132,6 +135,18 @@ function PostsList({ onSectionChange }) {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
+  // دالة التعامل مع تبديل القائمة الأسبوعية
+  const handleWeeklyPostToggle = async (postId, currentStatus) => {
+    setIsLoading(true);
+    try {
+      PatchPostById(postId, { weekly_event: !currentStatus });
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // تأكيد حذف المنشور
   const handleConfirmDelete = async () => {
     setIsLoading(true);
@@ -152,15 +167,23 @@ function PostsList({ onSectionChange }) {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getPostData(0, "");
+    getPostData(0, "", statusFilter);
+  };
+
+  // Handle status filter change
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    setSearch("");
+    getPostData(0, "", newStatus);
   };
 
   // حساب عدد الصفحات
   const totalPages = Math.ceil(totalRecords / limit);
 
   useEffect(() => {
-    getPostData(0);
-  }, [update]);
+    getPostData(0, "", statusFilter);
+  }, [update, statusFilter]);
   return (
     <div
       className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
@@ -232,7 +255,7 @@ function PostsList({ onSectionChange }) {
           )}
 
           <button
-            onClick={() => getPostData(0, search)}
+            onClick={() => getPostData(0, search, statusFilter)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -243,6 +266,28 @@ function PostsList({ onSectionChange }) {
       </div>
       {/* End Search */}
 
+      {/* Start Status Tabs Filter */}
+      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
+          <div className="flex gap-2 flex-wrap">
+            {["published", "draft", "archived"].map((status) => (
+              <button
+                key={status}
+                onClick={() => handleStatusChange(status)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  statusFilter === status
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t(status.charAt(0).toUpperCase() + status.slice(1))}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* End Status Tabs Filter */}
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14">
@@ -309,6 +354,11 @@ function PostsList({ onSectionChange }) {
               >
                 {t("Views")}
                 {getSortIcon("views")}
+              </div>
+            </TableHead>
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                {t("Weekly List")}
               </div>
             </TableHead>
             <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
@@ -403,6 +453,24 @@ function PostsList({ onSectionChange }) {
                 </TableCell>
                 <TableCell className="text-center text-[#1E1E1E]  text-[11px] py-4">
                   <span className="font-medium">{post?.views}</span>
+                </TableCell>
+                <TableCell className="text-center py-4">
+                  <button
+                    onClick={() =>
+                      handleWeeklyPostToggle(post?.id, post?.weekly_post)
+                    }
+                    className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
+                      post?.weekly_post
+                        ? "bg-green-100 text-green-800 hover:bg-green-200"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    }`}
+                  >
+                    {post?.weekly_post ? (
+                      <ToggleRight className="h-8 w-12" />
+                    ) : (
+                      <ToggleLeft className="h-8 w-12" />
+                    )}
+                  </button>
                 </TableCell>
                 <TableCell className="text-center py-4">
                   <div className="flex items-center justify-center gap-1">

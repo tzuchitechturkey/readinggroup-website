@@ -1,8 +1,8 @@
 import axios from "./axios";
 
-export async function GetVideos(limit, offset, search) {
+export async function GetVideos(limit, offset, status, search) {
   return await axios.get(
-    `/videos/?limit=${limit}&offset=${offset}&search=${search}`
+    `/videos/?limit=${limit}&offset=${offset}&status=${status}&search=${search}`
   );
 }
 

@@ -21,7 +21,7 @@ function ContentsFilterSction() {
   });
 
   // Results state
-  const [filteredReadings, setFilteredReadings] = useState([]);
+  const [filteredContents, setFilteredContents] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   const [clearFilterResult, setClearFilterResult] = useState(false);
   // Pagination state
@@ -75,9 +75,6 @@ function ContentsFilterSction() {
     // Add category filter - category is stored as string directly
     if (customFilters.category) apiFilters.category = customFilters.category;
 
-    // Always filter by 'reading' for guided reading page
-    apiFilters.post_type = "reading";
-
     // Add language filter
     if (customFilters.language) apiFilters.language = customFilters.language;
 
@@ -101,7 +98,7 @@ function ContentsFilterSction() {
       const totalCount = res.data?.count || 0;
 
       // Always reset data for pagination (not load more pattern)
-      setFilteredReadings(newResults);
+      setFilteredContents(newResults);
       setTotalRecords(totalCount);
       setCurrentPage(page);
       setIsSearchPerformed(true);
@@ -147,7 +144,7 @@ function ContentsFilterSction() {
       {clearFilterResult && (
         <section className="mt-8 sm:mt-10 md:mt-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <FilteredResults
-            data={filteredReadings}
+            data={filteredContents}
             isSearchPerformed={isSearchPerformed}
             totalCount={totalRecords}
             currentPage={currentPage}

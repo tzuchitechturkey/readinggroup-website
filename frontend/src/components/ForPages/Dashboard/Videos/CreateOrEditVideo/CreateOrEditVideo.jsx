@@ -27,7 +27,7 @@ import {
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages } from "@/constants/constants";
-import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
+import { processImageFile } from "@/Utility/imageConverter";
 import {
   Popover,
   PopoverContent,
@@ -35,8 +35,6 @@ import {
 } from "@/components/ui/popover";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
-
-const videoTypes = ["full_video", "unit_video"];
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();
@@ -52,13 +50,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const categoryDropdownRef = useRef(null);
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const [openHappendAt, setOpenHappendAt] = useState(false);
-
   const [errors, setErrors] = useState({});
   const [castInput, setCastInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [formData, setFormData] = useState({
     title: "",
-    // duration: "",
     category: "",
     video_type: "",
     language: "",
@@ -80,7 +76,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         title: video?.title || "",
         // duration: video?.duration || "",
         category: video?.category || "",
-        video_type: video?.video_type || "",
         language: video?.language || "",
         thumbnail: video?.thumbnail, // Reset file input
         thumbnail_url: video?.thumbnail_url || "",
@@ -269,7 +264,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
-
+  console.log("video ", video);
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -284,10 +279,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
     if (!formData?.category) {
       newErrors.category = t("Category is required");
-    }
-
-    if (!formData?.video_type) {
-      newErrors.video_type = t("Type is required");
     }
 
     if (!formData?.language) {
@@ -690,7 +681,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* End Category */}
 
             {/* Start Type */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Type")} *
               </label>
@@ -716,7 +707,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               {errors.video_type && (
                 <p className="text-red-500 text-xs mt-1">{errors.video_type}</p>
               )}
-            </div>
+            </div> */}
             {/* End Type */}
             {/* Start Series Selection */}
             <div>

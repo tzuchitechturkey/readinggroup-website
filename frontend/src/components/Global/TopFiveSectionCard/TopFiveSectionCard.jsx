@@ -23,11 +23,11 @@ function TopFiveSectionCard({ item, index }) {
         if (item.report_type === "videos") {
           router = `/events/video/${item.id}`;
         } else if (item.report_type === "reports") {
-          router = `/events/${item.id}`;
+          router = `/events/report/${item.id}`;
         } else if (item.video_type === "videos") {
           router = `/videos/${item.id}`;
-        } else if (item.post_type === "reading") {
-          router = `/guiding-reading/card/${item.id}`;
+        } else if (item.content_type === "content") {
+          router = `/contents/content/${item.id}`;
         } else {
           router = `/cards-photos/card/${item.id}`;
         }

@@ -16,7 +16,7 @@ function VideosHero({ top1Video }) {
   const { t } = useTranslation();
   const [top5Videos, setTop5Videos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [firstVideo, setFirstVideo] = useState();
   const getTop5Videos = async () => {
     try {
       const res = await GetTop5ViewedVideos();
@@ -25,10 +25,12 @@ function VideosHero({ top1Video }) {
       setErrorFn(err, t);
     }
   };
-
   useEffect(() => {
     getTop5Videos();
   }, []);
+  useEffect(() => {
+    setFirstVideo(top1Video !== null ? top1Video : top5Videos[0]);
+  }, [top1Video, top5Videos]);
   return (
     <div className="relative    min-h-screen   overflow-hidden">
       {/* Background Image */}
@@ -36,7 +38,7 @@ function VideosHero({ top1Video }) {
         className="absolute inset-0 bg-cover bg-center  "
         style={{
           backgroundImage: `url(${
-            top1Video?.thumbnail || top1Video?.thumbnail_url
+            firstVideo?.thumbnail || firstVideo?.thumbnail_url
           })`,
         }}
       />
@@ -52,14 +54,14 @@ function VideosHero({ top1Video }) {
         {/* Start Text */}
         <div className="max-w-4xl px-9 flex-1 flex flex-col justify-end  ">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">
-            {top1Video?.title}
+            {firstVideo?.title}
           </h1>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 m-2 mb-6  text-xl ">
-            {top1Video?.tags.length > 0 && (
+            {firstVideo?.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {top1Video?.tags.map((tag, index) => (
+                {firstVideo?.tags.map((tag, index) => (
                   <span key={index} className="px-1 py-1 text-white">
                     {tag}
                   </span>
@@ -71,7 +73,7 @@ function VideosHero({ top1Video }) {
           {/* Action Buttons */}
           <div className="flex gap-4">
             <Link
-              to={`/videos/${top1Video?.id}`}
+              to={`/videos/${firstVideo?.id}`}
               className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
               onClick={(e) => {
                 e.stopPropagation();
@@ -116,7 +118,7 @@ function VideosHero({ top1Video }) {
             onClose={() => {
               setIsModalOpen(false);
             }}
-            videoData={top1Video}
+            videoData={firstVideo}
           />,
           document.body
         )}

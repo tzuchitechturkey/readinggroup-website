@@ -35,7 +35,7 @@ function FilteredResults({
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesToShow = 10;
-    
+
     if (totalPages <= maxPagesToShow) {
       // Show all pages if total is less than max
       for (let i = 0; i < totalPages; i++) {
@@ -44,39 +44,39 @@ function FilteredResults({
     } else {
       // Always show first page
       pages.push(0);
-      
+
       let startPage = Math.max(1, currentPage - 1);
       let endPage = Math.min(totalPages - 2, currentPage + 1);
-      
+
       // Adjust if we're near the start
       if (currentPage <= 2) {
         endPage = 3;
       }
-      
+
       // Adjust if we're near the end
       if (currentPage >= totalPages - 3) {
         startPage = totalPages - 4;
       }
-      
+
       // Add ellipsis if needed
       if (startPage > 1) {
-        pages.push('ellipsis-start');
+        pages.push("ellipsis-start");
       }
-      
+
       // Add middle pages
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
-      
+
       // Add ellipsis if needed
       if (endPage < totalPages - 2) {
-        pages.push('ellipsis-end');
+        pages.push("ellipsis-end");
       }
-      
+
       // Always show last page
       pages.push(totalPages - 1);
     }
-    
+
     return pages;
   };
 
@@ -115,7 +115,8 @@ function FilteredResults({
             <div className="flex flex-col items-center gap-4 pt-8">
               {/* Pagination Info */}
               <p className="text-sm text-gray-600">
-                {t("Showing")} {startRecord} {t("to")} {endRecord} {t("of")} {totalRecords} {t("results")}
+                {t("Showing")} {startRecord} {t("to")} {endRecord} {t("of")}{" "}
+                {totalRecords} {t("results")}
               </p>
 
               {/* Pagination Controls */}
@@ -141,7 +142,7 @@ function FilteredResults({
                 {/* Page Numbers */}
                 <div className="flex items-center gap-1">
                   {pageNumbers.map((page) => {
-                    if (typeof page === 'string') {
+                    if (typeof page === "string") {
                       // Ellipsis
                       return (
                         <span key={page} className="px-2 text-gray-400">
@@ -149,7 +150,7 @@ function FilteredResults({
                         </span>
                       );
                     }
-                    
+
                     return (
                       <button
                         key={page}

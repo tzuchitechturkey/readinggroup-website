@@ -45,7 +45,6 @@ export default function HomeContent() {
 
   return (
     <div dir={direction} className="min-h-screen">
-
       {/* Start Hero Slider */}
       <div dir="ltr">
         <HeroSlider data={sliderData} />
@@ -64,8 +63,8 @@ export default function HomeContent() {
               title={
                 key === "video"
                   ? t("This Week's Video")
-                  : key === "post_reading"
-                  ? t("This Week’s Guided Reading")
+                  : key === "contents"
+                  ? t("This Week’s Contents")
                   : key === "post_card"
                   ? t("This Week's Card")
                   : key === "post_photo"
@@ -75,7 +74,7 @@ export default function HomeContent() {
               description={
                 key === "video"
                   ? t("Watch this week's featured video")
-                  : key === "post_reading"
+                  : key === "contents"
                   ? t("Master Cheng Yen's Daily Journal")
                   : key === "post_card"
                   ? t("Explore this week's card")
@@ -86,8 +85,8 @@ export default function HomeContent() {
               href={
                 key === "video"
                   ? "/videos"
-                  : key === "post_reading"
-                  ? "/guiding-reading"
+                  : key === "contents"
+                  ? "/contents"
                   : key === "post_card" || key === "post_photo"
                   ? "/cards-photos"
                   : ""
@@ -95,7 +94,7 @@ export default function HomeContent() {
               cardName={
                 key === "video"
                   ? VideoCard
-                  : key === "post_reading"
+                  : key === "contents"
                   ? GuidingReadingcard
                   : key === "post_card"
                   ? WeeklyMomentsCard

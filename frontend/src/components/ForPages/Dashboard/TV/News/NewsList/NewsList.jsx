@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetTvPrograms, DeleteTvProgramById } from "@/api/tvPrograms";

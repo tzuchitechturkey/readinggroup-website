@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
+import { ToggleLeft, ToggleRight } from "lucide-react";
 
 import {
   Table,
@@ -13,10 +14,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetContents, DeleteContentById } from "@/api/contents";
+import {
+  GetContents,
+  DeleteContentById,
+  PatchContentById,
+} from "@/api/contents";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
@@ -29,6 +34,7 @@ const ContentsList = ({ onSectionChange }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +42,7 @@ const ContentsList = ({ onSectionChange }) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [ContentsData, setContentsData] = useState([]);
   // Fetch Content from API
-  const getContentsData = async (page = 0, searchVal = search) => {
+  const getContentsData = async (page = 0, searchVal = search, status = statusFilter) => {
     setIsLoading(true);
     const offset = page * limit;
 
@@ -44,7 +50,7 @@ const ContentsList = ({ onSectionChange }) => {
     const params = searchVal ? { search: searchVal } : {};
 
     try {
-      const res = await GetContents(limit, offset, "published", params);
+      const res = await GetContents(limit, offset, status, params);
 
       setTotalRecords(res?.data?.count || 0);
       setContentsData(res?.data?.results || []);
@@ -93,8 +99,8 @@ const ContentsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getContentsData(0);
-  }, [update]);
+    getContentsData(0, "", statusFilter);
+  }, [update, statusFilter]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -125,7 +131,7 @@ const ContentsList = ({ onSectionChange }) => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-      getContentsData(newPage - 1, search);
+      getContentsData(newPage - 1, search, statusFilter);
     }
   };
 
@@ -133,7 +139,26 @@ const ContentsList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getContentsData(0, "");
+    getContentsData(0, "", statusFilter);
+  };
+
+  // Handle status filter change
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    setSearch("");
+    getContentsData(0, "", newStatus);
+  };
+  // دالة التعامل مع تبديل القائمة الأسبوعية
+  const handleWeeklyPostToggle = async (contentId, currentStatus) => {
+    setIsLoading(true);
+    try {
+      PatchContentById(contentId, { weekly_event: !currentStatus });
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -152,7 +177,6 @@ const ContentsList = ({ onSectionChange }) => {
       setIsLoading(false);
     }
   };
-  console.log("data", ContentsData);
   // Pagination
   const totalPages = Math.ceil(totalRecords / limit);
   return (
@@ -226,7 +250,7 @@ const ContentsList = ({ onSectionChange }) => {
           )}
 
           <button
-            onClick={() => getContentsData(0, search)}
+            onClick={() => getContentsData(0, search, statusFilter)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -236,6 +260,29 @@ const ContentsList = ({ onSectionChange }) => {
         </div>
       </div>
       {/* End Search */}
+
+      {/* Start Status Tabs Filter */}
+      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
+          <div className="flex gap-2 flex-wrap">
+            {["published", "draft", "archived"].map((status) => (
+              <button
+                key={status}
+                onClick={() => handleStatusChange(status)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  statusFilter === status
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t(status.charAt(0).toUpperCase() + status.slice(1))}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* End Status Tabs Filter */}
       {/* Start Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
@@ -310,6 +357,11 @@ const ContentsList = ({ onSectionChange }) => {
                   </button>
                 </div>
               </TableHead>
+              <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  {t("Weekly List")}
+                </div>
+              </TableHead>
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
               </TableHead>
@@ -381,6 +433,27 @@ const ContentsList = ({ onSectionChange }) => {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {content?.category?.name}
                     </span>
+                  </TableCell>
+                  <TableCell className="text-center py-4">
+                    <button
+                      onClick={() =>
+                        handleWeeklyPostToggle(
+                          content?.id,
+                          content?.weekly_post
+                        )
+                      }
+                      className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
+                        content?.weekly_post
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      }`}
+                    >
+                      {content?.weekly_post ? (
+                        <ToggleRight className="h-8 w-12" />
+                      ) : (
+                        <ToggleLeft className="h-8 w-12" />
+                      )}
+                    </button>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

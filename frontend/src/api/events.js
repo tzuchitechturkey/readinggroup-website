@@ -1,10 +1,11 @@
 import axios from "./axios";
 
-export async function GetEvents(limit, offset, params = {}) {
+export async function GetEvents(limit, offset, status, params = {}) {
   const queryParams = new URLSearchParams();
 
   queryParams.append("limit", limit);
   queryParams.append("offset", offset);
+  queryParams.append("status", status);
 
   if (params.search) queryParams.append("search", params.search);
   if (params.ordering) queryParams.append("ordering", params.ordering);
@@ -31,14 +32,19 @@ export async function EditEventById(id, data) {
   return await axios.put(`/events/${id}/`, data);
 }
 
-export async function PatchWebSiteInfo(id, data) {
+export async function PatchEventById(id, data) {
   return await axios.patch(`/events/${id}/`, data);
 }
 
 export async function DeleteEventById(id) {
   return await axios.delete(`/events/${id}/`);
 }
-
+// Get All Item By cAteogir Id
+export async function GetItemsByCategoryId(categoryId, limit, offset) {
+  return await axios.get(
+    `/event-categories/${categoryId}/events/?limit=${limit}&offset=${offset}`
+  );
+}
 // /top5-videos/
 export async function GetTop5Event() {
   return await axios.get(`/events/top-viewed/?limit=5`);

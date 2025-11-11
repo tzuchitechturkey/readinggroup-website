@@ -11,12 +11,13 @@ export function AxiosInterceptor() {
         const status = error?.response?.status;
         console.error(error, "error from Main axios file");
         console.error(status);
-        // Only clear tokens on 401 (Unauthorized). Don't clear on 403 (Forbidden)
-        // because 403 may indicate lack of permission for the action while the
-        // token itself is still valid. Clearing on 403 causes accidental logout.
-        if (status === 401) {
-          // Token invalid/expired. Clear and redirect to login.
+        if (status === 403 || status === 401) {
           clearTokens();
+          // Save current URL for redirect after login
+          localStorage.setItem(
+            "redirectAfterLogin",
+            window.location.pathname + window.location.search
+          );
           // Prevent infinite loops if already on auth pages
           const isOnAuth = window.location.pathname.startsWith("/auth");
           if (!isOnAuth) {

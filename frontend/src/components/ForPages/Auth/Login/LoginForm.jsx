@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -49,6 +49,16 @@ function LoginForm() {
   };
 
   const recaptchaLang = recaptchaLangMap[i18n.language] || "en";
+
+  // Check if there's a redirect URL saved and show message
+  useEffect(() => {
+    const redirectUrl = localStorage.getItem("redirectAfterLogin");
+    if (redirectUrl && redirectUrl !== "/" && redirectUrl !== "/auth/login") {
+      toast.info(
+        t("You were redirected to login. You will be returned to your previous page after successful login.")
+      );
+    }
+  }, [t]);
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -148,9 +158,12 @@ function LoginForm() {
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
         if (redirectAfterLogin && res?.data.user?.groups.includes("admin")) {
           navigate("/dashboard");
+        } else if (redirectAfterLogin && redirectAfterLogin !== "/") {
+          navigate(redirectAfterLogin);
         } else {
           navigate("/");
         }
+        localStorage.removeItem("redirectAfterLogin");
 
         // }
       } catch (err) {

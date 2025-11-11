@@ -203,7 +203,7 @@ function CardsAndPhotosTabs({ initialTab }) {
               isSlider={isMobile}
               cardName={GuidingReadingcard}
               viewMore={false}
-              viewMoreUrl="/guiding-reading"
+              viewMoreUrl="/contents"
               loading={loading && activeTab === cat.id.toString()}
             />
           </TabsContent>

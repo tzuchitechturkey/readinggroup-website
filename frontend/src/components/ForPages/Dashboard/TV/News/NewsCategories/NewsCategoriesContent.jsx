@@ -5,7 +5,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import {
   GetNewsCategories,

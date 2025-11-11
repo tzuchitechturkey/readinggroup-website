@@ -5,7 +5,6 @@ import Home from "@/pages/Home/HomeContent";
 import AboutUs from "@/pages/AboutUs/AboutUsContent";
 import AboutMemberContent from "@/pages/AboutUs/Member/MemberContent";
 import VideosPageContent from "@/pages/Videos/VideosPage/VideosPageContent";
-import VideoDetails from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
 import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
 import ContentsContent from "@/pages/Contents/ContentsPageContent";
@@ -15,7 +14,6 @@ import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
 import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
 import EventPageContent from "@/pages/Events/EventPageContent";
 import Pages404 from "@/pages/NotFound/NotFound";
-import SearchContent from "@/pages/Search/SearchPageContent";
 import EventsVideoPage from "@/components/ForPages/Events/EventsVideoPage/EventsVideoPage";
 import TOTPSetup from "@/components/ForPages/Auth/TOTPSetup/TOTPSetup";
 import MyListContent from "@/pages/MyList/MyListContent";
@@ -23,27 +21,28 @@ import MyListContent from "@/pages/MyList/MyListContent";
 export const userRoutes = [
   { path: "/", element: <Home /> },
   { path: "/dashboard", element: <Dashboard /> },
+  // About Us Routes
   { path: "/about", element: <AboutUs /> },
   { path: "/about/team/:id", element: <AboutMemberContent /> },
+  // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
-  { path: "/videos/details/:id", element: <VideoDetails /> },
   { path: "/videos/:id", element: <VideoPage /> },
+  { path: "/my-list", element: <MyListContent /> },
+  // Contents Routes
   { path: "/contents", element: <ContentsContent /> },
+  { path: "/contents/content/:id", element: <PostDetailsPageContent /> },
+  // Cards And Photos Routes
   { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
-  { path: "/contents/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
-  {
-    path: "/contents/weekly-moments/:id",
-    element: <PostDetailsPageContent />,
-  },
+
+  // Events Routes
   { path: "/events", element: <EventsContent /> },
-  { path: "/events/:id", element: <EventPageContent /> },
+  { path: "/events/reports/:id", element: <EventPageContent /> },
   { path: "/events/video/:id", element: <EventsVideoPage /> },
+
   { path: "/profile/:id", element: <UserProfileContent /> },
-  { path: "/my-list", element: <MyListContent /> },
   { path: "/settings", element: <UserSettingContent /> },
-  { path: "/search", element: <SearchContent /> },
 
   // Catch-all route for 404 - يجب أن يكون في النهاية
   { path: "*", element: <Pages404 /> },

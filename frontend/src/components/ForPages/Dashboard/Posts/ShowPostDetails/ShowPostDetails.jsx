@@ -227,7 +227,7 @@ function PostDetails({ post, onClose, onEdit }) {
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Writer")}:</span>
               <span className="font-medium">
-                {post.writer?.name || t("Unknown")}
+                {post.writer  || t("Unknown")}
               </span>
             </div>
             <div className="flex justify-between">

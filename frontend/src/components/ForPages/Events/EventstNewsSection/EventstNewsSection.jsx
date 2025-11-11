@@ -64,9 +64,7 @@ const EventstNewsSection = () => {
     </div>
   );
 
-  const handleCategoryClick = () => {
-  
-  };
+  const handleCategoryClick = () => {};
   useEffect(() => {
     getLastPosted();
     getTopViewed();
@@ -91,7 +89,7 @@ const EventstNewsSection = () => {
                 onClick={() => {
                   article?.report_type === "videos"
                     ? navigate(`/events/video/${article?.id}`)
-                    : navigate(`/events/${article?.id}`);
+                    : navigate(`/events/report/${article?.id}`);
                 }}
               />
             ))}
@@ -114,7 +112,7 @@ const EventstNewsSection = () => {
                     onClick={() => {
                       article?.report_type === "videos"
                         ? navigate(`/events/video/${article?.id}`)
-                        : navigate(`/events/${article?.id}`);
+                        : navigate(`/events/report/${article?.id}`);
                     }}
                     imgClassName=" md:!w-40 md:!h-28 "
                   />

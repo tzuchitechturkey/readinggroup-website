@@ -6,11 +6,7 @@ import { Star, User } from "lucide-react";
 function GuidingReadingcard({ item, showTags = true }) {
   const navigate = useNavigate();
   const handleCardClick = () => {
-    navigate(
-      `/${
-        item?.post_type === "reading" ? "guiding-reading" : "cards-photos"
-      }/card/${item?.id}`
-    );
+    navigate(`/cards-photos/card/${item?.id}`);
   };
   return (
     <div
@@ -39,7 +35,11 @@ function GuidingReadingcard({ item, showTags = true }) {
 
       <div className="text-center relative transform hover:scale-105 transition-all duration-300">
         <img
-          src={item?.post_type ? item?.image || item?.image_url : item?.images[0]?.image || item?.image_url}
+          src={
+            item?.post_type
+              ? item?.image || item?.image_url
+              : item?.images[0]?.image || item?.image_url
+          }
           alt="Chinese Text"
           className=" w-full h-[220px] rounded-lg "
         />

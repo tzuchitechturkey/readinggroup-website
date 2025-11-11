@@ -107,11 +107,11 @@ export default function HeroSlider({ newsPage = false }) {
           primaryTo:
             item?.video_type === "videos"
               ? `/events/video/${item.section.id}`
-              : `/events/${item.section.id}`,
+              : `/events/report/${item.section.id}`,
           secondaryTo:
             item?.video_type === "videos"
               ? `/events/video/${item.section.id}`
-              : `/events/${item.section.id}`,
+              : `/events/report/${item.section.id}`,
           topFive: item.top_5 || [],
         })) || [];
 

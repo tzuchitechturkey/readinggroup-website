@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
-import { Search, X } from "lucide-react";
+import { Search, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 import {
@@ -14,10 +14,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetEvents, DeleteEventById } from "@/api/events";
+import { GetEvents, DeleteEventById, PatchEventById } from "@/api/events";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
@@ -25,6 +25,7 @@ const EventsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
   // State management
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("published");
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -37,7 +38,7 @@ const EventsList = ({ onSectionChange }) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [eventsData, setEventsData] = useState([]);
   // Fetch Event from API
-  const getEventsData = async (page = 0, searchVal = search) => {
+  const getEventsData = async (page = 0, searchVal = search, status = statusFilter) => {
     setIsLoading(true);
     const offset = page * limit;
 
@@ -45,7 +46,7 @@ const EventsList = ({ onSectionChange }) => {
     const params = searchVal ? { search: searchVal } : {};
 
     try {
-      const res = await GetEvents(limit, offset, params);
+      const res = await GetEvents(limit, offset, status, params);
 
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
@@ -94,8 +95,8 @@ const EventsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getEventsData(0);
-  }, [update]);
+    getEventsData(0, "", statusFilter);
+  }, [update, statusFilter]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -123,10 +124,17 @@ const EventsList = ({ onSectionChange }) => {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    setSearch("");
+    getEventsData(0, "", newStatus);
+  };
+
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-      getEventsData(newPage - 1, search);
+      getEventsData(newPage - 1, search, statusFilter);
     }
   };
 
@@ -134,9 +142,19 @@ const EventsList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getEventsData(0, "");
+    getEventsData(0, "", statusFilter);
   };
-
+  // دالة التعامل مع تبديل القائمة الأسبوعية
+  const handleWeeklyEventToggle = async (eventId, currentStatus) => {
+    setIsLoading(true);
+    try {
+      PatchEventById(eventId, { weekly_event: !currentStatus });
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleConfirmDelete = async () => {
     if (!selectedEvent?.id) return;
 
@@ -158,7 +176,10 @@ const EventsList = ({ onSectionChange }) => {
   const totalPages = Math.ceil(totalRecords / limit);
 
   return (
-    <div className="p-3" dir={i18n.dir()}>
+    <div
+      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <CustomBreadcrumb
@@ -222,7 +243,7 @@ const EventsList = ({ onSectionChange }) => {
           )}
 
           <button
-            onClick={() => getEventsData(0, search)}
+            onClick={() => getEventsData(0, search, statusFilter)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -232,6 +253,24 @@ const EventsList = ({ onSectionChange }) => {
         </div>
       </div>
       {/* End Search */}
+
+      {/* Status Tabs Filter */}
+      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm flex gap-3 flex-wrap">
+        {["published", "draft", "archived"].map((status) => (
+          <button
+            key={status}
+            onClick={() => handleStatusChange(status)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+              statusFilter === status
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {t(status.charAt(0).toUpperCase() + status.slice(1))}
+          </button>
+        ))}
+      </div>
+      {/* End Status Tabs Filter */}
 
       {/* Stats */}
       <div className="mb-4 text-sm text-gray-600">
@@ -321,6 +360,11 @@ const EventsList = ({ onSectionChange }) => {
                   </button>
                 </div>
               </TableHead>
+              <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  {t("Weekly List")}
+                </div>
+              </TableHead>
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
               </TableHead>
@@ -392,6 +436,24 @@ const EventsList = ({ onSectionChange }) => {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {event?.category?.name}
                     </span>
+                  </TableCell>
+                  <TableCell className="text-center py-4">
+                    <button
+                      onClick={() =>
+                        handleWeeklyEventToggle(event?.id, event?.weekly_event)
+                      }
+                      className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
+                        event?.weekly_event
+                          ? "bg-green-100 text-green-800 hover:bg-green-200"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      }`}
+                    >
+                      {event?.weekly_event ? (
+                        <ToggleRight className="h-8 w-12" />
+                      ) : (
+                        <ToggleLeft className="h-8 w-12" />
+                      )}
+                    </button>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

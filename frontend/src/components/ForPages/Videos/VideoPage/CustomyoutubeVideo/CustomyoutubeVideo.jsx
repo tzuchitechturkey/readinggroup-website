@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
 import { AddToMyList, RemoveFromMyList, PatchVideoById } from "@/api/videos";
-import { PatchWebSiteInfo } from "@/api/events";
+import { PatchEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CustomyoutubeVideo({ videoData }) {
@@ -100,7 +100,7 @@ function CustomyoutubeVideo({ videoData }) {
     try {
       const newLikedState = !videoItem?.has_liked;
       if (videoData?.report_type) {
-        await PatchWebSiteInfo(videoItem.id, {
+        await PatchEventById(videoItem.id, {
           has_liked: newLikedState,
         });
       } else {

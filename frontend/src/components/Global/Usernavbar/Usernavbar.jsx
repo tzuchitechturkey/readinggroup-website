@@ -62,7 +62,8 @@ function Usernavbar() {
         hasDropdown: true,
         subItems: (siteInfo?.post_categories || []).map((category) => ({
           name: category.name,
-          scrollToId: category.slug || "",
+          categoryId: category.id,
+          scrollToId: `category-${category.id}`,
           href: "/cards-photos",
         })),
       },
@@ -73,7 +74,8 @@ function Usernavbar() {
         hasDropdown: true,
         subItems: (siteInfo?.event_categories || []).map((category) => ({
           name: category.name,
-          scrollToId: category.slug || "",
+          categoryId: category.id,
+          scrollToId: `category-${category.id}`,
           href: "/events",
         })),
       },
@@ -81,7 +83,19 @@ function Usernavbar() {
         name: t("About Us"),
         scrollToId: "",
         href: "/about",
-        hasDropdown: false,
+        hasDropdown: true,
+        subItems: [
+          {
+            name: t("History"),
+            href: "/about",
+            tab: "history",
+          },
+          {
+            name: t("Our Team"),
+            href: "/about",
+            tab: "our_team",
+          },
+        ],
       },
     ];
 

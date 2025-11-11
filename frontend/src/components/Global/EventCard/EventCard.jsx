@@ -19,7 +19,7 @@ function EventCard({ className = "", item }) {
         if (item.report_type === "videos") {
           setOpenDetailsVideoModal(true);
         } else {
-          navigate(`/events/${item.id}`);
+          navigate(`/events/report/${item.id}`);
         }
       }}
       className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}

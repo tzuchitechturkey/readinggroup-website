@@ -21,7 +21,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
   });
 
   // Results state
-  const [filteredReadings, setFilteredReadings] = useState([]);
+  const [filteredContents, setFilteredContents] = useState([]);
   const [isSearchPerformed, setIsSearchPerformed] = useState(false);
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -97,9 +97,6 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       } else {
         apiFilters.post_type = ["card", "photo"].join(",");
       }
-    } else {
-      // For guided reading page: always filter by 'reading'
-      apiFilters.post_type = "reading";
     }
 
     // Add language filter - convert array of strings to comma-separated string
@@ -127,7 +124,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       const totalCount = res.data?.count || 0;
 
       // Always reset data for pagination (not load more pattern)
-      setFilteredReadings(newResults);
+      setFilteredContents(newResults);
       setClearFilterResult(true);
       setTotalRecords(totalCount);
       setCurrentPage(page);
@@ -143,7 +140,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
   const applyFilters = (clearFilter, filter = filters) => {
     setCurrentPage(0);
     if (clearFilter) {
-      setFilteredReadings([]);
+      setFilteredContents([]);
       setClearFilterResult(false);
     } else {
       setClearFilterResult(true); // Show results section
@@ -180,7 +177,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
       {clearFilterResult && (
         <section className="mt-8 sm:mt-10 md:mt-12 mx-6 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-40">
           <FilteredResults
-            data={filteredReadings}
+            data={filteredContents}
             isSearchPerformed={isSearchPerformed}
             totalRecords={totalRecords}
             currentPage={currentPage}

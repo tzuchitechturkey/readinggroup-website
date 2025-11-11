@@ -79,25 +79,20 @@ function DashboardTable({ data, onSectionChange }) {
       });
     }
 
-    // Add reading
-    if (data?.post_reading) {
+    // Add contents
+    if (data?.contents) {
       items.push({
-        type: "Reading",
-        id: data?.post_reading.id,
-        image: data?.post_reading.image || data?.post_reading.image_url,
-        writer:
-          data?.post_reading.writer ||
-          data?.post_reading.author ||
-          t("Unknown"),
-        category: data?.post_reading.category?.name,
-        date:
-          data?.post_reading.created_at ||
-          data?.post_reading.published_at ||
-          "",
-        views: data?.post_reading.views || 0,
-        likes_count: data?.post_reading.likes_count || 0,
-        comment: data?.post_reading.comments || [],
-        originData: data?.post_reading,
+        type: "Contents",
+        id: data?.contents.id,
+        image:
+          data?.contents.images[0]?.image || data?.contents.image_url[0]?.image,
+        writer: data?.contents.writer || data?.contents.author || t("Unknown"),
+        category: data?.contents.category?.name,
+        date: data?.contents.created_at || data?.contents.published_at || "",
+        views: data?.contents.views || 0,
+        likes_count: data?.contents.likes_count || 0,
+        comment: data?.contents.comments || [],
+        originData: data?.contents,
         link: "createOrEditPost",
       });
     }

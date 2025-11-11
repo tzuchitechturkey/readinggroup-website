@@ -122,7 +122,7 @@ function VideosPageContent() {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Hero Section */}
-      <VideosHero top1Video={mixVideos?.top_1} />
+      <VideosHero top1Video={ratingVideos?.length ? ratingVideos[0] : null} />
 
       {/* Start Filter Secion */}
       <VideoFilterSections mixVideos={mixVideos} likedVideos={likedVideos} />

@@ -43,21 +43,24 @@ export default function HeroSlider({ newsPage = false, data = null }) {
       });
     }
 
-    // Slide 2: Guided Reading
-    if (data?.posts_reading && data?.posts_reading.length > 0) {
-      const mainReading = data?.posts_reading[0];
+    // Slide 2: Contents
+    if (data?.contents && data?.contents.length > 0) {
+      const mainContent = data?.contents[0];
       slides.push({
-        id: "reading",
-        image: mainReading.image || mainReading.image_url || "/authback.jpg",
-        h1Line1: mainReading.title || t("Guided Reading"),
+        id: "contents",
+        image:
+          mainContent.images[0]?.image ||
+          mainContent.image_url[0]?.image ||
+          "/authback.jpg",
+        h1Line1: mainContent.title || t("Contents"),
         h1Line2Prefix: "",
-        h1Line2Under: t("— Readings for you"),
+        h1Line2Under: t("— Contents for you"),
         description:
-          mainReading.description ||
-          t("Dive into inspiring readings and thoughtful insights every week."),
-        primaryTo: `/guiding-reading/card/${mainReading.id}`,
-        secondaryTo: "/guiding-reading",
-        allData: data?.posts_reading,
+          mainContent.description ||
+          t("Dive into inspiring contents and thoughtful insights every week."),
+        primaryTo: `/contents/content/${mainContent.id}`,
+        secondaryTo: "/contents",
+        allData: data?.contents,
       });
     }
 
@@ -91,7 +94,7 @@ export default function HeroSlider({ newsPage = false, data = null }) {
         primaryTo:
           mainCard?.report_type === "videos"
             ? `/events/video/${mainCard.id}`
-            : `events/${mainCard.id}`,
+            : `/events/report/${mainCard.id}`,
         secondaryTo: "/events",
         allData: data?.top_section?.events,
       });

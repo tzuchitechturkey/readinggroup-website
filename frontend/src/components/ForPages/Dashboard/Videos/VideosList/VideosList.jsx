@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 
-import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Eye,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ToggleRight,
+  ToggleLeft,
+} from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -14,11 +22,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import VideoDurationCell from "@/components/ForPages/Dashboard/Videos/VideoDurationCell/VideoDurationCell";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { DeleteVideoById, GetVideos } from "@/api/videos";
+import { DeleteVideoById, GetVideos, PatchVideoById } from "@/api/videos";
 
 import ShowVideoDetails from "../ShowVideoDetails/ShowVideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
@@ -38,15 +46,15 @@ function VideosList({ onSectionChange }) {
   const [totalRecords, setTotalRecords] = useState(0); // Mock total records
   const limit = 10;
   const [videoData, setVideoData] = useState([]);
-
   const [update, setUpdate] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
 
   // Fetch Data
-  const getVideoData = async (page, searchVal = searchTerm) => {
+  const getVideoData = async (page, searchVal = searchTerm, status = statusFilter) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetVideos(limit, offset, searchVal);
+      const res = await GetVideos(limit, offset, status, searchVal);
       setVideoData(res?.data?.results || []);
       setTotalRecords(res?.data?.count);
     } catch (error) {
@@ -114,6 +122,7 @@ function VideosList({ onSectionChange }) {
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
+      getVideoData(page - 1, searchTerm, statusFilter);
     }
   };
 
@@ -132,6 +141,18 @@ function VideosList({ onSectionChange }) {
     }
 
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
+  };
+
+  // دالة التعامل مع تبديل القائمة الأسبوعية
+  const handleWeeklyVideoToggle = async (videoId, currentStatus) => {
+    setIsLoading(true);
+    try {
+      PatchVideoById(videoId, { weekly_event: !currentStatus });
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // عرض تفاصيل الفيديو
@@ -171,9 +192,17 @@ function VideosList({ onSectionChange }) {
     onSectionChange("createOrEditVideo", video);
   };
 
+  // Handle status filter change
+  const handleStatusChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    setSearchTerm("");
+    getVideoData(0, "", newStatus);
+  };
+
   useEffect(() => {
-    getVideoData(0);
-  }, [update]);
+    getVideoData(0, "", statusFilter);
+  }, [update, statusFilter]);
   return (
     <div
       className="bg-white rounded-lg border  border-gray-200 pt-3 px-3"
@@ -245,7 +274,7 @@ function VideosList({ onSectionChange }) {
           <button
             onClick={() => {
               if (searchTerm.trim()) {
-                getVideoData(0);
+                getVideoData(0, searchTerm, statusFilter);
               }
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
@@ -257,6 +286,29 @@ function VideosList({ onSectionChange }) {
         </div>
       </div>
       {/* End Search */}
+
+      {/* Start Status Tabs Filter */}
+      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
+          <div className="flex gap-2 flex-wrap">
+            {["published", "draft", "archived"].map((status) => (
+              <button
+                key={status}
+                onClick={() => handleStatusChange(status)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  statusFilter === status
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t(status.charAt(0).toUpperCase() + status.slice(1))}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* End Status Tabs Filter */}
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14 ">
@@ -330,6 +382,11 @@ function VideosList({ onSectionChange }) {
                 {getSortIcon("happened_at")}
               </div>
             </TableHead>
+            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
+              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                {t("Weekly List")}
+              </div>
+            </TableHead>
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               {t("Status")}
             </TableHead>
@@ -401,6 +458,24 @@ function VideosList({ onSectionChange }) {
                     })}
                   </span>
                 </div>
+              </TableCell>
+              <TableCell className="text-center py-4">
+                <button
+                  onClick={() =>
+                    handleWeeklyVideoToggle(video?.id, video?.weekly_video)
+                  }
+                  className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
+                    video?.weekly_video
+                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  }`}
+                >
+                  {video?.weekly_video ? (
+                    <ToggleRight className="h-8 w-12" />
+                  ) : (
+                    <ToggleLeft className="h-8 w-12" />
+                  )}
+                </button>
               </TableCell>
               <TableCell className="py-4">
                 <div className="flex items-center justify-center gap-1 flex-wrap">

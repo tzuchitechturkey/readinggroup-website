@@ -7,11 +7,11 @@ import WeeklyMoments from "@/components/ForPages/Home/WeeklyMomentsSection/Weekl
 import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { 
-  GetContentCategories, 
-  TopLikedContents, 
+import {
+  GetContentCategories,
+  TopLikedContents,
   TopViewedContents,
-  GetItemsByCategoryId 
+  GetItemsByCategoryId,
 } from "@/api/contents";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
@@ -37,7 +37,9 @@ function ContentsPageContent() {
     try {
       const res = await GetContentCategories(100, 0);
       // Filter only active categories
-      const active = (res?.data?.results || []).filter(cat => cat.is_active === true);
+      const active = (res?.data?.results || []).filter(
+        (cat) => cat.is_active === true
+      );
       setActiveCategories(active);
 
       // Fetch items for each active category
@@ -47,7 +49,10 @@ function ContentsPageContent() {
           const itemsRes = await GetItemsByCategoryId(category.id);
           itemsMap[category.id] = itemsRes?.data?.results || [];
         } catch (error) {
-          console.error(`Error fetching items for category ${category.id}:`, error);
+          console.error(
+            `Error fetching items for category ${category.id}:`,
+            error
+          );
           itemsMap[category.id] = [];
         }
       }
@@ -84,7 +89,9 @@ function ContentsPageContent() {
   // Scroll to target category after data is loaded
   useEffect(() => {
     if (targetCategoryId && activeCategories.length > 0) {
-      const categoryExists = activeCategories.some(cat => cat.id === targetCategoryId);
+      const categoryExists = activeCategories.some(
+        (cat) => cat.id === targetCategoryId
+      );
       if (categoryExists) {
         setTimeout(() => {
           const el = document.getElementById(`category-${targetCategoryId}`);
@@ -107,7 +114,7 @@ function ContentsPageContent() {
         {/* Start Texts */}
         <div className="text-white flex flex-col items-center justify-center h-full pt-16 sm:pt-20 md:pt-24 lg:pt-32 max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-center">
-            {t("Guided Reading")}
+            {t("Contents")}
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-medium sm:font-semibold lg:font-bold mt-4 sm:mt-6 md:mt-8 text-center leading-relaxed sm:leading-loose px-4 sm:px-0">
             {t(
@@ -164,7 +171,11 @@ function ContentsPageContent() {
           className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
         >
           {activeCategories.map((category) => (
-            <div key={category.id} id={`category-${category.id}`} className="mt-12">
+            <div
+              key={category.id}
+              id={`category-${category.id}`}
+              className="mt-12"
+            >
               <DynamicSection
                 title={category.name}
                 data={categoriesData[category.id] || []}

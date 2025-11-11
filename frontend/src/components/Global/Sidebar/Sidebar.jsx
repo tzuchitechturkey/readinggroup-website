@@ -99,7 +99,7 @@ export default function AppSidebar({
           },
         ],
       },
-    
+
       {
         title: "Videos",
         onClick: () => onSectionChange("videos"),
@@ -110,7 +110,7 @@ export default function AppSidebar({
             onClick: () => onSectionChange("videos"),
           },
           {
-            title: "Add New Video",
+            title: "Add/Edit Video",
             onClick: () => onSectionChange("createOrEditVideo"),
           },
           {
@@ -123,7 +123,7 @@ export default function AppSidebar({
           },
         ],
       },
-  {
+      {
         title: "Events",
         onClick: "#",
         icon: TV,

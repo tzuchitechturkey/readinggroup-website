@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
-import DeleteConfirmation from "@/components/ForPages/Dashboard/Videos/DeleteConfirmation/DeleteConfirmation";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 
 import CreateorEditCardorPhoto from "../CreateorEditCardorPhoto/CreateorEditCardorPhoto";
 

@@ -74,7 +74,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
   const typeOptions = [
     { value: "card", label: "Card" },
     { value: "photo", label: "Photo" },
-    { value: "reading", label: "Reading" },
   ];
 
   // Initialize form data when editing

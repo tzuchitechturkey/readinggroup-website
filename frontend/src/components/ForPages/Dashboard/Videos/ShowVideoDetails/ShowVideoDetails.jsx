@@ -16,12 +16,8 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
     );
   };
 
-  const formatViews = (views) => {
-    if (!views) return "0";
-    return views.toLocaleString();
-  };
   return (
-    <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[85vh] overflow-y-auto">
+    <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 overflow-y-auto">
       <div className="space-y-6">
         {/* Header with thumbnail and title */}
         <div className="flex items-start gap-6">
@@ -65,9 +61,7 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-green-500" />
                 <span className="text-gray-600">{t("Views")}: </span>
-                <span className="font-medium">
-                  {formatViews(selectedVideo.views)}
-                </span>
+                <span className="font-medium">{selectedVideo.views}</span>
               </div>
             </div>
           </div>
@@ -88,14 +82,7 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
                   {selectedVideo.category?.name || "N/A"}
                 </span>
               </div>
-              <div>
-                <span className="text-gray-600 text-sm block mb-1">
-                  {t("Video Type")}
-                </span>
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                  {selectedVideo.video_type || "N/A"}
-                </span>
-              </div>
+
               <div>
                 <span className="text-gray-600 text-sm block mb-1">
                   {t("Language")}
@@ -150,7 +137,7 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
                   {t("Published Date")}
                 </span>
                 <span className="font-medium text-gray-800">
-                  {formatDate(selectedVideo.published_at)}
+                  {formatDate(selectedVideo.created_at)}
                 </span>
               </div>
             </div>
@@ -166,7 +153,7 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
           {/* Start Status badges */}
           <div className="flex gap-3 mb-4">
             <p> {t("Status")}</p>
-            {selectedVideo.featured && (
+            {selectedVideo.is_featured && (
               <span className="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
                 ⭐ {t("Featured Video")}
               </span>
@@ -184,14 +171,7 @@ function VideoShow({ selectedVideo, setShowDetailsModal, handleEdit }) {
           </div>
           {/* End Status badges */}
 
-          {/* Start Video Type */}
-          <div className="flex items-center gap-3 mt-3 mb-4">
-            <span> {t("Type")}</span>
-            <span className="w-fit  bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-1">
-              {selectedVideo?.video_type}
-            </span>
-          </div>
-          {/* End Video Type */}
+          
           {/* Video link */}
           {selectedVideo.video_url && (
             <div className="bg-gray-50 p-4 rounded-lg">
