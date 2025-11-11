@@ -177,10 +177,20 @@ const EventsList = ({ onSectionChange }) => {
     getEventsData(0, "", statusFilter, filters);
   };
   // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyEventToggle = async (eventId, currentStatus) => {
+  const handleWeeklyEventToggle = async (eventId, currentStatus, eventStatus) => {
+    // Prevent adding draft/archived events to weekly moments
+    if (!currentStatus && (eventStatus === "draft" || eventStatus === "archived")) {
+      toast.info(t("Cannot add event to weekly list. Only published events can be added to the weekly list."));
+      return;
+    }
+
     setIsLoading(true);
     try {
       await PatchEventById(eventId, { is_weekly_moment: !currentStatus });
+      const message = !currentStatus
+        ? t("Event added to weekly list successfully")
+        : t("Event removed from weekly list successfully");
+      toast.success(message);
       setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
@@ -528,7 +538,8 @@ const EventsList = ({ onSectionChange }) => {
                       onClick={() =>
                         handleWeeklyEventToggle(
                           event?.id,
-                          event?.is_weekly_moment
+                          event?.is_weekly_moment,
+                          event?.status
                         )
                       }
                       className={`py-1 rounded-full text-[10px] font-medium transition-colors ${

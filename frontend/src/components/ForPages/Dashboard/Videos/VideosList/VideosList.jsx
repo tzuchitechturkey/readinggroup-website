@@ -155,10 +155,25 @@ function VideosList({ onSectionChange }) {
 
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyVideoToggle = async (videoId, currentStatus) => {
+    // منع التفعيل إذا كانت الحالة draft أو archived
+    if ((statusFilter === "draft" || statusFilter === "archived") && !currentStatus) {
+      toast.info(
+        t(
+          "Cannot add video to weekly list. Only published videos can be added to the weekly list."
+        )
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       await PatchVideoById(videoId, { is_weekly_moment: !currentStatus });
       setUpdate((prev) => !prev);
+      toast.success(
+        !currentStatus
+          ? t("Video added to weekly list successfully")
+          : t("Video removed from weekly list successfully")
+      );
     } catch (error) {
       setErrorFn(error, t);
     } finally {

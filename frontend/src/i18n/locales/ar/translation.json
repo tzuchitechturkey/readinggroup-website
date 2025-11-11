@@ -1312,5 +1312,20 @@
   "Series deleted successfully": "تم حذف السلسلة بنجاح",
   "Category disabled": "تم تعطيل التصنيف",
   "Category enabled": "تم تمكين التصنيف",
-  "===============================================================": "==============================================================="
+  "===============================================================": "===============================================================",
+  "Cannot add content to weekly list. Only published content can be added to the weekly list.": "لا يمكن إضافة المحتوى إلى القائمة الأسبوعية. يمكن إضافة المحتوى المنشور فقط إلى القائمة الأسبوعية.",
+  "Cannot add video to weekly list. Only published videos can be added to the weekly list.": "لا يمكن إضافة الفيديو إلى القائمة الأسبوعية. يمكن إضافة الفيديوهات المنشورة فقط إلى القائمة الأسبوعية.",
+  "Video added to weekly list successfully": "تم إضافة الفيديو إلى القائمة الأسبوعية بنجاح",
+  "Video removed from weekly list successfully": "تمت إزالة الفيديو من القائمة الأسبوعية بنجاح",
+  "Content added to weekly list successfully": "تم إضافة المحتوى إلى القائمة الأسبوعية بنجاح",
+  "Content removed from weekly list successfully": "تمت إزالة المحتوى من القائمة الأسبوعية بنجاح",
+  "Cannot add post to weekly list. Only published posts can be added to the weekly list.": "لا يمكن إضافة المنشور إلى القائمة الأسبوعية. يمكن إضافة المنشورات المنشورة فقط إلى القائمة الأسبوعية.",
+  "Post added to weekly list successfully": "تم إضافة المنشور إلى القائمة الأسبوعية بنجاح",
+  "Post removed from weekly list successfully": "تمت إزالة المنشور من القائمة الأسبوعية بنجاح",
+  "Cannot add event to weekly list. Only published events can be added to the weekly list.": "لا يمكن إضافة الحدث إلى القائمة الأسبوعية. يمكن إضافة الأحداث المنشورة فقط إلى القائمة الأسبوعية.",
+  "Event added to weekly list successfully": "تم إضافة الحدث إلى القائمة الأسبوعية بنجاح",
+  "Event removed from weekly list successfully": "تمت إزالة الحدث من القائمة الأسبوعية بنجاح",
+  "": "",
+  "": "",
+  "": ""
 }

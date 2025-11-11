@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 
 function DeleteSeasonConfirmation({ onCancel, onConfirm, itemName }) {
   const { t } = useTranslation();
-
   return (
     <div className="space-y-4">
       <p className="text-gray-700">
@@ -14,7 +13,8 @@ function DeleteSeasonConfirmation({ onCancel, onConfirm, itemName }) {
       </p>
       {itemName && (
         <p className="text-sm text-gray-600">
-          <span className="font-semibold">{t("Season")}:</span> {itemName}
+          <span className="font-semibold"> </span>
+          {itemName}
         </p>
       )}
       <p className="text-sm text-red-600 font-medium">

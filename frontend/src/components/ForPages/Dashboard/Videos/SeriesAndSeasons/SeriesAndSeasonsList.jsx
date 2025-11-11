@@ -72,8 +72,8 @@ function SeriesAndSeasonsList({ onSectionChange }) {
   }, [update]);
 
   // Fetch Seasons for a specific Series
-  const fetchSeasonsBySeries = async (seriesId) => {
-    if (seasonsData[seriesId]) return; // Already loaded
+  const fetchSeasonsBySeries = async (seriesId, forceRefresh = false) => {
+    if (seasonsData[seriesId] && !forceRefresh) return; // Already loaded
 
     setIsLoading(true);
     try {
@@ -244,11 +244,13 @@ function SeriesAndSeasonsList({ onSectionChange }) {
 
       // Refresh seasons for this series
       const seriesId = selectedSeason.seriesId;
-      const newSeasonsData = { ...seasonsData };
-      delete newSeasonsData[seriesId];
-      setSeasonsData(newSeasonsData);
-      await fetchSeasonsBySeries(seriesId);
-
+      // Keep the series expanded
+      setExpandedSeries((prev) => ({
+        ...prev,
+        [seriesId]: true,
+      }));
+      // Force refresh seasons
+      await fetchSeasonsBySeries(seriesId, true);
       setSelectedSeason(null);
     } catch (error) {
       setErrorFn(error, t);
@@ -269,22 +271,28 @@ function SeriesAndSeasonsList({ onSectionChange }) {
   };
 
   const handleSeriesSuccess = () => {
-    setUpdate((prev) => !prev);
     handleCloseSeriesModal();
+    setUpdate((prev) => !prev);
   };
 
   const handleSeasonSuccess = () => {
     // Refresh seasons for the current series
     if (currentSeriesForSeason?.id) {
-      const newSeasonsData = { ...seasonsData };
-      delete newSeasonsData[currentSeriesForSeason.id];
-      setSeasonsData(newSeasonsData);
-      fetchSeasonsBySeries(currentSeriesForSeason.id);
+      // Keep the series expanded
+      setExpandedSeries((prev) => ({
+        ...prev,
+        [currentSeriesForSeason.id]: true,
+      }));
+      // Force refresh seasons
+      fetchSeasonsBySeries(currentSeriesForSeason.id, true);
     } else if (editingSeason?.season_title?.id) {
-      const newSeasonsData = { ...seasonsData };
-      delete newSeasonsData[editingSeason.season_title.id];
-      setSeasonsData(newSeasonsData);
-      fetchSeasonsBySeries(editingSeason.season_title.id);
+      // Keep the series expanded
+      setExpandedSeries((prev) => ({
+        ...prev,
+        [editingSeason.season_title.id]: true,
+      }));
+      // Force refresh seasons
+      fetchSeasonsBySeries(editingSeason.season_title.id, true);
     }
     handleCloseSeasonModal();
   };
@@ -556,7 +564,7 @@ function SeriesAndSeasonsList({ onSectionChange }) {
         <DeleteSeasonConfirmation
           onCancel={() => setShowDeleteSeasonModal(false)}
           onConfirm={handleConfirmDeleteSeason}
-          itemName={`${t("Season")} ${selectedSeason?.season_number}`}
+          itemName={`${t("Season")} ${selectedSeason?.season_id}`}
         />
       </Modal>
     </div>

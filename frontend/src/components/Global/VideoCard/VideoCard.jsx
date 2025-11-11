@@ -51,7 +51,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
             {/* End Gradient Overlay */}
 
             {/* Start Tags */}
-            <div className="absolute top-3 left-3 flex gap-2">
+            <div className="absolute top-14 left-5 flex gap-2">
               {item?.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {item?.tags?.slice(0, 2).map((tag, index) => (

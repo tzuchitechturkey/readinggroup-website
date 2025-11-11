@@ -170,10 +170,25 @@ const ContentsList = ({ onSectionChange }) => {
   };
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyPostToggle = async (contentId, currentStatus) => {
+    // منع التفعيل إذا كانت الحالة draft أو archived
+    if ((statusFilter === "draft" || statusFilter === "archived") && !currentStatus) {
+      toast.info(
+        t(
+          "Cannot add content to weekly list. Only published content can be added to the weekly list."
+        )
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       await PatchContentById(contentId, { is_weekly_moment: !currentStatus });
       setUpdate((prev) => !prev);
+      toast.success(
+        !currentStatus
+          ? t("Content added to weekly list successfully")
+          : t("Content removed from weekly list successfully")
+      );
     } catch (error) {
       setErrorFn(error, t);
     } finally {

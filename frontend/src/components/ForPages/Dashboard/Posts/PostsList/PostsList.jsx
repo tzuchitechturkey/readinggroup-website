@@ -147,10 +147,20 @@ function PostsList({ onSectionChange }) {
   };
 
   // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyPostToggle = async (postId, currentStatus) => {
+  const handleWeeklyPostToggle = async (postId, currentStatus, postStatus) => {
+    // Prevent adding draft/archived posts to weekly moments
+    if (!currentStatus && (postStatus === "draft" || postStatus === "archived")) {
+      toast.info(t("Cannot add post to weekly list. Only published posts can be added to the weekly list."));
+      return;
+    }
+
     setIsLoading(true);
     try {
       await PatchPostById(postId, { is_weekly_moment: !currentStatus });
+      const message = !currentStatus
+        ? t("Post added to weekly list successfully")
+        : t("Post removed from weekly list successfully");
+      toast.success(message);
       setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
@@ -523,7 +533,7 @@ function PostsList({ onSectionChange }) {
                 <TableCell className="text-center py-4">
                   <button
                     onClick={() =>
-                      handleWeeklyPostToggle(post?.id, post?.is_weekly_moment)
+                      handleWeeklyPostToggle(post?.id, post?.is_weekly_moment, post?.status)
                     }
                     className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
                       post?.is_weekly_moment
