@@ -1,32 +1,39 @@
 from django.db import models
 
-#In Post model
-class PostStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
-    
+#======================================================= Content Model Start =======================================================
 class ContentStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     PUBLISHED = "published", "Published"
     ARCHIVED = "archived", "Archived"
-
-#In Event model
-class EventSection(models.TextChoices):
-    WARM_DISCUSSION = "warm_discussion", "Warm Discussion"
-    DRAMA = "drama", "Drama"
-    EVENT_REPORT = "event_report", "Event Report"
-    RECOMMENDATION = "recommendation", "Recommendation"
-    TRENDING = "trending", "Trending"
-    BREAKING = "breaking", "Breaking News"
-    LATEST = "latest", "Latest Updates"
     
+#======================================================= Content Model End =======================================================
+#======================================================= Video Model Start =======================================================
+class VideoStatus(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    PUBLISHED = "published", "Published"
+    ARCHIVED = "archived", "Archived"
+    
+#======================================================= Video Model End =======================================================
+#======================================================= Event Model Start =======================================================    
 class ReportType(models.TextChoices):
     VIDEOS = "videos", "Videos"
     REPORTS = "reports", "Reports"
     NEWS = "news", "News"
     
-#In MediaCard model
+class EventStatus(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    PUBLISHED = "published", "Published"
+    ARCHIVED = "archived", "Archived"
+
+#======================================================= Event Model End =======================================================
+#======================================================= Post Model Start =======================================================
 class PostType(models.TextChoices):
     CARD = "card", "Card"
     PHOTO = "photo", "Photo"
+
+class PostStatus(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    PUBLISHED = "published", "Published"
+    ARCHIVED = "archived", "Archived"
+    
+#======================================================= Post Model End =======================================================

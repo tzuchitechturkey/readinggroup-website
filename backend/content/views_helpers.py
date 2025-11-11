@@ -4,7 +4,7 @@ from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
-from .enums import PostStatus
+from .enums import PostStatus, ContentStatus, EventStatus, VideoStatus
 from .models import Like
 
 
@@ -26,6 +26,36 @@ def annotate_likes_queryset(queryset, request=None):
         except Exception:
             # ignore failures to annotate has_liked
             pass
+    return queryset
+
+
+def _filter_published(queryset):
+    """If the queryset's model exposes a `status` field, attempt to filter it
+    to the published value for known enums (Post/Content/Event/Video).
+    This helper swallows exceptions to remain safe for models without status.
+    """
+    try:
+        # Try PostStatus
+        return queryset.filter(status=PostStatus.PUBLISHED)
+    except Exception:
+        pass
+
+    try:
+        return queryset.filter(status=ContentStatus.PUBLISHED)
+    except Exception:
+        pass
+
+    try:
+        return queryset.filter(status=EventStatus.PUBLISHED)
+    except Exception:
+        pass
+
+    try:
+        return queryset.filter(status=VideoStatus.PUBLISHED)
+    except Exception:
+        pass
+
+    # model doesn't have a known status enum or filtering failed; return as-is
     return queryset
 
 class IsStaffOrReadOnly(BasePermission):
@@ -118,13 +148,8 @@ class BaseContentViewSet(viewsets.ModelViewSet):
 
         # annotate queryset with likes info then order by annotated_likes_count
         qs = self.get_queryset()
-        # For Post model ensure we only return published posts (exclude draft/archived)
-        try:
-            # only apply for models that have a 'status' field (Post)
-            qs = qs.filter(status=PostStatus.PUBLISHED)
-        except Exception:
-            # ignore if model doesn't support status filtering
-            pass
+        # Filter queryset to published state when possible (Post/Content/Event/Video)
+        qs = _filter_published(qs)
 
         qs = self.annotate_likes(qs)
         # prefer annotated_likes_count (annotate_likes uses Count('likes'))
@@ -149,11 +174,8 @@ class BaseContentViewSet(viewsets.ModelViewSet):
             limit = 5
 
         qs = self.get_queryset()
-        # For Post model ensure we only return published posts (exclude draft/archived)
-        try:
-            qs = qs.filter(status=PostStatus.PUBLISHED)
-        except Exception:
-            pass
+        # Filter queryset to published state when possible (Post/Content/Event/Video)
+        qs = _filter_published(qs)
         # if model has 'views' field, order by it; fallback to created_at if not
         try:
             qs = qs.order_by('-views', '-created_at')[:limit]
@@ -177,11 +199,8 @@ class BaseContentViewSet(viewsets.ModelViewSet):
             limit = 5
 
         qs = self.get_queryset()
-        # For Post model ensure we only return published posts (exclude draft/archived)
-        try:
-            qs = qs.filter(status=PostStatus.PUBLISHED)
-        except Exception:
-            pass
+        # Filter queryset to published state when possible (Post/Content/Event/Video)
+        qs = _filter_published(qs)
         # if model has 'comments' field, order by it; fallback to created_at if not
         try:
             qs = qs.order_by('-comments_count', '-created_at')[:limit]

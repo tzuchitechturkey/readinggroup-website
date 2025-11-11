@@ -7,10 +7,12 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from datetime import timedelta
 from .enums import (
-    PostStatus,
     PostType,
     ReportType,
     ContentStatus,
+    PostStatus,
+    VideoStatus,
+    EventStatus,
 )
 
 class TimestampedModel(models.Model):
@@ -91,6 +93,7 @@ class Video(LikableMixin, TimestampedModel):
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=16, choices=VideoStatus.choices, default=VideoStatus.PUBLISHED)
     happened_at = models.DateTimeField(blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
@@ -100,6 +103,7 @@ class Video(LikableMixin, TimestampedModel):
     season_name = models.ForeignKey('SeasonId', on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
+    is_weekly_moment = models.BooleanField(default=False)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
 
     @property
@@ -116,12 +120,6 @@ class Video(LikableMixin, TimestampedModel):
         except Exception:
             return False
         
-    class Meta:
-        ordering = ("-happened_at", "-created_at")
-
-    def __str__(self) -> str:
-        return self.title
-
     def save(self, *args, **kwargs):
         """Ensure `is_new` is set to True on creation if within 24 hours of `created_at`.
         We need to call super().save() first so `created_at` (auto_now_add) is
@@ -139,6 +137,45 @@ class Video(LikableMixin, TimestampedModel):
                         super().save(update_fields=["is_new"])
             except Exception:
                 pass
+            
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """Return top `limit` videos ordered by number of likes (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_likes_count` to
+        """
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_viewed(cls, limit: int = 5):
+        """Return top `limit` videos ordered by views."""
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .order_by('-views', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_commented(cls, limit: int = 5):
+        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_comments_count` to
+        """
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')
+        )
+        return qs
+    
+    class Meta:
+        ordering = ("-happened_at", "-created_at")
+
+    def __str__(self) -> str:
+        return self.title
     
 class Post(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
@@ -149,7 +186,7 @@ class Post(LikableMixin, TimestampedModel):
     writer = models.CharField(max_length=255)
     writer_avatar = models.URLField(blank=True)
     category = models.ForeignKey('PostCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.DRAFT)
+    status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.PUBLISHED)
     is_active = models.BooleanField(default=True)
     views = models.PositiveIntegerField(default=0)
     read_time = models.CharField(max_length=32, blank=True)
@@ -162,6 +199,7 @@ class Post(LikableMixin, TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    is_weekly_moment = models.BooleanField(default=False)
     
     @classmethod
     def top_liked(cls, limit: int = 5):
@@ -223,6 +261,7 @@ class Event(LikableMixin, TimestampedModel):
     report_type = models.CharField(max_length=50, choices=ReportType.choices, default=ReportType.NEWS)
     country = models.CharField(max_length=100, blank=True)
     language = models.CharField(max_length=50)
+    status = models.CharField(max_length=16, choices=EventStatus.choices, default=EventStatus.PUBLISHED)
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
     section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
     summary = models.TextField(blank=True)
@@ -233,26 +272,47 @@ class Event(LikableMixin, TimestampedModel):
     cast = models.JSONField(default=list, blank=True)
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
+    is_weekly_moment = models.BooleanField(default=False)
+        
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """
+        Return top `limit` posts ordered by number of likes (descending) then created_at as tiebreaker.
+        """
+        qs = (
+            cls.objects.filter(status=EventStatus.PUBLISHED)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_viewed(cls, limit: int = 5):
+        """Return top `limit` videos ordered by views."""
+        qs = (
+            cls.objects.filter(status=EventStatus.PUBLISHED)
+            .order_by('-views', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_commented(cls, limit: int = 5):
+        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_comments_count` to
+        match the annotate_* naming convention used elsewhere.
+        """
+        qs = (
+            cls.objects.filter(status=EventStatus.PUBLISHED)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')
+        )
+        return qs
     class Meta:
         ordering = ("-happened_at", "title")
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
     
-    @classmethod
-    def top_commented(cls, limit: int = 5):
-        """Return top `limit` Event instances ordered by number of comments.
-
-        Annotates queryset with `annotated_comments_count` then orders by
-        `-annotated_comments_count` and `-created_at` as a tiebreaker.
-        """
-        try:
-            qs = cls.objects.annotate(annotated_comments_count=Count('comments')).order_by('-annotated_comments_count', '-created_at')[:limit]
-            return qs
-        except Exception:
-            # Fallback: return most recent events if annotation fails
-            return cls.objects.order_by('-created_at')[:limit]
-        
 class Content(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
     title = models.CharField(max_length=255)
@@ -273,6 +333,42 @@ class Content(LikableMixin, TimestampedModel):
     metadata = models.CharField(max_length=255, blank=True)
     country = models.CharField(max_length=100, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    is_weekly_moment = models.BooleanField(default=False)
+    
+    
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """
+        Return top `limit` Content ordered by number of likes (descending) then created_at as tiebreaker.
+        """
+        qs = (
+            cls.objects.filter(status=ContentStatus.PUBLISHED)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_viewed(cls, limit: int = 5):
+        """Return top `limit` Content ordered by views."""
+        qs = (
+            cls.objects.filter(status=ContentStatus.PUBLISHED)
+            .order_by('-views', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_commented(cls, limit: int = 5):
+        """Return top `limit` Content ordered by number of comments (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_comments_count` to
+        match the annotate_* naming convention used elsewhere.
+        """
+        qs = (
+            cls.objects.filter(status=ContentStatus.PUBLISHED)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')
+        )
+        return qs
     
     class Meta:
         ordering = ("-created_at",)
