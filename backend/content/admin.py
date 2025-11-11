@@ -22,7 +22,6 @@ from .models import (
     NavbarLogo,
 )
 
-
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ("title", "category_name", "language", "views", "is_featured")
@@ -53,6 +52,16 @@ class EventAdmin(admin.ModelAdmin):
     def section_name(self, obj):
         return obj.section.name if obj.section else None
     section_name.short_description = "section"
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+    category_name.short_description = "category"
+    
+@admin.register(Content)
+class ContentAdmin(admin.ModelAdmin):
+    list_display = ("title", "category_name", "language", "writer", "created_at")
+    list_filter = ("category__name", "language", "writer")
+    search_fields = ("title", "category__name", "writer")
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
@@ -147,13 +156,3 @@ class NavbarLogoAdmin(admin.ModelAdmin):
 class ContentCategoryAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
-    
-@admin.register(Content)
-class ContentAdmin(admin.ModelAdmin):
-    list_display = ("title", "category_name", "language", "writer", "created_at")
-    list_filter = ("category__name", "language", "writer")
-    search_fields = ("title", "category__name", "writer")
-
-    def category_name(self, obj):
-        return obj.category.name if obj.category else None
-    category_name.short_description = "category"

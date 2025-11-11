@@ -1,58 +1,35 @@
-from rest_framework import serializers
-from readinggroup_backend.helpers import DateTimeFormattingMixin
-from rest_framework.exceptions import ValidationError
-from django.contrib.contenttypes.models import ContentType
-from .models import ContentImage
 from accounts.serializers import UserSerializer
-from accounts.models import User as AccountUser
-from django.db.models import Q
-from .helpers import AbsoluteURLSerializer
+from django.contrib.contenttypes.models import ContentType
+from readinggroup_backend.helpers import DateTimeFormattingMixin
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+from .helpers import AbsoluteURLSerializer, get_account_user
 from .models import (
-    Event,
-    HistoryEntry,
-    Post,
-    Content,
-    TeamMember,
     Comments,
-    Reply,
-    Video,
-    MyListEntry,
-    VideoCategory,
-    PostCategory,
-    EventCategory,
+    Content,
     ContentCategory,
-    PositionTeamMember,
-    EventSection,
-    PostRating,
+    ContentImage,
     ContentRating,
+    Event,
+    EventCategory,
+    EventSection,
+    HistoryEntry,
     Like,
-    SeasonTitle,
-    SeasonId,
-    SocialMedia,
+    MyListEntry,
     NavbarLogo,
-)
-
-def _resolve_target_user(obj):
-    """Resolve a User instance from common attributes on `obj`.
-
-    Tries attributes like 'user', 'to_user', 'from_user', 'uploader', 'author',
-    'owner', 'created_by', 'writer'. If the attribute is a string, attempts to
-    find a matching User by username or display_name (case-insensitive).
-    """
-    attrs = ("user", "to_user", "from_user", "uploader", "author", "owner", "created_by", "writer")
-    for a in attrs:
-        if hasattr(obj, a):
-            val = getattr(obj, a)
-            if isinstance(val, AccountUser):
-                return val
-            if isinstance(val, str) and val.strip():
-                try:
-                    u = AccountUser.objects.filter(Q(username__iexact=val) | Q(display_name__iexact=val)).first()
-                    if u:
-                        return u
-                except Exception:
-                    pass
-    return None
+    PositionTeamMember,
+    Post,
+    PostCategory,
+    PostRating,
+    Reply,
+    SeasonId,
+    SeasonTitle,
+    SocialMedia,
+    TeamMember,
+    Video,
+    VideoCategory
+    )
 
 class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
@@ -334,7 +311,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         
     def get_user(self, obj):
         try:
-            target = _resolve_target_user(obj)
+            target = get_account_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -551,7 +528,7 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def get_user(self, obj):
         try:
-            target = _resolve_target_user(obj)
+            target = get_account_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -598,7 +575,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def get_user(self, obj):
         try:
-            target = _resolve_target_user(obj)
+            target = get_account_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -618,7 +595,7 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
     def get_user(self, obj):
         try:
-            target = _resolve_target_user(obj)
+            target = get_account_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
@@ -636,7 +613,7 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def get_user(self, obj):
         try:
-            target = _resolve_target_user(obj)
+            target = get_account_user(obj)
             if target:
                 return UserSerializer(target, context=self.context).data
         except Exception:
