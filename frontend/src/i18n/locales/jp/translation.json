@@ -1292,5 +1292,22 @@
   "Card Type": "カードタイプ",
   "Enter card type (e.g., featured, regular, special)": "カードタイプを入力してください（例：注目、通常、特別）",
   "Mark as New": "新着としてマーク",
-  "-------------------------------------------------------------": "-------------------------------------------------------------"
+  "No events found": "لا توجد أحداث",
+  "This Week's Contents": "今週のコンテンツ",
+  "Please register and you will be automatically redirected to the previous page.": "登録してください。自動的に前のページにリダイレクトされます。",
+  "Search events...": "イベントを検索...",
+  "Add New Season": "新しいシーズンを追加",
+  "No seasons found for this series": "このシリーズのシーズンが見つかりません",
+  "Edit Series": "シリーズを編集",
+  "Edit Season": "シーズンを編集",
+  "Delete Season": "シーズンを削除",
+  "Are you sure you want to delete this season?": "このシーズンを削除してもよろしいですか？",
+  "This action cannot be undone.": "この操作は元に戻せません。",
+  "Delete Series": "シリーズを削除",
+  "Are you sure you want to delete this series?": "このシリーズを削除してもよろしいですか？",
+  "Series deleted successfully": "シリーズが正常に削除されました",
+  "Category disabled": "カテゴリが無効になりました",
+  "Category enabled": "カテゴリが有効になりました",
+  "Search members?...": "メンバーを検索...",
+"-------------------------------------------------------------": "-------------------------------------------------------------"
 }
