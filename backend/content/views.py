@@ -30,7 +30,6 @@ from .models import (
     Video,
     Content,
     ContentImage,
-    WeeklyMoment,
     PostCategory,
     VideoCategory,
     EventCategory,
@@ -55,7 +54,6 @@ from .serializers import (
     ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
-    WeeklyMomentSerializer,
     PostCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
@@ -820,40 +818,6 @@ class EventViewSet(BaseContentViewSet):
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
-
-class WeeklyMomentViewSet(BaseContentViewSet):
-    """ViewSet for managing WeeklyMoment content."""
-    queryset = WeeklyMoment.objects.all()
-    serializer_class = WeeklyMomentSerializer
-    search_fields = ("title", "source", "language", "content_type")
-    ordering_fields = ("created_at", "title")
-    
-    #add action for top 5 Liked
-    @action(detail=False, methods=("get",), url_path="top-liked", url_name="top_liked")
-    def top_liked(self, request):
-        """Return top liked instances for this resource.
-
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get('limit', 5))
-        except Exception:
-            limit = 5
-
-        # annotate queryset with likes info then order by annotated_likes_count
-        qs = self.get_queryset()
-        qs = self.annotate_likes(qs)
-        # prefer annotated_likes_count (annotate_likes uses Count('likes'))
-        try:
-            qs = qs.order_by('-annotated_likes_count', '-created_at')[:limit]
-        except Exception:
-            # fallback: try ordering by annotated field name or likes_count
-            qs = qs[:limit]
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-    
 class TeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing TeamMember content."""
     queryset = TeamMember.objects.all()
@@ -1411,7 +1375,6 @@ class TopStatsViewSet(viewsets.ViewSet):
         "post_card",
         "post_photo",
         "event",
-        "weekly_moment",
         "content",
     ]
 
@@ -1454,8 +1417,6 @@ class TopStatsViewSet(viewsets.ViewSet):
             return PostSerializer(obj, context={"request": request}).data
         if isinstance(obj, Event):
             return EventSerializer(obj, context={"request": request}).data
-        if isinstance(obj, WeeklyMoment):
-            return WeeklyMomentSerializer(obj, context={"request": request}).data
         if isinstance(obj, Content):
             return ContentSerializer(obj, context={"request": request}).data
         return None
@@ -1563,8 +1524,6 @@ class TopStatsViewSet(viewsets.ViewSet):
         top_video = self._get_top_liked_object(Video.objects.all(), request)
         top_event = self._get_top_liked_object(Event.objects.all(), request)
         top_content = self._get_top_liked_object(Content.objects.all(), request)
-        top_weekly_moment = self._get_top_liked_object(WeeklyMoment.objects.all(), request)
-
 
         top_post_card = self._get_top_liked_object(
             Post.objects.filter(post_type=PostType.CARD), request
@@ -1583,7 +1542,6 @@ class TopStatsViewSet(viewsets.ViewSet):
             "post_card": self._serialize_any(top_post_card, request),
             "post_photo": self._serialize_any(top_post_photo, request),
             "event": self._serialize_any(top_event, request),
-            "weekly_moment": self._serialize_any(top_weekly_moment, request),
             "content": self._serialize_any(top_content, request),
             "top_posts": top_posts_data,
         }
@@ -1647,14 +1605,12 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         video_queryset = annotate_likes_queryset(Video.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
         post_queryset = annotate_likes_queryset(Post.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
         event_queryset = annotate_likes_queryset(Event.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
-        weekly_queryset = annotate_likes_queryset(WeeklyMoment.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
         content_queryset = annotate_likes_queryset(Content.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap], request)
 
         combined = []
         combined += [(obj, "video") for obj in video_queryset]
         combined += [(obj, "post") for obj in post_queryset]
         combined += [(obj, "event") for obj in event_queryset]
-        combined += [(obj, "weekly_moment") for obj in weekly_queryset]
         combined += [(obj, "content") for obj in content_queryset]
 
         # sort by created_at (newest first)
@@ -1674,8 +1630,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
                 data = PostSerializer(obj, context={"request": request}).data
             elif kind == "event":
                 data = EventSerializer(obj, context={"request": request}).data
-            elif kind == "weekly_moment":
-                data = WeeklyMomentSerializer(obj, context={"request": request}).data
             elif kind == "content":
                 data = ContentSerializer(obj, context={"request": request}).data
             else:

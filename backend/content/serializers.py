@@ -17,7 +17,6 @@ from .models import (
     Reply,
     Video,
     MyListEntry,
-    WeeklyMoment,
     VideoCategory,
     PostCategory,
     EventCategory,
@@ -605,23 +604,6 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-class WeeklyMomentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("start_time", "created_at", "updated_at")
-    user = serializers.SerializerMethodField(read_only=True)
-    class Meta:
-        model = WeeklyMoment
-        fields = "__all__"
-        file_fields = ("image",)
-
-    def get_user(self, obj):
-        try:
-            target = _resolve_target_user(obj)
-            if target:
-                return UserSerializer(target, context=self.context).data
-        except Exception:
-            pass
-        return None
-
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     position = serializers.PrimaryKeyRelatedField(queryset=PositionTeamMember.objects.all(), write_only=True, required=False)

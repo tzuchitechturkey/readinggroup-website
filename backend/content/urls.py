@@ -6,7 +6,6 @@ from .views import (
     ContentViewSet,
     TeamMemberViewSet,
     VideoViewSet,
-    WeeklyMomentViewSet,
     VideoCategoryViewSet,
     PostCategoryViewSet,
     EventCategoryViewSet,
@@ -33,7 +32,6 @@ router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"posts", PostViewSet, basename="post")
 router.register(r"events", EventViewSet, basename="event")
 router.register(r"contents", ContentViewSet, basename="content")
-router.register(r"weekly-moments", WeeklyMomentViewSet, basename="weekly-moment")
 router.register(r"team", TeamMemberViewSet, basename="team-member")
 router.register(r"history", HistoryEntryViewSet, basename="history-entry")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")

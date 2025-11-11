@@ -6,7 +6,6 @@ from .models import (
     Content,
     TeamMember,
     Video,
-    WeeklyMoment,
     PostCategory,
     VideoCategory,
     ContentCategory,
@@ -58,13 +57,6 @@ class EventAdmin(admin.ModelAdmin):
     def category_name(self, obj):
         return obj.category.name if obj.category else None
     category_name.short_description = "category"
-
-@admin.register(WeeklyMoment)
-class WeeklyMomentAdmin(admin.ModelAdmin):
-    list_display = ("title", "status_label", "source", "language", "created_at")
-    list_filter = ("language",)
-    search_fields = ("title", "source")
-
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):

@@ -395,26 +395,6 @@ class ContentImage(TimestampedModel):
     def __str__(self) -> str:
         return f"ContentImage<{self.content_id}:{self.pk}>"
 
-class WeeklyMoment(LikableMixin, TimestampedModel):
-    """Weekly highlighted items displayed on the home page."""
-    title = models.CharField(max_length=255)
-    start_time = models.CharField(max_length=32)
-    status_label = models.CharField(max_length=32)
-    status_color = models.CharField(max_length=32, blank=True)
-    content_type = models.CharField(max_length=100, blank=True)
-    source = models.CharField(max_length=100, blank=True)
-    language = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(upload_to="weekly/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    views = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ("-created_at", "title")
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
     name = models.CharField(max_length=255)
@@ -430,7 +410,6 @@ class TeamMember(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name
-
 
 class HistoryEntry(LikableMixin, TimestampedModel):
     """Timeline entries for the organisation history section."""
