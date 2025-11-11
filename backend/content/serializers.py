@@ -149,20 +149,21 @@ class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
-    season_title = serializers.SerializerMethodField(read_only=True)
+    # allow writing by primary key and represent as object in output
+    season_title = serializers.PrimaryKeyRelatedField(queryset=SeasonTitle.objects.all())
 
     class Meta:
         model = SeasonId
         fields = "__all__"
-
-    def get_season_title(self, obj):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # replace season_title pk with detailed object
         try:
-            st = obj.season_title
-            if st is None:
-                return None
-            return {"id": st.pk, "name": st.name}
+            st = instance.season_title
+            data["season_title"] = {"id": st.pk, "name": st.name} if st is not None else None
         except Exception:
-            return None
+            data["season_title"] = None
+        return data
 
 class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
