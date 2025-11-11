@@ -739,6 +739,14 @@ class EventViewSet(BaseContentViewSet):
                 queryset =queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
                 queryset =queryset.filter(is_weekly_moment=False)
+                
+        status = params.get("status")
+        if status:
+            values = []
+            for item in status.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(status__in=values)
             
         return queryset.order_by('-created_at')
 
