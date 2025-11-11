@@ -35,6 +35,13 @@ video_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'is_weekly_moment',
+        openapi.IN_QUERY,
+        description="Filter by is_weekly_moment status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 post_manual_parameters = [
@@ -76,6 +83,13 @@ post_manual_parameters = [
         'status',
         openapi.IN_QUERY,
         description="Filter by status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
+    openapi.Parameter(
+        'is_weekly_moment',
+        openapi.IN_QUERY,
+        description="Filter by is_weekly_moment status",
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
@@ -137,6 +151,13 @@ event_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'is_weekly_moment',
+        openapi.IN_QUERY,
+        description="Filter by is_weekly_moment status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
 
 team_member_manual_parameters = [
@@ -144,16 +165,6 @@ team_member_manual_parameters = [
         'Position',
         openapi.IN_QUERY,
         description="Filter by Position",
-        type=openapi.TYPE_STRING
-    ),
-]
-
-
-global_search_manual_parameters = [
-    openapi.Parameter(
-        'q',
-        openapi.IN_QUERY,
-        description="Search term",
         type=openapi.TYPE_STRING
     ),
 ]
@@ -187,7 +198,24 @@ content_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING)
     ),
+    openapi.Parameter(
+        'is_weekly_moment',
+        openapi.IN_QUERY,
+        description="Filter by is_weekly_moment status",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING)
+    ),
 ]
+
+global_search_manual_parameters = [
+    openapi.Parameter(
+        'q',
+        openapi.IN_QUERY,
+        description="Search term",
+        type=openapi.TYPE_STRING
+    ),
+]
+
 
 content_category_manual_parameters = [
     openapi.Parameter(

@@ -73,9 +73,7 @@ from .views_helpers import(
     BaseCRUDViewSet,
     IsStaffOrReadOnly,
     annotate_likes_queryset,
-    _filter_published,
 )
-
 
 class VideoViewSet(BaseContentViewSet):
     queryset = Video.objects.all()
@@ -150,6 +148,13 @@ class VideoViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                  queryset =queryset.filter(status__in=values)
+                 
+        is_weekly_moment = params.get("is_weekly_moment")
+        if is_weekly_moment is not None:
+            if is_weekly_moment.lower() in ('true'):
+                queryset =queryset.filter(is_weekly_moment=True)
+            elif is_weekly_moment.lower() in ('false'):
+                queryset =queryset.filter(is_weekly_moment=False)
         
         return queryset.order_by('-created_at')
 
@@ -248,26 +253,6 @@ class VideoViewSet(BaseContentViewSet):
 
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
-    
-    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
-    def weekly_moments(self, request):
-        """Return Event items flagged as weekly moments and published."""
-        qs = self.get_queryset()
-        try:
-            qs = qs.filter(is_weekly_moment=True)
-        except Exception:
-            pass
-
-        qs = _filter_published(qs)
-        qs = annotate_likes_queryset(qs, request)
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
 
 class PostViewSet(BaseContentViewSet):
     queryset = Post.objects.all()
@@ -343,8 +328,15 @@ class PostViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                  queryset =queryset.filter(status__in=values)
+                 
+        is_weekly_moment = params.get("is_weekly_moment")
+        if is_weekly_moment is not None:
+            if is_weekly_moment.lower() in ('true'):
+                queryset =queryset.filter(is_weekly_moment=True)
+            elif is_weekly_moment.lower() in ('false'):
+                queryset =queryset.filter(is_weekly_moment=False)
                                 
-        return queryset
+        return queryset.order_by('-created_at')
 
     @action(detail=True, methods=("post", "delete"), url_path="rating", url_name="rating")
     def rating(self, request, pk=None):
@@ -386,26 +378,6 @@ class PostViewSet(BaseContentViewSet):
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
-    def weekly_moments(self, request):
-        """Return Post items flagged as weekly moments and published."""
-        qs = self.get_queryset()
-        try:
-            qs = qs.filter(is_weekly_moment=True)
-        except Exception:
-            pass
-
-        qs = _filter_published(qs)
-        qs = annotate_likes_queryset(qs, request)
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-    
 class ContentViewSet(BaseContentViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
@@ -468,7 +440,14 @@ class ContentViewSet(BaseContentViewSet):
             if values:
                  queryset =queryset.filter(status__in=values)
                  
-        return queryset
+        is_weekly_moment = params.get("is_weekly_moment")
+        if is_weekly_moment is not None:
+            if is_weekly_moment.lower() in ('true'):
+                queryset =queryset.filter(is_weekly_moment=True)
+            elif is_weekly_moment.lower() in ('false'):
+                queryset =queryset.filter(is_weekly_moment=False)
+                 
+        return queryset.order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
         """Create Content and attach uploaded images/urls as ContentImage rows."""
@@ -660,26 +639,6 @@ class ContentViewSet(BaseContentViewSet):
         serializer = ContentSerializer(content, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
-    def weekly_moments(self, request):
-        """Return Content items flagged as weekly moments and published."""
-        qs = self.get_queryset()
-        try:
-            qs = qs.filter(is_weekly_moment=True)
-        except Exception:
-            pass
-
-        qs = _filter_published(qs)
-        qs = annotate_likes_queryset(qs, request)
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
@@ -773,8 +732,15 @@ class EventViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                  queryset =queryset.filter(category__name__in=values)
+                 
+        is_weekly_moment = params.get("is_weekly_moment")
+        if is_weekly_moment is not None:
+            if is_weekly_moment.lower() in ('true'):
+                queryset =queryset.filter(is_weekly_moment=True)
+            elif is_weekly_moment.lower() in ('false'):
+                queryset =queryset.filter(is_weekly_moment=False)
             
-        return queryset
+        return queryset.order_by('-created_at')
 
     @action(detail=False, methods=("get",), url_path="tags", url_name="tags")
     def tags(self, request):
