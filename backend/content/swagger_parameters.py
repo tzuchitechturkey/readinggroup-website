@@ -160,12 +160,6 @@ global_search_manual_parameters = [
 
 content_manual_parameters = [
     openapi.Parameter(
-        'created_at',
-        openapi.IN_QUERY,
-        description="Filter by created date",
-        type=openapi.TYPE_STRING
-    ),
-    openapi.Parameter(
         'category',
         openapi.IN_QUERY,
         description="Filter by category (JSON object with 'name' field)",

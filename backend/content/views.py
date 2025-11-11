@@ -142,6 +142,14 @@ class VideoViewSet(BaseContentViewSet):
                 queryset =queryset.filter(is_featured=True)
             elif is_featured.lower() in ('false'):
                 queryset =queryset.filter(is_featured=False)
+                
+        status = params.get("status")
+        if status:
+            values = []
+            for item in status.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(status__in=values)
         
         return queryset.order_by('-created_at')
 
@@ -360,24 +368,61 @@ class PostViewSet(BaseContentViewSet):
 class ContentViewSet(BaseContentViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
-    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
+    search_fields = ("title",)
     ordering_fields = ("views", "created_at")
-    filterset_fields = ("created_at", "writer", "category__name", "language", "post_type", "status")
+    filterset_fields = ("writer", "category__name", "language", "status")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     
     @swagger_auto_schema(
         operation_summary="List all contents",
-        operation_description="Retrieve a list of contents with optional filtering by created_at, writer, category, language, post_type, and status.",
+        operation_description="Retrieve a list of contents with optional filtering by writer, category, language, and status.",
         manual_parameters=content_manual_parameters
     )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        
+        queryset = super().get_queryset()
+        queryset = self.annotate_likes(queryset)
+        params = self.request.query_params
+        
+        writer = params.get("writer")
+        if writer:
+            values = []
+            for item in writer.split(","):
+                values.append(item.strip())
+            if values:
+                queryset = queryset.filter(writer__in=values)
+                
+        Category = params.get("category")
+        if Category:
+            values = []
+            for item in Category.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(category__name__in=values)
+                
+        language = params.get("language")
+        if language:
+            values = []
+            for item in language.split(","):
+                values.append(item.strip())
+            if values:
+                queryset =queryset.filter(language__in=values)
+                
+        status = params.get("status")
+        if status:
+            values = []
+            for item in status.split(","):
+                values.append(item.strip())
+            if values:
+                 queryset =queryset.filter(status__in=values)
+                 
+        return queryset
 
     def create(self, request, *args, **kwargs):
         """Create Content and attach uploaded images/urls as ContentImage rows."""
-        # Avoid copying request.data when files are uploaded: copying/memoizing
-        # multipart file objects can trigger deepcopy/pickle on underlying
-        # file buffers (BufferedRandom) which is not supported and raises
-        # "cannot pickle 'BufferedRandom' instances". Use the original
-        # request.data when request.FILES is present.
         if hasattr(request, 'data'):
             if getattr(request, 'FILES', None):
                 data = request.data
@@ -1088,9 +1133,7 @@ class SeasonIdViewSet(BaseCRUDViewSet):
 
         # Videos point to SeasonId via Video.season_name
         qs = Video.objects.filter(season_name=season).order_by('-happened_at', '-created_at')
-
-        # annotate likes info so serializers can show likes_count/has_liked
-        qs = self.annotate_likes(qs)
+        qs = annotate_likes_queryset(qs, request)
 
         # paginate if pagination is configured on the view
         page = self.paginate_queryset(qs)
@@ -1217,7 +1260,7 @@ class EventSectionViewSet(BaseCRUDViewSet):
                 events_qs = events_qs[:events_limit]
 
             # annotate likes on events so EventSerializer can include likes_count/has_liked
-            events_qs = self.annotate_likes(events_qs)
+            events_qs = annotate_likes_queryset(events_qs, request)
 
             section_data = EventSectionSerializer(section, context={"request": request}).data
             events_data = EventSerializer(events_qs, many=True, context={"request": request}).data
@@ -1258,7 +1301,7 @@ class EventSectionViewSet(BaseCRUDViewSet):
             events_qs = section.events().all()
 
             # annotate likes info so EventSerializer can include likes_count/has_liked
-            events_qs = self.annotate_likes(events_qs)
+            events_qs = annotate_likes_queryset(events_qs, request)
 
             # order by annotated likes count (fallback to created_at)
             try:
