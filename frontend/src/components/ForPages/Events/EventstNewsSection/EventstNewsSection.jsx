@@ -141,7 +141,7 @@ const EventstNewsSection = () => {
           <div className="lg:col-span-2 space-y-2 order-2">
             {/* Latest Updates */}
             <section>
-              <SectionHeader title="Latest Updates" ornamentHeight="h-10" />
+              <SectionHeader title={t("Latest Updates")} ornamentHeight="h-10" />
               <div className="   max-h-screen overflow-y-auto mt-5 scrollbar-thin">
                 {lastPosted?.map((article) => (
                   <NewsCard
@@ -156,7 +156,7 @@ const EventstNewsSection = () => {
 
             {/* Tags Category */}
             <section className="pt-3">
-              <SectionHeader title="Tags Category" ornamentHeight="h-10" />
+              <SectionHeader title={t("Tags Category")} ornamentHeight="h-10" />
               <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 mt-5 justify-center lg:justify-start">
                 {categoriesList.map((category, index) => (
                   <CategoryTag

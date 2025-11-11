@@ -237,7 +237,7 @@ function SocialMediaContent({ onSectionChange }) {
                 </option>
                 {getAvailablePlatforms().map((platform) => (
                   <option key={platform} value={platform}>
-                    {platform}
+                    {t(platform)}
                   </option>
                 ))}
               </select>
@@ -316,7 +316,7 @@ function SocialMediaContent({ onSectionChange }) {
                       <div className="flex items-center  mb-4 gap-3">
                         <Icon size={20} color={socialColors[name]} />
                         <span className="inline-block bg-primary/10  py-2 rounded-full text-sm font-semibold">
-                          {link.platform}
+                          {t(link.platform)}
                         </span>
                       </div>
                       {/* Start Actions */}
