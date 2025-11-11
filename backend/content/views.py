@@ -112,11 +112,11 @@ class VideoViewSet(BaseContentViewSet):
             if values:
                 queryset = queryset.filter(language__in=values)
 
-        category = params.getlist("category")
+        category = params.get("category")
         if category:
             values = []
-            for item in category:
-                values.extend([v.strip() for v in item.split(",") if v.strip()])
+            for item in category.split(","):
+                values.append(item.strip())
             if values:
                 queryset = queryset.filter(category__name__in=values)
 
@@ -156,6 +156,13 @@ class VideoViewSet(BaseContentViewSet):
                 queryset =queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
                 queryset =queryset.filter(is_weekly_moment=False)
+                
+                # If caller did not provide an explicit status filter, default to published items
+        if not params.get('status'):
+            try:
+                queryset = queryset.filter(status="published")
+            except Exception:
+                pass
         
         return queryset.order_by('-created_at')
 
@@ -341,6 +348,13 @@ class PostViewSet(BaseContentViewSet):
                 queryset =queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
                 queryset =queryset.filter(is_weekly_moment=False)
+                
+                # If caller did not provide an explicit status filter, default to published items
+        if not params.get('status'):
+            try:
+                queryset = queryset.filter(status="published")
+            except Exception:
+                pass
                                 
         return queryset.order_by('-created_at')
 
@@ -452,6 +466,12 @@ class ContentViewSet(BaseContentViewSet):
                 queryset =queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
                 queryset =queryset.filter(is_weekly_moment=False)
+                
+        if not params.get('status'):
+            try:
+                queryset = queryset.filter(status="published")
+            except Exception:
+                pass
                  
         return queryset.order_by('-created_at')
 
@@ -961,7 +981,7 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = PostCategory.objects.all()
+    queryset = PostCategory.objects.all().order_by('-created_at')
     
     @swagger_auto_schema(
         operation_summary="List all post categories",
@@ -1008,7 +1028,7 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = ContentCategory.objects.all()
+    queryset = ContentCategory.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all content categories",
@@ -1053,7 +1073,7 @@ class EventCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = EventCategory.objects.all()
+    queryset = EventCategory.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all event categories",
@@ -1188,6 +1208,12 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+            
+        try:
+            queryset = queryset.annotate(video_count=Count('video'))
+        except Exception:
+            pass
+
         return queryset
     
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
@@ -1197,8 +1223,16 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
             category = self.get_object()
         except Exception:
             return Response({"detail": "VideoCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+        # Ensure category is active
+        if not getattr(category, "is_active", True):
+            return Response({"detail": "VideoCategory not active."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Video.objects.filter(category=category).order_by('-happened_at', '-created_at')
+        # Only expose the category when it has at least one published video.
+        published_qs = Video.objects.filter(category=category, status="published")
+        if not published_qs.exists():
+            return Response({"detail": "No published videos in this category."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = published_qs.order_by('-happened_at', '-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)

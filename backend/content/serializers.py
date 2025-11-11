@@ -97,6 +97,8 @@ class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
         
 class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+    # annotated field: number of related Video objects (set by view queryset)
+    video_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = VideoCategory
         fields = "__all__"

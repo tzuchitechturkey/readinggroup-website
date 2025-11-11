@@ -559,9 +559,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                 <button
                   type="button"
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    i18n?.language === "ar" ? "text-right" : "text-left"
+                  } flex items-center gap-3 ${
                     errors.category ? "border-red-500" : "border-gray-300"
                   }`}
+                  aria-haspopup="listbox"
                 >
                   {formData?.category ? (
                     <>
@@ -587,13 +590,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                 </button>
 
                 {showCategoryDropdown && (
-                  <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                  <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
                     {/* Search Box */}
                     <div className="p-3 border-b border-gray-200 bg-gray-50">
                       <div className="flex items-center gap-2">
                         <div className="relative flex-1">
                           <input
                             type="text"
+                            dir={i18n?.language === "ar" ? "rtl" : "ltr"}
                             value={categorySearchValue}
                             onChange={(e) =>
                               setCategorySearchValue(e.target.value)
@@ -605,7 +609,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                               }
                             }}
                             placeholder={t("Search categories...")}
-                            className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                              i18n?.language === "ar" ? "text-right" : "text-left"
+                            }`}
                           />
                           {categorySearchValue && (
                             <button
@@ -641,7 +647,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                             key={category.id}
                             type="button"
                             onClick={() => handleCategorySelect(category)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                            className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
+                              i18n?.language === "ar" ? "text-right" : "text-left"
+                            }`}
                           >
                             <Tag className="w-5 h-5 text-blue-600" />
                             <div className="flex-1">

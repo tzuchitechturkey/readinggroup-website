@@ -24,7 +24,7 @@ import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import DatePickerWithYearMonth from "../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const writerDropdownRef = useRef(null);
@@ -664,9 +664,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <button
                 type="button"
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  i18n?.language === "ar" ? "text-right" : "text-left"
+                } flex items-center gap-3 ${
                   errors.category ? "border-red-500" : "border-gray-300"
                 }`}
+                aria-haspopup="listbox"
               >
                 {formData?.category ? (
                   <>
@@ -692,13 +695,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
+                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
                           value={categorySearchValue}
                           onChange={(e) =>
                             setCategorySearchValue(e.target.value)
@@ -710,7 +714,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                             }
                           }}
                           placeholder={t("Search categories...")}
-                          className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         />
                         {categorySearchValue && (
                           <button
@@ -742,11 +748,13 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   <div className="max-h-60 overflow-y-auto">
                     {categoriesList.length > 0 ? (
                       categoriesList.map((category) => (
-                        <button
+                          <button
                           key={category.id}
                           type="button"
                           onClick={() => handleCategorySelect(category)}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         >
                           <Tag className="w-5 h-5 text-blue-600" />
                           <div className="flex-1">
@@ -784,12 +792,16 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <button
                 type="button"
                 onClick={() => setShowWriterDropdown(!showWriterDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  i18n?.language === "ar" ? "text-right" : "text-left"
+                } flex items-center gap-3 ${
                   errors.writer ? "border-red-500" : "border-gray-300"
                 }`}
               >
                 {formData?.writer ? (
-                  <div className="font-medium text-sm">{formData?.writer}</div>
+                  <div className={`font-medium text-sm ${i18n?.language === "ar" ? "text-right" : "text-left"}`}>
+                    {formData?.writer}
+                  </div>
                 ) : (
                   <>
                     <User className="w-8 h-8 text-gray-400" />
@@ -799,13 +811,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showWriterDropdown && (
-                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
+                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
                           value={writerSearchValue}
                           onChange={(e) => setWriterSearchValue(e.target.value)}
                           onKeyDown={(e) => {
@@ -815,7 +828,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                             }
                           }}
                           placeholder={t("Search writers...")}
-                          className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         />
                         {writerSearchValue && (
                           <button
@@ -846,7 +861,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                           key={writer.id}
                           type="button"
                           onClick={() => handleWriterSelect(writer)}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         >
                           <img
                             src={writer.profile_image || "/fake-user.png"}
@@ -962,7 +979,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <button
                 type="button"
                 onClick={() => setShowSectionDropdown(!showSectionDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  i18n?.language === "ar" ? "text-right" : "text-left"
+                } flex items-center gap-3 ${
                   errors.section ? "border-red-500" : "border-gray-300"
                 }`}
               >
@@ -988,13 +1007,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showSectionDropdown && (
-                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
                         <input
                           type="text"
+                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
                           value={sectionSearchValue}
                           onChange={(e) =>
                             setSectionSearchValue(e.target.value)
@@ -1006,7 +1026,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                             }
                           }}
                           placeholder={t("Search sections...")}
-                          className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         />
                         {sectionSearchValue && (
                           <button
@@ -1042,7 +1064,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                           key={section.id}
                           type="button"
                           onClick={() => handleSectionSelect(section)}
-                          className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
+                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
                         >
                           <Tag className="w-5 h-5 text-blue-600" />
                           <div className="flex-1">

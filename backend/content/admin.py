@@ -24,7 +24,7 @@ from .models import (
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "category_name", "language", "views", "is_featured")
+    list_display = ("id", "title", "category_name", "language", "views", "is_featured")
     list_filter = ("category__name", "language", "is_featured", "is_new")
     search_fields = ("title", "category__name")
 
@@ -35,7 +35,7 @@ class VideoAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("title", "writer", "category_name", "status", "is_active")
+    list_display = ("id", "title", "writer", "category_name", "status", "is_active")
     list_filter = ("status", "category__name", "is_active")
     search_fields = ("title", "writer", "category__name")
 
@@ -45,7 +45,7 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "section_name", "category_name", "language", "happened_at")
+    list_display = ("id", "title", "section_name", "category_name", "language", "happened_at")
     list_filter = ("section__name", "category__name", "language")
     search_fields = ("title", "writer", "category__name")
 
@@ -59,7 +59,7 @@ class EventAdmin(admin.ModelAdmin):
     
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ("title", "category_name", "language", "writer", "created_at")
+    list_display = ("id", "title", "category_name", "language", "writer", "created_at")
     list_filter = ("category__name", "language", "writer")
     search_fields = ("title", "category__name", "writer")
 
@@ -69,40 +69,40 @@ class ContentAdmin(admin.ModelAdmin):
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ("name", "position", "job_title", "created_at")
+    list_display = ("id", "name", "position", "job_title", "created_at")
     search_fields = ("name", "position", "job_title")
 
 
 @admin.register(HistoryEntry)
 class HistoryEntryAdmin(admin.ModelAdmin):
-    list_display = ("title", "story_date")
+    list_display = ("id", "title", "story_date")
     list_filter = ("story_date",)
     search_fields = ("title", "description")
     
     
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
 
 @admin.register(PostCategory)
 class PostCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
     
 @admin.register(EventCategory)
 class EventCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
     
 @admin.register(PositionTeamMember)
 class PositionTeamMemberAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
     
 @admin.register(EventSection)
 class EventSectionAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("id", "name","description", "created_at")
     search_fields = ("name",)
     
 @admin.register(Comments)
@@ -120,17 +120,17 @@ class ReplyAdmin(admin.ModelAdmin):
 @admin.register(MyListEntry)
 class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
-    list_display = ("user", "video", "created_at")
+    list_display = ("id", "user", "video", "created_at")
     search_fields = ("user__username", "video__title")
     
 @admin.register(SeasonTitle)
 class SeasonTitleAdmin(admin.ModelAdmin):
-    list_display = ("name","description")
+    list_display = ("id", "name","description")
     search_fields = ("name","description")
     
 @admin.register(SeasonId)
 class SeasonIdAdmin(admin.ModelAdmin):
-    list_display = ("season_name", "season_id")
+    list_display = ("id", "season_name", "season_id")
     search_fields = ("season_name__name", "season_id")
 
     def season_name(self, obj):
