@@ -10,7 +10,6 @@ from .models import Like
 
 def annotate_likes_queryset(queryset, request=None):
     """Module-level helper to annotate a queryset with likes count and (when request.user authenticated) has_liked.
-
     This mirrors BaseContentViewSet.annotate_likes but is usable from function/class-based views.
     """
     try:
@@ -35,7 +34,6 @@ def _filter_published(queryset):
     This helper swallows exceptions to remain safe for models without status.
     """
     try:
-        # Try PostStatus
         return queryset.filter(status=PostStatus.PUBLISHED)
     except Exception:
         pass
@@ -55,7 +53,6 @@ def _filter_published(queryset):
     except Exception:
         pass
 
-    # model doesn't have a known status enum or filtering failed; return as-is
     return queryset
 
 class IsStaffOrReadOnly(BasePermission):

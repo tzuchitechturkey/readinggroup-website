@@ -72,7 +72,8 @@ from .views_helpers import(
     BaseContentViewSet,
     BaseCRUDViewSet,
     IsStaffOrReadOnly,
-    annotate_likes_queryset
+    annotate_likes_queryset,
+    _filter_published,
 )
 
 
@@ -82,6 +83,7 @@ class VideoViewSet(BaseContentViewSet):
     search_fields = ("title",)
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
+    pagination_class = LimitOffsetPagination
 
     @swagger_auto_schema(
         operation_summary="all List videos",
@@ -246,6 +248,26 @@ class VideoViewSet(BaseContentViewSet):
 
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
+    
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Return Event items flagged as weekly moments and published."""
+        qs = self.get_queryset()
+        try:
+            qs = qs.filter(is_weekly_moment=True)
+        except Exception:
+            pass
+
+        qs = _filter_published(qs)
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
 
 class PostViewSet(BaseContentViewSet):
     queryset = Post.objects.all()
@@ -254,6 +276,7 @@ class PostViewSet(BaseContentViewSet):
     ordering_fields = ("views", "created_at")
     filterset_fields = ("created_at", "writer", "category__name", "language", "post_type", "status")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = LimitOffsetPagination
     
     @swagger_auto_schema(
         operation_summary="List all posts",
@@ -362,6 +385,26 @@ class PostViewSet(BaseContentViewSet):
         PostRating.objects.filter(user=user, post=post).delete()
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Return Post items flagged as weekly moments and published."""
+        qs = self.get_queryset()
+        try:
+            qs = qs.filter(is_weekly_moment=True)
+        except Exception:
+            pass
+
+        qs = _filter_published(qs)
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
     
 class ContentViewSet(BaseContentViewSet):
     queryset = Content.objects.all()
@@ -370,6 +413,7 @@ class ContentViewSet(BaseContentViewSet):
     ordering_fields = ("views", "created_at")
     filterset_fields = ("writer", "category__name", "language", "status")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = LimitOffsetPagination
     
     @swagger_auto_schema(
         operation_summary="List all contents",
@@ -378,6 +422,13 @@ class ContentViewSet(BaseContentViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
     
     def get_queryset(self):
         
@@ -565,57 +616,7 @@ class ContentViewSet(BaseContentViewSet):
             pass
 
         return Response(self.get_serializer(content, context={'request': request}).data)
-    
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.views = instance.views + 1
-        instance.save(update_fields=["views"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-    
-    def get_queryset(self):
-        
-        queryset = super().get_queryset()
-        queryset = self.annotate_likes(queryset)
-        params = self.request.query_params
 
-        created_at = params.get("created_at")
-        if created_at:
-            queryset = queryset.filter(created_at__date=created_at)
-
-        writer = params.get("writer")
-        if writer:
-            values = []
-            for item in writer.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(writer__in=values)
-                
-        Category = params.get("category")
-        if Category:
-            values = []
-            for item in Category.split(","):
-                values.append(item.strip())
-            if values:
-                queryset =queryset.filter(category__name__in=values)
-                
-        language = params.get("language")
-        if language:
-            values = []
-            for item in language.split(","):
-                values.append(item.strip())
-            if values:
-                queryset =queryset.filter(language__in=values)
-                
-        status = params.get("status")
-        if status:
-            values = []
-            for item in status.split(","):
-                values.append(item.strip())
-            if values:
-                 queryset =queryset.filter(status__in=values)
-                 
-        return queryset
     
     @action(detail=True, methods=("post", "delete"), url_path="rating", url_name="rating")
     def rating(self, request, pk=None):
@@ -659,6 +660,26 @@ class ContentViewSet(BaseContentViewSet):
         serializer = ContentSerializer(content, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Return Content items flagged as weekly moments and published."""
+        qs = self.get_queryset()
+        try:
+            qs = qs.filter(is_weekly_moment=True)
+        except Exception:
+            pass
+
+        qs = _filter_published(qs)
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 class EventViewSet(BaseContentViewSet):
     """ViewSet for managing Event content."""
     queryset = Event.objects.all()
@@ -667,6 +688,7 @@ class EventViewSet(BaseContentViewSet):
     ordering_fields = ("happened_at", "created_at")
     filterset_fields = ("section", "category", "country", "language", "report_type", "tags")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = LimitOffsetPagination
     
     @swagger_auto_schema(
         manual_parameters=event_manual_parameters
@@ -815,6 +837,26 @@ class EventViewSet(BaseContentViewSet):
 
         # annotate likes info as well so serializers can show likes_count/has_liked
         qs = self.annotate_likes(qs)
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Return Event items flagged as weekly moments and published."""
+        qs = self.get_queryset()
+        try:
+            qs = qs.filter(is_weekly_moment=True)
+        except Exception:
+            pass
+
+        qs = _filter_published(qs)
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
