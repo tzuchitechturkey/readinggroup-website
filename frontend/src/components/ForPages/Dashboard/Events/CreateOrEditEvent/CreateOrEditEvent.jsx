@@ -17,7 +17,7 @@ import {
 import Loader from "@/components/Global/Loader/Loader";
 import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
-import { languages } from "@/constants/constants";
+import { languages, postStatusOptions } from "@/constants/constants";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     video_url: "",
     cast: [],
     tags: [],
+    status: "",
   });
 
   const [imagePreview, setImagePreview] = useState("");
@@ -119,6 +120,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         video_url: event.video_url || "",
         cast: event.cast || [],
         tags: event.tags || [],
+        status: event.status || "",
       });
       setImagePreview(
         event?.report_type === "videos"
@@ -144,6 +146,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         video_url: "",
         cast: [],
         tags: [],
+        status: "",
       });
       setImagePreview("");
     }
@@ -242,6 +245,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       video_url: "",
       cast: [],
       tags: [],
+      status: "",
     });
 
     // Clean up existing preview
@@ -386,6 +390,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.report_type = t("Report type is required");
     }
 
+    if (!formData.status) {
+      newErrors.status = t("Status is required");
+    }
+
     if (!formData.country) {
       newErrors.country = t("Country is required");
     }
@@ -444,6 +452,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     submitData.append("title", formData.title);
     submitData.append("writer", formData.writer);
     submitData.append("report_type", formData.report_type);
+    submitData.append("status", formData.status);
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
     submitData.append("duration_minutes", formData.duration_minutes);
@@ -922,6 +931,34 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             )}
           </div>
           {/* End Report Type */}
+
+          {/* Start Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Status")} *
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className={`w-full p-3 border rounded-lg outline-none ${
+                errors.status ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              <option value="" disabled hidden>
+                {t("Select Status")}
+              </option>
+              {postStatusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {t(option.label)}
+                </option>
+              ))}
+            </select>
+            {errors.status && (
+              <p className="text-red-500 text-xs mt-1">{errors.status}</p>
+            )}
+          </div>
+          {/* End Status */}
 
           {/* Start Section */}
           <div>

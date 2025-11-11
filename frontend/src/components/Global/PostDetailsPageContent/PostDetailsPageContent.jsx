@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Import components
@@ -25,6 +25,8 @@ function PostDetailsPageContent() {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
+  const location = useLocation();
+  const fromContent = location.pathname.includes("contents/content");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [userRating, setUserRating] = useState(0); // تقييم المستخدم
   const [hoveredRating, setHoveredRating] = useState(0); // للتفاعل مع hover
@@ -188,7 +190,7 @@ function PostDetailsPageContent() {
               <div className="space-y-4">
                 {topCommentedData?.map((card) => (
                   <div key={card.id} className="bg-gray-50 rounded-lg p-3">
-                    <GuidingReadingcard item={card} />
+                    <GuidingReadingcard item={card} fromContent={fromContent} />
                   </div>
                 ))}
               </div>

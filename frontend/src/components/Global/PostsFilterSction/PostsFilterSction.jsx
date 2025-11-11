@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import PostsFilter from "@/components/Global/PostsFilter/PostsFilter";
 import FilteredResults from "@/components/ForPages/Contents/FilteredResults/FilteredResults";
 import { GetPosts } from "@/api/posts";
+import { GetContents } from "@/api/contents";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function PostsFilterSction({ cardAndPhoto = false }) {
@@ -118,7 +119,11 @@ function PostsFilterSction({ cardAndPhoto = false }) {
 
     try {
       const apiFilters = clearFilter === true ? {} : buildFilters({ filter });
-      const res = await GetPosts(limit, offset, "published", apiFilters);
+      
+      // Use GetContents if cardAndPhoto is false, otherwise use GetPosts
+      const res = cardAndPhoto 
+        ? await GetPosts(limit, offset, "published", apiFilters)
+        : await GetContents(limit, offset, "published", apiFilters);
 
       const newResults = res.data?.results || [];
       const totalCount = res.data?.count || 0;

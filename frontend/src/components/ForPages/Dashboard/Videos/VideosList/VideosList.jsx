@@ -48,13 +48,19 @@ function VideosList({ onSectionChange }) {
   const [videoData, setVideoData] = useState([]);
   const [update, setUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
+  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
 
   // Fetch Data
-  const getVideoData = async (page, searchVal = searchTerm, status = statusFilter) => {
+  const getVideoData = async (
+    page,
+    searchVal = searchTerm,
+    status = statusFilter,
+    filters = {}
+  ) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetVideos(limit, offset, status, searchVal);
+      const res = await GetVideos(limit, offset, status, searchVal, filters);
       setVideoData(res?.data?.results || []);
       setTotalRecords(res?.data?.count);
     } catch (error) {
@@ -122,7 +128,11 @@ function VideosList({ onSectionChange }) {
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      getVideoData(page - 1, searchTerm, statusFilter);
+      const filters =
+        isWeeklyMomentFilter !== null
+          ? { is_weekly_moment: isWeeklyMomentFilter }
+          : {};
+      getVideoData(page - 1, searchTerm, statusFilter, filters);
     }
   };
 
@@ -147,7 +157,8 @@ function VideosList({ onSectionChange }) {
   const handleWeeklyVideoToggle = async (videoId, currentStatus) => {
     setIsLoading(true);
     try {
-      PatchVideoById(videoId, { weekly_event: !currentStatus });
+      await PatchVideoById(videoId, { is_weekly_moment: !currentStatus });
+      setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -200,9 +211,23 @@ function VideosList({ onSectionChange }) {
     getVideoData(0, "", newStatus);
   };
 
+  // Handle is_weekly_moment filter change
+  const handleWeeklyMomentFilterChange = (value) => {
+    const newFilter = value === isWeeklyMomentFilter ? null : value;
+    setIsWeeklyMomentFilter(newFilter);
+    setCurrentPage(1);
+    const filters = newFilter !== null ? { is_weekly_moment: newFilter } : {};
+    getVideoData(0, "", statusFilter, filters);
+  };
+
   useEffect(() => {
-    getVideoData(0, "", statusFilter);
-  }, [update, statusFilter]);
+    const filters =
+      isWeeklyMomentFilter !== null
+        ? { is_weekly_moment: isWeeklyMomentFilter }
+        : {};
+    getVideoData(0, "", statusFilter, filters);
+  }, [update, statusFilter, isWeeklyMomentFilter]);
+
   return (
     <div
       className="bg-white rounded-lg border  border-gray-200 pt-3 px-3"
@@ -245,7 +270,7 @@ function VideosList({ onSectionChange }) {
       </div>
       {/* End Header */}
       {/* Start Search */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+      <div className="bg-white rounded-lg p-4  shadow-sm">
         <div className="relative max-w-md flex">
           <input
             type="text"
@@ -261,7 +286,11 @@ function VideosList({ onSectionChange }) {
             <button
               onClick={() => {
                 setSearchTerm("");
-                getVideoData(0, "");
+                const filters =
+                  isWeeklyMomentFilter !== null
+                    ? { is_weekly_moment: isWeeklyMomentFilter }
+                    : {};
+                getVideoData(0, "", statusFilter, filters);
               }}
               className={` absolute ${
                 i18n?.language === "ar" ? " left-20" : " right-20"
@@ -274,7 +303,11 @@ function VideosList({ onSectionChange }) {
           <button
             onClick={() => {
               if (searchTerm.trim()) {
-                getVideoData(0, searchTerm, statusFilter);
+                const filters =
+                  isWeeklyMomentFilter !== null
+                    ? { is_weekly_moment: isWeeklyMomentFilter }
+                    : {};
+                getVideoData(0, searchTerm, statusFilter, filters);
               }
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
@@ -286,29 +319,75 @@ function VideosList({ onSectionChange }) {
         </div>
       </div>
       {/* End Search */}
-
-      {/* Start Status Tabs Filter */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
-          <div className="flex gap-2 flex-wrap">
-            {["published", "draft", "archived"].map((status) => (
-              <button
-                key={status}
-                onClick={() => handleStatusChange(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  statusFilter === status
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {t(status.charAt(0).toUpperCase() + status.slice(1))}
-              </button>
-            ))}
+      <div className="flex items-center justify-between">
+        {/* Start Status Tabs Filter */}
+        <div className="bg-white rounded-lg p-4  shadow-sm border-b">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {t("Status")}:
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {["published", "draft", "archived"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleStatusChange(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    statusFilter === status
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t(status.charAt(0).toUpperCase() + status.slice(1))}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
+        {/* End Status Tabs Filter */}
+        {/* Start Is Weekly Moment Filter */}
+        <div className="flex gap-4 my-4 px-4 py-3 bg-white rounded-lg border border-gray-200">
+          <div className="w-full">
+            <div className="flex items-center gap-4">
+              <span className="text-gray-600 font-medium text-sm">
+                {t("Weekly List")}:
+              </span>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => handleWeeklyMomentFilterChange(null)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isWeeklyMomentFilter === null
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t("All")}
+                </button>
+                <button
+                  onClick={() => handleWeeklyMomentFilterChange(true)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isWeeklyMomentFilter === true
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t("Weekly")}
+                </button>
+                <button
+                  onClick={() => handleWeeklyMomentFilterChange(false)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isWeeklyMomentFilter === false
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t("Not Weekly")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* End Is Weekly Moment Filter */}
       </div>
-      {/* End Status Tabs Filter */}
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14 ">
@@ -462,15 +541,15 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-center py-4">
                 <button
                   onClick={() =>
-                    handleWeeklyVideoToggle(video?.id, video?.weekly_video)
+                    handleWeeklyVideoToggle(video?.id, video?.is_weekly_moment)
                   }
                   className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                    video?.weekly_video
+                    video?.is_weekly_moment
                       ? "bg-green-100 text-green-800 hover:bg-green-200"
                       : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
                 >
-                  {video?.weekly_video ? (
+                  {video?.is_weekly_moment ? (
                     <ToggleRight className="h-8 w-12" />
                   ) : (
                     <ToggleLeft className="h-8 w-12" />

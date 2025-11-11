@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { createPortal } from "react-dom";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
@@ -10,6 +11,7 @@ import ImageModal from "@/components/Global/ImageModal/ImageModal";
 import { GetEventById, GetTopEventsViewed, PatchEventById } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
 import NewsCard from "../NewsCard/NewsCard";
 
@@ -21,6 +23,10 @@ const EventHeroEnhanced = ({ className = "" }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [sideEventData, setSideEventData] = useState([]);
   const [eventData, setEventData] = useState({});
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
+  const navigate = useNavigate();
+
   const getEventsData = async () => {
     try {
       const res = await GetTopEventsViewed();
@@ -29,10 +35,15 @@ const EventHeroEnhanced = ({ className = "" }) => {
       console.error("Failed to fetch side events data:", err);
     }
   };
-  console.log(sideEventData, "aaaaaaaaaaaaaaaaa");
   // Event handlers - يمكن تخصيصها حسب الحاجة
-  const handleArticleClick = () => {
-    // يمكن إضافة منطق التنقل هنا
+  const handleArticleClick = (article) => {
+    setSelectedItem(article);
+    if (article.report_type === "videos") {
+      setOpenDetailsVideoModal(true);
+    } else {
+      // console.log("Article clicked", article);
+      navigate(`/events/report/${article.id}`);
+    }
   };
   // دالة الإعجاب
   const handleLike = async () => {
@@ -227,6 +238,15 @@ const EventHeroEnhanced = ({ className = "" }) => {
         onDownloadImage={handleDownloadImage}
         isRTL={i18n.language === "ar"}
       />
+      {openDetailsVideoModal &&
+        createPortal(
+          <VideoDetailsContent
+            isOpen={openDetailsVideoModal}
+            onClose={() => setOpenDetailsVideoModal(false)}
+            videoData={selectedItem}
+          />,
+          document.body
+        )}
     </div>
   );
 };

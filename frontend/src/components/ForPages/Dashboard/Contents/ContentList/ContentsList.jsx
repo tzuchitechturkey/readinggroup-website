@@ -35,6 +35,7 @@ const ContentsList = ({ onSectionChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
+  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null); // State for weekly moment filter (null = show all, true = weekly, false = not weekly)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,12 +43,22 @@ const ContentsList = ({ onSectionChange }) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [ContentsData, setContentsData] = useState([]);
   // Fetch Content from API
-  const getContentsData = async (page = 0, searchVal = search, status = statusFilter) => {
+  const getContentsData = async (
+    page = 0,
+    searchVal = search,
+    status = statusFilter,
+    isWeekly = isWeeklyMomentFilter
+  ) => {
     setIsLoading(true);
     const offset = page * limit;
 
     // params سيكون كائن حتى لو كان فقط search
     const params = searchVal ? { search: searchVal } : {};
+
+    // إضافة فلتر is_weekly_moment إذا كان محدداً
+    if (isWeekly !== null) {
+      params.is_weekly_moment = isWeekly;
+    }
 
     try {
       const res = await GetContents(limit, offset, status, params);
@@ -99,8 +110,8 @@ const ContentsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getContentsData(0, "", statusFilter);
-  }, [update, statusFilter]);
+    getContentsData(0, "", statusFilter, isWeeklyMomentFilter);
+  }, [update, statusFilter, isWeeklyMomentFilter]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -131,7 +142,7 @@ const ContentsList = ({ onSectionChange }) => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-      getContentsData(newPage - 1, search, statusFilter);
+      getContentsData(newPage - 1, search, statusFilter, isWeeklyMomentFilter);
     }
   };
 
@@ -139,7 +150,7 @@ const ContentsList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getContentsData(0, "", statusFilter);
+    getContentsData(0, "", statusFilter, isWeeklyMomentFilter);
   };
 
   // Handle status filter change
@@ -147,13 +158,22 @@ const ContentsList = ({ onSectionChange }) => {
     setStatusFilter(newStatus);
     setCurrentPage(1);
     setSearch("");
-    getContentsData(0, "", newStatus);
+    getContentsData(0, "", newStatus, isWeeklyMomentFilter);
+  };
+
+  // Handle weekly moment filter change
+  const handleWeeklyMomentFilterChange = (value) => {
+    setIsWeeklyMomentFilter(value);
+    setCurrentPage(1);
+    setSearch("");
+    getContentsData(0, "", statusFilter, value);
   };
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyPostToggle = async (contentId, currentStatus) => {
     setIsLoading(true);
     try {
-      PatchContentById(contentId, { weekly_event: !currentStatus });
+      await PatchContentById(contentId, { is_weekly_moment: !currentStatus });
+      setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -222,7 +242,7 @@ const ContentsList = ({ onSectionChange }) => {
       </div>
       {/* End Header */}
       {/* Start Search */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+      <div className="bg-white rounded-lg p-4  shadow-sm">
         <div className="relative max-w-md flex">
           <input
             type="text"
@@ -250,7 +270,9 @@ const ContentsList = ({ onSectionChange }) => {
           )}
 
           <button
-            onClick={() => getContentsData(0, search, statusFilter)}
+            onClick={() =>
+              getContentsData(0, search, statusFilter, isWeeklyMomentFilter)
+            }
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -260,29 +282,74 @@ const ContentsList = ({ onSectionChange }) => {
         </div>
       </div>
       {/* End Search */}
-
       {/* Start Status Tabs Filter */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
-          <div className="flex gap-2 flex-wrap">
-            {["published", "draft", "archived"].map((status) => (
+      <div className="flex items-center justify-between  mb-3 ">
+        <div className="bg-white rounded-lg p-4 shadow-sm border-b">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {t("Status")}:
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {["published", "draft", "archived"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleStatusChange(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    statusFilter === status
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t(status.charAt(0).toUpperCase() + status.slice(1))}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* End Status Tabs Filter */}
+
+        {/* Start Weekly Moment Filter */}
+        <div className="bg-white rounded-lg p-4  shadow-sm border-b">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {t("Weekly List")}:
+            </span>
+            <div className="flex gap-2 flex-wrap">
               <button
-                key={status}
-                onClick={() => handleStatusChange(status)}
+                onClick={() => handleWeeklyMomentFilterChange(null)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  statusFilter === status
+                  isWeeklyMomentFilter === null
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                {t(status.charAt(0).toUpperCase() + status.slice(1))}
+                {t("All")}
               </button>
-            ))}
+              <button
+                onClick={() => handleWeeklyMomentFilterChange(true)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isWeeklyMomentFilter === true
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t("Weekly")}
+              </button>
+              <button
+                onClick={() => handleWeeklyMomentFilterChange(false)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isWeeklyMomentFilter === false
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t("Not Weekly")}
+              </button>
+            </div>
           </div>
         </div>
+        {/* End Weekly Moment Filter */}
       </div>
-      {/* End Status Tabs Filter */}
       {/* Start Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
@@ -317,13 +384,7 @@ const ContentsList = ({ onSectionChange }) => {
                   </button>
                 </div>
               </TableHead>
-              <TableHead className="hidden md:table-cell">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button className="flex items-center gap-1 font-medium">
-                    {t("Section")}
-                  </button>
-                </div>
-              </TableHead>
+
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
                   <button
@@ -332,17 +393,6 @@ const ContentsList = ({ onSectionChange }) => {
                   >
                     {t("Date")}
                     {getSortIcon("happened_at")}
-                  </button>
-                </div>
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("report_type")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Type")}
-                    {getSortIcon("report_type")}
                   </button>
                 </div>
               </TableHead>
@@ -402,18 +452,10 @@ const ContentsList = ({ onSectionChange }) => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <p
-                      className="text-gray-600 max-w-xs truncate text-center"
-                      title={content?.section?.name}
-                    >
-                      {content?.section?.name}
-                    </p>
-                  </TableCell>
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <div className="flex flex-col items-center ">
                       <span className="font-medium">
-                        {new Date(content.happened_at).toLocaleDateString(
+                        {new Date(content.created_at).toLocaleDateString(
                           "en-GB",
                           {
                             year: "numeric",
@@ -424,11 +466,7 @@ const ContentsList = ({ onSectionChange }) => {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell text-center">
-                    <span className="text-gray-600 ">
-                      {t(content?.report_type)}
-                    </span>
-                  </TableCell>
+
                   <TableCell className="hidden sm:table-cell text-center">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {content?.category?.name}
@@ -439,16 +477,16 @@ const ContentsList = ({ onSectionChange }) => {
                       onClick={() =>
                         handleWeeklyPostToggle(
                           content?.id,
-                          content?.weekly_post
+                          content?.is_weekly_moment
                         )
                       }
                       className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                        content?.weekly_post
+                        content?.is_weekly_moment
                           ? "bg-green-100 text-green-800 hover:bg-green-200"
                           : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                       }`}
                     >
-                      {content?.weekly_post ? (
+                      {content?.is_weekly_moment ? (
                         <ToggleRight className="h-8 w-12" />
                       ) : (
                         <ToggleLeft className="h-8 w-12" />

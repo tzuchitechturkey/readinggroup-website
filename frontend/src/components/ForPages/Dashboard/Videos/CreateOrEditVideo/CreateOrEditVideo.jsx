@@ -26,7 +26,7 @@ import {
   GetSeasonsBySeriesId,
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { languages } from "@/constants/constants";
+import { languages, postStatusOptions } from "@/constants/constants";
 import { processImageFile } from "@/Utility/imageConverter";
 import {
   Popover,
@@ -68,6 +68,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     description: "",
     cast: [],
     tags: [],
+    status: "",
   });
   // Initialize form data when editing
   useEffect(() => {
@@ -87,6 +88,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         description: video?.description || "",
         cast: video?.cast || [],
         tags: video?.tags || [],
+        status: video?.status || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -264,7 +266,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
-  console.log("video ", video);
+
   // Validate form
   const validateForm = () => {
     const newErrors = {};
@@ -283,6 +285,10 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
     if (!formData?.language) {
       newErrors.language = t("Language is required");
+    }
+
+    if (!formData?.status) {
+      newErrors.status = t("Status is required");
     }
 
     if (!formData?.video_url.trim()) {
@@ -343,6 +349,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     );
     formDataToSend.append("video_type", "video");
     formDataToSend.append("language", formData?.language);
+    formDataToSend.append("status", formData?.status);
     formDataToSend.append("is_featured", formData?.is_featured);
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
@@ -927,6 +934,40 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Language */}
+
+            {/* Start Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Status")} *
+              </label>
+              <select
+                name="status"
+                value={formData?.status}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.status
+                    ? "border-red-500 text-red-500"
+                    : !formData?.status
+                    ? "border-gray-300 text-gray-400"
+                    : "border-gray-300 text-black"
+                }`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select Status")}
+                </option>
+
+                {postStatusOptions.map((option) => (
+                  <option key={option.value} className="text-black" value={option.value}>
+                    {t(option.label)}
+                  </option>
+                ))}
+              </select>
+
+              {errors.status && (
+                <p className="text-red-500 text-xs mt-1">{errors.status}</p>
+              )}
+            </div>
+            {/* End Status */}
 
             {/* Start Duration */}
             {/* <div>

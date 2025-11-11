@@ -15,6 +15,8 @@ export async function GetContents(limit, offset = 0, status, filters = {}) {
   if (filters.writer) params.append("writer", filters.writer);
   if (filters.category) params.append("category", filters.category);
   if (filters.language) params.append("language", filters.language);
+  if (filters.is_weekly_moment !== undefined && filters.is_weekly_moment !== null) params.append("is_weekly_moment", filters.is_weekly_moment);
+  
   return await axios.get(`/contents/?status=${status}&${params.toString()}`);
 }
 

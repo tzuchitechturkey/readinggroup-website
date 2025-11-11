@@ -1,9 +1,19 @@
 import axios from "./axios";
 
-export async function GetVideos(limit, offset, status, search) {
-  return await axios.get(
-    `/videos/?limit=${limit}&offset=${offset}&status=${status}&search=${search}`
-  );
+export async function GetVideos(limit, offset, status, search, filters = {}) {
+  const params = {
+    limit,
+    offset,
+    status,
+    search,
+    ...filters,
+  };
+
+  const queryString = Object.entries(params)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+
+  return await axios.get(`/videos/?${queryString}`);
 }
 
 export async function GetVideosByFilter(limit, offset, params = {}) {
@@ -19,6 +29,8 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
   if (params.happened_at) queryParams.append("happened_at", params.happened_at);
   if (params.is_featured) queryParams.append("is_featured", params.is_featured);
   if (params.is_new) queryParams.append("is_new", params.is_new);
+  if (params.is_weekly_moment !== undefined && params.is_weekly_moment !== null)
+    queryParams.append("is_weekly_moment", params.is_weekly_moment);
 
   return await axios.get(`/videos/?${queryParams.toString()}`);
 }

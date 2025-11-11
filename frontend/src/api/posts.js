@@ -16,6 +16,12 @@ export async function GetPosts(limit, offset = 0, status, filters = {}) {
   if (filters.category) params.append("category", filters.category);
   if (filters.post_type) params.append("post_type", filters.post_type);
   if (filters.language) params.append("language", filters.language);
+  if (
+    filters.is_weekly_moment !== undefined &&
+    filters.is_weekly_moment !== null
+  )
+    params.append("is_weekly_moment", filters.is_weekly_moment);
+
   return await axios.get(`/posts/?status=${status}&${params.toString()}`);
 }
 

@@ -38,7 +38,7 @@ export const userRoutes = [
 
   // Events Routes
   { path: "/events", element: <EventsContent /> },
-  { path: "/events/reports/:id", element: <EventPageContent /> },
+  { path: "/events/report/:id", element: <EventPageContent /> },
   { path: "/events/video/:id", element: <EventsVideoPage /> },
 
   { path: "/profile/:id", element: <UserProfileContent /> },

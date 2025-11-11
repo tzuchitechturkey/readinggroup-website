@@ -3,10 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, User } from "lucide-react";
 
-function GuidingReadingcard({ item, showTags = true }) {
+function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
   const navigate = useNavigate();
+
   const handleCardClick = () => {
-    navigate(`/cards-photos/card/${item?.id}`);
+    navigate(fromContent ?`/contents/content/${item?.id}`: `/cards-photos/card/${item?.id}`);
   };
   return (
     <div

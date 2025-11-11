@@ -144,6 +144,7 @@ function ContentsPageContent() {
               data={topViewedData}
               isSlider={true}
               cardName={GuidingReadingcard}
+              propsToCard={{ fromContent: true }}
             />
           </div>
         </section>
@@ -160,6 +161,7 @@ function ContentsPageContent() {
               data={topLikedData}
               isSlider={true}
               cardName={GuidingReadingcard}
+              propsToCard={{ fromContent: true }}
             />
           </div>
         </section>
@@ -181,6 +183,7 @@ function ContentsPageContent() {
                 data={categoriesData[category.id] || []}
                 isSlider={true}
                 cardName={GuidingReadingcard}
+                propsToCard={{ fromContent: true }}
               />
             </div>
           ))}

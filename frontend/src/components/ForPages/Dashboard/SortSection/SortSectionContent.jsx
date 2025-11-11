@@ -52,7 +52,6 @@ function SortSectionContent({ onSectionChange }) {
   useEffect(() => {
     fetchSections();
   }, []);
-  console.log(sections);
   // التعامل مع بدء السحب
   const handleDragStart = (index) => {
     setDraggedItem(index);
@@ -123,7 +122,7 @@ function SortSectionContent({ onSectionChange }) {
   if (isLoading) {
     return <Loader />;
   }
-
+  console.log(sections, "sections");
   return (
     <div className="w-full mx-auto ">
       {isLoading && <Loader />}

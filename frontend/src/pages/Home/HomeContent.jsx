@@ -63,7 +63,7 @@ export default function HomeContent() {
               title={
                 key === "video"
                   ? t("This Week's Video")
-                  : key === "contents"
+                  : key === "content"
                   ? t("This Week’s Contents")
                   : key === "post_card"
                   ? t("This Week's Card")
@@ -74,7 +74,7 @@ export default function HomeContent() {
               description={
                 key === "video"
                   ? t("Watch this week's featured video")
-                  : key === "contents"
+                  : key === "content"
                   ? t("Master Cheng Yen's Daily Journal")
                   : key === "post_card"
                   ? t("Explore this week's card")
@@ -85,7 +85,7 @@ export default function HomeContent() {
               href={
                 key === "video"
                   ? "/videos"
-                  : key === "contents"
+                  : key === "content"
                   ? "/contents"
                   : key === "post_card" || key === "post_photo"
                   ? "/cards-photos"
@@ -94,7 +94,7 @@ export default function HomeContent() {
               cardName={
                 key === "video"
                   ? VideoCard
-                  : key === "contents"
+                  : key === "content"
                   ? GuidingReadingcard
                   : key === "post_card"
                   ? WeeklyMomentsCard

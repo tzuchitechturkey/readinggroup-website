@@ -47,20 +47,31 @@ function PostsList({ onSectionChange }) {
   const [search, setSearch] = useState("");
   const [update, setUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
+  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null); // State for weekly moment filter (null = show all, true = weekly, false = not weekly)
 
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    getPostData(newPage - 1, search, statusFilter);
+    getPostData(newPage - 1, search, statusFilter, isWeeklyMomentFilter);
   };
 
-  const getPostData = async (page = 0, searchVal = search, status = statusFilter) => {
+  const getPostData = async (
+    page = 0,
+    searchVal = search,
+    status = statusFilter,
+    isWeekly = isWeeklyMomentFilter
+  ) => {
     setIsLoading(true);
     const offset = page * 10;
+    const params = searchVal ? { search: searchVal } : {};
+
+    // إضافة فلتر is_weekly_moment إذا كان محدداً
+    if (isWeekly !== null) {
+      params.is_weekly_moment = isWeekly;
+    }
+
     try {
-      const res = await GetPosts(limit, offset, status, {
-        search: searchVal,
-      });
+      const res = await GetPosts(limit, offset, status, params);
       setPostData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (error) {
@@ -139,7 +150,8 @@ function PostsList({ onSectionChange }) {
   const handleWeeklyPostToggle = async (postId, currentStatus) => {
     setIsLoading(true);
     try {
-      PatchPostById(postId, { weekly_event: !currentStatus });
+      await PatchPostById(postId, { is_weekly_moment: !currentStatus });
+      setUpdate((prev) => !prev);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -167,7 +179,7 @@ function PostsList({ onSectionChange }) {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    getPostData(0, "", statusFilter);
+    getPostData(0, "", statusFilter, isWeeklyMomentFilter);
   };
 
   // Handle status filter change
@@ -175,15 +187,23 @@ function PostsList({ onSectionChange }) {
     setStatusFilter(newStatus);
     setCurrentPage(1);
     setSearch("");
-    getPostData(0, "", newStatus);
+    getPostData(0, "", newStatus, isWeeklyMomentFilter);
+  };
+
+  // Handle weekly moment filter change
+  const handleWeeklyMomentFilterChange = (value) => {
+    setIsWeeklyMomentFilter(value);
+    setCurrentPage(1);
+    setSearch("");
+    getPostData(0, "", statusFilter, value);
   };
 
   // حساب عدد الصفحات
   const totalPages = Math.ceil(totalRecords / limit);
 
   useEffect(() => {
-    getPostData(0, "", statusFilter);
-  }, [update, statusFilter]);
+    getPostData(0, "", statusFilter, isWeeklyMomentFilter);
+  }, [update, statusFilter, isWeeklyMomentFilter]);
   return (
     <div
       className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
@@ -255,7 +275,9 @@ function PostsList({ onSectionChange }) {
           )}
 
           <button
-            onClick={() => getPostData(0, search, statusFilter)}
+            onClick={() =>
+              getPostData(0, search, statusFilter, isWeeklyMomentFilter)
+            }
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             }  text-sm font-semibold hover:bg-blue-600`}
@@ -265,29 +287,75 @@ function PostsList({ onSectionChange }) {
         </div>
       </div>
       {/* End Search */}
+      <div className="flex items-center justify-between">
+        {/* Start Status Tabs Filter */}
+        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {t("Status")}:
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {["published", "draft", "archived"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleStatusChange(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    statusFilter === status
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t(status.charAt(0).toUpperCase() + status.slice(1))}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* End Status Tabs Filter */}
 
-      {/* Start Status Tabs Filter */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-sm font-medium text-gray-700">{t("Status")}:</span>
-          <div className="flex gap-2 flex-wrap">
-            {["published", "draft", "archived"].map((status) => (
+        {/* Start Weekly Moment Filter */}
+        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {t("Weekly List")}:
+            </span>
+            <div className="flex gap-2 flex-wrap">
               <button
-                key={status}
-                onClick={() => handleStatusChange(status)}
+                onClick={() => handleWeeklyMomentFilterChange(null)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  statusFilter === status
+                  isWeeklyMomentFilter === null
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                {t(status.charAt(0).toUpperCase() + status.slice(1))}
+                {t("All")}
               </button>
-            ))}
+              <button
+                onClick={() => handleWeeklyMomentFilterChange(true)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isWeeklyMomentFilter === true
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t("Weekly")}
+              </button>
+              <button
+                onClick={() => handleWeeklyMomentFilterChange(false)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isWeeklyMomentFilter === false
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {t("Not Weekly")}
+              </button>
+            </div>
           </div>
         </div>
+        {/* End Weekly Moment Filter */}
       </div>
-      {/* End Status Tabs Filter */}
+
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14">
@@ -361,9 +429,7 @@ function PostsList({ onSectionChange }) {
                 {t("Weekly List")}
               </div>
             </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              {t("Status")}
-            </TableHead>
+
             <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
               {t("Actions")}
             </TableHead>
@@ -457,43 +523,22 @@ function PostsList({ onSectionChange }) {
                 <TableCell className="text-center py-4">
                   <button
                     onClick={() =>
-                      handleWeeklyPostToggle(post?.id, post?.weekly_post)
+                      handleWeeklyPostToggle(post?.id, post?.is_weekly_moment)
                     }
                     className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                      post?.weekly_post
+                      post?.is_weekly_moment
                         ? "bg-green-100 text-green-800 hover:bg-green-200"
                         : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                     }`}
                   >
-                    {post?.weekly_post ? (
+                    {post?.is_weekly_moment ? (
                       <ToggleRight className="h-8 w-12" />
                     ) : (
                       <ToggleLeft className="h-8 w-12" />
                     )}
                   </button>
                 </TableCell>
-                <TableCell className="text-center py-4">
-                  <div className="flex items-center justify-center gap-1">
-                    <span
-                      className={`px-2 py-1 rounded-full text-[10px] ${
-                        post?.is_active
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {post?.is_active ? t("Active") : t("Inactive")}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-[10px] ${
-                        post?.status === "Published"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {t(post?.status)}
-                    </span>
-                  </div>
-                </TableCell>
+
                 <TableCell className="text-center py-4">
                   <div className="flex justify-center items-center gap-2 text-[#5B6B79]">
                     <button
