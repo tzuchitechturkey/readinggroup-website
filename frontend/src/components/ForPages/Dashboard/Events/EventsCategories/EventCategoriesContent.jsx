@@ -27,7 +27,11 @@ function EventCategoriesContent({ onSectionChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", description: "", is_active: true });
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    is_active: true,
+  });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -383,9 +387,9 @@ function EventCategoriesContent({ onSectionChange }) {
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active
+                    ? t("Show in the dropdown menu")
+                    : t("Hide from the dropdown menu")}
                 </span>
               </button>
             </div>

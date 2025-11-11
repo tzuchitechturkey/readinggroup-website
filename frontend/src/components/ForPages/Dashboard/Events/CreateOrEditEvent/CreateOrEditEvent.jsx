@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { X, User, Search, Tag, Upload, Calendar } from "lucide-react";
+import { X, User, Search, Tag, Upload } from "lucide-react";
 import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
+import { processImageFile } from "@/Utility/imageConverter";
 import {
   CreateEvent,
   EditEventById,
@@ -18,16 +18,10 @@ import Loader from "@/components/Global/Loader/Loader";
 import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages, postStatusOptions } from "@/constants/constants";
-import { cn } from "@/lib/utils";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import DatePickerWithYearMonth from "../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
@@ -45,7 +39,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const [writersList, setWritersList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const [sectionSearchValue, setSectionSearchValue] = useState("");
-  const [openHappendAt, setOpenHappendAt] = useState(false);
   const [castInput, setCastInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
 
@@ -1164,50 +1157,16 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("Happened At")} *
             </label>
-            <Popover
-              open={openHappendAt}
-              onOpenChange={setOpenHappendAt}
-              className="!z-[999999999999999]"
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.happened_at && "text-muted-foreground",
-                    errors.happened_at && "border-red-500"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {formData.happened_at
-                    ? format(new Date(formData.happened_at), "MM/dd/yyyy")
-                    : t("Pick Happened At date")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={
-                    formData.happened_at
-                      ? new Date(formData.happened_at)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    handleInputChange({
-                      target: { name: "happened_at", value: date },
-                    });
-                    setOpenHappendAt(false);
-                  }}
-                  disabled={(date) => {
-                    // Disable dates after today
-                    const today = new Date();
-                    today.setHours(23, 59, 59, 999);
-                    return date > today;
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePickerWithYearMonth
+              value={formData.happened_at}
+              onChange={(date) => {
+                handleInputChange({
+                  target: { name: "happened_at", value: date },
+                });
+              }}
+              placeholder="Pick Happened At date"
+              error={Boolean(errors.happened_at)}
+            />
 
             {errors.happened_at && (
               <p className="text-red-500 text-xs mt-1">{errors.happened_at}</p>

@@ -22,7 +22,7 @@ function CardsAndPhotosContent() {
 
   const getActivePostCategories = async () => {
     try {
-      const res = await GetPostCategories();
+      const res = await GetPostCategories(200, 0);
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);

@@ -1,35 +1,26 @@
 ﻿import React, { useState, useEffect } from "react";
 
-import { X, Calendar } from "lucide-react";
+import { X } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 
 import countries from "@/constants/countries.json";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { languages } from "@/constants/constants";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetAllUsers } from "@/api/info";
 import { GetEventCategories } from "@/api/events";
+import DatePickerWithYearMonth from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 function EventsFilter({
   filters,
   updateFilter,
   sectionsList,
-  setOpenFilterModal,
   hasActiveFilters,
   handleClearFilters,
 }) {
   const { t } = useTranslation();
-  const [dateOpen, setDateOpen] = useState(false);
   const [writersList, setWritersList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
 
@@ -191,45 +182,15 @@ function EventsFilter({
             {t("Happened Date")}
           </label>
           <div className="relative">
-            <Popover open={dateOpen} onOpenChange={setDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full text-left font-normal flex items-center",
-                    !filters.happened_at && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {filters.happened_at ? (
-                    format(new Date(filters.happened_at), "dd-MM-yyyy")
-                  ) : (
-                    <span>{t("Pick Happened Date")}</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={
-                    filters.happened_at
-                      ? new Date(filters.happened_at)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    if (!date) return;
-                    date.setHours(12);
-                    updateFilter("happened_at", format(date, "yyyy-MM-dd"));
-                    setDateOpen(false);
-                  }}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePickerWithYearMonth
+              value={filters.happened_at}
+              onChange={(date) => {
+                if (!date) return;
+                date.setHours(12);
+                updateFilter("happened_at", format(date, "yyyy-MM-dd"));
+              }}
+              placeholder="Pick Happened Date"
+            />
 
             {filters.happened_at && (
               <button

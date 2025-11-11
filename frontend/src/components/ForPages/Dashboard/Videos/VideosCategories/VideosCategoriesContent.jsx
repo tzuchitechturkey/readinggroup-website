@@ -27,9 +27,14 @@ function VideosCategoriesContent({ onSectionChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", description: "", is_active: true });
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    is_active: true,
+  });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const nameInputRef = React.useRef(null);
   const limit = 10;
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
@@ -130,6 +135,14 @@ function VideosCategoriesContent({ onSectionChange }) {
     }
   };
   const totalPages = Math.ceil(totalRecords / limit);
+
+  // Focus on name input when modal opens
+  useEffect(() => {
+    if (showModal && nameInputRef.current) {
+      setTimeout(() => nameInputRef.current?.focus(), 100);
+    }
+  }, [showModal]);
+
   useEffect(() => {
     getCategoriesData(0);
   }, []);
@@ -242,7 +255,7 @@ function VideosCategoriesContent({ onSectionChange }) {
                       i18n?.language === "ar" ? "text-right " : "  text-left"
                     } py-2 px-3`}
                   >
-                    {t("Status")}
+                    {t("Show in the dropdown menu")}
                   </th>
                   <th
                     className={`${
@@ -256,9 +269,25 @@ function VideosCategoriesContent({ onSectionChange }) {
               <tbody>
                 {categories?.map((cat) => (
                   <tr key={cat.id} className="border-t">
-                    <td className="py-3 px-3">{cat.name}</td>
-                    <td className="py-3 px-3">{cat.description}</td>
-                    <td className="py-3 px-3">
+                    <td
+                      className={` ${
+                        i18n?.language === "ar" ? "text-right " : "  text-left"
+                      }  py-3 px-3`}
+                    >
+                      {cat.name}
+                    </td>
+                    <td
+                      className={` ${
+                        i18n?.language === "ar" ? "text-right " : "  text-left"
+                      }  py-3 px-3`}
+                    >
+                      {cat.description || "-"}
+                    </td>
+                    <td
+                      className={` ${
+                        i18n?.language === "ar" ? "text-right " : "  text-left"
+                      }  py-3 px-3`}
+                    >
                       <button
                         onClick={async () => {
                           try {
@@ -342,6 +371,8 @@ function VideosCategoriesContent({ onSectionChange }) {
                 {t("Name")} <span className="text-red-500">*</span>
               </label>
               <input
+                ref={nameInputRef}
+                id="name"
                 name="name"
                 value={form.name}
                 onChange={handleInputChange}
@@ -388,9 +419,9 @@ function VideosCategoriesContent({ onSectionChange }) {
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active
+                    ? t("Show in the dropdown menu")
+                    : t("Hide from the dropdown menu")}
                 </span>
               </button>
             </div>

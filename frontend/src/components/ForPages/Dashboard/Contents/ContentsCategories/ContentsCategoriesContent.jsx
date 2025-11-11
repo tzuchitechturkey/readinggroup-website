@@ -27,9 +27,14 @@ function ContentsCategoriesContent({ onSectionChange }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [form, setForm] = useState({ name: "", description: "", is_active: true });
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    is_active: true,
+  });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const nameInputRef = React.useRef(null);
   const limit = 10;
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
@@ -130,6 +135,20 @@ function ContentsCategoriesContent({ onSectionChange }) {
     }
   };
   const totalPages = Math.ceil(totalRecords / limit);
+
+  // Focus on name input when modal opens
+  useEffect(() => {
+    const input = document.getElementById("name");
+
+    if (showModal) {
+      setTimeout(() => {
+        if (input) {
+          input.focus();
+        }
+      }, 100);
+    }
+  }, [showModal]);
+
   useEffect(() => {
     getCategoriesData(0);
   }, []);
@@ -337,6 +356,8 @@ function ContentsCategoriesContent({ onSectionChange }) {
                 {t("Name")} <span className="text-red-500">*</span>
               </label>
               <input
+                id="name"
+                ref={nameInputRef}
                 name="name"
                 value={form.name}
                 onChange={handleInputChange}
@@ -383,9 +404,9 @@ function ContentsCategoriesContent({ onSectionChange }) {
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active
+                    ? t("Show in the dropdown menu")
+                    : t("Hide from the dropdown menu")}
                 </span>
               </button>
             </div>

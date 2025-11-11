@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -55,7 +55,12 @@ function CreateOrEditSeason({ season, onClose, onSuccess, preSelectedSeries }) {
       setIsLoading(false);
     }
   };
-
+  useEffect(() => {
+    const input = document.getElementById("season_number");
+    if (input) {
+      input.focus();
+    }
+  }, []);
   return (
     <div className="space-y-4">
       {isLoading && <Loader />}

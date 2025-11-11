@@ -1,32 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 
-import { ChevronDown, X, Calendar } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { Button } from "@/components/ui/button";
 import { languages } from "@/constants/constants";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import DatePickerWithYearMonth from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 function VideoFilter({
   filters,
   updateFilter,
-  setOpenFilterModal,
   categoriesList,
   hasActiveFilters,
   setCurrentPage,
   setFilteredData,
 }) {
   const { t } = useTranslation();
-  const [dateOpen, setDateOpen] = useState(false);
 
   // Clear all filters and reset to default view
   const handleClearFilters = () => {
@@ -154,45 +145,15 @@ function VideoFilter({
             {t("Happened Date")}
           </label>
           <div className="relative">
-            <Popover open={dateOpen} onOpenChange={setDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full text-left font-normal flex items-center",
-                    !filters.happenedAt && "text-muted-foreground"
-                  )}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {filters.happenedAt ? (
-                    format(filters.happenedAt, "dd-MM-yyyy")
-                  ) : (
-                    <span>{t("Pick Happened Date")}</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={
-                    filters.happenedAt
-                      ? new Date(filters.happenedAt)
-                      : undefined
-                  }
-                  onSelect={(date) => {
-                    if (!date) return;
-                    date.setHours(12);
-                    updateFilter("happenedAt", format(date, "yyyy-MM-dd"));
-                    setDateOpen(false);
-                  }}
-                  disabled={(date) =>
-                    date > new Date() || date < new Date("1900-01-01")
-                  }
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <DatePickerWithYearMonth
+              value={filters.happenedAt}
+              onChange={(date) => {
+                if (!date) return;
+                date.setHours(12);
+                updateFilter("happenedAt", format(date, "yyyy-MM-dd"));
+              }}
+              placeholder="Pick Happened Date"
+            />
 
             {filters.happenedAt && (
               <button

@@ -80,19 +80,19 @@ function DashboardTable({ data, onSectionChange }) {
     }
 
     // Add contents
-    if (data?.contents) {
+    if (data?.content) {
       items.push({
-        type: "Contents",
-        id: data?.contents.id,
+        type: "Content",
+        id: data?.content.id,
         image:
-          data?.contents.images[0]?.image || data?.contents.image_url[0]?.image,
-        writer: data?.contents.writer || data?.contents.author || t("Unknown"),
-        category: data?.contents.category?.name,
-        date: data?.contents.created_at || data?.contents.published_at || "",
-        views: data?.contents.views || 0,
-        likes_count: data?.contents.likes_count || 0,
-        comment: data?.contents.comments || [],
-        originData: data?.contents,
+          data?.content.images[0]?.image || data?.content.image_url[0]?.image,
+        writer: data?.content.writer || data?.content.author || t("Unknown"),
+        category: data?.content.category?.name,
+        date: data?.content.created_at || data?.content.published_at || "",
+        views: data?.content.views || 0,
+        likes_count: data?.content.likes_count || 0,
+        comment: data?.content.comments || [],
+        originData: data?.content,
         link: "createOrEditPost",
       });
     }
@@ -116,7 +116,6 @@ function DashboardTable({ data, onSectionChange }) {
 
     return items;
   }, [data, t]);
-
   // Sort function
   const sortData = (key) => {
     let direction = "asc";

@@ -1,21 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import {
-  Save,
-  Upload,
-  Youtube,
-  X,
-  Tag,
-  Search,
-  Calendar,
-  User,
-} from "lucide-react";
+import { Save, Upload, Youtube, X, Tag, Search, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 
-import { cn } from "@/lib/utils";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,13 +17,9 @@ import {
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages, postStatusOptions } from "@/constants/constants";
 import { processImageFile } from "@/Utility/imageConverter";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import DatePickerWithYearMonth from "./DatePickerWithYearMonth";
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();
@@ -49,7 +34,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const categoryDropdownRef = useRef(null);
   const [categorySearchValue, setCategorySearchValue] = useState("");
-  const [openHappendAt, setOpenHappendAt] = useState(false);
   const [errors, setErrors] = useState({});
   const [castInput, setCastInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -829,51 +813,16 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("Happened At")} *
               </label>
-              <Popover
-                open={openHappendAt}
-                onOpenChange={setOpenHappendAt}
-                className="!z-[999999999999999]"
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.happened_at && "text-muted-foreground",
-                      errors.happened_at && "border-red-500"
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {formData.happened_at
-                      ? format(new Date(formData.happened_at), "MM/dd/yyyy")
-                      : t("Pick Happened At date")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={
-                      formData.happened_at
-                        ? new Date(formData.happened_at)
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      handleInputChange({
-                        target: { name: "happened_at", value: date },
-                      });
-                      setOpenHappendAt(false);
-                    }}
-                    disabled={(date) => {
-                      // Disable dates after today
-                      const today = new Date();
-                      today.setHours(23, 59, 59, 999);
-                      return date > today;
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-
+              <DatePickerWithYearMonth
+                value={formData.happened_at}
+                onChange={(date) => {
+                  handleInputChange({
+                    target: { name: "happened_at", value: date },
+                  });
+                }}
+                placeholder="Pick Happened At date"
+                error={Boolean(errors.happened_at)}
+              />
               {errors.happened_at && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.happened_at}
@@ -957,7 +906,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                 </option>
 
                 {postStatusOptions.map((option) => (
-                  <option key={option.value} className="text-black" value={option.value}>
+                  <option
+                    key={option.value}
+                    className="text-black"
+                    value={option.value}
+                  >
                     {t(option.label)}
                   </option>
                 ))}

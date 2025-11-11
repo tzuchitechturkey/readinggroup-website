@@ -62,7 +62,7 @@ function VideosPageContent() {
 
   const getActiveVideoCategories = async () => {
     try {
-      const res = await GetVideoCategories();
+      const res = await GetVideoCategories(200, 0);
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
@@ -116,6 +116,7 @@ function VideosPageContent() {
     getRatingVideos();
     getActiveVideoCategories();
   }, []);
+
   return (
     <div
       className="min-h-screen bg-gray-100"

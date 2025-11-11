@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -42,11 +42,16 @@ function CreateOrEditSeries({ series, onClose, onSuccess }) {
       setIsLoading(false);
     }
   };
-
+  useEffect(() => {
+    const input = document.getElementById("name");
+    if (input) {
+      input.focus();
+    }
+  }, []);
   return (
     <div className="space-y-4">
       {isLoading && <Loader />}
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label htmlFor="name" className="text-sm font-medium">
@@ -56,9 +61,7 @@ function CreateOrEditSeries({ series, onClose, onSuccess }) {
             id="name"
             type="text"
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder={t("Enter series name")}
             required
           />

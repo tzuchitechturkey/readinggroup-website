@@ -62,10 +62,6 @@ export async function DeleteVideoById(id) {
 }
 
 // /video-categories/
-export async function GetAllVideoCategories() {
-  return await axios.get(`/video-categories/`);
-}
-
 export async function GetVideoCategories(limit = 10, offset = 0, search = "") {
   return await axios.get(
     `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`
@@ -95,7 +91,7 @@ export async function GetItemsByCategoryId(categoryId) {
 
 // Top Rating
 export async function GetTopRatingVideos() {
-  return await axios.get(`/videos/top-rating/`);
+  return await axios.get(`/videos/top-rated/`);
 }
 
 // /top5-videos/
