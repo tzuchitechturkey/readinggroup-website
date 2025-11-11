@@ -6,6 +6,7 @@ import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetPostCategories } from "@/api/posts";
 import { languages } from "@/constants/constants";
 import { GetAllUsers } from "@/api/info";
+import { GetContentCategories } from "@/api/contents";
 
 import Loader from "../Loader/Loader";
 import AutoComplete from "../AutoComplete/AutoComplete";
@@ -38,7 +39,12 @@ function PostsFilter({
   const getCategories = async (searchVal) => {
     setIsLoading(true);
     try {
-      const res = await GetPostCategories(10, 0, searchVal);
+      let res;
+      if (cardAndPhoto) {
+        res = await GetPostCategories(10, 0, searchVal);
+      } else {
+        res = await GetContentCategories(10, 0, searchVal);
+      }
       setCategoriesList(res?.data?.results);
     } catch (err) {
       setErrorFn(err, t);
@@ -112,7 +118,11 @@ function PostsFilter({
       const languageValue = Array.isArray(language)
         ? language.map((l) => t(l)).join(", ")
         : t(language);
-      filters.push({ type: "language", label: t("Language"), value: languageValue });
+      filters.push({
+        type: "language",
+        label: t("Language"),
+        value: languageValue,
+      });
     }
     return filters;
   };
@@ -237,7 +247,11 @@ function PostsFilter({
             {/* Main Search Bar */}
             <div className="flex items-center gap-1 lg:gap-4 mb-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Search
+                  className={`absolute ${
+                    i18n?.language === "ar" ? "right-3" : "left-3"
+                  } top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500`}
+                />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -245,8 +259,30 @@ function PostsFilter({
                   value={titleQuery}
                   onChange={(e) => updateFilter("titleQuery", e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="h-12 w-full rounded-lg border-0 bg-white pl-10 pr-4 text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80 transition-all"
+                  className={`h-12 w-full rounded-lg border-0 bg-white ${
+                    i18n?.language === "ar"
+                      ? "pr-10 pl-4 text-right"
+                      : "pl-10 pr-4 text-left"
+                  } text-sm text-gray-800 placeholder-gray-500 outline-none ring-2 ring-transparent focus:ring-white/80 transition-all`}
                 />
+                {titleQuery && (
+                  <button
+                    onClick={() => {
+                      updateFilter("titleQuery", "");
+                      console.log(activeFilters);
+                      onSearch(activeFilters?.length === 0 ? true : undefined, {
+                        ...filters,
+                        titleQuery: "",
+                      });
+                    }}
+                    className={`absolute ${
+                      i18n?.language === "ar" ? "left-3" : "right-3"
+                    } top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors`}
+                    title={t("Clear search")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
               <button
                 onClick={() => {

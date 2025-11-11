@@ -146,7 +146,7 @@ export default function HeroSlider({ newsPage = false, data = null }) {
   }, [api, startAuto]);
 
   return (
-    <div className="w-full lg:pt-8">
+    <div className="w-full lg:pt-8" >
       <Carousel
         className="w-full"
         opts={{ align: "center", loop: true, skipSnaps: false }}

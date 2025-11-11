@@ -24,8 +24,8 @@ function EventsFilterSections() {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
-
   const [sectionsList, setSectionsList] = useState([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [defaultSections, setDefaultSections] = useState({
     section1: { id: null, name: "", events: [], events_count: 0 },
     section2: { id: null, name: "", events: [], events_count: 0 },
@@ -42,7 +42,6 @@ function EventsFilterSections() {
     happened_at: null,
   });
   const [makingSearch, setMakingSearch] = useState(false);
-
   const [filteredData, setFilteredData] = useState({ count: 0, results: [] });
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
@@ -166,8 +165,8 @@ function EventsFilterSections() {
       }
 
       if (filters.happened_at) params.happened_at = filters.happened_at;
-
-      const res = await GetEvents(limit, offset, params);
+      console.log("Fetching events with params:", params);
+      const res = await GetEvents(limit, offset, "published", params);
 
       if (page === 1) {
         setFilteredData(res?.data);
@@ -250,16 +249,23 @@ function EventsFilterSections() {
   useEffect(() => {
     loadDefaultSections();
     loadSectionsList();
+  }, []);
 
-    // Check if there's a selected category from navigation state
-    if (location.state?.selectedCategory) {
+  // Apply category filter from navigation state (only once)
+  useEffect(() => {
+    if (location.state?.selectedCategory && isInitialLoad) {
       const selectedCategory = location.state.selectedCategory;
+      console.log("Applying category from navigation state", selectedCategory);
       setFilters((prev) => ({
         ...prev,
         category: [selectedCategory],
       }));
+      setIsInitialLoad(false);
+
+      // Clear the navigation state to prevent persistence on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, []);
+  }, [location.state?.selectedCategory, isInitialLoad]);
 
   return (
     <div rtl={i18n.language === "ar" ? "rtl" : "ltr"} className="w-full">

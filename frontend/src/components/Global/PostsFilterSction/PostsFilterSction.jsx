@@ -119,9 +119,9 @@ function PostsFilterSction({ cardAndPhoto = false }) {
 
     try {
       const apiFilters = clearFilter === true ? {} : buildFilters({ filter });
-      
+
       // Use GetContents if cardAndPhoto is false, otherwise use GetPosts
-      const res = cardAndPhoto 
+      const res = cardAndPhoto
         ? await GetPosts(limit, offset, "published", apiFilters)
         : await GetContents(limit, offset, "published", apiFilters);
 

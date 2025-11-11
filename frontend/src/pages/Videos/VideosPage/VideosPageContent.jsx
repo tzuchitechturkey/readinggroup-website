@@ -44,7 +44,7 @@ function VideosPageContent() {
   };
   const getMixVideos = async () => {
     try {
-      const res = await GetVideos(10, 0, "");
+      const res = await GetVideos(10, 0, "published");
       setMixVideos(res.data?.results);
     } catch (err) {
       console.error("Failed to fetch top mix videos:", err);

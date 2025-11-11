@@ -145,11 +145,7 @@ export async function TopCommentedPosts() {
   return await axios.get(`/posts/top-commented/?limit=5`);
 }
 
-// xxx is is coming empty
-export async function weeklyMomentsPosts() {
-  return await axios.get(`/weekly-moments/top-liked/?limit=5`);
-}
-
+ 
 // it Gieves to data card_photo And reading
 export async function TopLikedPosts() {
   return await axios.get(`/posts/top-liked/`);

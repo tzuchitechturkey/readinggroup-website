@@ -1,6 +1,12 @@
 import axios from "./axios";
 
-export async function GetVideos(limit, offset, status, search, filters = {}) {
+export async function GetVideos(
+  limit,
+  offset,
+  status = "published",
+  search = "",
+  filters = {}
+) {
   const params = {
     limit,
     offset,

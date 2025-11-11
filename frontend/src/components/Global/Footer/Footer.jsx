@@ -14,9 +14,9 @@ function Footer({ authPages }) {
   const linkList = [
     { name: t("Contents"), href: "/contents" },
     { name: t("Videos"), href: "/videos" },
-    { name: t("Cards"), href: "/cards-photos" },
+    { name: t("Cards & Photos"), href: "/cards-photos" },
     { name: t("Events & Community"), href: "/events" },
-    { name: t("DA AI TV"), href: "/da-ai-tv" },
+    { name: t("DA AI TV"), href: "https://tzuchiculture.org/EN/da-ai-tv/" },
   ];
   const fetchSocialLinks = async () => {
     try {
@@ -36,19 +36,6 @@ function Footer({ authPages }) {
       className={`px-4 sm:px-8 md:px-10 lg:px-20 ${authPages ? "w-full" : ""}`}
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
-      {/* End Input  */}
-      <div className="mt-4">
-        <p
-          className={`${
-            authPages ? "text-[#ffffff] " : "text-[#141414]"
-          }  text-sm sm:text-base md:text-lg lg:text-base font-medium text-center lg:text-left`}
-        >
-          {t(
-            "Join us today! Enter your email to access weekly updated content, available in multiple languages, with the latest news and interactive programs."
-          )}
-        </p>
-      </div>
-
       <div className="py-6 border-t mt-5 border-[#ececec] flex flex-col md:flex-row items-center  justify-between gap-4 md:gap-0">
         <ul className="md:flex md:flex-wrap md:items-center gap-4 sm:gap-6 mb-4 md:mb-0 w-full md:w-auto">
           {linkList.map((link, index) => (

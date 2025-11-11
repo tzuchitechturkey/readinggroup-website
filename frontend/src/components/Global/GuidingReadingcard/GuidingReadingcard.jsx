@@ -9,11 +9,12 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
   const handleCardClick = () => {
     navigate(fromContent ?`/contents/content/${item?.id}`: `/cards-photos/card/${item?.id}`);
   };
+
   return (
     <div
       key={item?.id}
       onClick={handleCardClick}
-      className="rounded-xl max-w-[40 0px]  group cursor-pointer border border-gray-100 relative"
+      className="rounded-xl max-w-[400px]  group cursor-pointer border border-gray-100 relative"
     >
       {/* Start Tag" */}
       <div className="absolute z-10 top-3 left-3">
