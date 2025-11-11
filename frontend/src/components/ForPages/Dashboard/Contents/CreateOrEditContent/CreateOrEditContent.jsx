@@ -273,7 +273,12 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       newErrors.country = t("Country is required");
     }
 
-    if (!formData.image && !formData.images?.length && !content && imageFiles.length === 0) {
+    if (
+      !formData.image &&
+      !formData.images?.length &&
+      !content &&
+      imageFiles.length === 0
+    ) {
       newErrors.images = t("At least one image is required");
     }
 
@@ -321,7 +326,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         }
       });
     }
-    
+
     // Add image URLs (روابط الصور) if provided
     if (Array.isArray(formData.images_url) && formData.images_url.length > 0) {
       formData.images_url.forEach((imgUrl) => {
@@ -474,11 +479,12 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {formData.images.map((image, index) => {
                   // Handle both string URLs and image objects from backend
-                  const imageUrl = typeof image === "string" ? image : image?.image;
-                  
+                  const imageUrl =
+                    typeof image === "string" ? image : image?.image;
+
                   // Only show if we have an image URL
                   if (!imageUrl) return null;
-                  
+
                   return (
                     <div
                       key={`existing-${index}`}
@@ -558,7 +564,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                 {t("Click to upload images or drag and drop")}
               </p>
               <p className="text-xs text-gray-500">
-                {t("PNG, JPG, SVG, WEBP (max 5MB each)")}
+                {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
               </p>
             </label>
             <p className="text-xs text-gray-500 mt-2">
@@ -572,81 +578,86 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         {/* End Image Upload Section */}
 
         {/* Start Image URL Section - Only show if image field is empty and image_url has value */}
-        {formData.images.length > 0 && formData.images.some(img => {
-          // Check if any image has empty 'image' field but has 'image_url'
-          return typeof img === "object" && !img?.image && img?.image_url;
-        }) && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Image URLs")} ({t("Add multiple images as URLs")})
-            </label>
+        {formData.images.length > 0 &&
+          formData.images.some((img) => {
+            // Check if any image has empty 'image' field but has 'image_url'
+            return typeof img === "object" && !img?.image && img?.image_url;
+          }) && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("Image URLs")} ({t("Add multiple images as URLs")})
+              </label>
 
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                  placeholder={t("Enter image URL and press Enter")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && imageUrlInput.trim()) {
-                      e.preventDefault();
-                      // Add as string URL
-                      const newImage = imageUrlInput.trim();
-                      setFormData((prev) => ({
-                        ...prev,
-                        images: [...prev.images, newImage],
-                      }));
-                      setImageUrlInput("");
-                      setErrors((prev) => ({
-                        ...prev,
-                        images: "",
-                      }));
-                    }
-                  }}
-                />
-              </div>
-              
-              {formData.images.some(img => typeof img === "string") && (
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-500 font-medium">
-                    {t("URLs only")}:
-                  </p>
-                  {formData.images.map((image, index) => {
-                    // Only show string URLs in this section
-                    if (typeof image !== "string") return null;
-                    
-                    return (
-                      <div
-                        key={`url-${index}`}
-                        className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
-                      >
-                        <div className="flex-1 truncate">
-                          <p className="text-sm text-gray-600 truncate">{image}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              images: prev.images.filter((_, i) => i !== index),
-                            }));
-                          }}
-                          className="ml-2 text-red-600 hover:text-red-800"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    );
-                  })}
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={imageUrlInput}
+                    onChange={(e) => setImageUrlInput(e.target.value)}
+                    placeholder={t("Enter image URL and press Enter")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && imageUrlInput.trim()) {
+                        e.preventDefault();
+                        // Add as string URL
+                        const newImage = imageUrlInput.trim();
+                        setFormData((prev) => ({
+                          ...prev,
+                          images: [...prev.images, newImage],
+                        }));
+                        setImageUrlInput("");
+                        setErrors((prev) => ({
+                          ...prev,
+                          images: "",
+                        }));
+                      }
+                    }}
+                  />
                 </div>
-              )}
+
+                {formData.images.some((img) => typeof img === "string") && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500 font-medium">
+                      {t("URLs only")}:
+                    </p>
+                    {formData.images.map((image, index) => {
+                      // Only show string URLs in this section
+                      if (typeof image !== "string") return null;
+
+                      return (
+                        <div
+                          key={`url-${index}`}
+                          className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
+                        >
+                          <div className="flex-1 truncate">
+                            <p className="text-sm text-gray-600 truncate">
+                              {image}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                images: prev.images.filter(
+                                  (_, i) => i !== index
+                                ),
+                              }));
+                            }}
+                            className="ml-2 text-red-600 hover:text-red-800"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-gray-500 mt-1">
+                {t("Add image URLs for pictures without an image field")}
+              </p>
             </div>
-            
-            <p className="text-xs text-gray-500 mt-1">
-              {t("Add image URLs for pictures without an image field")}
-            </p>
-          </div>
-        )}
+          )}
 
         {/* Start Image URLs Section - Separate field for image URLs */}
         <div>
@@ -678,7 +689,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                 }}
               />
             </div>
-            
+
             {formData.images_url.length > 0 && (
               <div className="space-y-2">
                 {formData.images_url.map((url, index) => (
@@ -694,7 +705,9 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                       onClick={() => {
                         setFormData((prev) => ({
                           ...prev,
-                          images_url: prev.images_url.filter((_, i) => i !== index),
+                          images_url: prev.images_url.filter(
+                            (_, i) => i !== index
+                          ),
                         }));
                       }}
                       className="ml-2 text-red-600 hover:text-red-800"
@@ -706,7 +719,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
               </div>
             )}
           </div>
-          
+
           <p className="text-xs text-gray-500 mt-1">
             {t("Add image URLs here. These will be sent as images_url")}
           </p>
