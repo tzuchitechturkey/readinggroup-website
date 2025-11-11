@@ -232,14 +232,14 @@ function Usernavbar() {
                           }
                         }}
                         className={({ isActive }) =>
-                          `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex items-center ${
+                          `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex gap-[2px] items-center ${
                             isActive
                               ? "border-b-2 border-primary text-primary"
                               : "text-gray-700"
                           }`
                         }
                       >
-                        {item.name}
+                        {item.name} 
                         <svg
                           className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
                           fill="none"
