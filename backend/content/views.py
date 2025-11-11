@@ -1369,13 +1369,14 @@ class TopStatsViewSet(viewsets.ViewSet):
         "post_photo",
         "event",
         "weekly_moment",
+        "Content",
     ]
 
     # -----------------------
     # Helpers: Query building
     # -----------------------
     def _get_top_liked_object(self, queryset, request):
-        """أرجع أعلى عنصر معجب به من queryset (بناءً على annotated_likes_count ثم created_at)."""
+        """return single top liked object from the given queryset."""
         qs = annotate_likes_queryset(queryset, request)
         try:
             qs = qs.order_by("-annotated_likes_count", "-created_at")
@@ -1412,6 +1413,8 @@ class TopStatsViewSet(viewsets.ViewSet):
             return EventSerializer(obj, context={"request": request}).data
         if isinstance(obj, WeeklyMoment):
             return WeeklyMomentSerializer(obj, context={"request": request}).data
+        if isinstance(obj, Content):
+            return ContentSerializer(obj, context={"request": request}).data
         return None
 
     # -----------------------
@@ -1516,6 +1519,7 @@ class TopStatsViewSet(viewsets.ViewSet):
         # 2) maximized liked objects per type
         top_video = self._get_top_liked_object(Video.objects.all(), request)
         top_event = self._get_top_liked_object(Event.objects.all(), request)
+        top_content = self._get_top_liked_object(Content.objects.all(), request)
         top_weekly_moment = self._get_top_liked_object(WeeklyMoment.objects.all(), request)
 
 
@@ -1537,6 +1541,7 @@ class TopStatsViewSet(viewsets.ViewSet):
             "post_photo": self._serialize_any(top_post_photo, request),
             "event": self._serialize_any(top_event, request),
             "weekly_moment": self._serialize_any(top_weekly_moment, request),
+            "content": self._serialize_any(top_content, request),
             "top_posts": top_posts_data,
         }
 

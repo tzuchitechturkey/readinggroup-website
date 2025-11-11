@@ -324,6 +324,7 @@ class Content(LikableMixin, TimestampedModel):
     category = models.ForeignKey('ContentCategory', on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=16, choices=ContentStatus.choices, default=ContentStatus.DRAFT)
     is_active = models.BooleanField(default=True)
+    content_type = models.CharField(max_length=100, blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
     read_time = models.CharField(max_length=32, blank=True)
     tags = models.JSONField(default=list, blank=True)
