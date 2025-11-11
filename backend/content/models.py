@@ -1,19 +1,22 @@
+from datetime import timedelta
+
+from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.conf import settings
-from datetime import timedelta
+
 from .enums import (
+    ContentStatus,
+    EventStatus,
+    PostStatus,
     PostType,
     ReportType,
-    ContentStatus,
-    PostStatus,
-    VideoStatus,
-    EventStatus,
-)
+    VideoStatus
+    )
+
 
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""

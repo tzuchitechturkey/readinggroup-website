@@ -2,11 +2,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.utils import timezone
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import serializers
 from readinggroup_backend.helpers import DateTimeFormattingMixin
-from .models import User, FriendRequest
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from .models import FriendRequest, User
 
 try:
     from content.models import Post
