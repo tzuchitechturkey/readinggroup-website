@@ -7,26 +7,27 @@ import EventHeroSlider from "@/components/ForPages/Events/EventHeroSlider/EventH
 import EventsFilterSections from "@/components/ForPages/Events/EventsFilterSections/EventsFilterSections";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import EventCard from "@/components/Global/EventCard/EventCard";
-import { EventsData } from "@/mock/events";
 import {
-  GetTop5Event,
-  GetTopEventsLiked,
+   GetTopEventsLiked,
   GetEventCategories,
   GetItemsByCategoryId,
+  GetEvents,
 } from "@/api/events";
 
 function EventsPageContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const [topLiked, setTopLiked] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
+  const [weeklyList, setWeeklyList] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
   const [categoriesData, setCategoriesData] = useState({});
   const [targetCategoryId, setTargetCategoryId] = useState(null);
   const getSuggestionsData = async () => {
     try {
-      const res = await GetTop5Event();
-      setSuggestions(res.data);
+      const res = await GetEvents(20, 0, "published", {
+        is_weekly_moment: true,
+      });
+      setWeeklyList(res?.data?.results);
     } catch (err) {
       console.log("Error fetching data", err);
     }
@@ -104,13 +105,13 @@ function EventsPageContent() {
       {/* Start Filter Section */}
       <EventsFilterSections />
       {/* End Filter Section */}
-      
+
       <div className="max-w-7xl mx-auto">
-        {/* Start Suggestions you might like */}
+        {/* Start This Week's Top Events */}
         <DynamicSection
-          title={t("Suggestions you might like")}
+          title={t("This Week's Top Events")}
           titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5"
-          data={suggestions}
+          data={weeklyList}
           isSlider={true}
           cardName={EventCard}
           viewMore={false}

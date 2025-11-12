@@ -1331,5 +1331,12 @@
   "You cannot activate this category because it does not contain any videos. Please add videos first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي فيديوهات. يرجى إضافة فيديوهات أولاً.",
   "Start by adding a new series": "ابدأ بإضافة سلسلة جديدة.",
   "Network Error": "خطأ في الشبكة",
-  "Content updated successfully": "تم تحديث المحتوى بنجاح"
+  "Content updated successfully": "تم تحديث المحتوى بنجاح",
+  "You cannot activate this category because it does not contain any contents. Please add contents first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي محتويات. يرجى إضافة محتويات أولاً.",
+  "You cannot activate this category because it does not contain any posts. Please add posts first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي منشورات. يرجى إضافة منشورات أولاً.",
+  "You cannot activate this category because it does not contain any events. Please add events first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي أحداث. يرجى إضافة أحداث أولاً.",
+  "This Week's Top Events": "أحداث هذا الأسبوع المميزة",
+  "Top Weekly Videos": "أفضل فيديوهات هذا الأسبوع",
+  "": "",
+  "": ""
 }

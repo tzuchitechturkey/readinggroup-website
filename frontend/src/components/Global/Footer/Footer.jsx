@@ -21,7 +21,7 @@ function Footer({ authPages }) {
   const fetchSocialLinks = async () => {
     try {
       const response = await GetWebSiteInfo(100, 0);
-      setSocialLinks(response.data?.results || []);
+      setSocialLinks(response.data?.socialmedia || []);
     } catch (error) {
       setErrorFn(error, t);
     }

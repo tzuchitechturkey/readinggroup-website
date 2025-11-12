@@ -217,7 +217,6 @@ function PostsList({ onSectionChange }) {
 
   // حساب عدد الصفحات
   const totalPages = Math.ceil(totalRecords / limit);
-
   useEffect(() => {
     getPostData(0, "", statusFilter, isWeeklyMomentFilter);
   }, [update, statusFilter, isWeeklyMomentFilter]);

@@ -30,7 +30,8 @@ function VideosCategoriesContent({ onSectionChange }) {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    is_active: true,
+    is_active: false,
+    video_count: 0,
   });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +62,7 @@ function VideosCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "", is_active: true });
+    setForm({ name: "", description: "", is_active: false, video_count: 0 });
     setErrors({});
     setShowModal(true);
   };
@@ -71,7 +72,8 @@ function VideosCategoriesContent({ onSectionChange }) {
     setForm({
       name: cat.name || "",
       description: cat.description || "",
-      is_active: cat.is_active !== undefined ? cat.is_active : true,
+      is_active: cat.is_active !== undefined ? cat.is_active : false,
+      video_count: cat.video_count !== undefined ? cat.video_count : 0,
     });
     setErrors({});
     setShowModal(true);
@@ -326,7 +328,7 @@ function VideosCategoriesContent({ onSectionChange }) {
                             ? t("Click to disable")
                             : t("Click to enable")
                         }
-                       >
+                      >
                         {cat.is_active ? (
                           <ToggleRight className="h-8 w-12" />
                         ) : (
@@ -414,9 +416,17 @@ function VideosCategoriesContent({ onSectionChange }) {
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }))
-                }
+                onClick={() => {
+                  if (form.video_count === 0) {
+                    toast.info(
+                      t(
+                        "You cannot activate this category because it does not contain any videos. Please add videos first."
+                      )
+                    );
+                    return;
+                  }
+                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }));
+                }}
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
                   form.is_active
                     ? "bg-green-100 text-green-600 hover:bg-green-200"

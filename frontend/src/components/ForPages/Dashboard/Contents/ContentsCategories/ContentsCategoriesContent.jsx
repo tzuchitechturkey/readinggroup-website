@@ -30,7 +30,8 @@ function ContentsCategoriesContent({ onSectionChange }) {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    is_active: true,
+    is_active: false,
+    content_count: 0,
   });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +62,7 @@ function ContentsCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "", is_active: true });
+    setForm({ name: "", description: "", is_active: false, content_count: 0 });
     setErrors({});
     setShowModal(true);
   };
@@ -71,7 +72,8 @@ function ContentsCategoriesContent({ onSectionChange }) {
     setForm({
       name: cat.name || "",
       description: cat.description || "",
-      is_active: cat.is_active !== undefined ? cat.is_active : true,
+      is_active: cat.is_active !== undefined ? cat.is_active : false,
+      content_count: cat.content_count !== undefined ? cat.content_count : 0,
     });
     setErrors({});
     setShowModal(true);
@@ -152,7 +154,6 @@ function ContentsCategoriesContent({ onSectionChange }) {
   useEffect(() => {
     getCategoriesData(0);
   }, []);
-console.log("categories", categories);
   return (
     <div
       className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"
@@ -275,6 +276,14 @@ console.log("categories", categories);
                     <td className="py-3 px-3">
                       <button
                         onClick={async () => {
+                          if (!cat.is_active && cat.content_count === 0) {
+                            toast.info(
+                              t(
+                                "You cannot activate this category because it does not contain any contents. Please add contents first."
+                              )
+                            );
+                            return;
+                          }
                           try {
                             await EditContentCategoryById(cat.id, {
                               ...cat,
@@ -295,9 +304,15 @@ console.log("categories", categories);
                           cat.is_active
                             ? "bg-green-100 text-green-600 hover:bg-green-200"
                             : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        } ${
+                          !cat.is_active && cat.content_count === 0
+                            ? "opacity-50  "
+                            : ""
                         }`}
                         title={
-                          cat.is_active
+                          !cat.is_active && cat.content_count === 0
+                            ? t("Cannot activate category with no contents.")
+                            : cat.is_active
                             ? t("Click to disable")
                             : t("Click to enable")
                         }
@@ -389,14 +404,24 @@ console.log("categories", categories);
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }))
-                }
+                onClick={() => {
+                  if (form.content_count === 0) {
+                    toast.info(
+                      t(
+                        "You cannot activate this category because it does not contain any contents. Please add contents first."
+                      )
+                    );
+                    return;
+                  }
+
+                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }));
+                }}
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
                   form.is_active
                     ? "bg-green-100 text-green-600 hover:bg-green-200"
                     : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                 }`}
+                // disabled={editingCategory ? form?.content_count === 0 : true}
               >
                 {form.is_active ? (
                   <ToggleRight className="h-8 w-12" />
@@ -404,9 +429,7 @@ console.log("categories", categories);
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form?.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active ? t("Active") : t("Inactive")}
                 </span>
               </button>
             </div>

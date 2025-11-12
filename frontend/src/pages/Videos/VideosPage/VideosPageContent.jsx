@@ -10,17 +10,17 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import {
   GetMyListedVideos,
   GetTopLikedVideos,
-  GetTopRatingVideos,
   GetRandomPublishedVideos,
   GetVideoCategories,
   GetItemsByCategoryId,
+  GetVideos,
 } from "@/api/videos";
 
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
   const location = useLocation();
   const [mixVideos, setMixVideos] = useState([]);
-  const [ratingVideos, setRatingVideos] = useState([]);
+  const [weeklyList, setWeeklyList] = useState([]);
   const [myListedVideos, setMyListedVideos] = useState([]);
   const [likedVideos, setLikedVideos] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
@@ -51,10 +51,13 @@ function VideosPageContent() {
     }
   };
 
-  const getRatingVideos = async () => {
+  const getWeeklyList = async () => {
     try {
-      const res = await GetTopRatingVideos();
-      setRatingVideos(res.data?.results);
+      const res = await GetVideos(20, 0, "published", "", {
+        is_weekly_moment: true,
+      });
+      console.log(res.data?.results, "sssssssssssssssssss");
+      setWeeklyList(res.data?.results);
     } catch (err) {
       console.error("Failed to fetch top mix videos:", err);
     }
@@ -113,7 +116,7 @@ function VideosPageContent() {
     getMixVideos();
     getLikedVideos();
     getMyListedVideos();
-    getRatingVideos();
+    getWeeklyList();
     getActiveVideoCategories();
   }, []);
 
@@ -123,19 +126,19 @@ function VideosPageContent() {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Hero Section */}
-      <VideosHero top1Video={ratingVideos?.length ? ratingVideos[0] : null} />
+      <VideosHero top1Video={weeklyList?.length ? weeklyList[0] : null} />
 
       {/* Start Filter Secion */}
       <VideoFilterSections mixVideos={mixVideos} likedVideos={likedVideos} />
       {/* End Filter Secion */}
       <div className="max-w-7xl mx-auto pb-2">
-        {/* Start Rating Video */}
-        {ratingVideos?.length ? (
+        {/* Start Weekly List  */}
+        {weeklyList?.length ? (
           <div className="my-3" id="full-videos">
             <DynamicSection
-              title={t("Top Rating")}
+              title={t("Top Weekly Videos")}
               titleClassName="text-[30px] font-medium mb-2"
-              data={ratingVideos}
+              data={weeklyList}
               isSlider={false}
               cardName={VideoCard}
               viewMoreUrl="/videos"
@@ -144,19 +147,8 @@ function VideosPageContent() {
         ) : (
           ""
         )}
-        {/* End Rating Video */}
-        {/* Start Unit  Video */}
-        {/* <div className="my-3  pb-4" id="unit-videos">
-          <DynamicSection
-            title={t("Unit Video")}
-            titleClassName="text-[30px] font-medium mb-2"
-            data={mixVideos?.top_5_unit}
-            isSlider={false}
-            cardName={VideoCard}
-            viewMoreUrl="/videos"
-          />
-        </div> */}
-        {/* End Unit  Video */}
+        {/* End Weekly List  */}
+
         {/* Start My LIST */}
         {myListedVideos?.length > 0 && (
           <div className="my-3">

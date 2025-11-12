@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
-import GuidedReading from "@/components/ForPages/Home/GuidedReadingSeciotn/GuidedReading";
 import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {

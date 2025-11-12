@@ -30,7 +30,8 @@ function EventCategoriesContent({ onSectionChange }) {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    is_active: true,
+    is_active: false,
+    event_count: 0,
   });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +61,7 @@ function EventCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "", is_active: true });
+    setForm({ name: "", description: "", is_active: false, event_count: 0 });
     setErrors({});
     setShowModal(true);
   };
@@ -70,7 +71,8 @@ function EventCategoriesContent({ onSectionChange }) {
     setForm({
       name: cat.name || "",
       description: cat.description || "",
-      is_active: cat.is_active !== undefined ? cat.is_active : true,
+      is_active: cat.is_active !== undefined ? cat.is_active : false,
+      event_count: cat.event_count !== undefined ? cat.event_count : 0,
     });
     setErrors({});
     setShowModal(true);
@@ -260,6 +262,14 @@ function EventCategoriesContent({ onSectionChange }) {
                     <td className="py-3 px-3">
                       <button
                         onClick={async () => {
+                          if (!cat.is_active && cat.event_count === 0) {
+                            toast.info(
+                              t(
+                                "You cannot activate this category because it does not contain any events. Please add events first."
+                              )
+                            );
+                            return;
+                          }
                           try {
                             await EditEventCategoryById(cat.id, {
                               ...cat,
@@ -280,9 +290,15 @@ function EventCategoriesContent({ onSectionChange }) {
                           cat.is_active
                             ? "bg-green-100 text-green-600 hover:bg-green-200"
                             : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        } ${
+                          !cat.is_active && cat.event_count === 0
+                            ? "opacity-50 "
+                            : ""
                         }`}
                         title={
-                          cat.is_active
+                          !cat.is_active && cat.event_count === 0
+                            ? t("Cannot activate category with no events.")
+                            : cat.is_active
                             ? t("Click to disable")
                             : t("Click to enable")
                         }
@@ -372,9 +388,18 @@ function EventCategoriesContent({ onSectionChange }) {
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }))
-                }
+                onClick={() => {
+                  if (form.event_count === 0) {
+                    toast.info(
+                      t(
+                        "You cannot activate this category because it does not contain any events. Please add events first."
+                      )
+                    );
+                    return;
+                  }
+
+                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }));
+                }}
                 className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
                   form.is_active
                     ? "bg-green-100 text-green-600 hover:bg-green-200"
@@ -387,9 +412,7 @@ function EventCategoriesContent({ onSectionChange }) {
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form?.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active ? t("Active") : t("Inactive")}
                 </span>
               </button>
             </div>
