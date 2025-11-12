@@ -148,6 +148,11 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset()
         # Filter queryset to published state when possible (Post/Content/Event/Video)
         qs = _filter_published(qs)
+        # If items have a related `category` with `is_active`, only include active categories.
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
 
         qs = self.annotate_likes(qs)
         # prefer annotated_likes_count (annotate_likes uses Count('likes'))
@@ -174,6 +179,11 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset()
         # Filter queryset to published state when possible (Post/Content/Event/Video)
         qs = _filter_published(qs)
+        # If items have a related `category` with `is_active`, only include active categories.
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
         # if model has 'views' field, order by it; fallback to created_at if not
         try:
             qs = qs.order_by('-views', '-created_at')[:limit]
@@ -199,6 +209,11 @@ class BaseContentViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset()
         # Filter queryset to published state when possible (Post/Content/Event/Video)
         qs = _filter_published(qs)
+        # If items have a related `category` with `is_active`, only include active categories.
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
         # if model has 'comments' field, order by it; fallback to created_at if not
         try:
             qs = qs.order_by('-comments_count', '-created_at')[:limit]

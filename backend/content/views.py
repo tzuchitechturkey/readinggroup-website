@@ -1,5 +1,5 @@
 from django.db.models import Count as DjCount
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.contrib.contenttypes.models import ContentType
 from typing import Dict, List, Optional
 from rest_framework.decorators import action
@@ -112,11 +112,11 @@ class VideoViewSet(BaseContentViewSet):
             if values:
                 queryset = queryset.filter(language__in=values)
 
-        category = params.getlist("category")
+        category = params.get("category")
         if category:
             values = []
-            for item in category:
-                values.extend([v.strip() for v in item.split(",") if v.strip()])
+            for item in category.split(","):
+                values.append(item.strip())
             if values:
                 queryset = queryset.filter(category__name__in=values)
 
@@ -153,9 +153,23 @@ class VideoViewSet(BaseContentViewSet):
         is_weekly_moment = params.get("is_weekly_moment")
         if is_weekly_moment is not None:
             if is_weekly_moment.lower() in ('true'):
-                queryset =queryset.filter(is_weekly_moment=True)
+                queryset = queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
-                queryset =queryset.filter(is_weekly_moment=False)
+                queryset = queryset.filter(is_weekly_moment=False)
+
+        is_detail = bool(self.kwargs.get('pk')) if hasattr(self, 'kwargs') else False
+        if not is_detail and not params.get('status'):
+            try:
+                queryset = _filter_published(queryset)
+            except Exception:
+                try:
+                    queryset = queryset.filter(status="published")
+                except Exception:
+                    pass
+            try:
+                queryset = queryset.filter(category__is_active=True)
+            except Exception:
+                pass
         
         return queryset.order_by('-created_at')
 
@@ -206,6 +220,43 @@ class VideoViewSet(BaseContentViewSet):
         serializer = VideoSerializer(videos, many=True, context={"request": request})
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="List published videos",
+        operation_description="Return videos with status='published' and whose category is active.",
+        manual_parameters=video_manual_parameters,
+    )
+    @action(detail=False, methods=("get",), url_path="published", url_name="published")
+    def published(self, request):
+        """Return videos that are published and whose category is active.
+
+        URL: /api/v1/videos/published/
+        Supports pagination and includes likes annotation so serializers can show likes_count/has_liked.
+        """
+        qs = Video.objects.all()
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        qs = self.annotate_likes(qs)
+        qs = qs.order_by('-created_at')
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = VideoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = VideoSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
     @action(detail=False, methods=("get",), url_path="top-rated", url_name="top_rated")
     def top_rated(self, request):
         """Return top N videos ordered by average user rating (if ratings exist).
@@ -225,12 +276,15 @@ class VideoViewSet(BaseContentViewSet):
         except Exception:
             limit = 5
 
-        from django.db.models import Avg, Count
-
         qs = Video.objects.all()
         # only consider published videos for top-rated computation
         try:
             qs = _filter_published(qs)
+        except Exception:
+            pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
         except Exception:
             pass
 
@@ -338,9 +392,23 @@ class PostViewSet(BaseContentViewSet):
         is_weekly_moment = params.get("is_weekly_moment")
         if is_weekly_moment is not None:
             if is_weekly_moment.lower() in ('true'):
-                queryset =queryset.filter(is_weekly_moment=True)
+                queryset = queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
-                queryset =queryset.filter(is_weekly_moment=False)
+                queryset = queryset.filter(is_weekly_moment=False)
+
+        is_detail = bool(self.kwargs.get('pk')) if hasattr(self, 'kwargs') else False
+        if not is_detail and not params.get('status'):
+            try:
+                queryset = _filter_published(queryset)
+            except Exception:
+                try:
+                    queryset = queryset.filter(status="published")
+                except Exception:
+                    pass
+            try:
+                queryset = queryset.filter(category__is_active=True)
+            except Exception:
+                pass
                                 
         return queryset.order_by('-created_at')
 
@@ -449,10 +517,24 @@ class ContentViewSet(BaseContentViewSet):
         is_weekly_moment = params.get("is_weekly_moment")
         if is_weekly_moment is not None:
             if is_weekly_moment.lower() in ('true'):
-                queryset =queryset.filter(is_weekly_moment=True)
+                queryset = queryset.filter(is_weekly_moment=True)
             elif is_weekly_moment.lower() in ('false'):
-                queryset =queryset.filter(is_weekly_moment=False)
-                 
+                queryset = queryset.filter(is_weekly_moment=False)
+
+        is_detail = bool(self.kwargs.get('pk')) if hasattr(self, 'kwargs') else False
+        if not is_detail and not params.get('status'):
+            try:
+                queryset = _filter_published(queryset)
+            except Exception:
+                try:
+                    queryset = queryset.filter(status="published")
+                except Exception:
+                    pass
+            try:
+                queryset = queryset.filter(category__is_active=True)
+            except Exception:
+                pass
+            
         return queryset.order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
@@ -739,13 +821,6 @@ class EventViewSet(BaseContentViewSet):
             if values:
                  queryset =queryset.filter(category__name__in=values)
                  
-        is_weekly_moment = params.get("is_weekly_moment")
-        if is_weekly_moment is not None:
-            if is_weekly_moment.lower() in ('true'):
-                queryset =queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() in ('false'):
-                queryset =queryset.filter(is_weekly_moment=False)
-                
         status = params.get("status")
         if status:
             values = []
@@ -753,6 +828,27 @@ class EventViewSet(BaseContentViewSet):
                 values.append(item.strip())
             if values:
                  queryset =queryset.filter(status__in=values)
+                 
+        is_weekly_moment = params.get("is_weekly_moment")
+        if is_weekly_moment is not None:
+            if is_weekly_moment.lower() in ('true'):
+                queryset = queryset.filter(is_weekly_moment=True)
+            elif is_weekly_moment.lower() in ('false'):
+                queryset = queryset.filter(is_weekly_moment=False)
+
+        is_detail = bool(self.kwargs.get('pk')) if hasattr(self, 'kwargs') else False
+        if not is_detail and not params.get('status'):
+            try:
+                queryset = _filter_published(queryset)
+            except Exception:
+                try:
+                    queryset = queryset.filter(status="published")
+                except Exception:
+                    pass
+            try:
+                queryset = queryset.filter(category__is_active=True)
+            except Exception:
+                pass
             
         return queryset.order_by('-created_at')
 
@@ -961,7 +1057,7 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = PostCategory.objects.all()
+    queryset = PostCategory.objects.all().order_by('-created_at')
     
     @swagger_auto_schema(
         operation_summary="List all post categories",
@@ -990,7 +1086,26 @@ class PostCategoryViewSet(BaseCRUDViewSet):
         except Exception:
             return Response({"detail": "PostCategory not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Post.objects.filter(category=category).order_by('-created_at')
+        # Ensure category is active; behave like VideoCategory.videos which requires active category
+        if not getattr(category, "is_active", True):
+            return Response({"detail": "PostCategory not active."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Only include published posts whose category is active
+        qs = Post.objects.filter(category=category)
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        qs = qs.order_by('-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
@@ -1008,7 +1123,7 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = ContentCategory.objects.all()
+    queryset = ContentCategory.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all content categories",
@@ -1053,7 +1168,7 @@ class EventCategoryViewSet(BaseCRUDViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    queryset = EventCategory.objects.all()
+    queryset = EventCategory.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all event categories",
@@ -1079,7 +1194,24 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         except Exception:
             return Response({"detail": "EventCategory not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Event.objects.filter(category=category).order_by('-happened_at', '-created_at')
+        # Ensure category is active (mirror VideoCategory.videos / PostCategory.posts behavior)
+        if not getattr(category, "is_active", True):
+            return Response({"detail": "EventCategory not active."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Only include published events in this category
+        published_qs = Event.objects.filter(category=category)
+        try:
+            published_qs = _filter_published(published_qs)
+        except Exception:
+            try:
+                published_qs = published_qs.filter(status="published")
+            except Exception:
+                pass
+
+        if not published_qs.exists():
+            return Response({"detail": "No published events in this category."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = published_qs.order_by('-happened_at', '-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
@@ -1118,7 +1250,23 @@ class SeasonIdViewSet(BaseCRUDViewSet):
             return Response({"detail": "SeasonId not found."}, status=status.HTTP_404_NOT_FOUND)
 
         # Videos point to SeasonId via Video.season_name
-        qs = Video.objects.filter(season_name=season).order_by('-happened_at', '-created_at')
+        # Only include published videos whose related category is active.
+        qs = Video.objects.filter(season_name=season)
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            # model may not have category relation in some edge cases
+            pass
+
+        qs = qs.order_by('-happened_at', '-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         # paginate if pagination is configured on the view
@@ -1188,6 +1336,12 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+            
+        try:
+            queryset = queryset.annotate(video_count=Count('video'))
+        except Exception:
+            pass
+
         return queryset
     
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
@@ -1197,8 +1351,29 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
             category = self.get_object()
         except Exception:
             return Response({"detail": "VideoCategory not found."}, status=status.HTTP_404_NOT_FOUND)
+        # Ensure category is active
+        if not getattr(category, "is_active", True):
+            return Response({"detail": "VideoCategory not active."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Video.objects.filter(category=category).order_by('-happened_at', '-created_at')
+        # Only expose the category when it has at least one published video.
+        published_qs = Video.objects.filter(category=category)
+        try:
+            published_qs = _filter_published(published_qs)
+        except Exception:
+            try:
+                published_qs = published_qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            published_qs = published_qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        if not published_qs.exists():
+            return Response({"detail": "No published videos in this category."}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = published_qs.order_by('-happened_at', '-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
@@ -1341,10 +1516,27 @@ class CombinedTopLikedView(viewsets.ViewSet):
 
         groups = Post.top_liked(limit=limit)
         card_photo_qs = groups.get('card_photo') or Post.objects.none()
+        # ensure posts are published and belong to active categories
+        try:
+            card_photo_qs = _filter_published(card_photo_qs)
+        except Exception:
+            try:
+                card_photo_qs = card_photo_qs.filter(status="published")
+            except Exception:
+                pass
+        try:
+            card_photo_qs = card_photo_qs.filter(category__is_active=True)
+        except Exception:
+            pass
 
         videos_qs = Video.objects.all()
         try:
             videos_qs = _filter_published(videos_qs)
+        except Exception:
+            pass
+        # only include videos with active category
+        try:
+            videos_qs = videos_qs.filter(category__is_active=True)
         except Exception:
             pass
 
@@ -1358,6 +1550,11 @@ class CombinedTopLikedView(viewsets.ViewSet):
             events_qs = Event.objects.filter(section=section)
             try:
                 events_qs = _filter_published(events_qs)
+            except Exception:
+                pass
+            # only include events whose category is active
+            try:
+                events_qs = events_qs.filter(category__is_active=True)
             except Exception:
                 pass
             # annotate and order by likes similar to other uses
@@ -1427,6 +1624,13 @@ class TopStatsViewSet(viewsets.ViewSet):
         except Exception:
             qs = queryset
 
+        # also ensure the related category (if present) is active
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            # model may not have a category relation
+            pass
+
         qs = annotate_likes_queryset(qs, request)
         try:
             qs = qs.order_by("-annotated_likes_count", "-created_at")
@@ -1443,6 +1647,12 @@ class TopStatsViewSet(viewsets.ViewSet):
             qs = Post.objects.all()
             try:
                 qs = _filter_published(qs)
+            except Exception:
+                pass
+
+            # only consider posts whose category is active
+            try:
+                qs = qs.filter(category__is_active=True)
             except Exception:
                 pass
 
@@ -1658,11 +1868,21 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             video_q = _filter_published(video_q)
         except Exception:
             pass
+        # only include videos whose category is active
+        try:
+            video_q = video_q.filter(category__is_active=True)
+        except Exception:
+            pass
         video_queryset = annotate_likes_queryset(video_q, request)
 
         post_q = Post.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
         try:
             post_q = _filter_published(post_q)
+        except Exception:
+            pass
+        # only include posts whose category is active
+        try:
+            post_q = post_q.filter(category__is_active=True)
         except Exception:
             pass
         post_queryset = annotate_likes_queryset(post_q, request)
@@ -1672,11 +1892,21 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             event_q = _filter_published(event_q)
         except Exception:
             pass
+        # only include events whose category is active
+        try:
+            event_q = event_q.filter(category__is_active=True)
+        except Exception:
+            pass
         event_queryset = annotate_likes_queryset(event_q, request)
 
         content_q = Content.objects.filter(title__icontains=search_term).order_by("-created_at")[:per_model_cap]
         try:
             content_q = _filter_published(content_q)
+        except Exception:
+            pass
+        # only include contents whose category is active
+        try:
+            content_q = content_q.filter(category__is_active=True)
         except Exception:
             pass
         content_queryset = annotate_likes_queryset(content_q, request)
