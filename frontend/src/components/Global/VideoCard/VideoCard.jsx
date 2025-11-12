@@ -9,7 +9,7 @@ import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent
 import VideoDuration from "./VideoDuration";
 
 const VideoCard = ({ item, bigCart, className = "" }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCardClick = (e) => {
@@ -90,7 +90,11 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
             {/* End Duration */}
 
             {/* Start Title */}
-            <div className="absolute bottom-4 left-5">
+            <div
+              className={`absolute bottom-4 ${
+                i18n?.language === "ar" ? "right-5" : "left-5"
+              }`}
+            >
               <h3 className="text-white font-semibold text-sm group-hover:text-blue-400 transition-colors">
                 {item?.title?.length > 30
                   ? item?.title.slice(0, 30) + "..."

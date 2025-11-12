@@ -4,6 +4,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import { IoIosArrowForward } from "react-icons/io";
+import { useTranslation } from "react-i18next";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -156,12 +157,13 @@ const Sidebar = React.forwardRef(
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const { i18n } = useTranslation();
 
     if (collapsible === "none") {
       return (
         <div
           className={cn(
-            "flex h-full w-[--sidebar-width]  flex-col  bg-sidebar text-sidebar-foreground " ,
+            "flex h-full w-[--sidebar-width]  flex-col  bg-sidebar text-sidebar-foreground ",
             className
           )}
           ref={ref}
@@ -684,7 +686,9 @@ const SidebarMenuSub = React.forwardRef(({ className, ...props }, ref) => (
     ref={ref}
     data-sidebar="menu-sub"
     className={cn(
-      "line-parent mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
+      `line-parent mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 ${
+        props?.i18n?.language === "ar" ? "border-r" : "border-l"
+      }   border-sidebar-border px-2.5 py-0.5`,
       "group-data-[collapsible=icon]:hidden",
       className
     )}

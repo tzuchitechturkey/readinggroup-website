@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { CiSearch } from "react-icons/ci";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { GlobalSearch } from "@/api/info";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -17,7 +18,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const dropdownRef = useRef(null);
   const limit = 10;
-
+  const navigate = useNavigate();
   // Focus input when search opens
   useEffect(() => {
     if (isSearchOpen && searchInputRef.current) {
@@ -103,7 +104,8 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
       item?.image_url ||
       item?.thumbnail ||
       item?.thumbnail_url ||
-      null
+      item?.images[0]?.image ||
+      item?.image_url[0]?.image | null
     );
   };
 
@@ -151,7 +153,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
                         key={idx}
                         className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
-                          item?.post_type
+                          const path = item?.post_type
                             ? `/cards-photos/card/${item?.id}`
                             : item?.video_type
                             ? `/videos/${item?.id}`
@@ -160,6 +162,7 @@ export default function SearchItem({ t, isSearchOpen, setIsSearchOpen }) {
                               ? `/events/video/${item?.id}`
                               : `/events/report/${item?.id}`
                             : `/contents/content/${item?.id}`;
+                          navigate(path);
                         }}
                       >
                         <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">

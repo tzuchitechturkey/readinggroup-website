@@ -187,7 +187,7 @@ function PostDetailsPageContent() {
                               <img
                                 src={imageItem.image}
                                 alt={`Image ${index + 1}`}
-                                className="w-full h-full object-contain"
+                                className="w-full max-h-[400px] object-contain"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
                             </div>

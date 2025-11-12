@@ -201,6 +201,13 @@ ul .sub-item::before {
   z-index: -1;
 }
 
+/* RTL support for Arabic language */
+[dir="rtl"] ul .sub-item::before {
+  right: -12px;
+  left: auto;
+  rotate: -30deg;
+}
+
 /* Animations for Hero Slider */
 @keyframes fadeIn {
   from {

@@ -50,17 +50,6 @@ function LoginForm() {
 
   const recaptchaLang = recaptchaLangMap[i18n.language] || "en";
 
-  // Check if there's a redirect URL saved and show message
-  useEffect(() => {
-    const redirectUrl = localStorage.getItem("redirectAfterLogin");
-    if (redirectUrl && redirectUrl !== "/" && redirectUrl !== "/auth/login") {
-      toast.info(
-        t(
-          "Please register and you will be automatically redirected to the previous page."
-        )
-      );
-    }
-  }, [t]);
   async function handleSubmit(e) {
     e.preventDefault();
 

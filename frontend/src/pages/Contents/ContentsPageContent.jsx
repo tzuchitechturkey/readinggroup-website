@@ -129,22 +129,6 @@ function ContentsPageContent() {
       <PostsFilterSction />
       {/* End Filter */}
 
-      {/* Start Top Liked Section */}
-      {/* <section
-          id="week-topic-section"
-          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
-        >
-          <div className="mt-12">
-            <DynamicSection
-              title={t("Top Liked Contents")}
-              data={topLikedData}
-              isSlider={true}
-              cardName={GuidingReadingcard}
-              propsToCard={{ fromContent: true }}
-            />
-          </div>
-        </section> */}
-      {/* End Top liked Section */}
       <div className="max-w-7xl mx-auto">
         {/* Start Weekly Moments */}
         <section

@@ -107,7 +107,7 @@ export function DynamicNav({
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                  <SidebarMenuSub>
+                  <SidebarMenuSub i18n={i18n}>
                     {item.items?.map((subItem) => {
                       const key = getSectionKey(subItem.title);
                       const isActive = activeSection === key;
