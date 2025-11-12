@@ -91,7 +91,7 @@ function ResetQrModal({ onClose, mode = "resend" }) {
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-2 p-6 relative">
         {/* العنوان */}
         <div className="text-center mb-4">
-          <h5 className="text-green-600 font-bold text-lg">
+          <h5 className="text-blue-500 font-bold text-lg">
             {mode === "resend" ? t("Resend Qr") : t("Reset Password")}
           </h5>
         </div>
