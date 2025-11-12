@@ -30,7 +30,7 @@ import { DeletePostById, GetPosts, PatchPostById } from "@/api/posts";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-import ShowPostDetails from "../ShowPostDetails/ShowPostDetails";
+import PostDetails from "../PostDetails/PostDetails";
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
 function PostsList({ onSectionChange }) {
@@ -149,8 +149,15 @@ function PostsList({ onSectionChange }) {
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyPostToggle = async (postId, currentStatus, postStatus) => {
     // Prevent adding draft/archived posts to weekly moments
-    if (!currentStatus && (postStatus === "draft" || postStatus === "archived")) {
-      toast.info(t("Cannot add post to weekly list. Only published posts can be added to the weekly list."));
+    if (
+      !currentStatus &&
+      (postStatus === "draft" || postStatus === "archived")
+    ) {
+      toast.info(
+        t(
+          "Cannot add post to weekly list. Only published posts can be added to the weekly list."
+        )
+      );
       return;
     }
 
@@ -533,7 +540,11 @@ function PostsList({ onSectionChange }) {
                 <TableCell className="text-center py-4">
                   <button
                     onClick={() =>
-                      handleWeeklyPostToggle(post?.id, post?.is_weekly_moment, post?.status)
+                      handleWeeklyPostToggle(
+                        post?.id,
+                        post?.is_weekly_moment,
+                        post?.status
+                      )
                     }
                     className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
                       post?.is_weekly_moment
@@ -649,7 +660,7 @@ function PostsList({ onSectionChange }) {
         title={t("Post Details")}
         width="800px"
       >
-        <ShowPostDetails
+        <PostDetails
           post={selectedPost}
           onClose={() => setShowDetailsModal(false)}
           onEdit={() => {

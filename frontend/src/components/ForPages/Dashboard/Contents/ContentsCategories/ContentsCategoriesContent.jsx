@@ -152,7 +152,7 @@ function ContentsCategoriesContent({ onSectionChange }) {
   useEffect(() => {
     getCategoriesData(0);
   }, []);
-
+console.log("categories", categories);
   return (
     <div
       className="w-full min-h-screen bg-[#F5F7FB] px-3 relative text-[#1E1E1E] flex flex-col"

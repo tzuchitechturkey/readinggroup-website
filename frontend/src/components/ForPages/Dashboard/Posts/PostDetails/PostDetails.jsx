@@ -1,22 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Calendar, Clock, User, Tag, FileText, Eye, Edit3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-function PostDetails({ post, onClose, onEdit }) {
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
+
+function PostDetails({ post, onClose, onEdit, fromContent = false }) {
   const { t } = useTranslation();
+  const [api, setApi] = useState(null);
+  const [current, setCurrent] = useState(0);
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!api) return;
 
+    const handleSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+    };
+
+    api.on("select", handleSelect);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      api.off("select", handleSelect);
+    };
+  }, [api]);
   if (!post) return null;
-
-  const formatDate = (dateString) => {
-    if (!dateString) return t("Not published yet");
-    const date = new Date(dateString);
-    return (
-      date.toLocaleDateString() +
-      " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -48,64 +61,139 @@ function PostDetails({ post, onClose, onEdit }) {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="space-y-6">
         {/* Header Section with Writer Info */}
-        <div className="flex items-start gap-4">
-          {post.writer_avatar && (
-            <img
-              src={post.writer_avatar}
-              alt={post.writer}
-              className="w-12 h-12 rounded-full object-cover bg-gray-100"
-              onError={(e) => {
-                e.target.src = "/blur-weekly-images.png";
-              }}
-            />
-          )}
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold text-[#1D2630] mb-2 leading-tight">
-              {post.title}
-            </h3>
-            {post.subtitle && (
-              <p className="text-lg text-gray-600 mb-3">{post.subtitle}</p>
-            )}
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <User className="w-4 h-4" />
-                <span>
-                  {t("By")} {post.writer?.name || t("Unknown Writer")}
-                </span>
-              </div>
-              {post.read_time && (
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{post.read_time}</span>
+        <div className="flex items-start justify-between">
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              {post.writer_avatar && (
+                <img
+                  src={post.writer_avatar}
+                  alt={post.writer}
+                  className="w-12 h-12 rounded-full object-cover bg-gray-100"
+                  onError={(e) => {
+                    e.target.src = "/blur-weekly-images.png";
+                  }}
+                />
+              )}
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-[#1D2630] mb-2 leading-tight">
+                  {post.title}
+                </h3>
+                {post.subtitle && (
+                  <p className="text-lg text-gray-600 mb-3">{post.subtitle}</p>
+                )}
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <User className="w-4 h-4" />
+                    <span>
+                      {t("By")} {post.writer?.name || t("Unknown Writer")}
+                    </span>
+                  </div>
+                  {post.read_time && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{post.read_time}</span>
+                    </div>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Status and Category */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                  post.is_active
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {post.is_active ? t("Active") : t("Inactive")}
+              </span>
+              <span
+                className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(
+                  post.status
+                )}`}
+              >
+                {getStatusText(post.status)}
+              </span>
+              {post.category?.id && (
+                <span className="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                  {post.category?.name}
+                </span>
               )}
             </div>
           </div>
-        </div>
+          <div dir="ltr" className="w-1/2">
+            {fromContent &&
+            Array.isArray(post?.images) &&
+            post?.images.length > 0 ? (
+              // Carousel for multiple images (Content)
+              <Carousel
+                className="w-full"
+                opts={{ align: "center", loop: true }}
+                setApi={setApi}
+              >
+                <div className="relative    rounded-t-xl">
+                  <CarouselContent className="-ml-0 h-full">
+                    {post?.images.map((imageItem, index) => (
+                      <CarouselItem key={index} className="pl-0 basis-full">
+                        <div className="h-full w-full flex items-center justify-center ">
+                          <img
+                            src={imageItem.image}
+                            alt={`Image ${index + 1}`}
+                            className="w-full h-[250px] object-contain"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
 
-        {/* Status and Category */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <span
-            className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-              post.is_active
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {post.is_active ? t("Active") : t("Inactive")}
-          </span>
-          <span
-            className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColor(
-              post.status
-            )}`}
-          >
-            {getStatusText(post.status)}
-          </span>
-          {post.category?.id && (
-            <span className="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
-              {post.category?.name}
-            </span>
-          )}
+                  {post?.images.length > 1 && (
+                    <>
+                      <ArrowButton
+                        side="left"
+                        label="Previous image"
+                        onClick={() => api?.scrollPrev()}
+                      />
+                      <ArrowButton
+                        side="right"
+                        label="Next image"
+                        onClick={() => api?.scrollNext()}
+                      />
+                    </>
+                  )}
+
+                  {/* Pagination Dots */}
+                  {post?.images.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-50">
+                      {post?.images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => api?.scrollTo(index)}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            index === current
+                              ? "bg-white w-6"
+                              : "bg-white/50 hover:bg-white/75"
+                          }`}
+                          aria-label={`Go to image ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Carousel>
+            ) : (
+              // Single image (Post)
+              <div className="  bg-black rounded-xl flex items-center justify-center overflow-hidden">
+                <img
+                  src={post?.image || post?.image_url}
+                  alt="Thumbnail"
+                  className="  object-contain "
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Excerpt */}
@@ -226,9 +314,7 @@ function PostDetails({ post, onClose, onEdit }) {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Writer")}:</span>
-              <span className="font-medium">
-                {post.writer  || t("Unknown")}
-              </span>
+              <span className="font-medium">{post.writer || t("Unknown")}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">{t("Read Time")}:</span>

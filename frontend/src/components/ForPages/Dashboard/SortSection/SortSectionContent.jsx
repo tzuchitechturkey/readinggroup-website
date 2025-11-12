@@ -11,7 +11,7 @@ import { GetStatistics, ReorderSections } from "@/api/dashboard";
 import CustomBreadcrumb from "../CustomBreadcrumb/CustomBreadcrumb";
 
 function SortSectionContent({ onSectionChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModified, setIsModified] = useState(false);
@@ -122,7 +122,7 @@ function SortSectionContent({ onSectionChange }) {
   if (isLoading) {
     return <Loader />;
   }
-  console.log(sections, "sections");
+  console.log(sections, "sectionssssss");
   return (
     <div className="w-full mx-auto ">
       {isLoading && <Loader />}
@@ -167,7 +167,11 @@ function SortSectionContent({ onSectionChange }) {
                     <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300 w-12">
                       #
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 w-80">
+                    <th
+                      className={`px-4 py-3 ${
+                        i18n?.language === "ar" ? "text-right" : "text-left"
+                      }  text-sm font-semibold text-gray-700 dark:text-gray-300 w-80`}
+                    >
                       {t("Section Name")}
                     </th>
                     <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300 w-24">
@@ -220,7 +224,9 @@ function SortSectionContent({ onSectionChange }) {
                             section.image ||
                             section.image_url ||
                             section.thumbnail ||
-                            section.thumbnail_url
+                            section.thumbnail_url ||
+                            section.images[0]?.image ||
+                            section.image_url[0]?.image
                           }
                           alt={section.name}
                           className="w-12 h-12 mx-auto object-cover rounded-lg border border-gray-200 dark:border-gray-600"

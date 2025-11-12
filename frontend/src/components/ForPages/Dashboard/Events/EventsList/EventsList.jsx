@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
-import { Search, ToggleLeft, ToggleRight, X } from "lucide-react";
+import { Eye, Search, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 import {
@@ -20,6 +20,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetEvents, DeleteEventById, PatchEventById } from "@/api/events";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import VideoDetails from "../../Videos/VideoDetails/VideoDetails";
 
 const EventsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
@@ -32,6 +33,7 @@ const EventsList = ({ onSectionChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -177,10 +179,21 @@ const EventsList = ({ onSectionChange }) => {
     getEventsData(0, "", statusFilter, filters);
   };
   // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyEventToggle = async (eventId, currentStatus, eventStatus) => {
+  const handleWeeklyEventToggle = async (
+    eventId,
+    currentStatus,
+    eventStatus
+  ) => {
     // Prevent adding draft/archived events to weekly moments
-    if (!currentStatus && (eventStatus === "draft" || eventStatus === "archived")) {
-      toast.info(t("Cannot add event to weekly list. Only published events can be added to the weekly list."));
+    if (
+      !currentStatus &&
+      (eventStatus === "draft" || eventStatus === "archived")
+    ) {
+      toast.info(
+        t(
+          "Cannot add event to weekly list. Only published events can be added to the weekly list."
+        )
+      );
       return;
     }
 
@@ -198,6 +211,14 @@ const EventsList = ({ onSectionChange }) => {
       setIsLoading(false);
     }
   };
+
+  // تعديل الفيديو
+  const handleEdit = (eventId) => {
+    const event = eventsData.find((v) => v.id === eventId);
+    setEditingVideo(event);
+    onSectionChange("createOrEditEvent", event);
+  };
+
   const handleConfirmDelete = async () => {
     if (!selectedEvent?.id) return;
 
@@ -304,8 +325,7 @@ const EventsList = ({ onSectionChange }) => {
       {/* End Search */}
       <div className="flex items-center justify-between ">
         {/* Status Tabs Filter */}
-
-        <div className="bg-white rounded-lg p-4 shadow-sm flex gap-3 flex-wrap">
+        <div className="bg-white rounded-lg p-4 pt-1 shadow-sm flex gap-3 flex-wrap">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="text-sm font-medium text-gray-700">
               {t("Status")}:
@@ -368,21 +388,7 @@ const EventsList = ({ onSectionChange }) => {
         {/* End Is Weekly Moment Filter */}
       </div>
 
-      {/* Stats */}
-      <div className="mb-4 text-sm text-gray-600">
-        {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-            {t("Loading...")}
-          </div>
-        ) : (
-          `${t("Total")}: ${totalRecords} ${t("programs")} | ${t(
-            "Page"
-          )} ${currentPage} ${t("of")} ${totalPages}`
-        )}
-      </div>
-
-      {/* Table */}
+      {/* Start Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -558,6 +564,16 @@ const EventsList = ({ onSectionChange }) => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <button
+                        title={t("View Details")}
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowDetailsModal(true);
+                        }}
+                        className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => {
                           setSelectedEvent(event);
                           onSectionChange("createOrEditEvent", event);
@@ -662,7 +678,22 @@ const EventsList = ({ onSectionChange }) => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Start Video Details Modal */}
+      <Modal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        title={t("Event Details")}
+        width="700px"
+      >
+        <VideoDetails
+          selectedItem={selectedEvent}
+          setShowDetailsModal={setShowDetailsModal}
+          handleEdit={handleEdit}
+        />
+      </Modal>
+      {/* End Video Details Modal */}
+
+      {/* Start Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}
         isOpen={showDeleteModal}

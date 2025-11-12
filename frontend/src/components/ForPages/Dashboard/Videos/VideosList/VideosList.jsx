@@ -28,9 +28,10 @@ import VideoDurationCell from "@/components/ForPages/Dashboard/Videos/VideoDurat
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { DeleteVideoById, GetVideos, PatchVideoById } from "@/api/videos";
 
-import ShowVideoDetails from "../ShowVideoDetails/ShowVideoDetails";
+import ShowVideoDetails from "../VideoDetails/VideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import VideoDetails from "../VideoDetails/VideoDetails";
 
 function VideosList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -156,7 +157,10 @@ function VideosList({ onSectionChange }) {
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyVideoToggle = async (videoId, currentStatus) => {
     // منع التفعيل إذا كانت الحالة draft أو archived
-    if ((statusFilter === "draft" || statusFilter === "archived") && !currentStatus) {
+    if (
+      (statusFilter === "draft" || statusFilter === "archived") &&
+      !currentStatus
+    ) {
       toast.info(
         t(
           "Cannot add video to weekly list. Only published videos can be added to the weekly list."
@@ -179,12 +183,6 @@ function VideosList({ onSectionChange }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // عرض تفاصيل الفيديو
-  const handleViewDetails = (video) => {
-    setSelectedVideo(video);
-    setShowDetailsModal(true);
   };
 
   // تأكيد حذف الفيديو
@@ -594,7 +592,10 @@ function VideosList({ onSectionChange }) {
                 <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                   <button
                     title={t("View Details")}
-                    onClick={() => handleViewDetails(video)}
+                    onClick={() => {
+                      setSelectedVideo(video);
+                      setShowDetailsModal(true);
+                    }}
                     className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
                   >
                     <Eye className="h-4 w-4" />
@@ -726,8 +727,8 @@ function VideosList({ onSectionChange }) {
         title={t("Video Details")}
         width="700px"
       >
-        <ShowVideoDetails
-          selectedVideo={selectedVideo}
+        <VideoDetails
+          selectedItem={selectedVideo}
           setShowDetailsModal={setShowDetailsModal}
           handleEdit={handleEdit}
         />

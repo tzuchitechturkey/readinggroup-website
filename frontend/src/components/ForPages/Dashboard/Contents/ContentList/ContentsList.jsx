@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
-import { ToggleLeft, ToggleRight } from "lucide-react";
+import { Eye, ToggleLeft, ToggleRight } from "lucide-react";
 
 import {
   Table,
@@ -24,6 +24,7 @@ import {
 } from "@/api/contents";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import PostDetails from "../../Posts/PostDetails/PostDetails";
 
 const ContentsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
@@ -36,6 +37,7 @@ const ContentsList = ({ onSectionChange }) => {
   const [update, setUpdate] = useState(false);
   const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
   const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null); // State for weekly moment filter (null = show all, true = weekly, false = not weekly)
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,7 +173,10 @@ const ContentsList = ({ onSectionChange }) => {
   // دالة التعامل مع تبديل القائمة الأسبوعية
   const handleWeeklyPostToggle = async (contentId, currentStatus) => {
     // منع التفعيل إذا كانت الحالة draft أو archived
-    if ((statusFilter === "draft" || statusFilter === "archived") && !currentStatus) {
+    if (
+      (statusFilter === "draft" || statusFilter === "archived") &&
+      !currentStatus
+    ) {
       toast.info(
         t(
           "Cannot add content to weekly list. Only published content can be added to the weekly list."
@@ -511,6 +516,16 @@ const ContentsList = ({ onSectionChange }) => {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <button
+                        title={t("View Details")}
+                        onClick={() => {
+                          setSelectedContent(content);
+                          setShowDetailsModal(true);
+                        }}
+                        className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => {
                           setSelectedContent(content);
                           onSectionChange("createOrEditContent", content);
@@ -614,6 +629,23 @@ const ContentsList = ({ onSectionChange }) => {
         </div>
       )}
       {/* End Pagination */}
+      {/* Start Post Details Modal */}
+      <Modal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        title={t("Post Details")}
+        width="800px"
+      >
+        <PostDetails
+          post={selectedContent}
+          onClose={() => setShowDetailsModal(false)}
+          onEdit={() => {
+            onSectionChange("createOrEditContent", selectedContent);
+          }}
+          fromContent={true}
+        />
+      </Modal>
+      {/* End Post Details Modal */}
       {/* Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}

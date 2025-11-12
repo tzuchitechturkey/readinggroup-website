@@ -17,7 +17,6 @@ function DashboardTable({ data, onSectionChange }) {
   const { t, i18n } = useTranslation();
   // Sorting state
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-
   // Transform API data into table rows
   const rows = useMemo(() => {
     if (!data) return [];
@@ -81,19 +80,20 @@ function DashboardTable({ data, onSectionChange }) {
 
     // Add contents
     if (data?.content) {
+      console.log("Content Data:", data?.content);
       items.push({
         type: "Content",
-        id: data?.content.id,
+        id: data?.content?.id,
         image:
-          data?.content.images[0]?.image || data?.content.image_url[0]?.image,
-        writer: data?.content.writer || data?.content.author || t("Unknown"),
-        category: data?.content.category?.name,
-        date: data?.content.created_at || data?.content.published_at || "",
-        views: data?.content.views || 0,
-        likes_count: data?.content.likes_count || 0,
-        comment: data?.content.comments || [],
+          data?.content?.images[0]?.image || data?.content?.image_url[0]?.image,
+        writer: data?.content?.writer || data?.content?.author || t("Unknown"),
+        category: data?.content?.category?.name,
+        date: data?.content?.created_at || data?.content?.published_at || "",
+        views: data?.content?.views || 0,
+        likes_count: data?.content?.likes_count || 0,
+        comment: data?.content?.comments || [],
         originData: data?.content,
-        link: "createOrEditPost",
+        link: "createOrEditContent",
       });
     }
 

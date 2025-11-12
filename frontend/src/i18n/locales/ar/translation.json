@@ -1273,7 +1273,7 @@
   "Top Liked Contents": "المحتويات الأكثر إعجاباً",
   "Taiwant": "تايوان",
   "Add/Edit Video": "إضافة/تعديل الفيديو",
-  "All Events": "جميع الفعاليات",
+  "All Events": "جميع الأحداث",
   "Website Info": "معلومات الموقع",
   "Click to upload logo": "انقر لتحميل الشعار",
   "No logo uploaded yet": "لم يتم تحميل شعار بعد",
@@ -1324,5 +1324,13 @@
   "Event added to weekly list successfully": "تم إضافة الحدث إلى القائمة الأسبوعية بنجاح",
   "Event removed from weekly list successfully": "تمت إزالة الحدث من القائمة الأسبوعية بنجاح",
   "No videos found": "لم يتم العثور على فيديوهات",
-  "Top Liked Videos": "  أكثر الفيديوهات إعجاباً"
+  "Top Liked Videos": "  أكثر الفيديوهات إعجاباً",
+  "Event Details": "تفاصيل الحدث",
+  "Event Information": "معلومات الحدث",
+  "Sort Sections": "ترتيب الأقسام",
+  "": "",
+  "": "",
+  "": "",
+  "": "",
+  "": ""
 }
