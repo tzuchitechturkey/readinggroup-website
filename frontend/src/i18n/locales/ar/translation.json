@@ -1324,5 +1324,9 @@
   "Event added to weekly list successfully": "تم إضافة الحدث إلى القائمة الأسبوعية بنجاح",
   "Event removed from weekly list successfully": "تمت إزالة الحدث من القائمة الأسبوعية بنجاح",
   "No videos found": "لم يتم العثور على فيديوهات",
-  "Top Liked Videos": "  أكثر الفيديوهات إعجاباً"
+  "Top Liked Videos": "  أكثر الفيديوهات إعجاباً",
+  "You cannot activate this category because it does not contain any videos. Please add videos first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي فيديوهات. يرجى إضافة فيديوهات أولاً.",
+  "Start by adding a new series": "ابدأ بإضافة سلسلة جديدة.",
+  "Network Error": "خطأ في الشبكة",
+  "Content updated successfully": "تم تحديث المحتوى بنجاح"
 }

@@ -1235,7 +1235,7 @@ class SeasonIdViewSet(BaseCRUDViewSet):
     queryset = SeasonId.objects.all()
     serializer_class = SeasonIdSerializer
     search_fields = ("season_title__name",)
-    ordering_fields = ("created_at",)
+    ordering_fields = ("-created_at",)
 
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
     def videos(self, request, pk=None):
@@ -1266,7 +1266,8 @@ class SeasonIdViewSet(BaseCRUDViewSet):
             # model may not have category relation in some edge cases
             pass
 
-        qs = qs.order_by('-happened_at', '-created_at')
+        # Order season videos by creation time (newest first)
+        qs = qs.order_by('-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         # paginate if pagination is configured on the view
@@ -1283,7 +1284,7 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
+    ordering_fields = ("-created_at",)
     
     @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
     def season_ids(self, request, pk=None):
@@ -1296,7 +1297,7 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
         except Exception:
             return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = SeasonId.objects.filter(season_title=season_title).order_by('id')
+        qs = SeasonId.objects.filter(season_title=season_title).order_by('created_at')
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1373,7 +1374,7 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         if not published_qs.exists():
             return Response({"detail": "No published videos in this category."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = published_qs.order_by('-happened_at', '-created_at')
+        qs = published_qs.order_by('-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)

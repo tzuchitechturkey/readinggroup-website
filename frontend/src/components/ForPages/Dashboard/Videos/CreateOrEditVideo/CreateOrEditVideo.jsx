@@ -255,9 +255,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData?.thumbnail) {
-      newErrors.thumbnail = t("Thumbnail is required");
-    }
+    // Thumbnail is optional now (users can provide thumbnail_url or skip it)
 
     if (!formData?.title.trim()) {
       newErrors.title = t("Title is required");
@@ -451,7 +449,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             </p>
           </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Video Thumbnail")} *
+            {t("Video Thumbnail")}
           </label>
           <div className="flex items-center gap-4">
             <div
