@@ -1328,9 +1328,8 @@
   "Event Details": "تفاصيل الحدث",
   "Event Information": "معلومات الحدث",
   "Sort Sections": "ترتيب الأقسام",
-  "": "",
-  "": "",
-  "": "",
-  "": "",
-  "": ""
+  "You cannot activate this category because it does not contain any videos. Please add videos first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي فيديوهات. يرجى إضافة فيديوهات أولاً.",
+  "Start by adding a new series": "ابدأ بإضافة سلسلة جديدة.",
+  "Network Error": "خطأ في الشبكة",
+  "Content updated successfully": "تم تحديث المحتوى بنجاح"
 }

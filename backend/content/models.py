@@ -319,7 +319,7 @@ class Event(LikableMixin, TimestampedModel):
 class Content(LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
     title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
+    subtitle = models.CharField(max_length=1000, blank=True)
     excerpt = models.TextField(blank=True)
     body = models.TextField(blank=True)
     writer = models.CharField(max_length=255)
@@ -334,7 +334,7 @@ class Content(LikableMixin, TimestampedModel):
     language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=255, blank=True)
+    metadata = models.CharField(max_length=1000, blank=True)
     country = models.CharField(max_length=100, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
     is_weekly_moment = models.BooleanField(default=False)

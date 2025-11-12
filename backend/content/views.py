@@ -1073,6 +1073,10 @@ class PostCategoryViewSet(BaseCRUDViewSet):
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        try:
+            queryset = queryset.annotate(post_count=Count('post'))
+        except Exception:
+            pass
         return queryset
     
     @action(detail=True, methods=("get",), url_path="posts", url_name="posts")
@@ -1139,6 +1143,10 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        try:
+            queryset = queryset.annotate(content_count=Count('content'))
+        except Exception:
+            pass
         return queryset
     
     @action(detail=True, methods=("get",), url_path="contents", url_name="contents")
@@ -1184,6 +1192,10 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         is_active = self.request.query_params.get('is_active')
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        try:
+            queryset = queryset.annotate(event_count=Count('event'))
+        except Exception:
+            pass
         return queryset
     
     @action(detail=True, methods=("get",), url_path="events", url_name="events")
@@ -1235,7 +1247,7 @@ class SeasonIdViewSet(BaseCRUDViewSet):
     queryset = SeasonId.objects.all()
     serializer_class = SeasonIdSerializer
     search_fields = ("season_title__name",)
-    ordering_fields = ("created_at",)
+    ordering_fields = ("-created_at",)
 
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
     def videos(self, request, pk=None):
@@ -1266,7 +1278,8 @@ class SeasonIdViewSet(BaseCRUDViewSet):
             # model may not have category relation in some edge cases
             pass
 
-        qs = qs.order_by('-happened_at', '-created_at')
+        # Order season videos by creation time (newest first)
+        qs = qs.order_by('-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         # paginate if pagination is configured on the view
@@ -1283,7 +1296,7 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
+    ordering_fields = ("-created_at",)
     
     @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
     def season_ids(self, request, pk=None):
@@ -1296,7 +1309,7 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
         except Exception:
             return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = SeasonId.objects.filter(season_title=season_title).order_by('id')
+        qs = SeasonId.objects.filter(season_title=season_title).order_by('created_at')
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1373,7 +1386,7 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         if not published_qs.exists():
             return Response({"detail": "No published videos in this category."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = published_qs.order_by('-happened_at', '-created_at')
+        qs = published_qs.order_by('-created_at')
         qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
@@ -1977,11 +1990,13 @@ class SiteInfoViewSet(viewsets.ViewSet):
         # all social media links
         socials = SocialMedia.objects.all().order_by('-created_at')
         socials_data = SocialMediaSerializer(socials, many=True, context={"request": request}).data
+        
         # only include categories that are active (is_active == True)
-        post_categories = PostCategory.objects.filter(is_active=True).order_by('name')
-        video_categories = VideoCategory.objects.filter(is_active=True).order_by('name')
-        event_categories = EventCategory.objects.filter(is_active=True).order_by('name')
-        content_categories = ContentCategory.objects.filter(is_active=True).order_by('name')
+        post_categories = PostCategory.objects.filter(is_active=True).annotate(post_count=Count('post')).order_by('name')
+        video_categories = VideoCategory.objects.filter(is_active=True).annotate(video_count=Count('video')).order_by('name')
+        event_categories = EventCategory.objects.filter(is_active=True).annotate(event_count=Count('event')).order_by('name')
+        content_categories = ContentCategory.objects.filter(is_active=True).annotate(content_count=Count('content')).order_by('name')
+        
         # serialize categories
         post_categories_data = PostCategorySerializer(post_categories, many=True, context={"request": request}).data
         video_categories_data = VideoCategorySerializer(video_categories, many=True, context={"request": request}).data

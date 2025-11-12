@@ -199,7 +199,7 @@ function Profile({ userId, myUserId }) {
                 <span>{data?.display_name}</span>
               </div>
               <div className="text-[11px] border text-[#5B6B79] my-2">
-                {data?.profession_name || "Not specified"}
+                {data?.profession_name || t("Not specified")}
               </div>
               {+userId !== +myUserId && (
                 <button
