@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import HeroSlider from "@/components/ForPages/Home/HeroSliderSection/HeroSlider";
+import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
@@ -14,8 +14,6 @@ import DynamicHomeCard from "@/components/ForPages/Home/DynamicHomeCard/DynamicH
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === "ar";
-  const direction = isRtl ? "rtl" : "ltr";
   const [sliderData, setSliderData] = useState(null);
   const [top1Data, setTop1Data] = useState(null);
 
@@ -44,10 +42,10 @@ export default function HomeContent() {
   }, []);
 
   return (
-    <div dir={direction} className="min-h-screen">
+    <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="min-h-screen">
       {/* Start Hero Slider */}
-      <div dir="ltr">
-        <HeroSlider data={sliderData} />
+      <div>
+        <HomeHeroSlider data={sliderData} />
       </div>
       {/* End Hero Slider */}
 

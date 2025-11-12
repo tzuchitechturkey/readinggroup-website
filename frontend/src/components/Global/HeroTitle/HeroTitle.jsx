@@ -1,4 +1,5 @@
 function HeroTitle({
+  i18n,
   h1Line1,
   h1Line2Prefix,
   h1Line2Under,
@@ -6,9 +7,11 @@ function HeroTitle({
   titleClassName = "",
 }) {
   return (
-    <>
+    <div>
       <h1
-        className={`text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.06] tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] text-left max-w-3xl ${titleClassName} `}
+        className={` text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.06] tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] ${
+          i18n?.language === "ar" ? "rtl" : "ltr"
+        } max-w-3xl ${titleClassName} `}
       >
         <span className="block">{h1Line1}</span>
         <span className="block">
@@ -21,10 +24,14 @@ function HeroTitle({
         </span>
       </h1>
 
-      <p className="mt-4 text-sm md:text-base text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] text-left max-w-2xl">
+      <p
+        className={`mt-4 text-sm md:text-base text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] ${
+          i18n?.language === "ar" ? "text-right" : "text-left"
+        } max-w-2xl`}
+      >
         {description}
       </p>
-    </>
+    </div>
   );
 }
 

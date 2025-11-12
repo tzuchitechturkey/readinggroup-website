@@ -918,7 +918,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             {/* End Country */}
 
             {/* Start Category */}
-            <div>
+            <div >
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Category")} *
               </label>
@@ -1011,8 +1011,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                             onClick={() => handleCategorySelect(category)}
                             className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                           >
-                            <Tag className="w-5 h-5 text-blue-600" />
-                            <div className="flex-1">
+                            <div className={`flex-1 ${i18n?.language === "ar" ? "text-right" :"text-left"} `}>
                               <div className="font-medium text-sm">
                                 {category.name}
                               </div>
@@ -1022,6 +1021,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                                 </div>
                               )}
                             </div>
+                            <Tag className="w-5 h-5 text-blue-600" />
+
                           </button>
                         ))
                       ) : (
@@ -1061,7 +1062,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                         alt={formData?.writer}
                         className="w-8 h-8 rounded-full object-cover"
                       />
-                      <div className="flex-1">
+                      <div className={`flex-1`}>
                         <div className="font-medium text-sm">
                           {formData?.writer}
                         </div>
@@ -1134,7 +1135,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                               alt={writer.username}
                               className="w-8 h-8 rounded-full object-cover"
                             />
-                            <div className="flex-1">
+                            <div className={` ${i18n?.language === "ar" ? "text-right" :"text-left"}  flex-1`}>
                               <div className="font-medium text-sm">
                                 {writer.username}
                               </div>

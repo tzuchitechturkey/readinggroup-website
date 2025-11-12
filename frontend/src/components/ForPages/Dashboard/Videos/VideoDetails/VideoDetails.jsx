@@ -15,6 +15,7 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
       date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
   };
+  console.log(selectedItem, "sssss");
   return (
     <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 overflow-y-auto">
       <div className="space-y-6">
@@ -61,7 +62,7 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
               </div>
             )}
 
-            {/* Quick stats */}
+            {/* Start Duration && Views */}
             <div className="grid grid-cols-2 gap-4 text-sm">
               {/* Start Duration */}
               {selectedItem?.duration && (
@@ -74,12 +75,23 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
                 </div>
               )}
               {/* End Duration */}
+              {/* Start Views */}
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-green-500" />
+                {/* <Eye className="w-4 h-4 text-green-500" /> */}
                 <span className="text-gray-600">{t("Views")}: </span>
                 <span className="font-medium">{selectedItem?.views}</span>
               </div>
+              {/* End Views */}
             </div>
+            {/* End Duration && Views */}
+            {/* Start Description */}
+            <div>
+              <span className="text-gray-600">{t("Description")}: </span>
+              <span className="font-medium">
+                {selectedItem?.description || selectedItem?.summary}
+              </span>
+            </div>
+            {/* End Description */}
           </div>
         </div>
 
@@ -116,7 +128,9 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
                   {t("Tags")}
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {selectedItem?.tags && selectedItem?.tags.length > 0 ? (
+                  {selectedItem?.video_type &&
+                  selectedItem?.tags &&
+                  selectedItem?.tags.length > 0 ? (
                     selectedItem?.tags.map((tag, index) => (
                       <span
                         key={index}
@@ -131,7 +145,7 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
                 </div>
               </div>
               {/* Start Casts */}
-              {selectedItem?.cast && (
+              {selectedItem?.video_type && selectedItem?.cast && (
                 <div>
                   <span className="text-gray-600 text-sm block mb-2">
                     {t("Casts")}
@@ -168,13 +182,13 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
         </div>
 
         {/* Status and Links */}
-        <div className="border-t pt-6">
-          <h5 className="font-semibold text-lg text-[#1D2630] mb-4">
-            {t("Type & Links")}
-          </h5>
+        {selectedItem?.video_type && (
+          <div className="border-t pt-6">
+            <h5 className="font-semibold text-lg text-[#1D2630] mb-4">
+              {t("Type & Links")}
+            </h5>
 
-          {/* Start Status badges */}
-          {selectedItem?.video_type && (
+            {/* Start Status badges */}
             <div className="flex gap-3 mb-4">
               <p> {t("Status")}</p>
               {selectedItem?.is_featured && (
@@ -193,27 +207,27 @@ function VideoDetails({ selectedItem, setShowDetailsModal, handleEdit }) {
                 </span>
               )}
             </div>
-          )}
-          {/* End Status badges */}
+            {/* End Status badges */}
 
-          {/* Video link */}
-          {selectedItem?.video_url && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <span className="text-gray-600 text-sm block mb-2">
-                {t("Video URL")}
-              </span>
-              <a
-                href={selectedItem?.video_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2 hover:underline"
-              >
-                <ExternalLink className="w-4 h-4" />
-                {t("Watch Video")}
-              </a>
-            </div>
-          )}
-        </div>
+            {/* Video link */}
+            {selectedItem?.video_url && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <span className="text-gray-600 text-sm block mb-2">
+                  {t("Video URL")}
+                </span>
+                <a
+                  href={selectedItem?.video_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2 hover:underline"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {t("Watch Video")}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}

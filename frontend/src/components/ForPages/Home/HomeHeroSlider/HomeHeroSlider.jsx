@@ -14,8 +14,8 @@ import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSec
 import { useIsMobile } from "@/hooks/use-mobile";
 import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 
-export default function HeroSlider({ newsPage = false, data = null }) {
-  const { t } = useTranslation();
+export default function HomePageHeroSlider({ newsPage = false, data = null }) {
+  const { t, i18n } = useTranslation();
   const isMobile = useIsMobile(1024);
 
   const homePageSlider = React.useMemo(() => {
@@ -146,18 +146,24 @@ export default function HeroSlider({ newsPage = false, data = null }) {
   }, [api, startAuto]);
 
   return (
-    <div className="w-full lg:pt-8" >
+    <div className="w-full lg:pt-8">
       <Carousel
         className="w-full"
         opts={{ align: "center", loop: true, skipSnaps: false }}
         setApi={setApi}
       >
         <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-          <CarouselContent className="-ml-2 md:-ml-4">
+          <CarouselContent
+            className={` ${
+              i18n.language === "ar"
+                ? "flex-row-reverse"
+                : "flex-row -ml-2 md:-ml-4"
+            }`}
+          >
             {sliders.map((slide) => (
               <CarouselItem
                 key={slide.id}
-                className="pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"
+                className={"pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"}
               >
                 <div
                   className={`relative w-full min-h-[600px] md:min-h-[660px]  lg:min-h-[700px]  py-8 md:py-12 overflow-hidden rounded-2xl shadow-2xl group`}
@@ -176,6 +182,7 @@ export default function HeroSlider({ newsPage = false, data = null }) {
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
                       <div className="pb-24 md:pb-32 lg:pb-40">
                         <HeroTitle
+                          i18n={i18n}
                           h1Line1={slide.h1Line1}
                           h1Line2Prefix={newsPage ? "" : slide.h1Line2Prefix}
                           h1Line2Under={newsPage ? "" : slide.h1Line2Under}

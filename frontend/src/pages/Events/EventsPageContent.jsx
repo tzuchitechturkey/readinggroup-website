@@ -8,7 +8,7 @@ import EventsFilterSections from "@/components/ForPages/Events/EventsFilterSecti
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import EventCard from "@/components/Global/EventCard/EventCard";
 import {
-   GetTopEventsLiked,
+  GetTopEventsLiked,
   GetEventCategories,
   GetItemsByCategoryId,
   GetEvents,
@@ -98,7 +98,7 @@ function EventsPageContent() {
     <div className="" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {/* Hero Slider */}
       <div>
-        <EventHeroSlider newsPage={true} />
+        <EventHeroSlider />
       </div>
       {/* End Hero Slider */}
 

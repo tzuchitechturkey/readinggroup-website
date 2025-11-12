@@ -513,7 +513,7 @@ function VideosList({ onSectionChange }) {
                     {video.title}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
-                    {video.language} • {video.subject}
+                    {t(video.language)} • {video.subject}
                   </span>
                 </div>
               </TableCell>
