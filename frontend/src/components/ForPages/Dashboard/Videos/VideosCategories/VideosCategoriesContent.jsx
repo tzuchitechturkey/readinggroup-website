@@ -255,7 +255,7 @@ function VideosCategoriesContent({ onSectionChange }) {
                       i18n?.language === "ar" ? "text-right " : "  text-left"
                     } py-2 px-3`}
                   >
-                    {t("Show in the dropdown menu")}
+                    {t("Active")}
                   </th>
                   <th
                     className={`${
@@ -290,6 +290,10 @@ function VideosCategoriesContent({ onSectionChange }) {
                     >
                       <button
                         onClick={async () => {
+                          if (!cat.is_active && cat.video_count === 0) {
+                            toast.error(t("Cannot activate category with no videos."));
+                            return;
+                          }
                           try {
                             await EditVideoCategoryById(cat.id, {
                               ...cat,
@@ -310,12 +314,15 @@ function VideosCategoriesContent({ onSectionChange }) {
                           cat.is_active
                             ? "bg-green-100 text-green-600 hover:bg-green-200"
                             : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                        }`}
+                        } ${!cat.is_active && cat.video_count === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                         title={
-                          cat.is_active
+                          !cat.is_active && cat.video_count === 0
+                            ? t("Cannot activate category with no videos.")
+                            : cat.is_active
                             ? t("Click to disable")
                             : t("Click to enable")
                         }
+                        disabled={!cat.is_active && cat.video_count === 0}
                       >
                         {cat.is_active ? (
                           <ToggleRight className="h-8 w-12" />
@@ -420,8 +427,8 @@ function VideosCategoriesContent({ onSectionChange }) {
                 )}
                 <span className="text-base font-medium">
                   {form?.is_active
-                    ? t("Show in the dropdown menu")
-                    : t("Hide from the dropdown menu")}
+                    ? t("Active")
+                    : t("Inactive")}
                 </span>
               </button>
             </div>

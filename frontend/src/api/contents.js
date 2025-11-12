@@ -133,12 +133,7 @@ export async function LikeReply(replyId) {
 export async function UnlikeReply(replyId) {
   return await axios.delete(`/replies/${replyId}/like/`);
 }
-
-// TOP
-export async function TopCommentedContents() {
-  return await axios.get(`/content/top-commented/?limit=5`);
-}
-
+ 
 // it Gieves to data card_photo And reading
 export async function TopLikedContents() {
   return await axios.get(`/contents/top-liked/`);

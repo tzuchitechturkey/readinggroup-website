@@ -398,8 +398,8 @@ function PostsCategoriesContent({ onSectionChange }) {
                 )}
                 <span className="text-base font-medium">
                   {form?.is_active
-                    ? t("Show in the dropdown menu")
-                    : t("Hide from the dropdown menu")}
+                    ? t("Active")
+                    : t("Inactive")}
                 </span>
               </button>
             </div>
