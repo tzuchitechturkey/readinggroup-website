@@ -1296,7 +1296,8 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
     queryset = SeasonTitle.objects.all()
     serializer_class = SeasonTitleSerializer
     search_fields = ("name",)
-    ordering_fields = ("-created_at",)
+    # SeasonTitle model does not have created_at; allow ordering by name instead
+    ordering_fields = ("name",)
     
     @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
     def season_ids(self, request, pk=None):
@@ -1309,7 +1310,8 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
         except Exception:
             return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        qs = SeasonId.objects.filter(season_title=season_title).order_by('created_at')
+        # SeasonId doesn't have a created_at timestamp; order by the season_id field instead
+        qs = SeasonId.objects.filter(season_title=season_title).order_by('season_id')
 
         page = self.paginate_queryset(qs)
         if page is not None:
