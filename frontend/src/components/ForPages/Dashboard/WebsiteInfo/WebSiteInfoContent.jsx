@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
+import ImageCropModal from "@/components/Global/ImageCropModal/ImageCropModal";
 import {
   socialColors,
   socialMediaIcons,
@@ -38,6 +39,8 @@ function WebsiteInfoContent({ onSectionChange }) {
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  // Cropper modal state
+  const [showCropper, setShowCropper] = useState(false);
 
   // Social Media State
   const [socialLinks, setSocialLinks] = useState([]);
@@ -78,16 +81,31 @@ function WebsiteInfoContent({ onSectionChange }) {
         return;
       }
 
-      setLogoFile(file);
-
-      // Create preview
+      // Create preview and open cropper
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result);
+        setLogoFile(file);
+        setShowCropper(true);
       };
       reader.readAsDataURL(file);
     }
   };
+  const handleCropperClose = () => setShowCropper(false);
+
+  const handleCropComplete = useCallback(
+    async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], logoFile?.name || "logo.jpg", {
+        type: blob.type || "image/jpeg",
+      });
+      const previewUrl = URL.createObjectURL(blob);
+      setLogoFile(file);
+      setLogoPreview(previewUrl);
+      toast.info(t("Image cropped. Click Save to upload"));
+    },
+    [logoFile, t]
+  );
 
   // Handle logo upload
   const handleLogoUpload = async () => {
@@ -311,6 +329,14 @@ function WebsiteInfoContent({ onSectionChange }) {
                   >
                     <Save size={18} />
                     {uploadingLogo ? t("Uploading...") : t("Save Logo")}
+                  </button>
+                  <button
+                    onClick={() => setShowCropper(true)}
+                    disabled={uploadingLogo || !logoPreview}
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ImageIcon size={18} />
+                    {t("Re-crop")}
                   </button>
                   <button
                     onClick={handleCancelLogo}
@@ -550,6 +576,20 @@ function WebsiteInfoContent({ onSectionChange }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Cropper Modal (reusable component) */}
+      {showCropper && logoPreview && (
+        <ImageCropModal
+          isOpen={showCropper}
+          onClose={handleCropperClose}
+          imageSrc={logoPreview}
+          onCropComplete={handleCropComplete}
+          aspect={3 / 1}
+          outputWidth={720}
+          outputHeight={240}
+          title={t("Crop image for logo")}
+        />
       )}
     </div>
   );

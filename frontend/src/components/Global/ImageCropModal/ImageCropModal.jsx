@@ -1,25 +1,42 @@
 import React, { useState, useCallback } from "react";
 
 import Cropper from "react-easy-crop";
-import { X, Check, RotateCw } from "lucide-react";
+import { X, Check, RotateCw, Wand2, Plus, Minus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
 /**
- * ImageCropModal - Modal component for cropping images with 16:9 aspect ratio
+ * ImageCropModal - Reusable modal component for cropping images
  * @param {Object} props
  * @param {string} props.imageSrc - The source URL of the image to crop
  * @param {Function} props.onCropComplete - Callback when crop is completed, receives cropped image blob
  * @param {Function} props.onClose - Callback when modal is closed
  * @param {boolean} props.isOpen - Whether the modal is open
+ * @param {number} [props.aspect=16/9] - Cropper aspect ratio (e.g., 3/1)
+ * @param {number} [props.outputWidth=1920] - Output canvas width in pixels
+ * @param {number} [props.outputHeight=1080] - Output canvas height in pixels
+ * @param {string} [props.title] - Optional title for the modal header
+ * @param {boolean} [props.enableRotate=false] - Show rotate control
  */
-function ImageCropModal({ imageSrc, onCropComplete, onClose, isOpen }) {
+function ImageCropModal({
+  imageSrc,
+  onCropComplete,
+  onClose,
+  isOpen,
+  aspect = 16 / 9,
+  outputWidth = 1920,
+  outputHeight = 1080,
+  title,
+  enableRotate = false,
+}) {
   const { t, i18n } = useTranslation();
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  // Keep media size if later we want smarter auto-zoom; currently unused after initial set
+  const [, setMediaSize] = useState(null);
 
   const onCropChange = (crop) => {
     setCrop(crop);
@@ -33,9 +50,27 @@ function ImageCropModal({ imageSrc, onCropComplete, onClose, isOpen }) {
     setRotation(rotation);
   };
 
-  const onCropCompleteHandler = useCallback((croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
+  const onCropCompleteHandler = useCallback(
+    (croppedArea, croppedAreaPixels) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
+
+  const onMediaLoaded = useCallback((ms) => {
+    setMediaSize(ms);
+    // Try to auto fit initially
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   }, []);
+
+  const handleAutoCrop = () => {
+    // Simple auto-fit: center and minimal zoom
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
+  // no reset button – keep controls minimal per request
 
   const createImage = (url) =>
     new Promise((resolve, reject) => {
@@ -50,15 +85,9 @@ function ImageCropModal({ imageSrc, onCropComplete, onClose, isOpen }) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    // Set canvas size to desired output size (1920x1080)
-    const outputWidth = 1920;
-    const outputHeight = 1080;
+    // Set canvas size to desired output size
     canvas.width = outputWidth;
     canvas.height = outputHeight;
-
-    // Calculate scale factors
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
 
     // Apply rotation if needed
     if (rotation !== 0) {
@@ -68,17 +97,20 @@ function ImageCropModal({ imageSrc, onCropComplete, onClose, isOpen }) {
       ctx.translate(-outputWidth / 2, -outputHeight / 2);
     }
 
-    // Draw the cropped image scaled to 1920x1080
+    // Draw the cropped region scaled to target output
+    const scaleX = outputWidth / pixelCrop.width;
+    const scaleY = outputHeight / pixelCrop.height;
+
     ctx.drawImage(
       image,
-      pixelCrop.x * scaleX,
-      pixelCrop.y * scaleY,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
       pixelCrop.width * scaleX,
-      pixelCrop.height * scaleY,
-      0,
-      0,
-      outputWidth,
-      outputHeight
+      pixelCrop.height * scaleY
     );
 
     // Convert canvas to blob
@@ -118,94 +150,90 @@ function ImageCropModal({ imageSrc, onCropComplete, onClose, isOpen }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div
-        className="bg-white rounded-lg w-full max-w-4xl mx-4 pb-10 flex flex-col"
-        style={{ maxHeight: "90vh" }}
-        dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden animate-fadeIn">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {t("Crop Image")}
-          </h3>
+        <div className="flex justify-between items-center px-6 py-3 border-b bg-white/90">
+          <h2 className="text-lg font-semibold text-gray-800">
+            {t("Crop your logo image")}
+          </h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-red-100 rounded-full transition"
+            aria-label={t("Close")}
           >
             <X className="h-5 w-5 text-gray-500" />
           </button>
         </div>
 
-        {/* Info Banner */}
-       
-
-        {/* Cropper Area */}
-        <div className="relative flex-1" style={{ minHeight: "400px" }}>
+        {/* Crop Area */}
+        <div className="relative bg-gray-50 flex items-center justify-center min-h-[420px]">
           <Cropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            rotation={rotation}
-            aspect={16 / 9}
-            onCropChange={onCropChange}
-            onZoomChange={onZoomChange}
-            onRotationChange={onRotationChange}
+            aspect={3 / 1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
             onCropComplete={onCropCompleteHandler}
+            onMediaLoaded={onMediaLoaded}
             showGrid={true}
-            style={{
-              containerStyle: {
-                backgroundColor: "#f3f4f6",
-              },
-            }}
+            style={{ containerStyle: { borderRadius: 8 } }}
           />
         </div>
 
-        {/* Controls */}
-        <div className="p-4 border-t bg-gray-50 space-y-4">
-          {/* Zoom Control */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              {t("Zoom")}: {Math.round(zoom * 100)}%
-            </label>
+        {/* Toolbar */}
+        <div className="px-6 py-4 bg-gray-50 border-t space-y-4">
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
+              className="p-2 rounded-full bg-white border hover:bg-gray-100"
+              aria-label={t("Zoom out")}
+            >
+              <Minus className="h-4 w-4 text-blue-600" />
+            </button>
             <input
               type="range"
-              min={1}
-              max={3}
-              step={0.1}
+              min="1"
+              max="3"
+              step="0.01"
               value={zoom}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="w-48 accent-blue-600"
+              aria-label={t("Zoom slider")}
             />
-          </div>
-
-          {/* Rotation Control */}
-          <div className="flex items-center gap-3">
             <button
-              type="button"
-              onClick={handleRotate}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
+              className="p-2 rounded-full bg-white border hover:bg-gray-100"
+              aria-label={t("Zoom in")}
             >
-              <RotateCw className="h-4 w-4" />
-              {t("Rotate 90°")}
+              <Plus className="h-4 w-4 text-blue-600" />
             </button>
-            <span className="text-sm text-gray-600">
-              {t("Current rotation")}: {rotation}°
-            </span>
+            <button
+              onClick={handleAutoCrop}
+              className="ml-6 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-sm"
+            >
+              <Wand2 className="h-4 w-4" /> {t("Auto Crop")}
+            </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-2 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <p className="text-center text-xs text-gray-500">
+            {t("Aspect")}:{" "}
+            <span className="font-semibold text-gray-700">3:1</span> |{" "}
+            {t("Output")}:{" "}
+            <span className="font-semibold text-gray-700">1920×640 px</span>
+          </p>
+
+          {/* Footer Actions */}
+          <div className="flex justify-end gap-3 pt-3 border-t">
+            <Button variant="outline" onClick={onClose} className="rounded-lg">
               {t("Cancel")}
             </Button>
             <Button
-              type="button"
               onClick={handleCropConfirm}
-              className="flex items-center gap-2"
+              className="rounded-lg bg-blue-600 hover:bg-blue-700"
             >
-              <Check className="h-4 w-4" />
-              {t("Apply Crop")}
+              <Check className="h-4 w-4 mr-1" /> {t("Apply Crop")}
             </Button>
           </div>
         </div>

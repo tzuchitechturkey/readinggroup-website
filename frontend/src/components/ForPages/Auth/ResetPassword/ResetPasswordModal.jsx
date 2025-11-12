@@ -33,11 +33,12 @@ function ResetPasswordModal({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
-        <h2 className="text-xl font-bold mb-2 text-center">
+        <h2 className="text-xl font-bold mb-2 text-center text-blue-500">
           {t("Reset Password")}
         </h2>
-        <div className="mb-4 text-center text-gray-600">
-          {t("Please enter your email to reset your password.")}
+        <hr className="mb-4 border-gray-200" />
+        <div className="mb-4 text-center text-gray-600 whitespace-nowrap">
+          {t("Please enter your email to reset your password")}
         </div>
         <input
           type="email"
@@ -59,12 +60,16 @@ function ResetPasswordModal({ open, onClose }) {
         >
           {resetLoading ? t("Sending...") : t("Send")}
         </button>
-        <button
-          className="w-full py-2 mt-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
-          onClick={onClose}
-        >
-          {t("Close")}
-        </button>
+        <hr className="mt-6 mb-2 border-gray-200" />
+        <div className="flex flex-row justify-between items-center w-full px-1">
+          <div />
+          <button
+            className="text-gray-700 px-2 py-1 font-medium hover:text-gray-900"
+            onClick={onClose}
+          >
+            {t("Cancel")}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -35,12 +35,7 @@ const TOTPModal = ({
     text.replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 
   return (
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md   p-6">
-      {/* العنوان */}
-      <h5 className="text-center text-green-600 font-bold text-lg mb-4">
-        {t("Two-Factor Authentication")}
-      </h5>
-
+    <div className="mx-auto mt-8 max-w-[350px] w-full flex flex-col items-center">
       {/* صورة الـ QR */}
       {qrUrl && (
         <div className="text-center mb-4">
@@ -53,7 +48,7 @@ const TOTPModal = ({
               href="/auth/totp-setup"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline"
+              className="text-blue-500"
             >
               {t("Need help setting up the app? Click here.")}
             </a>
@@ -99,23 +94,18 @@ const TOTPModal = ({
         </button>
       </form>
 
-      {/* زر الإلغاء */}
-      <div className="mt-4 border-t pt-3">
-        <button
-          onClick={onClose}
-          className="w-full text-gray-500 hover:text-gray-700"
-        >
-          {t("Cancel")}
-        </button>
-      </div>
-
-      {/* زر إعادة إرسال QR */}
-      <div className="mt-2 text-center">
+      <div className="mt-4 border-t pt-3 flex flex-row justify-between w-full px-2">
         <button
           onClick={() => setOnOpenResendQr(true)}
-          className="text-blue-600 underline hover:text-blue-800"
+          className="text-blue-600  hover:text-blue-800 px-4 py-1"
         >
-          {t("resend Qr")}
+          {t("Resend QR ")}
+        </button>
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700 px-4 py-1"
+        >
+          {t("Cancel")}
         </button>
       </div>
     </div>
