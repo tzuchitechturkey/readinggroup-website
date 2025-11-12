@@ -1323,5 +1323,6 @@
   "Cannot add event to weekly list. Only published events can be added to the weekly list.": "لا يمكن إضافة الحدث إلى القائمة الأسبوعية. يمكن إضافة الأحداث المنشورة فقط إلى القائمة الأسبوعية.",
   "Event added to weekly list successfully": "تم إضافة الحدث إلى القائمة الأسبوعية بنجاح",
   "Event removed from weekly list successfully": "تمت إزالة الحدث من القائمة الأسبوعية بنجاح",
-  "No videos found": "لم يتم العثور على فيديوهات"
+  "No videos found": "لم يتم العثور على فيديوهات",
+  "Top Liked Videos": "  أكثر الفيديوهات إعجاباً"
 }

@@ -11,7 +11,7 @@ import { GetTop5ViewedVideos, GetVideoById } from "@/api/videos";
 import Loader from "@/components/Global/Loader/Loader";
 
 function VideoPageContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
   const [videoData, setVideoData] = useState(null);
@@ -49,7 +49,7 @@ function VideoPageContent() {
   }, []);
 
   return (
-    <div className="bg-white">
+    <div className="bg-white" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
       {/* Start Show Video */}
       <CustomyoutubeVideo videoData={videoData} />

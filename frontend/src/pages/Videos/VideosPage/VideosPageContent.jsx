@@ -11,7 +11,7 @@ import {
   GetMyListedVideos,
   GetTopLikedVideos,
   GetTopRatingVideos,
-  GetVideos,
+  GetRandomPublishedVideos,
   GetVideoCategories,
   GetItemsByCategoryId,
 } from "@/api/videos";
@@ -44,7 +44,7 @@ function VideosPageContent() {
   };
   const getMixVideos = async () => {
     try {
-      const res = await GetVideos(10, 0, "published");
+      const res = await GetRandomPublishedVideos(10, 0);
       setMixVideos(res.data?.results);
     } catch (err) {
       console.error("Failed to fetch top mix videos:", err);

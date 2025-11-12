@@ -267,7 +267,7 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
                   <div className="">
                     <div className="mb-2">
                       <h2 className="text-2xl font-bold text-text">
-                        {t("Top 5 in your like")}
+                        {t("Top Liked Videos")}
                       </h2>
                     </div>
                     <BrokenCarousel

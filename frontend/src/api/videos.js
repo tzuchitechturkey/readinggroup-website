@@ -255,3 +255,8 @@ export async function GetVideosBySeasonId(limit, offset, seasonId) {
     `/season-ids/${seasonId}/videos/?limit=${limit}&offset=${offset}`
   );
 }
+
+// Random Published Videos
+export async function GetRandomPublishedVideos(limit, offset) {
+  return await axios.get(`/videos/published/?limit=${limit}&offset=${offset}`);
+}
