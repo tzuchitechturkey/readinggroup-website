@@ -220,6 +220,43 @@ class VideoViewSet(BaseContentViewSet):
         serializer = VideoSerializer(videos, many=True, context={"request": request})
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        operation_summary="List published videos",
+        operation_description="Return videos with status='published' and whose category is active.",
+        manual_parameters=video_manual_parameters,
+    )
+    @action(detail=False, methods=("get",), url_path="published", url_name="published")
+    def published(self, request):
+        """Return videos that are published and whose category is active.
+
+        URL: /api/v1/videos/published/
+        Supports pagination and includes likes annotation so serializers can show likes_count/has_liked.
+        """
+        qs = Video.objects.all()
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        qs = self.annotate_likes(qs)
+        qs = qs.order_by('-created_at')
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = VideoSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = VideoSerializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
     @action(detail=False, methods=("get",), url_path="top-rated", url_name="top_rated")
     def top_rated(self, request):
         """Return top N videos ordered by average user rating (if ratings exist).
