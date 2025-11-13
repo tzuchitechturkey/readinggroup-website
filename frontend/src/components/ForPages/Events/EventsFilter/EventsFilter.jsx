@@ -20,7 +20,7 @@ function EventsFilter({
   hasActiveFilters,
   handleClearFilters,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [writersList, setWritersList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
 
@@ -134,6 +134,7 @@ function EventsFilter({
             renderItemLabel={(item) => item.username}
             renderItemSubLabel={(item) => item.groups?.[0]}
             showWriterAvatar={false}
+            isRtl={i18n?.language === "ar" ? true : false}
           />
         </div>
         {/* End Writer Filter */}

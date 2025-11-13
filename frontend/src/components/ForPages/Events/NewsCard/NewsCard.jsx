@@ -25,7 +25,7 @@ const NewsCard = ({ t, article, onClick, imgClassName }) => (
         className={`flex items-center gap-3 sm:gap-6 text-xs sm:text-sm text-text/80 `}
       >
         <span className="truncate max-w-[120px] sm:max-w-none">
-          {article.country} 
+          {t(article.country)}
         </span>
         <span className="whitespace-nowrap">
           {article.created_at.split(" ")[0]}

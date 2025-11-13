@@ -174,7 +174,7 @@ function VideosCategoriesContent({ onSectionChange }) {
 
           <div className="flex items-center justify-end gap-1">
             <span className="text-sm text-gray-500">
-              {t("Total")}: {categories.length} {t("categories")}
+              {t("Total")}: {totalRecords} {t("categories")}
             </span>
             <button
               onClick={openAddModal}

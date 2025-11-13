@@ -21,6 +21,7 @@ export default function AutoComplete({
   showWriterAvatar = true,
   multiple = false,
   selectedItems = [],
+  isRtl = false,
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -30,17 +31,22 @@ export default function AutoComplete({
 
   const handleSearch = async () => {
     if (searchApi) {
-      searchMethod(tempSearchInput);
+      searchMethod(search);
     } else {
-      const filteredList = list.filter((item) =>
-        item[searchParam].toLowerCase().includes(tempSearchInput.toLowerCase())
-      );
+      const filteredList = list.filter((item) => {
+        const labelValue = renderItemLabel ? renderItemLabel(item) : item.name || item.label || "";
+        return labelValue.toLowerCase().includes(search.toLowerCase());
+      });
       setSearchList(filteredList);
     }
   };
   const clearSearch = () => {
     setSearch("");
-    handleSearch();
+    if (searchApi) {
+      searchMethod("");
+    } else {
+      setSearchList(list);
+    }
   };
 
   useEffect(() => {
@@ -109,19 +115,24 @@ export default function AutoComplete({
                   </span>
                 ))}
               </div>
-            ) : !multiple && selectedItem?.username ? (
+            ) : !multiple && selectedItem ? (
               <>
-                <img
-                  src={
-                    selectedItem.profile_image
-                      ? selectedItem.profile_image
-                      : "/fake-user.png"
-                  }
-                  alt={selectedItem.username}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
+                {showWriterAvatar && selectedItem?.username && (
+                  <img
+                    src={
+                      selectedItem.profile_image
+                        ? selectedItem.profile_image
+                        : "/fake-user.png"
+                    }
+                    alt={selectedItem.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                )}
+                {showWriterAvatar && !selectedItem?.username && (
+                  <User className="w-8 h-8 text-gray-400" />
+                )}
                 <div className="flex-1">
-                  <div className="font-medium text-black/60 text-sm">
+                  <div className="font-medium text-black text-sm">
                     {renderItemLabel(selectedItem)}
                   </div>
                 </div>
@@ -241,7 +252,11 @@ export default function AutoComplete({
                         alt={item.username}
                         className="w-8 h-8 rounded-full object-cover  text-black"
                       />
-                      <div className="flex-1">
+                      <div
+                        className={`flex-1 ${
+                          isRtl ? "text-right" : "text-left"
+                        }`}
+                      >
                         <div className=" text-sm  text-black">
                           {renderItemLabel(item)}
                         </div>

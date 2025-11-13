@@ -666,10 +666,20 @@ function VideosList({ onSectionChange }) {
               {/* End First Page Button */}
               {/* Start Middle Pages */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = Math.max(
-                  1,
-                  Math.min(currentPage - 2 + i, totalPages - 4 + i)
-                );
+                let pageNum;
+                
+                // حساب رقم الصفحة بناءً على الصفحة الحالية
+                if (currentPage <= 3) {
+                  // إذا كنا في بداية الصفحات، اعرض 1, 2, 3, 4, 5
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  // إذا كنا في نهاية الصفحات، اعرض آخر 5 صفحات
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  // في الوسط، اعرض الصفحة الحالية في المنتصف
+                  pageNum = currentPage - 2 + i;
+                }
+
                 if (pageNum < 1 || pageNum > totalPages) return null;
 
                 const isActive = pageNum === currentPage;

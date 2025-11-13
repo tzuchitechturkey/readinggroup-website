@@ -165,7 +165,7 @@ function EventCategoriesContent({ onSectionChange }) {
 
           <div className="flex justify-end items-center gap-1">
             <span className="text-sm text-gray-500">
-              {t("Total")}: {categories.length} {t("categories")}
+              {t("Total")}: {totalRecords} {t("categories")}
             </span>
             <button
               onClick={openAddModal}

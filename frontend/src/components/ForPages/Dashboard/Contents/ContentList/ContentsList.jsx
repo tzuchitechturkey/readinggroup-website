@@ -43,7 +43,7 @@ const ContentsList = ({ onSectionChange }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [ContentsData, setContentsData] = useState([]);
+  const [contentsData, setContentsData] = useState([]);
   // Fetch Content from API
   const getContentsData = async (
     page = 0,
@@ -76,9 +76,9 @@ const ContentsList = ({ onSectionChange }) => {
 
   // Local sorting for displayed data
   const getSortedData = () => {
-    if (!ContentsData || !sortConfig.key) return ContentsData || [];
+    if (!contentsData || !sortConfig.key) return contentsData || [];
 
-    const sorted = [...ContentsData].sort((a, b) => {
+    const sorted = [...contentsData].sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
 
@@ -200,7 +200,7 @@ const ContentsList = ({ onSectionChange }) => {
       setIsLoading(false);
     }
   };
-
+  console.log(contentsData);
   const handleConfirmDelete = async () => {
     if (!selectedContent?.id) return;
 

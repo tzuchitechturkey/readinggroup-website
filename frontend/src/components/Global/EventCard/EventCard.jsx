@@ -6,10 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
-import Modal from "../Modal/Modal";
-
 function EventCard({ className = "", item }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
   const navigate = useNavigate();
 
@@ -64,7 +62,11 @@ function EventCard({ className = "", item }) {
           {/* End Tag */}
 
           {/* Start Title */}
-          <div className="absolute bottom-6 left-3">
+          <div
+            className={`absolute bottom-6 ${
+              i18n?.language === "ar" ? "right-3" : "left-3"
+            } `}
+          >
             <h3 className="text-white font-semibold text-lg group-hover:text-blue-400 transition-colors">
               {item.title}
             </h3>

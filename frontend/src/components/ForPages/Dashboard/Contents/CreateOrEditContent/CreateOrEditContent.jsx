@@ -45,8 +45,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     tags: "",
     language: "",
     image: null,
-    images: [],
-    images_url: [],
+    images: [], // الصور المرفوعة كملفات (File objects) أو الصور الموجودة من الـ Backend
+    images_url: [], // روابط الصور كنصوص (Array of strings) - يُرسل للـ Backend في مفتاح images_url
     metadata: "",
     country: "",
   });
@@ -273,13 +273,13 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       newErrors.country = t("Country is required");
     }
 
-    if (
-      !formData.image &&
-      !formData.images?.length &&
-      !content &&
-      imageFiles.length === 0
-    ) {
-      newErrors.images = t("At least one image is required");
+    const hasImageFiles = imageFiles.length > 0;
+    const hasImageUrls = formData.images_url && formData.images_url.length > 0;
+    const hasExistingImages = formData.images && formData.images.length > 0;
+
+    // يجب توفير واحد على الأقل من: صور مرفوعة، روابط صور، أو صور موجودة
+    if (!hasImageFiles && !hasImageUrls && !hasExistingImages && !content) {
+      newErrors.images = t("At least one image or image URL is required");
     }
 
     setErrors(newErrors);
@@ -314,23 +314,21 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     contentData.append("language", formData.language);
     contentData.append("country", formData.country);
 
-    // Add image if selected
-    // if (formData.image) {
-    //   contentData.append("image", formData.image);
-    // }
-    // Only append images (file uploads) if new files were selected
+    // إضافة الصور كملفات (images) - يتم رفعها من الجهاز
+    // هذه ستُحفظ في مفتاح images
     if (imageFiles.length > 0) {
       imageFiles.forEach((file) => {
         if (file instanceof File) {
-          contentData.append(`images`, file);
+          contentData.append("images", file);
         }
       });
     }
 
-    // Add image URLs (روابط الصور) if provided
+    // إضافة روابط الصور (images_url) - روابط نصية
+    // هذه ستُحفظ في مفتاح images_url كمصفوفة نصوص
     if (Array.isArray(formData.images_url) && formData.images_url.length > 0) {
       formData.images_url.forEach((imgUrl) => {
-        if (typeof imgUrl === "string") {
+        if (typeof imgUrl === "string" && imgUrl.trim()) {
           contentData.append("images_url", imgUrl);
         }
       });
@@ -918,7 +916,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             {/* End Country */}
 
             {/* Start Category */}
-            <div >
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Category")} *
               </label>
@@ -1011,7 +1009,13 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                             onClick={() => handleCategorySelect(category)}
                             className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                           >
-                            <div className={`flex-1 ${i18n?.language === "ar" ? "text-right" :"text-left"} `}>
+                            <div
+                              className={`flex-1 ${
+                                i18n?.language === "ar"
+                                  ? "text-right"
+                                  : "text-left"
+                              } `}
+                            >
                               <div className="font-medium text-sm">
                                 {category.name}
                               </div>
@@ -1022,7 +1026,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                               )}
                             </div>
                             <Tag className="w-5 h-5 text-blue-600" />
-
                           </button>
                         ))
                       ) : (
@@ -1135,7 +1138,13 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                               alt={writer.username}
                               className="w-8 h-8 rounded-full object-cover"
                             />
-                            <div className={` ${i18n?.language === "ar" ? "text-right" :"text-left"}  flex-1`}>
+                            <div
+                              className={` ${
+                                i18n?.language === "ar"
+                                  ? "text-right"
+                                  : "text-left"
+                              }  flex-1`}
+                            >
                               <div className="font-medium text-sm">
                                 {writer.username}
                               </div>

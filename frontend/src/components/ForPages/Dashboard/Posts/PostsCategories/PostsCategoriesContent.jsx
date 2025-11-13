@@ -171,7 +171,7 @@ function PostsCategoriesContent({ onSectionChange }) {
 
           <div className="flex items-center justify-between gap-1">
             <span className="text-xs md:text-sm text-gray-500">
-              {t("Total")}: {categories.length} {t("categories")}
+              {t("Total")}: {totalRecords} {t("categories")}
             </span>
             <button
               onClick={openAddModal}
@@ -300,7 +300,11 @@ function PostsCategoriesContent({ onSectionChange }) {
                           cat.is_active
                             ? "bg-green-100 text-green-600 hover:bg-green-200"
                             : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                        } ${!cat.is_active && cat.post_count === 0 ? 'opacity-50 ' : ''}`}
+                        } ${
+                          !cat.is_active && cat.post_count === 0
+                            ? "opacity-50 "
+                            : ""
+                        }`}
                         title={
                           !cat.is_active && cat.post_count === 0
                             ? t("Cannot activate category with no posts.")
@@ -417,9 +421,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                   <ToggleLeft className="h-8 w-12" />
                 )}
                 <span className="text-base font-medium">
-                  {form?.is_active
-                    ? t("Active")
-                    : t("Inactive")}
+                  {form?.is_active ? t("Active") : t("Inactive")}
                 </span>
               </button>
             </div>

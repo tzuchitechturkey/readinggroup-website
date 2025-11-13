@@ -159,7 +159,7 @@ function NewsCategoriesContent({ onSectionChange }) {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">
-              {t("Total")}: {categories.length} {t("categories")}
+              {t("Total")}: {totalRecords} {t("categories")}
             </span>
             <button
               onClick={openAddModal}
