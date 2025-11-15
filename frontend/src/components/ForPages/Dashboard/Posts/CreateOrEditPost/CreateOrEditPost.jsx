@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { Save, X, User, Tag, Search, Upload } from "lucide-react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -1040,21 +1042,47 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
           </p>
         </div>
 
-        {/* Body Content - Full Width */}
+        {/* Body Content - Full Width (CKEditor) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("Body Content")} *
           </label>
-          <textarea
-            name="body"
-            value={formData.body}
-            onChange={handleInputChange}
-            rows={8}
-            placeholder={t("Enter the full content of the post")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          <div
+            className={`border rounded-md ${
               errors.body ? "border-red-500" : "border-gray-300"
-            }`}
-          />
+            } focus-within:ring-2 focus-within:ring-blue-500`}
+          >
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.body}
+              config={{
+                placeholder: t("Enter the full content of the post"),
+                language: i18n.language === "ar" ? "ar" : "en",
+                // Custom upload adapter to suppress filerepository-no-upload-adapter error.
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                // Optional: remove plugins that may try to upload to server automatically.
+                removePlugins: [
+                  // If build contains these and you don't want server upload.
+                  "MediaEmbedToolbar",
+                ],
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                setFormData((prev) => ({ ...prev, body: data }));
+                if (errors.body) {
+                  setErrors((prev) => ({ ...prev, body: "" }));
+                }
+              }}
+              onBlur={() => {
+                if (!formData.body.trim()) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    body: t("Body content is required"),
+                  }));
+                }
+              }}
+            />
+          </div>
           {errors.body && (
             <p className="text-red-500 text-xs mt-1">{errors.body}</p>
           )}
@@ -1109,6 +1137,35 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
       </form>
     </div>
   );
+}
+
+// CKEditor custom upload adapter plugin (Base64 inline images)
+function MyCustomUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new Base64UploadAdapter(loader);
+  };
+}
+
+class Base64UploadAdapter {
+  constructor(loader) {
+    this.loader = loader;
+  }
+  upload() {
+    return this.loader.file.then(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({ default: reader.result });
+          };
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
+        })
+    );
+  }
+  abort() {
+    // No special abort handling needed for Base64 conversion.
+  }
 }
 
 export default CreateOrEditPost;

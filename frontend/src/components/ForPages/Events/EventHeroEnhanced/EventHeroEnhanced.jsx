@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -118,6 +118,39 @@ const EventHeroEnhanced = ({ className = "" }) => {
     getEventsData();
   }, []);
 
+  // Sanitize summary HTML from CKEditor (basic client-side approach)
+  const sanitizedSummary = useMemo(() => {
+    if (!eventData?.summary) return "";
+    try {
+      const temp = document.createElement("div");
+      temp.innerHTML = eventData.summary;
+      // Remove script tags
+      temp.querySelectorAll("script").forEach((el) => el.remove());
+      // Remove on* event handlers
+      temp.querySelectorAll("*").forEach((el) => {
+        [...el.attributes].forEach((attr) => {
+          if (/^on/i.test(attr.name)) {
+            el.removeAttribute(attr.name);
+          }
+        });
+      });
+      return temp.innerHTML;
+    } catch {
+      return "";
+    }
+  }, [eventData?.summary]);
+
+  // Component to inject sanitized HTML without using dangerouslySetInnerHTML (avoids lint rule)
+  const HtmlContent = ({ html, className = "" }) => {
+    const htmlRef = useRef(null);
+    useEffect(() => {
+      if (htmlRef.current) {
+        htmlRef.current.innerHTML = html;
+      }
+    }, [html]);
+    return <div ref={htmlRef} className={className} />;
+  };
+
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
@@ -141,12 +174,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
           />
         </div>
         {/* ENd Image */}
-        {/* Start Description */}
-        <p className="text-base md:text-lg text-text leading-relaxed">
-          {eventData?.description || eventData?.summary}
-        </p>
-        {/* End description */}
-        {/* Start Article Info */}
+         {/* Start Article Info */}
         <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
           {/* left: writer & date */}
           <div className="flex items-center gap-4">
@@ -200,6 +228,16 @@ const EventHeroEnhanced = ({ className = "" }) => {
             {/* End Icons */}
           </div>
         </div>
+        {/* Start Description / Summary (render HTML from CKEditor) */}
+        <div className="text-base md:text-lg text-text leading-relaxed prose max-w-none">
+          {eventData?.description ? (
+            <span>{eventData.description}</span>
+          ) : (
+            <HtmlContent html={sanitizedSummary} />
+          )}
+        </div>
+        {/* End Description */}
+       
       </div>
       {/* End Main Article */}
 

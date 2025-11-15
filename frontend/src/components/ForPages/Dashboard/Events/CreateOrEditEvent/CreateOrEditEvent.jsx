@@ -1,5 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+// CKEditor Base64 Upload Adapter (simple inline implementation)
+function MyCustomUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new Base64UploadAdapter(loader);
+  };
+}
+
+class Base64UploadAdapter {
+  constructor(loader) {
+    this.loader = loader;
+  }
+  upload() {
+    return this.loader.file.then(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({ default: reader.result });
+          };
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(file);
+        })
+    );
+  }
+  abort() {}
+}
+
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { X, User, Search, Tag, Upload } from "lucide-react";
@@ -695,7 +724,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showCategoryDropdown && (
-                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div
+                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
+                >
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
@@ -748,7 +780,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   <div className="max-h-60 overflow-y-auto">
                     {categoriesList.length > 0 ? (
                       categoriesList.map((category) => (
-                          <button
+                        <button
                           key={category.id}
                           type="button"
                           onClick={() => handleCategorySelect(category)}
@@ -799,7 +831,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 }`}
               >
                 {formData?.writer ? (
-                  <div className={`font-medium text-sm ${i18n?.language === "ar" ? "text-right" : "text-left"}`}>
+                  <div
+                    className={`font-medium text-sm ${
+                      i18n?.language === "ar" ? "text-right" : "text-left"
+                    }`}
+                  >
                     {formData?.writer}
                   </div>
                 ) : (
@@ -811,7 +847,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showWriterDropdown && (
-                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div
+                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
+                >
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
@@ -1007,7 +1046,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               </button>
 
               {showSectionDropdown && (
-                <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
+                <div
+                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
+                >
                   {/* Search Box */}
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
@@ -1320,16 +1362,29 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Summary")} *
           </label>
-          <textarea
-            name="summary"
-            value={formData.summary}
-            onChange={handleInputChange}
-            rows={4}
-            className={`w-full p-3 border rounded-lg outline-none ${
+          <div
+            className={`border rounded-lg ${
               errors.summary ? "border-red-500" : "border-gray-300"
             }`}
-            placeholder={t("Enter report summary")}
-          />
+          >
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.summary || ""}
+              config={{
+                placeholder: t("Enter report summary"),
+                language: i18n?.language === "ar" ? "ar" : "en",
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                removePlugins: ["MediaEmbedToolbar"],
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                setFormData((prev) => ({ ...prev, summary: data }));
+                if (errors.summary) {
+                  setErrors((prev) => ({ ...prev, summary: "" }));
+                }
+              }}
+            />
+          </div>
           {errors.summary && (
             <p className="text-red-500 text-xs mt-1">{errors.summary}</p>
           )}

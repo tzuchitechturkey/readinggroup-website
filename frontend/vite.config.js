@@ -7,4 +7,8 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve("./src") } },
   base: "/", // custom domain => root paths
   server: { port: 3000, open: true },
+  // Let Vite prebundle CKEditor CJS so named exports work.
+  optimizeDeps: {
+    include: ["@ckeditor/ckeditor5-react", "@ckeditor/ckeditor5-build-classic"],
+  },
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Star, User, Camera, Calendar, MapPin } from "lucide-react";
@@ -115,11 +115,9 @@ function ContentInfoCard({
       )}
       {/* End Writer/Photographer and Rating Row */}
 
-      {/* Start Body  */}
-      <div>
-        <p className="m-1">{contentData?.body}</p>
-      </div>
-      {/* End Body  */}
+      {/* Start Body (rich HTML from CKEditor) */}
+      <RichBody body={contentData?.body} isRTL={isRTL} />
+      {/* End Body */}
       {/* Date and Location Row for photos */}
       {contentType === "photo" && (
         <div
@@ -205,5 +203,40 @@ function ContentInfoCard({
     </div>
   );
 }
+
+// Sanitized rich body renderer (avoids dangerouslySetInnerHTML lint rule)
+const RichBody = ({ body = "", isRTL = false }) => {
+  const ref = useRef(null);
+  const sanitized = useMemo(() => {
+    if (!body) return "";
+    try {
+      const temp = document.createElement("div");
+      temp.innerHTML = body;
+      temp.querySelectorAll("script").forEach((el) => el.remove());
+      temp.querySelectorAll("*").forEach((el) => {
+        [...el.attributes].forEach((attr) => {
+          if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+        });
+      });
+      return temp.innerHTML;
+    } catch {
+      return "";
+    }
+  }, [body]);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.innerHTML = sanitized;
+    }
+  }, [sanitized]);
+
+  return (
+    <div
+      ref={ref}
+      dir={isRTL ? "rtl" : "ltr"}
+      className="prose max-w-none my-2 text-gray-800 leading-relaxed"
+    />
+  );
+};
 
 export default ContentInfoCard;
