@@ -1,28 +1,60 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
-import { ThumbsUp, ListPlus } from "lucide-react";
+import { ThumbsUp, ListPlus, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
-import { AddToMyList, RemoveFromMyList, PatchVideoById } from "@/api/videos";
+import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
+import RatingSection from "@/components/Global/RatingSection/RatingSection";
+import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
+import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import {
+  AddToMyList,
+  RemoveFromMyList,
+  PatchVideoById,
+  GetTop5ViewedVideos,
+} from "@/api/videos";
 import { PatchEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CustomyoutubeVideo({ videoData }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [videoItem, setVideoItem] = useState(videoData);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [relatedVideos, setRelatedVideos] = useState([]);
+  const [showAllRelated, setShowAllRelated] = useState(false);
   const videoRef = useRef(null);
+
+  // تطبيق RTL عند تغيير اللغة
+  useEffect(() => {
+    const isRTL = i18n.language === "ar";
+    document.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.style.direction = isRTL ? "rtl" : "ltr";
+  }, [i18n.language]);
 
   useEffect(() => {
     setVideoItem(videoData);
   }, [videoData]);
+
+  // Fetch top viewed videos to show as similar content (to match other section)
+  useEffect(() => {
+    const fetchRelated = async () => {
+      try {
+        const res = await GetTop5ViewedVideos();
+        setRelatedVideos(res?.data || []);
+      } catch (e) {
+        console.error("Failed to fetch related videos:", e);
+      }
+    };
+    fetchRelated();
+  }, []);
 
   const isYouTubeUrl = (url) =>
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
@@ -121,6 +153,8 @@ function CustomyoutubeVideo({ videoData }) {
     }
   };
 
+  // Placeholder for rating handler removed due to unused lint warning
+
   const handleAddToMyList = async () => {
     try {
       const currentlySaved = Boolean(videoItem?.has_in_my_list);
@@ -152,298 +186,299 @@ function CustomyoutubeVideo({ videoData }) {
       setErrorFn(err, t);
     }
   };
+  // console.log removed to satisfy lint rules
+
   return (
-    <div className="bg-gray-100 px-4 sm:px-0  ">
-      <div className="  ">
-        <div className="bg-white rounded-lg  overflow-hidden">
-          <div
-            className="relative bg-black"
-            onMouseEnter={() => setShowControls(true)}
-            onMouseLeave={() => setShowControls(true)}
-          >
-            {/* Start video player */}
-            <div className="w-full relative aspect-video">
-              {videoData?.video_url ? (
-                youTube ? (
-                  <iframe
-                    className="w-full h-full"
-                    src={getYouTubeEmbedUrl(videoData?.video_url)}
-                    title={videoData?.title || "YouTube video"}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover cursor-pointer"
-                    poster={videoData?.thumbnail}
-                    controls={false}
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleTimeUpdate}
-                    onClick={handlePlayPause}
-                  >
-                    <source src={videoData?.video_url} type="video/mp4" />
-                    {t("Your browser does not support.")}
-                  </video>
-                )
-              ) : (
-                <div className="w-full h-full relative">
-                  <img
-                    src={videoData?.thumbnail}
-                    alt="Video thumbnail"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white bg-black/50 p-4 sm:p-6 rounded-lg">
-                      <div className="text-2xl sm:text-3xl md:text-4xl mb-2 sm:mb-3">
-                        ▶
+    <div
+      className={`min-h-screen bg-gray-50 ${
+        i18n.language === "ar" ? "rtl" : "ltr"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content - Left Side */}
+          <div className="lg:col-span-2">
+            {/* Video Section */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+              <div className="relative group">
+                <div
+                  className="relative bg-black"
+                  onMouseEnter={() => setShowControls(true)}
+                  onMouseLeave={() => setShowControls(true)}
+                >
+                  {/* Video Player */}
+                  <div className="w-full relative aspect-video">
+                    {videoData?.video_url ? (
+                      youTube ? (
+                        <iframe
+                          className="w-full h-full rounded-t-xl"
+                          src={getYouTubeEmbedUrl(videoData?.video_url)}
+                          title={videoData?.title || "YouTube video"}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          ref={videoRef}
+                          className="w-full h-full object-cover cursor-pointer rounded-t-xl"
+                          poster={videoData?.thumbnail}
+                          controls={false}
+                          onTimeUpdate={handleTimeUpdate}
+                          onLoadedMetadata={handleTimeUpdate}
+                          onClick={handlePlayPause}
+                        >
+                          <source src={videoData?.video_url} type="video/mp4" />
+                          {t("Your browser does not support.")}
+                        </video>
+                      )
+                    ) : (
+                      <div className="w-full h-full relative rounded-t-xl">
+                        <img
+                          src={videoData?.thumbnail}
+                          alt="Video thumbnail"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center text-white bg-black/50 p-4 sm:p-6 rounded-lg">
+                            <div className="text-2xl sm:text-3xl md:text-4xl mb-2 sm:mb-3">
+                              ▶
+                            </div>
+                            <p className="text-xs sm:text-sm opacity-80">
+                              {t("Video Link")}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs sm:text-sm opacity-80">
-                        {t("Video Link")}
-                      </p>
+                    )}
+                  </div>
+
+                  {/* Video Controls */}
+                  {!youTube && showControls && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-6 sm:pt-8">
+                        {/* Progress Bar */}
+                        <div className="mb-3 sm:mb-4">
+                          <div
+                            className="w-full bg-white/30 rounded-full h-1 cursor-pointer"
+                            onClick={handleProgressClick}
+                          >
+                            <div
+                              className="bg-red-600 h-1 rounded-full transition-all duration-100"
+                              style={{
+                                width: duration
+                                  ? `${(currentTime / duration) * 100}%`
+                                  : "0%",
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="flex items-center justify-between text-white">
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <button
+                              onClick={handlePlayPause}
+                              className="hover:text-gray-300 text-sm sm:text-base"
+                            >
+                              {isPlaying ? t("pause") : t("play")}
+                            </button>
+                            <span className="text-xs sm:text-sm">
+                              {formatTime(currentTime)} / {formatTime(duration)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Video Info */}
+              <div className="p-6">
+                {/* Title & YouTube Button Row */}
+                <div
+                  className={`flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-6 ${
+                    i18n.language === "ar" ? "flex-row-reverse" : ""
+                  }`}
+                >
+                  {/* العنوان */}
+                  {videoData?.title && (
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-0">
+                      {videoData?.title}
+                    </h1>
+                  )}
+                  {/* زر يوتيوب */}
+                  {videoData?.video_url && (
+                    <button
+                      onClick={() =>
+                        window.open(videoData?.video_url, "_blank")
+                      }
+                      className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap"
+                    >
+                      <span className="font-medium">
+                        {t("Watch on YouTube")}
+                      </span>
+                      <img
+                        src="/icons/youtube-icon.png"
+                        alt="YouTube"
+                        className="w-4 h-4 sm:w-5 sm:h-5"
+                      />
+                    </button>
+                  )}
+                </div>
+                {/* مدة الفيديو */}
+                {videoData?.duration && (
+                  <span className="px-2 sm:px-3 py-1 bg-transparent border-[1px] border-gray-300 text-xs sm:text-sm rounded-full mb-4 inline-block">
+                    {videoData?.duration}
+                  </span>
+                )}
+
+                {/* Views and Date */}
+                {(videoData?.views || videoData?.timeAgo) && (
+                  <div
+                    className={`flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-6 ${
+                      i18n.language === "ar" ? "flex-row-reverse" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
+                      {videoData?.views && (
+                        <>
+                          <span>
+                            {t("Views")}: {videoData?.views}
+                          </span>
+                          {(videoData?.timeAgo &&
+                            videoData?.timeAgo.trim() !== "") ||
+                          videoData?.created_at ? (
+                            <span>•</span>
+                          ) : null}
+                        </>
+                      )}
+                      {videoData?.timeAgo &&
+                      videoData?.timeAgo.trim() !== "" ? (
+                        <span>{videoData?.timeAgo}</span>
+                      ) : videoData?.created_at ? (
+                        <span>
+                          {t("Published")}:{" "}
+                          {videoData?.created_at?.split(" ")[0]}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700">
+                      <button
+                        onClick={handleLike}
+                        className={`outline-0 flex items-center gap-1 sm:gap-2 transition-colors ${
+                          videoItem?.has_liked
+                            ? "text-blue-600"
+                            : "hover:text-black"
+                        }`}
+                        aria-pressed={videoItem?.has_liked}
+                      >
+                        {videoItem?.has_liked ? (
+                          <svg
+                            className="w-4 h-4 sm:w-5 sm:h-5"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M2 21h4V9H2v12zM23 10.5c0-.83-.67-1.5-1.5-1.5h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.22 8.95 7 9.45 7 10v9c0 1.1.9 2 2 2h7c.78 0 1.45-.45 1.79-1.11L23 10.5z" />
+                          </svg>
+                        ) : (
+                          <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                        <span className="text-sm sm:text-base md:text-lg font-semibold">
+                          {videoItem?.likes_count || "0"}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={handleOpenShare}
+                        className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
+                      >
+                        <img
+                          src="/icons/share_icon.png"
+                          alt="share"
+                          className="w-6 h-6 sm:w-7 sm:h-7"
+                        />
+                        <span className="text-sm sm:text-base md:text-lg font-semibold">
+                          {t("Share")}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={handleAddToMyList}
+                        className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
+                      >
+                        <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-sm sm:text-base md:text-lg font-semibold">
+                          {videoItem?.has_in_my_list
+                            ? t("Remove from My List")
+                            : t("Save")}
+                        </span>
+                      </button>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Comments Section */}
+            <CommentsSection itemId={videoItem?.id} type={"video"} />
+          </div>
+
+          {/* Sidebar - Right Side */}
+          <div className="lg:col-span-1">
+            {/* Video Info Card */}
+            <ContentInfoCard
+              contentData={videoItem}
+              contentType="video"
+              isRTL={i18n.language === "ar"}
+            />
+
+            {/* Similar Content - match layout used in other place */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <DynamicSection
+                title={t("Similar Content")}
+                titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium"
+                data={
+                  showAllRelated ? relatedVideos : relatedVideos.slice(0, 3)
+                }
+                isSlider={false}
+                cardName={VideoCard}
+                gridClassName="flex flex-col gap-4"
+                viewMoreUrl="/videos"
+              />
+              {relatedVideos?.length > 3 && (
+                <div className="mt-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllRelated((v) => !v)}
+                    aria-label={
+                      showAllRelated ? t("View Less") : t("View More")
+                    }
+                    className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    {showAllRelated ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
               )}
             </div>
-
-            {/* End video player */}
-
-            {/* Blur background*/}
-            <div className="pointer-events-none absolute -bottom-6 sm:-bottom-8 left-0 right-0 h-6 sm:h-8 bg-gradient-to-b from-black/60 via-black/25 to-transparent" />
-
-            {!youTube && showControls && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-6 sm:pt-8">
-                  {/* Start progressbar */}
-                  <div className="mb-3 sm:mb-4">
-                    <div
-                      className="w-full bg-white/30 rounded-full h-1 cursor-pointer"
-                      onClick={handleProgressClick}
-                    >
-                      <div
-                        className="bg-red-600 h-1 rounded-full transition-all duration-100"
-                        style={{
-                          width: duration
-                            ? `${(currentTime / duration) * 100}%`
-                            : "0%",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {/* End progressbar */}
-
-                  {/* Start Controls */}
-                  <div className="flex items-center justify-between text-white">
-                    <div className="flex items-center gap-2 sm:gap-4">
-                      <button
-                        onClick={handlePlayPause}
-                        className="hover:text-gray-300 text-sm sm:text-base"
-                      >
-                        {isPlaying ? t("pause") : t("play")}
-                      </button>
-                      <span className="text-xs sm:text-sm">
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                      </span>
-                    </div>
-                  </div>
-                  {/* End Controls */}
-                </div>
-              </div>
-            )}
           </div>
-
-          {/* Start Video Info */}
-          <div className="relative py-4 sm:py-5 md:py-6 px-4 sm:px-6 md:px-8 lg:px-10 z-50">
-            {/* Blur Background*/}
-            <div className="pointer-events-none absolute -top-3 sm:-top-4 left-0 right-0 h-3 sm:h-4 bg-gradient-to-b from-black/40 via-black/15 to-transparent" />
-
-            {/* Start Tags && Watch on YouTube Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 ">
-                {/* Start Tags */}
-                {Array.isArray(videoData?.tags) &&
-                  videoData?.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {videoData?.tags.map((t, i) => (
-                        <span
-                          key={`${t}-${i}`}
-                          className={`px-2 sm:px-3 py-1 bg-transparent  border-[1px] border-text 
-                        text-xs sm:text-sm rounded-full`}
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                {/* End Tags */}
-
-                {/* Start Duration */}
-                <div className="">
-                  <span
-                    className={`px-2 sm:px-3 py-1 bg-transparent  border-[1px] border-text 
-                    text-xs sm:text-sm rounded-full`}
-                  >
-                    {videoData?.duration}
-                  </span>
-                </div>
-                {/* End Duration */}
-              </div>
-
-              {/* Start Watch on YouTube Button */}
-              <button
-                onClick={() => window.open(videoData?.video_url, "_blank")}
-                className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap"
-              >
-                <span className="font-medium">{t("Watch on YouTube")}</span>
-                <img
-                  src="/icons/youtube-icon.png"
-                  alt="YouTube"
-                  className="w-4 h-4 sm:w-5 sm:h-5"
-                />
-              </button>
-              {/* End Watch on YouTube Button */}
-            </div>
-            {/* End Tags && Watch on YouTube Button */}
-
-            {/* Start Title */}
-            {videoData?.title && (
-              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 my-4 sm:my-5 md:my-6 lg:my-7 leading-tight">
-                {videoData?.title}
-              </h2>
-            )}
-            {/* End Title */}
-
-            {/* Start Views */}
-            {(videoData?.views || videoData?.timeAgo) && (
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-600 text-sm sm:text-base">
-                {t("Views")}:
-                {videoData?.views && <span>{videoData?.views}</span>}
-                {videoData?.views && videoData?.timeAgo && <span>•</span>}
-                {videoData?.timeAgo && <span>{videoData?.timeAgo}</span>}
-              </div>
-            )}
-            {/* End Views */}
-
-            {/* Start Description */}
-            {videoData?.description && (
-              <div className="pt-4 sm:pt-6 md:pt-8 max-w-5xl">
-                <span className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                  <ShowHideText
-                    text={videoData?.description}
-                    t={t}
-                    count={210}
-                  />
-                </span>
-              </div>
-            )}
-            {/* End Description */}
-
-            {/* Start social Actions */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-gray-700 my-4 sm:my-6 md:my-8">
-              <button
-                onClick={handleLike}
-                className={`outline-0 flex items-center gap-1 sm:gap-2 transition-colors ${
-                  videoItem?.has_liked ? "text-blue-600" : "hover:text-black"
-                }`}
-                aria-pressed={videoItem?.has_liked}
-              >
-                {videoItem?.has_liked ? (
-                  // filled thumbs up (simple svg)
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M2 21h4V9H2v12zM23 10.5c0-.83-.67-1.5-1.5-1.5h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 2 7.59 8.59C7.22 8.95 7 9.45 7 10v9c0 1.1.9 2 2 2h7c.78 0 1.45-.45 1.79-1.11L23 10.5z" />
-                  </svg>
-                ) : (
-                  <ThumbsUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
-                  {videoItem?.likes_count || "0"}
-                </span>
-              </button>
-
-              <button
-                onClick={handleOpenShare}
-                className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
-              >
-                <img
-                  src="/icons/share_icon.png"
-                  alt="share"
-                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8"
-                />
-                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
-                  {t("Share")}
-                </span>
-              </button>
-
-              <button
-                onClick={() => {
-                  handleAddToMyList();
-                }}
-                className="flex items-center gap-1 sm:gap-2 hover:text-black transition-colors"
-              >
-                <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold">
-                  {videoItem?.has_in_my_list
-                    ? t("Remove from My List")
-                    : t("Save")}
-                </span>
-              </button>
-            </div>
-            {/* End social Actions */}
-            {/* Render Share Modal */}
-            <ShareModal
-              isOpen={isShareOpen}
-              onClose={handleCloseShare}
-              url={videoData?.video_url}
-              title={videoData?.title}
-            />
-            {/* Start channel info */}
-            {/* <div className="mt-4 sm:mt-6 flex justify-between sm:flex-row items-start sm:items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-            
-              <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-                <img
-                  src={videoData?.channelAvatar}
-                  alt={videoData?.channelName}
-                  className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full object-cover"
-                />
-                <div>
-              
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="font-semibold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
-                      {videoData?.channelName}
-                    </span>
-                    {videoData?.channelVerified && (
-                      <img
-                        src="/icons/verifyAcoount.png"
-                        alt="Verified"
-                        className="w-4 h-4 sm:w-5 sm:h-5"
-                      />
-                    )}
-                  </div>
-               
-                  <div className="mt-1 text-gray-500 text-xs sm:text-sm md:text-base">
-                    {videoData?.channelSubscribers}
-                  </div>
-                
-                </div>
-              </div>
-            
-              <button className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-primary text-gray-900 hover:bg-primary hover:text-white transition-all duration-200 text-sm sm:text-base whitespace-nowrap">
-                {t("Followers")}
-              </button>
-            
-            </div> */}
-          </div>
-          {/* End Video Info */}
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={handleCloseShare}
+        url={videoData?.video_url || window.location.href}
+        title={videoData?.title}
+      />
     </div>
   );
 }

@@ -28,6 +28,7 @@ function VideoPageContent() {
       setIsLoading(false);
     }
   };
+  
   const getTopViewed = async () => {
     setIsLoading(true);
     try {
@@ -56,7 +57,7 @@ function VideoPageContent() {
       {/* End Show Video */}
       <div className="max-w-7xl mx-auto">
         {/* Start Content of a similar type */}
-        <div className="bg-white">
+        {/* <div className="bg-white">
           <DynamicSection
             title={t("Similar Content")}
             titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium  "
@@ -65,15 +66,8 @@ function VideoPageContent() {
             cardName={VideoCard}
             viewMoreUrl="/videos"
           />
-        </div>
+        </div> */}
         {/* End Content of a similar type */}
-        {/* Start Comments Section */}
-        <div className="w-full">
-          <div className="w-full lg:w-3/4 lg:pl-8">
-            <CommentsSection itemId={paramId} type={"video"} />
-          </div>
-        </div>
-        {/* End Comments Section */}
       </div>
     </div>
   );

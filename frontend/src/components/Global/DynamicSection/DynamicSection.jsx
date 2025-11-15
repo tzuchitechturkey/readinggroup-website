@@ -25,6 +25,7 @@ const DynamicSection = ({
   nextArrowClassname = "",
   stopslider = false,
   propsToCard = {},
+  gridClassName = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2",
 }) => {
   const { t, i18n } = useTranslation();
   const Card = cardName;
@@ -72,7 +73,7 @@ const DynamicSection = ({
         </div>
         {/* End Title && View More */}
         {!isSlider ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 px-2">
+          <div className={gridClassName}>
             {data.map((item, ind) => (
               <div key={item.id}>
                 <Card item={item} index={ind} />
@@ -106,7 +107,7 @@ const DynamicSection = ({
                   {data.map((item, ind) => (
                     <CarouselItem
                       key={item.id}
-                      className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4  overflow-visible"
+                      className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3  overflow-visible"
                     >
                       {Card && typeof Card === "function" ? (
                         <Card item={item} index={ind} {...propsToCard} />

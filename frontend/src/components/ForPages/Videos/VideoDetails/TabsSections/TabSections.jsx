@@ -10,9 +10,9 @@ import Loader from "@/components/Global/Loader/Loader";
 
 import EpisodeCard from "./EpisodeCard";
 
-const TabsSection = ({ videoData }) => {
+const TabsSection = ({ videoData, defaultTab = "reviews" }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("episodes");
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [episodes, setEpisodes] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -65,6 +65,16 @@ const TabsSection = ({ videoData }) => {
       {/* Tab Navigation */}
 
       <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
+          <button
+          onClick={() => setActiveTab("reviews")}
+          className={`px-4 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base md:text-lg transition-all duration-300 border-b-2 whitespace-nowrap flex-shrink-0 ${
+            activeTab === "reviews"
+              ? "text-black border-black"
+              : "text-gray-500 border-transparent hover:text-gray-700"
+          }`}
+        >
+          {t("User Reviews")}
+        </button>
         {episodes?.length > 0 && (
           <button
             onClick={() => setActiveTab("episodes")}
@@ -77,16 +87,7 @@ const TabsSection = ({ videoData }) => {
             {t("Episodes")}
           </button>
         )}
-        <button
-          onClick={() => setActiveTab("reviews")}
-          className={`px-4 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base md:text-lg transition-all duration-300 border-b-2 whitespace-nowrap flex-shrink-0 ${
-            activeTab === "reviews"
-              ? "text-black border-black"
-              : "text-gray-500 border-transparent hover:text-gray-700"
-          }`}
-        >
-          {t("User Reviews")}
-        </button>
+      
       </div>
 
       {/* Tab Content */}

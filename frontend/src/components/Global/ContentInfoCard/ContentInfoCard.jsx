@@ -5,7 +5,7 @@ import { Star, User, Camera, Calendar, MapPin } from "lucide-react";
 
 function ContentInfoCard({
   contentData,
-  contentType = "card", // "card" or "photo"
+  contentType = "card", // "card", "photo" أو "video"
   isRTL = false,
   className = "",
 }) {
@@ -47,7 +47,7 @@ function ContentInfoCard({
         </p>
       )}
 
-      {/* Start Writer/Photographer and Rating Row */}
+      {/* Start Writer/Photographer/Video Info and Rating Row */}
       <div
         className={`flex items-center ${
           isRTL ? "flex-row-reverse" : ""
@@ -60,33 +60,59 @@ function ContentInfoCard({
         >
           {contentType === "photo" ? (
             <Camera className="w-4 h-4 text-primary" />
+          ) : contentType === "video" ? (
+            <User className="w-4 h-4 text-primary" />
           ) : (
             <User className="w-4 h-4 text-primary" />
           )}
           <span className="text-sm text-primary">{contentData?.writer}</span>
         </div>
-        <div
-          className={`flex items-center ${
-            isRTL ? "space-x-reverse" : ""
-          } space-x-2`}
-        >
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 ${
-                  i < Math.floor(contentData?.rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
-                }`}
-              />
-            ))}
+        {contentType !== "video" && (
+          <div
+            className={`flex items-center ${
+              isRTL ? "space-x-reverse" : ""
+            } space-x-2`}
+          >
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${
+                    i < Math.floor(contentData?.rating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-sm text-gray-600">
+              ({contentData?.reviews})
+            </span>
           </div>
-          <span className="text-sm text-gray-600">
-            ({contentData?.reviews})
-          </span>
-        </div>
+        )}
       </div>
+
+      {/* معلومات إضافية للفيديو */}
+      {contentType === "video" && (
+        <div
+          className={`mb-4 flex flex-wrap items-center gap-4 ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+        >
+          {contentData?.language && (
+            <div className="text-sm text-gray-700 flex items-center gap-1">
+              <span className="font-semibold">{t("Language")}:</span>
+              <span>{contentData?.language}</span>
+            </div>
+          )}
+          {contentData?.category?.name && (
+            <div className="text-sm text-gray-700 flex items-center gap-1">
+              <span className="font-semibold">{t("Category")}:</span>
+              <span>{contentData?.category?.name}</span>
+            </div>
+          )}
+        </div>
+      )}
       {/* End Writer/Photographer and Rating Row */}
 
       {/* Start Body  */}

@@ -313,77 +313,62 @@ function VideoDetailsContent({
             <div className="lg:col-span-1">
               <div className="space-y-3">
                 {/* Start Cast   */}
-                <div>
-                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
+                <div className="mb-4">
+                  <div className="flex items-center mb-2">
                     <span className="font-medium text-gray-700">
-                      {t("Top Cast")}:{" "}
+                      {t("Top Cast")}:
                     </span>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
                     {videoItem?.cast?.map((cas, index) => (
                       <span
                         key={index}
-                        className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
+                        className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-200 text-xs cursor-pointer"
                       >
+                        {/* بدون أيقونة نقطة */}
                         {cas}
                       </span>
                     ))}
-                  </p>
-                  {/* {videoItem?.cast.length > 3 && (
-                    <button
-                      className="inline-flex items-center px-3 py-1.5 bg-transparent hover:bg-blue-50 text-[var(--color-primary)] hover:text-[var(--color-primary)] text-xs border border-[var(--color-primary)] rounded-full transition-all duration-200"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowAllCast(!showAllCast);
-                      }}
-                    >
-                      <span>{showAllCast ? "View Less" : "View More"}</span>
-                      <svg
-                        className={`ml-1 w-3 h-3 transition-transform duration-200 ${
-                          showAllCast ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-                  )} */}
+                  </div>
                 </div>
                 {/* End Cast   */}
 
-                <div>
-                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
+                {/* Start Tags   */}
+                <div className="mb-4">
+                  <div className="flex items-center mb-2">
                     <span className="font-medium text-gray-700">
-                      {t("Tags")}:{" "}
+                      {t("Tags")}:
                     </span>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
                     {videoItem?.tags?.map((tag, index) => (
                       <span
                         key={index}
-                        className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs"
+                        className="flex items-center gap-1 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-full shadow-sm hover:bg-yellow-100 transition-all duration-200 text-xs cursor-pointer"
                       >
+                        {/* بدون أيقونة نقطة */}
                         {tag}
                       </span>
                     ))}
-                  </p>
+                  </div>
                 </div>
+                {/* End Tags   */}
 
                 {/* Start Category   */}
-                <div>
-                  <p className="text-sm flex items-center flex-wrap text-gray-600 leading-snug mb-2">
+                <div className="mb-4">
+                  <div className="flex items-center mb-2">
                     <span className="font-medium text-gray-700">
-                      {t("Category")}:{" "}
+                      {t("Category")}:
                     </span>
-                    <span className="px-1 py-1 border-[1px] border-gray-300 rounded-full mx-1 text-xs">
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                    <span className="flex items-center gap-1 px-3 py-1 bg-green-50 text-green-800 rounded-full shadow-sm hover:bg-green-100 transition-all duration-200 text-xs cursor-pointer">
+                      {/* بدون أيقونة نقطة */}
                       {videoItem?.category?.name}
                     </span>
-                  </p>
+                  </div>
                 </div>
-                {/* End Cast   */}
+                {/* End Category   */}
               </div>
             </div>
           </div>
@@ -396,7 +381,7 @@ function VideoDetailsContent({
         {/* Start Episodes && User Reviews */}
         {!videoItem?.report_type && (
           <div className="px-0 xs:px-1 sm:px-2 md:px-2 lg:px-5 py-1 xs:py-2 sm:py-3 md:py-4">
-            <TabsSection videoData={videoItem} />
+            <TabsSection videoData={videoItem}  />
           </div>
         )}
         {/* End Episodes && User Reviews */}
