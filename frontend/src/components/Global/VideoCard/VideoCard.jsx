@@ -69,11 +69,11 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
               </span>
             )}
             {/* Start Is new */}
-            {item?.is_featured && (
+            {/* {item?.is_featured && (
               <span className="absolute bottom-16 left-7 bg-blue-500 border border-white/20 rounded-xl px-4 py-1 text-white text-xs font-semibold backdrop-blur-sm">
                 {t("Featured")}
               </span>
-            )}
+            )} */}
             {/* End Is New */}
 
             {/* Start Duration */}

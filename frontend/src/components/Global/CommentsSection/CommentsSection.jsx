@@ -25,9 +25,12 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { BASE_URL } from "@/configs";
 import { SendFriendRequest, SendUnFollowRequest } from "@/api/auth";
 
+import LoginModal from "../LoginModal";
+
 function VideoCommentsSection({ itemId, type }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [comment, setComment] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
@@ -104,6 +107,11 @@ function VideoCommentsSection({ itemId, type }) {
   };
 
   const handleSubmitComment = async () => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (!comment.trim()) {
       toast.error(t("Comment cannot be empty"));
       return;
@@ -179,6 +187,11 @@ function VideoCommentsSection({ itemId, type }) {
   };
 
   const handleLikeComment = async (commentId, isLiked) => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     try {
       if (isLiked) {
         await UnlikeComment(commentId);
@@ -245,6 +258,11 @@ function VideoCommentsSection({ itemId, type }) {
 
   // Submit a reply
   const handleSubmitReply = async (commentId) => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     const text = replyText[commentId];
     if (!text || !text.trim()) {
       toast.error(t("Reply cannot be empty"));
@@ -291,6 +309,11 @@ function VideoCommentsSection({ itemId, type }) {
 
   // Like/unlike reply
   const handleLikeReply = async (replyId, commentId, isLiked) => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     try {
       if (isLiked) {
         await UnlikeReply(replyId);
@@ -379,6 +402,11 @@ function VideoCommentsSection({ itemId, type }) {
     setEditReplyText("");
   };
   const handleFollow = async (followUserId, commentId) => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     setIsLoading(true);
     try {
       await SendFriendRequest({ to_user: followUserId });
@@ -404,6 +432,11 @@ function VideoCommentsSection({ itemId, type }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // دالة للتحقق من تسجيل الدخول
+  const isLoggedIn = () => {
+    return Boolean(localStorage.getItem("accessToken"));
   };
 
   useEffect(() => {
@@ -605,21 +638,23 @@ function VideoCommentsSection({ itemId, type }) {
                           {c.likes_count || 0}
                         </span>
                       </button>
-                      {Number(userId) !== c?.user?.id && (
-                        <button
-                          className="text-xs hover:text-black"
-                          onClick={() => {
-                            if (!c.replies) {
-                              loadReplies(c.id);
-                            }
-                            setActiveReplyComment(
-                              activeReplyComment === c.id ? null : c.id
-                            );
-                          }}
-                        >
-                          {t("Reply")}
-                        </button>
-                      )}
+                      <button
+                        className="text-xs hover:text-black"
+                        onClick={() => {
+                          if (!isLoggedIn()) {
+                            setShowLoginModal(true);
+                            return;
+                          }
+                          if (!c.replies) {
+                            loadReplies(c.id);
+                          }
+                          setActiveReplyComment(
+                            activeReplyComment === c.id ? null : c.id
+                          );
+                        }}
+                      >
+                        {t("Reply")}
+                      </button>
 
                       {Number(userId) === c?.user?.id && (
                         <button
@@ -867,6 +902,12 @@ function VideoCommentsSection({ itemId, type }) {
         )}
       </div>
       {/* End Comments List */}
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

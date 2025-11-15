@@ -1309,5 +1309,9 @@
   "Series deleted successfully": "Series deleted successfully",
   "Category disabled": "Category disabled",
   "Category enabled": "Category enabled",
+  "Authentication Required": "Authentication Required",
+  "You need to log in to interact. Please log in to continue.": "You need to log in to interact. Please log in to continue.",
+  "Log In": "Log In",
+  "Cancel": "Cancel",
   "-------------------------------------------------------------": "-------------------------------------------------------------"
 }

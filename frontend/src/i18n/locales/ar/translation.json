@@ -1337,6 +1337,10 @@
   "You cannot activate this category because it does not contain any events. Please add events first.": "لا يمكنك تفعيل هذا التصنيف لأنه لا يحتوي على أي أحداث. يرجى إضافة أحداث أولاً.",
   "This Week's Top Events": "أحداث هذا الأسبوع المميزة",
   "Top Weekly Videos": "أفضل فيديوهات هذا الأسبوع",
+  "Authentication Required": "تسجيل الدخول مطلوب",
+  "You need to log in to interact. Please log in to continue.": "من أجل التفاعل يجب أن تقوم بتسجيل الدخول. يرجى تسجيل الدخول للمتابعة.",
+  "Log In": "تسجيل الدخول",
+  "Cancel": "إلغاء",
   "": "",
   "": ""
 }

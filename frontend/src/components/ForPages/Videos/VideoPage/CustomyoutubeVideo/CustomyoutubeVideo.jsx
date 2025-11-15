@@ -11,6 +11,7 @@ import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
+import LoginModal from "@/components/Global/LoginModal";
 import {
   AddToMyList,
   RemoveFromMyList,
@@ -30,7 +31,13 @@ function CustomyoutubeVideo({ videoData }) {
   const [showControls, setShowControls] = useState(true);
   const [relatedVideos, setRelatedVideos] = useState([]);
   const [showAllRelated, setShowAllRelated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const videoRef = useRef(null);
+
+  // دالة للتحقق من تسجيل الدخول
+  const isLoggedIn = () => {
+    return Boolean(localStorage.getItem("accessToken"));
+  };
 
   // تطبيق RTL عند تغيير اللغة
   useEffect(() => {
@@ -129,6 +136,11 @@ function CustomyoutubeVideo({ videoData }) {
 
   // دالة الإعجاب
   const handleLike = async () => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     try {
       const newLikedState = !videoItem?.has_liked;
       if (videoData?.report_type) {
@@ -156,6 +168,11 @@ function CustomyoutubeVideo({ videoData }) {
   // Placeholder for rating handler removed due to unused lint warning
 
   const handleAddToMyList = async () => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+
     try {
       const currentlySaved = Boolean(videoItem?.has_in_my_list);
       if (currentlySaved) {
@@ -478,6 +495,12 @@ function CustomyoutubeVideo({ videoData }) {
         onClose={handleCloseShare}
         url={videoData?.video_url || window.location.href}
         title={videoData?.title}
+      />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
       />
     </div>
   );

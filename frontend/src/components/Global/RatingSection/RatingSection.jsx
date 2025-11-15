@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Star } from "lucide-react";
+
+import LoginModal from "../LoginModal";
 
 function RatingSection({
   userRating,
@@ -14,6 +16,28 @@ function RatingSection({
   className = "",
 }) {
   const { t } = useTranslation();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // دالة للتحقق من تسجيل الدخول
+  const isLoggedIn = () => {
+    return Boolean(localStorage.getItem("accessToken"));
+  };
+
+  // دالة للتعامل مع تقييم النجوم
+  const handleStarRating = (rating) => {
+    if (!isLoggedIn()) {
+      setShowLoginModal(true);
+      return;
+    }
+    onStarRating(rating);
+  };
+
+  const handleStarHover = (rating) => {
+    if (!isLoggedIn()) {
+      return;
+    }
+    onStarHover(rating);
+  };
 
   return (
     <div className={`bg-white rounded-xl shadow-sm p-6 mb-6 ${className}`}>
@@ -41,8 +65,8 @@ function RatingSection({
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
-                onClick={() => onStarRating(star)}
-                onMouseEnter={() => onStarHover(star)}
+                onClick={() => handleStarRating(star)}
+                onMouseEnter={() => handleStarHover(star)}
                 onMouseLeave={onStarLeave}
                 className="transition-all duration-200 hover:scale-110"
               >
@@ -86,6 +110,12 @@ function RatingSection({
           </div>
         </div>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
