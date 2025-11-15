@@ -10,6 +10,7 @@ function WeeklyMomentsCard({ item }) {
   const handleCardClick = () => {
     navigate(`/cards-photos/card/${item?.id}`);
   };
+
   return (
     <div
       onClick={handleCardClick}
@@ -36,29 +37,53 @@ function WeeklyMomentsCard({ item }) {
       {/* End white Shadow overlay */}
 
       <div className="mb-4 mt-5">
+        {/* Start Country and Date */}
+        <div className="flex items-center mb-6 gap-2">
+          <span className="text-gray-600 font-medium text-[14px]">
+            {item?.country} :
+          </span>
+          <span className="text-[#1e40af] font-semibold text-[15px]">
+            {item?.updated_at}
+          </span>
+        </div>
+        {/* End Country and Date */}
+
         {/* Start Title */}
-        <h3 className="  font-semibold text-[16px] my-5 leading-tight">
+        <h3 className="font-bold text-[24px] mb-8 leading-tight text-[#1e40af]">
           {item?.title}
         </h3>
         {/* End Title */}
 
-        {/* Start Type, Source, Language */}
-        <div className="flex justify-between gap-10 text-xs px-4">
-          <div className="text-left ">
-            <div className="text-primary text-start font-semibold mb-[6px]">
+        {/* Start Info Row */}
+        <div className="flex justify-start gap-16 text-sm">
+          <div className="text-left">
+            <div className="text-black font-bold mb-3 text-[18px]">
               {t("Type")}
             </div>
-            <div className="text-text ">{t(item?.post_type)}</div>
+            <div className="text-[#1e40af] font-semibold text-[16px]">
+              {t(item?.post_type || "News")}
+            </div>
           </div>
 
-          <div className="text-left ">
-            <div className="text-primary font-semibold mb-[6px]">
-              {t("Language")}
+          <div className="text-left">
+            <div className="text-black font-bold mb-3 text-[18px]">
+              {t("Source")}
             </div>
-            <div className="text-text">{t(item?.language)}</div>
+            <div className="text-[#1e40af] font-semibold text-[16px]">
+              {t(item?.category?.name)}
+            </div>
+          </div>
+
+          <div className="text-left">
+            <div className="text-black font-bold mb-3 text-[18px]">
+              {t("language")}
+            </div>
+            <div className="text-[#1e40af] font-semibold text-[16px]">
+              {t(item?.language || "AR / EN")}
+            </div>
           </div>
         </div>
-        {/* End Type, Source, Language */}
+        {/* End Info Row */}
       </div>
     </div>
   );

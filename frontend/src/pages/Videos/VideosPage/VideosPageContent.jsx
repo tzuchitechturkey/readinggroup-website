@@ -151,7 +151,7 @@ function VideosPageContent() {
 
         {/* Start My LIST */}
         {myListedVideos?.length > 0 && (
-          <div className="my-3">
+          <div className="my-5">
             <DynamicSection
               title={t("My List")}
               titleClassName="text-[30px] font-medium mb-2"

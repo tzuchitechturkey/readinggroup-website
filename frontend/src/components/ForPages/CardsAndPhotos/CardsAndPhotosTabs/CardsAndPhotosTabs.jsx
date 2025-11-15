@@ -15,6 +15,7 @@ import {
   GetItemsByCategoryId,
 } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 
 function CardsAndPhotosTabs({ initialTab }) {
   const isMobile = useIsMobile(1024);
@@ -213,28 +214,25 @@ function CardsAndPhotosTabs({ initialTab }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
         {/* Start Image */}
-        <Link
-          to={`/cards-photos/card/${topViewedData?.[0]?.id}`}
-          className="order-2 lg:order-1 mt-0 lg:mt-8"
-        >
-          <img
-            src={topViewedData?.[0]?.image}
-            alt="Weekly featured image"
-            className="w-full h-64 sm:h-80 md:h-96 lg:h-full object-cover rounded-xl shadow-lg"
-          />
-        </Link>
+        <div className="order-2 lg:order-1 mt-0 lg:mt-8">
+          {topViewedData?.[0] && <WeekPhotosCard item={topViewedData[0]} />}
+        </div>
         {/* End Image */}
 
         {/* Start Grid Cards */}
         <div className="order-1 lg:order-2 px-0 sm:px-3 md:px-5 lg:px-7">
           {/* Start Title */}
-          <h2 className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center ${i18n?.language  === "ar" ? "lg:text-right" : "lg:text-left" } `}>
+          <h2
+            className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center ${
+              i18n?.language === "ar" ? "lg:text-right" : "lg:text-left"
+            } `}
+          >
             {t("This Week's Top Cards")}
           </h2>
           {/* End Title */}
 
           {/* Start Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 lg:gap-7">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
             {topViewedData?.slice(1, 5).map((item, index) => (
               <div
                 key={index}

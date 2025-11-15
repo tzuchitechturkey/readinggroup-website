@@ -30,7 +30,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
         <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg h-full">
           <div
             className={` relative ${
-              bigCart ? "h-[360px]" : "h-[220px]"
+              bigCart ? "h-[280px]" : "h-[200px]"
             }  flex-shrink-0`}
           >
             {/* Start Image */}
@@ -51,7 +51,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
             {/* End Gradient Overlay */}
 
             {/* Start Tags */}
-            <div className="absolute top-14 left-5 flex gap-2">
+            {/* <div className="absolute top-14 left-5 flex gap-2">
               {item?.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {item?.tags?.slice(0, 2).map((tag, index) => (
@@ -61,29 +61,32 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
             {/* End Tags */}
 
             {/* Start Is new */}
             {item?.is_new && (
-              <span className="absolute top-4 right-3 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded fast-pulse">
+              <span className="absolute top-4 right-3 bg-blue-500 border border-white/20 rounded-xl px-4 py-1 text-white text-xs font-semibold backdrop-blur-sm fast-pulse">
                 {t("New")}
               </span>
             )}
             {/* Start Is new */}
             {item?.is_featured && (
-              <span className="absolute bottom-11 left-4 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded ">
-                {t("Featured Video")}
+              <span className="absolute bottom-16 left-7 bg-blue-500 border border-white/20 rounded-xl px-4 py-1 text-white text-xs font-semibold backdrop-blur-sm">
+                {t("Featured")}
               </span>
             )}
             {/* End Is New */}
 
             {/* Start Duration */}
             <div className="absolute top-4 left-5 flex items-center gap-3">
-              <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
+              <span className="bg-black/40 border border-white/20 rounded-xl px-4 py-1 text-white text-sm font-medium backdrop-blur-sm">
                 {t(item?.category?.name)}
               </span>
-              <span className="bg-blue-500 rounded-full text-white text-xs font-semibold px-3 py-2 backdrop-blur-sm">
+            </div>
+            {/* Video Duration at bottom right */}
+            <div className="absolute bottom-4 right-5">
+              <span className="bg-black/40 border border-white/20 rounded-xl px-4 py-1 text-white text-sm font-medium backdrop-blur-sm">
                 <VideoDuration videoUrl={item?.video_url} />
               </span>
             </div>
@@ -91,14 +94,12 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
 
             {/* Start Title */}
             <div
-              className={`absolute bottom-4 ${
-                i18n?.language === "ar" ? "right-5" : "left-5"
-              }`}
+              className={`absolute bottom-6 ${
+                i18n?.language === "ar" ? "right-7" : "left-7"
+              } px-2`}
             >
-              <h3 className="text-white font-semibold text-sm group-hover:text-blue-400 transition-colors">
-                {item?.title?.length > 30
-                  ? item?.title.slice(0, 30) + "..."
-                  : item?.title}
+              <h3 className="text-white font-extrabold text-2xl group-hover:text-blue-400 transition-colors drop-shadow-lg">
+                {item?.title}
               </h3>
             </div>
 

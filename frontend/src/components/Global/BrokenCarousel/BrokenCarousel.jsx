@@ -41,7 +41,7 @@ function BrokenCarousel({
       return "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4";
     }
     return `basis-full sm:basis-1/2 md:basis-[28.57%] lg:basis-[28.57%] ${
-      showCount === 4 ? "xl:basis-[22.57%]" : "xl:basis-[27.57%]"
+      showCount === 4 ? "xl:basis-[19.99%]" : "xl:basis-[35.57%]"
     }`;
   };
 
