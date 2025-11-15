@@ -5,6 +5,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 import { GetWebSiteInfo } from "@/api/info";
+import defaultLogo from "@/assets/logo.jpg";
 
 import UserIcons from "../UserIcons/UserIcons";
 
@@ -199,6 +200,8 @@ function Usernavbar() {
 
   // Get navigation items dynamically
   const navigationItems = buildNavigationItems();
+  // الشعار مع fallback
+  const logoSrc = siteInfo?.logo?.logo || defaultLogo;
   return (
     <nav className="relative bg-white shadow-sm" dir={i18n.dir()}>
       <div className="  mx-auto px-4 sm:px-6 lg:px-8">
@@ -207,9 +210,14 @@ function Usernavbar() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img
-                src={siteInfo?.logo?.logo}
+                src={logoSrc}
                 alt="logo"
                 className="w-28 h-10 sm:w-36 sm:h-12 object-cover"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultLogo) {
+                    e.currentTarget.src = defaultLogo;
+                  }
+                }}
               />
             </Link>
           </div>
@@ -239,7 +247,7 @@ function Usernavbar() {
                           }`
                         }
                       >
-                        {item.name} 
+                        {item.name}
                         <svg
                           className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
                           fill="none"
@@ -351,9 +359,14 @@ function Usernavbar() {
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <Link to="/" onClick={closeMenu} className="flex items-center">
               <img
-                src={siteInfo?.logo?.logo}
+                src={logoSrc}
                 alt="logo"
                 className="w-24 h-8 object-contain"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultLogo) {
+                    e.currentTarget.src = defaultLogo;
+                  }
+                }}
               />
             </Link>
             <button

@@ -97,9 +97,9 @@ function EventsPageContent() {
   return (
     <div className="" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {/* Hero Slider */}
-      <div>
+      {/* <div>
         <EventHeroSlider />
-      </div>
+      </div> */}
       {/* End Hero Slider */}
 
       {/* Start Filter Section */}

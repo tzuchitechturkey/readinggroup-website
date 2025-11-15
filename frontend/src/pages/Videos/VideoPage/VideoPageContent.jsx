@@ -49,6 +49,7 @@ function VideoPageContent() {
     getTopViewed();
   }, []);
 
+  
   return (
     <div className="bg-white" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
       {isLoading && <Loader />}
