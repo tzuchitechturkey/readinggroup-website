@@ -28,6 +28,8 @@ function EventCard({ className = "", item }) {
           <img
             src={item.image}
             alt={item.title}
+            title={item?.title || "video"}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {/* End Image */}

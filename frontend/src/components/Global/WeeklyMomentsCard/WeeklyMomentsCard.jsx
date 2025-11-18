@@ -26,6 +26,8 @@ function WeeklyMomentsCard({ item }) {
             filter:
               "drop-shadow(0 10px 25px rgba(255, 255, 255, 0.1)) drop-shadow(0 4px 15px rgba(255, 255, 255, 0.08))",
           }}
+          loading="lazy"
+          title={item?.title || "weekly moment image"}
         />
       </div>
       {/* End Image */}

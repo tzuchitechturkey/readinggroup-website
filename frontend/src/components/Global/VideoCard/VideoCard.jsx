@@ -40,6 +40,8 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
                 item?.image_url
               }
               alt={item?.title}
+              title={item?.title || "video"}
+              loading="lazy"
               className="w-full h-full border border-red-900 object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {/* End Image */}
@@ -83,7 +85,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
               </span>
             </div>
             {/* Video Duration at bottom right */}
-            
+
             {/* End Duration */}
 
             {/* Start Title */}

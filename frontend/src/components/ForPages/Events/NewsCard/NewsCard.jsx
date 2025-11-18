@@ -14,6 +14,7 @@ const NewsCard = ({ t, article, onClick, imgClassName }) => (
         alt={article.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 will-change-transform"
         loading="lazy"
+        title={article?.title || "article"}
       />
     </div>
     <div className="flex flex-col justify-around flex-1 min-w-0">
