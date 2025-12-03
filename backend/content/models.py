@@ -276,6 +276,7 @@ class Event(LikableMixin, TimestampedModel):
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
     is_weekly_moment = models.BooleanField(default=False)
+    external_link = models.URLField(max_length=1000, blank=True)
         
     @classmethod
     def top_liked(cls, limit: int = 5):
