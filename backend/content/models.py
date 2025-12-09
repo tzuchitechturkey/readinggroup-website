@@ -399,6 +399,23 @@ class ContentImage(TimestampedModel):
     def __str__(self) -> str:
         return f"ContentImage<{self.content_id}:{self.pk}>"
 
+
+class ContentAttachment(TimestampedModel):
+    """Multiple file attachments for a Content instance.
+    Supports documents (Word, PDF, PowerPoint) and other file types.
+    """
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to="content/attachments/", help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats")
+    file_name = models.CharField(max_length=255, blank=True, help_text="Original filename")
+    file_size = models.PositiveIntegerField(blank=True, null=True, help_text="File size in bytes")
+    description = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"ContentAttachment<{self.content_id}:{self.pk}>"
+
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
     name = models.CharField(max_length=255)

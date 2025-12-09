@@ -10,6 +10,7 @@ from .models import (
     Content,
     ContentCategory,
     ContentImage,
+    ContentAttachment,
     ContentRating,
     Event,
     EventCategory,
@@ -138,6 +139,17 @@ class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = ContentImage
         fields = ("id", "image", "image_url", "caption", "created_at", "updated_at")
         file_fields = ("image",)
+
+
+class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for Content file attachments (documents, PDFs, etc)."""
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = ContentAttachment
+        fields = ("id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
+        file_fields = ("file",)
+        
         
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -439,6 +451,7 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
     images = ContentImageSerializer(many=True, read_only=True)
+    attachments = ContentAttachmentSerializer(many=True, read_only=True)
     class Meta:
         model = Content
         fields = "__all__"

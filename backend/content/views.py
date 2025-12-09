@@ -30,6 +30,7 @@ from .models import (
     Video,
     Content,
     ContentImage,
+    ContentAttachment,
     PostCategory,
     VideoCategory,
     EventCategory,
@@ -67,6 +68,7 @@ from .serializers import (
     SeasonIdSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
+    ContentAttachmentSerializer,
 )
 from .views_helpers import(
     BaseContentViewSet,
@@ -642,6 +644,39 @@ class ContentViewSet(BaseContentViewSet):
                         ContentImage.objects.create(content=content, image_url=url)
                     except Exception:
                         pass
+
+            # handle file attachments
+            attachments = []
+            if hasattr(request.FILES, 'getlist'):
+                attachments = list(request.FILES.getlist('attachments') or request.FILES.getlist('attachments[]') or [])
+            
+            # fallback numbered keys attachment_0..attachment_n
+            if not attachments and 'attachment_count' in data:
+                try:
+                    cnt = int(data.get('attachment_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'attachment_{i}'
+                    if key in request.FILES:
+                        attachments.append(request.FILES[key])
+
+            # also accept any request.FILES keys that start with attachment_
+            if not attachments:
+                for k, v in request.FILES.items():
+                    if k.startswith('attachment_') or k == 'attachment':
+                        attachments.append(v)
+
+            for f in attachments:
+                try:
+                    ContentAttachment.objects.create(
+                        content=content,
+                        file=f,
+                        file_name=f.name,
+                        file_size=f.size
+                    )
+                except Exception:
+                    pass
         except Exception:
             # don't break creation if image handling fails
             pass
@@ -713,6 +748,37 @@ class ContentViewSet(BaseContentViewSet):
                         ContentImage.objects.create(content=content, image_url=url)
                     except Exception:
                         pass
+
+            # handle file attachments
+            attachments = []
+            if hasattr(request.FILES, 'getlist'):
+                attachments = list(request.FILES.getlist('attachments') or request.FILES.getlist('attachments[]') or [])
+            
+            if not attachments and 'attachment_count' in data:
+                try:
+                    cnt = int(data.get('attachment_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'attachment_{i}'
+                    if key in request.FILES:
+                        attachments.append(request.FILES[key])
+
+            if not attachments:
+                for k, v in request.FILES.items():
+                    if k.startswith('attachment_') or k == 'attachment':
+                        attachments.append(v)
+
+            for f in attachments:
+                try:
+                    ContentAttachment.objects.create(
+                        content=content,
+                        file=f,
+                        file_name=f.name,
+                        file_size=f.size
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
 
@@ -1235,6 +1301,15 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
 
         serializer = ContentSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
+    
+class ContentAttachmentViewSet(BaseCRUDViewSet):
+    """ViewSet for managing ContentAttachment content."""
+    queryset = ContentAttachment.objects.all()
+    serializer_class = ContentAttachmentSerializer
+    search_fields = ("file_name",)
+    ordering_fields = ("created_at",)
+    
+    
     
     
 class EventCategoryViewSet(BaseCRUDViewSet):
