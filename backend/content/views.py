@@ -1079,6 +1079,23 @@ class PostCategoryViewSet(BaseCRUDViewSet):
             pass
         return queryset
     
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder PostCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    PostCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=True, methods=("get",), url_path="posts", url_name="posts")
     def posts(self, request, pk=None):
         """Return posts belonging to this PostCategory.
@@ -1149,6 +1166,23 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
             pass
         return queryset
     
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder ContentCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    ContentCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=True, methods=("get",), url_path="contents", url_name="contents")
     def contents(self, request, pk=None):
         """Return Content objects belonging to this ContentCategory."""
@@ -1197,6 +1231,23 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder EventCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    EventCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=("get",), url_path="events", url_name="events")
     def events(self, request, pk=None):
@@ -1358,6 +1409,23 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
             pass
 
         return queryset
+    
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder VideoCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    VideoCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
     def videos(self, request, pk=None):

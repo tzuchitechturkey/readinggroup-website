@@ -476,9 +476,10 @@ class PostCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
@@ -487,9 +488,10 @@ class EventCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
@@ -498,9 +500,10 @@ class ContentCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
 
@@ -509,9 +512,10 @@ class VideoCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
     
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
