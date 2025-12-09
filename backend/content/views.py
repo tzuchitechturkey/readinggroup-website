@@ -1090,8 +1090,8 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     serializer_class = PostCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = PostCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = PostCategory.objects.all().order_by('order', '-created_at')
     
     @swagger_auto_schema(
         operation_summary="List all post categories",
@@ -1177,8 +1177,8 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     serializer_class = ContentCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = ContentCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = ContentCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all content categories",
@@ -1243,8 +1243,8 @@ class EventCategoryViewSet(BaseCRUDViewSet):
     serializer_class = EventCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = EventCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = EventCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all event categories",
@@ -1419,8 +1419,8 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
     serializer_class = VideoCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = VideoCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = VideoCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all video categories",
