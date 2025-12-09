@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { GetPosts } from "@/api/posts";
 import { GetContents } from "@/api/contents";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 
 const WeeklyList = ({ title, type }) => {
@@ -14,7 +14,7 @@ const WeeklyList = ({ title, type }) => {
       let res;
       if (type === "content") {
         // Use GetContents for content type
-        res = await GetContents(20, 0,"published", {
+        res = await GetContents(20, 0, "published", {
           is_weekly_moment: true,
         });
       } else {
@@ -37,7 +37,7 @@ const WeeklyList = ({ title, type }) => {
       <DynamicSection
         title={title}
         data={weeklyData}
-        cardName={type === "photo" ? WeekPhotosCard : GuidingReadingcard}
+        cardName={type === "photo" ? WeekPhotosCard : Contentcard}
         isSlider={true}
         propsToCard={{ showTags: false }}
       />

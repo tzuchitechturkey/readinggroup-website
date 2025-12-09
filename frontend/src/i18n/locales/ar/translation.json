@@ -1340,7 +1340,9 @@
   "Authentication Required": "تسجيل الدخول مطلوب",
   "You need to log in to interact. Please log in to continue.": "من أجل التفاعل يجب أن تقوم بتسجيل الدخول. يرجى تسجيل الدخول للمتابعة.",
   "Log In": "تسجيل الدخول",
-  "Cancel": "إلغاء",
-  "": "",
-  "": ""
+  "External Link is required": "الرابط الخارجي مطلوب",
+  "Please enter a valid URL": "يرجى إدخال رابط صحيح",
+  "Please enter a valid URL starting with http:// or https://": " يرجى إدخال رابط صحيح يبدأ بـ http:// أو https://",
+  "Enter the external link (e.g., https://example.com)": " أدخل الرابط الخارجي (مثل: https://example.com)",
+  "External Link": "الرابط الخارجي"
 }

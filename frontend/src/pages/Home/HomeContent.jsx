@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";

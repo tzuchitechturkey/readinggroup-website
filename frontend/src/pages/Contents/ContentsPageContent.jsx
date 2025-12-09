@@ -12,8 +12,8 @@ import {
   TopViewedContents,
   GetItemsByCategoryId,
 } from "@/api/contents";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
+import Contentcard from "@/components/Global/Contentcard/Contentcard";
 
 function ContentsPageContent() {
   const { t, i18n } = useTranslation();
@@ -151,7 +151,7 @@ function ContentsPageContent() {
               title={t("Top Viewed Contents")}
               data={topViewedData}
               isSlider={true}
-              cardName={GuidingReadingcard}
+              cardName={Contentcard}
               propsToCard={{ fromContent: true }}
             />
           </div>
@@ -173,7 +173,7 @@ function ContentsPageContent() {
                 title={category.name}
                 data={categoriesData[category.id] || []}
                 isSlider={true}
-                cardName={GuidingReadingcard}
+                cardName={Contentcard}
                 propsToCard={{ fromContent: true }}
               />
             </div>

@@ -98,7 +98,7 @@ function SortSectionContent({ onSectionChange }) {
     setIsLoading(true);
     // إنشاء مصفوفة من الـ IDs بالترتيب الجديد
     const orderedIds = sections.map((section, index) => ({
-      sectionName: section.sectionName,
+      sectionName: section?.sectionName,
       order: index + 1,
     }));
     try {
@@ -122,7 +122,6 @@ function SortSectionContent({ onSectionChange }) {
   if (isLoading) {
     return <Loader />;
   }
-  console.log(sections, "sectionssssss");
   return (
     <div className="w-full mx-auto ">
       {isLoading && <Loader />}
@@ -190,7 +189,7 @@ function SortSectionContent({ onSectionChange }) {
                 <tbody>
                   {sections.map((section, index) => (
                     <tr
-                      key={`${section.sectionName}-${section.id}`}
+                      key={`${section?.sectionName}-${section?.id}`}
                       draggable
                       onDragStart={() => handleDragStart(index)}
                       onDragOver={(e) => handleDragOver(e, index)}
@@ -213,7 +212,7 @@ function SortSectionContent({ onSectionChange }) {
                       {/* اسم القسم */}
                       <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">
                         <span className="inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">
-                          {t(section.sectionName)}
+                          {t(section?.sectionName)}
                         </span>
                       </td>
 
@@ -221,20 +220,22 @@ function SortSectionContent({ onSectionChange }) {
                       <td className="px-4 py-4 text-center">
                         <img
                           src={
-                            section.image ||
-                            section.image_url ||
-                            section.thumbnail ||
-                            section.thumbnail_url ||
-                            section.images[0]?.image ||
-                            section.image_url[0]?.image
+                            section?.image ||
+                            section?.image_url ||
+                            section?.thumbnail ||
+                            section?.thumbnail_url ||
+                            (section?.images?.length &&
+                              section?.images[0]?.image) ||
+                            (section?.images?.length &&
+                              section?.images[0]?.image_url)
                           }
-                          alt={section.name}
+                          alt={section?.name}
                           className="w-12 h-12 mx-auto object-cover rounded-lg border border-gray-200 dark:border-gray-600"
                         />
                       </td>
                       {/* اسم العنصر */}
                       <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs text-center truncate">
-                        {section.name}
+                        {section?.name}
                       </td>
 
                       {/* أيقونة السحب */}

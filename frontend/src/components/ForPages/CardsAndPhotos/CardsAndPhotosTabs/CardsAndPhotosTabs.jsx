@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   TopCommentedPosts,

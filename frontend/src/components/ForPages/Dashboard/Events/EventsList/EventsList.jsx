@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { LuArrowUpDown, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
-import { Eye, Search, ToggleLeft, ToggleRight, X } from "lucide-react";
+import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
+import { Eye, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 import {
@@ -422,13 +422,13 @@ const EventsList = ({ onSectionChange }) => {
                   </button>
                 </div>
               </TableHead>
-              <TableHead className="hidden md:table-cell">
+              {/* <TableHead className="hidden md:table-cell">
                 <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
                   <button className="flex items-center gap-1 font-medium">
                     {t("Section")}
                   </button>
                 </div>
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
                   <button
@@ -507,14 +507,14 @@ const EventsList = ({ onSectionChange }) => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  {/* <TableCell className="hidden md:table-cell">
                     <p
                       className="text-gray-600 max-w-xs truncate text-center"
                       title={event?.section?.name}
                     >
                       {event?.section?.name}
                     </p>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <div className="flex flex-col items-center ">
                       <span className="font-medium">

@@ -8,57 +8,56 @@ import { createPortal } from "react-dom";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
-import { GetEventById, GetTopEventsViewed, PatchEventById } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
+import {
+  GetContentById,
+  PatchContentById,
+  TopLikedContents,
+} from "@/api/contents";
+import Contentcard from "@/components/Global/Contentcard/Contentcard";
 
 import NewsCard from "../NewsCard/NewsCard";
 
-const EventHeroEnhanced = ({ className = "" }) => {
+const ContentHeroEnhanced = () => {
   const { t, i18n } = useTranslation();
   const { id: paramId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [sideEventData, setSideEventData] = useState([]);
-  const [eventData, setEventData] = useState({});
+  const [sideContentData, setSideContentData] = useState([]);
+  const [contentData, setContentData] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [openDetailsVideoModal, setOpenDetailsVideoModal] = useState(false);
   const navigate = useNavigate();
 
-  const getEventsData = async () => {
+  const getContentData = async () => {
     try {
-      const res = await GetTopEventsViewed();
-      setSideEventData(res.data);
+      const res = await TopLikedContents();
+      setSideContentData(res.data);
     } catch (err) {
-      console.error("Failed to fetch side events data:", err);
+      setErrorFn(err, t);
     }
   };
-  // Event handlers - يمكن تخصيصها حسب الحاجة
+  // Content handlers - يمكن تخصيصها حسب الحاجة
   const handleArticleClick = (article) => {
-    setSelectedItem(article);
-    if (article.report_type === "videos") {
-      setOpenDetailsVideoModal(true);
-    } else {
-      // console.log("Article clicked", article);
-      navigate(`/events/report/${article.id}`);
-    }
+    navigate(`/contents/content/${article?.id}`);
   };
   // دالة الإعجاب
   const handleLike = async () => {
     try {
-      const newLikedState = !eventData?.has_liked;
+      const newLikedState = !contentData?.has_liked;
 
-      await PatchEventById(eventData?.id, {
+      await PatchContentById(contentData?.id, {
         has_liked: newLikedState,
       });
-      setEventData({
-        ...eventData,
+      setContentData({
+        ...contentData,
         has_liked: newLikedState,
         likes_count: newLikedState
-          ? eventData?.likes_count + 1
-          : eventData?.likes_count - 1,
+          ? contentData?.likes_count + 1
+          : contentData?.likes_count - 1,
       });
       // toast.success(newLikedState ? t("Like Added") : t("Like Removed"));
     } catch (err) {
@@ -72,7 +71,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
   // دالة تحميل الصورة
   const handleDownloadImage = async () => {
     try {
-      const imageUrl = eventData?.image || eventData?.image_url;
+      const imageUrl = contentData?.image || contentData?.image_url;
 
       // جلب الصورة كـ blob
       const response = await fetch(imageUrl);
@@ -84,7 +83,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
       // إنشاء رابط التحميل
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `${eventData?.title.replace(/\s+/g, "_")}.jpg`;
+      link.download = `${contentData?.title.replace(/\s+/g, "_")}.jpg`;
       document.body.appendChild(link);
       link.click();
 
@@ -102,10 +101,10 @@ const EventHeroEnhanced = ({ className = "" }) => {
   const getData = async () => {
     setIsLoading(true);
     try {
-      const res = await GetEventById(paramId);
-      setEventData(res.data);
+      const res = await GetContentById(paramId);
+      setContentData(res.data);
     } catch (err) {
-      console.error("Failed to fetch event data:", err);
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
@@ -115,18 +114,18 @@ const EventHeroEnhanced = ({ className = "" }) => {
   }, [paramId]);
 
   useEffect(() => {
-    getEventsData();
+    getContentData();
   }, []);
 
   // Sanitize summary HTML from CKEditor (basic client-side approach)
   const sanitizedSummary = useMemo(() => {
-    if (!eventData?.summary) return "";
+    if (!contentData?.summary) return "";
     try {
       const temp = document.createElement("div");
-      temp.innerHTML = eventData.summary;
+      temp.innerHTML = contentData.summary;
       // Remove script tags
       temp.querySelectorAll("script").forEach((el) => el.remove());
-      // Remove on* event handlers
+      // Remove on* content handlers
       temp.querySelectorAll("*").forEach((el) => {
         [...el.attributes].forEach((attr) => {
           if (/^on/i.test(attr.name)) {
@@ -138,7 +137,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
     } catch {
       return "";
     }
-  }, [eventData?.summary]);
+  }, [contentData?.summary]);
 
   // Component to inject sanitized HTML without using dangerouslySetInnerHTML (avoids lint rule)
   const HtmlContent = ({ html, className = "" }) => {
@@ -150,10 +149,9 @@ const EventHeroEnhanced = ({ className = "" }) => {
     }, [html]);
     return <div ref={htmlRef} className={className} />;
   };
-
   return (
     <div
-      className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container ${className}`}
+      className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container  `}
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
@@ -161,38 +159,43 @@ const EventHeroEnhanced = ({ className = "" }) => {
       <div className="flex flex-col gap-6 flex-1 max-w-4xl news-hero-main">
         {/* Start TItle */}
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-text leading-tight tracking-tight">
-          {eventData?.title}
+          {contentData?.title}
         </h1>
         {/* End Title */}
         {/* Start Image */}
         <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
-          <img
-            src={eventData?.image || eventData?.image_url}
-            alt={eventData?.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
+          {contentData?.images?.length > 0 && (
+            <img
+              src={
+                contentData?.images[0]?.image ||
+                contentData?.images[0]?.image_url
+              }
+              alt={contentData?.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          )}
         </div>
         {/* ENd Image */}
-         {/* Start Article Info */}
+        {/* Start Article Info */}
         <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
           {/* left: writer & date */}
           <div className="flex items-center gap-4">
             <span className="text-base md:text-lg">
-              {t("By")} {eventData?.writer}
+              {t("By")} {contentData?.writer}
             </span>
             <div className="w-px h-6 bg-white opacity-50" />
-            <span className="text-base md:text-lg">{eventData?.date}</span>
+            <span className="text-base md:text-lg">{contentData?.date}</span>
           </div>
 
           {/* right: country pill + image controls */}
           <div className="flex items-center gap-3">
             <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
-              {t(eventData?.country)}
+              {t(contentData?.country)}
             </span>
 
             <ImageControls
-              has_liked={eventData?.has_liked}
+              hasLiked={contentData?.has_liked}
               onLike={handleLike}
               onExpandImage={handleOpenImage}
               onDownloadImage={handleDownloadImage}
@@ -230,26 +233,26 @@ const EventHeroEnhanced = ({ className = "" }) => {
         </div>
         {/* Start Description / Summary (render HTML from CKEditor) */}
         <div className="text-base md:text-lg text-text leading-relaxed prose max-w-none">
-          {eventData?.description ? (
-            <span>{eventData.description}</span>
+          {contentData?.description ? (
+            <span>{contentData.description}</span>
           ) : (
             <HtmlContent html={sanitizedSummary} />
           )}
         </div>
         {/* End Description */}
-       
       </div>
       {/* End Main Article */}
 
       {/* Start Side Articles */}
       <div className="flex flex-col gap-1 w-full lg:w-80 flex-shrink-0 news-hero-sidebar news-sidebar max-h-screen overflow-y-auto">
-        {sideEventData?.map((sideArticle) => (
+        {sideContentData?.map((sideArticle) => (
           <NewsCard
             key={sideArticle.id}
             t={t}
             article={sideArticle}
             onClick={handleArticleClick}
             imgClassName="w-20 h-20"
+            section="contents"
           />
         ))}
       </div>
@@ -259,7 +262,7 @@ const EventHeroEnhanced = ({ className = "" }) => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={window.location.href}
-        title={eventData?.title}
+        title={contentData?.title}
       />
       {/* End Share Modal */}
 
@@ -268,11 +271,11 @@ const EventHeroEnhanced = ({ className = "" }) => {
         isOpen={isImageModalOpen}
         onClose={() => setIsImageModalOpen(false)}
         imageData={{
-          image: eventData?.image,
-          title: eventData?.title,
-          subtitle: eventData?.category,
-          writer: eventData?.writer,
-          details: `${eventData?.date} • ${eventData?.country}`,
+          image: contentData?.image,
+          title: contentData?.title,
+          subtitle: contentData?.category,
+          writer: contentData?.writer,
+          details: `${contentData?.date} • ${contentData?.country}`,
         }}
         onDownloadImage={handleDownloadImage}
         isRTL={i18n.language === "ar"}
@@ -290,4 +293,4 @@ const EventHeroEnhanced = ({ className = "" }) => {
   );
 };
 
-export default EventHeroEnhanced;
+export default ContentHeroEnhanced;

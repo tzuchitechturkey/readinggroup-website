@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { TopLikedPosts } from "@/api/posts";
 

@@ -13,11 +13,9 @@ function EventCard({ className = "", item }) {
 
   return (
     <div
-      onClick={() => {
-        if (item.report_type === "videos") {
-          setOpenDetailsVideoModal(true);
-        } else {
-          navigate(`/events/report/${item.id}`);
+    onClick={() => {
+        if (item.external_link) {
+          window.open(item.external_link, "_blank", "noopener,noreferrer");
         }
       }}
       className={`group cursor-pointer transform hover:scale-105 transition-all duration-300 h-full ${className}`}

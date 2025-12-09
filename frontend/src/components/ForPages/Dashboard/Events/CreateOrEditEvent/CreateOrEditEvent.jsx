@@ -1,34 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-// CKEditor Base64 Upload Adapter (simple inline implementation)
-function MyCustomUploadAdapterPlugin(editor) {
-  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
-    return new Base64UploadAdapter(loader);
-  };
-}
-
-class Base64UploadAdapter {
-  constructor(loader) {
-    this.loader = loader;
-  }
-  upload() {
-    return this.loader.file.then(
-      (file) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve({ default: reader.result });
-          };
-          reader.onerror = (error) => reject(error);
-          reader.readAsDataURL(file);
-        })
-    );
-  }
-  abort() {}
-}
-
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { X, User, Search, Tag, Upload } from "lucide-react";
@@ -41,13 +12,13 @@ import {
   CreateEvent,
   EditEventById,
   GetEventCategories,
-  GetEventSections,
+  // GetEventSections,
 } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages, postStatusOptions } from "@/constants/constants";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import DatePickerWithYearMonth from "../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
@@ -58,18 +29,18 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const [errors, setErrors] = useState({});
   const writerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
-  const sectionDropdownRef = useRef(null);
   const [showWriterDropdown, setShowWriterDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [showSectionDropdown, setShowSectionDropdown] = useState(false);
   const [writerSearchValue, setWriterSearchValue] = useState("");
   const [categoriesList, setCategoriesList] = useState([]);
-  const [sectionsList, setSectionsList] = useState([]);
   const [writersList, setWritersList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
-  const [sectionSearchValue, setSectionSearchValue] = useState("");
-  const [castInput, setCastInput] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
+  // const [castInput, setCastInput] = useState("");
+  // const [tagsInput, setTagsInput] = useState("");
+  // const sectionDropdownRef = useRef(null);
+  // const [showSectionDropdown, setShowSectionDropdown] = useState(false);
+  // const [sectionsList, setSectionsList] = useState([]);
+  // const [sectionSearchValue, setSectionSearchValue] = useState("");
 
   const [formData, setFormData] = useState({
     category: "",
@@ -77,19 +48,20 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     writer: "",
     image: null,
     image_url: "",
-    report_type: "",
     country: "",
     language: "",
-    duration_minutes: "",
-    section: "",
     happened_at: "",
-    summary: "",
     thumbnail: null,
     thumbnail_url: "",
-    video_url: "",
-    cast: [],
-    tags: [],
     status: "",
+    external_link: "",
+    // summary: "",
+    // video_url: "",
+    // cast: [],
+    // tags: [],
+    // report_type: "",
+    // duration_minutes: "",
+    // section: "",
   });
 
   const [imagePreview, setImagePreview] = useState("");
@@ -112,14 +84,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
 
-  const getSections = async (searchVal = "") => {
-    try {
-      const res = await GetEventSections(10, 0, searchVal);
-      setSectionsList(res?.data?.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const getSections = async (searchVal = "") => {
+  //   try {
+  //     const res = await GetEventSections(10, 0, searchVal);
+  //     setSectionsList(res?.data?.results);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   //Reset form when modal opens/closes or event changes
   useEffect(() => {
@@ -130,19 +102,20 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         writer: event.writer || "",
         image: null,
         image_url: event.image_url || "",
-        report_type: event.report_type || "",
         country: event.country || "",
         language: event.language || "",
-        duration_minutes: event.duration_minutes || "",
-        section: event.section || "",
-        summary: event.summary || "",
         happened_at: event.happened_at || "",
         thumbnail: null,
         thumbnail_url: event.thumbnail_url || "",
-        video_url: event.video_url || "",
-        cast: event.cast || [],
-        tags: event.tags || [],
         status: event.status || "",
+        external_link: event.external_link || "",
+        // summary: event.summary || "",
+        // report_type: event.report_type || "",
+        // duration_minutes: event.duration_minutes || "",
+        // section: event.section || "",
+        // video_url: event.video_url || "",
+        // cast: event.cast || [],
+        // tags: event.tags || [],
       });
       setImagePreview(
         event?.report_type === "videos"
@@ -156,19 +129,19 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         writer: "",
         image: null,
         image_url: "",
-        report_type: "",
         country: "",
         language: "",
-        duration_minutes: "",
-        section: "",
-        summary: "",
         happened_at: "",
         thumbnail: null,
         thumbnail_url: "",
-        video_url: "",
-        cast: [],
-        tags: [],
         status: "",
+        // summary: "",
+        // report_type: "",
+        // duration_minutes: "",
+        // section: "",
+        // video_url: "",
+        // cast: [],
+        // tags: [],
       });
       setImagePreview("");
     }
@@ -230,22 +203,22 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   };
 
   // Handle section selection
-  const handleSectionSelect = (section) => {
-    setFormData((prev) => ({
-      ...prev,
-      section: section.id,
-    }));
-    setShowSectionDropdown(false);
-    setSectionSearchValue("");
+  // const handleSectionSelect = (section) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     section: section.id,
+  //   }));
+  //   setShowSectionDropdown(false);
+  //   setSectionSearchValue("");
 
-    // Clear section error if exists
-    if (errors.section) {
-      setErrors((prev) => ({
-        ...prev,
-        section: "",
-      }));
-    }
-  };
+  //   // Clear section error if exists
+  //   if (errors.section) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       section: "",
+  //     }));
+  //   }
+  // };
 
   // Reset form function
   const resetForm = () => {
@@ -255,19 +228,20 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       writer: "",
       image: null,
       image_url: "",
-      report_type: "",
       country: "",
       language: "",
-      duration_minutes: "",
-      section: "",
-      summary: "",
+      status: "",
+      external_link: "",
       happened_at: "",
       thumbnail: null,
       thumbnail_url: "",
-      video_url: "",
-      cast: [],
-      tags: [],
-      status: "",
+      // report_type: "",
+      // section: "",
+      // duration_minutes: "",
+      // video_url: "",
+      // summary: "",
+      // cast: [],
+      // tags: [],
     });
 
     // Clean up existing preview
@@ -276,8 +250,8 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
 
     setImagePreview("");
-    setCastInput("");
-    setTagsInput("");
+    // setCastInput("");
+    // setTagsInput("");
   };
 
   const handleInputChange = (e) => {
@@ -329,63 +303,73 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   };
 
   // Handle cast input
-  const handleCastInput = (e) => {
-    if (e.key === "Enter" && castInput.trim()) {
-      e.preventDefault();
-      if (!formData?.cast.includes(castInput.trim())) {
-        setFormData((prev) => ({
-          ...prev,
-          cast: [...prev.cast, castInput.trim()],
-        }));
-      }
-      setCastInput("");
+  // const handleCastInput = (e) => {
+  //   if (e.key === "Enter" && castInput.trim()) {
+  //     e.preventDefault();
+  //     if (!formData?.cast.includes(castInput.trim())) {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         cast: [...prev.cast, castInput.trim()],
+  //       }));
+  //     }
+  //     setCastInput("");
 
-      // Clear error when adding cast
-      if (errors.cast) {
-        setErrors((prev) => ({
-          ...prev,
-          cast: "",
-        }));
-      }
-    }
-  };
+  //     // Clear error when adding cast
+  //     if (errors.cast) {
+  //       setErrors((prev) => ({
+  //         ...prev,
+  //         cast: "",
+  //       }));
+  //     }
+  //   }
+  // };
 
   // Remove cast
-  const removeCast = (castToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      cast: prev.cast.filter((item) => item !== castToRemove),
-    }));
-  };
+  // const removeCast = (castToRemove) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     cast: prev.cast.filter((item) => item !== castToRemove),
+  //   }));
+  // };
 
   // Handle tags input
-  const handleTagsInput = (e) => {
-    if (e.key === "Enter" && tagsInput.trim()) {
-      e.preventDefault();
-      if (!formData?.tags.includes(tagsInput.trim())) {
-        setFormData((prev) => ({
-          ...prev,
-          tags: [...prev.tags, tagsInput.trim()],
-        }));
-      }
-      setTagsInput("");
+  // const handleTagsInput = (e) => {
+  //   if (e.key === "Enter" && tagsInput.trim()) {
+  //     e.preventDefault();
+  //     if (!formData?.tags.includes(tagsInput.trim())) {
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         tags: [...prev.tags, tagsInput.trim()],
+  //       }));
+  //     }
+  //     setTagsInput("");
 
-      // Clear error when adding tag
-      if (errors.tags) {
-        setErrors((prev) => ({
-          ...prev,
-          tags: "",
-        }));
-      }
-    }
-  };
+  //     // Clear error when adding tag
+  //     if (errors.tags) {
+  //       setErrors((prev) => ({
+  //         ...prev,
+  //         tags: "",
+  //       }));
+  //     }
+  //   }
+  // };
 
   // Remove tag
-  const removeTag = (tagToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
+  // const removeTag = (tagToRemove) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     tags: prev.tags.filter((tag) => tag !== tagToRemove),
+  //   }));
+  // };
+
+  // Validate URL format
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   // Validate form
@@ -408,14 +392,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.image = t("Image is required");
     }
 
-    if (!formData.report_type) {
-      newErrors.report_type = t("Report type is required");
-    }
-
+    
     if (!formData.status) {
       newErrors.status = t("Status is required");
     }
-
+    
     if (!formData.country) {
       newErrors.country = t("Country is required");
     }
@@ -423,35 +404,45 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     if (!formData.language) {
       newErrors.language = t("Language is required");
     }
-
-    if (!formData.duration_minutes) {
-      newErrors.duration_minutes = t("Duration is required");
-    }
+    
     if (!formData?.happened_at) {
       newErrors.happened_at = t("Happened At is required");
     }
-    if (!formData.section) {
-      newErrors.section = t("Section is required");
+    
+    if (!formData.external_link.trim()) {
+      newErrors.external_link = t("External Link is required");
+    } else if (!isValidUrl(formData.external_link)) {
+      newErrors.external_link = t("Please enter a valid URL");
     }
+    // if (!formData.report_type) {
+    //   newErrors.report_type = t("Report type is required");
+    // }
+    
+    // if (!formData.duration_minutes) {
+      //   newErrors.duration_minutes = t("Duration is required");
+      // }
+      // if (!formData.section) {
+    //   newErrors.section = t("Section is required");
+    // }
 
-    if (!formData.summary.trim()) {
-      newErrors.summary = t("Summary is required");
-    }
+    // if (!formData.summary.trim()) {
+    //   newErrors.summary = t("Summary is required");
+    // }
 
     // Validate video fields if report type is "videos"
-    if (formData.report_type === "videos") {
-      if (!formData?.video_url.trim()) {
-        newErrors.video_url = t("Video URL is required");
-      }
+    // if (formData.report_type === "videos") {
+    //   if (!formData?.video_url.trim()) {
+    //     newErrors.video_url = t("Video URL is required");
+    //   }
 
-      if (!formData?.cast || formData?.cast.length === 0) {
-        newErrors.cast = t("Cast is required");
-      }
+    //   if (!formData?.cast || formData?.cast.length === 0) {
+    //     newErrors.cast = t("Cast is required");
+    //   }
 
-      if (!formData?.tags || formData?.tags.length === 0) {
-        newErrors.tags = t("Tags are required");
-      }
-    }
+    //   if (!formData?.tags || formData?.tags.length === 0) {
+    //     newErrors.tags = t("Tags are required");
+    //   }
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -473,12 +464,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     submitData.append("category", formData?.category?.id || formData?.category);
     submitData.append("title", formData.title);
     submitData.append("writer", formData.writer);
-    submitData.append("report_type", formData.report_type);
     submitData.append("status", formData.status);
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
-    submitData.append("duration_minutes", formData.duration_minutes);
-    submitData.append("section", formData.section?.id || formData.section);
     if (formData.image) {
       submitData.append("image", formData.image);
       if (formData?.report_type === "videos") {
@@ -499,26 +487,24 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       );
       submitData.append("happened_at", formattedDate);
     }
-    submitData.append("summary", formData.summary);
+    submitData.append("external_link", formData.external_link);
 
+    // submitData.append("report_type", formData.report_type);
+    // submitData.append("duration_minutes", formData.duration_minutes);
+    // submitData.append("section", formData.section?.id || formData.section);
+    // submitData.append("summary", formData.summary);
     // Append video fields if report type is "videos"
-    if (formData.report_type === "videos") {
-      submitData.append("video_url", formData.video_url);
-      // Append cast as JSON array
-      if (formData.cast && formData.cast.length > 0) {
-        submitData.append("cast", JSON.stringify(formData.cast));
-      }
-      // Append tags as JSON array
-      if (formData.tags && formData.tags.length > 0) {
-        submitData.append("tags", JSON.stringify(formData.tags));
-      }
-
-      // submitData.append("thumbnail_url", formData.thumbnail_url);
-      // Append thumbnail file if it exists
-      // if (formData.thumbnail) {
-      //   submitData.append("thumbnail", formData.thumbnail);
-      // }
-    }
+    // if (formData.report_type === "videos") {
+    //   submitData.append("video_url", formData.video_url);
+    //   // Append cast as JSON array
+    //   if (formData.cast && formData.cast.length > 0) {
+    //     submitData.append("cast", JSON.stringify(formData.cast));
+    //   }
+    //   // Append tags as JSON array
+    //   if (formData.tags && formData.tags.length > 0) {
+    //     submitData.append("tags", JSON.stringify(formData.tags));
+    //   }
+    // }
 
     // Append file if it exists
 
@@ -545,7 +531,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   useEffect(() => {
     getWriters();
     getCategories();
-    getSections();
+    // getSections();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -568,12 +554,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       }
 
       // Close section dropdown if clicked outside
-      if (
-        sectionDropdownRef.current &&
-        !sectionDropdownRef.current.contains(event.target)
-      ) {
-        setShowSectionDropdown(false);
-      }
+      // if (
+      //   sectionDropdownRef.current &&
+      //   !sectionDropdownRef.current.contains(event.target)
+      // ) {
+      //   setShowSectionDropdown(false);
+      // }
     };
 
     // Add event listener
@@ -956,7 +942,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           {/* End Title */}
 
           {/* Start Report Type */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("Report Type")} *
             </label>
@@ -971,14 +957,13 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
               <option value="" disabled hidden>
                 {t("Select Type")}
               </option>
-              {/* <option value="news">{t("News")}</option> */}
               <option value="videos">{t("Video")}</option>
               <option value="reports">{t("Reports")}</option>
             </select>
             {errors.report_type && (
               <p className="text-red-500 text-xs mt-1">{errors.report_type}</p>
             )}
-          </div>
+          </div> */}
           {/* End Report Type */}
 
           {/* Start Status */}
@@ -1010,7 +995,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           {/* End Status */}
 
           {/* Start Section */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("Section")} *
             </label>
@@ -1050,7 +1035,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   dir={i18n?.language === "ar" ? "rtl" : "ltr"}
                   className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
                 >
-                  {/* Search Box */}
+                   Search Box 
                   <div className="p-3 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
@@ -1098,7 +1083,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                     </div>
                   </div>
 
-                  {/* Sections List */}
+                  Sections List
                   <div className="max-h-60 overflow-y-auto">
                     {sectionsList.length > 0 ? (
                       sectionsList.map((section) => (
@@ -1135,7 +1120,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             {errors.section && (
               <p className="text-red-500 text-xs mt-1">{errors.section}</p>
             )}
-          </div>
+          </div> */}
           {/* End Section */}
 
           {/* Start Country */}
@@ -1195,7 +1180,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           {/* End Language */}
 
           {/* Start Duration Minutes */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("Duration (Minutes)")} *
             </label>
@@ -1215,11 +1200,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                 {errors.duration_minutes}
               </p>
             )}
-          </div>
+          </div> */}
           {/* End Duration Minutes */}
 
           {/* Start Happened At */}
-          <div className="-mt-3">
+          <div className="">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("Happened At")} *
             </label>
@@ -1239,11 +1224,37 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             )}
           </div>
           {/* End Air Date */}
-
+          {/* Start External Link */}
+          <div className="">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("External Link")} *
+            </label>
+            <input
+              type="url"
+              name="external_link"
+              value={formData.external_link}
+              onChange={handleInputChange}
+              className={`w-full p-3 py-1 border rounded-md outline-none ${
+                errors.external_link ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder={t(
+                "Enter the external link (e.g., https://example.com)"
+              )}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {t("Please enter a valid URL starting with http:// or https://")}
+            </p>
+            {errors.external_link && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.external_link}
+              </p>
+            )}
+          </div>
+          {/* End External Link */}
           {/* Start Video Fields - Only show if report_type is videos */}
-          {formData.report_type === "videos" && (
+          {/* {formData.report_type === "videos" && (
             <>
-              {/* Start Video URL */}
+              Start Video URL
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t("Video URL")} *
@@ -1264,9 +1275,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   </p>
                 )}
               </div>
-              {/* End Video URL */}
+              End Video URL
 
-              {/* Start Cast */}
+              Start Cast
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t("Cast")} *
@@ -1306,9 +1317,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   <p className="text-red-500 text-xs mt-1">{errors.cast}</p>
                 )}
               </div>
-              {/* End Cast */}
+              End Cast
 
-              {/* Start Tags */}
+              Start Tags
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t("Tags")} *
@@ -1349,16 +1360,16 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
                   <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
                 )}
               </div>
-              {/* End Tags */}
+              End Tags
             </>
-          )}
+          )} */}
           {/* End Video Fields */}
 
           {/* End Air Date */}
         </div>
         {/* End Two-Column Grid */}
         {/* Start Summary */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Summary")} *
           </label>
@@ -1388,7 +1399,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           {errors.summary && (
             <p className="text-red-500 text-xs mt-1">{errors.summary}</p>
           )}
-        </div>
+        </div> */}
         {/* End Summary */}
 
         {/* Start Actions */}

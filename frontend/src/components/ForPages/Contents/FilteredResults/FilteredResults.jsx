@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 
 function FilteredResults({
   data,

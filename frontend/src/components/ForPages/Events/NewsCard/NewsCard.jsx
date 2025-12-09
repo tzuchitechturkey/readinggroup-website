@@ -1,6 +1,6 @@
 import React from "react";
 
-const NewsCard = ({ t, article, onClick, imgClassName }) => (
+const NewsCard = ({ t, article, onClick, imgClassName, section }) => (
   <article
     className="group flex gap-2 cursor-pointer transition-all duration-200 hover:bg-white/5 hover:-translate-y-0.5 focus:outline-2 focus:outline-white/50 focus:outline-offset-2 rounded-lg p-2"
     onClick={() => onClick?.(article)}
@@ -10,7 +10,11 @@ const NewsCard = ({ t, article, onClick, imgClassName }) => (
       className={`w-24 h-16 sm:w-32 sm:h-20 ${imgClassName} flex-shrink-0 overflow-hidden rounded-lg bg-gray-200`}
     >
       <img
-        src={article.image}
+        src={
+          section === "contents"
+            ? article.images[0]?.image || article.images[0]?.image_url
+            : article.image || article.image_url
+        }
         alt={article.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 will-change-transform"
         loading="lazy"
