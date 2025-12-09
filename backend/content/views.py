@@ -536,6 +536,40 @@ class ContentViewSet(BaseContentViewSet):
                 pass
             
         return queryset.order_by('-created_at')
+    
+    @action(detail=False, methods=("get",), url_path="last-posted", url_name="last_posted")
+    def last_posted(self, request):
+        """Return last published contents (default limit=5)."""
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = Content.objects.all()
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        qs = qs.order_by('-created_at')[:limit]
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 
     def create(self, request, *args, **kwargs):
         """Create Content and attach uploaded images/urls as ContentImage rows."""
