@@ -1311,6 +1311,43 @@ class ContentAttachmentViewSet(BaseCRUDViewSet):
     search_fields = ("file_name",)
     ordering_fields = ("created_at",)
     
+    def create(self, request, *args, **kwargs):
+        """Create a new ContentAttachment with content_id from request data."""
+        content_id = request.data.get('content_id')
+        
+        if not content_id:
+            return Response(
+                {'error': 'content_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            content = Content.objects.get(id=content_id)
+        except Content.DoesNotExist:
+            return Response(
+                {'error': f'Content with id {content_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create the attachment with the content
+        file = request.FILES.get('file')
+        if not file:
+            return Response(
+                {'error': 'file is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        attachment = ContentAttachment.objects.create(
+            content=content,
+            file=file,
+            file_name=request.data.get('file_name', file.name),
+            file_size=file.size,
+            description=request.data.get('description', '')
+        )
+        
+        serializer = self.get_serializer(attachment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     
     
     
