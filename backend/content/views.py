@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
-from .enums import PostType
+from .enums import PostType, PostStatus
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import(
@@ -455,6 +455,41 @@ class PostViewSet(BaseContentViewSet):
         PostRating.objects.filter(user=user, post=post).delete()
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Get weekly moment posts filtered by post_type.
+        
+        Query parameters:
+        - post_type: 'card' or 'photo' (optional, defaults to all)
+        
+        Returns posts where is_weekly_moment=True filtered by the specified post_type.
+        """
+        queryset = Post.objects.filter(is_weekly_moment=True, status=PostStatus.PUBLISHED)
+        queryset = self.annotate_likes(queryset)
+        
+        # Filter by post_type if provided
+        post_type = request.query_params.get('post_type')
+        if post_type:
+            valid_types = [PostType.CARD, PostType.PHOTO]
+            if post_type in valid_types:
+                queryset = queryset.filter(post_type=post_type)
+            else:
+                return Response(
+                    {"error": f"Invalid post_type. Must be one of: {', '.join(valid_types)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        queryset = queryset.order_by('-created_at')
+        
+        # Apply pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 class ContentViewSet(BaseContentViewSet):
     queryset = Content.objects.all()
