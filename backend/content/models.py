@@ -85,6 +85,20 @@ class LikableMixin(models.Model):
         by `-annotated_likes_count` then `-created_at` as a tiebreaker.
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
+    
+class Authors(TimestampedModel):
+    """Authors for videos and posts."""
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    position = models.CharField(max_length=255, blank=True)
+    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
+    avatar_url = models.URLField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
             
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""

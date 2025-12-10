@@ -24,6 +24,7 @@ from .views import (
     NavbarLogoViewSet,
     SiteInfoViewSet,
     ContentAttachmentViewSet,
+    AuthorsViewSet,
 )
 
 app_name = "content"
@@ -53,5 +54,6 @@ router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
 router.register(r"content-attachments", ContentAttachmentViewSet, basename="content-attachment")
+router.register(r"authors", AuthorsViewSet, basename="authors")
 
 urlpatterns = router.urls

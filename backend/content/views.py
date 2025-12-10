@@ -47,6 +47,7 @@ from .models import (
     SocialMedia,
     NavbarLogo,
     PostRating,
+    Authors,
 )
 from .serializers import (
     EventSerializer,
@@ -69,6 +70,7 @@ from .serializers import (
     SocialMediaSerializer,
     NavbarLogoSerializer,
     ContentAttachmentSerializer,
+    AuthorsSerializer,
 )
 from .views_helpers import(
     BaseContentViewSet,
@@ -2230,3 +2232,12 @@ class SiteInfoViewSet(viewsets.ViewSet):
             SocialMedia.objects.exclude(pk__in=processed_ids).delete()
 
         return Response({"logo": created_logo, "socialmedia": result_socials}, status=status.HTTP_201_CREATED)
+    
+class AuthorsViewSet(BaseCRUDViewSet):
+    """ViewSet for managing Authors content."""
+    queryset = Authors.objects.all()
+    serializer_class = AuthorsSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name", "description")
+    ordering_fields = ("created_at", "name")
+    queryset = Authors.objects.all().order_by('-created_at')

@@ -29,7 +29,8 @@ from .models import (
     SocialMedia,
     TeamMember,
     Video,
-    VideoCategory
+    VideoCategory,
+    Authors,
     )
 
 class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
@@ -147,7 +148,7 @@ class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
 
     class Meta:
         model = ContentAttachment
-        fields = ("id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
+        fields = ("id", "content_id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
         file_fields = ("file",)
         
         
@@ -657,4 +658,10 @@ class NavbarLogoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     class Meta:
         model = NavbarLogo
+        fields = "__all__"
+        
+class AuthorsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    class Meta:
+        model = Authors
         fields = "__all__"
