@@ -626,6 +626,12 @@ class ContentViewSet(BaseContentViewSet):
         serializer.is_valid(raise_exception=True)
         content = serializer.save()
 
+        # ربط المرفقات بالـ Content الجديد إذا أرسلت IDs فقط
+        attachment_ids = request.data.get('attachments', [])
+        if isinstance(attachment_ids, list) and attachment_ids:
+            from .models import ContentAttachment
+            ContentAttachment.objects.filter(id__in=attachment_ids).update(content=content)
+
         # handle file uploads and image urls
         try:
             # collect uploaded files: support images[] or repeated images key

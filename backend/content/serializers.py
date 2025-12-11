@@ -452,7 +452,8 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
     images = ContentImageSerializer(many=True, read_only=True)
-    attachments = ContentAttachmentSerializer(many=True, read_only=True)
+    attachments = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
+    attachments_data = ContentAttachmentSerializer(many=True, read_only=True, source='attachments')
     class Meta:
         model = Content
         fields = "__all__"
