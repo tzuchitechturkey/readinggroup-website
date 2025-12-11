@@ -145,11 +145,10 @@ class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Content file attachments (documents, PDFs, etc)."""
     datetime_fields = ("created_at", "updated_at")
-    content_id = serializers.IntegerField(write_only=True, required=True)
 
     class Meta:
         model = ContentAttachment
-        fields = ("id", "content_id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
+        fields = ("id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
         file_fields = ("file",)
         
         
