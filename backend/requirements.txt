@@ -23,3 +23,4 @@ drf-yasg
 pyotp==2.9.0
 qrcode==8.2
 psycopg2-binary==2.9.11
+django_extensions

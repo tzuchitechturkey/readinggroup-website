@@ -150,7 +150,6 @@ export default function Page() {
 
     let autoParent = data;
     if (typeof data === "object" || !autoParent) {
-      console.log("Determining parent for section:", section);
       const parentMap = {
         // Posts
         cards: "Cards Or Photos",

@@ -1,22 +1,47 @@
-import Dashboard from "@/pages/Dashboard/DashboardContent";
-import Login from "@/pages/Auth/Login/LoginContent";
-import Register from "@/pages/Auth/Register/RegisterContent";
-import Home from "@/pages/Home/HomeContent";
-import AboutUs from "@/pages/AboutUs/AboutUsContent";
-import AboutMemberContent from "@/pages/AboutUs/Member/MemberContent";
-import VideosPageContent from "@/pages/Videos/VideosPage/VideosPageContent";
-import VideoPage from "@/pages/Videos/VideoPage/VideoPageContent";
-import CardsAndPhotosContent from "@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent";
-import ContentsContent from "@/pages/Contents/ContentsPageContent";
-import PostDetailsPageContent from "@/components/Global/PostDetailsPageContent/PostDetailsPageContent";
-import EventsContent from "@/pages/Events/EventsPageContent";
-import UserProfileContent from "@/pages/UserProfile/UserProfileContent";
-import UserSettingContent from "@/pages/Auth/UserSetting/UserSettingContent";
-import EventPageContent from "@/pages/Events/EventPageContent";
-import Pages404 from "@/pages/NotFound/NotFound";
-import EventsVideoPage from "@/components/ForPages/Events/EventsVideoPage/EventsVideoPage";
-import TOTPSetup from "@/components/ForPages/Auth/TOTPSetup/TOTPSetup";
-import MyListContent from "@/pages/MyList/MyListContent";
+import { lazy } from "react";
+
+import ContentPage from "../pages/Contents/ContentPage/ContentPage";
+
+// Lazy load all page components
+const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
+const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
+const Register = lazy(() => import("@/pages/Auth/Register/RegisterContent"));
+const Home = lazy(() => import("@/pages/Home/HomeContent"));
+const AboutUs = lazy(() => import("@/pages/AboutUs/AboutUsContent"));
+const AboutMemberContent = lazy(() =>
+  import("@/pages/AboutUs/Member/MemberContent")
+);
+const VideosPageContent = lazy(() =>
+  import("@/pages/Videos/VideosPage/VideosPageContent")
+);
+const VideoPage = lazy(() =>
+  import("@/pages/Videos/VideoPage/VideoPageContent")
+);
+const CardsAndPhotosContent = lazy(() =>
+  import("@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent")
+);
+const ContentsContent = lazy(() =>
+  import("@/pages/Contents/ContentsPageContent")
+);
+const PostDetailsPageContent = lazy(() =>
+  import("@/components/Global/PostDetailsPageContent/PostDetailsPageContent")
+);
+const EventsContent = lazy(() => import("@/pages/Events/EventsPageContent"));
+const UserProfileContent = lazy(() =>
+  import("@/pages/UserProfile/UserProfileContent")
+);
+const UserSettingContent = lazy(() =>
+  import("@/pages/Auth/UserSetting/UserSettingContent")
+);
+const EventPageContent = lazy(() => import("@/pages/Events/EventPageContent"));
+const Pages404 = lazy(() => import("@/pages/NotFound/NotFound"));
+const EventsVideoPage = lazy(() =>
+  import("@/components/ForPages/Events/EventsVideoPage/EventsVideoPage")
+);
+const TOTPSetup = lazy(() =>
+  import("@/components/ForPages/Auth/TOTPSetup/TOTPSetup")
+);
+const MyListContent = lazy(() => import("@/pages/MyList/MyListContent"));
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -30,7 +55,7 @@ export const userRoutes = [
   { path: "/my-list", element: <MyListContent /> },
   // Contents Routes
   { path: "/contents", element: <ContentsContent /> },
-  { path: "/contents/content/:id", element: <PostDetailsPageContent /> },
+  { path: "/contents/content/:id", element: <ContentPage /> },
   // Cards And Photos Routes
   { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },

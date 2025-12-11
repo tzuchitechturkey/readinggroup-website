@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
-from .enums import PostType
+from .enums import PostType, PostStatus
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import(
@@ -30,6 +30,7 @@ from .models import (
     Video,
     Content,
     ContentImage,
+    ContentAttachment,
     PostCategory,
     VideoCategory,
     EventCategory,
@@ -46,6 +47,7 @@ from .models import (
     SocialMedia,
     NavbarLogo,
     PostRating,
+    Authors,
 )
 from .serializers import (
     EventSerializer,
@@ -67,6 +69,8 @@ from .serializers import (
     SeasonIdSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
+    ContentAttachmentSerializer,
+    AuthorsSerializer,
 )
 from .views_helpers import(
     BaseContentViewSet,
@@ -452,6 +456,41 @@ class PostViewSet(BaseContentViewSet):
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=("get",), url_path="weekly-moments", url_name="weekly_moments")
+    def weekly_moments(self, request):
+        """Get weekly moment posts filtered by post_type.
+        
+        Query parameters:
+        - post_type: 'card' or 'photo' (optional, defaults to all)
+        
+        Returns posts where is_weekly_moment=True filtered by the specified post_type.
+        """
+        queryset = Post.objects.filter(is_weekly_moment=True, status=PostStatus.PUBLISHED)
+        queryset = self.annotate_likes(queryset)
+        
+        # Filter by post_type if provided
+        post_type = request.query_params.get('post_type')
+        if post_type:
+            valid_types = [PostType.CARD, PostType.PHOTO]
+            if post_type in valid_types:
+                queryset = queryset.filter(post_type=post_type)
+            else:
+                return Response(
+                    {"error": f"Invalid post_type. Must be one of: {', '.join(valid_types)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        queryset = queryset.order_by('-created_at')
+        
+        # Apply pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 class ContentViewSet(BaseContentViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
@@ -536,6 +575,40 @@ class ContentViewSet(BaseContentViewSet):
                 pass
             
         return queryset.order_by('-created_at')
+    
+    @action(detail=False, methods=("get",), url_path="last-posted", url_name="last_posted")
+    def last_posted(self, request):
+        """Return last published contents (default limit=5)."""
+        try:
+            limit = int(request.query_params.get('limit', 5))
+        except Exception:
+            limit = 5
+
+        qs = Content.objects.all()
+        try:
+            qs = _filter_published(qs)
+        except Exception:
+            try:
+                qs = qs.filter(status="published")
+            except Exception:
+                pass
+
+        try:
+            qs = qs.filter(category__is_active=True)
+        except Exception:
+            pass
+
+        qs = qs.order_by('-created_at')[:limit]
+        qs = annotate_likes_queryset(qs, request)
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True, context={"request": request})
+        return Response(serializer.data)
+
 
     def create(self, request, *args, **kwargs):
         """Create Content and attach uploaded images/urls as ContentImage rows."""
@@ -608,6 +681,39 @@ class ContentViewSet(BaseContentViewSet):
                         ContentImage.objects.create(content=content, image_url=url)
                     except Exception:
                         pass
+
+            # handle file attachments
+            attachments = []
+            if hasattr(request.FILES, 'getlist'):
+                attachments = list(request.FILES.getlist('attachments') or request.FILES.getlist('attachments[]') or [])
+            
+            # fallback numbered keys attachment_0..attachment_n
+            if not attachments and 'attachment_count' in data:
+                try:
+                    cnt = int(data.get('attachment_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'attachment_{i}'
+                    if key in request.FILES:
+                        attachments.append(request.FILES[key])
+
+            # also accept any request.FILES keys that start with attachment_
+            if not attachments:
+                for k, v in request.FILES.items():
+                    if k.startswith('attachment_') or k == 'attachment':
+                        attachments.append(v)
+
+            for f in attachments:
+                try:
+                    ContentAttachment.objects.create(
+                        content=content,
+                        file=f,
+                        file_name=f.name,
+                        file_size=f.size
+                    )
+                except Exception:
+                    pass
         except Exception:
             # don't break creation if image handling fails
             pass
@@ -679,6 +785,37 @@ class ContentViewSet(BaseContentViewSet):
                         ContentImage.objects.create(content=content, image_url=url)
                     except Exception:
                         pass
+
+            # handle file attachments
+            attachments = []
+            if hasattr(request.FILES, 'getlist'):
+                attachments = list(request.FILES.getlist('attachments') or request.FILES.getlist('attachments[]') or [])
+            
+            if not attachments and 'attachment_count' in data:
+                try:
+                    cnt = int(data.get('attachment_count') or 0)
+                except Exception:
+                    cnt = 0
+                for i in range(cnt):
+                    key = f'attachment_{i}'
+                    if key in request.FILES:
+                        attachments.append(request.FILES[key])
+
+            if not attachments:
+                for k, v in request.FILES.items():
+                    if k.startswith('attachment_') or k == 'attachment':
+                        attachments.append(v)
+
+            for f in attachments:
+                try:
+                    ContentAttachment.objects.create(
+                        content=content,
+                        file=f,
+                        file_name=f.name,
+                        file_size=f.size
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
 
@@ -1056,8 +1193,8 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     serializer_class = PostCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = PostCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = PostCategory.objects.all().order_by('order', '-created_at')
     
     @swagger_auto_schema(
         operation_summary="List all post categories",
@@ -1078,6 +1215,23 @@ class PostCategoryViewSet(BaseCRUDViewSet):
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder PostCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    PostCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=("get",), url_path="posts", url_name="posts")
     def posts(self, request, pk=None):
@@ -1126,8 +1280,8 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
     serializer_class = ContentCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = ContentCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = ContentCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all content categories",
@@ -1149,6 +1303,23 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
             pass
         return queryset
     
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder ContentCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    ContentCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=True, methods=("get",), url_path="contents", url_name="contents")
     def contents(self, request, pk=None):
         """Return Content objects belonging to this ContentCategory."""
@@ -1168,6 +1339,52 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
         serializer = ContentSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
+class ContentAttachmentViewSet(BaseCRUDViewSet):
+    """ViewSet for managing ContentAttachment content."""
+    queryset = ContentAttachment.objects.all()
+    serializer_class = ContentAttachmentSerializer
+    search_fields = ("file_name",)
+    ordering_fields = ("created_at",)
+    
+    def create(self, request, *args, **kwargs):
+        """Create a new ContentAttachment with content_id from request data."""
+        content_id = request.data.get('content_id')
+        
+        if not content_id:
+            return Response(
+                {'error': 'content_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            content = Content.objects.get(id=content_id)
+        except Content.DoesNotExist:
+            return Response(
+                {'error': f'Content with id {content_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create the attachment with the content
+        file = request.FILES.get('file')
+        if not file:
+            return Response(
+                {'error': 'file is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        attachment = ContentAttachment.objects.create(
+            content=content,
+            file=file,
+            file_name=request.data.get('file_name', file.name),
+            file_size=file.size,
+            description=request.data.get('description', '')
+        )
+        
+        serializer = self.get_serializer(attachment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+    
     
 class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
@@ -1175,8 +1392,8 @@ class EventCategoryViewSet(BaseCRUDViewSet):
     serializer_class = EventCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = EventCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = EventCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all event categories",
@@ -1197,6 +1414,23 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder EventCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    EventCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=("get",), url_path="events", url_name="events")
     def events(self, request, pk=None):
@@ -1334,8 +1568,8 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
     serializer_class = VideoCategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    queryset = VideoCategory.objects.all().order_by('-created_at')
+    ordering_fields = ("order", "created_at")
+    queryset = VideoCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all video categories",
@@ -1358,6 +1592,23 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
             pass
 
         return queryset
+    
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder VideoCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    VideoCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
     def videos(self, request, pk=None):
@@ -2053,3 +2304,12 @@ class SiteInfoViewSet(viewsets.ViewSet):
             SocialMedia.objects.exclude(pk__in=processed_ids).delete()
 
         return Response({"logo": created_logo, "socialmedia": result_socials}, status=status.HTTP_201_CREATED)
+    
+class AuthorsViewSet(BaseCRUDViewSet):
+    """ViewSet for managing Authors content."""
+    queryset = Authors.objects.all()
+    serializer_class = AuthorsSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name", "description")
+    ordering_fields = ("created_at", "name")
+    queryset = Authors.objects.all().order_by('-created_at')

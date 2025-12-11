@@ -15,8 +15,12 @@ export async function GetContents(limit, offset = 0, status, filters = {}) {
   if (filters.writer) params.append("writer", filters.writer);
   if (filters.category) params.append("category", filters.category);
   if (filters.language) params.append("language", filters.language);
-  if (filters.is_weekly_moment !== undefined && filters.is_weekly_moment !== null) params.append("is_weekly_moment", filters.is_weekly_moment);
-  
+  if (
+    filters.is_weekly_moment !== undefined &&
+    filters.is_weekly_moment !== null
+  )
+    params.append("is_weekly_moment", filters.is_weekly_moment);
+
   return await axios.get(`/contents/?status=${status}&${params.toString()}`);
 }
 
@@ -40,12 +44,15 @@ export async function DeleteContentById(id) {
   return await axios.delete(`/contents/${id}/`);
 }
 
-
 // Category
 export async function GetContentCategories(limit, offset, search = "") {
   return await axios.get(
     `/content-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
+}
+
+export async function SortContentCategories(data) {
+  return await axios.post(`/content-categories/reorder/`, data);
 }
 
 export async function AddContentCategory(data) {
@@ -133,7 +140,7 @@ export async function LikeReply(replyId) {
 export async function UnlikeReply(replyId) {
   return await axios.delete(`/replies/${replyId}/like/`);
 }
- 
+
 // it Gieves to data card_photo And reading
 export async function TopLikedContents() {
   return await axios.get(`/contents/top-liked/`);
@@ -141,6 +148,14 @@ export async function TopLikedContents() {
 
 export async function TopViewedContents() {
   return await axios.get(`/contents/top-viewed/`);
+}
+
+export async function TopCommentedContents() {
+  return await axios.get(`/contents/top-commented/`);
+}
+
+export async function LatestContents() {
+  return await axios.get(`/contents/last-posted/?limit=5`);
 }
 
 // Rating

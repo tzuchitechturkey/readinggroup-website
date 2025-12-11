@@ -20,12 +20,14 @@ from .models import (
     SeasonId,
     SocialMedia,
     NavbarLogo,
+    Authors,
+    ContentAttachment,
 )
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "category_name", "language", "views", "is_featured")
-    list_filter = ("category__name", "language", "is_featured", "is_new")
+    list_filter = ("category__name", "is_featured", "is_new")
     search_fields = ("title", "category__name")
 
     def category_name(self, obj):
@@ -156,3 +158,13 @@ class NavbarLogoAdmin(admin.ModelAdmin):
 class ContentCategoryAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
+    
+@admin.register(Authors)
+class AuthorsAdmin(admin.ModelAdmin):
+    list_display = ("name", "description")
+    search_fields = ("name", "description")
+
+@admin.register(ContentAttachment)
+class ContentAttachmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "content", "file_name", "created_at")
+    search_fields = ("file_name", "content__title")

@@ -24,6 +24,8 @@ function WeekPhotosCard({ item }) {
               src={item?.image || item?.image_url}
               alt={item?.title}
               className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+              title={item?.title || "week photo image"}
             />
 
             {/* Bottom gradient overlay */}

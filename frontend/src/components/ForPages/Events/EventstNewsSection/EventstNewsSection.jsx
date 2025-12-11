@@ -8,13 +8,13 @@ import RecommendationNewsCard from "@/components/ForPages/Events/RecommendationN
 import CategoryTag from "@/components/ForPages/Events/EventsCategoryTag/CategoryTag";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
-  GetEventCategories,
-  GetTopEventsCommented,
-  GetTopEventsLastPosted,
-  GetTopEventsViewed,
-} from "@/api/events";
+  GetContentCategories,
+  LatestContents,
+  TopCommentedContents,
+  TopViewedContents,
+} from "@/api/contents";
 
-const EventstNewsSection = () => {
+const ContentstNewsSection = () => {
   const { t, i18n } = useTranslation();
   const [lastPosted, setLastPosted] = useState([]);
   const [topViewed, setTopViewed] = useState([]);
@@ -23,7 +23,7 @@ const EventstNewsSection = () => {
   const navigate = useNavigate();
   const getSuggestedData = async () => {
     try {
-      const res = await GetTopEventsCommented();
+      const res = await TopViewedContents();
       setSuggestedData(res.data);
     } catch (err) {
       setErrorFn(err, t);
@@ -31,15 +31,16 @@ const EventstNewsSection = () => {
   };
   const getLastPosted = async () => {
     try {
-      const res = await GetTopEventsLastPosted();
-      setLastPosted(res.data);
+      const res = await LatestContents();
+      console.log(res?.data, "ssss");
+      setLastPosted(res.data?.results);
     } catch (err) {
       setErrorFn(err, t);
     }
   };
-  const getTopViewed = async () => {
+  const getTopCommented = async () => {
     try {
-      const res = await GetTopEventsViewed();
+      const res = await TopCommentedContents();
       setTopViewed(res.data);
     } catch (err) {
       setErrorFn(err, t);
@@ -48,7 +49,7 @@ const EventstNewsSection = () => {
 
   const getCategories = async () => {
     try {
-      const res = await GetEventCategories(100, 0, "");
+      const res = await GetContentCategories(100, 0, "");
       setCategoriesList(res.data?.results || []);
     } catch (err) {
       setErrorFn(err, t);
@@ -66,7 +67,7 @@ const EventstNewsSection = () => {
 
   useEffect(() => {
     getLastPosted();
-    getTopViewed();
+    getTopCommented();
     getSuggestedData();
     getCategories();
   }, []);
@@ -86,9 +87,7 @@ const EventstNewsSection = () => {
                 key={article?.id}
                 article={article}
                 onClick={() => {
-                  article?.report_type === "videos"
-                    ? navigate(`/events/video/${article?.id}`)
-                    : navigate(`/events/report/${article?.id}`);
+                  navigate(`/contents/content/${article?.id}`);
                 }}
               />
             ))}
@@ -109,9 +108,7 @@ const EventstNewsSection = () => {
                     key={article?.id}
                     article={article}
                     onClick={() => {
-                      article?.report_type === "videos"
-                        ? navigate(`/events/video/${article?.id}`)
-                        : navigate(`/events/report/${article?.id}`);
+                      navigate(`/contents/content/${article?.id}`);
                     }}
                     imgClassName=" md:!w-40 md:!h-28 "
                   />
@@ -150,21 +147,29 @@ const EventstNewsSection = () => {
                     t={t}
                     key={article?.id}
                     article={article}
-                    onClick={() => {}}
+                    onClick={() => {
+                      if (article.external_link) {
+                        window.open(
+                          article.external_link,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                      }
+                    }}
                   />
                 ))}
               </div>
             </section>
 
             {/* Tags Category */}
-            <section className="pt-3">
+            {/* <section className="pt-3">
               <SectionHeader title={t("Tags Category")} ornamentHeight="h-10" />
               <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 mt-5 justify-center lg:justify-start">
                 {categoriesList.map((category, index) => (
                   <CategoryTag key={index} category={category} />
                 ))}
               </div>
-            </section>
+            </section> */}
           </div>
         </div>
       </div>
@@ -172,4 +177,4 @@ const EventstNewsSection = () => {
   );
 };
 
-export default EventstNewsSection;
+export default ContentstNewsSection;

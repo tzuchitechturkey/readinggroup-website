@@ -66,6 +66,8 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
               : item?.images[0]?.image || item?.image_url
           }
           alt="card-img"
+          loading="lazy"
+          title={item?.title || "card image"}
           className="absolute inset-0 w-full h-full object-cover rounded-2xl"
         />
         <div className="absolute bottom-3 right-3">

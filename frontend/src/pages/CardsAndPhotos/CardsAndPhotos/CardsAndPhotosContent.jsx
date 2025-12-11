@@ -7,7 +7,7 @@ import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPho
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
 import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import heroImg from "@/assets/eventsHero.png";
 import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
 import { GetPostCategories, GetItemsByCategoryId } from "@/api/posts";
@@ -114,7 +114,7 @@ function CardsAndPhotosContent() {
         {/* End Week's Photos */}
 
         {/* Start Show Active Categories */}
-        <section id="week-topic-section">
+        {/* <section id="week-topic-section">
           {activeCategories.map((category) => (
             <div
               key={category.id}
@@ -125,11 +125,11 @@ function CardsAndPhotosContent() {
                 title={category.name}
                 data={categoriesData[category.id] || []}
                 isSlider={true}
-                cardName={GuidingReadingcard}
+                cardName={Contentcard}
               />
             </div>
           ))}
-        </section>
+        </section> */}
         {/* End Show Active Categories */}
       </div>
     </div>

@@ -5,7 +5,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Import components
-import GuidingReadingcard from "@/components/Global/GuidingReadingcard/GuidingReadingcard";
+import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
@@ -287,7 +287,7 @@ function PostDetailsPageContent() {
               <div className="space-y-4">
                 {topCommentedData?.map((card) => (
                   <div key={card.id} className="bg-gray-50 rounded-lg p-3">
-                    <GuidingReadingcard item={card} fromContent={fromContent} />
+                    <Contentcard item={card} fromContent={fromContent} />
                   </div>
                 ))}
               </div>

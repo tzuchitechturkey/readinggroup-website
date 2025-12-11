@@ -85,6 +85,20 @@ class LikableMixin(models.Model):
         by `-annotated_likes_count` then `-created_at` as a tiebreaker.
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
+    
+class Authors(TimestampedModel):
+    """Authors for videos and posts."""
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    position = models.CharField(max_length=255, blank=True)
+    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
+    avatar_url = models.URLField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
             
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
@@ -276,6 +290,7 @@ class Event(LikableMixin, TimestampedModel):
     tags = models.JSONField(default=list, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='events')
     is_weekly_moment = models.BooleanField(default=False)
+    external_link = models.URLField(max_length=1000, blank=True)
         
     @classmethod
     def top_liked(cls, limit: int = 5):
@@ -398,6 +413,23 @@ class ContentImage(TimestampedModel):
     def __str__(self) -> str:
         return f"ContentImage<{self.content_id}:{self.pk}>"
 
+
+class ContentAttachment(TimestampedModel):
+    """Multiple file attachments for a Content instance.
+    Supports documents (Word, PDF, PowerPoint) and other file types.
+    """
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to="content/attachments/", help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats")
+    file_name = models.CharField(max_length=255, blank=True, help_text="Original filename")
+    file_size = models.PositiveIntegerField(blank=True, null=True, help_text="File size in bytes")
+    description = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"ContentAttachment<{self.content_id}:{self.pk}>"
+
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
     name = models.CharField(max_length=255)
@@ -475,9 +507,10 @@ class PostCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
@@ -486,9 +519,10 @@ class EventCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
@@ -497,9 +531,10 @@ class ContentCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
 
@@ -508,9 +543,10 @@ class VideoCategory(TimestampedModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
     
     class Meta:
-        ordering = ("name",)
+        ordering = ("order", "-created_at")
     def __str__(self) -> str: 
         return self.name
     
