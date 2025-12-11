@@ -22,6 +22,9 @@ export const getSectionKey = (title) => {
     "Add/Edit Event": "createOrEditEvent",
     "Events Categories": "eventsCategories",
     "Events Sections": "eventsSections",
+    // Writers
+    "All Writers": "writers",
+    "Add/Edit Writer": "createOrEditWriter",
     // Profile && Setting
     "Profile Settings": "profileSettings",
     profile: "profile",
@@ -29,6 +32,7 @@ export const getSectionKey = (title) => {
     History: "history",
     positions: "positions",
     "Our Team": "team",
+    "The Book": "book",
     // Web site info
     "Website Info": "websiteInfo",
     "Sort Section": "sortSection",

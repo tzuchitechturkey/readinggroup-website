@@ -3,20 +3,20 @@
  * i18next-parser configuration
  * - Extracts translatable strings from React/JS/TS source files.
  *  Run from inside the frontend folder:
- * 
+ *
  *  npm run i18n:extract
- * 
+ *
  * Auto watch:
- * 
+ *
  *  npm run i18n:watch
- * 
+ *
  * - Saves translations under src/i18n/locales/{{lng}}/{{ns}}.json.
  * - Uses "eng" as the default language; other languages remain empty by default.
  */
 
 const SOURCE_GLOBS = ["src/**/*.{js,jsx,ts,tsx}"];
 const FILE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
-const SUPPORTED_LANGS = ["ar", "ch", "en", "tr" , "jp"];
+const SUPPORTED_LANGS = ["ar", "ch", "chsi", "en", "tr", "jp"];
 
 module.exports = {
   input: SOURCE_GLOBS,

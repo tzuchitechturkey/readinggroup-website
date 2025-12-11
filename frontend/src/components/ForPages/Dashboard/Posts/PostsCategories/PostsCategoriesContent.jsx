@@ -12,6 +12,7 @@ import {
   AddPostCategory,
   EditPostCategoryById,
   DeletePostCategory,
+  SortPostCategories,
 } from "@/api/posts";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -36,6 +37,10 @@ function PostsCategoriesContent({ onSectionChange }) {
   });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [isSorting, setIsSorting] = useState(false);
+  const [originalCategories, setOriginalCategories] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
   const limit = 10;
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
@@ -44,7 +49,10 @@ function PostsCategoriesContent({ onSectionChange }) {
       const res = searchValue
         ? await GetPostCategories(limit, offset, searchValue)
         : await GetPostCategories(limit, offset);
-      setCategories(res?.data?.results || []);
+      const results = res?.data?.results || [];
+      setCategories(results);
+      setOriginalCategories(JSON.parse(JSON.stringify(results)));
+      setHasChanges(false);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
       setErrorFn(err, t);
@@ -96,6 +104,74 @@ function PostsCategoriesContent({ onSectionChange }) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDragStart = (e, item) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e, targetItem) => {
+    e.preventDefault();
+
+    if (!draggedItem || draggedItem.id === targetItem.id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // إنشاء array جديد مع الترتيب الجديد
+    const newCategories = [...categories];
+    const draggedIndex = newCategories.findIndex(
+      (cat) => cat.id === draggedItem.id
+    );
+    const targetIndex = newCategories.findIndex(
+      (cat) => cat.id === targetItem.id
+    );
+
+    // تبديل العناصر
+    [newCategories[draggedIndex], newCategories[targetIndex]] = [
+      newCategories[targetIndex],
+      newCategories[draggedIndex],
+    ];
+
+    setCategories(newCategories);
+    setHasChanges(true);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+  };
+
+  const handleSaveOrder = async () => {
+    setIsSorting(true);
+    try {
+      // إنشاء البيانات المرسلة
+      const sortData = categories.map((cat, index) => ({
+        id: cat.id,
+        order: index,
+      }));
+      // استدعاء API
+      await SortPostCategories({ categories: sortData });
+      toast.success(t("Categories reordered successfully"));
+      setHasChanges(false);
+      setOriginalCategories(JSON.parse(JSON.stringify(categories)));
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to reorder categories"));
+    } finally {
+      setIsSorting(false);
+    }
+  };
+
+  const handleCancelOrder = () => {
+    setCategories(JSON.parse(JSON.stringify(originalCategories)));
+    setHasChanges(false);
+    toast.info(t("Changes cancelled"));
   };
 
   const handleSubmit = async (e) => {
@@ -267,7 +343,22 @@ function PostsCategoriesContent({ onSectionChange }) {
               </thead>
               <tbody>
                 {categories?.map((cat) => (
-                  <tr key={cat.id} className="border-t">
+                  <tr
+                    key={cat.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, cat)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, cat)}
+                    onDragEnd={handleDragEnd}
+                    className={`border-t transition-all duration-200 ${
+                      draggedItem?.id === cat.id
+                        ? "opacity-50 bg-blue-50"
+                        : "cursor-move hover:bg-gray-50"
+                    } ${isSorting ? "opacity-75" : ""}`}
+                    style={{
+                      cursor: isSorting ? "not-allowed" : "move",
+                    }}
+                  >
                     <td className="py-3 px-3">{cat.name}</td>
                     <td className="py-3 px-3">{cat.description || "-"}</td>
                     <td className="py-3 px-3">
@@ -352,6 +443,41 @@ function PostsCategoriesContent({ onSectionChange }) {
               t={t}
             />
           </div>
+
+          {/* Save/Cancel Order Buttons */}
+          {hasChanges && (
+            <div className="flex gap-3 p-4 bg-yellow-50 border-t border-yellow-200">
+              <div className="flex-1 flex items-center gap-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                <span className="text-sm text-yellow-700">
+                  {t("You have unsaved changes in the category order")}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={isSorting}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {t("Cancel")}
+                </button>
+                <button
+                  onClick={handleSaveOrder}
+                  disabled={isSorting}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                >
+                  {isSorting ? (
+                    <>
+                      <span className="inline-block animate-spin">⟳</span>
+                      {t("Saving...")}
+                    </>
+                  ) : (
+                    `✓ ${t("Save Changes")}`
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Create / Edit Modal */}

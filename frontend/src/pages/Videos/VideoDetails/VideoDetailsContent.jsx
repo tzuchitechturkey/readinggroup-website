@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { Play, Heart, Download, Share2, X } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -9,7 +9,6 @@ import TabsSection from "@/components/ForPages/Videos/VideoDetails/TabsSections/
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import { PatchVideoById } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import Loader from "@/components/Global/Loader/Loader";
 import Modal from "@/components/Global/Modal/Modal";
 
 function VideoDetailsContent({
@@ -19,19 +18,9 @@ function VideoDetailsContent({
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
   const [videoItem, setVideoItem] = useState(videoData);
-  // Use internal state to control modal visibility
   const [internalIsOpen, setInternalIsOpen] = useState(externalIsOpen);
-  const [userId, setUserId] = useState();
-
-  const [showAllCast, setShowAllCast] = useState(false);
-
-  // State to control share modal visibility
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-
-  // State to control download button clicked status
   const [isDownloadClicked, setIsDownloadClicked] = useState(false);
 
   // Download image function
@@ -99,18 +88,15 @@ function VideoDetailsContent({
   }, [videoData]);
 
   const handleClose = () => {
-    // Set internal state first
     setInternalIsOpen(false);
 
-    // Use timeout to allow animation to complete before navigation
     setTimeout(() => {
       if (onClose && typeof onClose === "function") {
         onClose();
         return;
       }
-      // If no onClose provided (rendered via route), go back
       navigate(-1);
-    }, 300); // Match animation duration in Modal component
+    }, 300);
   };
 
   return (
@@ -121,7 +107,6 @@ function VideoDetailsContent({
       mountOnEnter={true}
       unmountOnExit={false}
     >
-      {isLoading && <Loader />}
       <div
         className="relative w-full h-full overflow-auto p-0 custom-scrollbar rounded-none"
         style={{
@@ -302,11 +287,17 @@ function VideoDetailsContent({
                   {t("Season")} · {videoItem?.season_name?.season_id}
                 </p>
               )}
-              <p className="text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4">
-                {videoItem?.report_type
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: videoItem?.description || "",
+                }}
+                className=" text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4"
+              />
+              {/* {videoItem?.report_type
                   ? videoItem?.summary
-                  : videoItem?.description}
-              </p>
+                  : videoItem?.description} */}
+
+              {/* </div> */}
             </div>
 
             {/* Right Column - Additional Info */}
@@ -325,7 +316,6 @@ function VideoDetailsContent({
                         key={index}
                         className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-200 text-xs cursor-pointer"
                       >
-                        {/* بدون أيقونة نقطة */}
                         {cas}
                       </span>
                     ))}
@@ -346,13 +336,12 @@ function VideoDetailsContent({
                         key={index}
                         className="flex items-center gap-1 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-full shadow-sm hover:bg-yellow-100 transition-all duration-200 text-xs cursor-pointer"
                       >
-                        {/* بدون أيقونة نقطة */}
                         {tag}
                       </span>
                     ))}
                   </div>
                 </div>
-                {/* End Tags   */}
+                {/* End Tags */}
 
                 {/* Start Category   */}
                 <div className="mb-4">
@@ -381,7 +370,7 @@ function VideoDetailsContent({
         {/* Start Episodes && User Reviews */}
         {!videoItem?.report_type && (
           <div className="px-0 xs:px-1 sm:px-2 md:px-2 lg:px-5 py-1 xs:py-2 sm:py-3 md:py-4">
-            <TabsSection videoData={videoItem}  />
+            <TabsSection videoData={videoItem} />
           </div>
         )}
         {/* End Episodes && User Reviews */}

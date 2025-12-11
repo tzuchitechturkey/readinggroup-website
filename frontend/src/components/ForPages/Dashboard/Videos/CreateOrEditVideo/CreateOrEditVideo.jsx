@@ -1,19 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import { Save, Upload, Youtube, X, Tag, Search, User } from "lucide-react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
+// import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import {
   CreateVideo,
   EditVideoById,
   GetVideoCategories,
-  GetSeries,
-  GetSeasonsBySeriesId,
+  // GetSeries,
+  // GetSeasonsBySeriesId,
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages, postStatusOptions } from "@/constants/constants";
@@ -27,10 +29,10 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [categoriesList, setCategoriesList] = useState([]);
-  const [seriesList, setSeriesList] = useState([]);
-  const [seasonsList, setSeasonsList] = useState([]);
-  const [selectedSeries, setSelectedSeries] = useState(null); // Changed from selectedSeriesId to selectedSeries object
-  const [selectedSeason, setSelectedSeason] = useState(null); // State for selected season object
+  // const [seriesList, setSeriesList] = useState([]);
+  // const [seasonsList, setSeasonsList] = useState([]);
+  // const [selectedSeries, setSelectedSeries] = useState(null);
+  // const [selectedSeason, setSelectedSeason] = useState(null);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -81,18 +83,18 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setHasChanges(false);
 
       // Set series and season objects when editing
-      const seriesData = video?.season_name?.season_title;
-      const seasonData = video?.season_name;
+      // const seriesData = video?.season_name?.season_title;
+      // const seasonData = video?.season_name;
 
-      if (seriesData) {
-        setSelectedSeries(seriesData);
-        // Fetch seasons for this series
-        fetchSeasonsBySeries(seriesData.id);
-      }
+      // if (seriesData) {
+      //   setSelectedSeries(seriesData);
+      //   // Fetch seasons for this series
+      //   fetchSeasonsBySeries(seriesData.id);
+      // }
 
-      if (seasonData) {
-        setSelectedSeason(seasonData);
-      }
+      // if (seasonData) {
+      //   setSelectedSeason(seasonData);
+      // }
 
       // Set existing thumbnail preview
       setImagePreview(video?.thumbnail || null);
@@ -112,85 +114,85 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   };
 
   // Fetch Series with search support for AutoComplete
-  const fetchSeries = async (searchVal = "") => {
-    try {
-      const res = await GetSeries(searchVal); // Pass search value to API
-      setSeriesList(res?.data?.results || []);
-    } catch (err) {
-      setErrorFn(err, t);
-    }
-  };
+  // const fetchSeries = async (searchVal = "") => {
+  //   try {
+  //     const res = await GetSeries(searchVal); // Pass search value to API
+  //     setSeriesList(res?.data?.results || []);
+  //   } catch (err) {
+  //     setErrorFn(err, t);
+  //   }
+  // };
 
   // Fetch Seasons by Series ID
-  const fetchSeasonsBySeries = async (seriesId) => {
-    if (!seriesId) {
-      setSeasonsList([]);
-      return;
-    }
-    try {
-      const res = await GetSeasonsBySeriesId(seriesId);
-      setSeasonsList(res?.data?.results || []);
-    } catch (err) {
-      setErrorFn(err, t);
-      setSeasonsList([]);
-    }
-  };
+  // const fetchSeasonsBySeries = async (seriesId) => {
+  //   if (!seriesId) {
+  //     setSeasonsList([]);
+  //     return;
+  //   }
+  //   try {
+  //     const res = await GetSeasonsBySeriesId(seriesId);
+  //     setSeasonsList(res?.data?.results || []);
+  //   } catch (err) {
+  //     setErrorFn(err, t);
+  //     setSeasonsList([]);
+  //   }
+  // };
 
   // Handle Series Selection from AutoComplete
-  const handleSeriesSelect = (series) => {
-    setSelectedSeries(series);
-    setSelectedSeason(null); // Reset selected season object
-    setFormData((prev) => ({
-      ...prev,
-      season_name: "", // Reset season when series changes
-    }));
-    fetchSeasonsBySeries(series?.id);
+  // const handleSeriesSelect = (series) => {
+  //   setSelectedSeries(series);
+  //   setSelectedSeason(null); // Reset selected season object
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     season_name: "", // Reset season when series changes
+  //   }));
+  //   fetchSeasonsBySeries(series?.id);
 
-    // Clear error if exists
-    if (errors.season_name) {
-      setErrors((prev) => ({
-        ...prev,
-        season_name: "",
-      }));
-    }
-  };
+  //   // Clear error if exists
+  //   if (errors.season_name) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       season_name: "",
+  //     }));
+  //   }
+  // };
 
   // Handle Clear Series Selection
-  const handleClearSeries = () => {
-    setSelectedSeries(null);
-    setSelectedSeason(null); // Clear selected season object
-    setSeasonsList([]);
-    setFormData((prev) => ({
-      ...prev,
-      season_name: "",
-    }));
-  };
+  // const handleClearSeries = () => {
+  //   setSelectedSeries(null);
+  //   setSelectedSeason(null); // Clear selected season object
+  //   setSeasonsList([]);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     season_name: "",
+  //   }));
+  // };
 
   // Handle Season Selection from AutoComplete
-  const handleSeasonSelect = (season) => {
-    setSelectedSeason(season);
-    setFormData((prev) => ({
-      ...prev,
-      season_name: season.id,
-    }));
+  // const handleSeasonSelect = (season) => {
+  //   setSelectedSeason(season);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     season_name: season.id,
+  //   }));
 
-    // Clear error if exists
-    if (errors.season_name) {
-      setErrors((prev) => ({
-        ...prev,
-        season_name: "",
-      }));
-    }
-  };
+  //   // Clear error if exists
+  //   if (errors.season_name) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       season_name: "",
+  //     }));
+  //   }
+  // };
 
   // Handle Clear Season Selection
-  const handleClearSeason = () => {
-    setSelectedSeason(null);
-    setFormData((prev) => ({
-      ...prev,
-      season_name: "",
-    }));
-  };
+  // const handleClearSeason = () => {
+  //   setSelectedSeason(null);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     season_name: "",
+  //   }));
+  // };
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -328,9 +330,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     //   newErrors.duration = t("Duration is required");
     // }
     // Series and Season are optional
-    if (selectedSeries && !formData?.season_name) {
-      newErrors.season_name = t("Season is required when Series is selected");
-    }
+    // if (selectedSeries && !formData?.season_name) {
+    //   newErrors.season_name = t("Season is required when Series is selected");
+    // }
 
     if (!formData?.happened_at) {
       newErrors.happened_at = t("Happened At is required");
@@ -441,7 +443,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
   useEffect(() => {
     getCategories();
-    fetchSeries();
+    // fetchSeries();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -759,7 +761,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             </div> */}
             {/* End Type */}
             {/* Start Series Selection with AutoComplete */}
-            <AutoComplete
+            {/* <AutoComplete
               label={t("Series")}
               placeholder={t("Select Series")}
               selectedItem={selectedSeries}
@@ -774,11 +776,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               customStyle="bg-white"
               showWriterAvatar={false}
               isRtl={i18n?.language === "ar"}
-            />
+            /> */}
             {/* End Series Selection */}
 
             {/* Start Season Selection with AutoComplete */}
-            <AutoComplete
+            {/* <AutoComplete
               label={t("Season")}
               placeholder={
                 !selectedSeries
@@ -803,7 +805,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             />
             {errors.season_name && (
               <p className="text-red-500 text-xs mt-1">{errors.season_name}</p>
-            )}
+            )} */}
             {/* End Season Selection */}
             {/* Start Happened At */}
             <div>
@@ -1045,19 +1047,71 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("Description")} *
           </label>
-          <textarea
-            name="description"
-            value={formData?.description}
-            onChange={handleInputChange}
-            rows={4}
-            placeholder={t("Enter video description")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          <div
+            className={`border rounded-md ${
               errors.description ? "border-red-500" : "border-gray-300"
-            }`}
-          />
+            } focus-within:ring-2 focus-within:ring-blue-500`}
+          >
+            <CKEditor
+              editor={ClassicEditor}
+              data={formData.description}
+              config={{
+                placeholder: t("Enter the full content of the post"),
+                language: i18n.language === "ar" ? "ar" : "en",
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                removePlugins: [
+                  "CKFinder",
+                  "CKFinderUploadAdapter",
+                  "Image",
+                  "ImageToolbar",
+                  "ImageCaption",
+                  "ImageStyle",
+                  "ImageResize",
+                  "ImageUpload",
+                  "EasyImage",
+                  "MediaEmbed",
+                  "MediaEmbedToolbar",
+                ],
+                toolbar: {
+                  // تأكد أن شريط الأدوات لا يحتوي على أزرار رفع/صورة
+                  items: [
+                    "heading",
+                    "|",
+                    "bold",
+                    "italic",
+                    "link",
+                    "|",
+                    "bulletedList",
+                    "numberedList",
+                    "|",
+                    "undo",
+                    "redo",
+                  ],
+                },
+              }}
+              onChange={(event, editor) => {
+                const data = editor.getData();
+                setFormData((prev) => ({ ...prev, description: data }));
+                if (errors.description) {
+                  setErrors((prev) => ({ ...prev, description: "" }));
+                }
+              }}
+              onBlur={() => {
+                if (!formData.description.trim()) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    description: t("Description is required"),
+                  }));
+                }
+              }}
+            />
+          </div>
           {errors.description && (
             <p className="text-red-500 text-xs mt-1">{errors.description}</p>
           )}
+          <p className="text-xs text-gray-500 mt-1">
+            {t("This is the description that will be displayed to viewers")}
+          </p>
         </div>
 
         {/* Form Actions */}
@@ -1088,3 +1142,31 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 }
 
 export default CreateOrEditVideo;
+// CKEditor custom upload adapter plugin (Base64 inline images)
+function MyCustomUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new Base64UploadAdapter(loader);
+  };
+}
+
+class Base64UploadAdapter {
+  constructor(loader) {
+    this.loader = loader;
+  }
+  upload() {
+    return this.loader.file.then(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({ default: reader.result });
+          };
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
+        })
+    );
+  }
+  abort() {
+    // No special abort handling needed for Base64 conversion.
+  }
+}

@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { languages } from "@/constants/constants";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
-import { GetAllUsers } from "@/api/info";
 import { GetEventCategories } from "@/api/events";
 import DatePickerWithYearMonth from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/DatePickerWithYearMonth";
+import { GetAuthors } from "@/api/authors";
 
 function EventsFilter({
   filters,
@@ -26,7 +26,7 @@ function EventsFilter({
 
   const getWriters = async (searchVal = "") => {
     try {
-      const res = await GetAllUsers(searchVal);
+      const res = await GetAuthors(10, 0, searchVal);
       setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -131,8 +131,8 @@ function EventsFilter({
             list={writersList}
             searchPlaceholder={t("Search writers...")}
             required={false}
-            renderItemLabel={(item) => item.username}
-            renderItemSubLabel={(item) => item.groups?.[0]}
+            renderItemLabel={(item) => item.name}
+            renderItemSubLabel={(item) => item.position}
             showWriterAvatar={false}
             isRtl={i18n?.language === "ar" ? true : false}
           />

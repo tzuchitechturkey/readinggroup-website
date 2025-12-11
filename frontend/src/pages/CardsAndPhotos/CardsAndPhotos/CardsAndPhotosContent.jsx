@@ -10,16 +10,29 @@ import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import heroImg from "@/assets/eventsHero.png";
 import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
-import { GetPostCategories, GetItemsByCategoryId } from "@/api/posts";
+import {
+  GetPostCategories,
+  GetItemsByCategoryId,
+  TopViewedPosts,
+} from "@/api/posts";
+import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 
 function CardsAndPhotosContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
-  const activeTabFromNav = location.state?.activeTab;
   const [activeCategories, setActiveCategories] = useState([]);
-  const [categoriesData, setCategoriesData] = useState({});
   const [targetCategoryId, setTargetCategoryId] = useState(null);
-
+  const [topViewedData, setTopViewedData] = useState();
+  const getTopViewed = async () => {
+    try {
+      const res = await TopViewedPosts();
+      setTopViewedData(res?.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
   const getActivePostCategories = async () => {
     try {
       const res = await GetPostCategories(200, 0);
@@ -28,20 +41,20 @@ function CardsAndPhotosContent() {
       setActiveCategories(active);
 
       // Fetch items for each active category
-      for (const category of active) {
-        try {
-          const itemsRes = await GetItemsByCategoryId(category.id);
-          setCategoriesData((prev) => ({
-            ...prev,
-            [category.id]: itemsRes.data?.results || itemsRes.data || [],
-          }));
-        } catch (err) {
-          console.error(
-            `Failed to fetch items for category ${category.id}:`,
-            err
-          );
-        }
-      }
+      // for (const category of active) {
+      //   try {
+      //     const itemsRes = await GetItemsByCategoryId(category.id);
+      //     // setCategoriesData((prev) => ({
+      //     //   ...prev,
+      //     //   [category.id]: itemsRes.data?.results || itemsRes.data || [],
+      //     // }));
+      //   } catch (err) {
+      //     console.error(
+      //       `Failed to fetch items for category ${category.id}:`,
+      //       err
+      //     );
+      //   }
+      // }
     } catch (err) {
       console.error("Failed to fetch post categories:", err);
     }
@@ -71,6 +84,7 @@ function CardsAndPhotosContent() {
 
   useEffect(() => {
     getActivePostCategories();
+    getTopViewed();
   }, []);
 
   return (
@@ -101,35 +115,53 @@ function CardsAndPhotosContent() {
 
         {/* Start Tabs */}
         <div id="cards-tabs-section">
-          <CardsAndPhotosTabs initialTab={activeTabFromNav} />
+          <CardsAndPhotosTabs />
         </div>
         {/* End Tabs */}
-
-        {/* Start Weekly Moments */}
-        <WeeklyList title={t("This Week's Cards")} type="card" />
-        {/* End Weekly Moments */}
 
         {/* Start Week's Photos */}
         <WeeklyList title={t("This Week's Photos")} type="photo" />
         {/* End Week's Photos */}
 
+        {/* Start Weekly Moments */}
+        <WeeklyList title={t("This Week's Cards")} type="card" />
+        {/* End Weekly Moments */}
+
         {/* Start Show Active Categories */}
-        {/* <section id="week-topic-section">
-          {activeCategories.map((category) => (
-            <div
-              key={category.id}
-              id={`category-${category.id}`}
-              className="mt-12"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
+          {/* Start Image */}
+          <div className="order-2 lg:order-1 mt-0 lg:mt-8">
+            {topViewedData?.[0] && <WeekPhotosCard item={topViewedData[0]} />}
+          </div>
+          {/* End Image */}
+
+          {/* Start Grid Cards */}
+          <div className="order-1 lg:order-2 px-0 sm:px-3 md:px-5 lg:px-7">
+            {/* Start Title */}
+            <h2
+              className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center ${
+                i18n?.language === "ar" ? "lg:text-right" : "lg:text-left"
+              } `}
             >
-              <DynamicSection
-                title={category.name}
-                data={categoriesData[category.id] || []}
-                isSlider={true}
-                cardName={Contentcard}
-              />
+              {t("This Week's Top Cards")}
+            </h2>
+            {/* End Title */}
+
+            {/* Start Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
+              {topViewedData?.slice(1, 5).map((item, index) => (
+                <div
+                  key={index}
+                  className="transform hover:scale-105 transition-transform duration-200"
+                >
+                  <GuidingReadingcard item={item} />
+                </div>
+              ))}
             </div>
-          ))}
-        </section> */}
+            {/* End Cards */}
+          </div>
+          {/* End Grid Cards */}
+        </div>
         {/* End Show Active Categories */}
       </div>
     </div>

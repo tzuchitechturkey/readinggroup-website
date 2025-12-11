@@ -1,9 +1,14 @@
 const languages = {
-  
   ch: {
     label: "中文",
     shortLabel: "CN",
     code: "ch",
+  },
+
+  chsi: {
+    label: "中文（简体）",
+    shortLabel: "CNSI",
+    code: "chsi",
   },
 
   jp: {

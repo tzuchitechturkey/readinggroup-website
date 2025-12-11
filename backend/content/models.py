@@ -418,7 +418,7 @@ class ContentAttachment(TimestampedModel):
     """Multiple file attachments for a Content instance.
     Supports documents (Word, PDF, PowerPoint) and other file types.
     """
-    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='attachments')
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, related_name='attachments', null=True, blank=True)
     file = models.FileField(upload_to="content/attachments/", help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats")
     file_name = models.CharField(max_length=255, blank=True, help_text="Original filename")
     file_size = models.PositiveIntegerField(blank=True, null=True, help_text="File size in bytes")

@@ -68,6 +68,10 @@ export async function GetEventCategories(limit, offset, search = "") {
   );
 }
 
+export async function SortEventCategories(data) {
+  return await axios.post(`/event-categories/reorder/`, data);
+}
+
 export async function AddEventCategory(data) {
   return await axios.post(`/event-categories/`, data);
 }

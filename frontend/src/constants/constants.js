@@ -32,7 +32,8 @@ export const languages = [
   "Arabic",
   "English",
   "Turkish",
-  "Chinese",
+  "Chinese (Simp)",
+  "Chinese (Trad)",
   "Spanish",
   "French",
 ];

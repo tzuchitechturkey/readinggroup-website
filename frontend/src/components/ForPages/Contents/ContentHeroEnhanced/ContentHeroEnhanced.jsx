@@ -16,9 +16,7 @@ import {
   PatchContentById,
   TopLikedContents,
 } from "@/api/contents";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
-
-import NewsCard from "../../../Global/NewsCard/NewsCard";
+import NewsCard from "@/components/Global/NewsCard/NewsCard";
 
 const ContentHeroEnhanced = () => {
   const { t, i18n } = useTranslation();

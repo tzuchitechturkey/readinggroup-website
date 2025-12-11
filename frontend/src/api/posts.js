@@ -52,6 +52,10 @@ export async function GetPostCategories(limit, offset, search = "") {
   );
 }
 
+export async function SortPostCategories(data) {
+  return await axios.post(`/post-categories/reorder/`, data);
+}
+
 export async function AddPostCategory(data) {
   return await axios.post(`/post-categories/`, data);
 }
@@ -145,17 +149,12 @@ export async function TopCommentedPosts() {
   return await axios.get(`/posts/top-commented/?limit=5`);
 }
 
- 
 // it Gieves to data card_photo And reading
 export async function TopLikedPosts() {
   return await axios.get(`/posts/top-liked/`);
 }
 
-export async function WeeklyCardPhotoPosts() {
-  return await axios.get(`/posts/top-viewed/?limit=5`);
-}
-
-export async function WeeklyReadingPosts() {
+export async function TopViewedPosts() {
   return await axios.get(`/posts/top-viewed/?limit=5`);
 }
 
@@ -163,3 +162,15 @@ export async function WeeklyReadingPosts() {
 export async function RatingPosts(postId, rating) {
   return await axios.post(`/posts/${postId}/rating/`, rating);
 }
+
+// Weekly Moment Posts
+export async function WeeklyMomentPosts(type, limit = 5, offset = 0) {
+  return await axios.get(
+    `/posts/weekly-moments/?post_type=${type}&limit=${limit}&offset=${offset}`
+  );
+}
+
+// not used
+// export async function WeeklyReadingPosts() {
+//   return await axios.get(`/posts/top-viewed/?limit=5`);
+// }

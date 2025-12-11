@@ -25,6 +25,7 @@ import {
 import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
+import FakeUser from "@/assets/fake-user.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
@@ -117,10 +118,10 @@ export default function AppSidebar({
             title: "Videos Categories",
             onClick: () => onSectionChange("videosCategories"),
           },
-          {
-            title: "Series & Seasons",
-            onClick: () => onSectionChange("seriesAndSeasons"),
-          },
+          // {
+          //   title: "Series & Seasons",
+          //   onClick: () => onSectionChange("seriesAndSeasons"),
+          // },
         ],
       },
       {
@@ -140,9 +141,24 @@ export default function AppSidebar({
             title: "Events Categories",
             onClick: () => onSectionChange("eventsCategories"),
           },
+          // {
+          //   title: "Events Sections",
+          //   onClick: () => onSectionChange("eventsSections"),
+          // },
+        ],
+      },
+      {
+        title: "Writers",
+        onClick: "#",
+        icon: FakeUser,
+        items: [
           {
-            title: "Events Sections",
-            onClick: () => onSectionChange("eventsSections"),
+            title: "All Writers",
+            onClick: () => onSectionChange("writers"),
+          },
+          {
+            title: "Add/Edit Writer",
+            onClick: () => onSectionChange("createOrEditWriter"),
           },
         ],
       },
@@ -162,6 +178,10 @@ export default function AppSidebar({
           {
             title: "Positions",
             onClick: () => onSectionChange("positions"),
+          },
+          {
+            title: "The Book",
+            onClick: () => onSectionChange("book"),
           },
         ],
       },

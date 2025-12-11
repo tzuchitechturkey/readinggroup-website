@@ -12,9 +12,9 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { processImageFile } from "@/Utility/imageConverter";
 import { CreatePost, EditPostById, GetPostCategories } from "@/api/posts";
-import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages, postStatusOptions } from "@/constants/constants";
+import { GetAuthors } from "@/api/authors";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
@@ -38,7 +38,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     writer_avatar: "",
     category: "",
     status: "",
-    is_active: true,
+    // is_active: true,
     read_time: "",
     tags: "",
     language: "",
@@ -57,7 +57,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
   const getWriters = async (searchVal = "") => {
     try {
-      const res = await GetAllUsers(searchVal);
+      const res = await GetAuthors(10, 0, searchVal);
       setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -90,7 +90,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         writer_avatar: post.writer_avatar || "",
         category: post.category || "",
         status: post.status || "draft",
-        is_active: post.is_active !== undefined ? post.is_active : true,
+        // is_active: post.is_active !== undefined ? post.is_active : true,
         read_time: post.read_time || "",
         tags: post.tags || "",
         language: post.language || "",
@@ -157,10 +157,11 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
   // Handle writer selection
   const handleWriterSelect = (writer) => {
+    console.log("Selected writer:", writer);
     setFormData((prev) => ({
       ...prev,
-      writer: writer.username,
-      writer_avatar: writer.profile_image,
+      writer: writer.name,
+      writer_avatar: writer.avatar || writer?.avatar_url,
     }));
     setShowWriterDropdown(false);
     setWriterSearchValue("");
@@ -307,7 +308,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     postData.append("writer", formData.writer);
     postData.append("category", formData?.category?.id || formData?.category);
     postData.append("status", formData.status);
-    postData.append("is_active", formData.is_active);
     postData.append("read_time", formData.read_time);
     postData.append("tags", JSON.stringify(formData.tags));
     postData.append("language", formData.language);
@@ -315,6 +315,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     postData.append("country", formData.country);
     postData.append("camera_name", formData.camera_name);
 
+    // postData.append("is_active", formData.is_active);
     // Add image if selected
     // if (formData.image) {
     //   postData.append("image", formData.image);
@@ -896,9 +897,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                   {formData?.writer ? (
                     <>
                       <img
-                        src={
-                          formData?.writer?.profile_image || "/fake-user.png"
-                        }
+                        src={formData?.writer_avatar || "/fake-user.png"}
                         alt={formData?.writer}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -971,16 +970,20 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
                             className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                           >
                             <img
-                              src={writer.profile_image || "/fake-user.png"}
-                              alt={writer.username}
+                              src={
+                                writer.avatar ||
+                                writer?.avatar_url ||
+                                "/fake-user.png"
+                              }
+                              alt={writer.name}
                               className="w-8 h-8 rounded-full object-cover"
                             />
                             <div className="flex-1">
                               <div className="font-medium text-sm">
-                                {writer.username}
+                                {writer.name}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {writer.groups[0]}
+                                {writer.position}
                               </div>
                             </div>
                           </button>
@@ -1001,7 +1004,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             {/* End Writer Selection */}
 
             {/* Start Active Status */}
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 type="checkbox"
                 name="is_active"
@@ -1012,7 +1015,7 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
               <label className="ml-2 text-sm text-gray-700">
                 {t("Active Post")}
               </label>
-            </div>
+            </div> */}
             {/* End Active Status */}
           </div>
         </div>

@@ -68,6 +68,10 @@ export async function GetVideoCategories(limit = 10, offset = 0, search = "") {
   );
 }
 
+export async function SortVideoCategories(data) {
+  return await axios.post(`/video-categories/reorder/`, data);
+}
+
 export async function AddVideoCategory(data) {
   return await axios.post(`/video-categories/`, data);
 }

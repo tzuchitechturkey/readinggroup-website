@@ -155,7 +155,6 @@ function PostDetailsPageContent() {
       api.off("select", handleSelect);
     };
   }, [api]);
-
   return (
     <div
       className={`min-h-screen bg-gray-50 ${
@@ -254,7 +253,14 @@ function PostDetailsPageContent() {
                 />
               </div>
             </div>
-
+            {/* Start Body */}
+            <div className=" p-4  px-6 rounded-xl mb-2 bg-white  prose prose-sm max-w-none">
+              <div
+                className="text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: cardData?.body || "" }}
+              />
+            </div>
+            {/* End Body */}
             {/* Rating Section */}
             <RatingSection
               hoveredRating={hoveredRating}

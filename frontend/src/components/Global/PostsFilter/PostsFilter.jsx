@@ -5,8 +5,8 @@ import { Search, ChevronDown, X, Filter } from "lucide-react";
 import MultiSelect from "@/components/Global/MultiSelect/MultiSelect";
 import { GetPostCategories } from "@/api/posts";
 import { languages } from "@/constants/constants";
-import { GetAllUsers } from "@/api/info";
 import { GetContentCategories } from "@/api/contents";
+import { GetAuthors } from "@/api/authors";
 
 import Loader from "../Loader/Loader";
 import AutoComplete from "../AutoComplete/AutoComplete";
@@ -30,7 +30,7 @@ function PostsFilter({
   const searchInputRef = useRef(null);
   const getWriters = async (searchVal = "") => {
     try {
-      const res = await GetAllUsers(searchVal);
+      const res = await GetAuthors(10, 0, searchVal);
       setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -344,7 +344,7 @@ function PostsFilter({
                       searchPlaceholder={t("Search writers...")}
                       required={false}
                       renderItemLabel={(item) => {
-                        return item.username;
+                        return item.name;
                       }}
                       // renderItemSubLabel={(item) => item.groups?.[0]}
                       showWriterAvatar={false}

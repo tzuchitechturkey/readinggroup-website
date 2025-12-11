@@ -31,6 +31,9 @@ import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/C
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
 import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
 import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
+import BookContent from "@/components/ForPages/Dashboard/AboutUs/Book/BookContent";
+import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/CreateorEditWriter/CreateorEditWriter";
+import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -71,6 +74,11 @@ export default function Page() {
   const [selectedEvent, setSelectedEvent] = useState(() => {
     // استرجاع الأحداث المحفوظة إن وجدت
     const saved = localStorage.getItem("dashboardSelectedEvent");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedWriter, setSelectedWriter] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedWriter");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -120,6 +128,14 @@ export default function Page() {
       );
     }
   }, [selectedEvent]);
+  useEffect(() => {
+    if (selectedWriter) {
+      localStorage.setItem(
+        "dashboardSelectedWriter",
+        JSON.stringify(selectedWriter)
+      );
+    }
+  }, [selectedWriter]);
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
@@ -131,10 +147,12 @@ export default function Page() {
       localStorage.removeItem("dashboardSelectedVideo");
       localStorage.removeItem("dashboardSelectedContent");
       localStorage.removeItem("dashboardSelectedEvent");
+      localStorage.removeItem("dashboardSelectedWriter");
       setSelectedPost(null);
       setSelectedVideo(null);
       setSelectedContent(null);
       setSelectedEvent(null);
+      setSelectedWriter(null);
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
@@ -146,6 +164,8 @@ export default function Page() {
       setSelectedContent(data);
     } else if (section === "createOrEditEvent") {
       setSelectedEvent(data);
+    } else if (section === "createOrEditWriter") {
+      setSelectedWriter(data);
     }
 
     let autoParent = data;
@@ -175,6 +195,7 @@ export default function Page() {
         history: "About Us",
         team: "About Us",
         positions: "About Us",
+        book: "THe Book",
         // Settings && Profile
         profileSettings: "Settings",
         profile: "Settings",
@@ -249,6 +270,16 @@ export default function Page() {
         return <EventCategoriesContent onSectionChange={handleSectionChange} />;
       case "eventsSections":
         return <EventSectionsContent onSectionChange={handleSectionChange} />;
+      // Writers
+      case "writers":
+        return <WritersList onSectionChange={handleSectionChange} />;
+      case "createOrEditWriter":
+        return (
+          <CreateorEditWriter
+            onSectionChange={handleSectionChange}
+            selectedWriter={selectedWriter}
+          />
+        );
       // About Us
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
@@ -256,6 +287,8 @@ export default function Page() {
         return <OurTeam onSectionChange={handleSectionChange} />;
       case "positions":
         return <PositionsContent onSectionChange={handleSectionChange} />;
+      case "book":
+        return <BookContent onSectionChange={handleSectionChange} />;
       default:
         return <DashboardSections />;
       // Profile && Settings

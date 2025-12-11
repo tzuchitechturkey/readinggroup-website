@@ -3,14 +3,18 @@ import detector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import translationCH from "./locales/ch/translation.json";
+import translationCHSI from "./locales/chsi/translation.json";
 import translationEN from "./locales/en/translation.json";
 import translationAR from "./locales/ar/translation.json";
-import  translationTR from "./locales/tr/translation.json";
+import translationTR from "./locales/tr/translation.json";
 import translationJP from "./locales/jp/translation.json";
 
 const resources = {
   ch: {
     translation: translationCH,
+  },
+  chsi: {
+    translation: translationCHSI,
   },
   en: {
     translation: translationEN,

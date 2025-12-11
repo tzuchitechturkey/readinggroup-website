@@ -16,12 +16,12 @@ import {
   GetNewsCategories,
 } from "@/api/tvPrograms";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetAllUsers } from "@/api/info";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { GetAuthors } from "@/api/authors";
 
 import CustomBreadcrumb from "../../../CustomBreadcrumb/CustomBreadcrumb";
 
@@ -53,7 +53,7 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
 
   const getWriters = async (searchVal = "") => {
     try {
-      const res = await GetAllUsers(searchVal);
+      const res = await GetAuthors(10, 0, searchVal);
       setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -116,7 +116,7 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
   const handleWriterSelect = (writer) => {
     setFormData((prev) => ({
       ...prev,
-      writer: writer.username,
+      writer: writer.name,
     }));
     setShowWriterDropdown(false);
     setWriterSearchValue("");
@@ -659,16 +659,20 @@ const CreateOrEditNews = ({ onSectionChange, news = null }) => {
                           className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                         >
                           <img
-                            src={writer.profile_image}
-                            alt={writer.username}
+                            src={
+                              writer.avatar ||
+                              writer.avatar_url ||
+                              "/fake-user.png"
+                            }
+                            alt={writer.name}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                           <div className="flex-1">
                             <div className="font-medium text-sm">
-                              {writer.username}
+                              {writer.name}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {writer.groups[0]}
+                              {writer.position}
                             </div>
                           </div>
                         </button>

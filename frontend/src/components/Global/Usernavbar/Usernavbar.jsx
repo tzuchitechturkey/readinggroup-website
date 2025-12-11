@@ -96,6 +96,11 @@ function Usernavbar() {
             href: "/about",
             tab: "our_team",
           },
+          {
+            name: t("Book of Study"),
+            href: "/about/book",
+            tab: "book_of_study",
+          },
         ],
       },
     ];

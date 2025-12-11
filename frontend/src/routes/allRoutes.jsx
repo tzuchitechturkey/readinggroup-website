@@ -1,5 +1,7 @@
 import { lazy } from "react";
 
+import BookOfStudy from "@/pages/AboutUs/BookOfStudy/BookOfStudy";
+
 import ContentPage from "../pages/Contents/ContentPage/ContentPage";
 
 // Lazy load all page components
@@ -49,6 +51,7 @@ export const userRoutes = [
   // About Us Routes
   { path: "/about", element: <AboutUs /> },
   { path: "/about/team/:id", element: <AboutMemberContent /> },
+  { path: "/about/book", element: <BookOfStudy /> },
   // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },
@@ -69,7 +72,6 @@ export const userRoutes = [
   { path: "/profile/:id", element: <UserProfileContent /> },
   { path: "/settings", element: <UserSettingContent /> },
 
-  // Catch-all route for 404 - يجب أن يكون في النهاية
   { path: "*", element: <Pages404 /> },
 ];
 

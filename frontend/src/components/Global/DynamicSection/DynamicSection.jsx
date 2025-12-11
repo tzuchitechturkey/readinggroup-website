@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -26,6 +26,9 @@ const DynamicSection = ({
   stopslider = false,
   propsToCard = {},
   gridClassName = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2",
+  enableLoadMore = false,
+  onLoadMore = null,
+  isLoadingMore = false,
 }) => {
   const { t, i18n } = useTranslation();
   const Card = cardName;
@@ -48,7 +51,7 @@ const DynamicSection = ({
       <div className=" mx-auto">
         {/* Start Title && View More */}
         <div className="flex items-center justify-between mb-1 md:mb-4">
-          {/* Start Tit````le */}
+          {/* Start Title */}
           <div className="">
             <h2
               className={`font-bold text-black text-[26px] lg:text-4xl ${titleClassName}`}
@@ -58,7 +61,7 @@ const DynamicSection = ({
           </div>
           {/* End Title */}
           {/* Start View More Button */}
-          {viewMore && (
+          {viewMore && !isSlider && (
             <Link
               to={viewMoreUrl}
               className="flex items-center gap- border-[1px] border-primary text-text text-sm rounded-full px-4 py-[4px] lg:py-[6px] hover:bg-primary hover:text-white transition-all duration-300"
@@ -73,12 +76,31 @@ const DynamicSection = ({
         </div>
         {/* End Title && View More */}
         {!isSlider ? (
-          <div className={gridClassName}>
-            {data.map((item, ind) => (
-              <div key={item.id}>
-                <Card item={item} index={ind} />
+          <div className="space-y-6">
+            <div className={gridClassName}>
+              {data.map((item, ind) => (
+                <div key={item.id}>
+                  <Card item={item} index={ind} />
+                </div>
+              ))}
+            </div>
+            {/* Load More Button for Grid */}
+            {enableLoadMore && onLoadMore && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={onLoadMore}
+                  disabled={isLoadingMore}
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-blue-400 disabled:to-blue-500"
+                >
+                  <ChevronDown
+                    className={`w-5 h-5 transition-transform duration-300 ${
+                      isLoadingMore ? "animate-spin" : ""
+                    }`}
+                  />
+                  <span>{isLoadingMore ? t("Loading...") : t("Load More")}</span>
+                </button>
               </div>
-            ))}
+            )}
           </div>
         ) : (
           <div>
@@ -86,6 +108,8 @@ const DynamicSection = ({
               <Carousel
                 className="w-full overflow-visible"
                 opts={{
+                  align: "start",
+                  loop: true,
                   watchDrag: true,
                   containScroll: "trimSnaps",
                 }}
@@ -119,6 +143,25 @@ const DynamicSection = ({
                       )}
                     </CarouselItem>
                   ))}
+                  {/* Load More Button - يظهر في نهاية السلايدر */}
+                  {enableLoadMore && onLoadMore && (
+                    <CarouselItem className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 overflow-visible flex items-center justify-center">
+                      <button
+                        onClick={onLoadMore}
+                        disabled={isLoadingMore}
+                        className="flex flex-col items-center justify-center w-full h-full min-h-[200px] bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-dashed border-blue-300 hover:border-blue-500 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronDown
+                          className={`w-8 h-8 text-blue-600 mb-2 transition-transform duration-300 ${
+                            isLoadingMore ? "animate-spin" : ""
+                          }`}
+                        />
+                        <span className="text-sm font-semibold text-blue-600">
+                          {isLoadingMore ? t("Loading...") : t("Load More")}
+                        </span>
+                      </button>
+                    </CarouselItem>
+                  )}
                 </CarouselContent>
                 {showArrows && (
                   <>

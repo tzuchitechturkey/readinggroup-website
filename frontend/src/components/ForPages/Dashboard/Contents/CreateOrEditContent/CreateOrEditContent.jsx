@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, X, User, Tag, Search, Upload } from "lucide-react";
+import { Save, X, User, Tag, Search, Upload, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -14,11 +14,13 @@ import {
   EditContentById,
   GetContentCategories,
 } from "@/api/contents";
-import { GetAllUsers } from "@/api/info";
 import countries from "@/constants/countries.json";
 import { languages, postStatusOptions } from "@/constants/constants";
+import Modal from "@/components/Global/Modal/Modal";
+import { GetAuthors } from "@/api/authors";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import AttachmentsModal from "./AttachmentsModal";
 
 function CreateOrEditContent({ onSectionChange, content = null }) {
   const { t, i18n } = useTranslation();
@@ -49,6 +51,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     images_url: [], // روابط الصور كنصوص (Array of strings) - يُرسل للـ Backend في مفتاح images_url
     metadata: "",
     country: "",
+    attachments: [], // الملفات المرفوعة (PDF, Word, PowerPoint)
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -58,10 +61,14 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const [imageUrlsInput, setImageUrlsInput] = useState("");
   const [imageFiles, setImageFiles] = useState([]); // Store multiple image files
   const [imagePreviews, setImagePreviews] = useState([]); // Store image previews
+  const [attachmentFiles, setAttachmentFiles] = useState([]); // Store attachment files
+  const [previewFile, setPreviewFile] = useState(null); // Store file for preview
+  const [previewUrl, setPreviewUrl] = useState(null); // Store preview URL
+  const [showAttachmentsModal, setShowAttachmentsModal] = useState(false);
 
   const getWriters = async (searchVal = "") => {
     try {
-      const res = await GetAllUsers(searchVal);
+      const res = await GetAuthors(10, 0, searchVal);
       setWritersList(res?.data?.results);
     } catch (error) {
       console.error(error);
@@ -74,6 +81,23 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  // Handle attachments confirmation
+  const handleConfirmAttachments = (selectedAttachments) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: selectedAttachments,
+    }));
+    setShowAttachmentsModal(false);
+  };
+
+  // Remove attachment
+  const handleRemoveAttachment = (attachmentId) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: prev.attachments.filter((att) => att.id !== attachmentId),
+    }));
   };
 
   // Initialize form data when editing
@@ -97,6 +121,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         images_url: content?.images_url || [],
         metadata: content?.metadata || "",
         country: content?.country || "",
+        attachments: content?.attachments || [],
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -156,8 +181,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const handleWriterSelect = (writer) => {
     setFormData((prev) => ({
       ...prev,
-      writer: writer.username,
-      writer_avatar: writer.profile_image,
+      writer: writer.name,
+      writer_avatar: writer.avatar || writer.avatar_url || "",
     }));
     setShowWriterDropdown(false);
     setWriterSearchValue("");
@@ -180,6 +205,22 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const handleClearWriterSearch = () => {
     setWriterSearchValue("");
     getWriters("");
+  };
+
+  // Handle file preview
+  const handlePreviewFile = (file) => {
+    setPreviewFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+  };
+
+  // Close preview
+  const handleClosePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewFile(null);
+    setPreviewUrl(null);
   };
 
   // Handle category selection
@@ -324,8 +365,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       });
     }
 
-    // إضافة روابط الصور (images_url) - روابط نصية
-    // هذه ستُحفظ في مفتاح images_url كمصفوفة نصوص
     if (Array.isArray(formData.images_url) && formData.images_url.length > 0) {
       formData.images_url.forEach((imgUrl) => {
         if (typeof imgUrl === "string" && imgUrl.trim()) {
@@ -337,6 +376,13 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     // Add metadata if provided
     if (formData.metadata) {
       contentData.append("metadata", formData.metadata);
+    }
+
+    // Add attachments IDs
+    if (formData.attachments && formData.attachments.length > 0) {
+      formData.attachments.forEach((att) => {
+        contentData.append("attachments", att.id);
+      });
     }
 
     // Add timestamps
@@ -515,8 +561,11 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             </div>
           )}
 
-          {/* Upload Area */}
+          {/* Upload Area - Images */}
           <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-3">
+              {t("Images")} ({imagePreviews.length})
+            </h3>
             <input
               type="file"
               accept="image/*,.heic,.heif"
@@ -568,9 +617,206 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             <p className="text-xs text-gray-500 mt-2">
               {t("Total images selected")}: {imagePreviews.length}
             </p>
+          </div>
+
+          {/* Start Image URLs Section - Separate field for image URLs */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Image URLs")} ({t("Add image URLs as alternative")})
+            </label>
+
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={imageUrlsInput}
+                  onChange={(e) => setImageUrlsInput(e.target.value)}
+                  placeholder={t("Enter image URL and press Enter")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && imageUrlsInput.trim()) {
+                      e.preventDefault();
+                      if (
+                        !formData.images_url.includes(imageUrlsInput.trim())
+                      ) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          images_url: [
+                            ...prev.images_url,
+                            imageUrlsInput.trim(),
+                          ],
+                        }));
+                      }
+                      setImageUrlsInput("");
+                      setErrors((prev) => ({
+                        ...prev,
+                        images_url: "",
+                      }));
+                    }
+                  }}
+                />
+              </div>
+
+              {formData.images_url.length > 0 && (
+                <div className="space-y-2">
+                  {formData.images_url.map((url, index) => (
+                    <div
+                      key={`url-${index}`}
+                      className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
+                    >
+                      <div className="flex-1 truncate">
+                        <p className="text-sm text-gray-600 truncate">{url}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            images_url: prev.images_url.filter(
+                              (_, i) => i !== index
+                            ),
+                          }));
+                        }}
+                        className="ml-2 text-red-600 hover:text-red-800"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <p className="text-xs text-gray-500 mt-1">
+              {t("Add image URLs here. These will be sent as images_url")}
+            </p>
+          </div>
+          {/* Upload Area - Attachments */}
+          <div>
+            {/* Attachments List */}
+            {attachmentFiles.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  {t("Attached files")}:
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {attachmentFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className=" flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center text-xs font-semibold text-blue-600">
+                          {file.name.split(".").pop().toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-700 truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handlePreviewFile(file)}
+                          className="px-2 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-xs font-medium"
+                          title={t("Preview")}
+                        >
+                          👁 {t("Preview")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAttachmentFiles((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            );
+                            setFormData((prev) => ({
+                              ...prev,
+                              attachments: prev.attachments.filter(
+                                (_, i) => i !== index
+                              ),
+                            }));
+                          }}
+                          className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {errors.images && (
               <p className="text-red-500 text-xs mt-2">{errors.images}</p>
             )}
+
+            {/* Start Attachments Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("Attachments")}
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowAttachmentsModal(true)}
+                className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                {t("Select Attachments")}
+              </button>
+
+              {/* Display selected attachments */}
+              {formData.attachments && formData.attachments.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    {t("Selected Attachments")} ({formData.attachments.length})
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {formData.attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">
+                              {attachment.title}
+                            </p>
+                            {attachment.file && (
+                              <a
+                                href={attachment.file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:underline"
+                              >
+                                {t("View File")}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttachment(attachment.id)}
+                          className="flex-shrink-0 ml-2 p-1 text-red-600 hover:bg-red-50 rounded"
+                          title={t("Remove")}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-500 mt-2">
+                {t("Click to select or manage attachments for this content")}
+              </p>
+            </div>
+            {/* End Attachments Section */}
           </div>
         </div>
         {/* End Image Upload Section */}
@@ -657,71 +903,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             </div>
           )}
 
-        {/* Start Image URLs Section - Separate field for image URLs */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Image URLs")} ({t("Add image URLs as alternative")})
-          </label>
-
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Input
-                value={imageUrlsInput}
-                onChange={(e) => setImageUrlsInput(e.target.value)}
-                placeholder={t("Enter image URL and press Enter")}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && imageUrlsInput.trim()) {
-                    e.preventDefault();
-                    if (!formData.images_url.includes(imageUrlsInput.trim())) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        images_url: [...prev.images_url, imageUrlsInput.trim()],
-                      }));
-                    }
-                    setImageUrlsInput("");
-                    setErrors((prev) => ({
-                      ...prev,
-                      images_url: "",
-                    }));
-                  }
-                }}
-              />
-            </div>
-
-            {formData.images_url.length > 0 && (
-              <div className="space-y-2">
-                {formData.images_url.map((url, index) => (
-                  <div
-                    key={`url-${index}`}
-                    className="flex items-center justify-between p-2 bg-gray-100 rounded-lg"
-                  >
-                    <div className="flex-1 truncate">
-                      <p className="text-sm text-gray-600 truncate">{url}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          images_url: prev.images_url.filter(
-                            (_, i) => i !== index
-                          ),
-                        }));
-                      }}
-                      className="ml-2 text-red-600 hover:text-red-800"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <p className="text-xs text-gray-500 mt-1">
-            {t("Add image URLs here. These will be sent as images_url")}
-          </p>
-        </div>
         {/* End Image URLs Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -1059,14 +1240,16 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                   {formData?.writer ? (
                     <>
                       <img
-                        src={
-                          formData?.writer?.profile_image || "/fake-user.png"
-                        }
+                        src={formData?.writer_avatar || "/fake-user.png"}
                         alt={formData?.writer}
                         className="w-8 h-8 rounded-full object-cover"
                       />
                       <div className={`flex-1`}>
-                        <div className="font-medium text-sm">
+                        <div
+                          className={`font-medium ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          } text-sm`}
+                        >
                           {formData?.writer}
                         </div>
                       </div>
@@ -1134,8 +1317,12 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                             className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                           >
                             <img
-                              src={writer.profile_image || "/fake-user.png"}
-                              alt={writer.username}
+                              src={
+                                writer.avatar ||
+                                writer.avatar_url ||
+                                "/fake-user.png"
+                              }
+                              alt={writer.name}
                               className="w-8 h-8 rounded-full object-cover"
                             />
                             <div
@@ -1146,10 +1333,10 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                               }  flex-1`}
                             >
                               <div className="font-medium text-sm">
-                                {writer.username}
+                                {writer.name}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {writer.groups[0]}
+                                {writer.position}
                               </div>
                             </div>
                           </button>
@@ -1263,6 +1450,116 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
           </Button>
         </div>
       </form>
+
+      {/* File Preview Modal */}
+
+      <Modal
+        isOpen={previewFile && previewUrl}
+        onClose={handleClosePreview}
+        title={`${t("Preview")}: ${previewFile?.name}`}
+        width="min(90vw, 500px)"
+      >
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] flex flex-col">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <button
+              onClick={handleClosePreview}
+              className="p-1 rounded hover:bg-gray-100 transition-colors"
+            >
+              <X className="h-6 w-6 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Modal Content */}
+          <div className="flex-1 overflow-hidden bg-gray-50">
+            {previewFile?.type === "application/pdf" ? (
+              <iframe
+                src={previewUrl}
+                className="w-full h-full border-none"
+                title="PDF Preview"
+              />
+            ) : previewFile?.type.includes("word") ||
+              previewFile?.type ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ? (
+              <div className="flex flex-col items-center justify-center h-full p-8">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">📄</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {t("Word Document")}
+                  </h3>
+                  <p className="text-gray-600 mb-4">{previewFile?.name}</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {t("Preview not available for Word documents in browser")}
+                  </p>
+                  <a
+                    href={previewUrl}
+                    download={previewFile?.name}
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t("Download")}
+                  </a>
+                </div>
+              </div>
+            ) : previewFile?.type.includes("powerpoint") ||
+              previewFile?.type ===
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation" ? (
+              <div className="flex flex-col items-center justify-center h-full p-8">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">🎯</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {t("PowerPoint Presentation")}
+                  </h3>
+                  <p className="text-gray-600 mb-4">{previewFile?.name}</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {t("Preview not available for PowerPoint files in browser")}
+                  </p>
+                  <a
+                    href={previewUrl}
+                    download={previewFile?.name}
+                    className="inline-block px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    {t("Download")}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-8">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-3xl">📎</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {t("File")}
+                  </h3>
+                  <p className="text-gray-600 mb-4">{previewFile?.name}</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {t("Preview not available for this file type")}
+                  </p>
+                  <a
+                    href={previewUrl}
+                    download={previewFile?.name}
+                    className="inline-block px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    {t("Download")}
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Attachments Modal */}
+      <AttachmentsModal
+        isOpen={showAttachmentsModal}
+        onClose={() => setShowAttachmentsModal(false)}
+        selectedAttachments={formData.attachments}
+        onConfirm={handleConfirmAttachments}
+      />
     </div>
   );
 }

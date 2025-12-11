@@ -6,7 +6,7 @@ const CategoryTag = ({ category, isActive = false }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/contents", {
+    navigate("/events", {
       state: {
         selectedCategory: category,
       },

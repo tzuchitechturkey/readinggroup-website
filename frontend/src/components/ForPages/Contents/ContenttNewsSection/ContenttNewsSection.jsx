@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import NewsCard from "@/components/Global/NewsCard/NewsCard";
-import RecommendationNewsCard from "@/components/ForPages/Events/RecommendationNewsCard/RecommendationNewsCard";
-import CategoryTag from "@/components/ForPages/Events/EventsCategoryTag/CategoryTag";
+import RecommendationNewsCard from "@/components/ForPages/Contents/RecommendationNewsCard/RecommendationNewsCard";
+import CategoryTag from "@/components/ForPages/Contents/ContentsCategoryTag/ContentsCategoryTag";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
   GetContentCategories,
@@ -107,6 +107,7 @@ const ContentstNewsSection = () => {
                     t={t}
                     key={article?.id}
                     article={article}
+                    section="contents"
                     onClick={() => {
                       navigate(`/contents/content/${article?.id}`);
                     }}
@@ -147,14 +148,9 @@ const ContentstNewsSection = () => {
                     t={t}
                     key={article?.id}
                     article={article}
+                    section="contents"
                     onClick={() => {
-                      if (article.external_link) {
-                        window.open(
-                          article.external_link,
-                          "_blank",
-                          "noopener,noreferrer"
-                        );
-                      }
+                      navigate(`/contents/content/${article?.id}`);
                     }}
                   />
                 ))}
