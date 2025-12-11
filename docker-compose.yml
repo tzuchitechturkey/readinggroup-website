@@ -1,6 +1,19 @@
 version: "3.9"
 
 services:
+  db:
+    image: postgres:15
+    container_name: readinggroup-db
+    restart: always
+    environment:
+      POSTGRES_DB: readinggroup
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build:
       context: ./backend
@@ -10,11 +23,22 @@ services:
     volumes:
       - ./backend/media:/app/media
       - ./backend/staticfiles:/app/staticfiles
+      - ./backend:/app
     environment:
       DJANGO_DEBUG: "false"
       DJANGO_ALLOWED_HOSTS: "backend,localhost,127.0.0.1"
       DJANGO_SECRET_KEY: "change-me"
       DJANGO_TIME_ZONE: "UTC"
+
+      DJANGO_DB_ENGINE: "django.db.backends.postgresql"
+      DJANGO_DB_NAME: "readinggroup"
+      DJANGO_DB_USER: "postgres"
+      DJANGO_DB_PASSWORD: "postgres"
+      DJANGO_DB_HOST: "db"
+      DJANGO_DB_PORT: "5432"
+    
+    depends_on:
+      - db
     ports:
       - "8001:8001"
 
