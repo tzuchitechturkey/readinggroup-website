@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "55432:5432"
 
   backend:
     build:
@@ -35,7 +35,7 @@ services:
       DJANGO_DB_USER: "postgres"
       DJANGO_DB_PASSWORD: "postgres"
       DJANGO_DB_HOST: "db"
-      DJANGO_DB_PORT: "5432"
+      DJANGO_DB_PORT: "55432"
     
     depends_on:
       - db
