@@ -60,3 +60,7 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
                 data[field_name] = self._build_absolute_uri(file_value.url)
         return data
         
+
+def translate(text: str, from_lang: str, to_lang: str):
+    # use api to translate text
+    return text

@@ -17,6 +17,8 @@ from .enums import (
     VideoStatus
     )
 
+from .helpers import translate
+
 
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""
@@ -102,6 +104,7 @@ class Authors(TimestampedModel):
             
 class Video(LikableMixin, TimestampedModel):
     """Video content that powers the dashboard listings."""
+    key = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     duration = models.CharField(max_length=64, blank=True, null=True)
     category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
@@ -122,6 +125,7 @@ class Video(LikableMixin, TimestampedModel):
     tags = models.JSONField(default=list, blank=True)
     is_weekly_moment = models.BooleanField(default=False)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
+    language = models.CharField(max_length=50, choices=Language.choices)
 
     @property
     def is_new_computed(self) -> bool:
@@ -145,6 +149,19 @@ class Video(LikableMixin, TimestampedModel):
         using update_fields on the follow-up save.
         """
         is_create = self.pk is None
+        if not self.key:
+            self.key = self.title
+            for language in Language.choices:
+                if language != self.language:
+                    # add new record with the language
+                    Video.objects.create(
+                        **self.__dict__,
+                        title=translate(self.title, from_lang=self.language, to_lang=language),
+                        description=translate(self.description, from_lang=self.language, to_lang=language),
+                        language=language,
+                        key=self.key, 
+                    )
+
         super().save(*args, **kwargs)
         if is_create:
             try:
