@@ -41,7 +41,11 @@ export async function DeleteEventById(id) {
   return await axios.delete(`/events/${id}/`);
 }
 // Get All Item By cAteogir Id
-export async function GetItemsByCategoryId(categoryId, limit, offset) {
+export async function GetEventsByCategoryId(
+  categoryId,
+  limit = 10,
+  offset = 0
+) {
   return await axios.get(
     `/event-categories/${categoryId}/events/?limit=${limit}&offset=${offset}`
   );

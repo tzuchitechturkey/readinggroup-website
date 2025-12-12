@@ -32,7 +32,9 @@ export const getSectionKey = (title) => {
     History: "history",
     positions: "positions",
     "Our Team": "team",
-    "The Book": "book",
+    "The Books": "books",
+    "Add/Edit Book": "createOrEditBook",
+    "The Books Groups": "booksGroups",
     // Web site info
     "Website Info": "websiteInfo",
     "Sort Section": "sortSection",

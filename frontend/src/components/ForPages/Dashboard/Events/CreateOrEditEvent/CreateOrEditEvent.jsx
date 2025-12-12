@@ -28,14 +28,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const writerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
-  const [showWriterDropdown, setShowWriterDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [writerSearchValue, setWriterSearchValue] = useState("");
   const [categoriesList, setCategoriesList] = useState([]);
-  const [writersList, setWritersList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
+  // const writerDropdownRef = useRef(null);
+  // const [showWriterDropdown, setShowWriterDropdown] = useState(false);
+  // const [writerSearchValue, setWriterSearchValue] = useState("");
+  // const [writersList, setWritersList] = useState([]);
   // const [castInput, setCastInput] = useState("");
   // const [tagsInput, setTagsInput] = useState("");
   // const sectionDropdownRef = useRef(null);
@@ -46,7 +46,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const [formData, setFormData] = useState({
     category: "",
     title: "",
-    writer: "",
+    // writer: "",
     image: null,
     image_url: "",
     country: "",
@@ -56,25 +56,25 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     thumbnail_url: "",
     status: "",
     external_link: "",
+    report_type: "",
     // summary: "",
     // video_url: "",
     // cast: [],
     // tags: [],
-    // report_type: "",
     // duration_minutes: "",
     // section: "",
   });
 
   const [imagePreview, setImagePreview] = useState("");
 
-  const getWriters = async (searchVal = "") => {
-    try {
-      const res = await GetAuthors(10, 0, searchVal);
-      setWritersList(res?.data?.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const getWriters = async (searchVal = "") => {
+  //   try {
+  //     const res = await GetAuthors(10, 0, searchVal);
+  //     setWritersList(res?.data?.results);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const getCategories = async (searchVal = "") => {
     try {
@@ -100,7 +100,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       setFormData({
         category: event.category || "",
         title: event.title || "",
-        writer: event.writer || "",
+        // writer: event.writer || "",
         image: null,
         image_url: event.image_url || "",
         country: event.country || "",
@@ -110,8 +110,8 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         thumbnail_url: event.thumbnail_url || "",
         status: event.status || "",
         external_link: event.external_link || "",
+        report_type: event.report_type || "",
         // summary: event.summary || "",
-        // report_type: event.report_type || "",
         // duration_minutes: event.duration_minutes || "",
         // section: event.section || "",
         // video_url: event.video_url || "",
@@ -119,15 +119,16 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         // tags: event.tags || [],
       });
       setImagePreview(
-        event?.report_type === "videos"
-          ? event.thumbnail || event.thumbnail_url
-          : event.image || event.image_url
+        // event?.report_type === "videos"
+        //   ? event.thumbnail || event.thumbnail_url
+        // :
+        event.image || event.image_url
       );
     } else {
       setFormData({
         category: "",
         title: "",
-        writer: "",
+        // writer: "",
         image: null,
         image_url: "",
         country: "",
@@ -136,8 +137,8 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         thumbnail: null,
         thumbnail_url: "",
         status: "",
+        report_type: "",
         // summary: "",
-        // report_type: "",
         // duration_minutes: "",
         // section: "",
         // video_url: "",
@@ -157,33 +158,33 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     };
   }, [imagePreview]);
   // Handle writer selection
-  const handleWriterSelect = (writer) => {
-    setFormData((prev) => ({
-      ...prev,
-      writer: writer.name,
-    }));
-    setShowWriterDropdown(false);
-    setWriterSearchValue("");
+  // const handleWriterSelect = (writer) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     writer: writer.name,
+  //   }));
+  //   setShowWriterDropdown(false);
+  //   setWriterSearchValue("");
 
-    // Clear writer error if exists
-    if (errors.writer) {
-      setErrors((prev) => ({
-        ...prev,
-        writer: "",
-      }));
-    }
-  };
+  //   // Clear writer error if exists
+  //   if (errors.writer) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       writer: "",
+  //     }));
+  //   }
+  // };
 
   // Handle writer search
-  const handleWriterSearch = () => {
-    getWriters(writerSearchValue);
-  };
+  // const handleWriterSearch = () => {
+  //   getWriters(writerSearchValue);
+  // };
 
   // Handle clear writer search
-  const handleClearWriterSearch = () => {
-    setWriterSearchValue("");
-    getWriters("");
-  };
+  // const handleClearWriterSearch = () => {
+  //   setWriterSearchValue("");
+  //   getWriters("");
+  // };
 
   // Handle category selection
   const handleCategorySelect = (category) => {
@@ -226,7 +227,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     setFormData({
       category: "",
       title: "",
-      writer: "",
+      // writer: "",
       image: null,
       image_url: "",
       country: "",
@@ -236,7 +237,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       happened_at: "",
       thumbnail: null,
       thumbnail_url: "",
-      // report_type: "",
+      report_type: "",
       // section: "",
       // duration_minutes: "",
       // video_url: "",
@@ -385,9 +386,9 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.title = t("Title is required");
     }
 
-    if (!formData.writer) {
-      newErrors.writer = t("Writer is required");
-    }
+    // if (!formData.writer) {
+    //   newErrors.writer = t("Writer is required");
+    // }
 
     if (!formData.image && !formData.image_url && !event?.id) {
       newErrors.image = t("Image is required");
@@ -409,14 +410,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.happened_at = t("Happened At is required");
     }
 
-    if (!formData.external_link.trim()) {
+    if (!formData?.external_link?.trim()) {
       newErrors.external_link = t("External Link is required");
-    } else if (!isValidUrl(formData.external_link)) {
+    } else if (!isValidUrl(formData?.external_link)) {
       newErrors.external_link = t("Please enter a valid URL");
     }
-    // if (!formData.report_type) {
-    //   newErrors.report_type = t("Report type is required");
-    // }
+    if (!formData.report_type) {
+      newErrors.report_type = t("Report type is required");
+    }
 
     // if (!formData.duration_minutes) {
     //   newErrors.duration_minutes = t("Duration is required");
@@ -463,21 +464,21 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     // Append text fields
     submitData.append("category", formData?.category?.id || formData?.category);
     submitData.append("title", formData.title);
-    submitData.append("writer", formData.writer);
+    submitData.append("writer", "formData.writer");
     submitData.append("status", formData.status);
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
     if (formData.image) {
       submitData.append("image", formData.image);
-      if (formData?.report_type === "videos") {
-        submitData.append("thumbnail", formData.image);
-      }
+      // if (formData?.report_type === "videos") {
+      //   submitData.append("thumbnail", formData.image);
+      // }
     }
     if (formData?.image_url) {
       submitData.append("image_url", formData.image_url);
-      if (formData?.report_type === "videos") {
-        submitData.append("thumbnail_url", formData.image_url);
-      }
+      // if (formData?.report_type === "videos") {
+      //   submitData.append("thumbnail_url", formData.image_url);
+      // }
     }
 
     if (formData?.happened_at) {
@@ -489,7 +490,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
     submitData.append("external_link", formData.external_link);
 
-    // submitData.append("report_type", formData.report_type);
+    submitData.append("report_type", formData.report_type);
     // submitData.append("duration_minutes", formData.duration_minutes);
     // submitData.append("section", formData.section?.id || formData.section);
     // submitData.append("summary", formData.summary);
@@ -529,7 +530,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
   useEffect(() => {
-    getWriters();
+    // getWriters();
     getCategories();
     // getSections();
   }, []);
@@ -538,12 +539,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Close writer dropdown if clicked outside
-      if (
-        writerDropdownRef.current &&
-        !writerDropdownRef.current.contains(event.target)
-      ) {
-        setShowWriterDropdown(false);
-      }
+      // if (
+      //   writerDropdownRef.current &&
+      //   !writerDropdownRef.current.contains(event.target)
+      // ) {
+      //   setShowWriterDropdown(false);
+      // }
 
       // Close category dropdown if clicked outside
       if (
@@ -599,10 +600,11 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             </p>
           </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {formData?.report_type === "videos"
-              ? t("Event Video Thumbnail")
-              : t("Event Image")}{" "}
-            *
+            {/* {formData?.report_type === "videos"
+              ? t("Event Video Thumbnail") 
+              :
+              */}
+            {t("Event Image")}*
           </label>
           <div className="flex items-center gap-4">
             <div
@@ -657,9 +659,10 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             value={formData.image_url}
             onChange={handleInputChange}
             placeholder={
-              formData?.report_type === "videos"
-                ? t("Enter thumbnail URL as alternative to file upload")
-                : t("Enter image URL as alternative to file upload")
+              // formData?.report_type === "videos"
+              // ? t("Enter thumbnail URL as alternative to file upload")
+              // :
+              t("Enter image URL as alternative to file upload")
             }
           />
           <p className="text-xs text-gray-500 mt-1">
@@ -670,16 +673,184 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
 
         {/* Start Two-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Start Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Title")} *
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              className={`w-full p-3 border rounded-lg outline-none ${
+                errors.title ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder={t("Enter report title")}
+            />
+            {errors.title && (
+              <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+            )}
+          </div>
+          {/* End Title */}
+
+          {/* Start Writer Selection */}
+          {/* <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("Writer")} *
+            </label>
+            <div className="relative" ref={writerDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowWriterDropdown(!showWriterDropdown)}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  i18n?.language === "ar" ? "text-right" : "text-left"
+                } flex items-center gap-3 ${
+                  errors.writer ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                {formData?.writer ? (
+                  <div
+                    className={`font-medium text-sm ${
+                      i18n?.language === "ar" ? "text-right" : "text-left"
+                    }`}
+                  >
+                    {formData?.writer}
+                  </div>
+                ) : (
+                  <>
+                    <User className="w-8 h-8 text-gray-400" />
+                    <span className="text-gray-500">{t("Select Writer")}</span>
+                  </>
+                )}
+              </button>
+
+              {showWriterDropdown && (
+                <div
+                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
+                >
+                  Search Box
+                  <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+                          value={writerSearchValue}
+                          onChange={(e) => setWriterSearchValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleWriterSearch();
+                            }
+                          }}
+                          placeholder={t("Search writers...")}
+                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
+                        />
+                        {writerSearchValue && (
+                          <button
+                            type="button"
+                            onClick={handleClearWriterSearch}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleWriterSearch}
+                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        title={t("Search")}
+                      >
+                        <Search className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  Writers List
+                  <div className="max-h-60 overflow-y-auto">
+                    {writersList.length > 0 ? (
+                      writersList.map((writer) => (
+                        <button
+                          key={writer.id}
+                          type="button"
+                          onClick={() => handleWriterSelect(writer)}
+                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
+                            i18n?.language === "ar" ? "text-right" : "text-left"
+                          }`}
+                        >
+                          <img
+                            src={
+                              writer.avatar ||
+                              writer?.avatar_url ||
+                              "/fake-user.png"
+                            }
+                            alt={writer.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">
+                              {writer.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {writer.position}
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
+                        {t("No writers found")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {errors.writer && (
+              <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
+            )}
+          </div> */}
+          {/* End Writer Selection */}
+
+          {/* Start Report Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Report Type")} *
+            </label>
+            <select
+              name="report_type"
+              value={formData.report_type}
+              onChange={handleInputChange}
+              className={`w-full p-3 border rounded-lg outline-none ${
+                errors.report_type ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              <option value="" disabled hidden>
+                {t("Select Type")}
+              </option>
+              <option value="videos">{t("Video")}</option>
+              <option value="reports">{t("Reports")}</option>
+            </select>
+            {errors.report_type && (
+              <p className="text-red-500 text-xs mt-1">{errors.report_type}</p>
+            )}
+          </div>
+          {/* End Report Type */}
           {/* Start Category */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("Category")} *
             </label>
             <div className="relative" ref={categoryDropdownRef}>
               <button
                 type="button"
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-[14px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   i18n?.language === "ar" ? "text-right" : "text-left"
                 } flex items-center gap-3 ${
                   errors.category ? "border-red-500" : "border-gray-300"
@@ -801,175 +972,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             )}
           </div>
           {/* End Category */}
-          {/* Start Writer Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("Writer")} *
-            </label>
-            <div className="relative" ref={writerDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowWriterDropdown(!showWriterDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  i18n?.language === "ar" ? "text-right" : "text-left"
-                } flex items-center gap-3 ${
-                  errors.writer ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                {formData?.writer ? (
-                  <div
-                    className={`font-medium text-sm ${
-                      i18n?.language === "ar" ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {formData?.writer}
-                  </div>
-                ) : (
-                  <>
-                    <User className="w-8 h-8 text-gray-400" />
-                    <span className="text-gray-500">{t("Select Writer")}</span>
-                  </>
-                )}
-              </button>
-
-              {showWriterDropdown && (
-                <div
-                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
-                >
-                  {/* Search Box */}
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                          value={writerSearchValue}
-                          onChange={(e) => setWriterSearchValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleWriterSearch();
-                            }
-                          }}
-                          placeholder={t("Search writers...")}
-                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        />
-                        {writerSearchValue && (
-                          <button
-                            type="button"
-                            onClick={handleClearWriterSearch}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleWriterSearch}
-                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        title={t("Search")}
-                      >
-                        <Search className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Writers List */}
-                  <div className="max-h-60 overflow-y-auto">
-                    {writersList.length > 0 ? (
-                      writersList.map((writer) => (
-                        <button
-                          key={writer.id}
-                          type="button"
-                          onClick={() => handleWriterSelect(writer)}
-                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        >
-                          <img
-                            src={
-                              writer.avatar ||
-                              writer?.avatar_url ||
-                              "/fake-user.png"
-                            }
-                            alt={writer.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">
-                              {writer.name}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {writer.position}
-                            </div>
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                        {t("No writers found")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.writer && (
-              <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
-            )}
-          </div>
-          {/* End Writer Selection */}
-
-          {/* Start Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Title")} *
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              className={`w-full p-3 border rounded-lg outline-none ${
-                errors.title ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder={t("Enter report title")}
-            />
-            {errors.title && (
-              <p className="text-red-500 text-xs mt-1">{errors.title}</p>
-            )}
-          </div>
-          {/* End Title */}
-
-          {/* Start Report Type */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Report Type")} *
-            </label>
-            <select
-              name="report_type"
-              value={formData.report_type}
-              onChange={handleInputChange}
-              className={`w-full p-3 border rounded-lg outline-none ${
-                errors.report_type ? "border-red-500" : "border-gray-300"
-              }`}
-            >
-              <option value="" disabled hidden>
-                {t("Select Type")}
-              </option>
-              <option value="videos">{t("Video")}</option>
-              <option value="reports">{t("Reports")}</option>
-            </select>
-            {errors.report_type && (
-              <p className="text-red-500 text-xs mt-1">{errors.report_type}</p>
-            )}
-          </div> */}
-          {/* End Report Type */}
-
           {/* Start Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

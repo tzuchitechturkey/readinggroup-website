@@ -72,8 +72,8 @@ export async function DeletePostCategory(id) {
   return await axios.delete(`/post-categories/${id}/`);
 }
 
-// Get All Item By cAteogir Id
-export async function GetItemsByCategoryId(categoryId, limit, offset) {
+// Get All Item By Category Id
+export async function GetPostsByCategoryId(categoryId, limit = 10, offset = 0) {
   return await axios.get(
     `/post-categories/${categoryId}/posts/?limit=${limit}&offset=${offset}`
   );

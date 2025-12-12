@@ -1,467 +1,615 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
+import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
-import { Save, Upload, X, Trash2, Edit2, Plus } from "lucide-react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { Save } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  GetHistory,
-  EditHistoryById,
-  CreateHistory,
-  DeleteHistoryById,
-} from "@/api/aboutUs";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { processImageFile } from "@/Utility/imageConverter";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import Modal from "@/components/Global/Modal/Modal";
+import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import {
+  GetBooksGroups,
+  DeleteBooksGroupById,
+  CreateBooksGroup,
+  EditBooksGroupById,
+} from "@/api/books";
 
-function BookOfStudy() {
+import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+
+const BooksGroupsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
+  // State management
+  const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [bookOfStudyGroups, setBookOfStudyGroups] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [errors, setErrors] = useState({});
-
+  const [update, setUpdate] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
-    title: "",
+    name: "",
     description: "",
-    image: null,
-    image_url: "",
   });
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Fetch Book of Study groups
-  const fetchBookOfStudyGroups = async () => {
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [groupsData, setGroupsData] = useState([]);
+
+  // Fetch Book Groups from API
+  const getGroupsData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
+    const offset = page * limit;
+
+    const params = searchVal ? { search: searchVal } : {};
+
     try {
-      const res = await GetHistory(100, 0, "");
-      setBookOfStudyGroups(res.data.results || []);
-    } catch (err) {
-      setErrorFn(err, t);
+      // const res = await GetBooksGroups(limit, offset, params);
+      // setTotalRecords(res?.data?.count || 0);
+      // setGroupsData(res?.data?.results || []);
+    } catch (error) {
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Local sorting for displayed data
+  const getSortedData = () => {
+    if (!groupsData || !sortConfig.key) return groupsData || [];
+
+    const sorted = [...groupsData].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      // numeric fields
+      if (sortConfig.key === "id") {
+        return sortConfig.direction === "asc"
+          ? aValue - bValue
+          : bValue - aValue;
+      }
+
+      // string fallback
+      const strA = String(aValue).toLowerCase();
+      const strB = String(bValue).toLowerCase();
+      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
+      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  };
+
+  // Initial load and refetch on dependencies change
   useEffect(() => {
-    fetchBookOfStudyGroups();
-  }, []);
+    getGroupsData(currentPage - 1, search);
+  }, [update]);
+
+  // Sorting functionality
+  const sortData = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Get sort icon
+  const getSortIcon = (columnKey) => {
+    if (sortConfig.key !== columnKey) {
+      return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
+    }
+
+    if (sortConfig.direction === "asc") {
+      return <LuArrowUpDown className="h-3 w-3 text-blue-600 rotate-180" />;
+    }
+
+    if (sortConfig.direction === "desc") {
+      return <LuArrowUpDown className="h-3 w-3 text-blue-600" />;
+    }
+
+    return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages && !isLoading) {
+      setCurrentPage(newPage);
+      getGroupsData(newPage - 1, search);
+    }
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearch("");
+    setCurrentPage(1);
+    getGroupsData(0, "");
+  };
 
   // Reset form
   const resetForm = () => {
     setFormData({
-      title: "",
+      name: "",
       description: "",
-      image: null,
-      image_url: "",
     });
-    setImagePreview(null);
-    setErrors({});
-    setEditingId(null);
-    setShowForm(false);
+    setInitialFormData(null);
+    setFormErrors({});
+    setSelectedGroup(null);
+    setHasChanges(false);
+    setShowFormModal(false);
   };
 
-  // Handle input change
-  const handleInputChange = (e) => {
+  // Handle form input change
+  const handleFormInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    if (errors[name]) {
-      setErrors((prev) => ({
+
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({
         ...prev,
         [name]: "",
       }));
     }
   };
 
-  // Handle image upload
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        const { file: processedFile, url } = await processImageFile(file);
-        setImagePreview(processedFile);
-        setFormData((prev) => ({ ...prev, image: url }));
-        setErrors((prev) => ({
-          ...prev,
-          image: "",
-        }));
-      } catch (error) {
-        console.error("Error processing image:", error);
-        toast.error(t("Failed to process image"));
-      }
+  // Check for changes when editing
+  useEffect(() => {
+    if (selectedGroup && initialFormData) {
+      const hasTextChanges = Object.keys(initialFormData).some((key) => {
+        return formData[key] !== initialFormData[key];
+      });
+      setHasChanges(hasTextChanges);
     }
-  };
+  }, [formData, selectedGroup, initialFormData]);
 
   // Validate form
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = t("Title is required");
+    if (!formData.name.trim()) {
+      newErrors.name = t("Name is required");
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = t("Description is required");
-    }
-
-    if (!editingId && !formData.image && !formData.image_url) {
-      newErrors.image = t("Image is required");
-    }
-
-    setErrors(newErrors);
+    setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error(t("Please fix the errors in the form"));
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("title", formData.title);
-    formDataToSend.append("description", formData.description);
-
-    if (imagePreview instanceof File) {
-      formDataToSend.append("image", imagePreview);
-    } else if (formData.image_url) {
-      formDataToSend.append("image_url", formData.image_url);
-    }
-
     setIsLoading(true);
-
     try {
-      if (editingId) {
-        await EditHistoryById(editingId, formDataToSend);
-        toast.success(t("Group updated successfully"));
+      const submitData = {
+        name: formData.name,
+        description: formData.description,
+      };
+
+      if (selectedGroup?.id) {
+        await EditBooksGroupById(selectedGroup.id, submitData);
+        toast.success(t("Book group updated successfully"));
       } else {
-        await CreateHistory(formDataToSend);
-        toast.success(t("Group created successfully"));
+        await CreateBooksGroup(submitData);
+        toast.success(t("Book group created successfully"));
       }
+
       resetForm();
-      fetchBookOfStudyGroups();
-    } catch (err) {
-      setErrorFn(err, t);
+      setUpdate((prev) => !prev);
+    } catch (error) {
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle edit
-  const handleEdit = (group) => {
-    setFormData({
-      title: group.title,
-      description: group.description,
-      image: group.image,
-      image_url: group.image_url,
-    });
-    setImagePreview(group.image || group.image_url);
-    setEditingId(group.id);
-    setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  // Open create form
+  const openCreateForm = () => {
+    resetForm();
+    setShowFormModal(true);
   };
 
-  // Handle delete
-  const handleDelete = async (id) => {
-    if (!window.confirm(t("Are you sure you want to delete this group?"))) {
-      return;
-    }
+  // Open edit form
+  const openEditForm = (group) => {
+    const initialData = {
+      name: group?.name || "",
+      description: group?.description || "",
+    };
+    setFormData(initialData);
+    setInitialFormData(initialData);
+    setSelectedGroup(group);
+    setHasChanges(false);
+    setShowFormModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedGroup?.id) return;
 
     setIsLoading(true);
-
     try {
-      await DeleteHistoryById(id);
-      toast.success(t("Group deleted successfully"));
-      fetchBookOfStudyGroups();
-    } catch (err) {
-      setErrorFn(err, t);
+      await DeleteBooksGroupById(selectedGroup.id);
+      toast.success(t("Book group deleted successfully"));
+      setShowDeleteModal(false);
+      setSelectedGroup(null);
+      setUpdate((prev) => !prev);
+    } catch (error) {
+      setErrorFn(error, t);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Pagination
+  const totalPages = Math.ceil(totalRecords / limit);
 
   return (
     <div
-      className={`min-h-screen bg-gray-50 ${
-        i18n.language === "ar" ? "rtl" : "ltr"
-      }`}
-      dir={i18n.language === "ar" ? "rtl" : "ltr"}
+      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
+      {/* Start Breadcrumb */}
+      <CustomBreadcrumb
+        backTitle={t("Back to Dashboard")}
+        onBack={() => {
+          onSectionChange("dashboard");
+        }}
+        page={t("Book Groups")}
+      />
+      {/* End Breadcrumb */}
 
-      <div className=" p-3 mx-auto ">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {t("Book of Study")}
-          </h1>
-          <p className="text-gray-600">
-            {t("Manage study groups with photos and descriptions")}
-          </p>
-        </div>
+      {/* Start Header */}
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
+        <h2 className="text-lg font-medium text-[#1D2630]">
+          {t("Book Groups")}
+        </h2>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">
+            {t("Total")}: {totalRecords} {t("groups")}
+          </span>
 
-        {/* Add/Edit Form Section */}
-        {showForm && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {editingId ? t("Edit Group") : t("Create New Group")}
-              </h2>
-              <button
-                onClick={resetForm}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Image Upload Section */}
-              <div>
-                <div className="px-4 py-3 bg-blue-50 border-b border-blue-100 rounded-t-lg mb-4">
-                  <p className="text-xs md:text-sm text-blue-800">
-                    <strong>{t("Important")}:</strong>{" "}
-                    {t(
-                      "Please select an image with minimum dimensions of 300x200 pixels for best quality."
-                    )}
-                  </p>
-                </div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("Group Photo")}
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="w-32 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                    {imagePreview ? (
-                      <img
-                        src={
-                          imagePreview instanceof File
-                            ? URL.createObjectURL(imagePreview)
-                            : imagePreview
-                        }
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <Upload className="h-8 w-8 text-gray-400" />
-                    )}
-                  </div>
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*,.heic,.heif"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 border ${
-                        errors.image ? "border-red-500" : "border-gray-300"
-                      } rounded-md hover:bg-gray-50`}
-                    >
-                      <Upload className="h-4 w-4" />
-                      {t("Upload Image")}
-                    </label>
-                    {errors.image && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.image}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("Title")} *
-                </label>
-                <Input
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder={t("Enter group title")}
-                  className={errors.title ? "border-red-500" : ""}
-                />
-                {errors.title && (
-                  <p className="text-red-500 text-xs mt-1">{errors.title}</p>
-                )}
-              </div>
-
-              {/* Description with CKEditor */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("Description")} *
-                </label>
-                <div
-                  className={`border rounded-md ${
-                    errors.description ? "border-red-500" : "border-gray-300"
-                  } focus-within:ring-2 focus-within:ring-blue-500`}
-                >
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data={formData.description}
-                    config={{
-                      placeholder: t("Enter group description"),
-                      language: i18n.language === "ar" ? "ar" : "en",
-                      removePlugins: [
-                        "MediaEmbed",
-                        "ImageUpload",
-                        "Image",
-                        "MediaEmbedToolbar",
-                        "EasyImage",
-                      ],
-                    }}
-                    onChange={(event, editor) => {
-                      const data = editor.getData();
-                      setFormData((prev) => ({ ...prev, description: data }));
-                      if (errors.description) {
-                        setErrors((prev) => ({ ...prev, description: "" }));
-                      }
-                    }}
-                    onBlur={() => {
-                      if (!formData.description.trim()) {
-                        setErrors((prev) => ({
-                          ...prev,
-                          description: t("Description is required"),
-                        }));
-                      }
-                    }}
-                  />
-                </div>
-                {errors.description && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.description}
-                  </p>
-                )}
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex items-center justify-end gap-3 pt-6 border-t">
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  {t("Cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex items-center gap-2"
-                  disabled={isLoading}
-                >
-                  <Save className="h-4 w-4" />
-                  {isLoading
-                    ? t("Saving...")
-                    : editingId
-                    ? t("Update Group")
-                    : t("Create Group")}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Add Button */}
-        {!showForm && (
-          <div className="mb-8">
-            <Button
-              onClick={() => {
-                resetForm();
-                setShowForm(true);
-              }}
-              className="flex items-center gap-2"
+          {/* Start Add Button */}
+          <div>
+            <button
+              onClick={openCreateForm}
+              className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
             >
-              <Plus className="h-4 w-4" />
-              {t("Add New Group")}
-            </Button>
+              {t("Add New")}
+            </button>
           </div>
-        )}
-
-        {/* Groups Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bookOfStudyGroups.map((group) => (
-            <div
-              key={group.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-            >
-              {/* Image */}
-              <div className="aspect-video bg-gray-200 overflow-hidden">
-                {group.image || group.image_url ? (
-                  <img
-                    src={group.image || group.image_url}
-                    alt={group.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                    <Upload className="w-12 h-12 text-gray-400" />
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {group.title}
-                </h3>
-
-                {/* Description Preview */}
-                <div className="text-sm text-gray-600 mb-4 line-clamp-3">
-                  <div
-                    className="prose prose-sm max-w-none"
-                    // eslint-disable-next-line react/no-danger
-                    dangerouslySetInnerHTML={{
-                      __html: group.description || "",
-                    }}
-                  />
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-4 border-t">
-                  <button
-                    onClick={() => handleEdit(group)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
-                    disabled={isLoading}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    {t("Edit")}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(group.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-                    disabled={isLoading}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {t("Delete")}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+          {/* End Add Button */}
         </div>
-
-        {/* Empty State */}
-        {!isLoading && bookOfStudyGroups.length === 0 && !showForm && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <Upload className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {t("No groups yet")}
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {t("Create your first study group with a photo and description")}
-            </p>
-          </div>
-        )}
       </div>
+      {/* End Header */}
+
+      {/* Start Search */}
+      <div className="bg-white rounded-lg p-4 shadow-sm mb-6">
+        <div className="relative max-w-md flex">
+          <input
+            type="text"
+            placeholder={t("Search groups...")}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            className={`flex-1 px-4 py-2 border border-gray-300 ${
+              i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
+            } text-sm pr-8`}
+          />
+
+          {search && (
+            <button
+              onClick={() => {
+                clearSearch();
+              }}
+              className={` absolute ${
+                i18n?.language === "ar" ? " left-20" : " right-20"
+              } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
+            >
+              ✕
+            </button>
+          )}
+
+          <button
+            onClick={() => getGroupsData(0, search)}
+            className={`px-4 py-2 bg-[#4680ff] text-white ${
+              i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
+            } text-sm font-semibold hover:bg-blue-600`}
+          >
+            {t("Search")}
+          </button>
+        </div>
+      </div>
+      {/* End Search */}
+
+      {/* Start Table */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <Table>
+          <TableHeader className="bg-[#FAFAFA] h-14">
+            <TableRow>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
+                <button
+                  onClick={() => sortData("id")}
+                  className="flex items-center gap-1 font-medium"
+                >
+                  #{getSortIcon("id")}
+                </button>
+              </TableHead>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("name")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Name")}
+                    {getSortIcon("name")}
+                  </button>
+                </div>
+              </TableHead>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+                  <button
+                    onClick={() => sortData("description")}
+                    className="flex items-center gap-1 font-medium"
+                  >
+                    {t("Description")}
+                    {getSortIcon("description")}
+                  </button>
+                </div>
+              </TableHead>
+              <TableHead className="text-center w-[100px]">
+                {t("Actions")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+                    {t("Loading Groups...")}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : getSortedData().length > 0 ? (
+              getSortedData().map((group) => (
+                <TableRow key={group?.id} className="hover:bg-gray-50">
+                  <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
+                    {group?.id}
+                  </TableCell>
+                  <TableCell>
+                    <div className="min-w-0 text-center">
+                      <p className="font-medium text-gray-900 truncate">
+                        {group?.name}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="min-w-0 text-center">
+                      <p className="text-gray-600 text-sm truncate max-w-xs">
+                        {group?.description}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => openEditForm(group)}
+                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                        title={t("Edit")}
+                      >
+                        <LuPencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedGroup(group);
+                          setShowDeleteModal(true);
+                        }}
+                        className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
+                        title={t("Delete")}
+                      >
+                        <LuTrash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={4}
+                  className="text-center py-8 text-gray-500"
+                >
+                  {search
+                    ? t("No groups found matching your search.")
+                    : t("No groups available.")}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Start Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="text-sm text-gray-600">
+            {t("Showing")} {(currentPage - 1) * limit + 1} {t("to")}{" "}
+            {Math.min(currentPage * limit, totalRecords)} {t("of")}{" "}
+            {totalRecords} {t("results")}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || isLoading}
+              className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t("Previous")}
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                const pageNum = i + 1;
+                const isActive = pageNum === currentPage;
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={isLoading}
+                    className={`px-3 py-1 text-sm rounded ${
+                      isActive
+                        ? "bg-blue-600 text-white"
+                        : "border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {totalPages > 5 && (
+                <>
+                  <span className="px-2 text-gray-500">...</span>
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages || isLoading}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || isLoading}
+              className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t("Next")}
+            </button>
+          </div>
+        </div>
+      )}
+      {/* End Pagination */}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        title={t("Confirm Delete")}
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedGroup(null);
+        }}
+      >
+        <DeleteConfirmation
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedGroup(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title={t("Delete Group")}
+          message={t(
+            "Are you sure you want to delete this group? This action cannot be undone."
+          )}
+          itemName={selectedGroup?.name}
+        />
+      </Modal>
+
+      {/* Create/Edit Form Modal */}
+      <Modal
+        title={
+          selectedGroup ? t("Edit Book Group") : t("Create New Book Group")
+        }
+        isOpen={showFormModal}
+        onClose={resetForm}
+        width="600px"
+      >
+        <form onSubmit={handleFormSubmit} className="space-y-6">
+          {/* Name Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Name")} *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleFormInputChange}
+              placeholder={t("Enter group name")}
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                formErrors.name ? "border-red-500" : "border-gray-300"
+              }`}
+            />
+            {formErrors.name && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+            )}
+          </div>
+
+          {/* Description Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Description")}
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleFormInputChange}
+              placeholder={t("Enter group description")}
+              rows="4"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          {/* Submit Buttons */}
+          <div className="flex gap-3 justify-end pt-6 border-t">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              {t("Cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading || (selectedGroup && !hasChanges)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="h-4 w-4" />
+              {selectedGroup ? t("Update Group") : t("Create Group")}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
-}
+};
 
-export default BookOfStudy;
+export default BooksGroupsList;

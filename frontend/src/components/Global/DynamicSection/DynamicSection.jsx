@@ -25,7 +25,7 @@ const DynamicSection = ({
   nextArrowClassname = "",
   stopslider = false,
   propsToCard = {},
-  gridClassName = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2",
+  gridClassName = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 px-2",
   enableLoadMore = false,
   onLoadMore = null,
   isLoadingMore = false,
@@ -61,7 +61,7 @@ const DynamicSection = ({
           </div>
           {/* End Title */}
           {/* Start View More Button */}
-          {viewMore && !isSlider && (
+          {viewMore && (
             <Link
               to={viewMoreUrl}
               className="flex items-center gap- border-[1px] border-primary text-text text-sm rounded-full px-4 py-[4px] lg:py-[6px] hover:bg-primary hover:text-white transition-all duration-300"
@@ -97,7 +97,9 @@ const DynamicSection = ({
                       isLoadingMore ? "animate-spin" : ""
                     }`}
                   />
-                  <span>{isLoadingMore ? t("Loading...") : t("Load More")}</span>
+                  <span>
+                    {isLoadingMore ? t("Loading...") : t("Load More")}
+                  </span>
                 </button>
               </div>
             )}
@@ -109,7 +111,7 @@ const DynamicSection = ({
                 className="w-full overflow-visible"
                 opts={{
                   align: "start",
-                  loop: true,
+
                   watchDrag: true,
                   containScroll: "trimSnaps",
                 }}
@@ -131,7 +133,7 @@ const DynamicSection = ({
                   {data.map((item, ind) => (
                     <CarouselItem
                       key={item.id}
-                      className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3  overflow-visible"
+                      className={`pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4  overflow-visible `}
                     >
                       {Card && typeof Card === "function" ? (
                         <Card item={item} index={ind} {...propsToCard} />
@@ -145,7 +147,7 @@ const DynamicSection = ({
                   ))}
                   {/* Load More Button - يظهر في نهاية السلايدر */}
                   {enableLoadMore && onLoadMore && (
-                    <CarouselItem className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 overflow-visible flex items-center justify-center">
+                    <CarouselItem className="pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 overflow-visible flex items-center justify-center">
                       <button
                         onClick={onLoadMore}
                         disabled={isLoadingMore}

@@ -31,9 +31,11 @@ import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/C
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
 import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
 import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
-import BookContent from "@/components/ForPages/Dashboard/AboutUs/Book/BookContent";
+import BooksList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksList";
+import BooksGroupsList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksGroupsList";
 import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/CreateorEditWriter/CreateorEditWriter";
 import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
+import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/CreateorEditBook";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -61,11 +63,7 @@ export default function Page() {
     const saved = localStorage.getItem("dashboardSelectedVideo");
     return saved ? JSON.parse(saved) : null;
   });
-  const [selectedNews, setSelectedNews] = useState(() => {
-    // استرجاع الأخبار المحفوظة إن وجدت
-    const saved = localStorage.getItem("dashboardSelectedNews");
-    return saved ? JSON.parse(saved) : null;
-  });
+
   const [selectedContent, setSelectedContent] = useState(() => {
     // استرجاع المحتوى المحفوظ إن وجد
     const saved = localStorage.getItem("dashboardSelectedContent");
@@ -79,6 +77,11 @@ export default function Page() {
   const [selectedWriter, setSelectedWriter] = useState(() => {
     // استرجاع الأحداث المحفوظة إن وجدت
     const saved = localStorage.getItem("dashboardSelectedWriter");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedBook, setSelectedBook] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedBook");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -112,15 +115,6 @@ export default function Page() {
   }, [selectedVideo]);
 
   useEffect(() => {
-    if (selectedNews) {
-      localStorage.setItem(
-        "dashboardSelectedNews",
-        JSON.stringify(selectedNews)
-      );
-    }
-  }, [selectedNews]);
-
-  useEffect(() => {
     if (selectedEvent) {
       localStorage.setItem(
         "dashboardSelectedEvent",
@@ -137,6 +131,15 @@ export default function Page() {
     }
   }, [selectedWriter]);
 
+  useEffect(() => {
+    if (selectedBook) {
+      localStorage.setItem(
+        "dashboardSelectedBook",
+        JSON.stringify(selectedBook)
+      );
+    }
+  }, [selectedBook]);
+
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
@@ -148,11 +151,13 @@ export default function Page() {
       localStorage.removeItem("dashboardSelectedContent");
       localStorage.removeItem("dashboardSelectedEvent");
       localStorage.removeItem("dashboardSelectedWriter");
+      localStorage.removeItem("dashboardSelectedBook");
       setSelectedPost(null);
       setSelectedVideo(null);
       setSelectedContent(null);
       setSelectedEvent(null);
       setSelectedWriter(null);
+      setSelectedBook(null);
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
@@ -166,6 +171,8 @@ export default function Page() {
       setSelectedEvent(data);
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
+    } else if (section === "createOrEditbook") {
+      setSelectedBook(data);
     }
 
     let autoParent = data;
@@ -195,7 +202,9 @@ export default function Page() {
         history: "About Us",
         team: "About Us",
         positions: "About Us",
-        book: "THe Book",
+        books: "About Us",
+        createOrEditBook: "About Us",
+        booksGroups: "About Us",
         // Settings && Profile
         profileSettings: "Settings",
         profile: "Settings",
@@ -287,8 +296,17 @@ export default function Page() {
         return <OurTeam onSectionChange={handleSectionChange} />;
       case "positions":
         return <PositionsContent onSectionChange={handleSectionChange} />;
-      case "book":
-        return <BookContent onSectionChange={handleSectionChange} />;
+      case "books":
+        return <BooksList onSectionChange={handleSectionChange} />;
+      case "createOrEditBook":
+        return (
+          <CreateOrEditBook
+            selectedBook={selectedBook}
+            onSectionChange={handleSectionChange}
+          />
+        );
+      case "booksGroups":
+        return <BooksGroupsList onSectionChange={handleSectionChange} />;
       default:
         return <DashboardSections />;
       // Profile && Settings

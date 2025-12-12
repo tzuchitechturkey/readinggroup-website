@@ -12,7 +12,7 @@ import {
   GetTopLikedVideos,
   GetRandomPublishedVideos,
   GetVideoCategories,
-  GetItemsByCategoryId,
+  GetVideosByCategoryId,
   GetVideos,
 } from "@/api/videos";
 
@@ -26,6 +26,11 @@ function VideosPageContent() {
   const [activeCategories, setActiveCategories] = useState([]);
   const [categoriesData, setCategoriesData] = useState({});
   const [targetCategoryId, setTargetCategoryId] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMoreWeeklyData, setHasMoreWeeklyData] = useState(true);
+  const limit = 8;
+
   const getMyListedVideos = async () => {
     try {
       const res = await GetMyListedVideos(10, 0, "");
@@ -51,13 +56,20 @@ function VideosPageContent() {
     }
   };
 
-  const getWeeklyList = async () => {
+  const getWeeklyList = async (newOffset = 0) => {
     try {
-      const res = await GetVideos(20, 0, "published", "", {
+      const res = await GetVideos(limit, newOffset, "published", "", {
         is_weekly_moment: true,
       });
-      console.log(res.data?.results, "sssssssssssssssssss");
-      setWeeklyList(res.data?.results);
+      if (newOffset === 0) {
+        setWeeklyList(res.data?.results);
+      } else {
+        setWeeklyList((prev) => [...prev, ...(res.data?.results || [])]);
+      }
+
+      const totalFetched = newOffset + (res?.data?.results.length || 0);
+      setHasMoreWeeklyData(totalFetched < (res?.data?.count || 0));
+      setOffset(totalFetched);
     } catch (err) {
       console.error("Failed to fetch top mix videos:", err);
     }
@@ -73,7 +85,7 @@ function VideosPageContent() {
       // Fetch items for each active category
       for (const category of active) {
         try {
-          const itemsRes = await GetItemsByCategoryId(category.id);
+          const itemsRes = await GetVideosByCategoryId(category.id);
           setCategoriesData((prev) => ({
             ...prev,
             [category.id]: itemsRes.data?.results || itemsRes.data || [],
@@ -119,7 +131,14 @@ function VideosPageContent() {
     getWeeklyList();
     getActiveVideoCategories();
   }, []);
-
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      await getWeeklyList(offset);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
   return (
     <div
       className="min-h-screen bg-gray-100"
@@ -139,9 +158,12 @@ function VideosPageContent() {
               title={t("Top Weekly Videos")}
               titleClassName="text-[30px] font-medium mb-2"
               data={weeklyList}
-              isSlider={false}
+              isSlider={true}
               cardName={VideoCard}
               viewMoreUrl="/videos"
+              enableLoadMore={hasMoreWeeklyData}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={isLoadingMore}
             />
           </div>
         ) : (
@@ -176,9 +198,12 @@ function VideosPageContent() {
             <DynamicSection
               title={category.name}
               titleClassName="text-[30px] font-medium mb-2"
+              gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2"
               data={categoriesData[category.id] || []}
               isSlider={false}
               cardName={VideoCard}
+              viewMore={true}
+              viewMoreUrl={`/videos/category/${category.id}`}
             />
           </div>
         ))}

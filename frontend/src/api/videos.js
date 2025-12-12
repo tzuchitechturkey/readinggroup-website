@@ -88,9 +88,15 @@ export async function DeleteVideoCategory(id) {
   return await axios.delete(`/video-categories/${id}/`);
 }
 
-// Get All Item By cAteogir Id
-export async function GetItemsByCategoryId(categoryId) {
-  return await axios.get(`/video-categories/${categoryId}/videos/`);
+// Get All Item By Category Id
+export async function GetVideosByCategoryId(
+  categoryId,
+  limit = 10,
+  offset = 0
+) {
+  return await axios.get(
+    `/video-categories/${categoryId}/videos/?limit=${limit}&offset=${offset}`
+  );
 }
 
 // Top Rating

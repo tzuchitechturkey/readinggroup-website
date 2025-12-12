@@ -112,7 +112,7 @@ const EventsList = ({ onSectionChange }) => {
       isWeeklyMomentFilter !== null
         ? { is_weekly_moment: isWeeklyMomentFilter }
         : {};
-    getEventsData(0, "", statusFilter, filters);
+    getEventsData(currentPage - 1, search, statusFilter, filters);
   }, [update, statusFilter, isWeeklyMomentFilter]);
 
   // Sorting functionality
