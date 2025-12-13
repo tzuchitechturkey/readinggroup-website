@@ -33,30 +33,36 @@ export async function DeleteBookById(id) {
 
 export async function GetBooksGroups(limit = 10, offset = 0, search = "") {
   return await axios.get(
-    `/book-groups/?limit=${limit}&offset=${offset}&search=${search}`
+    `/book-category/?limit=${limit}&offset=${offset}&search=${search}`
   );
 }
 
 export async function CreateBooksGroup(data) {
-  return await axios.post(`/book-groups/`, data);
+  return await axios.post(`/book-category/`, data);
 }
 
-export async function GetBooksByGroupId(groupId) {
-  return await axios.get(`/book/${groupId}/book-groups`);
+export async function SortBooksGroups(data) {
+  return await axios.post(`/book-category/reorder/`, data);
+}
+
+export async function GetBooksByGroupId(groupId, limit = 10, offset = 0) {
+  return await axios.get(
+    `/book-category/${groupId}/books/?limit=${limit}&offset=${offset}`
+  );
 }
 
 export async function GetBooksGroupById(id) {
-  return await axios.get(`/book-groups/${id}/`);
+  return await axios.get(`/book-category/${id}/`);
 }
 
 export async function EditBooksGroupById(id, data) {
-  return await axios.put(`/book-groups/${id}/`, data);
+  return await axios.put(`/book-category/${id}/`, data);
 }
 
 export async function PatchBooksGroupById(id, data) {
-  return await axios.patch(`/book-groups/${id}/`, data);
+  return await axios.patch(`/book-category/${id}/`, data);
 }
 
 export async function DeleteBooksGroupById(id) {
-  return await axios.delete(`/book-groups/${id}/`);
+  return await axios.delete(`/book-category/${id}/`);
 }

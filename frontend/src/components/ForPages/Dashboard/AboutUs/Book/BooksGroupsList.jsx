@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
-import { Save } from "lucide-react";
+import { Save, Eye } from "lucide-react";
 
 import {
   Table,
@@ -22,6 +22,7 @@ import {
   DeleteBooksGroupById,
   CreateBooksGroup,
   EditBooksGroupById,
+  SortBooksGroups,
 } from "@/api/books";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
@@ -34,6 +35,8 @@ const BooksGroupsList = ({ onSectionChange }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [selectedDescription, setSelectedDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -43,6 +46,10 @@ const BooksGroupsList = ({ onSectionChange }) => {
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [isSorting, setIsSorting] = useState(false);
+  const [originalGroupsData, setOriginalGroupsData] = useState([]);
+  const [hasOrderChanges, setHasOrderChanges] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,12 +62,15 @@ const BooksGroupsList = ({ onSectionChange }) => {
     setIsLoading(true);
     const offset = page * limit;
 
-    const params = searchVal ? { search: searchVal } : {};
+    // const params = searchVal ? { search: searchVal } : {};
 
     try {
-      // const res = await GetBooksGroups(limit, offset, params);
-      // setTotalRecords(res?.data?.count || 0);
-      // setGroupsData(res?.data?.results || []);
+      const res = await GetBooksGroups(limit, offset, searchVal);
+      const results = res?.data?.results || [];
+      setTotalRecords(res?.data?.count || 0);
+      setGroupsData(results);
+      setOriginalGroupsData(JSON.parse(JSON.stringify(results)));
+      setHasOrderChanges(false);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -70,6 +80,11 @@ const BooksGroupsList = ({ onSectionChange }) => {
 
   // Local sorting for displayed data
   const getSortedData = () => {
+    // لا تقم بالترتيب عند وجود تغييرات في الترتيب
+    if (hasOrderChanges) {
+      return groupsData || [];
+    }
+
     if (!groupsData || !sortConfig.key) return groupsData || [];
 
     const sorted = [...groupsData].sort((a, b) => {
@@ -180,6 +195,79 @@ const BooksGroupsList = ({ onSectionChange }) => {
       setHasChanges(hasTextChanges);
     }
   }, [formData, selectedGroup, initialFormData]);
+
+  // Drag and Drop handlers
+  const handleDragStart = (e, item) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e, targetItem) => {
+    e.preventDefault();
+
+    if (!draggedItem || draggedItem.id === targetItem.id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // Reset sorting to avoid re-sorting after drop
+    setSortConfig({ key: "id", direction: "asc" });
+
+    const newGroupsData = [...groupsData];
+    const draggedIndex = newGroupsData.findIndex(
+      (group) => group.id === draggedItem.id
+    );
+    const targetIndex = newGroupsData.findIndex(
+      (group) => group.id === targetItem.id
+    );
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      [newGroupsData[draggedIndex], newGroupsData[targetIndex]] = [
+        newGroupsData[targetIndex],
+        newGroupsData[draggedIndex],
+      ];
+
+      setGroupsData(newGroupsData);
+      setHasOrderChanges(true);
+    }
+
+    setDraggedItem(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+  };
+
+  const handleSaveOrder = async () => {
+    setIsSorting(true);
+    try {
+      const sortData = groupsData.map((categories, index) => ({
+        id: categories.id,
+        order: index,
+      }));
+      // Note: يحتاج API endpoint للترتيب - تأكد من وجود EndPoint
+      await SortBooksGroups({ categories: sortData });
+      toast.success(t("Book groups reordered successfully"));
+      setHasOrderChanges(false);
+      setOriginalGroupsData(JSON.parse(JSON.stringify(groupsData)));
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to reorder groups"));
+    } finally {
+      setIsSorting(false);
+    }
+  };
+
+  const handleCancelOrder = () => {
+    setGroupsData(JSON.parse(JSON.stringify(originalGroupsData)));
+    setHasOrderChanges(false);
+    toast.info(t("Changes cancelled"));
+  };
 
   // Validate form
   const validateForm = () => {
@@ -396,7 +484,22 @@ const BooksGroupsList = ({ onSectionChange }) => {
               </TableRow>
             ) : getSortedData().length > 0 ? (
               getSortedData().map((group) => (
-                <TableRow key={group?.id} className="hover:bg-gray-50">
+                <TableRow
+                  key={group?.id}
+                  draggable
+                  // onDragStart={(e) => handleDragStart(e, group)}
+                  // onDragOver={handleDragOver}
+                  // onDrop={(e) => handleDrop(e, group)}
+                  // onDragEnd={handleDragEnd}
+                  className={`transition-all duration-200 ${
+                    draggedItem?.id === group.id
+                      ? "opacity-50 bg-blue-50"
+                      : "se hover:bg-gray-50"
+                  } ${isSorting ? "opacity-75" : ""}`}
+                  style={{
+                    cursor: isSorting ? "not-allowed" : "moves",
+                  }}
+                >
                   <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                     {group?.id}
                   </TableCell>
@@ -408,10 +511,17 @@ const BooksGroupsList = ({ onSectionChange }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="min-w-0 text-center">
-                      <p className="text-gray-600 text-sm truncate max-w-xs">
-                        {group?.description}
-                      </p>
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={() => {
+                          setSelectedDescription(group?.description || "");
+                          setShowDescriptionModal(true);
+                        }}
+                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                        title={t("View Description")}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -518,6 +628,58 @@ const BooksGroupsList = ({ onSectionChange }) => {
         </div>
       )}
       {/* End Pagination */}
+
+      {/* Save/Cancel Order Buttons */}
+      {hasOrderChanges && (
+        <div className="flex gap-3 p-4 bg-yellow-50 border-t border-yellow-200 mt-4 rounded-lg">
+          <div className="flex-1 flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+            <span className="text-sm text-yellow-700">
+              {t("You have unsaved changes in the group order")}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancelOrder}
+              disabled={isSorting}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {t("Cancel")}
+            </button>
+            <button
+              onClick={handleSaveOrder}
+              disabled={isSorting}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            >
+              {isSorting ? (
+                <>
+                  <span className="inline-block animate-spin">⟳</span>
+                  {t("Saving...")}
+                </>
+              ) : (
+                `✓ ${t("Save Changes")}`
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Description Modal */}
+      <Modal
+        title={t("Group Description")}
+        isOpen={showDescriptionModal}
+        onClose={() => {
+          setShowDescriptionModal(false);
+          setSelectedDescription("");
+        }}
+      >
+        <div className="p-4">
+          <div
+            className="prose max-w-none text-gray-700"
+            dangerouslySetInnerHTML={{ __html: selectedDescription }}
+          />
+        </div>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal

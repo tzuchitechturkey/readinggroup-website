@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
-import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
+import PostsTabs from "@/components/ForPages/Posts/PostsTabs/PostsTabs";
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
 import heroImg from "@/assets/eventsHero.png";
 import ContentPostsFilterSction from "@/components/Global/ContentPostsFilterSction/ContentPostsFilterSction";
@@ -12,7 +12,7 @@ import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 
-function CardsAndPhotosContent() {
+function PostsContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const [activeCategories, setActiveCategories] = useState([]);
@@ -92,7 +92,7 @@ function CardsAndPhotosContent() {
 
         {/* Start Tabs */}
         <div id="cards-tabs-section">
-          <CardsAndPhotosTabs />
+          <PostsTabs />
         </div>
         {/* End Tabs */}
 
@@ -105,10 +105,12 @@ function CardsAndPhotosContent() {
         {/* End Weekly Moments */}
 
         {/* Start Show Active Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6  lg:gap-8 px-4 my-6 sm:my-8 md:my-10">
           {/* Start Image */}
-          <div className="order-2 lg:order-1 mt-0 lg:mt-8">
-            {topViewedData?.[0] && <WeekPhotosCard item={topViewedData[0]} />}
+          <div className="order-2 lg:order-1 mt-0 lg:mt-8 ">
+            {topViewedData?.[0] && (
+              <WeekPhotosCard item={topViewedData[0]} imgHeight="h-[280px] lg:h-[580px]" />
+            )}
           </div>
           {/* End Image */}
 
@@ -125,7 +127,7 @@ function CardsAndPhotosContent() {
             {/* End Title */}
 
             {/* Start Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-6">
               {topViewedData?.slice(1, 5).map((item, index) => (
                 <div
                   key={index}
@@ -145,4 +147,4 @@ function CardsAndPhotosContent() {
   );
 }
 
-export default CardsAndPhotosContent;
+export default PostsContent;

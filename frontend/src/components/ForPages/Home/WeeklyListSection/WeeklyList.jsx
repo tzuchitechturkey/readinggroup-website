@@ -63,7 +63,7 @@ const WeeklyList = ({ title, type }) => {
         data={weeklyData}
         cardName={type === "photo" ? WeekPhotosCard : Contentcard}
         isSlider={true}
-        propsToCard={{ showTags: false }}
+        propsToCard={{ showTags: false, fromContent: type === "content" }}
         enableLoadMore={hasMoreData}
         onLoadMore={handleLoadMore}
         isLoadingMore={isLoadingMore}

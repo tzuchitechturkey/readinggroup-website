@@ -4,7 +4,15 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { Download, FileText } from "lucide-react";
 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";
@@ -24,6 +32,8 @@ const ContentHeroEnhanced = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageCarouselApi, setImageCarouselApi] = useState(null);
   const [sideContentData, setSideContentData] = useState([]);
   const [contentData, setContentData] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
@@ -115,6 +125,22 @@ const ContentHeroEnhanced = () => {
     getContentData();
   }, []);
 
+  // Track carousel slide changes for images
+  useEffect(() => {
+    if (!imageCarouselApi) return;
+
+    const handleSelect = () => {
+      setCurrentImageIndex(imageCarouselApi.selectedScrollSnap());
+    };
+
+    imageCarouselApi.on("select", handleSelect);
+
+    return () => {
+      imageCarouselApi.off("select", handleSelect);
+    };
+  }, [imageCarouselApi]);
+  console.log(contentData, "contentData");
+
   // Sanitize summary HTML from CKEditor (basic client-side approach)
   const sanitizedSummary = useMemo(() => {
     if (!contentData?.summary) return "";
@@ -160,22 +186,108 @@ const ContentHeroEnhanced = () => {
           {contentData?.title}
         </h1>
         {/* End Title */}
-        {/* Start Image */}
-        <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
-          {contentData?.images?.length > 0 && (
-            <img
-              src={
-                contentData?.images[0]?.image ||
-                contentData?.images[0]?.image_url
-              }
-              alt={contentData?.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
+        {/* Start Image Carousel */}
+        {contentData?.images?.length > 0 && (
+          <div className="w-full">
+            <Carousel
+              className="w-full"
+              opts={{
+                align: "center",
+                loop: true,
+              }}
+              setApi={setImageCarouselApi}
+            >
+              <CarouselContent className="-ml-0">
+                {contentData.images.map((imageItem, index) => (
+                  <CarouselItem key={index} className="pl-0 basis-full">
+                    <div className="w-full h-64 md:h-80 lg:h-96 bg-gray-200 rounded-lg overflow-hidden shadow-lg">
+                      <img
+                        src={imageItem?.image || imageItem?.image_url}
+                        alt={`${contentData?.title} - ${index + 1}`}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              
+            </Carousel>
+
+            {/* Pagination Dots */}
+            {contentData.images.length > 1 && (
+              <div className="flex justify-center gap-2 mt-2">
+                {contentData.images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => imageCarouselApi?.scrollTo(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentImageIndex
+                        ? "bg-blue-600 w-6"
+                        : "bg-gray-400 hover:bg-gray-500"
+                    }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {/* End Image Carousel */}
+        {/* Start Attachments Carousel */}
+        {contentData?.attachments_data &&
+          contentData?.attachments_data.length > 0 && (
+            <div className="w-full">
+              <h3 className="text-lg font-semibold text-text mb-4">
+                {t("Attachments")}
+              </h3>
+              <Carousel
+                className="w-full"
+                opts={{
+                  align: "start",
+                  containScroll: "trimSnaps",
+                }}
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {contentData.attachments_data.map((attachment) => (
+                    <CarouselItem
+                      key={attachment.id}
+                      className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3"
+                    >
+                      <a
+                        href={attachment.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="flex flex-col items-center justify-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300 group cursor-pointer h-full"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 transition-colors">
+                          <FileText className="w-4 h-4 text-white" />
+                        </div>
+                        <p className="text-sm font-semibold text-gray-800 text-center line-clamp-2 group-hover:text-blue-600 transition-colors">
+                          {attachment.file_name}
+                        </p>
+                        {attachment.file_size && (
+                          <p className="text-xs text-gray-600 mt-1">
+                            ({(attachment.file_size / 1024 / 1024).toFixed(2)}{" "}
+                            MB)
+                          </p>
+                        )}
+                      </a>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {contentData.attachments_data.length > 2 && (
+                  <>
+                    <CarouselPrevious className="hidden md:flex -left-12" />
+                    <CarouselNext className="hidden md:flex -right-12" />
+                  </>
+                )}
+              </Carousel>
+            </div>
           )}
-        </div>
-        {/* ENd Image */}
-        {/* Start Article Info */}
+        {/* End Attachments Carousel */}
+        {/* Article Info */}
         <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
           {/* left: writer & date */}
           <div className="flex items-center gap-4">

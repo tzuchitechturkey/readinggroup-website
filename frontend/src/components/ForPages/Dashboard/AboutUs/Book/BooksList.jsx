@@ -17,10 +17,7 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import {
-  GetBooks,
-  DeleteBookById,
-} from "@/api/books";
+import { GetBooks, DeleteBookById } from "@/api/books";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
@@ -31,9 +28,10 @@ const BooksList = ({ onSectionChange }) => {
   const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
   const [selectedBook, setSelectedBook] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [selectedDescription, setSelectedDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,17 +40,12 @@ const BooksList = ({ onSectionChange }) => {
   const [booksData, setBooksData] = useState([]);
 
   // Fetch Books from API
-  const getBooksData = async (
-    page = 0,
-    searchVal = search
-  ) => {
+  const getBooksData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * limit;
 
-    const params = searchVal ? { search: searchVal } : {};
-
     try {
-      const res = await GetBooks(limit, offset, params);
+      const res = await GetBooks(limit, offset, searchVal);
 
       setTotalRecords(res?.data?.count || 0);
       setBooksData(res?.data?.results || []);
@@ -229,9 +222,7 @@ const BooksList = ({ onSectionChange }) => {
           )}
 
           <button
-            onClick={() =>
-              getBooksData(0, search)
-            }
+            onClick={() => getBooksData(0, search)}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
             } text-sm font-semibold hover:bg-blue-600`}
@@ -312,15 +303,22 @@ const BooksList = ({ onSectionChange }) => {
                   <TableCell>
                     <div className="min-w-0 text-center">
                       <p className="font-medium text-gray-900 truncate">
-                        {book?.title}
+                        {book?.name}
                       </p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="min-w-0 text-center">
-                      <p className="text-gray-600 text-sm truncate max-w-xs">
-                        {book?.description}
-                      </p>
+                    <div className="flex items-center justify-center">
+                      <button
+                        onClick={() => {
+                          setSelectedDescription(book?.description || "");
+                          setShowDescriptionModal(true);
+                        }}
+                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                        title={t("View Description")}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
                     </div>
                   </TableCell>
                   <TableCell className="text-center py-4">
@@ -458,6 +456,23 @@ const BooksList = ({ onSectionChange }) => {
           )}
           itemName={selectedBook?.title}
         />
+      </Modal>
+
+      {/* Description Modal */}
+      <Modal
+        title={t("Book Description")}
+        isOpen={showDescriptionModal}
+        onClose={() => {
+          setShowDescriptionModal(false);
+          setSelectedDescription("");
+        }}
+      >
+        <div className="p-4">
+          <div 
+            className="prose max-w-none text-gray-700"
+            dangerouslySetInnerHTML={{ __html: selectedDescription }}
+          />
+        </div>
       </Modal>
     </div>
   );

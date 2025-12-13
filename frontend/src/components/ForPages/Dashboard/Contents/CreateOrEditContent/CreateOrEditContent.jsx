@@ -23,6 +23,7 @@ import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import AttachmentsModal from "./AttachmentsModal";
 
 function CreateOrEditContent({ onSectionChange, content = null }) {
+  console.log(content);
   const { t, i18n } = useTranslation();
   const writerDropdownRef = useRef(null);
   const categoryDropdownRef = useRef(null);
@@ -121,7 +122,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         images_url: content?.images_url || [],
         metadata: content?.metadata || "",
         country: content?.country || "",
-        attachments: content?.attachments || [],
+        attachments: content?.attachments_data || content?.attachments || [],
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -410,7 +411,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     getWriters();
     getCategories();
@@ -784,7 +784,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">
-                              {attachment.title}
+                              {attachment.file_name}
                             </p>
                             {attachment.file && (
                               <a
@@ -793,7 +793,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                                 rel="noopener noreferrer"
                                 className="text-xs text-blue-600 hover:underline"
                               >
-                                {t("View File")}
+                                {t("View File")} 
                               </a>
                             )}
                           </div>

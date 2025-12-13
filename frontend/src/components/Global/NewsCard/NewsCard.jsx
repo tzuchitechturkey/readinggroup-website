@@ -1,7 +1,6 @@
 import React from "react";
 
 const NewsCard = ({ t, article, onClick, imgClassName, section }) => {
-  console.log("article in Newscard:", article);
   return (
     <article
       className="group flex gap-2 cursor-pointer transition-all duration-200 hover:bg-white/5 hover:-translate-y-0.5 focus:outline-2 focus:outline-white/50 focus:outline-offset-2 rounded-lg p-2"

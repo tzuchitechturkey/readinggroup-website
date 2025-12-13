@@ -2,7 +2,7 @@ import React from "react";
 
 import { useNavigate } from "react-router-dom";
 
-function WeekPhotosCard({ item }) {
+function WeekPhotosCard({ item, imgHeight = "h-[280px]" }) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -10,7 +10,7 @@ function WeekPhotosCard({ item }) {
   };
 
   return (
-    <div className="mx-auto">
+    <div className="mx-auto h-full flex-1  ">
       <div
         key={item?.id}
         className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
@@ -18,7 +18,7 @@ function WeekPhotosCard({ item }) {
       >
         {/* Card */}
         <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
-          <div className="relative w-full h-[280px]">
+          <div className={`relative w-full ${imgHeight} `}>
             {/* Image */}
             <img
               src={item?.image || item?.image_url}

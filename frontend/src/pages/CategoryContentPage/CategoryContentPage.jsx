@@ -110,15 +110,28 @@ function CategoryContentPage() {
     >
       {isLoading && <Loader />}
 
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 pt-6">
-        <div className="text-sm text-gray-600 mb-6">
-          <button
-            onClick={() => window.history.back()}
-            className="hover:text-gray-800 transition-colors"
-          >
-            ← {t("Back")}
-          </button>
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition-all duration-200 text-white"
+                title={t("Back")}
+              >
+                <span className="text-xl">
+                  {i18n?.language === "ar" ? "→" : "←"}
+                </span>
+              </button>
+              <div>
+                <p className="text-white/80 text-sm font-medium">{t("Category")}</p>
+                <h1 className="text-white text-3xl font-bold">
+                  {categoryName || t(type) || "Content"}
+                </h1>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

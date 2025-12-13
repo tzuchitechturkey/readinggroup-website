@@ -23,7 +23,7 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
     <div
       key={item?.id}
       onClick={handleCardClick}
-      className="rounded-2xl w-full max-w-[300px] mx-auto group cursor-pointer border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 relative"
+      className="rounded-2xl w-full max-w-[340px] md:max-w-[300px] mx-auto group cursor-pointer border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 relative"
     >
       {/* Start Tag" */}
       <div className="absolute z-10 top-3 left-3">

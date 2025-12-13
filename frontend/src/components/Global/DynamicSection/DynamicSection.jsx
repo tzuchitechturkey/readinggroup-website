@@ -35,7 +35,7 @@ const DynamicSection = ({
   // إذا لم يتم تمرير data، عرض رسالة
   if (!data || data.length === 0) {
     return (
-      <div className="pt-12 px-4 md:px-8 lg:px-10 bg-gray-50">
+      <div className="pt-12 px-4 md:px-6 bg-gray-50">
         <div className="mx-auto text-center py-12">
           <h2 className="text-5xl font-bold text-black mb-2">{title}</h2>
           <p className="text-gray-500">{t("No data available")}</p>
@@ -45,7 +45,7 @@ const DynamicSection = ({
   }
   return (
     <div
-      className="px-4 md:px-8 lg:px-10 "
+      className="px-4 md:px-6 "
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       <div className=" mx-auto">
@@ -80,7 +80,7 @@ const DynamicSection = ({
             <div className={gridClassName}>
               {data.map((item, ind) => (
                 <div key={item.id}>
-                  <Card item={item} index={ind} />
+                  <Card item={item} index={ind} {...propsToCard} />
                 </div>
               ))}
             </div>
@@ -106,12 +106,14 @@ const DynamicSection = ({
           </div>
         ) : (
           <div>
-            <div className=" " style={{ touchAction: "pan-x" }}>
+            <div
+              dir={i18n?.language === "ar" ? "ltr" : "ltr"}
+              style={{ touchAction: "pan-x" }}
+            >
               <Carousel
                 className="w-full overflow-visible"
                 opts={{
                   align: "start",
-
                   watchDrag: true,
                   containScroll: "trimSnaps",
                 }}
@@ -133,7 +135,7 @@ const DynamicSection = ({
                   {data.map((item, ind) => (
                     <CarouselItem
                       key={item.id}
-                      className={`pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4  overflow-visible `}
+                      className={`pl-3 md:pl-6 py-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 overflow-visible `}
                     >
                       {Card && typeof Card === "function" ? (
                         <Card item={item} index={ind} {...propsToCard} />

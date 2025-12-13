@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { GetPostCategories, GetPostsByCategoryId } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function CardsAndPhotosTabs() {
+function PostsTabs() {
   const isMobile = useIsMobile(1024);
   const { t, i18n } = useTranslation();
 
@@ -241,4 +241,4 @@ function CardsAndPhotosTabs() {
   );
 }
 
-export default CardsAndPhotosTabs;
+export default PostsTabs;

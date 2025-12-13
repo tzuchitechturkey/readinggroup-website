@@ -98,7 +98,7 @@ function Usernavbar() {
           },
           {
             name: t("Book of Study"),
-            href: "/about/book",
+            href: "/about/books",
             tab: "book_of_study",
           },
         ],
@@ -118,10 +118,14 @@ function Usernavbar() {
 
   // Toggle submenu expansion for mobile
   const toggleMobileSubmenu = (menuName) => {
-    setExpandedMenus((prev) => ({
-      ...prev,
-      [menuName]: !prev[menuName],
-    }));
+    setExpandedMenus((prev) => {
+      // إذا كانت القائمة مفتوحة، أغلقها
+      // وإلا افتحها وأغلق جميع القوائم الأخرى
+      if (prev[menuName]) {
+        return {};
+      }
+      return { [menuName]: true };
+    });
   };
 
   const handleNavClick = (e, item) => {
@@ -435,11 +439,7 @@ function Usernavbar() {
                             >
                               {({ isActive }) => (
                                 <div
-                                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                    isActive
-                                      ? "bg-primary text-white"
-                                      : "text-gray-700 hover:bg-white hover:text-primary"
-                                  }`}
+                                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200  "text-gray-700 `}
                                 >
                                   {subItem.name}
                                 </div>

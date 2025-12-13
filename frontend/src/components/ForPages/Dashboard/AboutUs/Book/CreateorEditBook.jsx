@@ -21,14 +21,14 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
   const [categoriesList, setCategoriesList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const [formData, setFormData] = useState({
-    title: "",
+    name: "",
     description: "",
     category: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
-
+  console.log("selectedBook:", selectedBook);
   const getCategories = async (searchVal = "") => {
     try {
       const res = await GetBooksGroups(10, 0, searchVal);
@@ -42,7 +42,7 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
   useEffect(() => {
     if (selectedBook) {
       const initialData = {
-        title: selectedBook?.title || "",
+        name: selectedBook?.name || "",
         description: selectedBook?.description || "",
         category: selectedBook?.category?.id || "",
       };
@@ -53,7 +53,7 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
       setInitialFormData(null);
       setHasChanges(false);
       setFormData({
-        title: "",
+        name: "",
         description: "",
         category: "",
       });
@@ -121,8 +121,8 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = t("Title is required");
+    if (!formData.name.trim()) {
+      newErrors.name = t("Name is required");
     }
 
     if (!formData.description.trim()) {
@@ -148,7 +148,7 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
     setIsLoading(true);
     try {
       const submitData = {
-        title: formData.title,
+        name: formData.name,
         description: formData.description,
         category: formData.category,
       };
@@ -224,16 +224,16 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
             </label>
             <input
               type="text"
-              name="title"
-              value={formData.title}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               placeholder={t("Enter book title")}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.title ? "border-red-500" : "border-gray-300"
+                errors.name ? "border-red-500" : "border-gray-300"
               }`}
             />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
             )}
           </div>
           {/* Start Gropus Selection */}

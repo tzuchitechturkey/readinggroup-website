@@ -1,13 +1,13 @@
 import { lazy } from "react";
 
-// import BookOfStudy from "@/pages/AboutUs/BookOfStudy/BookOfStudy";
-
-import ContentPage from "../pages/Contents/ContentPage/ContentPage";
-
 const CategoryContentPage = lazy(() =>
   import("@/pages/CategoryContentPage/CategoryContentPage")
 );
 // Lazy load all page components
+const BooksContent = lazy(() => import("@/pages/AboutUs/Books/BooksContent"));
+const ContentPage = lazy(() =>
+  import("../pages/Contents/ContentPage/ContentPage")
+);
 const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
 const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
 const Register = lazy(() => import("@/pages/Auth/Register/RegisterContent"));
@@ -22,9 +22,7 @@ const VideosPageContent = lazy(() =>
 const VideoPage = lazy(() =>
   import("@/pages/Videos/VideoPage/VideoPageContent")
 );
-const CardsAndPhotosContent = lazy(() =>
-  import("@/pages/CardsAndPhotos/CardsAndPhotos/CardsAndPhotosContent")
-);
+const PostsContent = lazy(() => import("@/pages/Posts/PostsContent"));
 const ContentsContent = lazy(() =>
   import("@/pages/Contents/ContentsPageContent")
 );
@@ -54,7 +52,7 @@ export const userRoutes = [
   // About Us Routes
   { path: "/about", element: <AboutUs /> },
   { path: "/about/team/:id", element: <AboutMemberContent /> },
-  // { path: "/about/book", element: <BookOfStudy /> },
+  { path: "/about/books", element: <BooksContent /> },
   // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },
@@ -64,7 +62,7 @@ export const userRoutes = [
   { path: "/contents/content/:id", element: <ContentPage /> },
   // Cards And Photos Routes
   { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
-  { path: "/cards-photos", element: <CardsAndPhotosContent /> },
+  { path: "/cards-photos", element: <PostsContent /> },
   // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
 
   { path: "/:type/category/:id", element: <CategoryContentPage /> },

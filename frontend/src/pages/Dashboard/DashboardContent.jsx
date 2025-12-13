@@ -171,7 +171,7 @@ export default function Page() {
       setSelectedEvent(data);
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
-    } else if (section === "createOrEditbook") {
+    } else if (section === "createOrEditBook") {
       setSelectedBook(data);
     }
 

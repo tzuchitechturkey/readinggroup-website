@@ -1408,5 +1408,13 @@
   "Create New Book Group": "إنشاء مجموعة كتب جديدة",
   "Enter group name": "أدخل اسم المجموعة",
   "Enter group description": "أدخل وصف المجموعة",
-  "Create Group": "إنشاء مجموعة"
+  "Create Group": "إنشاء مجموعة",
+  "No books available in this category": "لا توجد كتب متاحة في هذه الفئة",
+  "Explore our collection of books": "استكشف مجموعتنا من الكتب",
+  "Books": "الكتب",
+  "Read More": "اقرأ المزيد",
+  "Books of Study": "  كتب الدراسة",
+  "Book Description": "وصف الكتاب",
+  "": "",
+  "": ""
 }
