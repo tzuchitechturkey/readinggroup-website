@@ -9,9 +9,8 @@ import { GetContentCategories } from "@/api/contents";
 import { GetAuthors } from "@/api/authors";
 
 import Loader from "../Loader/Loader";
-import AutoComplete from "../AutoComplete/AutoComplete";
 
-function PostsFilter({
+function ContentPostsFilter({
   t,
   i18n,
   filters,
@@ -78,15 +77,15 @@ function PostsFilter({
         filters.push({
           type: "writer",
           label: t("writer"),
-          value: w?.username || w,
+          value: w?.name || "",
           writerItem: w,
         });
       });
-    } else if (writer && typeof writer === "object" && writer.username) {
+    } else if (writer && typeof writer === "object" && writer.name) {
       filters.push({
         type: "writer",
         label: t("writer"),
-        value: writer?.username,
+        value: writer?.name || "",
       });
     }
     if (Array.isArray(category) && category.length > 0) {
@@ -134,7 +133,7 @@ function PostsFilter({
       case "writer":
         if (Array.isArray(updatedFilters.writer)) {
           updatedFilters.writer = updatedFilters.writer.filter(
-            (w) => (w?.username || w) !== filterValue
+            (w) => (w?.name || "") !== filterValue
           );
         } else {
           updatedFilters.writer = [];
@@ -176,7 +175,7 @@ function PostsFilter({
           if (Array.isArray(writer)) {
             updateFilter(
               "writer",
-              writer.filter((w) => (w?.username || w) !== filterValue)
+              writer.filter((w) => (w?.name || "") !== filterValue)
             );
           } else {
             updateFilter("writer", []);
@@ -269,7 +268,6 @@ function PostsFilter({
                   <button
                     onClick={() => {
                       updateFilter("titleQuery", "");
-                      console.log(activeFilters);
                       onSearch(activeFilters?.length === 0 ? true : undefined, {
                         ...filters,
                         titleQuery: "",
@@ -325,29 +323,16 @@ function PostsFilter({
                   {/* Start Category && type && Language,   */}
                   <div className="grid lg:grid-cols-4 gap-4">
                     {/* Start Writer */}
-                    <AutoComplete
-                      placeholder={t("Select Writer")}
-                      customStyle="bg-white"
-                      multiple={true}
-                      selectedItems={
+                    <MultiSelect
+                      items={writersList}
+                      selected={
                         Array.isArray(writer) ? writer : writer ? [writer] : []
                       }
-                      onSelect={(items) => {
-                        updateFilter("writer", items);
-                      }}
-                      onClear={() => {
-                        updateFilter("writer", []);
-                      }}
-                      searchMethod={getWriters}
-                      searchApi={true}
-                      list={writersList}
-                      searchPlaceholder={t("Search writers...")}
-                      required={false}
-                      renderItemLabel={(item) => {
-                        return item.name;
-                      }}
-                      // renderItemSubLabel={(item) => item.groups?.[0]}
-                      showWriterAvatar={false}
+                      onChange={(selected) => updateFilter("writer", selected)}
+                      placeholder={t("Select Writer")}
+                      renderLabel={(item) => item?.name || ""}
+                      renderValue={(item) => item?.name || ""}
+                      searchable={true}
                     />
                     {/* End writer */}
                     {/* Start Category */}
@@ -364,9 +349,10 @@ function PostsFilter({
                         updateFilter("category", selected)
                       }
                       placeholder={t("Category")}
-                      renderLabel={(item) => t(item?.name || item)}
-                      renderValue={(item) => t(item?.name) || item}
+                      renderLabel={(item) => item?.name || ""}
+                      renderValue={(item) => item?.name || ""}
                       searchable={true}
+                      getKey={(item) => item?.id}
                     />
                     {/* End Category */}
 
@@ -386,19 +372,23 @@ function PostsFilter({
                     {/* Start Type */}
                     {cardAndPhoto && (
                       <MultiSelect
-                        items={[{ name: "card" }, { name: "photo" }]}
+                        items={[
+                          { name: "card", id: "card" },
+                          { name: "photo", id: "photo" },
+                        ]}
                         selected={
                           Array.isArray(type)
                             ? type
                             : type
-                            ? [{ name: type }]
+                            ? [{ name: type, id: type }]
                             : []
                         }
                         onChange={(selected) => updateFilter("type", selected)}
                         placeholder={t("Type")}
-                        renderLabel={(item) => t(item?.name || item)}
-                        renderValue={(item) => t(item?.name) || item}
+                        renderLabel={(item) => item?.name || ""}
+                        renderValue={(item) => item?.name || ""}
                         searchable={true}
+                        getKey={(item) => item?.id}
                       />
                     )}
                     {/* End Type */}
@@ -479,4 +469,4 @@ function PostsFilter({
   );
 }
 
-export default PostsFilter;
+export default ContentPostsFilter;

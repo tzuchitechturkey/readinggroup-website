@@ -63,7 +63,7 @@ function VideosHero({ top1Video }) {
               <div className="flex flex-wrap gap-2">
                 {firstVideo?.tags.map((tag, index) => (
                   <span key={index} className="px-1 py-1 text-white">
-                    {tag}
+                    {tag}asd asd
                   </span>
                 ))}
               </div>

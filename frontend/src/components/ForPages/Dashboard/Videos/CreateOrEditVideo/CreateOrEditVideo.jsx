@@ -63,7 +63,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     if (video) {
       const initialData = {
         title: video?.title || "",
-        // duration: video?.duration || "",
         category: video?.category || "",
         language: video?.language || "",
         thumbnail: video?.thumbnail, // Reset file input
@@ -326,9 +325,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       newErrors.video_url = t("Please enter a valid YouTube URL");
     }
 
-    // if (!formData?.duration.trim()) {
-    //   newErrors.duration = t("Duration is required");
-    // }
     // Series and Season are optional
     // if (selectedSeries && !formData?.season_name) {
     //   newErrors.season_name = t("Season is required when Series is selected");
@@ -829,6 +825,45 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               )}
             </div>
             {/* End Happened At */}
+            {/* Start Tags  */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Tags")} *
+              </label>
+              <div className="space-y-2">
+                <Input
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  onKeyDown={handleTagsInput}
+                  placeholder={t("Type a tag and press Enter")}
+                  className={errors.tags ? "border-red-500" : ""}
+                />
+                {errors.tags && (
+                  <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
+                )}
+                {formData?.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData?.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        <Tag className="w-3 h-3" />
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* End Tags  */}
             {/* Start Status Checkboxes */}
             <div className="space-y-3">
               <div className="flex items-center">
@@ -839,7 +874,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="mx-2 text-sm text-gray-700">
                   {t("Featured Video")}
                 </label>
               </div>
@@ -921,24 +956,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             </div>
             {/* End Status */}
 
-            {/* Start Duration */}
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Duration")} *
-              </label>
-              <Input
-                name="duration"
-                value={formData?.duration}
-                onChange={handleInputChange}
-                placeholder={t("e.g., 1h 28min or 15:30")}
-                className={errors.duration ? "border-red-500" : ""}
-              />
-              {errors.duration && (
-                <p className="text-red-500 text-xs mt-1">{errors.duration}</p>
-              )}
-            </div> */}
-            {/* End Duration */}
-
             {/* Start Video URL */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1000,45 +1017,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               </div>
             </div>
             {/* End Casts */}
-            {/* Start Tags  */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Tags")} *
-              </label>
-              <div className="space-y-2">
-                <Input
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  onKeyDown={handleTagsInput}
-                  placeholder={t("Type a tag and press Enter")}
-                  className={errors.tags ? "border-red-500" : ""}
-                />
-                {errors.tags && (
-                  <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
-                )}
-                {formData?.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData?.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        <Tag className="w-3 h-3" />
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            {/* End Tags  */}
           </div>
         </div>
 
@@ -1056,7 +1034,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               editor={ClassicEditor}
               data={formData.description}
               config={{
-                placeholder: t("Enter the full content of the post"),
+                placeholder: t("Enter the full content of the Video"),
                 language: i18n.language === "ar" ? "ar" : "en",
                 extraPlugins: [MyCustomUploadAdapterPlugin],
                 removePlugins: [

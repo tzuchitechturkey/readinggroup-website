@@ -11,7 +11,7 @@ import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import EventsFilter from "@/components/ForPages/Events/EventsFilter/EventsFilter";
 import {
   GetEventSections,
-  GetTop5EventsBySectionId,
+  // GetTop5EventsBySectionId,
   GetEvents,
   GetTopSections,
 } from "@/api/events";
@@ -56,55 +56,53 @@ function EventsFilterSections() {
     (Array.isArray(filters.language) && filters.language.length > 0) ||
     filters.happened_at !== null;
 
-  const loadSectionsList = async () => {
-    try {
-      const res = await GetEventSections(100, 0, "");
-      setSectionsList(res.data?.results || []);
-      return res.data?.results || [];
-    } catch (error) {
-      setErrorFn(error);
-      return [];
-    }
-  };
+  // const loadSectionsList = async () => {
+  //   try {
+  //     const res = await GetEventSections(100, 0, "");
+  //     setSectionsList(res.data?.results || []);
+  //     return res.data?.results || [];
+  //   } catch (error) {
+  //     setErrorFn(error);
+  //     return [];
+  //   }
+  // };
 
+  // const loadDefaultSections = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await GetTopSections();
+  //     const sections = res.data;
+
+  //     setDefaultSections({
+  //       section1: {
+  //         id: sections[0]?.section?.id,
+  //         name: sections[0]?.section?.name,
+  //         events: sections[0]?.events || [],
+  //         events_count: sections[0]?.events_count || 0,
+  //       },
+  //       section2: {
+  //         id: sections[1]?.section?.id,
+  //         name: sections[1]?.section?.name,
+  //         events: sections[1]?.events || [],
+  //         events_count: sections[1]?.events_count || 0,
+  //       },
+  //       section3: {
+  //         id: sections[2]?.section?.id,
+  //         name: sections[2]?.section?.name,
+  //         events: sections[2]?.events || [],
+  //         events_count: sections[2]?.events_count || 0,
+  //       },
+  //     });
+  //     // }
+  //   } catch (error) {
+  //     setErrorFn(error, t);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const updateFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
-  const loadDefaultSections = async () => {
-    setIsLoading(true);
-    try {
-      const res = await GetTopSections();
-      const sections = res.data;
-
-      setDefaultSections({
-        section1: {
-          id: sections[0]?.section?.id,
-          name: sections[0]?.section?.name,
-          events: sections[0]?.events || [],
-          events_count: sections[0]?.events_count || 0,
-        },
-        section2: {
-          id: sections[1]?.section?.id,
-          name: sections[1]?.section?.name,
-          events: sections[1]?.events || [],
-          events_count: sections[1]?.events_count || 0,
-        },
-        section3: {
-          id: sections[2]?.section?.id,
-          name: sections[2]?.section?.name,
-          events: sections[2]?.events || [],
-          events_count: sections[2]?.events_count || 0,
-        },
-      });
-      // }
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const fetchFilteredEvents = async (page = 1, searchVal = filters.search) => {
     setIsLoading(true);
     const offset = (page - 1) * limit;
@@ -165,7 +163,6 @@ function EventsFilterSections() {
       }
 
       if (filters.happened_at) params.happened_at = filters.happened_at;
-      console.log("Fetching events with params:", params);
       const res = await GetEvents(limit, offset, "published", params);
 
       if (page === 1) {
@@ -247,15 +244,14 @@ function EventsFilterSections() {
     setFilteredData({ count: 0, results: [] });
   };
   useEffect(() => {
-    loadDefaultSections();
-    loadSectionsList();
+    // loadDefaultSections();
+    // loadSectionsList();
   }, []);
 
   // Apply category filter from navigation state (only once)
   useEffect(() => {
     if (location.state?.selectedCategory && isInitialLoad) {
       const selectedCategory = location.state.selectedCategory;
-      console.log("Applying category from navigation state", selectedCategory);
       setFilters((prev) => ({
         ...prev,
         category: [selectedCategory],
@@ -289,7 +285,7 @@ function EventsFilterSections() {
             <EventsFilter
               filters={filters}
               updateFilter={updateFilter}
-              sectionsList={sectionsList}
+              // sectionsList={sectionsList}
               hasActiveFilters={hasActiveFilters}
               handleClearFilters={handleClearFilters}
             />
@@ -392,7 +388,7 @@ function EventsFilterSections() {
         <EventsFilter
           filters={filters}
           updateFilter={updateFilter}
-          sectionsList={sectionsList}
+          // sectionsList={sectionsList}
         />
       </Modal>
       {/* End Mobile Modal  */}

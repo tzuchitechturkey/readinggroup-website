@@ -72,8 +72,14 @@ export async function DeleteContentCategory(id) {
 }
 
 // Get All Item By cAteogir Id
-export async function GetItemsByCategoryId(categoryId) {
-  return await axios.get(`/content-categories/${categoryId}/contents/`);
+export async function GetContentsByCategoryId(
+  categoryId,
+  limit = 10,
+  offset = 0
+) {
+  return await axios.get(
+    `/content-categories/${categoryId}/contents/?limit=${limit}&offset=${offset}`
+  );
 }
 
 // Comments management for posts

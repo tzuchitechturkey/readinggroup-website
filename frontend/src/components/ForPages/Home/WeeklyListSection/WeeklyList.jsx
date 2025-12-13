@@ -9,7 +9,7 @@ import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 const WeeklyList = ({ title, type }) => {
   const [weeklyData, setWeeklyData] = useState([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [limit] = useState(10);
+  const [limit] = useState(8);
   const [offset, setOffset] = useState(0);
   const [hasMoreData, setHasMoreData] = useState(true);
 
@@ -26,14 +26,14 @@ const WeeklyList = ({ title, type }) => {
         res = await WeeklyMomentPosts(type, limit, newOffset);
       }
       const results = res.data?.results || [];
-      
+
       // تحديد ما إذا كانت هناك بيانات إضافية
       if (newOffset === 0) {
         setWeeklyData(results);
       } else {
         setWeeklyData((prev) => [...prev, ...results]);
       }
-      
+
       // تحديد ما إذا كانت هناك بيانات أكثر للجلب
       setHasMoreData(results.length === limit);
       setOffset(newOffset + limit);
@@ -64,7 +64,7 @@ const WeeklyList = ({ title, type }) => {
         cardName={type === "photo" ? WeekPhotosCard : Contentcard}
         isSlider={true}
         propsToCard={{ showTags: false }}
-        enableLoadMore={hasMoreData && type !== "content"}
+        enableLoadMore={hasMoreData}
         onLoadMore={handleLoadMore}
         isLoadingMore={isLoadingMore}
       />

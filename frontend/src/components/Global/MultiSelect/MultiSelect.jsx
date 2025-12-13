@@ -189,6 +189,13 @@ const MultiSelect = ({
                       )}
                     </div>
                     {/* Label */}
+                    {item.avatar && (
+                      <img
+                        src={item.avatar}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
                     <span
                       className={
                         isSelected

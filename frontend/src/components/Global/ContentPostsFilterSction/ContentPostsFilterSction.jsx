@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import PostsFilter from "@/components/Global/PostsFilter/PostsFilter";
+import ContentPostsFilter from "@/components/Global/ContentPostsFilter/ContentPostsFilter";
 import FilteredResults from "@/components/ForPages/Contents/FilteredResults/FilteredResults";
 import { GetPosts } from "@/api/posts";
 import { GetContents } from "@/api/contents";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function PostsFilterSction({ cardAndPhoto = false }) {
+function ContentPostsFilterSction({ cardAndPhoto = false }) {
   const { t, i18n } = useTranslation();
 
   // Filter states - all in one object
@@ -61,12 +61,12 @@ function PostsFilterSction({ cardAndPhoto = false }) {
     // Add writer filter - send writer username(s)
     if (Array.isArray(filter.writer) && filter.writer.length > 0) {
       const writerNames = filter.writer
-        .map((w) => w?.username)
+        .map((w) => w?.name)
         .filter(Boolean)
         .join(",");
       if (writerNames) apiFilters.writer = writerNames;
-    } else if (filter.writer?.username) {
-      apiFilters.writer = filter.writer.username;
+    } else if (filter.writer?.name) {
+      apiFilters.writer = filter.writer.name;
     }
 
     // Add category filter - convert array of objects to comma-separated string
@@ -168,7 +168,7 @@ function PostsFilterSction({ cardAndPhoto = false }) {
 
   return (
     <div>
-      <PostsFilter
+      <ContentPostsFilter
         t={t}
         i18n={i18n}
         filters={filters}
@@ -198,4 +198,4 @@ function PostsFilterSction({ cardAndPhoto = false }) {
   );
 }
 
-export default PostsFilterSction;
+export default ContentPostsFilterSction;

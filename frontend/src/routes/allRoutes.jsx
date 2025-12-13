@@ -1,9 +1,12 @@
 import { lazy } from "react";
 
-import BookOfStudy from "@/pages/AboutUs/BookOfStudy/BookOfStudy";
+// import BookOfStudy from "@/pages/AboutUs/BookOfStudy/BookOfStudy";
 
 import ContentPage from "../pages/Contents/ContentPage/ContentPage";
 
+const CategoryContentPage = lazy(() =>
+  import("@/pages/CategoryContentPage/CategoryContentPage")
+);
 // Lazy load all page components
 const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
 const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
@@ -51,7 +54,7 @@ export const userRoutes = [
   // About Us Routes
   { path: "/about", element: <AboutUs /> },
   { path: "/about/team/:id", element: <AboutMemberContent /> },
-  { path: "/about/book", element: <BookOfStudy /> },
+  // { path: "/about/book", element: <BookOfStudy /> },
   // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },
@@ -63,6 +66,8 @@ export const userRoutes = [
   { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <CardsAndPhotosContent /> },
   // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
+
+  { path: "/:type/category/:id", element: <CategoryContentPage /> },
 
   // Events Routes
   { path: "/events", element: <EventsContent /> },

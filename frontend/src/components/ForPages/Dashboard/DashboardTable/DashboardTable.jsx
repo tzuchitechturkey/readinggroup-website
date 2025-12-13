@@ -80,7 +80,6 @@ function DashboardTable({ data, onSectionChange }) {
 
     // Add contents
     if (data?.content) {
-      console.log("Content Data:", data?.content);
       items.push({
         type: "Content",
         id: data?.content?.id,

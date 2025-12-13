@@ -34,7 +34,9 @@ export default function AutoComplete({
       searchMethod(search);
     } else {
       const filteredList = list.filter((item) => {
-        const labelValue = renderItemLabel ? renderItemLabel(item) : item.name || item.label || "";
+        const labelValue = renderItemLabel
+          ? renderItemLabel(item)
+          : item.name || item.label || "";
         return labelValue.toLowerCase().includes(search.toLowerCase());
       });
       setSearchList(filteredList);
@@ -120,9 +122,9 @@ export default function AutoComplete({
                 {showWriterAvatar && selectedItem?.username && (
                   <img
                     src={
-                      selectedItem.profile_image
-                        ? selectedItem.profile_image
-                        : "/fake-user.png"
+                      selectedItem.profile_image ||
+                      selectedItem.avatar ||
+                      "/fake-user.png"
                     }
                     alt={selectedItem.username}
                     className="w-8 h-8 rounded-full object-cover"
@@ -245,9 +247,7 @@ export default function AutoComplete({
                       )}
                       <img
                         src={
-                          item.profile_image
-                            ? item.profile_image
-                            : "/fake-user.png"
+                          item.profile_image || item.avatar || "/fake-user.png"
                         }
                         alt={item.username}
                         className="w-8 h-8 rounded-full object-cover  text-black"

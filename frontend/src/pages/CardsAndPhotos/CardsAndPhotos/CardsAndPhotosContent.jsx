@@ -5,16 +5,9 @@ import { useLocation } from "react-router-dom";
 
 import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
-import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
-import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import heroImg from "@/assets/eventsHero.png";
-import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
-import {
-  GetPostCategories,
-  GetItemsByCategoryId,
-  TopViewedPosts,
-} from "@/api/posts";
+import ContentPostsFilterSction from "@/components/Global/ContentPostsFilterSction/ContentPostsFilterSction";
+import { GetPostCategories, TopViewedPosts } from "@/api/posts";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
@@ -39,24 +32,8 @@ function CardsAndPhotosContent() {
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
-
-      // Fetch items for each active category
-      // for (const category of active) {
-      //   try {
-      //     const itemsRes = await GetItemsByCategoryId(category.id);
-      //     // setCategoriesData((prev) => ({
-      //     //   ...prev,
-      //     //   [category.id]: itemsRes.data?.results || itemsRes.data || [],
-      //     // }));
-      //   } catch (err) {
-      //     console.error(
-      //       `Failed to fetch items for category ${category.id}:`,
-      //       err
-      //     );
-      //   }
-      // }
     } catch (err) {
-      console.error("Failed to fetch post categories:", err);
+      setErrorFn(err, t);
     }
   };
 
@@ -102,7 +79,7 @@ function CardsAndPhotosContent() {
       </div>
       <div className="max-w-7xl mx-auto">
         {/* Start Filter */}
-        <PostsFilterSction cardAndPhoto={true} />
+        <ContentPostsFilterSction cardAndPhoto={true} />
         {/* End Filter */}
 
         {/* Content container */}

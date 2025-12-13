@@ -6,11 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  TopViewedPosts,
-  GetPostCategories,
-  GetItemsByCategoryId,
-} from "@/api/posts";
+import { GetPostCategories, GetPostsByCategoryId } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CardsAndPhotosTabs() {
@@ -87,7 +83,11 @@ function CardsAndPhotosTabs() {
       setLoading(true);
     }
     try {
-      const response = await GetItemsByCategoryId(categoryId, itemsLimit, newOffset);
+      const response = await GetPostsByCategoryId(
+        categoryId,
+        itemsLimit,
+        newOffset
+      );
       const results = response?.data?.results || [];
 
       if (newOffset === 0) {

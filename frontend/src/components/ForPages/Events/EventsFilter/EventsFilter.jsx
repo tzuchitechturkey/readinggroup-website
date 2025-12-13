@@ -16,7 +16,7 @@ import { GetAuthors } from "@/api/authors";
 function EventsFilter({
   filters,
   updateFilter,
-  sectionsList,
+  // sectionsList,
   hasActiveFilters,
   handleClearFilters,
 }) {
@@ -51,7 +51,7 @@ function EventsFilter({
     <div className="w-full lg:w-80 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
         {/* Start Section Filter */}
-        <div className="mb-2 lg:mb-5">
+        {/* <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
               {t("Sections")}
@@ -66,7 +66,7 @@ function EventsFilter({
             renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
-        </div>
+        </div> */}
         {/* End Section Filter */}
 
         {/* Start Category Filter */}
