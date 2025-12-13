@@ -22,6 +22,8 @@ from .models import (
     NavbarLogo,
     Authors,
     ContentAttachment,
+    Book,
+    BookCategory,
 )
 
 @admin.register(Video)
@@ -168,3 +170,13 @@ class AuthorsAdmin(admin.ModelAdmin):
 class ContentAttachmentAdmin(admin.ModelAdmin):
     list_display = ("id", "content", "file_name", "created_at")
     search_fields = ("file_name", "content__title")
+    
+@admin.register(BookCategory)
+class BookCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "description")
+    search_fields = ("name", "description")
+    
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)

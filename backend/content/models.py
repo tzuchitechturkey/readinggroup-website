@@ -393,6 +393,16 @@ class Content(LikableMixin, TimestampedModel):
         ordering = ("-created_at",)
     def __str__(self) -> str:
         return self.title
+    
+class Book(TimestampedModel):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey('BookCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        ordering = ("name",)
+    def __str__(self):
+        return self.name
 
 
 class ContentImage(TimestampedModel):
@@ -540,6 +550,18 @@ class ContentCategory(TimestampedModel):
 
 class VideoCategory(TimestampedModel):
     """Categories for organizing videos."""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
+    
+    class Meta:
+        ordering = ("order", "-created_at")
+    def __str__(self) -> str: 
+        return self.name
+    
+class BookCategory(TimestampedModel):
+    """Categories for organizing books."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)

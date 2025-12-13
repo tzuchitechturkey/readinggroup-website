@@ -48,6 +48,8 @@ from .models import (
     NavbarLogo,
     PostRating,
     Authors,
+    Book,
+    BookCategory,
 )
 from .serializers import (
     EventSerializer,
@@ -71,6 +73,8 @@ from .serializers import (
     NavbarLogoSerializer,
     ContentAttachmentSerializer,
     AuthorsSerializer,
+    BookSerializer,
+    BookCategorySerializer,
 )
 from .views_helpers import(
     BaseContentViewSet,
@@ -1079,6 +1083,21 @@ class EventViewSet(BaseContentViewSet):
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
     
+class BookViewSet(BaseContentViewSet):
+    """ViewSet for managing Book content."""
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    pagination_class = LimitOffsetPagination
+    
+    @swagger_auto_schema(
+        operation_summary="List all books",
+        operation_description="Retrieve a list of books with optional filtering by author, publisher, language, and tags.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
 class TeamMemberViewSet(BaseContentViewSet):
     """ViewSet for managing TeamMember content."""
     queryset = TeamMember.objects.all()
@@ -1371,9 +1390,6 @@ class ContentAttachmentViewSet(BaseCRUDViewSet):
         serializer = self.get_serializer(attachment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    
-    
-    
 class EventCategoryViewSet(BaseCRUDViewSet):
     """ViewSet for managing EventCategory content."""
     queryset = EventCategory.objects.all()
@@ -1455,8 +1471,14 @@ class EventCategoryViewSet(BaseCRUDViewSet):
 
         serializer = EventSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
-
-
+    
+class BookCategoryViewSet(BaseCRUDViewSet):
+    """ViewSet for managing BookCategory content."""
+    queryset = BookCategory.objects.all()
+    serializer_class = BookCategorySerializer
+    search_fields = ("name",)
+    ordering_fields = ("created_at",)
+    
 class PositionTeamMemberViewSet(BaseCRUDViewSet):
     """ViewSet for managing PositionTeamMember content."""
     queryset = PositionTeamMember.objects.all()

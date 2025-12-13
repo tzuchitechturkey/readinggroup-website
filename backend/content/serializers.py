@@ -31,6 +31,8 @@ from .models import (
     Video,
     VideoCategory,
     Authors,
+    BookCategory,
+    Book,
     )
 
 class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
@@ -96,6 +98,13 @@ class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return obj.content_type.model if obj.content_type else None
         except Exception:
             return None
+        
+class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    book_count = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = BookCategory
+        fields = "__all__"
         
 class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -554,6 +563,18 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
+    
+class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    category = serializers.PrimaryKeyRelatedField(queryset=BookCategory.objects.all(), write_only=True, required=False)
+    class Meta:
+        model = Book
+        fields = "__all__"
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category"] = BookCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        return data
     
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
