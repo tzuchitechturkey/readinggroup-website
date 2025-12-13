@@ -1478,6 +1478,30 @@ class BookCategoryViewSet(BaseCRUDViewSet):
     serializer_class = BookCategorySerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
+
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder ContentCategories based on provided order.
+        
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    BookCategory.objects.filter(id=category_id).update(order=order_value)
+            return Response({"detail": "Categories reordered successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=True, methods=("get",), url_path="books", url_name="books")
+    def books(self, request, pk=None):
+        """Return all books related to this BookCategory (by id)."""
+        books = Book.objects.filter(category_id=pk)
+        serializer = BookSerializer(books, many=True, context={"request": request})
+        return Response(serializer.data)
     
 class PositionTeamMemberViewSet(BaseCRUDViewSet):
     """ViewSet for managing PositionTeamMember content."""
