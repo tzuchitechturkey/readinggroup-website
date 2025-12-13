@@ -564,6 +564,28 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             pass
         return None
     
+    def create(self, validated_data):
+        """Handle creation with attachments field."""
+        attachments_ids = validated_data.pop('attachments', [])
+        instance = super().create(validated_data)
+        
+        if attachments_ids:
+            attachment_instances = ContentAttachment.objects.filter(id__in=attachments_ids)
+            instance.attachments.set(attachment_instances)
+        
+        return instance
+    
+    def update(self, instance, validated_data):
+        """Handle update with attachments field."""
+        attachments_ids = validated_data.pop('attachments', None)
+        instance = super().update(instance, validated_data)
+        
+        if attachments_ids is not None:
+            attachment_instances = ContentAttachment.objects.filter(id__in=attachments_ids)
+            instance.attachments.set(attachment_instances)
+        
+        return instance
+    
 class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=BookCategory.objects.all(), write_only=True, required=False)
