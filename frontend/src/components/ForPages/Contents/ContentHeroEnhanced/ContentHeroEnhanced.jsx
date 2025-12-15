@@ -25,6 +25,7 @@ import {
   TopLikedContents,
 } from "@/api/contents";
 import NewsCard from "@/components/Global/NewsCard/NewsCard";
+import HtmlContent from "@/components/Global/HtmlContent/HtmlContent";
 
 const ContentHeroEnhanced = () => {
   const { t, i18n } = useTranslation();
@@ -139,40 +140,7 @@ const ContentHeroEnhanced = () => {
       imageCarouselApi.off("select", handleSelect);
     };
   }, [imageCarouselApi]);
-  console.log(contentData, "contentData");
 
-  // Sanitize summary HTML from CKEditor (basic client-side approach)
-  const sanitizedSummary = useMemo(() => {
-    if (!contentData?.summary) return "";
-    try {
-      const temp = document.createElement("div");
-      temp.innerHTML = contentData.summary;
-      // Remove script tags
-      temp.querySelectorAll("script").forEach((el) => el.remove());
-      // Remove on* content handlers
-      temp.querySelectorAll("*").forEach((el) => {
-        [...el.attributes].forEach((attr) => {
-          if (/^on/i.test(attr.name)) {
-            el.removeAttribute(attr.name);
-          }
-        });
-      });
-      return temp.innerHTML;
-    } catch {
-      return "";
-    }
-  }, [contentData?.summary]);
-
-  // Component to inject sanitized HTML without using dangerouslySetInnerHTML (avoids lint rule)
-  const HtmlContent = ({ html, className = "" }) => {
-    const htmlRef = useRef(null);
-    useEffect(() => {
-      if (htmlRef.current) {
-        htmlRef.current.innerHTML = html;
-      }
-    }, [html]);
-    return <div ref={htmlRef} className={className} />;
-  };
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container  `}
@@ -211,7 +179,6 @@ const ContentHeroEnhanced = () => {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              
             </Carousel>
 
             {/* Pagination Dots */}
@@ -288,32 +255,33 @@ const ContentHeroEnhanced = () => {
           )}
         {/* End Attachments Carousel */}
         {/* Article Info */}
-        <div className="w-full flex items-center justify-between text-text border-b-2 border-blue-600/60 pb-3">
-          {/* left: writer & date */}
-          <div className="flex items-center gap-4">
-            <span className="text-base md:text-lg">
-              {t("By")} {contentData?.writer}
-            </span>
-            <div className="w-px h-6 bg-white opacity-50" />
-            <span className="text-base md:text-lg">{contentData?.date}</span>
-          </div>
+        <div className="w-full border-b-2 border-blue-600/60 pb-3">
+          <div className="w-full flex items-center justify-between text-text">
+            {/* left: writer & date */}
+            <div className="flex items-center gap-4">
+              <span className="text-base md:text-lg">
+                {t("By")} {contentData?.writer}
+              </span>
+              <div className="w-px h-6 bg-white opacity-50" />
+              <span className="text-base md:text-lg">{contentData?.date}</span>
+            </div>
 
-          {/* right: country pill + image controls */}
-          <div className="flex items-center gap-3">
-            <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
-              {t(contentData?.country)}
-            </span>
+            {/* right: country pill + image controls */}
+            <div className="flex items-center gap-3">
+              <span className="lg:px-3 py-1 border border-white/50 rounded-full text-text/80 backdrop-blur-sm text-sm">
+                {t(contentData?.country)}
+              </span>
 
-            <ImageControls
-              hasLiked={contentData?.has_liked}
-              onLike={handleLike}
-              onExpandImage={handleOpenImage}
-              onDownloadImage={handleDownloadImage}
-              onShareImage={() => setIsShareModalOpen(true)}
-              className="!relative !bottom-0 !left-0"
-            />
-            {/* Start Icons */}
-            {/* <div className="flex items-center gap-2">
+              <ImageControls
+                hasLiked={contentData?.has_liked}
+                onLike={handleLike}
+                onExpandImage={handleOpenImage}
+                onDownloadImage={handleDownloadImage}
+                onShareImage={() => setIsShareModalOpen(true)}
+                className="!relative !bottom-0 !left-0"
+              />
+              {/* Start Icons */}
+              {/* <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsShareOpen(true)}
                 className="w-8 h-8 flex items-center justify-center text-text hover:bg-white/10 rounded transition-colors"
@@ -338,18 +306,18 @@ const ContentHeroEnhanced = () => {
                 <Download />
               </button>
             </div> */}
-            {/* End Icons */}
+              {/* End Icons */}
+            </div>
+            {/* Start body / Summary (render HTML from CKEditor) */}
           </div>
+          <div className="text-base md:text-lg text-text leading-relaxed prose max-w-none mt-4">
+            <HtmlContent
+              html={contentData?.body}
+              className="prose max-w-none"
+            />
+          </div>
+          {/* End body */}
         </div>
-        {/* Start Description / Summary (render HTML from CKEditor) */}
-        <div className="text-base md:text-lg text-text leading-relaxed prose max-w-none">
-          {contentData?.description ? (
-            <span>{contentData.description}</span>
-          ) : (
-            <HtmlContent html={sanitizedSummary} />
-          )}
-        </div>
-        {/* End Description */}
       </div>
       {/* End Main Article */}
 

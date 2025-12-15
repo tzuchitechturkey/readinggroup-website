@@ -18,8 +18,8 @@ import SeriesAndSeasonsList from "@/components/ForPages/Dashboard/Videos/SeriesA
 import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
 import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
-import OurTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam";
-import PositionsContent from "@/components/ForPages/Dashboard/AboutUs/Positions/PositionsContent";
+import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeamList";
+import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departments/DepartmentsContent";
 import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
@@ -293,9 +293,9 @@ export default function Page() {
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
       case "team":
-        return <OurTeam onSectionChange={handleSectionChange} />;
-      case "positions":
-        return <PositionsContent onSectionChange={handleSectionChange} />;
+        return <OurTeamList onSectionChange={handleSectionChange} />;
+      case "departments":
+        return <DepartmentsContent onSectionChange={handleSectionChange} />;
       case "books":
         return <BooksList onSectionChange={handleSectionChange} />;
       case "createOrEditBook":

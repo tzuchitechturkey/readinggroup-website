@@ -177,8 +177,8 @@ export default function AppSidebar({
             onClick: () => onSectionChange("team"),
           },
           {
-            title: "Positions",
-            onClick: () => onSectionChange("positions"),
+            title: "Departments",
+            onClick: () => onSectionChange("departments"),
           },
           {
             title: "The Books Groups",

@@ -30,7 +30,7 @@ export const getSectionKey = (title) => {
     profile: "profile",
     // About Us
     History: "history",
-    positions: "positions",
+    Departments: "departments",
     "Our Team": "team",
     "The Books": "books",
     "Add/Edit Book": "createOrEditBook",

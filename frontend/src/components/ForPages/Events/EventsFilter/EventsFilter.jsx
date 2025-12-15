@@ -21,17 +21,17 @@ function EventsFilter({
   handleClearFilters,
 }) {
   const { t, i18n } = useTranslation();
-  const [writersList, setWritersList] = useState([]);
+  // const [writersList, setWritersList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
 
-  const getWriters = async (searchVal = "") => {
-    try {
-      const res = await GetAuthors(10, 0, searchVal);
-      setWritersList(res?.data?.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const getWriters = async (searchVal = "") => {
+  //   try {
+  //     const res = await GetAuthors(10, 0, searchVal);
+  //     setWritersList(res?.data?.results);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const loadCategories = async () => {
     try {
@@ -43,7 +43,7 @@ function EventsFilter({
   };
 
   useEffect(() => {
-    getWriters();
+    // getWriters();
     loadCategories();
   }, []);
 
@@ -109,7 +109,7 @@ function EventsFilter({
         {/* End Category Filter */}
 
         {/* Start Writer Filter */}
-        <div className="mb-2 lg:mb-5">
+        {/* <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
               {t("Writer")}
@@ -136,7 +136,7 @@ function EventsFilter({
             showWriterAvatar={false}
             isRtl={i18n?.language === "ar" ? true : false}
           />
-        </div>
+        </div> */}
         {/* End Writer Filter */}
 
         {/* Start Country Filter */}

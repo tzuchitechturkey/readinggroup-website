@@ -52,7 +52,7 @@ function CategoryContentPage() {
     }
 
     try {
-      const apiFunction = apiFunctionMap[type];
+      const apiFunction = apiFunctionMap[type === "cards-photos" ? "posts" : type];
       if (!apiFunction) {
         console.error(`Unknown type: ${type}`);
         return;
@@ -125,9 +125,9 @@ function CategoryContentPage() {
                 </span>
               </button>
               <div>
-                <p className="text-white/80 text-sm font-medium">{t("Category")}</p>
+                <h1 className="text-white text-3xl font-bold">{t(type)}</h1>
                 <h1 className="text-white text-3xl font-bold">
-                  {categoryName || t(type) || "Content"}
+                  {categoryName}
                 </h1>
               </div>
             </div>
@@ -139,7 +139,7 @@ function CategoryContentPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {items.length > 0 ? (
           <DynamicSection
-            title={categoryName || t(type) || "Category"}
+            // title={categoryName || t(type) || "Category"}
             titleClassName="text-[30px] font-medium mb-6"
             gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             data={items}

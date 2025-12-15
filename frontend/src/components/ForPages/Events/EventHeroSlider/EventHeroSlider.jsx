@@ -1,120 +1,27 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 
+import { Play, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
-import { useIsMobile } from "@/hooks/use-mobile";
-import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
-import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
-import Loader from "@/components/Global/Loader/Loader";
-import { GetTop5BySections } from "@/api/events";
+import { Button } from "@/components/ui/button";
+import { GetTop5ViewedEvent } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
+import EventCard from "@/components/Global/EventCard/EventCard";
+import Loader from "@/components/Global/Loader/Loader";
 
-export default function EventHeroSlider() {
-  const { t, i18n } = useTranslation();
-  const isMobile = useIsMobile(1024);
+export default function EventHeroSlider({ top1Event }) {
+  const { t } = useTranslation();
+  const [firstEvent, setFirstEvent] = useState();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [sliders, setSliders] = useState([]);
-  const [api, setApi] = useState(null);
-  const timerRef = useRef(null);
-  const pausedRef = useRef(false);
-  const isInteractingWithInnerCarousel = useRef(false);
-
-  const startAuto = useCallback(() => {
-    if (!api || pausedRef.current) return;
-    timerRef.current = window.setInterval(() => {
-      if (!pausedRef.current) api.scrollNext();
-    }, 9000);
-  }, [api]);
-
-  const stopAuto = useCallback(() => {
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  const onEnter = useCallback(() => {
-    pausedRef.current = true;
-    stopAuto();
-  }, [stopAuto]);
-
-  const onLeave = useCallback(() => {
-    pausedRef.current = false;
-    stopAuto();
-    startAuto();
-  }, [startAuto, stopAuto]);
-
-  useEffect(() => {
-    if (!api) {
-      return () => {};
-    }
-
-    // Disable dragging when interacting with inner carousel
-    const handlePointerDown = (evt) => {
-      const target = evt.target;
-      const innerCarousel = target.closest('[data-inner-carousel="true"]');
-      if (innerCarousel) {
-        isInteractingWithInnerCarousel.current = true;
-        // Temporarily disable the main carousel dragging
-        if (api.plugins()?.autoplay) {
-          api.plugins().autoplay.stop();
-        }
-      }
-    };
-
-    const handlePointerUp = () => {
-      if (isInteractingWithInnerCarousel.current) {
-        isInteractingWithInnerCarousel.current = false;
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("pointerup", handlePointerUp);
-    document.addEventListener("touchend", handlePointerUp);
-
-    startAuto();
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("pointerup", handlePointerUp);
-      document.removeEventListener("touchend", handlePointerUp);
-    };
-  }, [api, startAuto, stopAuto]);
+  const [top5Events, setTop5Events] = useState([]);
 
   const fetchSectionsWithTop5 = async () => {
     setIsLoading(true);
     try {
-      const response = await GetTop5BySections();
-
-      // Transform API data to slider format
-      const transformedSliders =
-        response?.data?.map((item) => ({
-          id: item.section.id,
-          h1Line1: item.section.name,
-          h1Line2Prefix: "",
-          h1Line2Under: "",
-          description: item.section.description || "",
-          image: item.top_5[0]?.image || "/authback.jpg", // Use first event image
-          primaryTo:
-            item?.video_type === "videos"
-              ? `/events/video/${item.section.id}`
-              : `/events/report/${item.section.id}`,
-          secondaryTo:
-            item?.video_type === "videos"
-              ? `/events/video/${item.section.id}`
-              : `/events/report/${item.section.id}`,
-          topFive: item.top_5 || [],
-        })) || [];
-
-      setSliders(transformedSliders);
+      const response = await GetTop5ViewedEvent();
+      setTop5Events(response?.data || []);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -125,125 +32,87 @@ export default function EventHeroSlider() {
   useEffect(() => {
     fetchSectionsWithTop5();
   }, []);
+  useEffect(() => {
+    setFirstEvent(top1Event !== null ? top1Event : top5Events[0]);
+  }, [top1Event, top5Events]);
   return (
-    <div className="w-full lg:pt-8">
+    <div className="relative min-h-screen overflow-hidden">
       {isLoading && <Loader />}
-      <Carousel
-        className="w-full"
-        opts={{ align: "center", loop: true, skipSnaps: false }}
-        setApi={setApi}
-      >
-        <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-          <CarouselContent
-            className={` ${
-              i18n.language === "ar"
-                ? "flex-row-reverse"
-                : "flex-row -ml-2 md:-ml-4"
-            }`}
-          >
-            {sliders.map((slide) => (
-              <CarouselItem
-                key={slide.id}
-                className="pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"
-              >
-                <div className="relative w-full min-h-[600px] md:min-h-[660px]  lg:min-h-[700px]  py-8 md:py-12 overflow-hidden rounded-2xl shadow-2xl group">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${slide.image})` }}
-                    role="img"
-                    aria-label={slide.h1Line1}
-                  />
-                  <div className="absolute inset-0 bg-black/70" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center  "
+        style={{
+          backgroundImage: `url(${firstEvent?.image || firstEvent?.image_url})`,
+        }}
+      />
+      <img
+        src={"/videoPageblurBack.png"}
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover  "
+      />
+      {/* Overlay */}
 
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
-                      <div className="pb-24 md:pb-32 lg:pb-40">
-                        <HeroTitle
-                          i18n={i18n}
-                          h1Line1={slide.h1Line1}
-                          titleClassName={"font-semibold"}
-                        />
+      {/* Start Content */}
+      <div className="relative h-screen flex flex-col  justify-between   ">
+        {/* Start Text */}
+        <div className="max-w-4xl px-9 flex-1 flex flex-col justify-end  ">
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-2">
+            {firstEvent?.title}
+          </h1>
 
-                        {/* Start Actions */}
-                        <div className="mt-4">
-                          <div className=" flex items-center gap-3 mt-6">
-                            <Link
-                              to={slide.primaryTo}
-                              className="inline-flex items-center gap-2 rounded-full text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow transition-all duration-200"
-                              style={{
-                                background:
-                                  "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)",
-                              }}
-                              aria-label={t("Play")}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background =
-                                  "linear-gradient(90deg, #321AC5 0%, #6512CF 100%)";
-                                e.currentTarget.style.transform = "scale(1.06)";
-                                e.currentTarget.style.boxShadow =
-                                  "0 4px 24px 0 rgba(50,26,197,0.18)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background =
-                                  "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)";
-                                e.currentTarget.style.transform = "scale(1)";
-                                e.currentTarget.style.boxShadow = "";
-                              }}
-                            >
-                              {t("WATCH NOW")}
-                            </Link>
-                            {/* <button
-                                className="border-[1px] border-white rounded-full px-3 py-1 transition-all duration-200 bg-white/10 hover:bg-white/30 hover:scale-110 shadow hover:shadow-lg"
-                                style={{ backdropFilter: "blur(2px)" }}
-                                aria-label={t("Add")}
-                              >
-                                <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 group-hover:text-white transition-colors duration-200" />
-                              </button> */}
-                          </div>
-                        </div>
-                        {/* Start Actions */}
-                      </div>
-                    </div>
-                  </div>
-                  {/* End Title && Actions */}
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 m-2 mb-6  text-xl ">
+            {firstEvent?.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {firstEvent?.tags.map((tag, index) => (
+                  <span key={index} className="px-1 py-1 text-white">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
-                  <div
-                    className="absolute left-6 right-6 bottom-3 md:bottom-10 z-10"
-                    data-inner-carousel="true"
-                    style={{ touchAction: "pan-x" }}
-                  >
-                    <TopFiveSection data={slide.topFive} />
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-
-          {!isMobile && (
-            <>
-              <ArrowButton
-                side="left"
-                label={t("Previous slide")}
-                onClick={() => {
-                  stopAuto();
-                  api?.scrollPrev();
-                  startAuto();
-                }}
-              />
-              <ArrowButton
-                side="right"
-                label={t("Next slide")}
-                onClick={() => {
-                  stopAuto();
-                  api?.scrollNext();
-                  startAuto();
-                }}
-              />
-            </>
-          )}
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <Link
+              to={`/videos/${firstEvent?.id}`}
+              className="flex items-center justify-center bg-white text-black hover:bg-white/90 transition-all duration-300 rounded-md px-3 xs:px-4 py-1.5 xs:py-2 font-medium text-xs xs:text-sm hover:scale-105 hover:shadow-lg hover:shadow-white/25 group"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Play className="w-3.5 xs:w-4 h-3.5 xs:h-4 mr-1.5 xs:mr-2 transition-all duration-300 group-hover:scale-110 group-hover:translate-x-0.5 pointer-events-none" />
+              <span className="text-sm transition-all duration-300 group-hover:font-semibold pointer-events-none">
+                {t("Watch Now")}
+              </span>
+            </Link>
+            <Button
+              variant="outline"
+              className="border-white font-bold text-black hover:bg-white hover:text-black px-6 py-3"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+            >
+              {t("More Info")}
+              <Info className="w-4 h-4 mr-2" />
+            </Button>
+          </div>
         </div>
-      </Carousel>
+        {/* End Text */}
+        {/* Start Weekly Videos Carousel */}
+        <div className="mt-12 w-full mb-1  pr-2 ">
+          <BrokenCarousel
+            data={top5Events}
+            title={t("This Week's Videos")}
+            showCount={4}
+            cardName={EventCard}
+          />
+        </div>
+        {/* End Weekly Videos Carousel */}
+      </div>
+      {/* End Content */}
     </div>
   );
 }

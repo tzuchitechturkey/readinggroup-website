@@ -69,7 +69,7 @@ function WeeklyMomentsCard({ item }) {
 
           <div className="text-left">
             <div className="text-black font-bold mb-3 text-[18px]">
-              {t("Source")}
+              {t("Category")}
             </div>
             <div className="text-[#1e40af] font-semibold text-[16px]">
               {t(item?.category?.name)}

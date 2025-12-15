@@ -12,12 +12,15 @@ import {
   GetEventCategories,
   GetEventsByCategoryId,
   GetEvents,
+  GetRandomPublishedEvents,
 } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { GetRandomPublishedVideos } from "@/api/videos";
 
 function EventsPageContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const [mixEvents, setMixEvents] = useState([]);
   const [topLiked, setTopLiked] = useState([]);
   const [weeklyList, setWeeklyList] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
@@ -28,7 +31,14 @@ function EventsPageContent() {
   const [weeklyOffset, setWeeklyOffset] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [totalWeeklyCount, setTotalWeeklyCount] = useState(0);
-
+  const getMixEvents = async () => {
+    try {
+      const res = await GetRandomPublishedEvents(10, 0);
+      setMixEvents(res.data?.results);
+    } catch (err) {
+      console.error("Failed to fetch top mix events:", err);
+    }
+  };
   const getWeeklyEventData = async (offset = 0) => {
     const isLoadMore = offset > 0;
     if (isLoadMore) {
@@ -124,19 +134,22 @@ function EventsPageContent() {
   };
   useEffect(() => {
     getTopLiked();
+    getMixEvents();
     getWeeklyEventData();
     getActiveEventCategories();
   }, []);
   return (
     <div className="" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {/* Hero Slider */}
-      {/* <div>
-        <EventHeroSlider />
-      </div> */}
+      <div>
+        <EventHeroSlider
+          top1Event={weeklyList?.length ? weeklyList[0] : null}
+        />
+      </div>
       {/* End Hero Slider */}
 
       {/* Start Filter Section */}
-      <EventsFilterSections />
+      <EventsFilterSections mixEvents={mixEvents} topLiked={topLiked} />
       {/* End Filter Section */}
 
       <div className="max-w-7xl mx-auto">

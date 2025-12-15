@@ -39,7 +39,7 @@ function Usernavbar() {
         hasDropdown: true,
         subItems: (siteInfo?.content_categories || []).map((category) => ({
           name: category.name,
-          href: "/contents",
+          href: `/:contents/category/${category.id}`,
           categoryId: category.id,
           scrollToId: `category-${category.id}`,
         })),
@@ -53,7 +53,7 @@ function Usernavbar() {
           name: category.name,
           categoryId: category.id,
           scrollToId: `category-${category.id}`,
-          href: "/videos",
+          href: `/videos/category/${category.id}`,
         })),
       },
       {
@@ -65,7 +65,7 @@ function Usernavbar() {
           name: category.name,
           categoryId: category.id,
           scrollToId: `category-${category.id}`,
-          href: "/cards-photos",
+          href: `/cards-photos/category/${category.id}`,
         })),
       },
       {
@@ -77,7 +77,7 @@ function Usernavbar() {
           name: category.name,
           categoryId: category.id,
           scrollToId: `category-${category.id}`,
-          href: "/events",
+          href: `/events/category/${category.id}`,
         })),
       },
       {
@@ -119,8 +119,6 @@ function Usernavbar() {
   // Toggle submenu expansion for mobile
   const toggleMobileSubmenu = (menuName) => {
     setExpandedMenus((prev) => {
-      // إذا كانت القائمة مفتوحة، أغلقها
-      // وإلا افتحها وأغلق جميع القوائم الأخرى
       if (prev[menuName]) {
         return {};
       }
