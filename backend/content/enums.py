@@ -37,3 +37,12 @@ class PostStatus(models.TextChoices):
     ARCHIVED = "archived", "Archived"
     
 #======================================================= Post Model End =======================================================
+
+class LanguageChoices(models.TextChoices):
+    ENGLISH = "en", "English"
+    TURKISH = "tr", "Turkish"
+    ARABIC = "ar", "Arabic"
+    CHINESE = "ch", "Chinese"
+    JAPANESE = "jp", "Japanese"
+    CHINESE_SIMPLIFIED = "chsi", "Chinese Simplified"
+    

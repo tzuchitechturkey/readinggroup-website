@@ -1213,33 +1213,63 @@ class HistoryEntryViewSet(BaseContentViewSet):
     ordering_fields = ("story_date", "created_at")
 
 class PostCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing PostCategory content."""
+    """ViewSet for managing PostCategory content with multi-language support."""
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
+    search_fields = ("name", "key")
     ordering_fields = ("order", "created_at")
     queryset = PostCategory.objects.all().order_by('order', '-created_at')
     
     @swagger_auto_schema(
         operation_summary="List all post categories",
-        operation_description="Retrieve a list of post categories with optional filtering by is_active status.",
+        operation_description="Retrieve a list of post categories with optional filtering by is_active status, language, or key.",
         manual_parameters=post_category_manual_parameters
     )
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
+    
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context['include_translations'] = self.request.query_params.get('include_translations', 'false').lower() == 'true'
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         is_active = self.request.query_params.get('is_active')
+        language = self.request.query_params.get('language')
+        key = self.request.query_params.get('key')
+        
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        if key:
+            queryset = queryset.filter(key=key)
         try:
             queryset = queryset.annotate(post_count=Count('post'))
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=["get"], url_path="by-key/(?P<key>[^/.]+)", url_name="by-key")
+    def by_key(self, request, key=None):
+        """Get all translations for a specific category key."""
+        categories = PostCategory.objects.filter(key=key).order_by('language')
+        if not categories.exists():
+            return Response({"detail": "No categories found with this key."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="translations", url_name="translations")
+    def translations(self, request, pk=None):
+        """Get all translations for this category."""
+        category = self.get_object()
+        translations = PostCategory.objects.filter(key=category.key).exclude(id=category.id)
+        serializer = self.get_serializer(translations, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
@@ -1300,33 +1330,63 @@ class PostCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
     
 class ContentCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing ContentCategory content."""
+    """ViewSet for managing ContentCategory content with multi-language support."""
     queryset = ContentCategory.objects.all()
     serializer_class = ContentCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
+    search_fields = ("name", "key")
     ordering_fields = ("order", "created_at")
     queryset = ContentCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all content categories",
-        operation_description="Retrieve a list of content categories with optional filtering by is_active status.",
+        operation_description="Retrieve a list of content categories with optional filtering by is_active status, language, or key.",
         manual_parameters=content_category_manual_parameters
     )
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
+    
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context['include_translations'] = self.request.query_params.get('include_translations', 'false').lower() == 'true'
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         is_active = self.request.query_params.get('is_active')
+        language = self.request.query_params.get('language')
+        key = self.request.query_params.get('key')
+        
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        if key:
+            queryset = queryset.filter(key=key)
         try:
             queryset = queryset.annotate(content_count=Count('content'))
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=["get"], url_path="by-key/(?P<key>[^/.]+)", url_name="by-key")
+    def by_key(self, request, key=None):
+        """Get all translations for a specific category key."""
+        categories = ContentCategory.objects.filter(key=key).order_by('language')
+        if not categories.exists():
+            return Response({"detail": "No categories found with this key."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="translations", url_name="translations")
+    def translations(self, request, pk=None):
+        """Get all translations for this category."""
+        category = self.get_object()
+        translations = ContentCategory.objects.filter(key=category.key).exclude(id=category.id)
+        serializer = self.get_serializer(translations, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
@@ -1391,33 +1451,63 @@ class ContentAttachmentViewSet(BaseCRUDViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 class EventCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing EventCategory content."""
+    """ViewSet for managing EventCategory content with multi-language support."""
     queryset = EventCategory.objects.all()
     serializer_class = EventCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
+    search_fields = ("name", "key")
     ordering_fields = ("order", "created_at")
     queryset = EventCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all event categories",
-        operation_description="Retrieve a list of event categories with optional filtering by is_active status.",
+        operation_description="Retrieve a list of event categories with optional filtering by is_active status, language, or key.",
         manual_parameters=event_category_manual_parameters
     )
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
+    
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context['include_translations'] = self.request.query_params.get('include_translations', 'false').lower() == 'true'
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         is_active = self.request.query_params.get('is_active')
+        language = self.request.query_params.get('language')
+        key = self.request.query_params.get('key')
+        
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        if key:
+            queryset = queryset.filter(key=key)
         try:
             queryset = queryset.annotate(event_count=Count('event'))
         except Exception:
             pass
         return queryset
+    
+    @action(detail=False, methods=["get"], url_path="by-key/(?P<key>[^/.]+)", url_name="by-key")
+    def by_key(self, request, key=None):
+        """Get all translations for a specific category key."""
+        categories = EventCategory.objects.filter(key=key).order_by('language')
+        if not categories.exists():
+            return Response({"detail": "No categories found with this key."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="translations", url_name="translations")
+    def translations(self, request, pk=None):
+        """Get all translations for this category."""
+        category = self.get_object()
+        translations = EventCategory.objects.filter(key=category.key).exclude(id=category.id)
+        serializer = self.get_serializer(translations, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
@@ -1473,11 +1563,53 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
     
 class BookCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing BookCategory content."""
+    """ViewSet for managing BookCategory content with multi-language support."""
     queryset = BookCategory.objects.all()
     serializer_class = BookCategorySerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
+    search_fields = ("name", "key")
+    ordering_fields = ("order", "created_at")
+    queryset = BookCategory.objects.all().order_by('order', '-created_at')
+    
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context['include_translations'] = self.request.query_params.get('include_translations', 'false').lower() == 'true'
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_active = self.request.query_params.get('is_active')
+        language = self.request.query_params.get('language')
+        key = self.request.query_params.get('key')
+        
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        if key:
+            queryset = queryset.filter(key=key)
+        try:
+            queryset = queryset.annotate(book_count=Count('book'))
+        except Exception:
+            pass
+        return queryset
+    
+    @action(detail=False, methods=["get"], url_path="by-key/(?P<key>[^/.]+)", url_name="by-key")
+    def by_key(self, request, key=None):
+        """Get all translations for a specific category key."""
+        categories = BookCategory.objects.filter(key=key).order_by('language')
+        if not categories.exists():
+            return Response({"detail": "No categories found with this key."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="translations", url_name="translations")
+    def translations(self, request, pk=None):
+        """Get all translations for this category."""
+        category = self.get_object()
+        translations = BookCategory.objects.filter(key=category.key).exclude(id=category.id)
+        serializer = self.get_serializer(translations, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
@@ -1597,28 +1729,41 @@ class LikeViewSet(BaseContentViewSet):
     ordering_fields = ("created_at",)
     
 class VideoCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing VideoCategory content."""
+    """ViewSet for managing VideoCategory content with multi-language support."""
     queryset = VideoCategory.objects.all()
     serializer_class = VideoCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
+    search_fields = ("name", "key")
     ordering_fields = ("order", "created_at")
     queryset = VideoCategory.objects.all().order_by('order', '-created_at')
 
     @swagger_auto_schema(
         operation_summary="List all video categories",
-        operation_description="Retrieve a list of video categories with optional filtering by is_active status.",
+        operation_description="Retrieve a list of video categories with optional filtering by is_active status, language, or key.",
         manual_parameters=video_category_manual_parameters
     )
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
     
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context['include_translations'] = self.request.query_params.get('include_translations', 'false').lower() == 'true'
+        return context
+    
     def get_queryset(self):
         queryset = super().get_queryset()
         is_active = self.request.query_params.get('is_active')
+        language = self.request.query_params.get('language')
+        key = self.request.query_params.get('key')
+        
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        if key:
+            queryset = queryset.filter(key=key)
             
         try:
             queryset = queryset.annotate(video_count=Count('video'))
@@ -1626,6 +1771,23 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
             pass
 
         return queryset
+    
+    @action(detail=False, methods=["get"], url_path="by-key/(?P<key>[^/.]+)", url_name="by-key")
+    def by_key(self, request, key=None):
+        """Get all translations for a specific category key."""
+        categories = VideoCategory.objects.filter(key=key).order_by('language')
+        if not categories.exists():
+            return Response({"detail": "No categories found with this key."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="translations", url_name="translations")
+    def translations(self, request, pk=None):
+        """Get all translations for this category."""
+        category = self.get_object()
+        translations = VideoCategory.objects.filter(key=category.key).exclude(id=category.id)
+        serializer = self.get_serializer(translations, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
