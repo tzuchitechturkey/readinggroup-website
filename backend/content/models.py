@@ -7,6 +7,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
+import uuid
+from django.utils.text import slugify
 
 from .enums import (
     ContentStatus,
@@ -533,6 +535,28 @@ class PostCategory(TimestampedModel):
             models.Index(fields=['key', 'language']),
         ]
     
+    def save(self, *args, **kwargs):
+        """Auto-generate unique key on creation if key is 'default'."""
+        if not self.pk and self.key == "default":
+            # Generate unique key from name and uuid
+            base_key = slugify(self.name) if self.name else "category"
+            unique_suffix = str(uuid.uuid4())[:8]
+            self.key = f"{base_key}-{unique_suffix}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_translations(cls, key):
+        """Get all translations for a given key."""
+        return cls.objects.filter(key=key)
+    
+    @classmethod
+    def get_by_language(cls, key, language):
+        """Get specific translation by key and language."""
+        try:
+            return cls.objects.get(key=key, language=language)
+        except cls.DoesNotExist:
+            return None
+    
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
     
@@ -555,6 +579,28 @@ class EventCategory(TimestampedModel):
         indexes = [
             models.Index(fields=['key', 'language']),
         ]
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate unique key on creation if key is 'default'."""
+        if not self.pk and self.key == "default":
+            # Generate unique key from name and uuid
+            base_key = slugify(self.name) if self.name else "category"
+            unique_suffix = str(uuid.uuid4())[:8]
+            self.key = f"{base_key}-{unique_suffix}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_translations(cls, key):
+        """Get all translations for a given key."""
+        return cls.objects.filter(key=key)
+    
+    @classmethod
+    def get_by_language(cls, key, language):
+        """Get specific translation by key and language."""
+        try:
+            return cls.objects.get(key=key, language=language)
+        except cls.DoesNotExist:
+            return None
     
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
@@ -579,6 +625,28 @@ class ContentCategory(TimestampedModel):
             models.Index(fields=['key', 'language']),
         ]
     
+    def save(self, *args, **kwargs):
+        """Auto-generate unique key on creation if key is 'default'."""
+        if not self.pk and self.key == "default":
+            # Generate unique key from name and uuid
+            base_key = slugify(self.name) if self.name else "category"
+            unique_suffix = str(uuid.uuid4())[:8]
+            self.key = f"{base_key}-{unique_suffix}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_translations(cls, key):
+        """Get all translations for a given key."""
+        return cls.objects.filter(key=key)
+    
+    @classmethod
+    def get_by_language(cls, key, language):
+        """Get specific translation by key and language."""
+        try:
+            return cls.objects.get(key=key, language=language)
+        except cls.DoesNotExist:
+            return None
+    
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
 
@@ -602,6 +670,28 @@ class VideoCategory(TimestampedModel):
             models.Index(fields=['key', 'language']),
         ]
     
+    def save(self, *args, **kwargs):
+        """Auto-generate unique key on creation if key is 'default'."""
+        if not self.pk and self.key == "default":
+            # Generate unique key from name and uuid
+            base_key = slugify(self.name) if self.name else "category"
+            unique_suffix = str(uuid.uuid4())[:8]
+            self.key = f"{base_key}-{unique_suffix}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_translations(cls, key):
+        """Get all translations for a given key."""
+        return cls.objects.filter(key=key)
+    
+    @classmethod
+    def get_by_language(cls, key, language):
+        """Get specific translation by key and language."""
+        try:
+            return cls.objects.get(key=key, language=language)
+        except cls.DoesNotExist:
+            return None
+    
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
     
@@ -624,6 +714,28 @@ class BookCategory(TimestampedModel):
         indexes = [
             models.Index(fields=['key', 'language']),
         ]
+    
+    def save(self, *args, **kwargs):
+        """Auto-generate unique key on creation if key is 'default'."""
+        if not self.pk and self.key == "default":
+            # Generate unique key from name and uuid
+            base_key = slugify(self.name) if self.name else "category"
+            unique_suffix = str(uuid.uuid4())[:8]
+            self.key = f"{base_key}-{unique_suffix}"
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_translations(cls, key):
+        """Get all translations for a given key."""
+        return cls.objects.filter(key=key)
+    
+    @classmethod
+    def get_by_language(cls, key, language):
+        """Get specific translation by key and language."""
+        try:
+            return cls.objects.get(key=key, language=language)
+        except cls.DoesNotExist:
+            return None
     
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
