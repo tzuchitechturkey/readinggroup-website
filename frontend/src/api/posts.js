@@ -174,3 +174,90 @@ export async function WeeklyMomentPosts(type, limit = 5, offset = 0) {
 // export async function WeeklyReadingPosts() {
 //   return await axios.get(`/posts/top-viewed/?limit=5`);
 // }
+// إنشاء فئة جديدة (Create):
+// // Frontend POST request
+// fetch('/api/content/post-categories/', {
+//   method: 'POST',
+//   headers: { 'Content-Type': 'application/json' },
+//   body: JSON.stringify({
+//     key: "technology",
+//     name: "التكنولوجيا",
+//     language: "ar",
+//     is_active: true,
+//     order: 1
+//   })
+// })
+
+// 2. إنشاء ترجمة للفئة نفسها:
+// // Create English translation for same key
+// fetch('/api/content/post-categories/', {
+//   method: 'POST',
+//   body: JSON.stringify({
+//     key: "technology",  // نفس الـ key
+//     name: "Technology",
+//     language: "en",
+//     is_active: true,
+//     order: 1
+//   })
+// })
+
+// 3. جلب جميع الفئات بلغة محددة:
+// // Get categories in Arabic only
+// fetch('/api/content/post-categories/?language=ar')
+//   .then(res => res.json())
+//   .then(data => console.log(data))
+// // Response: [{id: 1, key: "technology", name: "التكنولوجيا", language: "ar"}, ...]
+
+// 4. جلب فئة مع جميع ترجماتها:
+// // Get category with translations
+// fetch('/api/content/post-categories/1/?include_translations=true')
+//   .then(res => res.json())
+//   .then(data => console.log(data))
+
+// // Response:
+// {
+//   id: 1,
+//   key: "technology",
+//   name: "التكنولوجيا",
+//   language: "ar",
+//   is_active: true,
+//   order: 1,
+//   translations: [
+//     {id: 2, language: "en", name: "Technology"},
+//     {id: 3, language: "tr", name: "Teknoloji"}
+//   ]
+// }
+
+// 5. جلب جميع ترجمات فئة محددة:
+// // Get all translations for category ID 1
+// fetch('/api/content/post-categories/1/translations/')
+//   .then(res => res.json())
+//   .then(data => console.log(data))
+
+// // Response: 
+// [
+//   {id: 2, key: "technology", name: "Technology", language: "en"},
+//   {id: 3, key: "technology", name: "Teknoloji", language: "tr"}
+// ]
+
+// 6. جلب كل الترجمات بناءً على key:
+// // Get all translations using key
+// fetch('/api/content/post-categories/by-key/technology/')
+//   .then(res => res.json())
+//   .then(data => console.log(data))
+
+// // Response:
+// [
+//   {id: 1, key: "technology", name: "التكنولوجيا", language: "ar"},
+//   {id: 2, key: "technology", name: "Technology", language: "en"},
+//   {id: 3, key: "technology", name: "Teknoloji", language: "tr"}
+// ]
+
+// 7. تحديث ترجمة محددة:
+// // Update English translation
+// fetch('/api/content/post-categories/2/', {
+//   method: 'PATCH',
+//   body: JSON.stringify({
+//     name: "Technology & Innovation"
+//   })
+// })
