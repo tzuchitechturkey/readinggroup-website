@@ -17,7 +17,6 @@ export default function HomeContent() {
   const [sliderData, setSliderData] = useState(null);
   const [top1Data, setTop1Data] = useState(null);
 
-  // استخدام useCallback لتجنب إعادة إنشاء الدوال في كل render
   const getSliderData = useCallback(async () => {
     try {
       const res = await HomeData();
@@ -36,7 +35,6 @@ export default function HomeContent() {
     }
   }, [t]);
 
-  // Parallel API calls بدلاً من sequential
   useEffect(() => {
     Promise.all([getSliderData(), getTop1Data()]).catch((err) => {
       setErrorFn(err, t);
@@ -44,7 +42,6 @@ export default function HomeContent() {
     localStorage.removeItem("redirectAfterLogin");
   }, [getSliderData, getTop1Data, t]);
 
-  // مemoized data mapping لتجنب إعادة الحسابات
   const filteredSections = useMemo(() => {
     if (!top1Data) return [];
 

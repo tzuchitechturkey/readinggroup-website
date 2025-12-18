@@ -5,6 +5,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 import { GetWebSiteInfo } from "@/api/info";
+import { GetContentsByCategoryId } from "@/api/contents";
+import { GetPostsByCategoryId } from "@/api/posts";
+import { GetVideosByCategoryId } from "@/api/videos";
+import { GetEventsByCategoryId } from "@/api/events";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import defaultLogo from "@/assets/logo.jpg";
 
 import UserIcons from "../UserIcons/UserIcons";
@@ -15,6 +20,8 @@ function Usernavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [siteInfo, setSiteInfo] = useState({});
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [categoryContents, setCategoryContents] = useState({});
+  const [loadingContents, setLoadingContents] = useState({});
 
   const fetchWebSiteInfo = async () => {
     try {
@@ -23,6 +30,118 @@ function Usernavbar() {
     } catch (error) {
       setErrorFn(error, t);
     }
+  };
+  // Fetch category contents dynamically
+  const fetchCategoryContents = async (categoryId, categoryType) => {
+    const cacheKey = `${categoryType}-${categoryId}`;
+
+    // If already loaded, don't fetch again
+    if (categoryContents[cacheKey]) return;
+
+    // If currently loading, don't fetch again
+    if (loadingContents[cacheKey]) return;
+
+    setLoadingContents((prev) => ({ ...prev, [cacheKey]: true }));
+
+    try {
+      let response;
+      const limit = 8;
+      const offset = 0;
+
+      switch (categoryType) {
+        case "content":
+          response = await GetContentsByCategoryId(categoryId, limit, offset);
+          break;
+        case "video":
+          response = await GetVideosByCategoryId(categoryId, limit, offset);
+          break;
+        case "post":
+          response = await GetPostsByCategoryId(categoryId, limit, offset);
+          break;
+        case "event":
+          response = await GetEventsByCategoryId(categoryId, limit, offset);
+          break;
+        default:
+          return;
+      }
+
+      setCategoryContents((prev) => ({
+        ...prev,
+        [cacheKey]: response?.data?.results || [],
+      }));
+    } catch (error) {
+      console.error(
+        `Error fetching ${categoryType} for category ${categoryId}:`,
+        error
+      );
+    } finally {
+      setLoadingContents((prev) => ({ ...prev, [cacheKey]: false }));
+    }
+  };
+
+  // Build content item href based on type
+  const getContentHref = (item, categoryType) => {
+    switch (categoryType) {
+      case "content":
+        return `/contents/content/${item.id}`;
+      case "video":
+        return `/videos/${item.id}`;
+      case "post":
+        return `/cards-photos/card/${item.id}`;
+      case "event":
+        // Use external link if available, otherwise use event detail page
+        return item.external_link || `/events/${item.id}`;
+      default:
+        return "#";
+    }
+  };
+
+  // Check if item should open in new tab (for external links)
+  const shouldOpenInNewTab = (item, categoryType) => {
+    return categoryType === "event" && item.external_link;
+  };
+
+  // Get item size class based on number of items
+  const getItemSizeClass = (itemCount) => {
+    if (itemCount <= 2) {
+      // 1-2 items: larger
+      return "w-40 h-48";
+    }
+    if (itemCount <= 4) {
+      // 3-4 items: medium
+      return "w-32 h-40";
+    }
+    if (itemCount <= 6) {
+      // 5-6 items: small-medium
+      return "w-28 h-32";
+    }
+    // 7-8 items: normal
+    return "w-24 h-28";
+  };
+
+  // Get image container class based on item count
+  const getImageSizeClass = (itemCount) => {
+    if (itemCount <= 2) {
+      return "h-32";
+    }
+    if (itemCount <= 4) {
+      return "h-24";
+    }
+    if (itemCount <= 6) {
+      return "h-20";
+    }
+    return "h-16";
+  };
+
+  // Get title text size based on item count
+  const getTitleSizeClass = (itemCount) => {
+    if (itemCount <= 2) {
+      return "text-sm";
+    }
+    if (itemCount <= 4) {
+      return "text-xs";
+    }
+    return "text-xs";
   };
 
   // Navigation items with dropdowns - built dynamically from siteInfo
@@ -37,52 +156,52 @@ function Usernavbar() {
         name: t("Contents"),
         href: "/contents",
         hasDropdown: true,
+        categoryType: "content",
         subItems: (siteInfo?.content_categories || []).map((category) => ({
           name: category.name,
-          href: `/:contents/category/${category.id}`,
+          href: `/contents/category/${category.id}`,
           categoryId: category.id,
-          scrollToId: `category-${category.id}`,
+          content_count: category.content_count || 0,
         })),
       },
       {
         name: t("Videos"),
-        scrollToId: "",
         href: "/videos",
         hasDropdown: true,
+        categoryType: "video",
         subItems: (siteInfo?.video_categories || []).map((category) => ({
           name: category.name,
           categoryId: category.id,
-          scrollToId: `category-${category.id}`,
           href: `/videos/category/${category.id}`,
+          content_count: category.video_count || 0,
         })),
       },
       {
         name: t("Cards & Photos"),
-        scrollToId: "",
         href: "/cards-photos",
         hasDropdown: true,
+        categoryType: "post",
         subItems: (siteInfo?.post_categories || []).map((category) => ({
           name: category.name,
           categoryId: category.id,
-          scrollToId: `category-${category.id}`,
           href: `/cards-photos/category/${category.id}`,
+          content_count: category.post_count || 0,
         })),
       },
       {
         name: t("Events & Community"),
-        scrollToId: "",
         href: "/events",
         hasDropdown: true,
+        categoryType: "event",
         subItems: (siteInfo?.event_categories || []).map((category) => ({
           name: category.name,
           categoryId: category.id,
-          scrollToId: `category-${category.id}`,
           href: `/events/category/${category.id}`,
+          content_count: category.event_count || 0,
         })),
       },
       {
         name: t("About Us"),
-        scrollToId: "",
         href: "/about",
         hasDropdown: true,
         subItems: [
@@ -169,7 +288,6 @@ function Usernavbar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
   // منع التمرير في الخلفية عندما يكون الـ sidebar مفتوح
   useEffect(() => {
     if (isMenuOpen) {
@@ -208,6 +326,8 @@ function Usernavbar() {
   // Get navigation items dynamically
   const navigationItems = buildNavigationItems();
   // الشعار مع fallback
+  console.log(navigationItems);
+
   const logoSrc = siteInfo?.logo?.logo || defaultLogo;
   return (
     <nav className="relative bg-white shadow-sm" dir={i18n.dir()}>
@@ -277,6 +397,17 @@ function Usernavbar() {
                               <li
                                 key={subIdx}
                                 className="relative group/submenu"
+                                onMouseEnter={() => {
+                                  if (
+                                    subItem.content_count > 0 &&
+                                    item.categoryType
+                                  ) {
+                                    fetchCategoryContents(
+                                      subItem.categoryId,
+                                      item.categoryType
+                                    );
+                                  }
+                                }}
                               >
                                 <Link
                                   to={subItem.href}
@@ -286,7 +417,195 @@ function Usernavbar() {
                                   <span className="flex items-center">
                                     {subItem.name}
                                   </span>
+                                  {/* Show arrow if has nested content */}
+                                  {subItem.content_count > 0 && (
+                                    <svg
+                                      className="w-4 h-4 -rotate-90"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                      />
+                                    </svg>
+                                  )}
                                 </Link>
+
+                                {/* Nested Dropdown for content items - Horizontal Grid */}
+                                {subItem.content_count > 0 &&
+                                  item.categoryType && (
+                                    <div className="absolute left-full top-0 ml-2 opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200 z-50">
+                                      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
+                                        {loadingContents[
+                                          `${item.categoryType}-${subItem.categoryId}`
+                                        ] ? (
+                                          <div className="px-4 py-8 text-sm text-gray-500 text-center">
+                                            {t("Loading...")}
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className={`grid ${
+                                              subItem?.content_count < 4
+                                                ? `grid-cols-${subItem?.content_count}`
+                                                : "grid-cols-4"
+                                            }  gap-3 w-max max-w-3xl`}
+                                          >
+                                            {(
+                                              categoryContents[
+                                                `${item.categoryType}-${subItem.categoryId}`
+                                              ] || []
+                                            ).map((contentItem, contentIdx) => {
+                                              const itemCount =
+                                                categoryContents[
+                                                  `${item.categoryType}-${subItem.categoryId}`
+                                                ]?.length || 0;
+                                              const sizeClass =
+                                                getItemSizeClass(itemCount);
+                                              const imageSizeClass =
+                                                getImageSizeClass(itemCount);
+                                              const titleSizeClass =
+                                                getTitleSizeClass(itemCount);
+
+                                              return (
+                                                <div
+                                                  key={contentIdx}
+                                                  className={`${sizeClass} rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col bg-gray-50 hover:bg-white border border-gray-100`}
+                                                >
+                                                  {shouldOpenInNewTab(
+                                                    contentItem,
+                                                    item.categoryType
+                                                  ) ? (
+                                                    <a
+                                                      href={getContentHref(
+                                                        contentItem,
+                                                        item.categoryType
+                                                      )}
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                      className="flex flex-col h-full hover:no-underline"
+                                                    >
+                                                      {/* Start Image Container */}
+                                                      <div
+                                                        className={`${imageSizeClass} bg-gray-200 overflow-hidden flex-shrink-0 relative group`}
+                                                      >
+                                                        {contentItem?.image ||
+                                                        contentItem?.thumbnail ||
+                                                        contentItem?.image_url ? (
+                                                          <img
+                                                            src={
+                                                              contentItem?.image ||
+                                                              contentItem?.thumbnail ||
+                                                              contentItem?.image_url
+                                                            }
+                                                            alt={
+                                                              contentItem?.title ||
+                                                              contentItem?.name
+                                                            }
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                          />
+                                                        ) : (
+                                                          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                                            <svg
+                                                              className="w-8 h-8 text-gray-400"
+                                                              fill="none"
+                                                              stroke="currentColor"
+                                                              viewBox="0 0 24 24"
+                                                            >
+                                                              <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                              />
+                                                            </svg>
+                                                          </div>
+                                                        )}
+                                                        {/* External link icon */}
+                                                        <div className="absolute top-1 right-1 bg-white/80 rounded-full p-1">
+                                                          <svg
+                                                            className="w-3 h-3 text-primary"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                          >
+                                                            <path
+                                                              strokeLinecap="round"
+                                                              strokeLinejoin="round"
+                                                              strokeWidth={2}
+                                                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                            />
+                                                          </svg>
+                                                        </div>
+                                                      </div>
+                                                      {/* End  Image Container */}
+
+                                                      {/* Start Title Container */}
+                                                      <div className="flex-1 p-2 flex flex-col justify-center">
+                                                        <p
+                                                          className={`${titleSizeClass} text-gray-700 font-medium line-clamp-2`}
+                                                        >
+                                                          {contentItem?.title ||
+                                                            contentItem?.name}
+                                                        </p>
+                                                      </div>
+                                                      {/* End Title Container */}
+                                                    </a>
+                                                  ) : (
+                                                    <Link
+                                                      to={getContentHref(
+                                                        contentItem,
+                                                        item.categoryType
+                                                      )}
+                                                      className="flex flex-col h-full hover:no-underline"
+                                                    >
+                                                      {/* Start Image Container */}
+                                                      <div
+                                                        className={`${imageSizeClass} bg-gray-200 overflow-hidden flex-shrink-0 relative group`}
+                                                      >
+                                                        <img
+                                                          src={
+                                                            contentItem?.images
+                                                              ?.length > 0
+                                                              ? contentItem
+                                                                  ?.images[0]
+                                                                  ?.image
+                                                              : contentItem?.image ||
+                                                                contentItem?.thumbnail ||
+                                                                contentItem?.image_url
+                                                          }
+                                                          alt={
+                                                            contentItem?.title ||
+                                                            contentItem?.name
+                                                          }
+                                                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                        />
+                                                      </div>
+                                                      {/* End Image Container */}
+
+                                                      {/* Start Title Container */}
+                                                      <div className="flex-1 p-2 flex flex-col justify-center">
+                                                        <p
+                                                          className={`${titleSizeClass} text-gray-700 font-medium line-clamp-2`}
+                                                        >
+                                                          {contentItem?.title ||
+                                                            contentItem?.name}
+                                                        </p>
+                                                      </div>
+                                                      {/* End Title Container */}
+                                                    </Link>
+                                                  )}
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
                               </li>
                             ))}
                           </ul>
@@ -425,25 +744,210 @@ function Usernavbar() {
 
                       {/* Mobile Submenu */}
                       {expandedMenus[item.name] && (
-                        <div className="mt-2 ml-4 space-y-2 bg-gray-50 rounded-lg p-3">
-                          {item.subItems.map((subItem, subIdx) => (
-                            <NavLink
-                              key={subIdx}
-                              to={subItem.href}
-                              onClick={(e) => {
-                                handleNavClick(e, subItem);
-                                closeMenu();
-                              }}
-                            >
-                              {({ isActive }) => (
-                                <div
-                                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200  "text-gray-700 `}
+                        <div className="mt-2 ml-4 bg-gray-50 rounded-lg p-3">
+                          {/* Category Navigation Links */}
+                          <div className="space-y-2 mb-3">
+                            {item.subItems.map((subItem, subIdx) => (
+                              <div key={subIdx}>
+                                <NavLink
+                                  to={subItem.href}
+                                  onClick={(e) => {
+                                    // Load contents if has content_count > 0 and not already loaded
+                                    if (
+                                      subItem.content_count > 0 &&
+                                      item.categoryType
+                                    ) {
+                                      fetchCategoryContents(
+                                        subItem.categoryId,
+                                        item.categoryType
+                                      );
+                                    }
+                                    // Only navigate and close if clicking the main link
+                                    if (!subItem.content_count) {
+                                      handleNavClick(e, subItem);
+                                      closeMenu();
+                                    } else {
+                                      e.preventDefault();
+                                      handleNavClick(e, subItem);
+                                    }
+                                  }}
                                 >
-                                  {subItem.name}
-                                </div>
-                              )}
-                            </NavLink>
-                          ))}
+                                  {({ isActive }) => (
+                                    <div
+                                      className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+                                        isActive
+                                          ? "bg-primary/10 text-primary"
+                                          : "text-gray-700"
+                                      }`}
+                                    >
+                                      <span>{subItem.name}</span>
+                                      {subItem.content_count > 0 && (
+                                        <span className="text-xs text-gray-500 ml-2">
+                                          ({subItem.content_count})
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </NavLink>
+
+                                {/* Nested content items for mobile - Horizontal Grid */}
+                                {subItem.content_count > 0 &&
+                                  item.categoryType &&
+                                  categoryContents[
+                                    `${item.categoryType}-${subItem.categoryId}`
+                                  ] && (
+                                    <div className="mt-2 ml-4 px-3 py-2 bg-white rounded-lg ">
+                                      <div className="grid grid-cols-4 gap-2">
+                                        {(
+                                          categoryContents[
+                                            `${item.categoryType}-${subItem.categoryId}`
+                                          ] || []
+                                        ).map((contentItem, contentIdx) => {
+                                          const itemCount =
+                                            categoryContents[
+                                              `${item.categoryType}-${subItem.categoryId}`
+                                            ]?.length || 0;
+                                          const sizeClass =
+                                            getItemSizeClass(itemCount);
+                                          const imageSizeClass =
+                                            getImageSizeClass(itemCount);
+                                          const titleSizeClass =
+                                            getTitleSizeClass(itemCount);
+
+                                          return (
+                                            <div
+                                              key={contentIdx}
+                                              className={`${sizeClass} rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 flex flex-col bg-gray-50 hover:bg-white border border-gray-100`}
+                                            >
+                                              {shouldOpenInNewTab(
+                                                contentItem,
+                                                item.categoryType
+                                              ) ? (
+                                                <a
+                                                  href={getContentHref(
+                                                    contentItem,
+                                                    item.categoryType
+                                                  )}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  onClick={closeMenu}
+                                                  className="flex flex-col h-full hover:no-underline"
+                                                >
+                                                  {/* Image Container */}
+                                                  <div
+                                                    className={`${imageSizeClass} bg-gray-200 overflow-hidden flex-shrink-0 relative group`}
+                                                  >
+                                                    {contentItem?.image ||
+                                                    contentItem?.thumbnail ||
+                                                    contentItem?.image_url ? (
+                                                      <img
+                                                        src={
+                                                          contentItem?.image ||
+                                                          contentItem?.thumbnail ||
+                                                          contentItem?.image_url
+                                                        }
+                                                        alt={
+                                                          contentItem?.title ||
+                                                          contentItem?.name
+                                                        }
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                      />
+                                                    ) : (
+                                                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                                        <svg
+                                                          className="w-6 h-6 text-gray-400"
+                                                          fill="none"
+                                                          stroke="currentColor"
+                                                          viewBox="0 0 24 24"
+                                                        >
+                                                          <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                          />
+                                                        </svg>
+                                                      </div>
+                                                    )}
+                                                  </div>
+
+                                                  {/* Title Container */}
+                                                  <div className="flex-1 p-1.5 flex flex-col justify-center">
+                                                    <p
+                                                      className={`${titleSizeClass} text-gray-700 font-medium line-clamp-2`}
+                                                    >
+                                                      {contentItem?.title ||
+                                                        contentItem?.name}
+                                                    </p>
+                                                  </div>
+                                                </a>
+                                              ) : (
+                                                <Link
+                                                  to={getContentHref(
+                                                    contentItem,
+                                                    item.categoryType
+                                                  )}
+                                                  onClick={closeMenu}
+                                                  className="flex flex-col h-full hover:no-underline"
+                                                >
+                                                  {/* Image Container */}
+                                                  <div
+                                                    className={`${imageSizeClass} bg-gray-200 overflow-hidden flex-shrink-0 relative group`}
+                                                  >
+                                                    {contentItem?.image ||
+                                                    contentItem?.thumbnail ||
+                                                    contentItem?.image_url ? (
+                                                      <img
+                                                        src={
+                                                          contentItem?.image ||
+                                                          contentItem?.thumbnail ||
+                                                          contentItem?.image_url
+                                                        }
+                                                        alt={
+                                                          contentItem?.title ||
+                                                          contentItem?.name
+                                                        }
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                      />
+                                                    ) : (
+                                                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                                        <svg
+                                                          className="w-6 h-6 text-gray-400"
+                                                          fill="none"
+                                                          stroke="currentColor"
+                                                          viewBox="0 0 24 24"
+                                                        >
+                                                          <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                          />
+                                                        </svg>
+                                                      </div>
+                                                    )}
+                                                  </div>
+
+                                                  {/* Title Container */}
+                                                  <div className="flex-1 p-1.5 flex flex-col justify-center">
+                                                    <p
+                                                      className={`${titleSizeClass} text-gray-700 font-medium line-clamp-2`}
+                                                    >
+                                                      {contentItem?.title ||
+                                                        contentItem?.name}
+                                                    </p>
+                                                  </div>
+                                                </Link>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </>

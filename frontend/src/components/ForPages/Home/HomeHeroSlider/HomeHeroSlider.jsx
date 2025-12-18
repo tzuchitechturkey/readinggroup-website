@@ -14,11 +14,10 @@ import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSec
 import { useIsMobile } from "@/hooks/use-mobile";
 import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 
-export default function HomePageHeroSlider({ newsPage = false, data = null }) {
+export default function HomePageHeroSlider({ data = null }) {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile(1024);
-
-  const homePageSlider = React.useMemo(() => {
+  const sliders = React.useMemo(() => {
     if (!data) return [];
 
     const slides = [];
@@ -82,28 +81,27 @@ export default function HomePageHeroSlider({ newsPage = false, data = null }) {
       });
     }
     // Slide 4: Top Section Events
-    if (data?.top_section?.id && data?.top_section?.events?.length > 0) {
-      const mainCard = data?.top_section?.events[0];
-      slides.push({
-        id: "events",
-        image: mainCard.image || mainCard.image_url,
-        h1Line1: mainCard.title,
-        h1Line2Prefix: "",
-        h1Line2Under: t("— Events weekly"),
-        description: mainCard.description,
-        primaryTo:
-          mainCard?.report_type === "videos"
-            ? `/events/video/${mainCard.id}`
-            : `/events/report/${mainCard.id}`,
-        secondaryTo: "/events",
-        allData: data?.top_section?.events,
-      });
-    }
+    // if (data?.top_section?.id && data?.top_section?.events?.length > 0) {
+    //   const mainCard = data?.top_section?.events[0];
+    //   slides.push({
+    //     id: "events",
+    //     image: mainCard.image || mainCard.image_url,
+    //     h1Line1: mainCard.title,
+    //     h1Line2Prefix: "",
+    //     h1Line2Under: t("— Events weekly"),
+    //     description: mainCard.description,
+    //     primaryTo:
+    //       mainCard?.report_type === "videos"
+    //         ? `/events/video/${mainCard.id}`
+    //         : `/events/report/${mainCard.id}`,
+    //     secondaryTo: "/events",
+    //     allData: data?.top_section?.events,
+    //   });
+    // }
 
     return slides;
   }, [data, t]);
 
-  const sliders = newsPage ? newsPageSlider : homePageSlider;
   const [api, setApi] = React.useState(null);
   const timerRef = React.useRef(null);
   const pausedRef = React.useRef(false);
@@ -184,82 +182,45 @@ export default function HomePageHeroSlider({ newsPage = false, data = null }) {
                         <HeroTitle
                           i18n={i18n}
                           h1Line1={slide.h1Line1}
-                          h1Line2Prefix={newsPage ? "" : slide.h1Line2Prefix}
-                          h1Line2Under={newsPage ? "" : slide.h1Line2Under}
-                          description={newsPage ? "" : slide.description}
-                          titleClassName={newsPage ? "font-semibold" : ""}
+                          h1Line2Prefix={slide.h1Line2Prefix}
+                          h1Line2Under={slide.h1Line2Under}
+                          description={slide.description}
+                          titleClassName={""}
                         />
 
                         {/* Start Actions */}
                         <div className="mt-4">
-                          {newsPage ? (
-                            <div className=" flex items-center gap-3 mt-6">
-                              <Link
-                                to={slide.primaryTo}
-                                className="inline-flex items-center gap-2 rounded-full text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow transition-all duration-200"
-                                style={{
-                                  background:
-                                    "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)",
-                                }}
-                                aria-label={t("Play")}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.background =
-                                    "linear-gradient(90deg, #321AC5 0%, #6512CF 100%)";
-                                  e.currentTarget.style.transform =
-                                    "scale(1.06)";
-                                  e.currentTarget.style.boxShadow =
-                                    "0 4px 24px 0 rgba(50,26,197,0.18)";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background =
-                                    "linear-gradient(90deg, #6512CF 0%, #321AC5 100%)";
-                                  e.currentTarget.style.transform = "scale(1)";
-                                  e.currentTarget.style.boxShadow = "";
-                                }}
-                              >
-                                {t("WATCH NOW")}
-                              </Link>
-                              <button
-                                className="border-[1px] border-white rounded-full px-3 py-1 transition-all duration-200 bg-white/10 hover:bg-white/30 hover:scale-110 shadow hover:shadow-lg"
-                                style={{ backdropFilter: "blur(2px)" }}
-                                aria-label={t("Add")}
-                              >
-                                <Plus className="h-6 w-6 md:h-7 md:w-7 text-white/90 group-hover:text-white transition-colors duration-200" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              <Link
-                                to={slide.primaryTo}
-                                className="inline-flex items-center gap-2 rounded-md bg-white text-black px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow hover:brightness-95"
-                                aria-label={t("Play")}
-                              >
-                                {slide?.id === "videos" ? (
-                                  <Play
-                                    className="h-4 w-4 md:h-5 md:w-5 fill-black text-black"
-                                    aria-hidden="true"
-                                  />
-                                ) : (
-                                  <SquareDashedMousePointer className="h-4 w-4 md:h-5 md:w-5 text-black" />
-                                )}
-                                {slide?.id === "videos"
-                                  ? t("Play")
-                                  : t("Browse Now")}
-                              </Link>
-
-                              <Link
-                                to={slide.secondaryTo}
-                                className="inline-flex items-center gap-2 rounded-md bg-white/20 text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/30"
-                                aria-label={t("More Info")}
-                              >
-                                <Info
-                                  className="h-4 w-4 md:h-5 md:w-5"
+                          <div className="flex items-center gap-3">
+                            <Link
+                              to={slide.primaryTo}
+                              className="inline-flex items-center gap-2 rounded-md bg-white text-black px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow hover:brightness-95"
+                              aria-label={t("Play")}
+                            >
+                              {slide?.id === "videos" ? (
+                                <Play
+                                  className="h-4 w-4 md:h-5 md:w-5 fill-black text-black"
                                   aria-hidden="true"
                                 />
-                                {t("More Info")}
-                              </Link>
-                            </div>
-                          )}
+                              ) : (
+                                <SquareDashedMousePointer className="h-4 w-4 md:h-5 md:w-5 text-black" />
+                              )}
+                              {slide?.id === "videos"
+                                ? t("Play")
+                                : t("Browse Now")}
+                            </Link>
+
+                            <Link
+                              to={slide.secondaryTo}
+                              className="inline-flex items-center gap-2 rounded-md bg-white/20 text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/30"
+                              aria-label={t("More Info")}
+                            >
+                              <Info
+                                className="h-4 w-4 md:h-5 md:w-5"
+                                aria-hidden="true"
+                              />
+                              {t("More Info")}
+                            </Link>
+                          </div>
                         </div>
                         {/* Start Actions */}
                       </div>

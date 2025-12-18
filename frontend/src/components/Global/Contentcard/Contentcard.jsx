@@ -43,15 +43,15 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
                   #{tag}
                 </span>
               ))}
-              {!showAllTags && item?.tags.length > 3 && (
+              {/* {!showAllTags && item?.tags.length > 3 && (
                 <button
                   onClick={handleShowMoreTags}
                   className="px-4 py-1 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 border-2 border-yellow-300 rounded-xl text-white text-sm font-bold shadow-md backdrop-blur-sm hover:scale-105 transition-transform"
                   style={{ minWidth: "90px" }}
                 >
-                  عرض المزيد
+                 {t("Show More")}
                 </button>
-              )}
+              )} */}
             </div>
           </div>
         )}
