@@ -5,7 +5,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // Import components
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import ImageControls from "@/components/Global/ImageControls/ImageControls";
 import ImageModal from "@/components/Global/ImageModal/ImageModal";

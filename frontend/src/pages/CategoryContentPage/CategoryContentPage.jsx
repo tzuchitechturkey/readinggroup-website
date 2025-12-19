@@ -11,7 +11,7 @@ import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import EventCard from "@/components/Global/EventCard/EventCard";
 import Loader from "@/components/Global/Loader/Loader";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 
 function CategoryContentPage() {
   const { type, id } = useParams();

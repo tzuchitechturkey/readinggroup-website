@@ -13,7 +13,7 @@ import {
   GetContentsByCategoryId,
 } from "@/api/contents";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 
 function ContentsPageContent() {
   const { t, i18n } = useTranslation();
@@ -144,7 +144,6 @@ function ContentsPageContent() {
           id="week-topic-section"
           className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6  "
         >
-          {/* <GuidedReading data={topViewedData} /> */}
           <div className="mt-12">
             <DynamicSection
               title={t("Top Viewed Contents")}

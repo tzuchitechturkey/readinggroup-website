@@ -3,6 +3,8 @@ import React, { useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Star, User, Camera, Calendar, MapPin } from "lucide-react";
 
+import HtmlContent from "../HtmlContent/HtmlContent";
+
 function ContentInfoCard({
   contentData,
   contentType = "card", // "card", "photo" أو "video"
@@ -15,7 +17,6 @@ function ContentInfoCard({
   const translateTag = (tag) => {
     return t(tag) || tag;
   };
-
   return (
     <div className={`bg-white rounded-xl shadow-sm p-6 mb-6 ${className}`}>
       {/* Header with badge and more options */}
@@ -58,14 +59,17 @@ function ContentInfoCard({
             isRTL ? "space-x-reverse" : ""
           } space-x-2`}
         >
-          {contentType === "photo" ? (
+          {contentType === "photo" && (
             <Camera className="w-4 h-4 text-primary" />
-          ) : contentType === "video" ? (
-            <User className="w-4 h-4 text-primary" />
-          ) : (
-            <User className="w-4 h-4 text-primary" />
           )}
-          <span className="text-sm text-primary">{contentData?.writer}</span>
+          {contentType?.writer && (
+            <>
+              <User className="w-4 h-4 text-primary" />
+              <span className="text-sm text-primary">
+                {contentData?.writer}
+              </span>
+            </>
+          )}
         </div>
         {contentType !== "video" && (
           <div
@@ -152,7 +156,11 @@ function ContentInfoCard({
           isRTL ? "text-right" : "text-left"
         }`}
       >
-        {contentData?.description}
+        <HtmlContent
+          html={contentData?.description}
+          className="prose max-w-none"
+        />
+        {/* {contentData?.description} */}
       </p>
 
       {/* Camera Settings for photos */}

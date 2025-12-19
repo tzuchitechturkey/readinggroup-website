@@ -16,7 +16,7 @@ import {
   PatchContentById,
   TopLikedContents,
 } from "@/api/contents";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 import HtmlContent from "@/components/Global/HtmlContent/HtmlContent";
 
 import NewsCard from "../../../Global/NewsCard/NewsCard";

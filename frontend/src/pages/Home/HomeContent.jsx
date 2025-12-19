@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
-import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
+import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -85,7 +85,7 @@ export default function HomeContent() {
           key === "video"
             ? VideoCard
             : key === "content"
-            ? GuidingReadingcard
+            ? GlobalCard
             : key === "post_card"
             ? WeeklyMomentsCard
             : key === "post_photo"

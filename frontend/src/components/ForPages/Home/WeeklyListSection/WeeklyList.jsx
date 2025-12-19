@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import { GetPosts, WeeklyMomentPosts } from "@/api/posts";
 import { GetContents } from "@/api/contents";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 
 const WeeklyList = ({ title, type }) => {

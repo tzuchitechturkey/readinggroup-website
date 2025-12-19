@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
+import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { GetPostCategories, GetPostsByCategoryId } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -22,7 +22,7 @@ function PostsTabs() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [tabOffsets, setTabOffsets] = useState({}); // Track offset for each category
   const [tabHasMore, setTabHasMore] = useState({}); // Track if each category has more data
-  const categoriesLimit = 10;
+  const categoriesLimit = 20;
   const itemsLimit = 8;
 
   // Fetch all active categories
@@ -209,7 +209,7 @@ function PostsTabs() {
         </div>
 
         {/* Show More Categories Button */}
-        {categories.length < totalCategories && (
+        {/* {categories.length < totalCategories && (
           <div className="flex justify-center mt-4 px-4">
             <button
               onClick={handleLoadMoreCategories}
@@ -219,7 +219,7 @@ function PostsTabs() {
               {isLoadingMore ? t("Loading...") : t("Show More")}
             </button>
           </div>
-        )}
+        )} */}
 
         {categories.map((cat) => (
           <TabsContent key={cat.id} value={cat.id.toString()}>
@@ -227,7 +227,7 @@ function PostsTabs() {
               titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-3 md:mb-4"
               data={tabData[cat.id] || []}
               isSlider={isMobile}
-              cardName={GuidingReadingcard}
+              cardName={GlobalCard}
               viewMore={false}
               viewMoreUrl="/contents"
               enableLoadMore={tabHasMore[cat.id] || false}

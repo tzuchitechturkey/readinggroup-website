@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -15,7 +15,7 @@ function VideoPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const { id: paramId } = useParams();
   const [videoData, setVideoData] = useState(null);
-  const [top5VideoData, setTop5VideoData] = useState(null);
+  // const [top5VideoData, setTop5VideoData] = useState(null);
 
   const getData = async () => {
     setIsLoading(true);
@@ -28,28 +28,27 @@ function VideoPageContent() {
       setIsLoading(false);
     }
   };
-  
-  const getTopViewed = async () => {
-    setIsLoading(true);
-    try {
-      const res = await GetTop5ViewedVideos();
-      setTop5VideoData(res.data);
-    } catch (err) {
-      console.error("Failed to fetch video data:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+  // const getTopViewed = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await GetTop5ViewedVideos();
+  //     setTop5VideoData(res.data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch video data:", err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     getData();
   }, [paramId]);
 
-  useEffect(() => {
-    getTopViewed();
-  }, []);
+  // useEffect(() => {
+  //   getTopViewed();
+  // }, []);
 
-  
   return (
     <div className="bg-white" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
       {isLoading && <Loader />}

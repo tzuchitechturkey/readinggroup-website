@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, User } from "lucide-react";
 
-function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
+function GlobalCard({ item, showTags = true, fromContent = false }) {
   const [showAllTags, setShowAllTags] = React.useState(false);
   const handleShowMoreTags = (e) => {
     e.stopPropagation();
@@ -114,4 +114,4 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
   );
 }
 
-export default GuidingReadingcard;
+export default GlobalCard;
