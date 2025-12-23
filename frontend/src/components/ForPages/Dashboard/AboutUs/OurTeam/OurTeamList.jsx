@@ -15,14 +15,14 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetTeam, DeleteTeamById, GetPositions } from "@/api/aboutUs";
+import { GetTeam, DeleteTeamById } from "@/api/aboutUs";
 import Loader from "@/components/Global/Loader/Loader";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
 import CreateOrEditMember from "./CreateOrEditMember";
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
-function OurTeam({ onSectionChange }) {
+function OurTeamList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -211,7 +211,7 @@ function OurTeam({ onSectionChange }) {
                       {t("Member")}
                     </TableHead>
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                      {t("Position")}
+                      {t("Department")}
                     </TableHead>
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("job")}
@@ -483,4 +483,4 @@ function OurTeam({ onSectionChange }) {
   );
 }
 
-export default OurTeam;
+export default OurTeamList;

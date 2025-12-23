@@ -16,7 +16,8 @@ import {
   PatchContentById,
   TopLikedContents,
 } from "@/api/contents";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
+import HtmlContent from "@/components/Global/HtmlContent/HtmlContent";
 
 import NewsCard from "../../../Global/NewsCard/NewsCard";
 
@@ -139,16 +140,6 @@ const ContentHeroEnhanced = () => {
     }
   }, [contentData?.summary]);
 
-  // Component to inject sanitized HTML without using dangerouslySetInnerHTML (avoids lint rule)
-  const HtmlContent = ({ html, className = "" }) => {
-    const htmlRef = useRef(null);
-    useEffect(() => {
-      if (htmlRef.current) {
-        htmlRef.current.innerHTML = html;
-      }
-    }, [html]);
-    return <div ref={htmlRef} className={className} />;
-  };
   return (
     <div
       className={`lg:flex gap-4 lg:gap-4 items-start w-full  p-4 lg:p-6 news-hero-container  `}

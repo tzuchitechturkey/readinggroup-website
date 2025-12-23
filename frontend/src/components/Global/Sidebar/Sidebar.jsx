@@ -25,6 +25,7 @@ import {
 import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
+import Content from "@/assets/icons/Page.png";
 import FakeUser from "@/assets/fake-user.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
@@ -65,7 +66,7 @@ export default function AppSidebar({
       {
         title: "Contents",
         onClick: () => onSectionChange("contents"),
-        icon: Video,
+        icon: Content,
         items: [
           {
             title: "All Contents",
@@ -176,12 +177,20 @@ export default function AppSidebar({
             onClick: () => onSectionChange("team"),
           },
           {
-            title: "Positions",
-            onClick: () => onSectionChange("positions"),
+            title: "Departments",
+            onClick: () => onSectionChange("departments"),
           },
           {
-            title: "The Book",
-            onClick: () => onSectionChange("book"),
+            title: "The Books Groups",
+            onClick: () => onSectionChange("booksGroups"),
+          },
+          {
+            title: "The Books",
+            onClick: () => onSectionChange("books"),
+          },
+          {
+            title: "Add/Edit Book",
+            onClick: () => onSectionChange("createOrEditBook"),
           },
         ],
       },

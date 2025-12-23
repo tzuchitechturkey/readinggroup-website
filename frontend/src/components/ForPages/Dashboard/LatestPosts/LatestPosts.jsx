@@ -6,8 +6,16 @@ import { useTranslation } from "react-i18next";
 
 function LatestPosts({ data, onSectionChange }) {
   const { t, i18n } = useTranslation();
-  const limitText = (text, max = 120) => {
-    return text.length > max ? text.slice(0, max) + "..." : text;
+
+  const htmlToText = (html) => {
+    if (!html) return "";
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
+  const getPreviewText = (html, limit = 120) => {
+    const text = htmlToText(html);
+    return text.length > limit ? text.slice(0, limit) + "..." : text;
   };
   return (
     <aside
@@ -73,8 +81,9 @@ function LatestPosts({ data, onSectionChange }) {
                     />
                   </div> */}
                 </div>
+
                 <p className="mt-3 mx-2 text-sm text-[#0057B7]">
-                  {limitText(p.excerpt)}
+                  {getPreviewText(p?.body, 120)}
                 </p>
               </div>
             </div>

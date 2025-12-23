@@ -353,29 +353,18 @@ function CustomyoutubeVideo({ videoData }) {
                 )}
 
                 {/* Views and Date */}
-                {(videoData?.views || videoData?.timeAgo) && (
+                {videoData?.views && (
                   <div
                     className={`flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-6 ${
                       i18n.language === "ar" ? "flex-row-reverse" : ""
                     }`}
                   >
                     <div className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-                      {videoData?.views && (
-                        <>
-                          <span>
-                            {t("Views")}: {videoData?.views}
-                          </span>
-                          {(videoData?.timeAgo &&
-                            videoData?.timeAgo.trim() !== "") ||
-                          videoData?.created_at ? (
-                            <span>•</span>
-                          ) : null}
-                        </>
-                      )}
-                      {videoData?.timeAgo &&
-                      videoData?.timeAgo.trim() !== "" ? (
-                        <span>{videoData?.timeAgo}</span>
-                      ) : videoData?.created_at ? (
+                      <span>
+                        {t("Views")}: {videoData?.views}
+                      </span>
+
+                      {videoData?.created_at ? (
                         <span>
                           {t("Published")}:{" "}
                           {videoData?.created_at?.split(" ")[0]}

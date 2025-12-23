@@ -72,14 +72,6 @@ function VideoReplies({ data, initiallyOpen = false }) {
                     <span className="font-medium text-gray-900 text-sm">
                       {r.writer || t("User", { defaultValue: "User" })}
                     </span>
-                    {r.timeAgo && (
-                      <span className="text-gray-500">{r.timeAgo}</span>
-                    )}
-                    {r.edited && (
-                      <span className="text-gray-400">
-                        ({t("edited", { defaultValue: "edited" })})
-                      </span>
-                    )}
                   </div>
                   {r.text && (
                     <p className="mt-1 text-[15px] text-gray-800 leading-relaxed">

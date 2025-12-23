@@ -1,19 +1,9 @@
 import React from "react";
 
 import { useTranslation } from "react-i18next";
-import {
-  Star,
-  Calendar,
-  User,
-  BookOpen,
-  Globe,
-  MapPin,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
-import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
+import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
 
 function FilteredResults({
   data,
@@ -105,7 +95,7 @@ function FilteredResults({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {data?.map((item) => (
               <div key={item.id}>
-                <GuidingReadingcard item={item} />
+                <GlobalCard item={item} />
               </div>
             ))}
           </div>

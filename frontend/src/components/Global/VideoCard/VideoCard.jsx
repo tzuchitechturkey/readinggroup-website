@@ -94,7 +94,7 @@ const VideoCard = ({ item, bigCart, className = "" }) => {
                 i18n?.language === "ar" ? "right-7" : "left-7"
               } px-2`}
             >
-              <h3 className="text-white font-extrabold text-2xl group-hover:text-blue-400 transition-colors drop-shadow-lg">
+              <h3 className="text-white font-extrabold text-2xl transition-colors drop-shadow-lg">
                 {item?.title}
               </h3>
             </div>

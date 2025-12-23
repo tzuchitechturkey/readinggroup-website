@@ -238,7 +238,7 @@ function VideosList({ onSectionChange }) {
       isWeeklyMomentFilter !== null
         ? { is_weekly_moment: isWeeklyMomentFilter }
         : {};
-    getVideoData(0, "", statusFilter, filters);
+    getVideoData(currentPage - 1, searchTerm, statusFilter, filters);
   }, [update, statusFilter, isWeeklyMomentFilter]);
 
   return (

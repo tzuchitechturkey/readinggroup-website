@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Calendar, Clock, User, Tag, FileText, Eye, Edit3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -9,11 +9,20 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
+import HtmlContent from "@/components/Global/HtmlContent/HtmlContent";
 
 function PostDetails({ post, onClose, onEdit, fromContent = false }) {
   const { t } = useTranslation();
   const [api, setApi] = useState(null);
   const [current, setCurrent] = useState(0);
+
+  // Convert HTML/Editor content to plain text
+  const stripHtmlTags = (html) => {
+    if (!html) return "";
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
   // Track carousel slide changes
   useEffect(() => {
     if (!api) return;
@@ -196,17 +205,6 @@ function PostDetails({ post, onClose, onEdit, fromContent = false }) {
           </div>
         </div>
 
-        {/* Excerpt */}
-        {post.excerpt && (
-          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-            <h4 className="font-semibold text-[#1D2630] mb-2 flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              {t("Excerpt")}
-            </h4>
-            <p className="text-gray-700 leading-relaxed">{post.excerpt}</p>
-          </div>
-        )}
-
         {/* Body Content Preview */}
         {post.body && (
           <div>
@@ -216,9 +214,7 @@ function PostDetails({ post, onClose, onEdit, fromContent = false }) {
             </h4>
             <div className="bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
               <p className="text-gray-700 leading-relaxed text-sm">
-                {post.body.length > 300
-                  ? post.body.substring(0, 300) + "..."
-                  : post.body}
+                <HtmlContent html={post.body} />
               </p>
             </div>
           </div>
@@ -327,7 +323,7 @@ function PostDetails({ post, onClose, onEdit, fromContent = false }) {
               <span className="text-gray-600">{t("Content Length")}:</span>
               <span className="font-medium">
                 {post.body
-                  ? `${post.body.length} ${t("characters")}`
+                  ? `${stripHtmlTags(post.body).length} ${t("characters")}`
                   : t("No content")}
               </span>
             </div>

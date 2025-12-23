@@ -175,11 +175,11 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
     getCategoriesList();
   }, []);
   return (
-    <div rtl={i18n.language === "ar" ? "rtl" : "ltr"} className="w-full ">
+    <div rtl={i18n.language === "ar" ? "rtl" : "ltr"} className="w-full">
       {isLoading && <Loader />}
       {/* Start Search Header - الآن فوق الأقسام */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 py-5 flex justify-end">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-6xl">
           <SearchSecion
             setOpenFilterModal={setOpenFilterModal}
             setSearchValue={(value) => updateFilter("searchValue", value)}
@@ -197,7 +197,7 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
         <div className="flex flex-col lg:flex-row gap-4 ">
           {/* Start Sidebar Filters */}
 
-          <div className="hidden lg:flex w-full lg:w-80 min-h-screen mr-4">
+          <div className="hidden lg:flex w-full lg:w-80 min-h-[50vh] mr-4">
             <VideoFilter
               filters={filters}
               updateFilter={updateFilter}

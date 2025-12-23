@@ -11,7 +11,7 @@ import SearchSecion from "@/components/Global/SearchSecion/SearchSecion";
 import EventsFilter from "@/components/ForPages/Events/EventsFilter/EventsFilter";
 import {
   GetEventSections,
-  GetTop5EventsBySectionId,
+  // GetTop5EventsBySectionId,
   GetEvents,
   GetTopSections,
 } from "@/api/events";
@@ -19,12 +19,12 @@ import Loader from "@/components/Global/Loader/Loader";
 import { Button } from "@/components/ui/button";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function EventsFilterSections() {
+function EventsFilterSections({ mixEvents, topLiked }) {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [sectionsList, setSectionsList] = useState([]);
+  // const [sectionsList, setSectionsList] = useState([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [defaultSections, setDefaultSections] = useState({
     section1: { id: null, name: "", events: [], events_count: 0 },
@@ -33,11 +33,11 @@ function EventsFilterSections() {
   });
   const [filters, setFilters] = useState({
     search: "",
-    section: [],
+    // section: [],
     report_type: [],
     category: [],
     country: [],
-    writer: [],
+    // writer: [],
     language: [],
     happened_at: null,
   });
@@ -48,63 +48,61 @@ function EventsFilterSections() {
 
   const hasActiveFilters =
     makingSearch ||
-    (Array.isArray(filters.section) && filters.section.length > 0) ||
+    // (Array.isArray(filters.section) && filters.section.length > 0) ||
     (Array.isArray(filters.report_type) && filters.report_type.length > 0) ||
     (Array.isArray(filters.category) && filters.category.length > 0) ||
     (Array.isArray(filters.country) && filters.country.length > 0) ||
-    (Array.isArray(filters.writer) && filters.writer.length > 0) ||
+    // (Array.isArray(filters.writer) && filters.writer.length > 0) ||
     (Array.isArray(filters.language) && filters.language.length > 0) ||
     filters.happened_at !== null;
 
-  const loadSectionsList = async () => {
-    try {
-      const res = await GetEventSections(100, 0, "");
-      setSectionsList(res.data?.results || []);
-      return res.data?.results || [];
-    } catch (error) {
-      setErrorFn(error);
-      return [];
-    }
-  };
+  // const loadSectionsList = async () => {
+  //   try {
+  //     const res = await GetEventSections(100, 0, "");
+  //     setSectionsList(res.data?.results || []);
+  //     return res.data?.results || [];
+  //   } catch (error) {
+  //     setErrorFn(error);
+  //     return [];
+  //   }
+  // };
 
+  // const loadDefaultSections = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await GetTopSections();
+  //     const sections = res.data;
+
+  //     setDefaultSections({
+  //       section1: {
+  //         id: sections[0]?.section?.id,
+  //         name: sections[0]?.section?.name,
+  //         events: sections[0]?.events || [],
+  //         events_count: sections[0]?.events_count || 0,
+  //       },
+  //       section2: {
+  //         id: sections[1]?.section?.id,
+  //         name: sections[1]?.section?.name,
+  //         events: sections[1]?.events || [],
+  //         events_count: sections[1]?.events_count || 0,
+  //       },
+  //       section3: {
+  //         id: sections[2]?.section?.id,
+  //         name: sections[2]?.section?.name,
+  //         events: sections[2]?.events || [],
+  //         events_count: sections[2]?.events_count || 0,
+  //       },
+  //     });
+  //     // }
+  //   } catch (error) {
+  //     setErrorFn(error, t);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const updateFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
-
-  const loadDefaultSections = async () => {
-    setIsLoading(true);
-    try {
-      const res = await GetTopSections();
-      const sections = res.data;
-
-      setDefaultSections({
-        section1: {
-          id: sections[0]?.section?.id,
-          name: sections[0]?.section?.name,
-          events: sections[0]?.events || [],
-          events_count: sections[0]?.events_count || 0,
-        },
-        section2: {
-          id: sections[1]?.section?.id,
-          name: sections[1]?.section?.name,
-          events: sections[1]?.events || [],
-          events_count: sections[1]?.events_count || 0,
-        },
-        section3: {
-          id: sections[2]?.section?.id,
-          name: sections[2]?.section?.name,
-          events: sections[2]?.events || [],
-          events_count: sections[2]?.events_count || 0,
-        },
-      });
-      // }
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const fetchFilteredEvents = async (page = 1, searchVal = filters.search) => {
     setIsLoading(true);
     const offset = (page - 1) * limit;
@@ -118,11 +116,11 @@ function EventsFilterSections() {
       }
 
       // Convert section array to comma-separated string
-      if (Array.isArray(filters.section) && filters.section.length > 0) {
-        params.section = filters.section
-          .map((item) => item?.name || item)
-          .join(",");
-      }
+      // if (Array.isArray(filters.section) && filters.section.length > 0) {
+      //   params.section = filters.section
+      //     .map((item) => item?.name || item)
+      //     .join(",");
+      // }
 
       // Convert category array to comma-separated string
       if (
@@ -149,15 +147,15 @@ function EventsFilterSections() {
       }
 
       // Handle writer array - convert to comma-separated usernames
-      if (Array.isArray(filters.writer) && filters.writer.length > 0) {
-        const writerNames = filters.writer
-          .map((w) => w?.username)
-          .filter(Boolean)
-          .join(",");
-        if (writerNames) {
-          params.writer = writerNames;
-        }
-      }
+      // if (Array.isArray(filters.writer) && filters.writer.length > 0) {
+      //   const writerNames = filters.writer
+      //     .map((w) => w?.username)
+      //     .filter(Boolean)
+      //     .join(",");
+      //   if (writerNames) {
+      //     params.writer = writerNames;
+      //   }
+      // }
 
       // Convert language array to comma-separated string
       if (Array.isArray(filters.language) && filters.language.length > 0) {
@@ -165,7 +163,6 @@ function EventsFilterSections() {
       }
 
       if (filters.happened_at) params.happened_at = filters.happened_at;
-      console.log("Fetching events with params:", params);
       const res = await GetEvents(limit, offset, "published", params);
 
       if (page === 1) {
@@ -189,30 +186,30 @@ function EventsFilterSections() {
     fetchFilteredEvents(nextPage);
   };
 
-  const handleSortData = () => {
-    if (hasActiveFilters) {
-      setFilteredData((prevData) => ({
-        ...prevData,
-        results: [...prevData.results].reverse(),
-      }));
-    } else {
-      setDefaultSections((prev) => ({
-        section1: {
-          ...prev.section1,
-          events: [...prev.section1.events].reverse(),
-        },
-        section2: {
-          ...prev.section2,
-          events: [...prev.section2.events].reverse(),
-        },
-        section3: {
-          ...prev.section3,
-          events: [...prev.section3.events].reverse(),
-        },
-      }));
-    }
-    toast.success(t("Data Sorted!"));
-  };
+  // const handleSortData = () => {
+  //   if (hasActiveFilters) {
+  //     setFilteredData((prevData) => ({
+  //       ...prevData,
+  //       results: [...prevData.results].reverse(),
+  //     }));
+  //   } else {
+  //     setDefaultSections((prev) => ({
+  //       section1: {
+  //         ...prev.section1,
+  //         events: [...prev.section1.events].reverse(),
+  //       },
+  //       section2: {
+  //         ...prev.section2,
+  //         events: [...prev.section2.events].reverse(),
+  //       },
+  //       section3: {
+  //         ...prev.section3,
+  //         events: [...prev.section3.events].reverse(),
+  //       },
+  //     }));
+  //   }
+  //   toast.success(t("Data Sorted!"));
+  // };
   const onSearch = (searchVal) => {
     setCurrentPage(1);
     fetchFilteredEvents(1, searchVal);
@@ -224,22 +221,22 @@ function EventsFilterSections() {
       fetchFilteredEvents(1);
     }
   }, [
-    filters.section,
+    // filters.section,
     filters.report_type,
     filters.category,
     filters.country,
-    filters.writer,
+    // filters.writer,
     filters.language,
     filters.happened_at,
   ]);
   const handleClearFilters = () => {
     setFilters({
       search: "",
-      section: [],
+      // section: [],
       report_type: [],
       category: [],
       country: [],
-      writer: [],
+      // writer: [],
       language: [],
       happened_at: null,
     });
@@ -247,15 +244,14 @@ function EventsFilterSections() {
     setFilteredData({ count: 0, results: [] });
   };
   useEffect(() => {
-    loadDefaultSections();
-    loadSectionsList();
+    // loadDefaultSections();
+    // loadSectionsList();
   }, []);
 
   // Apply category filter from navigation state (only once)
   useEffect(() => {
     if (location.state?.selectedCategory && isInitialLoad) {
       const selectedCategory = location.state.selectedCategory;
-      console.log("Applying category from navigation state", selectedCategory);
       setFilters((prev) => ({
         ...prev,
         category: [selectedCategory],
@@ -276,7 +272,7 @@ function EventsFilterSections() {
           setOpenFilterModal={setOpenFilterModal}
           setSearchValue={(value) => updateFilter("search", value)}
           searchValue={filters.search}
-          handleSortData={handleSortData}
+          // handleSortData={handleSortData}
           setMakingSearch={setMakingSearch}
           onSearch={onSearch}
           hasActiveFilters={hasActiveFilters}
@@ -289,7 +285,7 @@ function EventsFilterSections() {
             <EventsFilter
               filters={filters}
               updateFilter={updateFilter}
-              sectionsList={sectionsList}
+              // sectionsList={sectionsList}
               hasActiveFilters={hasActiveFilters}
               handleClearFilters={handleClearFilters}
             />
@@ -328,7 +324,42 @@ function EventsFilterSections() {
               </div>
             ) : (
               <div className="space-y-3">
-                {defaultSections.section1.events?.length > 0 && (
+                {mixEvents?.length > 0 && (
+                  <div>
+                    <div className="mb-2">
+                      <h2 className="text-2xl font-bold text-text">
+                        {t("Mix Videos")}
+                      </h2>
+                    </div>
+                    <BrokenCarousel
+                      data={mixEvents}
+                      showArrows={mixEvents?.length > 4}
+                      cardName={EventCard}
+                      nextArrowClassname={"-right-5"}
+                      prevArrowClassname={"-left-5"}
+                    />
+                  </div>
+                )}
+
+                {/* Category Section */}
+                {topLiked.length > 0 && (
+                  <div className="">
+                    <div className="mb-2">
+                      <h2 className="text-2xl font-bold text-text">
+                        {t("Top Liked Videos")}
+                      </h2>
+                    </div>
+                    <BrokenCarousel
+                      data={topLiked}
+                      showArrows={topLiked.length > 4}
+                      cardName={EventCard}
+                      nextArrowClassname={"-right-5"}
+                      prevArrowClassname={"-left-5"}
+                    />
+                  </div>
+                )}
+
+                {/* {defaultSections.section1.events?.length > 0 && (
                   <div>
                     <div className="">
                       <h2 className="text-2xl font-bold text-text">
@@ -377,7 +408,7 @@ function EventsFilterSections() {
                       prevArrowClassname={"-left-5"}
                     />
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
@@ -392,7 +423,7 @@ function EventsFilterSections() {
         <EventsFilter
           filters={filters}
           updateFilter={updateFilter}
-          sectionsList={sectionsList}
+          // sectionsList={sectionsList}
         />
       </Modal>
       {/* End Mobile Modal  */}

@@ -4,16 +4,16 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
-import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
+import ContentPostsFilterSction from "@/components/Global/ContentPostsFilterSction/ContentPostsFilterSction";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import {
   GetContentCategories,
-  TopLikedContents,
+  // TopLikedContents,
   TopViewedContents,
-  GetItemsByCategoryId,
+  GetContentsByCategoryId,
 } from "@/api/contents";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
+import Contentcard from "@/components/Global/GlobalCard/GlobalCard";
 
 function ContentsPageContent() {
   const { t, i18n } = useTranslation();
@@ -21,8 +21,8 @@ function ContentsPageContent() {
   const [activeCategories, setActiveCategories] = useState([]);
   const [categoriesData, setCategoriesData] = useState({});
   const [topViewedData, setTopViewedData] = useState();
-  const [topLikedData, setTopLikedData] = useState();
   const [targetCategoryId, setTargetCategoryId] = useState(null);
+  // const [topLikedData, setTopLikedData] = useState();
 
   // Check if we need to scroll to a specific category
   useEffect(() => {
@@ -45,7 +45,7 @@ function ContentsPageContent() {
       const itemsMap = {};
       for (const category of active) {
         try {
-          const itemsRes = await GetItemsByCategoryId(category.id);
+          const itemsRes = await GetContentsByCategoryId(category.id);
           itemsMap[category.id] = itemsRes?.data?.results || [];
         } catch (error) {
           console.error(
@@ -70,19 +70,19 @@ function ContentsPageContent() {
     }
   };
 
-  const getTopLiked = async () => {
-    try {
-      const res = await TopLikedContents();
-      setTopLikedData(res?.data);
-    } catch (err) {
-      setErrorFn(err, t);
-    }
-  };
+  // const getTopLiked = async () => {
+  //   try {
+  //     const res = await TopLikedContents();
+  //     setTopLikedData(res?.data);
+  //   } catch (err) {
+  //     setErrorFn(err, t);
+  //   }
+  // };
 
   useEffect(() => {
     getActiveCategories();
     getTopViewed();
-    getTopLiked();
+    // getTopLiked();
   }, []);
 
   // Scroll to target category after data is loaded
@@ -126,14 +126,13 @@ function ContentsPageContent() {
       {/* End Header */}
 
       {/* Start Filter */}
-      <PostsFilterSction />
+      <ContentPostsFilterSction />
       {/* End Filter */}
-
       <div className="max-w-7xl mx-auto">
         {/* Start Weekly Moments */}
         <section
           id="week-topic-section"
-          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 "
         >
           <WeeklyList title={t("This Week's Contents")} type="content" />
         </section>
@@ -143,9 +142,8 @@ function ContentsPageContent() {
         {/* Start Top Viewed Section */}
         <section
           id="week-topic-section"
-          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6  "
         >
-          {/* <GuidedReading data={topViewedData} /> */}
           <div className="mt-12">
             <DynamicSection
               title={t("Top Viewed Contents")}
@@ -161,7 +159,7 @@ function ContentsPageContent() {
         {/* Start Show Active Categories */}
         <section
           id="week-topic-section"
-          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16"
+          className="mt-8 sm:mt-12 md:mt-16 px-4 sm:px-6   "
         >
           {activeCategories.map((category) => (
             <div
@@ -175,6 +173,8 @@ function ContentsPageContent() {
                 isSlider={true}
                 cardName={Contentcard}
                 propsToCard={{ fromContent: true }}
+                viewMore={categoriesData[category.id]?.length > 5}
+                viewMoreUrl={`/contents/category/${category.id}`}
               />
             </div>
           ))}

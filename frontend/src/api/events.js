@@ -20,6 +20,7 @@ export async function GetEvents(limit, offset, status, params = {}) {
     queryParams.append("is_weekly_moment", params.is_weekly_moment);
   return await axios.get(`/events/?${queryParams.toString()}`);
 }
+// /events/?limit=10&offset=0&status=published
 
 export async function CreateEvent(data) {
   return await axios.post(`/events/`, data);
@@ -41,14 +42,14 @@ export async function DeleteEventById(id) {
   return await axios.delete(`/events/${id}/`);
 }
 // Get All Item By cAteogir Id
-export async function GetItemsByCategoryId(categoryId, limit, offset) {
+export async function GetEventsByCategoryId(
+  categoryId,
+  limit = 10,
+  offset = 0
+) {
   return await axios.get(
     `/event-categories/${categoryId}/events/?limit=${limit}&offset=${offset}`
   );
-}
-// /top5-videos/
-export async function GetTop5Event() {
-  return await axios.get(`/events/top-viewed/?limit=5`);
 }
 
 export async function GetTopSections() {
@@ -146,9 +147,7 @@ export async function DeleteCommentEvent(data) {
 export async function GetTopEventsLiked() {
   return await axios.get(`/events/top-liked/`);
 }
-export async function GetTopEventsViewed() {
-  return await axios.get(`/events/top-viewed/`);
-}
+
 export async function GetTopEventsLastPosted() {
   return await axios.get(`/events/last-posted/`);
 }
@@ -156,7 +155,15 @@ export async function GetTopEventsCommented() {
   return await axios.get(`/events/top-commented/`);
 }
 
+export async function GetTop5ViewedEvent() {
+  return await axios.get(`/events/top-viewed/?limit=5`);
+}
+
 // Gettags
 export async function GetEventTags() {
   return await axios.get(`/events/tags/`);
+}
+// Random Published Videos
+export async function GetRandomPublishedEvents(limit, offset) {
+  return await axios.get(`/events/?limit=10&offset=0&status=published`);
 }

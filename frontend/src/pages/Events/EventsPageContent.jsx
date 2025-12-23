@@ -10,26 +10,65 @@ import EventCard from "@/components/Global/EventCard/EventCard";
 import {
   GetTopEventsLiked,
   GetEventCategories,
-  GetItemsByCategoryId,
+  GetEventsByCategoryId,
   GetEvents,
+  GetRandomPublishedEvents,
 } from "@/api/events";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { GetRandomPublishedVideos } from "@/api/videos";
 
 function EventsPageContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const [mixEvents, setMixEvents] = useState([]);
   const [topLiked, setTopLiked] = useState([]);
   const [weeklyList, setWeeklyList] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
   const [categoriesData, setCategoriesData] = useState({});
   const [targetCategoryId, setTargetCategoryId] = useState(null);
-  const getSuggestionsData = async () => {
+  const limit = 10;
+  const [hasMoreWeeklyData, setHasMoreWeeklyData] = useState(false);
+  const [weeklyOffset, setWeeklyOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [totalWeeklyCount, setTotalWeeklyCount] = useState(0);
+  const getMixEvents = async () => {
     try {
-      const res = await GetEvents(20, 0, "published", {
+      const res = await GetRandomPublishedEvents(10, 0);
+      setMixEvents(res.data?.results);
+    } catch (err) {
+      console.error("Failed to fetch top mix events:", err);
+    }
+  };
+  const getWeeklyEventData = async (offset = 0) => {
+    const isLoadMore = offset > 0;
+    if (isLoadMore) {
+      setIsLoadingMore(true);
+    }
+
+    try {
+      const res = await GetEvents(limit, offset, "published", {
         is_weekly_moment: true,
       });
-      setWeeklyList(res?.data?.results);
+
+      if (offset === 0) {
+        // Initial load
+        setWeeklyList(res?.data?.results || []);
+        setTotalWeeklyCount(res?.data?.count || 0);
+      } else {
+        // Load more
+        setWeeklyList((prev) => [...prev, ...(res?.data?.results || [])]);
+      }
+
+      // Calculate if there's more data
+      const newOffset = offset + (res?.data?.results?.length || 0);
+      setWeeklyOffset(newOffset);
+      setHasMoreWeeklyData(newOffset < (res?.data?.count || 0));
     } catch (err) {
-      console.log("Error fetching data", err);
+      setErrorFn(err, t);
+    } finally {
+      if (isLoadMore) {
+        setIsLoadingMore(false);
+      }
     }
   };
   const getTopLiked = async () => {
@@ -37,7 +76,7 @@ function EventsPageContent() {
       const res = await GetTopEventsLiked();
       setTopLiked(res.data);
     } catch (err) {
-      console.error("Error fetching data", err);
+      setErrorFn(err, t);
     }
   };
 
@@ -51,7 +90,7 @@ function EventsPageContent() {
       // Fetch items for each active category
       for (const category of active) {
         try {
-          const itemsRes = await GetItemsByCategoryId(category.id);
+          const itemsRes = await GetEventsByCategoryId(category.id);
           setCategoriesData((prev) => ({
             ...prev,
             [category.id]: itemsRes.data?.results || itemsRes.data || [],
@@ -89,42 +128,59 @@ function EventsPageContent() {
       }
     }
   }, [targetCategoryId, activeCategories]);
+  // Handle load more
+  const handleLoadMore = async () => {
+    await getWeeklyEventData(weeklyOffset);
+  };
   useEffect(() => {
     getTopLiked();
-    getSuggestionsData();
+    getMixEvents();
+    getWeeklyEventData();
     getActiveEventCategories();
   }, []);
   return (
     <div className="" dir={i18n?.language === "ar" ? "rtl" : "ltr"}>
       {/* Hero Slider */}
-      {/* <div>
-        <EventHeroSlider />
-      </div> */}
+      <div>
+        <EventHeroSlider
+          top1Event={weeklyList?.length ? weeklyList[0] : null}
+        />
+      </div>
       {/* End Hero Slider */}
 
       {/* Start Filter Section */}
-      <EventsFilterSections />
+      <EventsFilterSections mixEvents={mixEvents} topLiked={topLiked} />
       {/* End Filter Section */}
 
       <div className="max-w-7xl mx-auto">
         {/* Start This Week's Top Events */}
-        <DynamicSection
-          title={t("This Week's Top Events")}
-          titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5"
-          data={weeklyList}
-          isSlider={true}
-          cardName={EventCard}
-          viewMore={false}
-          viewMoreUrl="/contents"
-        />
-        <DynamicSection
-          title={t("Most Liked events")}
-          titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5 "
-          data={topLiked}
-          isSlider={true}
-          cardName={EventCard}
-          viewMore={false}
-        />
+        {weeklyList?.length ? (
+          <DynamicSection
+            title={t("This Weekly Events")}
+            titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5"
+            data={weeklyList}
+            isSlider={true}
+            cardName={EventCard}
+            viewMore={false}
+            // viewMoreUrl="/events"
+            enableLoadMore={hasMoreWeeklyData}
+            onLoadMore={handleLoadMore}
+            isLoadingMore={isLoadingMore}
+          />
+        ) : (
+          ""
+        )}
+        {/* {topLiked?.length && (
+          <DynamicSection
+            title={t("Most Liked events")}
+            titleClassName="text-lg sm:text-xl md:text-2xl lg:text-3xl mt-5 "
+            gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 px-2"
+            data={topLiked}
+            isSlider={false}
+            cardName={EventCard}
+            viewMore={false}
+          />
+        )} */}
         {/* End Suggestions you might like */}
 
         {/* Start Show Active Categories */}
@@ -140,6 +196,8 @@ function EventsPageContent() {
               data={categoriesData[category.id] || []}
               isSlider={true}
               cardName={EventCard}
+              viewMore={categoriesData[category.id]?.length > 5}
+              viewMoreUrl={`/events/category/${category.id}`}
             />
           </div>
         ))}

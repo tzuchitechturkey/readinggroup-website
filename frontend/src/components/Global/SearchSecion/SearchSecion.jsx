@@ -11,7 +11,7 @@ function SearchSecion({
   setSearchValue,
   setMakingSearch,
   searchValue,
-  handleSortData,
+  // handleSortData,
   onSearch,
   hasActiveFilters,
 }) {
@@ -83,7 +83,7 @@ function SearchSecion({
 
         {/* Start Sort && View Options */}
         <div className="w-full lg:col-span-2 flex  sm:flex-row lg:flex-row items-start sm:items-center lg:items-center gap-3 sm:gap-4 lg:gap-8">
-          {hasActiveFilters && (
+          {/* {hasActiveFilters && (
             <button
               onClick={() => {
                 handleSortData();
@@ -95,7 +95,7 @@ function SearchSecion({
               </span>
               <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             </button>
-          )}
+          )} */}
 
           {/* View Mode Toggle */}
           {/* <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">

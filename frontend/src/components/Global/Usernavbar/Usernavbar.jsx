@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 import { GetWebSiteInfo } from "@/api/info";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import defaultLogo from "@/assets/logo.jpg";
+import buildNavigationItems from "@/Utility/Navbar/buildNavigationItems";
 
 import UserIcons from "../UserIcons/UserIcons";
+import DesktopNavigation from "../DesktopNavigation/DesktopNavigation";
+import MobileSidebar from "../MobileSidebar/MobileSidebar";
 
 function Usernavbar() {
   const { t, i18n } = useTranslation();
@@ -15,6 +19,8 @@ function Usernavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [siteInfo, setSiteInfo] = useState({});
   const [expandedMenus, setExpandedMenus] = useState({});
+  const [categoryContents, setCategoryContents] = useState({});
+  const [loadingContents, setLoadingContents] = useState({});
 
   const fetchWebSiteInfo = async () => {
     try {
@@ -25,87 +31,9 @@ function Usernavbar() {
     }
   };
 
-  // Navigation items with dropdowns - built dynamically from siteInfo
-  const buildNavigationItems = () => {
-    const items = [
-      {
-        name: t("Home"),
-        href: "/",
-        hasDropdown: false,
-      },
-      {
-        name: t("Contents"),
-        href: "/contents",
-        hasDropdown: true,
-        subItems: (siteInfo?.content_categories || []).map((category) => ({
-          name: category.name,
-          href: "/contents",
-          categoryId: category.id,
-          scrollToId: `category-${category.id}`,
-        })),
-      },
-      {
-        name: t("Videos"),
-        scrollToId: "",
-        href: "/videos",
-        hasDropdown: true,
-        subItems: (siteInfo?.video_categories || []).map((category) => ({
-          name: category.name,
-          categoryId: category.id,
-          scrollToId: `category-${category.id}`,
-          href: "/videos",
-        })),
-      },
-      {
-        name: t("Cards & Photos"),
-        scrollToId: "",
-        href: "/cards-photos",
-        hasDropdown: true,
-        subItems: (siteInfo?.post_categories || []).map((category) => ({
-          name: category.name,
-          categoryId: category.id,
-          scrollToId: `category-${category.id}`,
-          href: "/cards-photos",
-        })),
-      },
-      {
-        name: t("Events & Community"),
-        scrollToId: "",
-        href: "/events",
-        hasDropdown: true,
-        subItems: (siteInfo?.event_categories || []).map((category) => ({
-          name: category.name,
-          categoryId: category.id,
-          scrollToId: `category-${category.id}`,
-          href: "/events",
-        })),
-      },
-      {
-        name: t("About Us"),
-        scrollToId: "",
-        href: "/about",
-        hasDropdown: true,
-        subItems: [
-          {
-            name: t("History"),
-            href: "/about",
-            tab: "history",
-          },
-          {
-            name: t("Our Team"),
-            href: "/about",
-            tab: "our_team",
-          },
-          {
-            name: t("Book of Study"),
-            href: "/about/book",
-            tab: "book_of_study",
-          },
-        ],
-      },
-    ];
-
-    return items;
+  // Check if item should open in new tab (for external links)
+  const shouldOpenInNewTab = (item, categoryType) => {
+    return categoryType === "event" && item.external_link;
   };
 
   const toggleMenu = () => {
@@ -118,10 +46,12 @@ function Usernavbar() {
 
   // Toggle submenu expansion for mobile
   const toggleMobileSubmenu = (menuName) => {
-    setExpandedMenus((prev) => ({
-      ...prev,
-      [menuName]: !prev[menuName],
-    }));
+    setExpandedMenus((prev) => {
+      if (prev[menuName]) {
+        return {};
+      }
+      return { [menuName]: true };
+    });
   };
 
   const handleNavClick = (e, item) => {
@@ -157,6 +87,7 @@ function Usernavbar() {
 
   // إغلاق القائمة عند تغيير حجم الشاشة إلى أكبر من lg
   useEffect(() => {
+    fetchWebSiteInfo();
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         // lg breakpoint
@@ -167,7 +98,6 @@ function Usernavbar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
   // منع التمرير في الخلفية عندما يكون الـ sidebar مفتوح
   useEffect(() => {
     if (isMenuOpen) {
@@ -199,23 +129,20 @@ function Usernavbar() {
     };
   }, [isMenuOpen]);
 
-  useEffect(() => {
-    fetchWebSiteInfo();
-  }, []);
+  const navigationItems = useMemo(
+    () => buildNavigationItems(t, siteInfo),
+    [t, siteInfo]
+  );
 
-  // Get navigation items dynamically
-  const navigationItems = buildNavigationItems();
-  // الشعار مع fallback
-  const logoSrc = siteInfo?.logo?.logo || defaultLogo;
   return (
-    <nav className="relative bg-white shadow-sm" dir={i18n.dir()}>
+    <nav className="relative  shadow-sm" dir={i18n.dir()}>
       <div className="  mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img
-                src={logoSrc}
+                src={siteInfo?.logo?.logo || defaultLogo}
                 alt="logo"
                 className="w-28 h-10 sm:w-36 sm:h-12 object-cover"
                 onError={(e) => {
@@ -228,88 +155,16 @@ function Usernavbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 mx-8">
-            <ul className="flex items-center ">
-              {navigationItems.map((item, idx) => (
-                <li key={idx} className="relative group">
-                  {item.hasDropdown ? (
-                    <>
-                      <NavLink
-                        to={item.href}
-                        onClick={(e) => {
-                          if (item.href === "/about") {
-                            localStorage.removeItem("aboutUsMainTab");
-                          }
-                          if (item.scrollToId) {
-                            handleNavClick(e, item);
-                          }
-                        }}
-                        className={({ isActive }) =>
-                          `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex gap-[2px] items-center ${
-                            isActive
-                              ? "border-b-2 border-primary text-primary"
-                              : "text-gray-700"
-                          }`
-                        }
-                      >
-                        {item.name}
-                        <svg
-                          className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </NavLink>
-                      {/* Dropdown Menu */}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div className="min-w-[240px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">
-                          <ul className="space-y-1">
-                            {item.subItems.map((subItem, subIdx) => (
-                              <li
-                                key={subIdx}
-                                className="relative group/submenu"
-                              >
-                                <Link
-                                  to={subItem.href}
-                                  onClick={(e) => handleNavClick(e, subItem)}
-                                  className="px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200 group/item relative flex items-center justify-between"
-                                >
-                                  <span className="flex items-center">
-                                    {subItem.name}
-                                  </span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <NavLink
-                      to={item.href}
-                      className={({ isActive }) =>
-                        `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
-                          isActive
-                            ? "border-b-2 border-primary text-primary"
-                            : "text-gray-700 hover:text-primary"
-                        }`
-                      }
-                    >
-                      {item.name}
-                    </NavLink>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-
+          <DesktopNavigation
+            navigationItems={navigationItems}
+            handleNavClick={handleNavClick}
+            categoryContents={categoryContents}
+            loadingContents={loadingContents}
+            setLoadingContents={setLoadingContents}
+            setCategoryContents={setCategoryContents}
+            t={t}
+            shouldOpenInNewTab={shouldOpenInNewTab}
+          />
           {/* Desktop User Icons */}
           <div className="hidden lg:flex lg:items-center">
             <UserIcons />
@@ -339,152 +194,21 @@ function Usernavbar() {
       </div>
 
       {/* Mobile Sidebar Menu */}
-      <div
-        className={`lg:hidden fixed inset-0 z-50 pointer-events-none ${
-          isMenuOpen ? "pointer-events-auto" : ""
-        }`}
-      >
-        {/* Overlay */}
-        <div
-          className={`fixed inset-0 bg-black transition-all duration-300 ease-in-out ${
-            isMenuOpen ? "bg-opacity-50 visible" : "bg-opacity-0 invisible"
-          }`}
-          onClick={closeMenu}
-        />
-
-        {/* Sidebar */}
-        <div
-          className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl border-l border-gray-100 transform transition-all duration-300 ease-in-out ${
-            isMenuOpen
-              ? "translate-x-0 opacity-100"
-              : "translate-x-full opacity-0"
-          }`}
-        >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <Link to="/" onClick={closeMenu} className="flex items-center">
-              <img
-                src={logoSrc}
-                alt="logo"
-                className="w-24 h-8 object-contain"
-                onError={(e) => {
-                  if (e.currentTarget.src !== defaultLogo) {
-                    e.currentTarget.src = defaultLogo;
-                  }
-                }}
-              />
-            </Link>
-            <button
-              onClick={closeMenu}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-            >
-              <HiX className="h-6 w-6" />
-            </button>
-          </div>
-
-          {/* Sidebar Content */}
-          <div className="flex flex-col h-full">
-            {/* Navigation Links */}
-            <nav className="flex-1 px-6 py-8 space-y-3">
-              <div className="mb-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                  {t("Navigation")}
-                </h3>
-              </div>
-              {navigationItems.map((item, idx) => (
-                <div key={idx}>
-                  {item.hasDropdown ? (
-                    <>
-                      <button
-                        onClick={() => toggleMobileSubmenu(item.name)}
-                        className={`w-full flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden ${
-                          expandedMenus[item.name]
-                            ? "bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/25"
-                            : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-primary"
-                        }`}
-                      >
-                        <span>{item.name}</span>
-                        <svg
-                          className={`w-5 h-5 transition-transform duration-200 ${
-                            expandedMenus[item.name] ? "rotate-180" : ""
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-
-                      {/* Mobile Submenu */}
-                      {expandedMenus[item.name] && (
-                        <div className="mt-2 ml-4 space-y-2 bg-gray-50 rounded-lg p-3">
-                          {item.subItems.map((subItem, subIdx) => (
-                            <NavLink
-                              key={subIdx}
-                              to={subItem.href}
-                              onClick={(e) => {
-                                handleNavClick(e, subItem);
-                                closeMenu();
-                              }}
-                            >
-                              {({ isActive }) => (
-                                <div
-                                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                    isActive
-                                      ? "bg-primary text-white"
-                                      : "text-gray-700 hover:bg-white hover:text-primary"
-                                  }`}
-                                >
-                                  {subItem.name}
-                                </div>
-                              )}
-                            </NavLink>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <NavLink to={item.href} onClick={closeMenu}>
-                      {({ isActive }) => (
-                        <div
-                          className={`group flex items-center px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 relative overflow-hidden ${
-                            isActive
-                              ? "bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/25"
-                              : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 hover:text-primary"
-                          }`}
-                        >
-                          <span className="relative z-10">{item.name}</span>
-                          {isActive && (
-                            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white/30 rounded-l-full" />
-                          )}
-                        </div>
-                      )}
-                    </NavLink>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            {/* Sidebar Footer with User Icons */}
-            <div className="border-t border-gray-100 bg-gradient-to-r from-gray-50 to-blue-50/30 p-6">
-              <div className="text-center mb-4">
-                <p className="text-xs text-gray-500 font-medium">
-                  {t("Quick Access")}
-                </p>
-              </div>
-              <div className="flex items-center justify-center space-x-4">
-                <UserIcons />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MobileSidebar
+        siteInfo={siteInfo}
+        isMenuOpen={isMenuOpen}
+        closeMenu={closeMenu}
+        navigationItems={navigationItems}
+        t={t}
+        expandedMenus={expandedMenus}
+        toggleMobileSubmenu={toggleMobileSubmenu}
+        categoryContents={categoryContents}
+        handleNavClick={handleNavClick}
+        shouldOpenInNewTab={shouldOpenInNewTab}
+        loadingContents={loadingContents}
+        setLoadingContents={setLoadingContents}
+        setCategoryContents={setCategoryContents}
+      />
     </nav>
   );
 }

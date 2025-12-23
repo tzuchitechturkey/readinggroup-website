@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
 import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
-import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
+import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -17,7 +17,6 @@ export default function HomeContent() {
   const [sliderData, setSliderData] = useState(null);
   const [top1Data, setTop1Data] = useState(null);
 
-  // استخدام useCallback لتجنب إعادة إنشاء الدوال في كل render
   const getSliderData = useCallback(async () => {
     try {
       const res = await HomeData();
@@ -36,7 +35,6 @@ export default function HomeContent() {
     }
   }, [t]);
 
-  // Parallel API calls بدلاً من sequential
   useEffect(() => {
     Promise.all([getSliderData(), getTop1Data()]).catch((err) => {
       setErrorFn(err, t);
@@ -44,7 +42,6 @@ export default function HomeContent() {
     localStorage.removeItem("redirectAfterLogin");
   }, [getSliderData, getTop1Data, t]);
 
-  // مemoized data mapping لتجنب إعادة الحسابات
   const filteredSections = useMemo(() => {
     if (!top1Data) return [];
 
@@ -88,7 +85,7 @@ export default function HomeContent() {
           key === "video"
             ? VideoCard
             : key === "content"
-            ? GuidingReadingcard
+            ? GlobalCard
             : key === "post_card"
             ? WeeklyMomentsCard
             : key === "post_photo"

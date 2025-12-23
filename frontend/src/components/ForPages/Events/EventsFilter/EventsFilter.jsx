@@ -16,22 +16,22 @@ import { GetAuthors } from "@/api/authors";
 function EventsFilter({
   filters,
   updateFilter,
-  sectionsList,
+  // sectionsList,
   hasActiveFilters,
   handleClearFilters,
 }) {
   const { t, i18n } = useTranslation();
-  const [writersList, setWritersList] = useState([]);
+  // const [writersList, setWritersList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
 
-  const getWriters = async (searchVal = "") => {
-    try {
-      const res = await GetAuthors(10, 0, searchVal);
-      setWritersList(res?.data?.results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const getWriters = async (searchVal = "") => {
+  //   try {
+  //     const res = await GetAuthors(10, 0, searchVal);
+  //     setWritersList(res?.data?.results);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const loadCategories = async () => {
     try {
@@ -43,7 +43,7 @@ function EventsFilter({
   };
 
   useEffect(() => {
-    getWriters();
+    // getWriters();
     loadCategories();
   }, []);
 
@@ -51,7 +51,7 @@ function EventsFilter({
     <div className="w-full lg:w-80 flex-shrink-0">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
         {/* Start Section Filter */}
-        <div className="mb-2 lg:mb-5">
+        {/* <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
               {t("Sections")}
@@ -66,7 +66,7 @@ function EventsFilter({
             renderValue={(item) => t(item?.name) || item}
             searchable={true}
           />
-        </div>
+        </div> */}
         {/* End Section Filter */}
 
         {/* Start Category Filter */}
@@ -109,7 +109,7 @@ function EventsFilter({
         {/* End Category Filter */}
 
         {/* Start Writer Filter */}
-        <div className="mb-2 lg:mb-5">
+        {/* <div className="mb-2 lg:mb-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm sm:text-base font-medium text-gray-900">
               {t("Writer")}
@@ -136,7 +136,7 @@ function EventsFilter({
             showWriterAvatar={false}
             isRtl={i18n?.language === "ar" ? true : false}
           />
-        </div>
+        </div> */}
         {/* End Writer Filter */}
 
         {/* Start Country Filter */}

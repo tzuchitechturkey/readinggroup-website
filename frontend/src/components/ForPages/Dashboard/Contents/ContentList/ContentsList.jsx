@@ -112,7 +112,7 @@ const ContentsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getContentsData(0, "", statusFilter, isWeeklyMomentFilter);
+    getContentsData(currentPage - 1, search, statusFilter, isWeeklyMomentFilter);
   }, [update, statusFilter, isWeeklyMomentFilter]);
 
   // Sorting functionality

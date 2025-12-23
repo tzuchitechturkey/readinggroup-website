@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
 
-import { GetAllPositions, GetPositions } from "@/api/aboutUs";
+import { GetAllDepartments } from "@/api/aboutUs";
 
 function TabsSection({ activeTab, setActiveTab }) {
-  const [positionData, setPositionData] = useState([{ name: "All" }]);
-  const getPositions = async () => {
+  const [departmentsData, setDepartmentsData] = useState([{ name: "All" }]);
+  const getDepartments = async () => {
     try {
-      const res = await GetAllPositions();
-      setPositionData([{ name: "All" }, ...(res?.data?.results || [])]);
+      const res = await GetAllDepartments();
+      setDepartmentsData([{ name: "All" }, ...(res?.data?.results || [])]);
     } catch (err) {
       console.error(err);
     }
   };
   useEffect(() => {
-    getPositions();
+    getDepartments();
   }, []);
   return (
     <div className="mb-6 md:mb-8">
       {/* Desktop and Tablet Tabs */}
       <div className="hidden sm:flex flex-wrap border-b border-gray-200">
-        {positionData.map((tab) => (
+        {departmentsData.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.name)}
@@ -39,7 +39,7 @@ function TabsSection({ activeTab, setActiveTab }) {
       <div className="sm:hidden border-b border-gray-200">
         <div className="overflow-x-auto scrollbar-hide scroll-smooth">
           <div className="flex space-x-2 min-w-max px-4 pb-1">
-            {positionData.map((tab) => (
+            {departmentsData.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.name)}

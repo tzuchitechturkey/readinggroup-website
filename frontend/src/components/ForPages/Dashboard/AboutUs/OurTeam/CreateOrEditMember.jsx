@@ -4,11 +4,11 @@ import { Trash2, X, Tag, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { CreateTeam, EditTeamById, GetPositions } from "@/api/aboutUs";
+import { CreateTeam, EditTeamById, GetDepartments } from "@/api/aboutUs";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import { socialPlatforms } from "@/constants/constants";
-import { processImageFile, isHeicFile } from "@/Utility/imageConverter";
+import { processImageFile } from "@/Utility/imageConverter";
 
 const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
@@ -16,25 +16,24 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
 
   const [formData, setFormData] = useState({
     name: "",
-    position: "",
+    department: "",
     description: "",
     job_title: "",
     avatar: "",
     avatar_url: "",
     social_links: [{ name: "", url: "" }],
   });
-  const [positionsList, setPositionsList] = useState([]);
-  const [showPositionDropdown, setShowPositionDropdown] = useState(false);
-  const positionDropdownRef = useRef(null);
-  const [positionSearchValue, setPositionSearchValue] = useState("");
-
+  const [DepartmentsList, setDepartmentsList] = useState([]);
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
+  const departmentDropdownRef = useRef(null);
+  const [departmentSearchValue, setDepartmentSearchValue] = useState("");
   const [errors, setErrors] = useState({});
   // Reset form when modal opens/closes or member changes
 
-  const getPositions = async (searchVal) => {
+  const getDepartments = async (searchVal) => {
     try {
-      const res = await GetPositions(10, 0, searchVal);
-      setPositionsList(res?.data?.results || []);
+      const res = await GetDepartments(10, 0, searchVal);
+      setDepartmentsList(res?.data?.results || []);
     } catch (err) {
       console.error(err);
     }
@@ -45,7 +44,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       if (member?.id) {
         setFormData({
           name: member.name,
-          position: member.position,
+          department: member.position,
           description: member.description,
           job_title: member.job_title,
           avatar: member.avatar,
@@ -55,7 +54,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       } else {
         setFormData({
           name: "",
-          position: "",
+          department: "",
           description: "",
           job_title: "",
           avatar: "",
@@ -110,20 +109,20 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
-  // Handle position selection
-  const handlePositionSelect = (position) => {
+  // Handle  selection
+  const handleDepartmentSelect = (department) => {
     setFormData((prev) => ({
       ...prev,
-      position: position.id,
+      department: department.id,
     }));
-    setShowPositionDropdown(false);
-    setPositionSearchValue("");
+    setShowDepartmentDropdown(false);
+    setDepartmentSearchValue("");
 
-    // Clear position error if exists
-    if (errors.position) {
+    // Clear department error if exists
+    if (errors.department) {
       setErrors((prev) => ({
         ...prev,
-        position: "",
+        department: "",
       }));
     }
   };
@@ -162,8 +161,8 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       newErrors.name = t("Name is required");
     }
 
-    if (!formData.position) {
-      newErrors.position = t("Position is required");
+    if (!formData.department) {
+      newErrors.department = t("Department is required");
     }
     if (!formData.job_title.trim()) {
       newErrors.job_title = t("Job title is required");
@@ -189,7 +188,10 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     // Prepare data for submission
     const submitData = new FormData();
     submitData.append("name", formData.name);
-    submitData.append("position", formData.position?.id || formData.position);
+    submitData.append(
+      "position",
+      formData.department?.id || formData.department
+    );
     submitData.append("description", formData.description);
     submitData.append("job_title", formData.job_title);
 
@@ -220,19 +222,19 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   };
 
   useEffect(() => {
-    getPositions();
+    getDepartments();
   }, []);
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Close writer dropdown if clicked outside
 
-      // Close position dropdown if clicked outside
+      // Close department dropdown if clicked outside
       if (
-        positionDropdownRef.current &&
-        !positionDropdownRef.current.contains(event.target)
+        departmentDropdownRef.current &&
+        !departmentDropdownRef.current.contains(event.target)
       ) {
-        setShowPositionDropdown(false);
+        setShowDepartmentDropdown(false);
       }
     };
 
@@ -269,41 +271,43 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           )}
         </div>
 
-        {/* Start Position */}
+        {/* Start Department */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t("Position")} *
+            {t("Department")} *
           </label>
-          <div className="relative" ref={positionDropdownRef}>
+          <div className="relative" ref={departmentDropdownRef}>
             <button
               type="button"
-              onClick={() => setShowPositionDropdown(!showPositionDropdown)}
+              onClick={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
-                errors.position ? "border-red-500" : "border-gray-300"
+                errors.department ? "border-red-500" : "border-gray-300"
               }`}
             >
-              {formData?.position ? (
+              {formData?.department ? (
                 <>
                   <Tag className="w-5 h-5 text-blue-600" />
                   <div className="flex-1">
                     <div className="font-medium text-sm">
-                      {positionsList.find(
+                      {DepartmentsList.find(
                         (pos) =>
                           pos.id ===
-                          (formData.position?.id || formData.position)
-                      )?.name || t("Select Position")}
+                          (formData.department?.id || formData.department)
+                      )?.name || t("Select Department")}
                     </div>
                   </div>
                 </>
               ) : (
                 <>
                   <Tag className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-500">{t("Select Position")}</span>
+                  <span className="text-gray-500">
+                    {t("Select Department")}
+                  </span>
                 </>
               )}
             </button>
 
-            {showPositionDropdown && (
+            {showDepartmentDropdown && (
               <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
                 {/* Search Box */}
                 <div className="p-3 border-b border-gray-200 bg-gray-50">
@@ -311,23 +315,25 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
                     <div className="relative flex-1">
                       <input
                         type="text"
-                        value={positionSearchValue}
-                        onChange={(e) => setPositionSearchValue(e.target.value)}
+                        value={departmentSearchValue}
+                        onChange={(e) =>
+                          setDepartmentSearchValue(e.target.value)
+                        }
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            getCategories(positionSearchValue);
+                            getCategories(departmentSearchValue);
                           }
                         }}
-                        placeholder={t("Search positions...")}
+                        placeholder={t("Search departments...")}
                         className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       />
-                      {positionSearchValue && (
+                      {departmentSearchValue && (
                         <button
                           type="button"
                           onClick={() => {
-                            setPositionSearchValue("");
-                            getPositions("");
+                            setDepartmentSearchValue("");
+                            getDepartments("");
                           }}
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
@@ -338,7 +344,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        getPositions(positionSearchValue);
+                        getDepartments(departmentSearchValue);
                       }}
                       className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                       title={t("Search")}
@@ -350,22 +356,22 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
 
                 {/* Categories List */}
                 <div className="max-h-60 overflow-y-auto">
-                  {positionsList.length > 0 ? (
-                    positionsList.map((position) => (
+                  {DepartmentsList.length > 0 ? (
+                    DepartmentsList.map((department) => (
                       <button
-                        key={position.id}
+                        key={department.id}
                         type="button"
-                        onClick={() => handlePositionSelect(position)}
+                        onClick={() => handleDepartmentSelect(department)}
                         className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                       >
                         <Tag className="w-5 h-5 text-blue-600" />
                         <div className="flex-1">
                           <div className="font-medium text-sm">
-                            {position.name}
+                            {department.name}
                           </div>
-                          {position.description && (
+                          {department.description && (
                             <div className="text-xs text-gray-500">
-                              {position.description}
+                              {department.description}
                             </div>
                           )}
                         </div>
@@ -380,11 +386,11 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
               </div>
             )}
           </div>
-          {errors.position && (
-            <p className="text-red-500 text-xs mt-1">{errors.position}</p>
+          {errors.department && (
+            <p className="text-red-500 text-xs mt-1">{errors.department}</p>
           )}
         </div>
-        {/* End Position */}
+        {/* End Department */}
         {/* Start Job Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

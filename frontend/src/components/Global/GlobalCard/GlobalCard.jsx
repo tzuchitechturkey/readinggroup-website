@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, User } from "lucide-react";
 
-function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
+function GlobalCard({ item, showTags = true, fromContent = false }) {
   const [showAllTags, setShowAllTags] = React.useState(false);
   const handleShowMoreTags = (e) => {
     e.stopPropagation();
@@ -23,7 +23,7 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
     <div
       key={item?.id}
       onClick={handleCardClick}
-      className="rounded-2xl w-full max-w-[300px] mx-auto group cursor-pointer border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 relative"
+      className="rounded-2xl w-full max-w-[340px] md:max-w-[300px] mx-auto group cursor-pointer border border-gray-100 bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 relative"
     >
       {/* Start Tag" */}
       <div className="absolute z-10 top-3 left-3">
@@ -43,15 +43,15 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
                   #{tag}
                 </span>
               ))}
-              {!showAllTags && item?.tags.length > 3 && (
+              {/* {!showAllTags && item?.tags.length > 3 && (
                 <button
                   onClick={handleShowMoreTags}
                   className="px-4 py-1 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600 border-2 border-yellow-300 rounded-xl text-white text-sm font-bold shadow-md backdrop-blur-sm hover:scale-105 transition-transform"
                   style={{ minWidth: "90px" }}
                 >
-                  عرض المزيد
+                 {t("Show More")}
                 </button>
-              )}
+              )} */}
             </div>
           </div>
         )}
@@ -114,4 +114,4 @@ function GuidingReadingcard({ item, showTags = true, fromContent = false }) {
   );
 }
 
-export default GuidingReadingcard;
+export default GlobalCard;

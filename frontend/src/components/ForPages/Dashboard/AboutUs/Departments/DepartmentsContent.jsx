@@ -8,58 +8,57 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import {
-  GetPositions,
-  CreatePosition,
-  EditPositionById,
-  DeletePositionsById,
+  GetDepartments,
+  CreateDepartment,
+  EditDepartmentById,
+  DeleteDepartmentById,
 } from "@/api/aboutUs";
 
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 
-export default function PositionsContent({ onSectionChange }) {
+export default function DepartmentsContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [positions, setPositions] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingPosition, setEditingPosition] = useState(null);
+  const [editingDepartment, setEditingDepartments] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [form, setForm] = useState({ name: "", description: "" });
   const [errors, setErrors] = useState({});
 
-  const fetchPositions = async (searchValue = searchTerm) => {
+  const fetchDepartments = async (searchValue = searchTerm) => {
     setIsLoading(true);
     try {
       const res = searchValue
-        ? await GetPositions(100, 0, searchValue)
-        : await GetPositions(100, 0, "");
-      setPositions(res?.data?.results || []);
+        ? await GetDepartments(100, 0, searchValue)
+        : await GetDepartments(100, 0, "");
+      setDepartments(res?.data?.results || []);
     } catch (err) {
       console.error(err);
-      toast.error(t("Failed to load positions"));
+      toast.error(t("Failed to load departments"));
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPositions();
+    fetchDepartments();
   }, []);
 
   const openAddModal = () => {
-    setEditingPosition(null);
+    setEditingDepartments(null);
     setForm({ name: "", description: "" });
     setErrors({});
     setShowModal(true);
   };
 
-  const openEditModal = (position) => {
-    setEditingPosition(position);
+  const openEditModal = (department) => {
+    setEditingDepartments(department);
     setForm({
-      name: position.name || "",
-      description: position.description || "",
+      name: department.name || "",
+      description: department.description || "",
     });
     setErrors({});
     setShowModal(true);
@@ -96,15 +95,15 @@ export default function PositionsContent({ onSectionChange }) {
     }
 
     try {
-      if (editingPosition && editingPosition.id) {
-        await EditPositionById(editingPosition.id, form);
-        toast.success(t("Position updated"));
+      if (editingDepartment && editingDepartment.id) {
+        await EditDepartmentById(editingDepartment.id, form);
+        toast.success(t("Department updated"));
       } else {
-        await CreatePosition(form);
-        toast.success(t("Position created"));
+        await CreateDepartment(form);
+        toast.success(t("Department created"));
       }
       setShowModal(false);
-      fetchPositions();
+      fetchDepartments();
     } catch (err) {
       console.error(err);
       toast.error(t("Operation failed"));
@@ -112,13 +111,13 @@ export default function PositionsContent({ onSectionChange }) {
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedPosition?.id) return;
+    if (!selectedDepartment?.id) return;
     try {
-      await DeletePositionsById(selectedPosition.id);
-      toast.success(t("Position deleted"));
+      await DeleteDepartmentById(selectedDepartment.id);
+      toast.success(t("Department deleted"));
       setShowDeleteModal(false);
-      setSelectedPosition(null);
-      fetchPositions();
+      setSelectedDepartment(null);
+      fetchDepartments();
     } catch (err) {
       console.error(err);
       toast.error(t("Delete failed"));
@@ -137,7 +136,7 @@ export default function PositionsContent({ onSectionChange }) {
         onBack={() => {
           onSectionChange("dashboard");
         }}
-        page={t("Positions")}
+        page={t("Departments")}
       />
 
       {/* End Breadcrumb */}
@@ -146,18 +145,18 @@ export default function PositionsContent({ onSectionChange }) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
           <h2 className="text-lg font-medium text-[#1D2630]">
-            {t("Positions Management")}
+            {t("Departments Management")}
           </h2>
           <div className="flex items-center justify-between gap-1">
             <span className="text-xs md:text-sm text-gray-500">
-              {t("Total")}: {positions.length} {t("positions")}
+              {t("Total")}: {departments.length} {t("departments")}
             </span>
             <button
               onClick={openAddModal}
               className="flex items-center gap-2 text-xs md:text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
             >
               <Plus className="h-4 w-4" />
-              {t("Add Position")}
+              {t("Add Department")}
             </button>
           </div>
         </div>
@@ -167,17 +166,17 @@ export default function PositionsContent({ onSectionChange }) {
           <div className="relative max-w-md flex">
             <input
               type="text"
-              placeholder={t("Search Positions")}
+              placeholder={t("Search Departments...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg text-sm pr-8"
+              className={`flex-1 px-4 py-2 border border-gray-300 ${i18n?.language === "ar" ? "rounded-r-lg " : "rounded-l-lg "} text-sm pr-8`}
             />
 
             {searchTerm && (
               <button
                 onClick={() => {
                   setSearchTerm("");
-                  fetchPositions("");
+                  fetchDepartments("");
                 }}
                 className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
@@ -188,10 +187,10 @@ export default function PositionsContent({ onSectionChange }) {
             <button
               onClick={() => {
                 if (searchTerm.trim()) {
-                  fetchPositions();
+                  fetchDepartments();
                 }
               }}
-              className="px-4 py-2 bg-[#4680ff] text-white rounded-r-lg text-sm font-semibold hover:bg-blue-600"
+              className={` px-4 py-2 bg-[#4680ff] text-white ${i18n?.language === "ar" ? "rounded-l-lg " : "rounded-r-lg " } text-sm font-semibold hover:bg-blue-600`}
             >
               {t("Search")}
             </button>
@@ -229,17 +228,22 @@ export default function PositionsContent({ onSectionChange }) {
                 </tr>
               </thead>
               <tbody>
-                {positions.length > 0 ? (
-                  positions.map((position) => (
-                    <tr key={position.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-3 font-medium">{position.name}</td>
+                {departments.length > 0 ? (
+                  departments.map((department) => (
+                    <tr
+                      key={department.id}
+                      className="border-b hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-3 font-medium">
+                        {department.name}
+                      </td>
                       <td className="py-3 px-3 text-gray-600">
-                        {position.description}
+                        {department.description}
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex gap-2">
                           <button
-                            onClick={() => openEditModal(position)}
+                            onClick={() => openEditModal(department)}
                             className="p-1 rounded hover:bg-gray-100"
                             title={t("Edit")}
                           >
@@ -247,7 +251,7 @@ export default function PositionsContent({ onSectionChange }) {
                           </button>
                           <button
                             onClick={() => {
-                              setSelectedPosition(position);
+                              setSelectedDepartment(department);
                               setShowDeleteModal(true);
                             }}
                             className="p-1 rounded hover:bg-gray-100"
@@ -262,7 +266,7 @@ export default function PositionsContent({ onSectionChange }) {
                 ) : (
                   <tr>
                     <td colSpan="3" className="py-8 text-center text-gray-500">
-                      {t("No positions found")}
+                      {t("No departments found")}
                     </td>
                   </tr>
                 )}
@@ -276,7 +280,7 @@ export default function PositionsContent({ onSectionChange }) {
         <Modal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          title={editingPosition ? t("Edit Position") : t("Add Position")}
+          title={editingDepartment ? t("Edit Department") : t("Add Department")}
           width="600px"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -323,7 +327,7 @@ export default function PositionsContent({ onSectionChange }) {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
-                {editingPosition ? t("Save Changes") : t("Add Position")}
+                {editingDepartment ? t("Save Changes") : t("Add Department")}
               </button>
             </div>
           </form>
@@ -340,11 +344,11 @@ export default function PositionsContent({ onSectionChange }) {
             isOpen={showDeleteModal}
             onClose={() => setShowDeleteModal(false)}
             onConfirm={handleConfirmDelete}
-            title={t("Delete Position")}
+            title={t("Delete Department")}
             message={t(
-              "Are you sure you want to delete this position? This action cannot be undone."
+              "Are you sure you want to delete this department? This action cannot be undone."
             )}
-            itemName={selectedPosition?.name}
+            itemName={selectedDepartment?.name}
           />
         </Modal>
       </div>

@@ -3,23 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
-import CardsAndPhotosTabs from "@/components/ForPages/CardsAndPhotos/CardsAndPhotosTabs/CardsAndPhotosTabs";
+import PostsTabs from "@/components/ForPages/Posts/PostsTabs/PostsTabs";
 import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
-import WeekPhotos from "@/components/ForPages/Home/WeekPhotosSection/WeekPhotos";
-import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import Contentcard from "@/components/Global/Contentcard/Contentcard";
 import heroImg from "@/assets/eventsHero.png";
-import PostsFilterSction from "@/components/Global/PostsFilterSction/PostsFilterSction";
-import {
-  GetPostCategories,
-  GetItemsByCategoryId,
-  TopViewedPosts,
-} from "@/api/posts";
-import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
+import ContentPostsFilterSction from "@/components/Global/ContentPostsFilterSction/ContentPostsFilterSction";
+import { GetPostCategories, TopViewedPosts } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import GuidingReadingcard from "@/components/Global/Contentcard/Contentcard";
+import CustomGridCards from "@/components/ForPages/Posts/CustomGridCards/CustomGridCards";
+import Gallery from "@/components/ForPages/Posts/Gallery/Gallery";
 
-function CardsAndPhotosContent() {
+function PostsContent() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const [activeCategories, setActiveCategories] = useState([]);
@@ -39,24 +32,8 @@ function CardsAndPhotosContent() {
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
-
-      // Fetch items for each active category
-      // for (const category of active) {
-      //   try {
-      //     const itemsRes = await GetItemsByCategoryId(category.id);
-      //     // setCategoriesData((prev) => ({
-      //     //   ...prev,
-      //     //   [category.id]: itemsRes.data?.results || itemsRes.data || [],
-      //     // }));
-      //   } catch (err) {
-      //     console.error(
-      //       `Failed to fetch items for category ${category.id}:`,
-      //       err
-      //     );
-      //   }
-      // }
     } catch (err) {
-      console.error("Failed to fetch post categories:", err);
+      setErrorFn(err, t);
     }
   };
 
@@ -96,13 +73,13 @@ function CardsAndPhotosContent() {
       <div className="relative">
         <img
           src={heroImg}
-          alt="Guiding"
+          alt="Content"
           className="h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] w-full object-cover"
         />
       </div>
       <div className="max-w-7xl mx-auto">
         {/* Start Filter */}
-        <PostsFilterSction cardAndPhoto={true} />
+        <ContentPostsFilterSction cardAndPhoto={true} />
         {/* End Filter */}
 
         {/* Content container */}
@@ -115,7 +92,7 @@ function CardsAndPhotosContent() {
 
         {/* Start Tabs */}
         <div id="cards-tabs-section">
-          <CardsAndPhotosTabs />
+          <PostsTabs />
         </div>
         {/* End Tabs */}
 
@@ -127,45 +104,16 @@ function CardsAndPhotosContent() {
         <WeeklyList title={t("This Week's Cards")} type="card" />
         {/* End Weekly Moments */}
 
-        {/* Start Show Active Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 px-4 sm:px-6 md:px-8 lg:px-12 my-6 sm:my-8 md:my-10">
-          {/* Start Image */}
-          <div className="order-2 lg:order-1 mt-0 lg:mt-8">
-            {topViewedData?.[0] && <WeekPhotosCard item={topViewedData[0]} />}
-          </div>
-          {/* End Image */}
+        {/* Start Gallery */}
+        <Gallery />
+        {/* End Gallery */}
 
-          {/* Start Grid Cards */}
-          <div className="order-1 lg:order-2 px-0 sm:px-3 md:px-5 lg:px-7">
-            {/* Start Title */}
-            <h2
-              className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center ${
-                i18n?.language === "ar" ? "lg:text-right" : "lg:text-left"
-              } `}
-            >
-              {t("This Week's Top Cards")}
-            </h2>
-            {/* End Title */}
-
-            {/* Start Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12">
-              {topViewedData?.slice(1, 5).map((item, index) => (
-                <div
-                  key={index}
-                  className="transform hover:scale-105 transition-transform duration-200"
-                >
-                  <GuidingReadingcard item={item} />
-                </div>
-              ))}
-            </div>
-            {/* End Cards */}
-          </div>
-          {/* End Grid Cards */}
-        </div>
-        {/* End Show Active Categories */}
+        {/* Start Grid Items */}
+        <CustomGridCards topViewedData={topViewedData} i18n={i18n} t={t} />
+        {/* End Grid Items */}
       </div>
     </div>
   );
 }
 
-export default CardsAndPhotosContent;
+export default PostsContent;

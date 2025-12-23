@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Save, X, User, Tag, Search, Upload, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +38,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
-    excerpt: "",
+    // excerpt: "",
     body: "",
     writer: "",
     writer_avatar: "",
@@ -106,7 +108,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       const initialData = {
         title: content?.title || "",
         subtitle: content?.subtitle || "",
-        excerpt: content?.excerpt || "",
+        // excerpt: content?.excerpt || "",
         body: content?.body || "",
         writer: content?.writer || "",
         writer_avatar: content?.writer_avatar || "",
@@ -121,7 +123,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         images_url: content?.images_url || [],
         metadata: content?.metadata || "",
         country: content?.country || "",
-        attachments: content?.attachments || [],
+        attachments: content?.attachments_data || content?.attachments || [],
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -278,9 +280,9 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       newErrors.subtitle = t("Subtitle is required");
     }
 
-    if (!formData.excerpt.trim()) {
-      newErrors.excerpt = t("Excerpt is required");
-    }
+    // if (!formData.excerpt.trim()) {
+    //   newErrors.excerpt = t("Excerpt is required");
+    // }
 
     if (!formData.body.trim()) {
       newErrors.body = t("Body content is required");
@@ -341,7 +343,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     // Add all text fields
     contentData.append("title", formData.title);
     contentData.append("subtitle", formData.subtitle);
-    contentData.append("excerpt", formData.excerpt);
+    // contentData.append("excerpt", formData.excerpt);
     contentData.append("body", formData.body);
     contentData.append("writer", formData.writer);
     contentData.append(
@@ -410,7 +412,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     getWriters();
     getCategories();
@@ -784,7 +785,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">
-                              {attachment.title}
+                              {attachment.file_name}
                             </p>
                             {attachment.file && (
                               <a
@@ -1359,7 +1360,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         </div>
 
         {/* Excerpt - Full Width */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("Excerpt")} *
           </label>
@@ -1381,23 +1382,44 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
             {Math.ceil(formData.excerpt.split(" ").length / 60)}{" "}
             {t("minute(s) read")}
           </p>
-        </div>
+        </div> */}
 
         {/* Body Content - Full Width */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("Body Content")} *
           </label>
-          <textarea
-            name="body"
-            value={formData.body}
-            onChange={handleInputChange}
-            rows={8}
-            placeholder={t("Enter the full content of the content")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.body ? "border-red-500" : "border-gray-300"
-            }`}
+          <CKEditor
+            editor={ClassicEditor}
+            data={formData.body}
+            config={{
+              placeholder: t("Enter the full content of the content"),
+              language: i18n.language === "ar" ? "ar" : "en",
+              // Custom upload adapter to suppress filerepository-no-upload-adapter error.
+              extraPlugins: [MyCustomUploadAdapterPlugin],
+              // Optional: remove plugins that may try to upload to server automatically.
+              removePlugins: [
+                // If build contains these and you don't want server upload.
+                "MediaEmbedToolbar",
+              ],
+            }}
+            onChange={(event, editor) => {
+              const data = editor.getData();
+              setFormData((prev) => ({ ...prev, body: data }));
+              if (errors.body) {
+                setErrors((prev) => ({ ...prev, body: "" }));
+              }
+            }}
+            // onBlur={() => {
+            //   if (!formData.body.trim()) {
+            //     setErrors((prev) => ({
+            //       ...prev,
+            //       body: t("Body content is required"),
+            //     }));
+            //   }
+            // }}
           />
+
           {errors.body && (
             <p className="text-red-500 text-xs mt-1">{errors.body}</p>
           )}
@@ -1563,5 +1585,32 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     </div>
   );
 }
+// CKEditor custom upload adapter plugin (Base64 inline images)
+function MyCustomUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new Base64UploadAdapter(loader);
+  };
+}
 
+class Base64UploadAdapter {
+  constructor(loader) {
+    this.loader = loader;
+  }
+  upload() {
+    return this.loader.file.then(
+      (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            resolve({ default: reader.result });
+          };
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
+        })
+    );
+  }
+  abort() {
+    // No special abort handling needed for Base64 conversion.
+  }
+}
 export default CreateOrEditContent;
