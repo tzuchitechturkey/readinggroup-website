@@ -1,10 +1,12 @@
 from accounts.serializers import UserSerializer
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .helpers import AbsoluteURLSerializer, get_account_user
+from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     Comments,
     Content,
@@ -342,6 +344,39 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
         file_fields = ("thumbnail",)
     
+    def create(self, validated_data):
+        youtube_url = validated_data.get("video_url")
+        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
+        should_enrich = bool(youtube_url and api_key)
+
+        if should_enrich:
+            try:
+                info = fetch_video_info(youtube_url, api_key)
+            except YouTubeAPIError:
+                info = None
+            else:
+                if not validated_data.get("title"):
+                    validated_data["title"] = info.title
+                if not validated_data.get("description"):
+                    validated_data["description"] = info.description
+                if not validated_data.get("duration"):
+                    validated_data["duration"] = info.duration_formatted
+                if not validated_data.get("language") and info.default_language:
+                    validated_data["language"] = info.default_language
+                if not validated_data.get("reference_code"):
+                    validated_data["reference_code"] = info.video_id
+                if not validated_data.get("thumbnail_url"):
+                    thumbnails = info.thumbnails or {}
+                    preferred_order = ("maxres", "high", "medium", "standard", "default")
+                    thumb_url = next(
+                        (thumbnails[size]["url"] for size in preferred_order if thumbnails.get(size) and thumbnails[size].get("url")),
+                        None,
+                    )
+                    if thumb_url:
+                        validated_data["thumbnail_url"] = thumb_url
+
+        return super().create(validated_data)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None

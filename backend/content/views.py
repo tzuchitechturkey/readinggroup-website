@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Count as DjCount
 from django.db.models import Count, Avg
 from django.contrib.contenttypes.models import ContentType
@@ -76,6 +77,7 @@ from .serializers import (
     BookSerializer,
     BookCategorySerializer,
 )
+from .youtube import YouTubeAPIError, fetch_video_info
 from .views_helpers import(
     BaseContentViewSet,
     BaseCRUDViewSet,
@@ -99,6 +101,35 @@ class VideoViewSet(BaseContentViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @action(detail=False, methods=("post",), url_path="fetch-youtube-info")
+    def fetch_youtube_info(self, request):
+        video_url = request.data.get("video_url") or request.data.get("url")
+        if not video_url:
+            return Response({"detail": "video_url is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
+        if not api_key:
+            return Response({"detail": "YouTube API key is not configured."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        try:
+            info = fetch_video_info(video_url, api_key)
+        except YouTubeAPIError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_payload = {
+            "title": info.title,
+            "description": info.description,
+            "duration_seconds": info.duration_seconds,
+            "duration_formatted": info.duration_formatted,
+            "reference_code": info.video_id,
+            "default_language": info.default_language,
+            "channel_title": info.channel_title,
+            "thumbnails": info.thumbnails,
+            "published_at": info.published_at.isoformat() if info.published_at else None,
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

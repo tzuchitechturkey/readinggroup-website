@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, Upload, Youtube, X, Tag, Search, User } from "lucide-react";
+import { Save, Upload, Youtube, X, Tag, Search, User, Loader2 } from "lucide-react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useTranslation } from "react-i18next";
@@ -16,6 +16,7 @@ import {
   GetVideoCategories,
   // GetSeries,
   // GetSeasonsBySeriesId,
+  FetchYouTubeInfo,
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { languages, postStatusOptions } from "@/constants/constants";
@@ -41,6 +42,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [errors, setErrors] = useState({});
   const [castInput, setCastInput] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -57,6 +59,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     cast: [],
     tags: [],
     status: "",
+    duration: "",
   });
   // Initialize form data when editing
   useEffect(() => {
@@ -76,6 +79,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         cast: video?.cast || [],
         tags: video?.tags || [],
         status: video?.status || "",
+        duration: video?.duration || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -200,6 +204,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setHasChanges(true);
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -276,6 +281,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           ...prev,
           tags: [...prev.tags, tagsInput.trim()],
         }));
+        setHasChanges(true);
       }
       setTagsInput("");
 
@@ -295,6 +301,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
+    setHasChanges(true);
   };
 
   // Validate form
@@ -390,6 +397,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formDataToSend.append("description", formData?.description);
     formDataToSend.append("cast", JSON.stringify(formData?.cast));
     formDataToSend.append("tags", JSON.stringify(formData?.tags));
+    if (formData?.duration) {
+      formDataToSend.append("duration", formData?.duration);
+    }
     if (imagePreview instanceof File) {
       formDataToSend.append("thumbnail", imagePreview);
     }
@@ -415,6 +425,75 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       setErrorFn(err, t);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFetchYouTubeInfo = async () => {
+    const url = formData?.video_url?.trim();
+
+    if (!url) {
+      setErrors((prev) => ({
+        ...prev,
+        video_url: t("Video URL is required"),
+      }));
+      toast.error(t("Please enter a YouTube URL"));
+      return;
+    }
+
+    if (!isValidYouTubeUrl(url)) {
+      setErrors((prev) => ({
+        ...prev,
+        video_url: t("Please enter a valid YouTube URL"),
+      }));
+      toast.error(t("Please enter a valid YouTube URL"));
+      return;
+    }
+
+    setIsFetchingYoutube(true);
+
+    try {
+      const response = await FetchYouTubeInfo({ video_url: url });
+      const data = response?.data || {};
+
+      setFormData((prev) => {
+        const preferredOrder = ["maxres", "high", "standard", "medium", "default"];
+        const thumbnails = data?.thumbnails || {};
+        const fallbackThumb = preferredOrder
+          .map((key) => thumbnails?.[key]?.url)
+          .find((thumb) => Boolean(thumb));
+
+        const next = {
+          ...prev,
+          title: prev.title || data?.title || "",
+          description: prev.description || data?.description || "",
+          reference_code: prev.reference_code || data?.reference_code || "",
+          language: prev.language || data?.default_language || "",
+          duration: prev.duration || data?.duration_formatted || "",
+          thumbnail_url: prev.thumbnail_url || fallbackThumb || prev.thumbnail_url,
+          happened_at: prev.happened_at || data?.published_at || prev.happened_at,
+        };
+
+        if (!prev.thumbnail_url && fallbackThumb) {
+          setImagePreview(fallbackThumb);
+        }
+
+        return next;
+      });
+
+      setErrors((prev) => ({
+        ...prev,
+        title: "",
+        description: "",
+        reference_code: "",
+        language: "",
+        video_url: "",
+      }));
+      setHasChanges(true);
+      toast.success(t("YouTube details fetched successfully"));
+    } catch (err) {
+      setErrorFn(err, t);
+    } finally {
+      setIsFetchingYoutube(false);
     }
   };
 
@@ -967,11 +1046,28 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                   value={formData?.video_url}
                   onChange={handleInputChange}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className={`pl-10 ${
+                  className={`pl-10 pr-28 ${
                     errors.video_url ? "border-red-500" : ""
                   }`}
                 />
                 <Youtube className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleFetchYouTubeInfo}
+                  disabled={isFetchingYoutube}
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                >
+                  {isFetchingYoutube ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <Search className="h-3 w-3" />
+                      {t("Fetch info")}
+                    </span>
+                  )}
+                </Button>
               </div>
               {errors.video_url && (
                 <p className="text-red-500 text-xs mt-1">{errors.video_url}</p>

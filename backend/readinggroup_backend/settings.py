@@ -177,3 +177,5 @@ DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+YOUTUBE_API_KEY = "" # google api key
