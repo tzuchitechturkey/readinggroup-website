@@ -19,6 +19,7 @@ from .enums import (
     VideoStatus,
     LanguageChoices,
     )
+from .translation import auto_translate_instance, is_translation_enabled
 
 
 class TimestampedModel(models.Model):
@@ -28,6 +29,26 @@ class TimestampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class TranslatableModelMixin(models.Model):
+    """Mixin that groups translations across languages for a record."""
+
+    translation_group = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, auto_translate: bool = True, **kwargs):
+        is_create = self.pk is None
+        result = super().save(*args, **kwargs)
+        if (
+            is_create
+            and auto_translate
+            and is_translation_enabled()
+        ):
+            auto_translate_instance(self)
+        return result
         
 class Like(models.Model):
     """Generic like model for any entity (Video/Post/Event/...)"""
@@ -89,187 +110,6 @@ class LikableMixin(models.Model):
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
     
-class Authors(TimestampedModel):
-    """Authors for videos and posts."""
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    position = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
-    avatar_url = models.URLField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-            
-class Video(LikableMixin, TimestampedModel):
-    """Video content that powers the dashboard listings."""
-    title = models.CharField(max_length=255)
-    duration = models.CharField(max_length=64, blank=True, null=True)
-    category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    video_type = models.CharField(max_length=100, blank=True, null=True)
-    language = models.CharField(max_length=50)
-    thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
-    views = models.PositiveIntegerField(default=0)
-    status = models.CharField(max_length=16, choices=VideoStatus.choices, default=VideoStatus.PUBLISHED)
-    happened_at = models.DateTimeField(blank=True, null=True)
-    is_featured = models.BooleanField(default=False)
-    is_new = models.BooleanField(default=False)
-    reference_code = models.CharField(max_length=32, blank=True)
-    video_url = models.URLField()
-    cast = models.JSONField(default=list, blank=True)
-    season_name = models.ForeignKey('SeasonId', on_delete=models.SET_NULL, null=True, blank=True)
-    description = models.TextField(blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
-    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
-
-    @property
-    def is_new_computed(self) -> bool:
-        """Is the video considered 'new' within 24 hours of creation.
-        This is a computed property and does NOT replace the DB boolean field
-        `is_new`. Keeping the DB field allows admin filters and writes to work
-        as before while the API exposes the computed value.
-        """
-        if not self.created_at:
-            return False
-        try:
-            return timezone.now() - self.created_at <= timedelta(hours=24)
-        except Exception:
-            return False
-        
-    def save(self, *args, **kwargs):
-        """Ensure `is_new` is set to True on creation if within 24 hours of `created_at`.
-        We need to call super().save() first so `created_at` (auto_now_add) is
-        populated by the database. After the initial save we check the creation
-        time and update `is_new` if appropriate. We avoid infinite recursion by
-        using update_fields on the follow-up save.
-        """
-        is_create = self.pk is None
-        super().save(*args, **kwargs)
-        if is_create:
-            try:
-                if self.created_at and (timezone.now() - self.created_at) <= timedelta(hours=24):
-                    if not self.is_new:
-                        self.is_new = True
-                        super().save(update_fields=["is_new"])
-            except Exception:
-                pass
-            
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """Return top `limit` videos ordered by number of likes (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_likes_count` to
-        """
-        qs = (
-            cls.objects.filter(status=VideoStatus.PUBLISHED)
-            .annotate(annotated_likes_count=Count('likes'))
-            .order_by('-annotated_likes_count', '-created_at')
-        )
-        return qs
-    
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """Return top `limit` videos ordered by views."""
-        qs = (
-            cls.objects.filter(status=VideoStatus.PUBLISHED)
-            .order_by('-views', '-created_at')
-        )
-        return qs
-    
-    @classmethod
-    def top_commented(cls, limit: int = 5):
-        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_comments_count` to
-        """
-        qs = (
-            cls.objects.filter(status=VideoStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count('comments'))
-            .order_by('-annotated_comments_count', '-created_at')
-        )
-        return qs
-    
-    class Meta:
-        ordering = ("-happened_at", "-created_at")
-
-    def __str__(self) -> str:
-        return self.title
-    
-class Post(LikableMixin, TimestampedModel):
-    """Landing posts that appear across the application."""
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
-    excerpt = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255)
-    writer_avatar = models.URLField(blank=True)
-    category = models.ForeignKey('PostCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.PUBLISHED)
-    is_active = models.BooleanField(default=True)
-    views = models.PositiveIntegerField(default=0)
-    read_time = models.CharField(max_length=32, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    post_type = models.CharField(max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD)
-    language = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    camera_name = models.CharField(max_length=255, blank=True)
-    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
-    is_weekly_moment = models.BooleanField(default=False)
-    
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """
-        Return top `limit` posts where post_type is Card or Photo,
-        ordered by number of likes (descending) then created_at as tiebreaker.
-        """
-        qs = (
-            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
-            .annotate(annotated_likes_count=Count('likes'))
-            .order_by('-annotated_likes_count', '-created_at')
-        )
-        # Return grouped shape to match callers that expect a dict with 'card_photo'
-        return {"card_photo": qs}
-    
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """
-        The returned querysets are ordered by `-views` then `-created_at`.
-        The view will call `annotate_likes` on these querysets before serialization
-        so we intentionally do not annotate likes here.
-            """
-        card_photo_qs = (
-            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
-            .order_by('-views', '-created_at')
-        )
-        return {"card_photo": card_photo_qs}
-    
-    @classmethod
-    def top_commented_by_types(cls, types: list, limit: int = 5):
-        """
-        Return top `limit` posts filtered by `post_type` in `types`, ordered by
-        number of comments (descending) then created_at as tiebreaker.
-
-        The returned queryset is annotated with `annotated_comments_count` to
-        match the annotate_* naming convention used elsewhere.
-        """
-        qs = (
-            cls.objects.filter(post_type__in=types, status=PostStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count('comments'))
-            .order_by('-annotated_comments_count', '-created_at')
-        )
-        return qs
-    
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return self.title
-    
 class Event(LikableMixin, TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)
@@ -280,7 +120,7 @@ class Event(LikableMixin, TimestampedModel):
     category = models.ForeignKey('EventCategory', on_delete=models.SET_NULL, null=True, blank=True)
     report_type = models.CharField(max_length=50, choices=ReportType.choices, default=ReportType.NEWS)
     country = models.CharField(max_length=100, blank=True)
-    language = models.CharField(max_length=50)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     status = models.CharField(max_length=16, choices=EventStatus.choices, default=EventStatus.PUBLISHED)
     duration_minutes = models.PositiveIntegerField(blank=True, null=True)
     section = models.ForeignKey('EventSection', on_delete=models.SET_NULL, null=True, blank=True)
@@ -333,9 +173,191 @@ class Event(LikableMixin, TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
+class Authors(TimestampedModel):
+    """Authors for videos and posts."""
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    position = models.CharField(max_length=255, blank=True)
+    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
+    avatar_url = models.URLField(blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self) -> str:
+        return self.name
+            
+class Video(TranslatableModelMixin, LikableMixin, TimestampedModel):
+    """Video content that powers the dashboard listings."""
+    title = models.CharField(max_length=255)
+    duration = models.CharField(max_length=64, blank=True, null=True)
+    category = models.ForeignKey('VideoCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    video_type = models.CharField(max_length=100, blank=True, null=True)
+    thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True)
+    views = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=16, choices=VideoStatus.choices, default=VideoStatus.PUBLISHED)
+    happened_at = models.DateTimeField(blank=True, null=True)
+    is_featured = models.BooleanField(default=False)
+    is_new = models.BooleanField(default=False)
+    reference_code = models.CharField(max_length=32, blank=True)
+    video_url = models.URLField()
+    cast = models.JSONField(default=list, blank=True)
+    season_name = models.ForeignKey('SeasonId', on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    is_weekly_moment = models.BooleanField(default=False)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='comments')
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
+
+    @property
+    def is_new_computed(self) -> bool:
+        """Is the video considered 'new' within 24 hours of creation.
+        This is a computed property and does NOT replace the DB boolean field
+        `is_new`. Keeping the DB field allows admin filters and writes to work
+        as before while the API exposes the computed value.
+        """
+        if not self.created_at:
+            return False
+        try:
+            return timezone.now() - self.created_at <= timedelta(hours=24)
+        except Exception:
+            return False
+        
+    def save(self, *args, **kwargs):
+        """Ensure `is_new` is set to True on creation if within 24 hours of `created_at`.
+        We need to call super().save() first so `created_at` (auto_now_add) is
+        populated by the database. After the initial save we check the creation
+        time and update `is_new` if appropriate. We avoid infinite recursion by
+        using update_fields on the follow-up save.
+        """
+        auto_translate = kwargs.pop("auto_translate", True)
+        is_create = self.pk is None
+        super().save(*args, auto_translate=False, **kwargs)
+        if is_create:
+            try:
+                if self.created_at and (timezone.now() - self.created_at) <= timedelta(hours=24):
+                    if not self.is_new:
+                        self.is_new = True
+                        super().save(update_fields=["is_new"], auto_translate=False)
+            except Exception:
+                pass
+
+            if auto_translate and is_translation_enabled():
+                auto_translate_instance(self)
+            
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """Return top `limit` videos ordered by number of likes (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_likes_count` to
+        """
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')
+        )
+        return qs
     
-class Content(LikableMixin, TimestampedModel):
+    @classmethod
+    def top_viewed(cls, limit: int = 5):
+        """Return top `limit` videos ordered by views."""
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .order_by('-views', '-created_at')
+        )
+        return qs
+    
+    @classmethod
+    def top_commented(cls, limit: int = 5):
+        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
+        The returned queryset is annotated with `annotated_comments_count` to
+        """
+        qs = (
+            cls.objects.filter(status=VideoStatus.PUBLISHED)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')
+        )
+        return qs
+    
+    class Meta:
+        ordering = ("-happened_at", "-created_at")
+        unique_together = (("translation_group", "language"),)
+
+    def __str__(self) -> str:
+        return self.title
+    
+class Post(TranslatableModelMixin, LikableMixin, TimestampedModel):
     """Landing posts that appear across the application."""
+    title = models.CharField(max_length=255)
+    subtitle = models.CharField(max_length=255, blank=True)
+    excerpt = models.TextField(blank=True)
+    body = models.TextField(blank=True)
+    writer = models.CharField(max_length=255)
+    writer_avatar = models.URLField(blank=True)
+    category = models.ForeignKey('PostCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=16, choices=PostStatus.choices, default=PostStatus.PUBLISHED)
+    is_active = models.BooleanField(default=True)
+    views = models.PositiveIntegerField(default=0)
+    read_time = models.CharField(max_length=32, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    post_type = models.CharField(max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD)
+    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
+    image_url = models.URLField(max_length=1000, blank=True)
+    metadata = models.CharField(max_length=255, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    camera_name = models.CharField(max_length=255, blank=True)
+    comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
+    is_weekly_moment = models.BooleanField(default=False)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
+    
+    @classmethod
+    def top_liked(cls, limit: int = 5):
+        """
+        Return top `limit` posts where post_type is Card or Photo,
+        ordered by number of likes (descending) then created_at as tiebreaker.
+        """
+        qs = (
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
+            .annotate(annotated_likes_count=Count('likes'))
+            .order_by('-annotated_likes_count', '-created_at')
+        )
+        # Return grouped shape to match callers that expect a dict with 'card_photo'
+        return {"card_photo": qs}
+    
+    @classmethod
+    def top_viewed(cls, limit: int = 5):
+        """
+        The returned querysets are ordered by `-views` then `-created_at`.
+        The view will call `annotate_likes` on these querysets before serialization
+        so we intentionally do not annotate likes here.
+            """
+        card_photo_qs = (
+            cls.objects.filter(post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED)
+            .order_by('-views', '-created_at')
+        )
+        return {"card_photo": card_photo_qs}
+    
+    @classmethod
+    def top_commented_by_types(cls, types: list, limit: int = 5):
+        """
+        Return top `limit` posts filtered by `post_type` in `types`, ordered by
+        number of comments (descending) then created_at as tiebreaker.
+
+        The returned queryset is annotated with `annotated_comments_count` to
+        match the annotate_* naming convention used elsewhere.
+        """
+        qs = (
+            cls.objects.filter(post_type__in=types, status=PostStatus.PUBLISHED)
+            .annotate(annotated_comments_count=Count('comments'))
+            .order_by('-annotated_comments_count', '-created_at')
+        )
+    class Meta:
+        ordering = ("-created_at",)
+        unique_together = (("translation_group", "language"),)
+
+class Content(TranslatableModelMixin, LikableMixin, TimestampedModel):
+    """Landing posts that appear across the application."""
+
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=1000, blank=True)
     excerpt = models.TextField(blank=True)
@@ -356,51 +378,48 @@ class Content(LikableMixin, TimestampedModel):
     country = models.CharField(max_length=100, blank=True)
     comments = GenericRelation('Comments', content_type_field='content_type', object_id_field='object_id', related_query_name='posts')
     is_weekly_moment = models.BooleanField(default=False)
-    
-    
+
+    class Meta:
+        ordering = ("-created_at",)
+        unique_together = (("translation_group", "language"),)
+
+    def __str__(self) -> str:
+        return self.title
+
     @classmethod
     def top_liked(cls, limit: int = 5):
-        """
-        Return top `limit` Content ordered by number of likes (descending) then created_at as tiebreaker.
-        """
+        """Return top `limit` posts ordered by number of likes (descending)."""
         qs = (
             cls.objects.filter(status=ContentStatus.PUBLISHED)
             .annotate(annotated_likes_count=Count('likes'))
             .order_by('-annotated_likes_count', '-created_at')
         )
-        return qs
-    
+        return qs[:limit]
+
     @classmethod
     def top_viewed(cls, limit: int = 5):
-        """Return top `limit` Content ordered by views."""
+        """Return top `limit` posts ordered by views."""
         qs = (
             cls.objects.filter(status=ContentStatus.PUBLISHED)
             .order_by('-views', '-created_at')
         )
-        return qs
-    
+        return qs[:limit]
+
     @classmethod
     def top_commented(cls, limit: int = 5):
-        """Return top `limit` Content ordered by number of comments (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_comments_count` to
-        match the annotate_* naming convention used elsewhere.
-        """
+        """Return top `limit` posts ordered by number of comments (descending)."""
         qs = (
             cls.objects.filter(status=ContentStatus.PUBLISHED)
             .annotate(annotated_comments_count=Count('comments'))
             .order_by('-annotated_comments_count', '-created_at')
         )
-        return qs
-    
-    class Meta:
-        ordering = ("-created_at",)
-    def __str__(self) -> str:
-        return self.title
-    
-class Book(TimestampedModel):
+        return qs[:limit]
+
+class Book(TranslatableModelMixin, TimestampedModel):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     category = models.ForeignKey('BookCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     
     class Meta:
         ordering = ("name",)
@@ -443,7 +462,7 @@ class ContentAttachment(TimestampedModel):
     def __str__(self) -> str:
         return f"ContentAttachment<{self.content_id}:{self.pk}>"
 
-class TeamMember(TimestampedModel):
+class TeamMember(TranslatableModelMixin, TimestampedModel):
     """Team member details for the About Us section."""
     name = models.CharField(max_length=255)
     position = models.ForeignKey('PositionTeamMember', on_delete=models.SET_NULL, null=True, blank=True)
@@ -452,14 +471,16 @@ class TeamMember(TimestampedModel):
     avatar = models.ImageField(upload_to="team/avatars/", blank=True, null=True)
     avatar_url = models.URLField(blank=True)
     social_links = models.JSONField(default=list, blank=True)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
 
     class Meta:
         ordering = ("name",)
+        unique_together = (("translation_group", "language"),)
 
     def __str__(self) -> str:
         return self.name
 
-class HistoryEntry(LikableMixin, TimestampedModel):
+class HistoryEntry(TranslatableModelMixin, LikableMixin, TimestampedModel):
     """Timeline entries for the organisation history section."""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -467,9 +488,11 @@ class HistoryEntry(LikableMixin, TimestampedModel):
     image = models.ImageField(upload_to="history/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
     views = models.PositiveIntegerField(default=0)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
 
     class Meta:
         ordering = ("story_date", "title")
+        unique_together = (("translation_group", "language"),)
 
     def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
@@ -515,12 +538,8 @@ class SectionOrder(models.Model):
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
 
-class PostCategory(TimestampedModel):
-    """Categories for organizing posts with multi-language support.
-    
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
+class BaseTranslatableCategory(TranslatableModelMixin, TimestampedModel):
+    """Abstract base for category models with translation support."""
     key = models.CharField(max_length=100, db_index=True, default="default", help_text="Unique identifier for this category across all languages")
     name = models.CharField(max_length=100, help_text="Category name in the specified language")
     description = models.TextField(blank=True)
@@ -529,57 +548,13 @@ class PostCategory(TimestampedModel):
     language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
 
     class Meta:
+        abstract = True
         ordering = ("order", "-created_at")
-        unique_together = (('key', 'language'),)
+        unique_together = (("key", "language"),)
         indexes = [
             models.Index(fields=['key', 'language']),
         ]
-    
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if key is 'default'."""
-        if not self.pk and self.key == "default":
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-    
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-    
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-    
-    def __str__(self) -> str: 
-        return f"{self.name} ({self.language})"
-    
-class EventCategory(TimestampedModel):
-    """Categories for organizing events with multi-language support.
-    
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-    key = models.CharField(max_length=100, db_index=True, default="default", help_text="Unique identifier for this category across all languages")
-    name = models.CharField(max_length=100, help_text="Category name in the specified language")
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
-    language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
 
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (('key', 'language'),)
-        indexes = [
-            models.Index(fields=['key', 'language']),
-        ]
-    
     def save(self, *args, **kwargs):
         """Auto-generate unique key on creation if key is 'default'."""
         if not self.pk and self.key == "default":
@@ -602,148 +577,39 @@ class EventCategory(TimestampedModel):
         except cls.DoesNotExist:
             return None
     
-    def __str__(self) -> str: 
-        return f"{self.name} ({self.language})"
-    
-class ContentCategory(TimestampedModel):
-    """Categories for organizing content with multi-language support.
-    
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-    key = models.CharField(max_length=100, db_index=True, default="default", help_text="Unique identifier for this category across all languages")
-    name = models.CharField(max_length=100, help_text="Category name in the specified language")
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
-    language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (('key', 'language'),)
-        indexes = [
-            models.Index(fields=['key', 'language']),
-        ]
-    
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if key is 'default'."""
-        if not self.pk and self.key == "default":
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-    
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-    
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-    
-    def __str__(self) -> str: 
+    def __str__(self) -> str:
         return f"{self.name} ({self.language})"
 
-class VideoCategory(TimestampedModel):
-    """Categories for organizing videos with multi-language support.
-    
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-    key = models.CharField(max_length=100, db_index=True, default="default", help_text="Unique identifier for this category across all languages")
-    name = models.CharField(max_length=100, help_text="Category name in the specified language")
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
-    language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
-    
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (('key', 'language'),)
-        indexes = [
-            models.Index(fields=['key', 'language']),
-        ]
-    
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if key is 'default'."""
-        if not self.pk and self.key == "default":
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-    
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-    
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-    
-    def __str__(self) -> str: 
-        return f"{self.name} ({self.language})"
-    
-class BookCategory(TimestampedModel):
-    """Categories for organizing books with multi-language support.
-    
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-    key = models.CharField(max_length=100, db_index=True, default="default", help_text="Unique identifier for this category across all languages")
-    name = models.CharField(max_length=100, help_text="Category name in the specified language")
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0, help_text="Manual ordering (lower values appear first)")
-    language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
-    
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (('key', 'language'),)
-        indexes = [
-            models.Index(fields=['key', 'language']),
-        ]
-    
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if key is 'default'."""
-        if not self.pk and self.key == "default":
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-    
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-    
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-    
-    def __str__(self) -> str: 
-        return f"{self.name} ({self.language})"
+
+class PostCategory(BaseTranslatableCategory):
+    """Categories for organizing posts with multi-language support."""
+    pass
+
+
+class EventCategory(BaseTranslatableCategory):
+    """Categories for organizing events with multi-language support."""
+    pass
+
+
+class ContentCategory(BaseTranslatableCategory):
+    """Categories for organizing content with multi-language support."""
+    pass
+
+
+class VideoCategory(BaseTranslatableCategory):
+    """Categories for organizing videos with multi-language support."""
+    pass
+
+
+class BookCategory(BaseTranslatableCategory):
+    """Categories for organizing books with multi-language support."""
+    pass
     
 class SeasonTitle(models.Model):
     """Season and Title mapping for Videos."""
     name = models.CharField(max_length=255, blank=True, unique=True)
     description = models.TextField(blank=True)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
 
@@ -775,7 +641,7 @@ class PositionTeamMember(TimestampedModel):
     """Positions for Team Members."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
     def __str__(self) -> str: 
@@ -785,7 +651,7 @@ class EventSection(TimestampedModel):
     """Sections for Events."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
     def events(self):
@@ -800,6 +666,7 @@ class Comments(LikableMixin, TimestampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     text = models.CharField(max_length=1000)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
 
     class Meta:
         ordering = ("-created_at",)
@@ -811,6 +678,7 @@ class Reply(LikableMixin, TimestampedModel):
     comment = models.ForeignKey(Comments, related_name='replies', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.CharField(max_length=1000)
+    language = models.CharField(max_length=50, choices=LanguageChoices.choices)
 
     class Meta:
         ordering = ("-created_at",)
