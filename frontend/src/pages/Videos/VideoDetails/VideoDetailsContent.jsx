@@ -10,6 +10,7 @@ import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import { PatchVideoById } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Modal from "@/components/Global/Modal/Modal";
+import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
 
 function VideoDetailsContent({
   isOpen: externalIsOpen = true,
@@ -287,11 +288,18 @@ function VideoDetailsContent({
                   {t("Season")} · {videoItem?.season_name?.season_id}
                 </p>
               )}
-              <div
+              {/* <div
                 dangerouslySetInnerHTML={{
                   __html: videoItem?.description || "",
                 }}
                 className=" text-xs xs:text-sm sm:text-base md:text-lg text-gray-800 leading-relaxed mb-3 xs:mb-4"
+              /> */}
+
+              <ShowHideText
+                t={t}
+                text={videoItem?.description}
+                count={500}
+                allowHtml={true}
               />
               {/* {videoItem?.report_type
                   ? videoItem?.summary
@@ -304,26 +312,28 @@ function VideoDetailsContent({
             <div className="lg:col-span-1">
               <div className="space-y-3">
                 {/* Start Cast   */}
-                <div className="mb-4">
-                  <div className="flex items-center mb-2">
-                    <span className="font-medium text-gray-700">
-                      {t("Top Cast")}:
-                    </span>
-                  </div>
-                  <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
-                    {videoItem?.cast?.map((cas, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-200 text-xs cursor-pointer"
-                      >
-                        {cas}
+                {videoItem?.cast?.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="font-medium text-gray-700">
+                        {t("Top Cast")}:
                       </span>
-                    ))}
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                      {videoItem?.cast?.map((cas, index) => (
+                        <span
+                          key={index}
+                          className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full shadow-sm hover:bg-blue-50 transition-all duration-200 text-xs cursor-pointer"
+                        >
+                          {cas}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                {/* End Cast   */}
+                )}
+                {/* End Cast */}
 
-                {/* Start Tags   */}
+                {/* Start Tags */}
                 <div className="mb-4">
                   <div className="flex items-center mb-2">
                     <span className="font-medium text-gray-700">
@@ -352,12 +362,18 @@ function VideoDetailsContent({
                   </div>
                   <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
                     <span className="flex items-center gap-1 px-3 py-1 bg-green-50 text-green-800 rounded-full shadow-sm hover:bg-green-100 transition-all duration-200 text-xs cursor-pointer">
-                      {/* بدون أيقونة نقطة */}
                       {videoItem?.category?.name}
                     </span>
                   </div>
                 </div>
-                {/* End Category   */}
+                {/* End Category */}
+                {/* Start Duration */}
+                {videoData?.duration && (
+                  <span className="px-2 sm:px-3 py-1 bg-transparent border-[1px] border-gray-300 text-xs sm:text-sm rounded-full mb-4 inline-block">
+                    {videoData?.duration}
+                  </span>
+                )}
+                {/* End Duration */}
               </div>
             </div>
           </div>

@@ -1,4 +1,7 @@
+import ShowHideText from "../ShowHideText/ShowHideText";
+
 function HeroTitle({
+  t,
   i18n,
   h1Line1,
   h1Line2Prefix,
@@ -29,7 +32,7 @@ function HeroTitle({
           i18n?.language === "ar" ? "text-right" : "text-left"
         } max-w-2xl`}
       >
-        {description}
+        <ShowHideText text={description} t={t} count={150} allowHtml={true} />
       </p>
     </div>
   );

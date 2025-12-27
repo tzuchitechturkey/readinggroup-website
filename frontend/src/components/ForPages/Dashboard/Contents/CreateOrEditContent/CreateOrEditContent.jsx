@@ -343,7 +343,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     // Add all text fields
     contentData.append("title", formData.title);
     contentData.append("subtitle", formData.subtitle);
-    // contentData.append("excerpt", formData.excerpt);
     contentData.append("body", formData.body);
     contentData.append("writer", formData.writer);
     contentData.append(
@@ -356,6 +355,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
     contentData.append("tags", JSON.stringify(formData.tags));
     contentData.append("language", formData.language);
     contentData.append("country", formData.country);
+    // contentData.append("excerpt", formData.excerpt);
 
     // إضافة الصور كملفات (images) - يتم رفعها من الجهاز
     // هذه ستُحفظ في مفتاح images
