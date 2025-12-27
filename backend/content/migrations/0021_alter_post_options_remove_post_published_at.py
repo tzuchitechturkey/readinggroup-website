@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0020_tvprogram_views'),
+        ("content", "0020_tvprogram_views"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='post',
-            options={'ordering': ('-created_at',)},
+            name="post",
+            options={"ordering": ("-created_at",)},
         ),
         migrations.RemoveField(
-            model_name='post',
-            name='published_at',
+            model_name="post",
+            name="published_at",
         ),
     ]

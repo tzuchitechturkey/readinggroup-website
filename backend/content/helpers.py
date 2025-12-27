@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.db.models import Q
 from accounts.models import User as AccountUser
 
-#for serializers.py use
+
+# for serializers.py use
 def get_account_user(obj):
     """
     Given an object that may have a user-related attribute, attempt to
@@ -29,8 +30,8 @@ def get_account_user(obj):
             if isinstance(attr_value, str) and attr_value.strip():
                 try:
                     user = AccountUser.objects.filter(
-                        Q(username__iexact=attr_value) |
-                        Q(display_name__iexact=attr_value)
+                        Q(username__iexact=attr_value)
+                        | Q(display_name__iexact=attr_value)
                     ).first()
                     if user:
                         return user
@@ -40,6 +41,7 @@ def get_account_user(obj):
 
     # If no user is found,
     return None
+
 
 class AbsoluteURLSerializer(serializers.ModelSerializer):
     """Mixin that ensures file fields are returned as absolute URLs."""
@@ -59,4 +61,3 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
             if file_value:
                 data[field_name] = self._build_absolute_uri(file_value.url)
         return data
-        

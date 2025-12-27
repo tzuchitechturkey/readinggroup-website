@@ -24,11 +24,9 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
-import VideoDurationCell from "@/components/ForPages/Dashboard/Videos/VideoDurationCell/VideoDurationCell";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { DeleteVideoById, GetVideos, PatchVideoById } from "@/api/videos";
 
-import ShowVideoDetails from "../VideoDetails/VideoDetails";
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
 import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import VideoDetails from "../VideoDetails/VideoDetails";
@@ -438,7 +436,7 @@ function VideosList({ onSectionChange }) {
                 {getSortIcon("category")}
               </div>
             </TableHead>
-            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+            {/* <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
                 className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("video_type")}
@@ -446,7 +444,7 @@ function VideosList({ onSectionChange }) {
                 {t("Type")}
                 {getSortIcon("video_type")}
               </div>
-            </TableHead>
+            </TableHead> */}
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
                 className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
@@ -513,7 +511,7 @@ function VideosList({ onSectionChange }) {
                     {video.title}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
-                    • {t(video.language)} 
+                    • {t(video.language)}
                   </span>
                 </div>
               </TableCell>
@@ -522,13 +520,20 @@ function VideosList({ onSectionChange }) {
                   {video.category?.name}
                 </span>
               </TableCell>
-              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+              {/* <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
                   {t(video.video_type)}
                 </span>
-              </TableCell>
+              </TableCell> */}
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <VideoDurationCell videoUrl={video.video_url} />
+                <div className="flex flex-col items-center">
+                  <span className="font-medium">
+                    {video.duration ? video.duration : 0}
+                  </span>
+                  <span className="text-[#9FA2AA] text-[10px]">
+                    {t("minutes")}
+                  </span>
+                </div>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
@@ -667,7 +672,7 @@ function VideosList({ onSectionChange }) {
               {/* Start Middle Pages */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
-                
+
                 // حساب رقم الصفحة بناءً على الصفحة الحالية
                 if (currentPage <= 3) {
                   // إذا كنا في بداية الصفحات، اعرض 1, 2, 3, 4, 5

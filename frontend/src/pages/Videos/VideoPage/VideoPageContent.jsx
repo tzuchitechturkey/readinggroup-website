@@ -55,20 +55,6 @@ function VideoPageContent() {
       {/* Start Show Video */}
       <CustomyoutubeVideo videoData={videoData} />
       {/* End Show Video */}
-      <div className="max-w-7xl mx-auto">
-        {/* Start Content of a similar type */}
-        {/* <div className="bg-white">
-          <DynamicSection
-            title={t("Similar Content")}
-            titleClassName="text-[21px] sm:text-2xl md:text-3xl font-medium  "
-            data={top5VideoData}
-            isSlider={false}
-            cardName={VideoCard}
-            viewMoreUrl="/videos"
-          />
-        </div> */}
-        {/* End Content of a similar type */}
-      </div>
     </div>
   );
 }

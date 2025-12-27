@@ -76,20 +76,44 @@ class SampleContentBuilder:
         self.positions = self._upsert_by_name(
             PositionTeamMember,
             [
-                {"name": "Executive Director", "description": "Guides overall reading missions."},
-                {"name": "Program Lead", "description": "Oversees learning circles and facilitators."},
-                {"name": "Volunteer Coordinator", "description": "Connects volunteer leads across regions."},
-                {"name": "Storyteller in Residence", "description": "Captures impact stories."},
+                {
+                    "name": "Executive Director",
+                    "description": "Guides overall reading missions.",
+                },
+                {
+                    "name": "Program Lead",
+                    "description": "Oversees learning circles and facilitators.",
+                },
+                {
+                    "name": "Volunteer Coordinator",
+                    "description": "Connects volunteer leads across regions.",
+                },
+                {
+                    "name": "Storyteller in Residence",
+                    "description": "Captures impact stories.",
+                },
             ],
         )
 
         self.video_categories = self._upsert_by_name(
             VideoCategory,
             [
-                {"name": "Community Stories", "description": "Updates from global volunteers."},
-                {"name": "Education Highlights", "description": "Clips from reading classrooms."},
-                {"name": "Health Missions", "description": "Medical outreach spotlights."},
-                {"name": "Environmental Stewardship", "description": "Earth-friendly initiatives."},
+                {
+                    "name": "Community Stories",
+                    "description": "Updates from global volunteers.",
+                },
+                {
+                    "name": "Education Highlights",
+                    "description": "Clips from reading classrooms.",
+                },
+                {
+                    "name": "Health Missions",
+                    "description": "Medical outreach spotlights.",
+                },
+                {
+                    "name": "Environmental Stewardship",
+                    "description": "Earth-friendly initiatives.",
+                },
             ],
         )
 
@@ -106,7 +130,10 @@ class SampleContentBuilder:
             ContentCategory,
             [
                 {"name": "Impact Stories", "description": "Feature essays"},
-                {"name": "Volunteer Voices", "description": "First-person perspectives"},
+                {
+                    "name": "Volunteer Voices",
+                    "description": "First-person perspectives",
+                },
                 {"name": "Program Updates", "description": "Milestones and metrics"},
             ],
         )
@@ -114,7 +141,10 @@ class SampleContentBuilder:
         self.event_categories = self._upsert_by_name(
             EventCategory,
             [
-                {"name": "Disaster Relief", "description": "Rapid response deployments"},
+                {
+                    "name": "Disaster Relief",
+                    "description": "Rapid response deployments",
+                },
                 {"name": "Medical Outreach", "description": "Clinics and screenings"},
                 {"name": "Education", "description": "Learning and literacy"},
             ],
@@ -123,8 +153,14 @@ class SampleContentBuilder:
         self.event_sections = self._upsert_by_name(
             EventSection,
             [
-                {"name": "Global Relief Updates", "description": "Macro view of deployments"},
-                {"name": "Education & Youth", "description": "Clubs, camps, and cohorts"},
+                {
+                    "name": "Global Relief Updates",
+                    "description": "Macro view of deployments",
+                },
+                {
+                    "name": "Education & Youth",
+                    "description": "Clubs, camps, and cohorts",
+                },
                 {"name": "Healthcare Missions", "description": "Mobile clinic routes"},
             ],
         )
@@ -247,7 +283,9 @@ class SampleContentBuilder:
             payload = dict(spec)
             username = payload.pop("username")
             password = payload.pop("password", "ReadingGroup#2025")
-            user, created = self.User.objects.get_or_create(username=username, defaults=payload)
+            user, created = self.User.objects.get_or_create(
+                username=username, defaults=payload
+            )
             if not created:
                 for field, value in payload.items():
                     setattr(user, field, value)
@@ -274,13 +312,17 @@ class SampleContentBuilder:
             payload = template.copy()
             season_ids = payload.pop("season_ids")
             name = payload.pop("name")
-            title, created = SeasonTitle.objects.get_or_create(name=name, defaults=payload)
+            title, created = SeasonTitle.objects.get_or_create(
+                name=name, defaults=payload
+            )
             if not created and payload:
                 for field, value in payload.items():
                     setattr(title, field, value)
                 title.save(update_fields=list(payload.keys()))
             for identifier in season_ids:
-                season, _ = SeasonId.objects.get_or_create(season_title=title, season_id=identifier)
+                season, _ = SeasonId.objects.get_or_create(
+                    season_title=title, season_id=identifier
+                )
                 mapping[identifier] = season
         return mapping
 
@@ -391,7 +433,9 @@ class SampleContentBuilder:
                 "cast": data["cast"],
                 "happened_at": (self.now - timedelta(days=data["days_ago"])),
             }
-            video, created = Video.objects.get_or_create(title=data["title"], defaults=defaults)
+            video, created = Video.objects.get_or_create(
+                title=data["title"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(video, field, value)
@@ -477,7 +521,9 @@ class SampleContentBuilder:
                 "status": PostStatus.PUBLISHED,
                 "post_type": data["post_type"],
             }
-            post, created = Post.objects.get_or_create(title=data["title"], defaults=defaults)
+            post, created = Post.objects.get_or_create(
+                title=data["title"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(post, field, value)
@@ -554,7 +600,9 @@ class SampleContentBuilder:
                 "read_time": "7 min",
                 "is_active": True,
             }
-            content, created = Content.objects.get_or_create(title=data["title"], defaults=defaults)
+            content, created = Content.objects.get_or_create(
+                title=data["title"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(content, field, value)
@@ -629,7 +677,9 @@ class SampleContentBuilder:
                 "views": data["views"],
                 "happened_at": (self.now - timedelta(days=data["days_ago"])).date(),
             }
-            event, created = Event.objects.get_or_create(title=data["title"], defaults=defaults)
+            event, created = Event.objects.get_or_create(
+                title=data["title"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(event, field, value)
@@ -673,7 +723,9 @@ class SampleContentBuilder:
                 "description": data["description"],
                 "image_url": data["image_url"],
             }
-            entry, created = HistoryEntry.objects.get_or_create(title=data["title"], defaults=defaults)
+            entry, created = HistoryEntry.objects.get_or_create(
+                title=data["title"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(entry, field, value)
@@ -734,7 +786,9 @@ class SampleContentBuilder:
                 "avatar_url": data["avatar_url"],
                 "social_links": data["social_links"],
             }
-            member, created = TeamMember.objects.get_or_create(name=data["name"], defaults=defaults)
+            member, created = TeamMember.objects.get_or_create(
+                name=data["name"], defaults=defaults
+            )
             if not created:
                 for field, value in defaults.items():
                     setattr(member, field, value)
@@ -750,13 +804,17 @@ class SampleContentBuilder:
             {"platform": "Podcast", "url": "https://example.com/podcast"},
         ]
         for entry in entries:
-            SocialMedia.objects.update_or_create(platform=entry["platform"], defaults={"url": entry["url"]})
+            SocialMedia.objects.update_or_create(
+                platform=entry["platform"], defaults={"url": entry["url"]}
+            )
 
     def _ensure_navbar_logo(self) -> None:
         if NavbarLogo.objects.exists():
             return
         logo = NavbarLogo.objects.create()
-        logo.logo.save("readinggroup-logo.png", ContentFile(PLACEHOLDER_LOGO), save=True)
+        logo.logo.save(
+            "readinggroup-logo.png", ContentFile(PLACEHOLDER_LOGO), save=True
+        )
 
     def _ensure_section_order(self) -> None:
         defaults = [
@@ -767,20 +825,26 @@ class SampleContentBuilder:
             ("content", 5),
         ]
         for key, position in defaults:
-            SectionOrder.objects.update_or_create(key=key, defaults={"position": position})
+            SectionOrder.objects.update_or_create(
+                key=key, defaults={"position": position}
+            )
 
     def _seed_engagement(self, videos, posts, contents, events) -> None:
-        comment_phrases = cycle([
-            "Appreciate the behind-the-scenes look.",
-            "Sharing this with our reading circle tonight.",
-            "Beautiful reminder to slow down together.",
-            "Inspired to try this with our youth chapter.",
-        ])
-        reply_phrases = cycle([
-            "Thank you for reading along!",
-            "Let us know how your group adapts it.",
-            "Sending gratitude from Hualien.",
-        ])
+        comment_phrases = cycle(
+            [
+                "Appreciate the behind-the-scenes look.",
+                "Sharing this with our reading circle tonight.",
+                "Beautiful reminder to slow down together.",
+                "Inspired to try this with our youth chapter.",
+            ]
+        )
+        reply_phrases = cycle(
+            [
+                "Thank you for reading along!",
+                "Let us know how your group adapts it.",
+                "Sending gratitude from Hualien.",
+            ]
+        )
         collections = [videos, posts, contents, events]
         for objects in collections:
             if not objects:
@@ -802,7 +866,9 @@ class SampleContentBuilder:
                             user=responder,
                             defaults={"text": next(reply_phrases)},
                         )
-                    Like.objects.get_or_create(user=user, content_type=ct, object_id=obj.pk)
+                    Like.objects.get_or_create(
+                        user=user, content_type=ct, object_id=obj.pk
+                    )
 
     def _seed_ratings(self, posts: Iterable[Post], contents: Iterable[Content]) -> None:
         for idx, post in enumerate(posts):

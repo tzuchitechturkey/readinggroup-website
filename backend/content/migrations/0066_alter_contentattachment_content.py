@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0065_authors'),
+        ("content", "0065_authors"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contentattachment',
-            name='content',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='content.content'),
+            model_name="contentattachment",
+            name="content",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attachments",
+                to="content.content",
+            ),
         ),
     ]

@@ -6,15 +6,18 @@ from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
     """Custom user model that keeps usernames while enforcing unique emails."""
+
     # Personal information
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+    profile_image = models.ImageField(
+        upload_to="profile_images/", null=True, blank=True
+    )
     profession_name = models.CharField(max_length=255, blank=True)
     display_name = models.CharField(max_length=255, blank=True)
     about_me = models.TextField(blank=True)
-    
+
     # Contect information
     country = models.CharField(max_length=100, blank=True)
-    mobile_number = models.CharField(max_length=20, blank=True) 
+    mobile_number = models.CharField(max_length=20, blank=True)
     address_details = models.TextField(blank=True)
     website_address = models.URLField(blank=True)
     email = models.EmailField(unique=True)
@@ -23,7 +26,6 @@ class User(AbstractUser):
     is_first_login = models.BooleanField(default=True)
     last_password_change = models.DateTimeField(null=True, blank=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
-
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         full_name = self.get_full_name()
@@ -64,7 +66,9 @@ class FriendRequest(models.Model):
         related_name="received_friend_requests",
         on_delete=models.CASCADE,
     )
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(
+        max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING
+    )
     message = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

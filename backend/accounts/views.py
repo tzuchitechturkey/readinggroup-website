@@ -22,8 +22,8 @@ from .serializers import (
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
-    UserSerializer
-    )
+    UserSerializer,
+)
 
 User = get_user_model()
 
@@ -34,6 +34,7 @@ class FriendRequestListCreateView(generics.ListCreateAPIView):
     Query params:
     - direction=incoming|outgoing (default incoming)
     """
+
     serializer_class = FriendRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -54,37 +55,55 @@ class FriendRequestActionView(APIView):
 
     POST body: { "action": "accept" | "reject" | "block" }
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
         action = request.data.get("action")
         if action not in ("accept", "reject", "block"):
-            return Response({"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             fr = FriendRequest.objects.get(pk=pk)
         except FriendRequest.DoesNotExist:
-            return Response({"detail": "Friend request not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Friend request not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         # only the recipient may accept/reject; block may be performed by recipient or requestor
         user = request.user
         if action == "accept":
             if fr.to_user != user:
-                return Response({"detail": "Only recipient can accept."}, status=status.HTTP_403_FORBIDDEN)
+                return Response(
+                    {"detail": "Only recipient can accept."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             fr.accept()
-            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+            return Response(
+                FriendRequestSerializer(fr, context={"request": request}).data
+            )
 
         if action == "reject":
             if fr.to_user != user:
-                return Response({"detail": "Only recipient can reject."}, status=status.HTTP_403_FORBIDDEN)
+                return Response(
+                    {"detail": "Only recipient can reject."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             fr.reject()
-            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+            return Response(
+                FriendRequestSerializer(fr, context={"request": request}).data
+            )
 
         # block
         if action == "block":
             # allow both sides to block; create or update inverse request as BLOCKED too
             fr.block()
-            return Response(FriendRequestSerializer(fr, context={"request": request}).data)
+            return Response(
+                FriendRequestSerializer(fr, context={"request": request}).data
+            )
 
 
 class UnfriendView(APIView):
@@ -93,34 +112,54 @@ class UnfriendView(APIView):
 
     DELETE /api/v1/friend-requests/unfriend/{user_id}/
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, user_id):
         try:
             target = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         if target == request.user:
-            return Response({"detail": "Cannot unfriend yourself."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Cannot unfriend yourself."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # find any accepted friend requests in either direction
         qs = FriendRequest.objects.filter(
-            (Q(from_user=request.user, to_user=target) | Q(from_user=target, to_user=request.user)),
+            (
+                Q(from_user=request.user, to_user=target)
+                | Q(from_user=target, to_user=request.user)
+            ),
             status=FriendRequest.STATUS_ACCEPTED,
         )
 
         # if none found, inform caller
         if not qs.exists():
-            return Response({"detail": "Friendship not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Friendship not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # delete the accepted friendship records
         try:
             qs.delete()
         except Exception:
-            return Response({"detail": "Failed to remove friendship."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"detail": "Failed to remove friendship."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-        return Response({"detail": "Friendship removed.", "user": UserSerializer(target, context={"request": request}).data}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "detail": "Friendship removed.",
+                "user": UserSerializer(target, context={"request": request}).data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class FriendRequestsForUserView(APIView):
@@ -133,25 +172,40 @@ class FriendRequestsForUserView(APIView):
       "outgoing": [<FriendRequestSerializer>]
     }
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, user_id):
         # Only staff or the target user may access
         if not (request.user.is_staff or request.user.id == int(user_id)):
-            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         try:
             target = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
-        incoming_qs = FriendRequest.objects.filter(to_user=target).order_by('-created_at')
-        outgoing_qs = FriendRequest.objects.filter(from_user=target).order_by('-created_at')
+        incoming_qs = FriendRequest.objects.filter(to_user=target).order_by(
+            "-created_at"
+        )
+        outgoing_qs = FriendRequest.objects.filter(from_user=target).order_by(
+            "-created_at"
+        )
 
-        incoming = FriendRequestSerializer(incoming_qs, many=True, context={"request": request}).data
-        outgoing = FriendRequestSerializer(outgoing_qs, many=True, context={"request": request}).data
+        incoming = FriendRequestSerializer(
+            incoming_qs, many=True, context={"request": request}
+        ).data
+        outgoing = FriendRequestSerializer(
+            outgoing_qs, many=True, context={"request": request}
+        ).data
 
-        return Response({"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK)
+        return Response(
+            {"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK
+        )
 
 
 class PendingFriendRequestsView(generics.ListAPIView):
@@ -162,13 +216,14 @@ class PendingFriendRequestsView(generics.ListAPIView):
 
     Returns FriendRequestSerializer list filtered by status=STATUS_PENDING.
     """
+
     serializer_class = FriendRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         request_user = self.request.user
         # allow an optional user_id query param so admins (or the user themself) can fetch pending for another user
-    # allow user_id either as query param or as URL kwarg (path param)
+        # allow user_id either as query param or as URL kwarg (path param)
         user_id = self.request.query_params.get("user_id") or self.kwargs.get("user_id")
         direction = self.request.query_params.get("direction", "incoming").lower()
 
@@ -181,6 +236,7 @@ class PendingFriendRequestsView(generics.ListAPIView):
                     # don't leak data
                     return FriendRequest.objects.none()
                 from django.contrib.auth import get_user_model
+
                 UserModel = get_user_model()
                 target_user = UserModel.objects.filter(pk=uid).first()
                 if not target_user:
@@ -191,22 +247,30 @@ class PendingFriendRequestsView(generics.ListAPIView):
             target_user = request_user
 
         if direction == "outgoing":
-            return FriendRequest.objects.filter(from_user=target_user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
-        return FriendRequest.objects.filter(to_user=target_user, status=FriendRequest.STATUS_PENDING).order_by("-created_at")
+            return FriendRequest.objects.filter(
+                from_user=target_user, status=FriendRequest.STATUS_PENDING
+            ).order_by("-created_at")
+        return FriendRequest.objects.filter(
+            to_user=target_user, status=FriendRequest.STATUS_PENDING
+        ).order_by("-created_at")
+
 
 class UserListView(generics.ListAPIView):
     """List all users with search and ordering support.
     Read-only access is allowed for anonymous users; write actions require authentication.
     """
+
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = User.objects.all()
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ("id","username", "email", "display_name")
+    search_fields = ("id", "username", "email", "display_name")
     ordering_fields = ("date_joined", "id", "username")
+
 
 class RegisterView(generics.CreateAPIView):
     """Register a new user and return JWT tokens."""
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -219,9 +283,15 @@ class RegisterView(generics.CreateAPIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        "user": openapi.Schema(type=openapi.TYPE_OBJECT, description="User details"),
-                        "access": openapi.Schema(type=openapi.TYPE_STRING, description="Access token"),
-                        "refresh": openapi.Schema(type=openapi.TYPE_STRING, description="Refresh token"),
+                        "user": openapi.Schema(
+                            type=openapi.TYPE_OBJECT, description="User details"
+                        ),
+                        "access": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="Access token"
+                        ),
+                        "refresh": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="Refresh token"
+                        ),
                     },
                 ),
             ),
@@ -268,9 +338,12 @@ class RegisterView(generics.CreateAPIView):
         #     pass
 
         # Inform the client that registration succeeded (no email confirmation required)
-        return Response({
-            "detail": "User registered successfully.",
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "detail": "User registered successfully.",
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 # class ConfirmEmailView(APIView):
@@ -324,6 +397,7 @@ class RegisterView(generics.CreateAPIView):
 
 class LoginView(APIView):
     """Authenticate a user and return JWT tokens. If TOTP is enabled, require TOTP code."""
+
     permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
@@ -331,9 +405,15 @@ class LoginView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "username": openapi.Schema(type=openapi.TYPE_STRING, description="Username or email"),
-                "password": openapi.Schema(type=openapi.TYPE_STRING, description="Password"),
-                "totp_code": openapi.Schema(type=openapi.TYPE_STRING, description="TOTP code (if enabled)"),
+                "username": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Username or email"
+                ),
+                "password": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="Password"
+                ),
+                "totp_code": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="TOTP code (if enabled)"
+                ),
             },
             required=["username", "password"],
         ),
@@ -343,9 +423,15 @@ class LoginView(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        "user": openapi.Schema(type=openapi.TYPE_OBJECT, description="User details"),
-                        "access": openapi.Schema(type=openapi.TYPE_STRING, description="Access token"),
-                        "refresh": openapi.Schema(type=openapi.TYPE_STRING, description="Refresh token"),
+                        "user": openapi.Schema(
+                            type=openapi.TYPE_OBJECT, description="User details"
+                        ),
+                        "access": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="Access token"
+                        ),
+                        "refresh": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="Refresh token"
+                        ),
                     },
                 ),
             ),
@@ -355,11 +441,15 @@ class LoginView(APIView):
     )
     def post(self, request, *args, **kwargs):
         from django.utils import timezone
+
         username = request.data.get("username")
         password = request.data.get("password")
         totp_code = request.data.get("totp_code") or request.data.get("totp")
 
-        user = User.objects.filter(username=username).first() or User.objects.filter(email=username).first()
+        user = (
+            User.objects.filter(username=username).first()
+            or User.objects.filter(email=username).first()
+        )
         # if the account exists but is not active (email not confirmed), refuse login
         # if user and hasattr(user, 'is_active') and not user.is_active:
         #     return Response({"detail": "Please confirm your account via the confirmation email."}, status=403)
@@ -368,10 +458,14 @@ class LoginView(APIView):
 
         # Check if user is blocked (if you have is_blocked field)
         if hasattr(user, "is_blocked") and user.is_blocked:
-            return Response({"error": "Account is blocked due to too many failed attempts."}, status=403)
+            return Response(
+                {"error": "Account is blocked due to too many failed attempts."},
+                status=403,
+            )
 
         # Authenticate
         from django.contrib.auth import authenticate
+
         auth_user = authenticate(username=user.username, password=password)
         if not auth_user:
             # Track failed attempts if field exists
@@ -382,11 +476,14 @@ class LoginView(APIView):
                 if hasattr(user, "last_failed_login"):
                     user.last_failed_login = timezone.now()
                 user.save()
-                return Response({
-                    "error": "Incorrect Username Or Password",
-                    "failed_attempts": user.failed_login_attempts,
-                    "is_blocked": getattr(user, "is_blocked", False),
-                }, status=400)
+                return Response(
+                    {
+                        "error": "Incorrect Username Or Password",
+                        "failed_attempts": user.failed_login_attempts,
+                        "is_blocked": getattr(user, "is_blocked", False),
+                    },
+                    status=400,
+                )
             return Response({"error": "Incorrect Username Or Password"}, status=400)
 
         # Force password change logic (if you have force_password_change field)
@@ -404,18 +501,14 @@ class LoginView(APIView):
         # If TOTP is enabled but not yet verified
         if user.totp_secret:
             if not totp_code and user.is_first_login:
-                return Response({
-                    "requires_totp": True,
-                    "qr": qr,
-                    "uri": uri,
-                    "show_qr": True
-                }, status=200)
+                return Response(
+                    {"requires_totp": True, "qr": qr, "uri": uri, "show_qr": True},
+                    status=200,
+                )
             if not totp_code:
-                return Response({
-                    "requires_totp": True,
-                    "qr": qr,
-                    "uri": uri
-                }, status=200)
+                return Response(
+                    {"requires_totp": True, "qr": qr, "uri": uri}, status=200
+                )
             totp = pyotp.TOTP(user.totp_secret)
             if totp_code != "123457" and not totp.verify(totp_code):
                 if hasattr(user, "failed_login_attempts"):
@@ -436,19 +529,22 @@ class LoginView(APIView):
             user.save()
 
         refresh = RefreshToken.for_user(user)
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "qr": qr,
-            "secret": user.totp_secret,
-            "user": UserSerializer(user).data,
-            "force_password_change": getattr(user, "force_password_change", False),
-        })
-        
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "qr": qr,
+                "secret": user.totp_secret,
+                "user": UserSerializer(user).data,
+                "force_password_change": getattr(user, "force_password_change", False),
+            }
+        )
+
 
 # Optional: endpoint to verify TOTP code (for setup/enable)
 class TOTPVerifyAPIView(APIView):
     """Verify a TOTP code for the authenticated user."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
@@ -456,7 +552,9 @@ class TOTPVerifyAPIView(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "totp_code": openapi.Schema(type=openapi.TYPE_STRING, description="TOTP code"),
+                "totp_code": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="TOTP code"
+                ),
             },
             required=["totp_code"],
         ),
@@ -466,16 +564,24 @@ class TOTPVerifyAPIView(APIView):
         user = request.user
         totp_code = request.data.get("totp_code")
         if not user.totp_secret:
-            return Response({"detail": "TOTP is not enabled for this user."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "TOTP is not enabled for this user."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         totp = pyotp.TOTP(user.totp_secret)
         if totp.verify(totp_code):
-            return Response({"detail": "TOTP code is valid."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "TOTP code is valid."}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"detail": "Invalid TOTP code."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Invalid TOTP code."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     """Allow authenticated users to view and update their profile."""
+
     serializer_class = ProfileUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -500,17 +606,21 @@ class PublicProfileView(generics.RetrieveAPIView):
     Example: GET /api/v1/user/profile/123/
     Uses `UserSerializer` which exposes the public fields (id, username, display_name, profile_image_url, ...).
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     # allow anonymous access for public profiles
     permission_classes = [permissions.AllowAny]
 
+
 class ForgotPasswordView(APIView):
     """Allow users to reset their password via email."""
+
     permission_classes = [permissions.AllowAny]
+
     class ForgotPasswordSerializer(serializers.Serializer):
         email = serializers.EmailField()
-        
+
     @swagger_auto_schema(
         operation_description="Request a password reset via email.",
         request_body=ForgotPasswordSerializer,
@@ -552,9 +662,11 @@ class ForgotPasswordView(APIView):
             {"detail": "If the email is registered, a reset link will be sent."},
             status=status.HTTP_200_OK,
         )
-        
+
+
 class ResetPasswordView(APIView):
     """Allow authenticated users to reset their password (old password + new password x2)."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     class ResetPasswordSerializer(serializers.Serializer):
@@ -564,7 +676,9 @@ class ResetPasswordView(APIView):
 
         def validate(self, data):
             if data["new_password1"] != data["new_password2"]:
-                raise serializers.ValidationError({"new_password2": "Passwords do not match."})
+                raise serializers.ValidationError(
+                    {"new_password2": "Passwords do not match."}
+                )
             return data
 
     @swagger_auto_schema(
@@ -572,7 +686,7 @@ class ResetPasswordView(APIView):
         responses={
             200: "Password updated successfully.",
             400: "Validation Error",
-            401: "Unauthorized"
+            401: "Unauthorized",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -581,15 +695,21 @@ class ResetPasswordView(APIView):
         user = request.user
         old_password = serializer.validated_data["old_password"]
         if not user.check_password(old_password):
-            return Response({"old_password": "Old password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"old_password": "Old password is incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         user.set_password(serializer.validated_data["new_password1"])
         user.save()
-        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
-    
+        return Response(
+            {"detail": "Password updated successfully."}, status=status.HTTP_200_OK
+        )
+
+
 class PasswordChangeView(APIView):
     """Allow authenticated users to change their password (new password x2)."""
-    permission_classes = [permissions.IsAuthenticated]
 
+    permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Change password by providing new password twice.",
@@ -597,25 +717,28 @@ class PasswordChangeView(APIView):
         responses={
             200: "Password updated successfully.",
             400: "Validation Error",
-            401: "Unauthorized"
+            401: "Unauthorized",
         },
     )
     def post(self, request, *args, **kwargs):
-        serializer = PasswordChangeSerializer(data=request.data, context={"request": request})
+        serializer = PasswordChangeSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Password updated successfully."}, status=status.HTTP_200_OK
+        )
+
 
 class TOTPSetupAPIView(APIView):
     """Provide TOTP setup QR code and secret for the authenticated user."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
         operation_description="Get TOTP setup QR code and secret for the authenticated user.",
-        responses={
-            200: openapi.Response("TOTP setup info"),
-            401: "Unauthorized"
-        },
+        responses={200: openapi.Response("TOTP setup info"), 401: "Unauthorized"},
     )
     def get(self, request):
         user = request.user
@@ -625,10 +748,11 @@ class TOTPSetupAPIView(APIView):
         uri = get_totp_uri(user.totp_secret, user.username)
         qr = generate_qr_code_base64(uri)
         return Response({"qr": qr, "secret": user.totp_secret})
-        
-        
+
+
 class ResetTOTPAPIView(APIView):
     """Reset a user's TOTP secret and send a new QR code via email."""
+
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(

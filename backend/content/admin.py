@@ -26,6 +26,7 @@ from .models import (
     BookCategory,
 )
 
+
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "category_name", "language", "views", "is_featured")
@@ -34,6 +35,7 @@ class VideoAdmin(admin.ModelAdmin):
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
+
     category_name.short_description = "category"
 
 
@@ -45,22 +47,34 @@ class PostAdmin(admin.ModelAdmin):
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
+
     category_name.short_description = "category"
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "section_name", "category_name", "language", "happened_at")
+    list_display = (
+        "id",
+        "title",
+        "section_name",
+        "category_name",
+        "language",
+        "happened_at",
+    )
     list_filter = ("section__name", "category__name", "language")
     search_fields = ("title", "writer", "category__name")
 
     def section_name(self, obj):
         return obj.section.name if obj.section else None
+
     section_name.short_description = "section"
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
+
     category_name.short_description = "category"
-    
+
+
 @admin.register(Content)
 class ContentAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "category_name", "language", "writer", "created_at")
@@ -69,7 +83,9 @@ class ContentAdmin(admin.ModelAdmin):
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
+
     category_name.short_description = "category"
+
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
@@ -82,56 +98,71 @@ class HistoryEntryAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "story_date")
     list_filter = ("story_date",)
     search_fields = ("title", "description")
-    
-    
+
+
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = ("name",)
+    list_display = ("id", "name", "key", "language", "description", "created_at")
+    search_fields = ("name", "key")
+    list_filter = ("language", "is_active")
+    exclude = ("key", "translation_group")
+
 
 @admin.register(PostCategory)
 class PostCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = ("name",)
-    
+    list_display = ("id", "name", "key", "language", "description", "created_at")
+    search_fields = ("name", "key")
+    list_filter = ("language", "is_active")
+    exclude = ("key", "translation_group")
+
+
 @admin.register(EventCategory)
 class EventCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = ("name",)
-    
+    list_display = ("id", "name", "key", "language", "description", "created_at")
+    search_fields = ("name", "key")
+    list_filter = ("language", "is_active")
+    exclude = ("key", "translation_group")
+
+
 @admin.register(PositionTeamMember)
 class PositionTeamMemberAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
-    
+
+
 @admin.register(EventSection)
 class EventSectionAdmin(admin.ModelAdmin):
-    list_display = ("id", "name","description", "created_at")
+    list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
-    
+
+
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
     list_display = ("user", "content_type", "object_id", "created_at")
     # 'Comments' model uses the field name 'text'
     search_fields = ("user__username", "text")
 
+
 @admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
     list_display = ("user", "comment", "created_at")
     # 'Reply' model uses the field name 'text'
     search_fields = ("user__username", "text")
-  
+
+
 @admin.register(MyListEntry)
 class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
     list_display = ("id", "user", "video", "created_at")
     search_fields = ("user__username", "video__title")
-    
+
+
 @admin.register(SeasonTitle)
 class SeasonTitleAdmin(admin.ModelAdmin):
-    list_display = ("id", "name","description")
-    search_fields = ("name","description")
-    
+    list_display = ("id", "name", "description")
+    search_fields = ("name", "description")
+
+
 @admin.register(SeasonId)
 class SeasonIdAdmin(admin.ModelAdmin):
     list_display = ("id", "season_name", "season_id")
@@ -139,43 +170,56 @@ class SeasonIdAdmin(admin.ModelAdmin):
 
     def season_name(self, obj):
         return obj.season_name.name if obj.season_name else None
+
     season_name.short_description = "season_name"
-    
+
+
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
     list_display = ("user",)
     search_fields = ("user__username", "content_type__model")
-    
+
+
 @admin.register(SocialMedia)
 class SocialMediaAdmin(admin.ModelAdmin):
     list_display = ("platform", "url")
     search_fields = ("platform", "url")
 
+
 @admin.register(NavbarLogo)
 class NavbarLogoAdmin(admin.ModelAdmin):
     list_display = ("logo",)
     search_fields = ("logo",)
-    
+
+
 @admin.register(ContentCategory)
 class ContentCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
-    
+    list_display = ("id", "name", "key", "language", "description", "created_at")
+    search_fields = ("name", "key")
+    list_filter = ("language", "is_active")
+    exclude = ("key", "translation_group")
+
+
 @admin.register(Authors)
 class AuthorsAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name", "description")
 
+
 @admin.register(ContentAttachment)
 class ContentAttachmentAdmin(admin.ModelAdmin):
     list_display = ("id", "content", "file_name", "created_at")
     search_fields = ("file_name", "content__title")
-    
+
+
 @admin.register(BookCategory)
 class BookCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
-    search_fields = ("name", "description")
-    
+    list_display = ("id", "name", "key", "language", "description", "created_at")
+    search_fields = ("name", "key")
+    list_filter = ("language", "is_active")
+    exclude = ("key", "translation_group")
+
+
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = ("id", "name")

@@ -181,6 +181,7 @@ export default function HomePageHeroSlider({ data = null }) {
                       <div className="pb-24 md:pb-32 lg:pb-40">
                         <HeroTitle
                           i18n={i18n}
+                          t={t}
                           h1Line1={slide.h1Line1}
                           h1Line2Prefix={slide.h1Line2Prefix}
                           h1Line2Under={slide.h1Line2Under}
