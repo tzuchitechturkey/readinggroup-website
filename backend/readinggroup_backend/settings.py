@@ -44,7 +44,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "corsheaders",
-    "drf_yasg"
+    "drf_yasg",
 ]
 
 LOCAL_APPS = [
@@ -100,7 +100,9 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -152,9 +154,6 @@ SIMPLE_JWT = {
 }
 
 
-
-
-
 # CORS
 CORS_ALLOW_ALL_ORIGINS = os.getenv("DJANGO_CORS_ALLOW_ALL", "true").lower() == "true"
 CORS_ALLOW_CREDENTIALS = True
@@ -164,7 +163,9 @@ CORS_ALLOW_CREDENTIALS = True
 AUTH_USER_MODEL = "accounts.User"
 
 # Email settings (for password reset)
-EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = os.getenv(
+    "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", 587))
 

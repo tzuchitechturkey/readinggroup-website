@@ -5,39 +5,39 @@ from django.db import migrations, models
 
 def update_category_keys(apps, schema_editor):
     """Update existing categories with unique keys based on their ID to avoid duplicates."""
-    PostCategory = apps.get_model('content', 'PostCategory')
-    EventCategory = apps.get_model('content', 'EventCategory')
-    ContentCategory = apps.get_model('content', 'ContentCategory')
-    VideoCategory = apps.get_model('content', 'VideoCategory')
-    BookCategory = apps.get_model('content', 'BookCategory')
-    
+    PostCategory = apps.get_model("content", "PostCategory")
+    EventCategory = apps.get_model("content", "EventCategory")
+    ContentCategory = apps.get_model("content", "ContentCategory")
+    VideoCategory = apps.get_model("content", "VideoCategory")
+    BookCategory = apps.get_model("content", "BookCategory")
+
     # Update PostCategory
     for category in PostCategory.objects.all():
-        base_key = category.name.lower().replace(' ', '_').replace('-', '_')[:50]
+        base_key = category.name.lower().replace(" ", "_").replace("-", "_")[:50]
         category.key = f"{base_key}_{category.id}"
         category.save()
-    
+
     # Update EventCategory
     for category in EventCategory.objects.all():
-        base_key = category.name.lower().replace(' ', '_').replace('-', '_')[:50]
+        base_key = category.name.lower().replace(" ", "_").replace("-", "_")[:50]
         category.key = f"{base_key}_{category.id}"
         category.save()
-    
+
     # Update ContentCategory
     for category in ContentCategory.objects.all():
-        base_key = category.name.lower().replace(' ', '_').replace('-', '_')[:50]
+        base_key = category.name.lower().replace(" ", "_").replace("-", "_")[:50]
         category.key = f"{base_key}_{category.id}"
         category.save()
-    
+
     # Update VideoCategory
     for category in VideoCategory.objects.all():
-        base_key = category.name.lower().replace(' ', '_').replace('-', '_')[:50]
+        base_key = category.name.lower().replace(" ", "_").replace("-", "_")[:50]
         category.key = f"{base_key}_{category.id}"
         category.save()
-    
+
     # Update BookCategory
     for category in BookCategory.objects.all():
-        base_key = category.name.lower().replace(' ', '_').replace('-', '_')[:50]
+        base_key = category.name.lower().replace(" ", "_").replace("-", "_")[:50]
         category.key = f"{base_key}_{category.id}"
         category.save()
 
@@ -180,7 +180,9 @@ class Migration(migrations.Migration):
             ),
         ),
         # Run Python function to update keys before applying unique constraints
-        migrations.RunPython(update_category_keys, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(
+            update_category_keys, reverse_code=migrations.RunPython.noop
+        ),
         migrations.AlterField(
             model_name="bookcategory",
             name="name",

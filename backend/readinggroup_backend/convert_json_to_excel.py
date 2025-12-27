@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 # Pure Helper Functions
 # ==========================
 
+
 def flatten_json(data: Any, parent_key: str = "") -> List[Tuple[str, Any]]:
     """Flattens general JSON (dict/list) into a list of (path, value) pairs.
     Example path: "a.b[0].c"
@@ -91,7 +92,9 @@ def json_to_dataframe(data: Any) -> pd.DataFrame:
     return df
 
 
-def write_excel(df: pd.DataFrame, out_path: Path, sheet_name: str = DEFAULT_SHEET_NAME) -> None:
+def write_excel(
+    df: pd.DataFrame, out_path: Path, sheet_name: str = DEFAULT_SHEET_NAME
+) -> None:
     """يحفظ DataFrame إلى ملف Excel باستخدام openpyxl."""
     try:
         with pd.ExcelWriter(out_path, engine="openpyxl") as writer:
@@ -103,6 +106,7 @@ def write_excel(df: pd.DataFrame, out_path: Path, sheet_name: str = DEFAULT_SHEE
 # ==========================
 # Helper Functions for Files and Paths
 # ==========================
+
 
 def find_repo_root(start: Path | None = None) -> Path:
     """Tries to find the repository root based on the known locales directory.
@@ -152,6 +156,7 @@ def infer_default_input(locales_dir: Path) -> Path:
 # Entry Point (CLI)
 # ==========================
 
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Convert JSON to Excel (.xlsx)")
     parser.add_argument(
@@ -163,10 +168,22 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "If omitted when running inside interactive shells the script will try to pick a sensible default."
         ),
     )
-    parser.add_argument("-o", "--output", help="Output .xlsx path (default: same name as input with .xlsx)")
-    parser.add_argument("--sheet", default=DEFAULT_SHEET_NAME, help="Sheet name inside Excel")
-    parser.add_argument("--encoding", default=DEFAULT_ENCODING, help="Encoding for reading JSON (default: utf-8)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable detailed logging (DEBUG)")
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Output .xlsx path (default: same name as input with .xlsx)",
+    )
+    parser.add_argument(
+        "--sheet", default=DEFAULT_SHEET_NAME, help="Sheet name inside Excel"
+    )
+    parser.add_argument(
+        "--encoding",
+        default=DEFAULT_ENCODING,
+        help="Encoding for reading JSON (default: utf-8)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable detailed logging (DEBUG)"
+    )
     return parser.parse_args(argv)
 
 
@@ -198,7 +215,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not in_path.exists():
         raise SystemExit(f"Cannot find file: {in_path}")
 
-    out_path = Path(args.output).expanduser().resolve() if args.output else in_path.with_suffix(".xlsx")
+    out_path = (
+        Path(args.output).expanduser().resolve()
+        if args.output
+        else in_path.with_suffix(".xlsx")
+    )
 
     # Process data
     data = load_json(in_path, encoding=args.encoding)

@@ -81,7 +81,9 @@ def _load_json_from_url(url: str) -> Dict[str, Any]:
         with request.urlopen(req, timeout=10) as resp:
             data = resp.read().decode("utf-8")
     except error.HTTPError as exc:
-        raise YouTubeAPIError(f"YouTube API request failed with status {exc.code}.") from exc
+        raise YouTubeAPIError(
+            f"YouTube API request failed with status {exc.code}."
+        ) from exc
     except error.URLError as exc:
         raise YouTubeAPIError("Unable to contact YouTube API.") from exc
 
@@ -119,7 +121,9 @@ def fetch_video_info(video_url: str, api_key: str) -> YouTubeVideoInfo:
     published_at = None
     if published_at_raw:
         try:
-            published_at = datetime.fromisoformat(published_at_raw.replace("Z", "+00:00"))
+            published_at = datetime.fromisoformat(
+                published_at_raw.replace("Z", "+00:00")
+            )
             if published_at.tzinfo is None:
                 published_at = published_at.replace(tzinfo=timezone.utc)
             else:

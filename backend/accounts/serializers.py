@@ -16,6 +16,7 @@ except Exception:  # pragma: no cover - defensive import
 
 class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serialize the public profile of a user."""
+
     datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
     friend_request_status = serializers.SerializerMethodField()
@@ -24,6 +25,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
@@ -53,21 +55,15 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "website_address",
             "status",
         )
-        read_only_fields = (
-            "id",
-            "is_staff",
-            "is_active",
-            "date_joined"
-        )
+        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
-    
+
     def get_status(self, obj):
         try:
             pending_requests = FriendRequest.objects.filter(
-                to_user=obj,
-                status=FriendRequest.STATUS_PENDING
+                to_user=obj, status=FriendRequest.STATUS_PENDING
             ).count()
             if pending_requests > 0:
                 return f"You have {pending_requests} pending friend request(s)."
@@ -83,8 +79,12 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
         when a FriendRequest exists in either direction, otherwise None. If the request user
         is not authenticated or is the same as `obj`, return None.
         """
-        request = self.context.get('request')
-        if not request or not getattr(request, 'user', None) or not request.user.is_authenticated:
+        request = self.context.get("request")
+        if (
+            not request
+            or not getattr(request, "user", None)
+            or not request.user.is_authenticated
+        ):
             return None
 
         requester = request.user
@@ -104,13 +104,13 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
         return None
 
     def get_profile_image_url(self, obj):
-        request = self.context.get('request')
-        if obj.profile_image and hasattr(obj.profile_image, 'url'):
+        request = self.context.get("request")
+        if obj.profile_image and hasattr(obj.profile_image, "url"):
             if request:
                 return request.build_absolute_uri(obj.profile_image.url)
             return obj.profile_image.url
         return None
-    
+
     def get_posts_count(self, obj):
         # reuse same logic as UserSerializer
         if Post is None:
@@ -139,15 +139,20 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
 
     def get_followers_count(self, obj):
         try:
-            return FriendRequest.objects.filter(to_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+            return FriendRequest.objects.filter(
+                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
+            ).count()
         except Exception:
             return 0
 
     def get_following_count(self, obj):
         try:
-            return FriendRequest.objects.filter(from_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+            return FriendRequest.objects.filter(
+                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
+            ).count()
         except Exception:
             return 0
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     """Handle registration of a new user."""
@@ -185,11 +190,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         # Check email uniqueness (case-insensitive)
         if User.objects.filter(email__iexact=email).exists():
-            raise serializers.ValidationError({"email": "A user with this email already exists."})
+            raise serializers.ValidationError(
+                {"email": "A user with this email already exists."}
+            )
 
         # Check username uniqueness (case-insensitive)
         if username and User.objects.filter(username__iexact=username).exists():
-            raise serializers.ValidationError({"username": "A user with this username already exists."})
+            raise serializers.ValidationError(
+                {"username": "A user with this username already exists."}
+            )
 
         attrs["username"] = username
         return attrs
@@ -231,7 +240,9 @@ class LoginSerializer(serializers.Serializer):
             except User.DoesNotExist as exc:
                 raise serializers.ValidationError(("Invalid credentials.")) from exc
 
-            user = authenticate(request=request, username=user_obj.username, password=password)
+            user = authenticate(
+                request=request, username=user_obj.username, password=password
+            )
 
         if user is None:
             raise serializers.ValidationError(("Invalid credentials."))
@@ -256,7 +267,8 @@ class LoginSerializer(serializers.Serializer):
 
 class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Update limited user profile fields."""
-    datetime_fields = ("date_joined")
+
+    datetime_fields = "date_joined"
     profile_image_url = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
@@ -291,26 +303,24 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "website_address",
             "status",
         )
-        read_only_fields = (
-            "id", 
-            "is_staff",
-            "is_active",
-            "date_joined"
-        )
+        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
     def get_profile_image_url(self, obj):
-        request = self.context.get('request')
-        if hasattr(obj, 'profile_image') and obj.profile_image and hasattr(obj.profile_image, 'url'):
+        request = self.context.get("request")
+        if (
+            hasattr(obj, "profile_image")
+            and obj.profile_image
+            and hasattr(obj.profile_image, "url")
+        ):
             if request:
                 return request.build_absolute_uri(obj.profile_image.url)
             return obj.profile_image.url
         return None
-    
+
     def get_status(self, obj):
         try:
             pending_requests = FriendRequest.objects.filter(
-                to_user=obj,
-                status=FriendRequest.STATUS_PENDING
+                to_user=obj, status=FriendRequest.STATUS_PENDING
             ).count()
             if pending_requests > 0:
                 return f"You have {pending_requests} pending friend request(s)."
@@ -346,18 +356,24 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
 
     def get_followers_count(self, obj):
         try:
-            return FriendRequest.objects.filter(to_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+            return FriendRequest.objects.filter(
+                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
+            ).count()
         except Exception:
             return 0
 
     def get_following_count(self, obj):
         try:
-            return FriendRequest.objects.filter(from_user=obj, status=FriendRequest.STATUS_ACCEPTED).count()
+            return FriendRequest.objects.filter(
+                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
+            ).count()
         except Exception:
             return 0
 
+
 class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for FriendRequest model."""
+
     datetime_fields = ("created_at", "updated_at")
     from_user = UserSerializer(read_only=True)
     to_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
@@ -371,15 +387,9 @@ class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "status",
             "message",
             "created_at",
-            "updated_at"
+            "updated_at",
         )
-        read_only_fields = (
-            "id",
-            "from_user",
-            "status",
-            "created_at",
-            "updated_at"
-        )
+        read_only_fields = ("id", "from_user", "status", "created_at", "updated_at")
 
     def validate(self, attrs):
         request = self.context.get("request")
@@ -391,12 +401,18 @@ class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             raise serializers.ValidationError("Cannot send friend request to yourself.")
 
         # Prevent sending if blocked or already existing
-        existing = FriendRequest.objects.filter(from_user=from_user, to_user=to_user).first()
+        existing = FriendRequest.objects.filter(
+            from_user=from_user, to_user=to_user
+        ).first()
         if existing:
-            raise serializers.ValidationError("A friend request already exists between these users.")
+            raise serializers.ValidationError(
+                "A friend request already exists between these users."
+            )
 
         # Also check if 'to_user' previously blocked 'from_user'
-        blocked = FriendRequest.objects.filter(from_user=to_user, to_user=from_user, status=FriendRequest.STATUS_BLOCKED).exists()
+        blocked = FriendRequest.objects.filter(
+            from_user=to_user, to_user=from_user, status=FriendRequest.STATUS_BLOCKED
+        ).exists()
         if blocked:
             raise serializers.ValidationError("You are blocked by this user.")
 
@@ -409,6 +425,7 @@ class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
         # default message may be empty
         return super().create(validated_data)
 
+
 class PasswordChangeSerializer(serializers.Serializer):
     """Simple serializer for password updates."""
 
@@ -418,7 +435,9 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate(self, attrs):
         user: User = self.context["request"].user
         if not user.check_password(attrs["current_password"]):
-            raise serializers.ValidationError({"current_password": ("Incorrect password.")})
+            raise serializers.ValidationError(
+                {"current_password": ("Incorrect password.")}
+            )
         return attrs
 
     def save(self, **kwargs):
