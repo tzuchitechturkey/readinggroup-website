@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, Upload, Youtube, X, Tag, Search, User, Loader2 } from "lucide-react";
+import {
+  Save,
+  Upload,
+  Youtube,
+  X,
+  Tag,
+  Search,
+  User,
+  Loader2,
+} from "lucide-react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useTranslation } from "react-i18next";
@@ -53,13 +62,13 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     is_featured: false,
     reference_code: "",
     video_url: "",
-    season_name: "",
     happened_at: "",
     description: "",
     cast: [],
     tags: [],
     status: "",
     duration: "",
+    // season_name: "",
   });
   // Initialize form data when editing
   useEffect(() => {
@@ -73,13 +82,13 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         is_featured: video?.is_featured || false,
         reference_code: video?.reference_code || "",
         video_url: video?.video_url || "",
-        season_name: video?.season_name?.id || "", // ID الـ season
         happened_at: video?.happened_at || "",
         description: video?.description || "",
-        cast: video?.cast || [],
         tags: video?.tags || [],
         status: video?.status || "",
         duration: video?.duration || "",
+        cast: video?.cast || [],
+        // season_name: video?.season_name?.id || "", // ID الـ season
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -345,9 +354,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       newErrors.description = t("Description is required");
     }
 
-    if (!formData?.cast || formData?.cast.length === 0) {
-      newErrors.cast = t("Cast is required");
-    }
+    // if (!formData?.cast || formData?.cast.length === 0) {
+    //   newErrors.cast = t("Cast is required");
+    // }
 
     if (!formData?.tags || formData?.tags.length === 0) {
       newErrors.tags = t("Tags are required");
@@ -385,7 +394,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formDataToSend.append("is_featured", formData?.is_featured);
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
-    formDataToSend.append("season_name", formData?.season_name);
+    // formDataToSend.append("season_name", formData?.season_name);
     // Format happened_at to ISO 8601 format (YYYY-MM-DDThh:mm:ss)
     if (formData?.happened_at) {
       const formattedDate = format(
@@ -454,9 +463,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     try {
       const response = await FetchYouTubeInfo({ video_url: url });
       const data = response?.data || {};
-
       setFormData((prev) => {
-        const preferredOrder = ["maxres", "high", "standard", "medium", "default"];
+        const preferredOrder = [
+          "maxres",
+          "high",
+          "standard",
+          "medium",
+          "default",
+        ];
         const thumbnails = data?.thumbnails || {};
         const fallbackThumb = preferredOrder
           .map((key) => thumbnails?.[key]?.url)
@@ -469,8 +483,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           reference_code: prev.reference_code || data?.reference_code || "",
           language: prev.language || data?.default_language || "",
           duration: prev.duration || data?.duration_formatted || "",
-          thumbnail_url: prev.thumbnail_url || fallbackThumb || prev.thumbnail_url,
-          happened_at: prev.happened_at || data?.published_at || prev.happened_at,
+          thumbnail_url:
+            prev.thumbnail_url ||
+            thumbnails?.standard?.url ||
+            prev.thumbnail_url,
+          happened_at:
+            prev.happened_at || data?.published_at || prev.happened_at,
         };
 
         if (!prev.thumbnail_url && fallbackThumb) {
@@ -580,7 +598,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               {imagePreview ? (
                 <img
                   // src={imagePreview}
-                  src={formData?.thumbnail}
+                  src={
+                    formData?.thumbnail ||
+                    formData?.thumbnail_url ||
+                    imagePreview
+                  }
                   alt="Preview"
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -1064,7 +1086,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                   ) : (
                     <span className="flex items-center gap-1">
                       <Search className="h-3 w-3" />
-                      {t("Fetch info")}
+                      {t("Fetch info")}asdasd
                     </span>
                   )}
                 </Button>
@@ -1077,7 +1099,8 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {/* Start Casts */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Casts")} *
+                {t("Casts")}
+                {/* * */}
               </label>
               <div className="space-y-2">
                 <Input
@@ -1085,11 +1108,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
                   onChange={(e) => setCastInput(e.target.value)}
                   onKeyDown={handleCastInput}
                   placeholder={t("Type a cast member name and press Enter")}
-                  className={errors.cast ? "border-red-500" : ""}
+                  // className={errors.cast ? "border-red-500" : ""}
                 />
-                {errors.cast && (
+                {/* {errors.cast && (
                   <p className="text-red-500 text-xs mt-1">{errors.cast}</p>
-                )}
+                )} */}
                 {formData?.cast.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData?.cast.map((member, index) => (
