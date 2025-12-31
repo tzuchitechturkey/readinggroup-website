@@ -120,7 +120,6 @@ class Video(LikableMixin, TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     cast = models.JSONField(default=list, blank=True)
-    season_name = models.ForeignKey('SeasonId', on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     is_weekly_moment = models.BooleanField(default=False)
@@ -740,26 +739,6 @@ class BookCategory(TimestampedModel):
     def __str__(self) -> str: 
         return f"{self.name} ({self.language})"
     
-class SeasonTitle(models.Model):
-    """Season and Title mapping for Videos."""
-    name = models.CharField(max_length=255, blank=True, unique=True)
-    description = models.TextField(blank=True)
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str: 
-        return self.name
-    
-class SeasonId(models.Model):
-    """Season ID mapping for Videos."""
-    season_title = models.ForeignKey("SeasonTitle", on_delete=models.CASCADE, related_name="season_ids")
-    season_id = models.CharField(max_length=100)
-    
-    class Meta:
-        ordering = ("season_title__name",)
-    def __str__(self) -> str:
-        return self.season_id
-
 class MyListEntry(TimestampedModel):
     """User saved videos for later viewing."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_list")

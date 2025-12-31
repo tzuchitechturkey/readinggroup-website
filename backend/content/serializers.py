@@ -24,8 +24,6 @@ from .models import (
     PostCategory,
     PostRating,
     Reply,
-    SeasonId,
-    SeasonTitle,
     SocialMedia,
     TeamMember,
     Video,
@@ -212,30 +210,6 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
         model = PositionTeamMember
         fields = ["id", "name", "description"]
         
-class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    class Meta:
-        model = SeasonTitle
-        fields = "__all__"
-
-class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    # allow writing by primary key and represent as object in output
-    season_title = serializers.PrimaryKeyRelatedField(queryset=SeasonTitle.objects.all())
-
-    class Meta:
-        model = SeasonId
-        fields = "__all__"
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # replace season_title pk with detailed object
-        try:
-            st = instance.season_title
-            data["season_title"] = {"id": st.pk, "name": st.name} if st is not None else None
-        except Exception:
-            data["season_title"] = None
-        return data
-
 class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
     user = UserSerializer(read_only=True)
@@ -331,7 +305,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
     datetime_fields = ("happened_at", "created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
-    season_name = serializers.PrimaryKeyRelatedField(queryset=SeasonId.objects.all(), write_only=True, required=False)
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
@@ -345,7 +318,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["category"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["season_name"] = SeasonIdSerializer(instance.season_name, context=self.context).data if instance.season_name else None
         data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
         request = self.context.get("request")
         user = getattr(request, "user", None)

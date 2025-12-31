@@ -41,8 +41,6 @@ from .models import (
     Reply,
     Like,
     MyListEntry,
-    SeasonTitle,
-    SeasonId,
     SectionOrder,
     SocialMedia,
     NavbarLogo,
@@ -67,8 +65,6 @@ from .serializers import (
     CommentsSerializer,
     ReplySerializer,
     LikeSerializer,
-    SeasonTitleSerializer,
-    SeasonIdSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
     ContentAttachmentSerializer,
@@ -1641,85 +1637,6 @@ class PositionTeamMemberViewSet(BaseCRUDViewSet):
     serializer_class = PositionTeamMemberSerializer
     search_fields = ("name",)
     ordering_fields = ("created_at",)
-    
-class SeasonIdViewSet(BaseCRUDViewSet):
-    """ViewSet for managing SeasonId content."""
-    queryset = SeasonId.objects.all()
-    serializer_class = SeasonIdSerializer
-    search_fields = ("season_title__name",)
-    ordering_fields = ("-created_at",)
-
-    @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
-    def videos(self, request, pk=None):
-        """Return all Video objects associated with this SeasonId.
-        URL: /.../seasonid/{id}/videos/
-        Videos are ordered by happened_at (newest first) then created_at.
-        Supports pagination if the viewset/router has pagination configured.
-        """
-        try:
-            season = self.get_object()
-        except Exception:
-            return Response({"detail": "SeasonId not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Videos point to SeasonId via Video.season_name
-        # Only include published videos whose related category is active.
-        qs = Video.objects.filter(season_name=season)
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            try:
-                qs = qs.filter(status="published")
-            except Exception:
-                pass
-
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            # model may not have category relation in some edge cases
-            pass
-
-        # Order season videos by creation time (newest first)
-        qs = qs.order_by('-created_at')
-        qs = annotate_likes_queryset(qs, request)
-
-        # paginate if pagination is configured on the view
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = VideoSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = VideoSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-class SeasonTitleViewSet(BaseCRUDViewSet):
-    """ViewSet for managing SeasonTitle content."""
-    queryset = SeasonTitle.objects.all()
-    serializer_class = SeasonTitleSerializer
-    search_fields = ("name",)
-    # SeasonTitle model does not have created_at; allow ordering by name instead
-    ordering_fields = ("name",)
-    
-    @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
-    def season_ids(self, request, pk=None):
-        """Return SeasonId objects linked to this SeasonTitle.
-
-        GET /api/v1/season-titles/{pk}/season-ids/
-        """
-        try:
-            season_title = self.get_object()
-        except Exception:
-            return Response({"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # SeasonId doesn't have a created_at timestamp; order by the season_id field instead
-        qs = SeasonId.objects.filter(season_title=season_title).order_by('season_id')
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = SeasonIdSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = SeasonIdSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
     
 class LikeViewSet(BaseContentViewSet):
     """ViewSet for managing Like content."""

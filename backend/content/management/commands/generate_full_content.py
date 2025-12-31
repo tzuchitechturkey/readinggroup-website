@@ -32,8 +32,6 @@ from content.models import (
     PostRating,
     Reply,
     SectionOrder,
-    SeasonId,
-    SeasonTitle,
     SocialMedia,
     TeamMember,
     Video,
@@ -180,8 +178,6 @@ class SampleContentBuilder:
         Content.objects.all().delete()
         HistoryEntry.objects.all().delete()
         TeamMember.objects.all().delete()
-        SeasonId.objects.all().delete()
-        SeasonTitle.objects.all().delete()
         SectionOrder.objects.all().delete()
         SocialMedia.objects.all().delete()
         NavbarLogo.objects.all().delete()
