@@ -58,7 +58,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   // Map language names to language codes
   const languageCodeMap = {
     ar: "ar",
-    eng: "en",
+    en: "en",
     tr: "tr",
     ch: "ch",
     chsi: "chsi",
@@ -100,6 +100,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   const openEditModal = (cat) => {
     setEditingCategory(cat);
     setCategoryKey(cat.key || null);
+    console.log(i18n?.language || "en");
     setSelectedLanguage(i18n?.language || "en");
     setForm({
       name: cat.name || "",
@@ -140,6 +141,9 @@ function PostsCategoriesContent({ onSectionChange }) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (name === "name" || name === "description") {
+      setCategoryKey(null);
+    }
+    if (categoryKey && editingCategory) {
       setCategoryKey(null);
     }
     // إزالة الخطأ عند الإدخال
@@ -232,9 +236,9 @@ function PostsCategoriesContent({ onSectionChange }) {
     if (!validateForm()) {
       return;
     }
-    console.log("Selected Language:", selectedLanguage);
     const languageCode = languageCodeMap[selectedLanguage];
     const submitData = { ...form };
+    console.log(languageCodeMap);
 
     // إذا كانت عملية إنشاء جديدة، أرسل اللغة
     if (!editingCategory || !editingCategory.id) {
@@ -245,10 +249,14 @@ function PostsCategoriesContent({ onSectionChange }) {
       // إذا أردنا تعديل الترجمات (اسم أو وصف)، لا نرسل الـ key
       if (categoryKey) {
         submitData.key = categoryKey;
+        console.log("if", categoryKey);
+      } else {
+        submitData.key = null;
+        console.log("else", categoryKey);
       }
       submitData.language = languageCode;
     }
-    submitData.key = languageCode;
+    // submitData.key = languageCode;
     console.log("Submitting data:", submitData);
     setIsLoading(true);
     try {

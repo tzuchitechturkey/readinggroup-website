@@ -175,5 +175,11 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
 
 
+# Gemini translation
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBUIgYyluNn3Y0j51vZYRxp2VNjylCJ8ag")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+GEMINI_TRANSLATION_ENABLED = os.getenv("GEMINI_TRANSLATION_ENABLED", "true").lower() == "true"
+
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
