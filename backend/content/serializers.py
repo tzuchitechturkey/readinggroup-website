@@ -1,10 +1,12 @@
 from accounts.serializers import UserSerializer
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .helpers import AbsoluteURLSerializer, get_account_user
+from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     Comments,
     Content,
@@ -33,14 +35,18 @@ from .models import (
     Authors,
     BookCategory,
     Book,
-    )
+)
+
 
 class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for reply model attached to comments."""
+
     user = UserSerializer(read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
-    comment = serializers.PrimaryKeyRelatedField(queryset=Comments.objects.all(), required=False)
+    comment = serializers.PrimaryKeyRelatedField(
+        queryset=Comments.objects.all(), required=False
+    )
 
     class Meta:
         model = Reply
@@ -84,8 +90,10 @@ class ReplySerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return obj.has_liked(user)
         return False
 
+
 class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for Like model used across views that expose likes info."""
+
     user = UserSerializer(read_only=True)
     content_type = serializers.SerializerMethodField(read_only=True)
 
@@ -98,89 +106,113 @@ class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return obj.content_type.model if obj.content_type else None
         except Exception:
             return None
-        
+
+
 class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     book_count = serializers.IntegerField(read_only=True)
     translations = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = BookCategory
         fields = "__all__"
-    
+
     def get_translations(self, obj):
         """Return all translations for this category key."""
-        if self.context.get('include_translations', False):
+        if self.context.get("include_translations", False):
             translations = BookCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [{'id': t.id, 'language': t.language, 'name': t.name} for t in translations]
+            return [
+                {"id": t.id, "language": t.language, "name": t.name}
+                for t in translations
+            ]
         return None
-        
+
+
 class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     video_count = serializers.IntegerField(read_only=True)
     translations = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = VideoCategory
         fields = "__all__"
-    
+
     def get_translations(self, obj):
         """Return all translations for this category key."""
-        if self.context.get('include_translations', False):
+        if self.context.get("include_translations", False):
             translations = VideoCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [{'id': t.id, 'language': t.language, 'name': t.name} for t in translations]
+            return [
+                {"id": t.id, "language": t.language, "name": t.name}
+                for t in translations
+            ]
         return None
-        
+
+
 class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     post_count = serializers.IntegerField(read_only=True)
     translations = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = PostCategory
         fields = "__all__"
-    
+
     def get_translations(self, obj):
         """Return all translations for this category key."""
-        if self.context.get('include_translations', False):
+        if self.context.get("include_translations", False):
             translations = PostCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [{'id': t.id, 'language': t.language, 'name': t.name} for t in translations]
+            return [
+                {"id": t.id, "language": t.language, "name": t.name}
+                for t in translations
+            ]
         return None
-                
+
+
 class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     event_count = serializers.IntegerField(read_only=True)
     translations = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = EventCategory
         fields = "__all__"
-    
+
     def get_translations(self, obj):
         """Return all translations for this category key."""
-        if self.context.get('include_translations', False):
+        if self.context.get("include_translations", False):
             translations = EventCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [{'id': t.id, 'language': t.language, 'name': t.name} for t in translations]
+            return [
+                {"id": t.id, "language": t.language, "name": t.name}
+                for t in translations
+            ]
         return None
-        
+
+
 class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     content_count = serializers.IntegerField(read_only=True)
     translations = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = ContentCategory
         fields = "__all__"
-    
+
     def get_translations(self, obj):
         """Return all translations for this category key."""
-        if self.context.get('include_translations', False):
-            translations = ContentCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [{'id': t.id, 'language': t.language, 'name': t.name} for t in translations]
+        if self.context.get("include_translations", False):
+            translations = ContentCategory.objects.filter(key=obj.key).exclude(
+                id=obj.id
+            )
+            return [
+                {"id": t.id, "language": t.language, "name": t.name}
+                for t in translations
+            ]
         return None
+
 
 class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = EventSection
         fields = "__all__"
@@ -188,6 +220,7 @@ class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for the per-Content image rows (file + url + caption)."""
+
     datetime_fields = ("created_at", "updated_at")
 
     class Meta:
@@ -198,46 +231,66 @@ class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Content file attachments (documents, PDFs, etc)."""
+
     datetime_fields = ("created_at", "updated_at")
 
     class Meta:
         model = ContentAttachment
-        fields = ("id", "file", "file_name", "file_size", "description", "created_at", "updated_at")
+        fields = (
+            "id",
+            "file",
+            "file_name",
+            "file_size",
+            "description",
+            "created_at",
+            "updated_at",
+        )
         file_fields = ("file",)
-        
-        
+
+
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = PositionTeamMember
         fields = ["id", "name", "description"]
-        
+
+
 class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = SeasonTitle
         fields = "__all__"
 
+
 class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     # allow writing by primary key and represent as object in output
-    season_title = serializers.PrimaryKeyRelatedField(queryset=SeasonTitle.objects.all())
+    season_title = serializers.PrimaryKeyRelatedField(
+        queryset=SeasonTitle.objects.all()
+    )
 
     class Meta:
         model = SeasonId
         fields = "__all__"
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # replace season_title pk with detailed object
         try:
             st = instance.season_title
-            data["season_title"] = {"id": st.pk, "name": st.name} if st is not None else None
+            data["season_title"] = (
+                {"id": st.pk, "name": st.name} if st is not None else None
+            )
         except Exception:
             data["season_title"] = None
         return data
 
+
 class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     """Serializer for comments with nested replies info."""
+
     user = UserSerializer(read_only=True)
     replies = ReplySerializer(many=True, read_only=True)
     content_type = serializers.CharField(write_only=True, required=False)
@@ -292,14 +345,24 @@ class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             ct_lookup_name = content_type_name.strip().lower()
             if ct_lookup_name in ("content", "post", "posts"):
                 try:
-                    ct = ContentType.objects.get(app_label__iexact="content", model__iexact="post")
+                    ct = ContentType.objects.get(
+                        app_label__iexact="content", model__iexact="post"
+                    )
                 except ContentType.DoesNotExist:
-                    raise ValidationError({"content_type": "Post content type not found in ContentType table."})
+                    raise ValidationError(
+                        {
+                            "content_type": "Post content type not found in ContentType table."
+                        }
+                    )
             else:
                 try:
                     ct = ContentType.objects.get(model__iexact=content_type_name)
                 except ContentType.DoesNotExist:
-                    raise ValidationError({"content_type": f"ContentType with name '{content_type_name}' does not exist."})
+                    raise ValidationError(
+                        {
+                            "content_type": f"ContentType with name '{content_type_name}' does not exist."
+                        }
+                    )
 
             attrs["content_type"] = ct
 
@@ -315,8 +378,12 @@ class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             try:
                 model_cls.objects.get(pk=obj_id)
             except model_cls.DoesNotExist:
-                raise ValidationError({"object_id": f"Object with id {obj_id} not found for content_type {content_type_name}."})
-        
+                raise ValidationError(
+                    {
+                        "object_id": f"Object with id {obj_id} not found for content_type {content_type_name}."
+                    }
+                )
+
         return attrs
 
     def create(self, validated_data):
@@ -327,40 +394,106 @@ class CommentsSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             validated_data["user"] = user
         return super().create(validated_data)
 
+
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
+
     datetime_fields = ("happened_at", "created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=VideoCategory.objects.all(), write_only=True, required=False)
-    season_name = serializers.PrimaryKeyRelatedField(queryset=SeasonId.objects.all(), write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=VideoCategory.objects.all(), write_only=True, required=False
+    )
+    season_name = serializers.PrimaryKeyRelatedField(
+        queryset=SeasonId.objects.all(), write_only=True, required=False
+    )
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
     has_in_my_list = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Video
         fields = "__all__"
         file_fields = ("thumbnail",)
-    
+
+    def create(self, validated_data):
+        youtube_url = validated_data.get("video_url")
+        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
+        should_enrich = bool(youtube_url and api_key)
+
+        if should_enrich:
+            try:
+                info = fetch_video_info(youtube_url, api_key)
+            except YouTubeAPIError:
+                info = None
+            else:
+                if not validated_data.get("title"):
+                    validated_data["title"] = info.title
+                if not validated_data.get("description"):
+                    validated_data["description"] = info.description
+                if not validated_data.get("duration"):
+                    validated_data["duration"] = info.duration_formatted
+                if not validated_data.get("language") and info.default_language:
+                    validated_data["language"] = info.default_language
+                if not validated_data.get("reference_code"):
+                    validated_data["reference_code"] = info.video_id
+                if not validated_data.get("thumbnail_url"):
+                    thumbnails = info.thumbnails or {}
+                    preferred_order = (
+                        "maxres",
+                        "high",
+                        "medium",
+                        "standard",
+                        "default",
+                    )
+                    thumb_url = next(
+                        (
+                            thumbnails[size]["url"]
+                            for size in preferred_order
+                            if thumbnails.get(size) and thumbnails[size].get("url")
+                        ),
+                        None,
+                    )
+                    if thumb_url:
+                        validated_data["thumbnail_url"] = thumb_url
+
+        return super().create(validated_data)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["category"] = VideoCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["season_name"] = SeasonIdSerializer(instance.season_name, context=self.context).data if instance.season_name else None
-        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
+        data["category"] = (
+            VideoCategorySerializer(instance.category, context=self.context).data
+            if instance.category
+            else None
+        )
+        data["season_name"] = (
+            SeasonIdSerializer(instance.season_name, context=self.context).data
+            if instance.season_name
+            else None
+        )
+        data["likes_count"] = getattr(
+            instance, "annotated_likes_count", getattr(instance, "likes_count", 0)
+        )
         request = self.context.get("request")
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
-        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        data["has_liked"] = (
+            bool(annotated)
+            if annotated is not None
+            else (instance.has_liked(user) if user and user.is_authenticated else False)
+        )
         # has_in_my_list indicates if the requesting user has saved this video
         try:
             if user and user.is_authenticated:
-                data["has_in_my_list"] = MyListEntry.objects.filter(user=user, video=instance).exists()
+                data["has_in_my_list"] = MyListEntry.objects.filter(
+                    user=user, video=instance
+                ).exists()
             else:
                 data["has_in_my_list"] = False
         except Exception:
             data["has_in_my_list"] = False
         return data
-    
+
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -380,7 +513,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             return MyListEntry.objects.filter(user=user, video=obj).exists()
         except Exception:
             return False
-        
+
     def get_user(self, obj):
         try:
             target = get_account_user(obj)
@@ -389,10 +522,15 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
+
+
 class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Post model with absolute URL handling for file fields."""
+
     datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=PostCategory.objects.all(), write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=PostCategory.objects.all(), write_only=True, required=False
+    )
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
@@ -400,43 +538,60 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Post
         fields = "__all__"
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["category"] = PostCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
-        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
+        data["category"] = (
+            PostCategorySerializer(instance.category, context=self.context).data
+            if instance.category
+            else None
+        )
+        data["comments"] = CommentsSerializer(
+            instance.comments.all(), many=True, context=self.context
+        ).data
+        data["likes_count"] = getattr(
+            instance, "annotated_likes_count", getattr(instance, "likes_count", 0)
+        )
         request = self.context.get("request")
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
-        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        data["has_liked"] = (
+            bool(annotated)
+            if annotated is not None
+            else (instance.has_liked(user) if user and user.is_authenticated else False)
+        )
         # ratings: average, count, and the requesting user's rating (if any)
         try:
-            avg = getattr(instance, 'annotated_rating_avg', None)
-            count = getattr(instance, 'annotated_rating_count', None)
+            avg = getattr(instance, "annotated_rating_avg", None)
+            count = getattr(instance, "annotated_rating_count", None)
             if avg is None or count is None:
                 from django.db.models import Avg, Count
-                agg = PostRating.objects.filter(post=instance).aggregate(avg=Avg('rating'), count=Count('id'))
-                avg = agg.get('avg')
-                count = agg.get('count')
-            data['average_rating'] = round(avg, 2) if avg is not None else None
-            data['rating_count'] = int(count or 0)
+
+                agg = PostRating.objects.filter(post=instance).aggregate(
+                    avg=Avg("rating"), count=Count("id")
+                )
+                avg = agg.get("avg")
+                count = agg.get("count")
+            data["average_rating"] = round(avg, 2) if avg is not None else None
+            data["rating_count"] = int(count or 0)
         except Exception:
-            data['average_rating'] = None
-            data['rating_count'] = 0
+            data["average_rating"] = None
+            data["rating_count"] = 0
 
         try:
             if user and user.is_authenticated:
                 pr = PostRating.objects.filter(post=instance, user=user).first()
-                data['user_rating'] = pr.rating if pr else None
+                data["user_rating"] = pr.rating if pr else None
             else:
-                data['user_rating'] = None
+                data["user_rating"] = None
         except Exception:
-            data['user_rating'] = None
+            data["user_rating"] = None
         return data
+
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -446,15 +601,16 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
-    
+
     def get_average_rating(self, obj):
         """Return average rating for the post (rounded to 2 decimals) or None."""
         try:
-            avg = getattr(obj, 'annotated_rating_avg', None)
+            avg = getattr(obj, "annotated_rating_avg", None)
             if avg is None:
                 from django.db.models import Avg
-                agg = PostRating.objects.filter(post=obj).aggregate(avg=Avg('rating'))
-                avg = agg.get('avg')
+
+                agg = PostRating.objects.filter(post=obj).aggregate(avg=Avg("rating"))
+                avg = agg.get("avg")
             return round(avg, 2) if avg is not None else None
         except Exception:
             return None
@@ -462,19 +618,20 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def get_rating_count(self, obj):
         """Return integer count of ratings for the post."""
         try:
-            count = getattr(obj, 'annotated_rating_count', None)
+            count = getattr(obj, "annotated_rating_count", None)
             if count is None:
                 from django.db.models import Count
-                agg = PostRating.objects.filter(post=obj).aggregate(count=Count('id'))
-                count = agg.get('count')
+
+                agg = PostRating.objects.filter(post=obj).aggregate(count=Count("id"))
+                count = agg.get("count")
             return int(count or 0)
         except Exception:
             return 0
 
     def get_user_rating(self, obj):
         """Return the requesting user's rating for the post, or None."""
-        request = self.context.get('request')
-        user = getattr(request, 'user', None)
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
         if not user or not user.is_authenticated:
             return None
         try:
@@ -485,8 +642,8 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def get_user(self, obj):
         """Return the user associated with the post, or None."""
-        request = self.context.get('request')
-        user = getattr(request, 'user', None)
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
         if not user or not user.is_authenticated:
             return None
         try:
@@ -494,10 +651,14 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             return None
 
+
 class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Content model with absolute URL handling for file fields."""
+
     datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=ContentCategory.objects.all(), write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=ContentCategory.objects.all(), write_only=True, required=False
+    )
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
@@ -506,8 +667,13 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     rating_count = serializers.SerializerMethodField(read_only=True)
     user_rating = serializers.SerializerMethodField(read_only=True)
     images = ContentImageSerializer(many=True, read_only=True)
-    attachments = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
-    attachments_data = ContentAttachmentSerializer(many=True, read_only=True, source='attachments')
+    attachments = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
+    attachments_data = ContentAttachmentSerializer(
+        many=True, read_only=True, source="attachments"
+    )
+
     class Meta:
         model = Content
         fields = "__all__"
@@ -515,43 +681,60 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["category"] = ContentCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        data["category"] = (
+            ContentCategorySerializer(instance.category, context=self.context).data
+            if instance.category
+            else None
+        )
         # include comments for models that have GenericRelation
         try:
-            data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
+            data["comments"] = CommentsSerializer(
+                instance.comments.all(), many=True, context=self.context
+            ).data
         except Exception:
             data["comments"] = []
-        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
+        data["likes_count"] = getattr(
+            instance, "annotated_likes_count", getattr(instance, "likes_count", 0)
+        )
         request = self.context.get("request")
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
-        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        data["has_liked"] = (
+            bool(annotated)
+            if annotated is not None
+            else (instance.has_liked(user) if user and user.is_authenticated else False)
+        )
         # ratings: average, count, and user's rating (if any)
         try:
-            avg = getattr(instance, 'annotated_rating_avg', None)
-            count = getattr(instance, 'annotated_rating_count', None)
+            avg = getattr(instance, "annotated_rating_avg", None)
+            count = getattr(instance, "annotated_rating_count", None)
             if avg is None or count is None:
                 from django.db.models import Avg, Count
-                agg = ContentRating.objects.filter(content=instance).aggregate(avg=Avg('rating'), count=Count('id'))
-                avg = agg.get('avg')
-                count = agg.get('count')
-            data['average_rating'] = round(avg, 2) if avg is not None else None
-            data['rating_count'] = int(count or 0)
+
+                agg = ContentRating.objects.filter(content=instance).aggregate(
+                    avg=Avg("rating"), count=Count("id")
+                )
+                avg = agg.get("avg")
+                count = agg.get("count")
+            data["average_rating"] = round(avg, 2) if avg is not None else None
+            data["rating_count"] = int(count or 0)
         except Exception:
-            data['average_rating'] = None
-            data['rating_count'] = 0
+            data["average_rating"] = None
+            data["rating_count"] = 0
 
         try:
             if user and user.is_authenticated:
                 cr = ContentRating.objects.filter(content=instance, user=user).first()
-                data['user_rating'] = cr.rating if cr else None
+                data["user_rating"] = cr.rating if cr else None
             else:
-                data['user_rating'] = None
+                data["user_rating"] = None
         except Exception:
-            data['user_rating'] = None
+            data["user_rating"] = None
         # include associated ContentImage rows as `images` for slider support
         try:
-            data["images"] = ContentImageSerializer(instance.images.all(), many=True, context=self.context).data
+            data["images"] = ContentImageSerializer(
+                instance.images.all(), many=True, context=self.context
+            ).data
         except Exception:
             # fall back to empty list if anything goes wrong
             data["images"] = []
@@ -559,29 +742,35 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def get_average_rating(self, obj):
         try:
-            avg = getattr(obj, 'annotated_rating_avg', None)
+            avg = getattr(obj, "annotated_rating_avg", None)
             if avg is None:
                 from django.db.models import Avg
-                agg = ContentRating.objects.filter(content=obj).aggregate(avg=Avg('rating'))
-                avg = agg.get('avg')
+
+                agg = ContentRating.objects.filter(content=obj).aggregate(
+                    avg=Avg("rating")
+                )
+                avg = agg.get("avg")
             return round(avg, 2) if avg is not None else None
         except Exception:
             return None
 
     def get_rating_count(self, obj):
         try:
-            count = getattr(obj, 'annotated_rating_count', None)
+            count = getattr(obj, "annotated_rating_count", None)
             if count is None:
                 from django.db.models import Count
-                agg = ContentRating.objects.filter(content=obj).aggregate(count=Count('id'))
-                count = agg.get('count')
+
+                agg = ContentRating.objects.filter(content=obj).aggregate(
+                    count=Count("id")
+                )
+                count = agg.get("count")
             return int(count or 0)
         except Exception:
             return 0
 
     def get_user_rating(self, obj):
-        request = self.context.get('request')
-        user = getattr(request, 'user', None)
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
         if not user or not user.is_authenticated:
             return None
         try:
@@ -599,7 +788,7 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
-    
+
     def get_user(self, obj):
         try:
             target = get_account_user(obj)
@@ -608,49 +797,67 @@ class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-    
+
     def create(self, validated_data):
         """Handle creation with attachments field."""
-        attachments_ids = validated_data.pop('attachments', [])
+        attachments_ids = validated_data.pop("attachments", [])
         instance = super().create(validated_data)
-        
+
         if attachments_ids:
-            attachment_instances = ContentAttachment.objects.filter(id__in=attachments_ids)
+            attachment_instances = ContentAttachment.objects.filter(
+                id__in=attachments_ids
+            )
             instance.attachments.set(attachment_instances)
-        
+
         return instance
-    
+
     def update(self, instance, validated_data):
         """Handle update with attachments field."""
-        attachments_ids = validated_data.pop('attachments', None)
+        attachments_ids = validated_data.pop("attachments", None)
         instance = super().update(instance, validated_data)
-        
+
         if attachments_ids is not None:
-            attachment_instances = ContentAttachment.objects.filter(id__in=attachments_ids)
+            attachment_instances = ContentAttachment.objects.filter(
+                id__in=attachments_ids
+            )
             instance.attachments.set(attachment_instances)
-        
+
         return instance
-    
+
+
 class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=BookCategory.objects.all(), write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=BookCategory.objects.all(), write_only=True, required=False
+    )
+
     class Meta:
         model = Book
         fields = "__all__"
-        
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["category"] = BookCategorySerializer(instance.category, context=self.context).data if instance.category else None
+        data["category"] = (
+            BookCategorySerializer(instance.category, context=self.context).data
+            if instance.category
+            else None
+        )
         return data
-    
+
+
 class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(queryset=EventCategory.objects.all(), write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=EventCategory.objects.all(), write_only=True, required=False
+    )
     comments = CommentsSerializer(many=True, read_only=True)
     likes_count = serializers.SerializerMethodField(read_only=True)
     has_liked = serializers.SerializerMethodField(read_only=True)
-    section = serializers.PrimaryKeyRelatedField(queryset=EventSection.objects.all(), write_only=True, required=False)
+    section = serializers.PrimaryKeyRelatedField(
+        queryset=EventSection.objects.all(), write_only=True, required=False
+    )
     user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Event
         fields = "__all__"
@@ -658,19 +865,36 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["category"] = EventCategorySerializer(instance.category, context=self.context).data if instance.category else None
-        data["section"] = EventSectionSerializer(instance.section, context=self.context).data if instance.section else None
+        data["category"] = (
+            EventCategorySerializer(instance.category, context=self.context).data
+            if instance.category
+            else None
+        )
+        data["section"] = (
+            EventSectionSerializer(instance.section, context=self.context).data
+            if instance.section
+            else None
+        )
         # include comments for models that have GenericRelation
         try:
-            data["comments"] = CommentsSerializer(instance.comments.all(), many=True, context=self.context).data
+            data["comments"] = CommentsSerializer(
+                instance.comments.all(), many=True, context=self.context
+            ).data
         except Exception:
             data["comments"] = []
-        data["likes_count"] = getattr(instance, "annotated_likes_count", getattr(instance, "likes_count", 0))
+        data["likes_count"] = getattr(
+            instance, "annotated_likes_count", getattr(instance, "likes_count", 0)
+        )
         request = self.context.get("request")
         user = getattr(request, "user", None)
         annotated = getattr(instance, "annotated_has_liked", None)
-        data["has_liked"] = bool(annotated) if annotated is not None else (instance.has_liked(user) if user and user.is_authenticated else False)
+        data["has_liked"] = (
+            bool(annotated)
+            if annotated is not None
+            else (instance.has_liked(user) if user and user.is_authenticated else False)
+        )
         return data
+
     def get_likes_count(self, obj):
         return getattr(obj, "likes_count", 0)
 
@@ -680,7 +904,7 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         if user and user.is_authenticated:
             return obj.has_liked(user)
         return False
-    
+
     def get_user(self, obj):
         try:
             target = get_account_user(obj)
@@ -689,18 +913,29 @@ class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
+
+
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
-    position = serializers.PrimaryKeyRelatedField(queryset=PositionTeamMember.objects.all(), write_only=True, required=False)
+    position = serializers.PrimaryKeyRelatedField(
+        queryset=PositionTeamMember.objects.all(), write_only=True, required=False
+    )
     user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = TeamMember
         fields = "__all__"
         file_fields = ("avatar",)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["position"] = PositionTeamMemberSerializer(instance.position, context=self.context).data if instance.position else None
+        data["position"] = (
+            PositionTeamMemberSerializer(instance.position, context=self.context).data
+            if instance.position
+            else None
+        )
         return data
+
     def get_user(self, obj):
         try:
             target = get_account_user(obj)
@@ -714,11 +949,12 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("story_date", "created_at", "updated_at")
     user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = HistoryEntry
         fields = "__all__"
         file_fields = ("image",)
-    
+
     def get_user(self, obj):
         try:
             target = get_account_user(obj)
@@ -727,7 +963,7 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # include resolved user representation (if present)
@@ -736,21 +972,27 @@ class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             data["user"] = None
         return data
-    
+
+
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = SocialMedia
         fields = "__all__"
-        
+
+
 class NavbarLogoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = NavbarLogo
         fields = "__all__"
-        
+
+
 class AuthorsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+
     class Meta:
         model = Authors
         fields = "__all__"

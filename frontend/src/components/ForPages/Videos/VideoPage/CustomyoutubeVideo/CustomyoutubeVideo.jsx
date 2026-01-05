@@ -5,9 +5,7 @@ import { ThumbsUp, ListPlus, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-toastify";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
-import ShowHideText from "@/components/Global/ShowHideText/ShowHideText";
 import ContentInfoCard from "@/components/Global/ContentInfoCard/ContentInfoCard";
-import RatingSection from "@/components/Global/RatingSection/RatingSection";
 import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -316,13 +314,13 @@ function CustomyoutubeVideo({ videoData }) {
               <div className="p-6">
                 {/* Title & YouTube Button Row */}
                 <div
-                  className={`flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-6 ${
+                  className={`flex flex-col sm:flex-row items-start justify-between gap-1  mb-6 ${
                     i18n.language === "ar" ? "flex-row-reverse" : ""
                   }`}
                 >
                   {/* العنوان */}
                   {videoData?.title && (
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-0">
+                    <h1 className="text-2xl w-3/4 md:text-xl lg:text-2xl font-semibold text-gray-900 leading-tight mb-0">
                       {videoData?.title}
                     </h1>
                   )}
@@ -332,7 +330,7 @@ function CustomyoutubeVideo({ videoData }) {
                       onClick={() =>
                         window.open(videoData?.video_url, "_blank")
                       }
-                      className="flex items-center gap-2 text-white bg-[#DC2626] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base whitespace-nowrap"
+                      className="rounded-full w-[200px] flex items-center gap-2 text-white bg-[#DC2626] px-3 py-1.5 sm:py-2 hover:text-[#Dc2626] transition-all duration-200 hover:bg-white border-[1px] border-[#Dc2626] text-sm sm:text-base "
                     >
                       <span className="font-medium">
                         {t("Watch on YouTube")}
@@ -340,7 +338,7 @@ function CustomyoutubeVideo({ videoData }) {
                       <img
                         src="/icons/youtube-icon.png"
                         alt="YouTube"
-                        className="w-4 h-4 sm:w-5 sm:h-5"
+                        className="w-4 h-4  "
                       />
                     </button>
                   )}

@@ -3,7 +3,7 @@ import React, { useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Star, User, Camera, Calendar, MapPin } from "lucide-react";
 
-import HtmlContent from "../HtmlContent/HtmlContent";
+import ShowHideText from "../ShowHideText/ShowHideText";
 
 function ContentInfoCard({
   contentData,
@@ -30,7 +30,7 @@ function ContentInfoCard({
 
       {/* Title */}
       <h1
-        className={`text-xl font-bold text-gray-900 mb-2 ${
+        className={`text-xl font-semibold text-gray-900 mb-2 ${
           isRTL ? "text-right" : "text-left"
         }`}
       >
@@ -150,18 +150,20 @@ function ContentInfoCard({
         </div>
       )}
 
-      {/* Description */}
+      {/* Start Description */}
       <p
-        className={`text-gray-700 text-sm leading-relaxed mb-4 ${
+        className={`text-gray-700 text-sm mb-4 break-words overflow-wrap-break-word ${
           isRTL ? "text-right" : "text-left"
         }`}
       >
-        <HtmlContent
-          html={contentData?.description}
-          className="prose max-w-none"
+        <ShowHideText
+          t={t}
+          text={contentData?.description}
+          count={300}
+          allowHtml={true}
         />
-        {/* {contentData?.description} */}
       </p>
+      {/* End Description */}
 
       {/* Camera Settings for photos */}
       {contentType === "photo" &&
