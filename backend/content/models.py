@@ -110,7 +110,7 @@ class LikableMixin(models.Model):
         """
         return cls.objects.annotate(annotated_likes_count=Count('likes')).order_by('-annotated_likes_count', '-created_at')[:limit]
     
-class Event(LikableMixin, TimestampedModel):
+class Event(TranslatableModelMixin, LikableMixin, TimestampedModel):
     """Represent events and news items grouped by section."""
     title = models.CharField(max_length=255)
     writer = models.CharField(max_length=255)
@@ -170,6 +170,7 @@ class Event(LikableMixin, TimestampedModel):
         return qs
     class Meta:
         ordering = ("-happened_at", "title")
+        unique_together = (("translation_group", "language"),)
 
     def __str__(self) -> str:
         return f"{self.title} ({self.section.name if self.section else ''})"
@@ -423,6 +424,7 @@ class Book(TranslatableModelMixin, TimestampedModel):
     
     class Meta:
         ordering = ("name",)
+        unique_together = (("translation_group", "language"),)
     def __str__(self):
         return self.name
 
@@ -605,13 +607,14 @@ class BookCategory(BaseTranslatableCategory):
     """Categories for organizing books with multi-language support."""
     pass
     
-class SeasonTitle(models.Model):
+class SeasonTitle(TranslatableModelMixin):
     """Season and Title mapping for Videos."""
     name = models.CharField(max_length=255, blank=True, unique=True)
     description = models.TextField(blank=True)
     language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
+        unique_together = (("translation_group", "language"),)
 
     def __str__(self) -> str: 
         return self.name
@@ -637,23 +640,25 @@ class MyListEntry(TimestampedModel):
     def __str__(self) -> str: 
         return f"MyListEntry<{self.user_id}:{self.video_id}>"
     
-class PositionTeamMember(TimestampedModel):
+class PositionTeamMember(TranslatableModelMixin, TimestampedModel):
     """Positions for Team Members."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
+        unique_together = (("translation_group", "language"),)
     def __str__(self) -> str: 
         return self.name
 
-class EventSection(TimestampedModel):
+class EventSection(TranslatableModelMixin, TimestampedModel):
     """Sections for Events."""
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     language = models.CharField(max_length=50, choices=LanguageChoices.choices)
     class Meta:
         ordering = ("name",)
+        unique_together = (("translation_group", "language"),)
     def events(self):
         """Return a queryset of Event objects that belong to this section."""
         return self.event_set.all()

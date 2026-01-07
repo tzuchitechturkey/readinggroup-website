@@ -33,6 +33,9 @@ TRANSLATABLE_FIELD_MAP: dict[str, tuple[str, ...]] = {
     "content.contentcategory": ("name", "description"),
     "content.videocategory": ("name", "description"),
     "content.bookcategory": ("name", "description"),
+    "content.seasontitle": ("name", "description"),
+    "content.positionteammember": ("name", "description"),
+    "content.eventsection": ("name", "description"),
 }
 
 
