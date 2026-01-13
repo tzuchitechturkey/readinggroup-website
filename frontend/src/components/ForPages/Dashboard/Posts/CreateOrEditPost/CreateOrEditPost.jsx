@@ -11,12 +11,17 @@ import { Input } from "@/components/ui/input";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { processImageFile } from "@/Utility/imageConverter";
-import { CreatePost, EditPostById, GetPostCategories } from "@/api/posts";
+import {
+  CreatePost,
+  EditPostById,
+  GetPostById,
+  GetPostCategories,
+} from "@/api/posts";
 import countries from "@/constants/countries.json";
-import { languages, postStatusOptions } from "@/constants/constants";
+import { postStatusOptions } from "@/constants/constants";
 import { GetAuthors } from "@/api/authors";
-
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import { languages, getCurrentLanguage } from "@/constants";
 
 function CreateOrEditPost({ onSectionChange, post = null }) {
   const { t, i18n } = useTranslation();
@@ -38,23 +43,57 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     writer_avatar: "",
     category: "",
     status: "",
-    // is_active: true,
     read_time: "",
     tags: "",
-    language: "",
     post_type: "",
     image: null,
     image_url: "",
     metadata: "",
     country: "",
     camera_name: "",
+    language: getCurrentLanguage(i18n),
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
   const [tagInput, setTagInput] = useState("");
   const [imageFile, setImageFile] = useState(null); // Store the actual file
+  const handleLoadTranslation = async () => {
+    if (!post?.id || !formData.language) return;
 
+    setIsLoading(true);
+    try {
+      const response = await GetPostById(post.id, formData.language);
+      if (response?.data) {
+        setFormData((prev) => ({
+          ...prev,
+          title: response.data.title,
+          subtitle: response.data.subtitle,
+          excerpt: response.data.excerpt,
+          body: response.data.body,
+          writer: response.data.writer,
+          writer_avatar: response.data.writer_avatar,
+          category: response.data.category,
+          status: response.data.status,
+          read_time: response.data.read_time,
+          tags: response.data.tags,
+          post_type: response.data.post_type,
+          image: response.data.image,
+          image_url: response.data.image_url,
+          metadata: response.data.metadata,
+          country: response.data.country,
+          camera_name: response.data.camera_name,
+          language: response.data.language,
+        }));
+        toast.success(t("Translation loaded successfully"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const getWriters = async (searchVal = "") => {
     try {
       const res = await GetAuthors(10, 0, searchVal);
@@ -90,7 +129,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
         writer_avatar: post.writer_avatar || "",
         category: post.category || "",
         status: post.status || "draft",
-        // is_active: post.is_active !== undefined ? post.is_active : true,
         read_time: post.read_time || "",
         tags: post.tags || "",
         language: post.language || "",
@@ -314,7 +352,9 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     postData.append("post_type", formData.post_type);
     postData.append("country", formData.country);
     postData.append("camera_name", formData.camera_name);
-
+    if (content?.key) {
+      contentData.append("key", content.key);
+    }
     // postData.append("is_active", formData.is_active);
     // Add image if selected
     // if (formData.image) {
@@ -365,6 +405,13 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
     getCategories();
   }, []);
 
+  useEffect(() => {
+    // Update language in formData when i18n language changes
+    setFormData((prev) => ({
+      ...prev,
+      language: getCurrentLanguage(i18n),
+    }));
+  }, [i18n.language]);
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -657,6 +704,65 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
 
           {/* Right Column */}
           <div className="space-y-4">
+            {/* Start Language */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Language")} *
+              </label>
+              <div className="flex gap-2">
+                <select
+                  name="language"
+                  value={formData.language}
+                  onChange={handleInputChange}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                {post?.key && (
+                  <button
+                    type="button"
+                    onClick={handleLoadTranslation}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    title={t("Load translation for selected language")}
+                  >
+                    🌐 {t("Load")}
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Language")} *
+              </label>
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-md  outline-none   ${
+                  errors.language ? "border-red-500" : "border-gray-300"
+                } ${!formData.language ? "text-gray-400" : "text-black"}`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select Language")}
+                </option>
+
+                {languages.map((lang) => (
+                  <option key={lang} className="text-black" value={lang}>
+                    {t(lang)}
+                  </option>
+                ))}
+              </select>
+
+              {errors.language && (
+                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
+              )}
+            </div> */}
+            {/* End Language */}
+
             {/* Start Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -697,35 +803,6 @@ function CreateOrEditPost({ onSectionChange, post = null }) {
             </div>
             {/* End Type */}
 
-            {/* Start Language */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("Language")} *
-              </label>
-              <select
-                name="language"
-                value={formData.language}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md  outline-none   ${
-                  errors.language ? "border-red-500" : "border-gray-300"
-                } ${!formData.language ? "text-gray-400" : "text-black"}`}
-              >
-                <option value="" hidden disabled>
-                  {t("Select Language")}
-                </option>
-
-                {languages.map((lang) => (
-                  <option key={lang} className="text-black" value={lang}>
-                    {t(lang)}
-                  </option>
-                ))}
-              </select>
-
-              {errors.language && (
-                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
-              )}
-            </div>
-            {/* End Language */}
             {/* Start Country */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

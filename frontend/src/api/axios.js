@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getToken } from "./getToken";
 import { API_URL } from "../configs";
+import i18n from "../i18n/i18n";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -18,6 +19,7 @@ axiosInstance.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.headers["accept-language"] = i18n?.language || "en";
 
   return config;
 });

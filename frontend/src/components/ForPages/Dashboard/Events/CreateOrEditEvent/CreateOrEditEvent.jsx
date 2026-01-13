@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { X, User, Search, Tag, Upload } from "lucide-react";
+import { X, Search, Tag, Upload } from "lucide-react";
 import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
@@ -12,16 +12,14 @@ import {
   CreateEvent,
   EditEventById,
   GetEventCategories,
-  // GetEventSections,
+  GetEventById,
 } from "@/api/events";
 import Loader from "@/components/Global/Loader/Loader";
 import countries from "@/constants/countries.json";
-import { languages, postStatusOptions } from "@/constants/constants";
-// import { Button } from "@/components/ui/button";
+import { postStatusOptions } from "@/constants/constants";
+import { languages, getCurrentLanguage } from "@/constants";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import { GetAuthors } from "@/api/authors";
-
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import DatePickerWithYearMonth from "../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
@@ -32,49 +30,54 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
-  // const writerDropdownRef = useRef(null);
-  // const [showWriterDropdown, setShowWriterDropdown] = useState(false);
-  // const [writerSearchValue, setWriterSearchValue] = useState("");
-  // const [writersList, setWritersList] = useState([]);
-  // const [castInput, setCastInput] = useState("");
-  // const [tagsInput, setTagsInput] = useState("");
-  // const sectionDropdownRef = useRef(null);
-  // const [showSectionDropdown, setShowSectionDropdown] = useState(false);
-  // const [sectionsList, setSectionsList] = useState([]);
-  // const [sectionSearchValue, setSectionSearchValue] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
 
   const [formData, setFormData] = useState({
     category: "",
     title: "",
-    // writer: "",
     image: null,
     image_url: "",
     country: "",
-    language: "",
     happened_at: "",
     thumbnail: null,
     thumbnail_url: "",
     status: "",
     external_link: "",
     report_type: "",
-    // summary: "",
-    // video_url: "",
-    // cast: [],
-    // tags: [],
-    // duration_minutes: "",
-    // section: "",
+    language: getCurrentLanguage(i18n),
   });
 
-  const [imagePreview, setImagePreview] = useState("");
+  const handleLoadTranslation = async () => {
+    if (!event?.id || !formData.language) return;
 
-  // const getWriters = async (searchVal = "") => {
-  //   try {
-  //     const res = await GetAuthors(10, 0, searchVal);
-  //     setWritersList(res?.data?.results);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+    setIsLoading(true);
+    try {
+      const response = await GetEventById(event.id, formData.language);
+      if (response?.data) {
+        setFormData((prev) => ({
+          ...prev,
+          category: response?.data?.category || "",
+          title: response?.data?.title || "",
+          image: null,
+          image_url: response?.data?.image_url || "",
+          country: response?.data?.country || "",
+          language: response?.data?.language || "",
+          happened_at: response?.data?.happened_at || "",
+          thumbnail: null,
+          thumbnail_url: response?.data?.thumbnail_url || "",
+          status: response?.data?.status || "",
+          external_link: response?.data?.external_link || "",
+          report_type: response?.data?.report_type || "",
+        }));
+        toast.success(t("Translation loaded successfully"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getCategories = async (searchVal = "") => {
     try {
@@ -85,22 +88,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
 
-  // const getSections = async (searchVal = "") => {
-  //   try {
-  //     const res = await GetEventSections(10, 0, searchVal);
-  //     setSectionsList(res?.data?.results);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
   //Reset form when modal opens/closes or event changes
   useEffect(() => {
     if (event?.id) {
       setFormData({
         category: event.category || "",
         title: event.title || "",
-        // writer: event.writer || "",
         image: null,
         image_url: event.image_url || "",
         country: event.country || "",
@@ -111,24 +104,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         status: event.status || "",
         external_link: event.external_link || "",
         report_type: event.report_type || "",
-        // summary: event.summary || "",
-        // duration_minutes: event.duration_minutes || "",
-        // section: event.section || "",
-        // video_url: event.video_url || "",
-        // cast: event.cast || [],
-        // tags: event.tags || [],
       });
-      setImagePreview(
-        // event?.report_type === "videos"
-        //   ? event.thumbnail || event.thumbnail_url
-        // :
-        event.image || event.image_url
-      );
+      setImagePreview(event.image || event.image_url);
     } else {
       setFormData({
         category: "",
         title: "",
-        // writer: "",
         image: null,
         image_url: "",
         country: "",
@@ -138,16 +119,18 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         thumbnail_url: "",
         status: "",
         report_type: "",
-        // summary: "",
-        // duration_minutes: "",
-        // section: "",
-        // video_url: "",
-        // cast: [],
-        // tags: [],
       });
       setImagePreview("");
     }
   }, [event]);
+
+  useEffect(() => {
+    // Update language in formData when i18n language changes
+    setFormData((prev) => ({
+      ...prev,
+      language: getCurrentLanguage(i18n),
+    }));
+  }, [i18n.language]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -157,34 +140,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       }
     };
   }, [imagePreview]);
-  // Handle writer selection
-  // const handleWriterSelect = (writer) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     writer: writer.name,
-  //   }));
-  //   setShowWriterDropdown(false);
-  //   setWriterSearchValue("");
-
-  //   // Clear writer error if exists
-  //   if (errors.writer) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       writer: "",
-  //     }));
-  //   }
-  // };
-
-  // Handle writer search
-  // const handleWriterSearch = () => {
-  //   getWriters(writerSearchValue);
-  // };
-
-  // Handle clear writer search
-  // const handleClearWriterSearch = () => {
-  //   setWriterSearchValue("");
-  //   getWriters("");
-  // };
 
   // Handle category selection
   const handleCategorySelect = (category) => {
@@ -204,24 +159,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
 
-  // Handle section selection
-  // const handleSectionSelect = (section) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     section: section.id,
-  //   }));
-  //   setShowSectionDropdown(false);
-  //   setSectionSearchValue("");
-
-  //   // Clear section error if exists
-  //   if (errors.section) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       section: "",
-  //     }));
-  //   }
-  // };
-
   // Reset form function
   const resetForm = () => {
     setFormData({
@@ -238,12 +175,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       thumbnail: null,
       thumbnail_url: "",
       report_type: "",
-      // section: "",
-      // duration_minutes: "",
-      // video_url: "",
-      // summary: "",
-      // cast: [],
-      // tags: [],
     });
 
     // Clean up existing preview
@@ -252,8 +183,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
 
     setImagePreview("");
-    // setCastInput("");
-    // setTagsInput("");
   };
 
   const handleInputChange = (e) => {
@@ -304,66 +233,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
 
-  // Handle cast input
-  // const handleCastInput = (e) => {
-  //   if (e.key === "Enter" && castInput.trim()) {
-  //     e.preventDefault();
-  //     if (!formData?.cast.includes(castInput.trim())) {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         cast: [...prev.cast, castInput.trim()],
-  //       }));
-  //     }
-  //     setCastInput("");
-
-  //     // Clear error when adding cast
-  //     if (errors.cast) {
-  //       setErrors((prev) => ({
-  //         ...prev,
-  //         cast: "",
-  //       }));
-  //     }
-  //   }
-  // };
-
-  // Remove cast
-  // const removeCast = (castToRemove) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     cast: prev.cast.filter((item) => item !== castToRemove),
-  //   }));
-  // };
-
-  // Handle tags input
-  // const handleTagsInput = (e) => {
-  //   if (e.key === "Enter" && tagsInput.trim()) {
-  //     e.preventDefault();
-  //     if (!formData?.tags.includes(tagsInput.trim())) {
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         tags: [...prev.tags, tagsInput.trim()],
-  //       }));
-  //     }
-  //     setTagsInput("");
-
-  //     // Clear error when adding tag
-  //     if (errors.tags) {
-  //       setErrors((prev) => ({
-  //         ...prev,
-  //         tags: "",
-  //       }));
-  //     }
-  //   }
-  // };
-
-  // Remove tag
-  // const removeTag = (tagToRemove) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     tags: prev.tags.filter((tag) => tag !== tagToRemove),
-  //   }));
-  // };
-
   // Validate URL format
   const isValidUrl = (url) => {
     try {
@@ -385,10 +254,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     if (!formData.title.trim()) {
       newErrors.title = t("Title is required");
     }
-
-    // if (!formData.writer) {
-    //   newErrors.writer = t("Writer is required");
-    // }
 
     if (!formData.image && !formData.image_url && !event?.id) {
       newErrors.image = t("Image is required");
@@ -419,32 +284,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       newErrors.report_type = t("Report type is required");
     }
 
-    // if (!formData.duration_minutes) {
-    //   newErrors.duration_minutes = t("Duration is required");
-    // }
-    // if (!formData.section) {
-    //   newErrors.section = t("Section is required");
-    // }
-
-    // if (!formData.summary.trim()) {
-    //   newErrors.summary = t("Summary is required");
-    // }
-
-    // Validate video fields if report type is "videos"
-    // if (formData.report_type === "videos") {
-    //   if (!formData?.video_url.trim()) {
-    //     newErrors.video_url = t("Video URL is required");
-    //   }
-
-    //   if (!formData?.cast || formData?.cast.length === 0) {
-    //     newErrors.cast = t("Cast is required");
-    //   }
-
-    //   if (!formData?.tags || formData?.tags.length === 0) {
-    //     newErrors.tags = t("Tags are required");
-    //   }
-    // }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -468,16 +307,14 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     submitData.append("status", formData.status);
     submitData.append("country", formData.country);
     submitData.append("language", formData.language);
+    if (event?.key) {
+      submitData.append("key", event.key);
+    }
     if (formData.image) {
       submitData.append("image", formData.image);
-      // if (formData?.report_type === "videos") {
-      //   submitData.append("thumbnail", formData.image);
-      // }
     }
     if (formData?.image_url) {
       submitData.append("image_url", formData.image_url);
-      // if (formData?.report_type === "videos") {
-      //   submitData.append("thumbnail_url", formData.image_url);
       // }
     }
 
@@ -489,25 +326,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       submitData.append("happened_at", formattedDate);
     }
     submitData.append("external_link", formData.external_link);
-
     submitData.append("report_type", formData.report_type);
-    // submitData.append("duration_minutes", formData.duration_minutes);
-    // submitData.append("section", formData.section?.id || formData.section);
-    // submitData.append("summary", formData.summary);
-    // Append video fields if report type is "videos"
-    // if (formData.report_type === "videos") {
-    //   submitData.append("video_url", formData.video_url);
-    //   // Append cast as JSON array
-    //   if (formData.cast && formData.cast.length > 0) {
-    //     submitData.append("cast", JSON.stringify(formData.cast));
-    //   }
-    //   // Append tags as JSON array
-    //   if (formData.tags && formData.tags.length > 0) {
-    //     submitData.append("tags", JSON.stringify(formData.tags));
-    //   }
-    // }
-
-    // Append file if it exists
 
     setIsLoading(true);
     try {
@@ -530,22 +349,12 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
     }
   };
   useEffect(() => {
-    // getWriters();
     getCategories();
-    // getSections();
   }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close writer dropdown if clicked outside
-      // if (
-      //   writerDropdownRef.current &&
-      //   !writerDropdownRef.current.contains(event.target)
-      // ) {
-      //   setShowWriterDropdown(false);
-      // }
-
       // Close category dropdown if clicked outside
       if (
         categoryDropdownRef.current &&
@@ -553,14 +362,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
       ) {
         setShowCategoryDropdown(false);
       }
-
-      // Close section dropdown if clicked outside
-      // if (
-      //   sectionDropdownRef.current &&
-      //   !sectionDropdownRef.current.contains(event.target)
-      // ) {
-      //   setShowSectionDropdown(false);
-      // }
     };
 
     // Add event listener
@@ -600,10 +401,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             </p>
           </div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {/* {formData?.report_type === "videos"
-              ? t("Event Video Thumbnail") 
-              :
-              */}
             {t("Event Image")}*
           </label>
           <div className="flex items-center gap-4">
@@ -658,12 +455,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             name="image_url"
             value={formData.image_url}
             onChange={handleInputChange}
-            placeholder={
-              // formData?.report_type === "videos"
-              // ? t("Enter thumbnail URL as alternative to file upload")
-              // :
-              t("Enter image URL as alternative to file upload")
-            }
+            placeholder={t("Enter image URL as alternative to file upload")}
           />
           <p className="text-xs text-gray-500 mt-1">
             {t("You can either upload a file above or provide a URL here")}
@@ -694,129 +486,63 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           </div>
           {/* End Title */}
 
-          {/* Start Writer Selection */}
-          {/* <div>
+          {/* Start Language */}
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("Writer")} *
+              {t("Language")} *
             </label>
-            <div className="relative" ref={writerDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowWriterDropdown(!showWriterDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  i18n?.language === "ar" ? "text-right" : "text-left"
-                } flex items-center gap-3 ${
-                  errors.writer ? "border-red-500" : "border-gray-300"
-                }`}
+            <div className="flex gap-2">
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleInputChange}
+                className="flex-1 p-2 border border-gray-300 rounded"
               >
-                {formData?.writer ? (
-                  <div
-                    className={`font-medium text-sm ${
-                      i18n?.language === "ar" ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {formData?.writer}
-                  </div>
-                ) : (
-                  <>
-                    <User className="w-8 h-8 text-gray-400" />
-                    <span className="text-gray-500">{t("Select Writer")}</span>
-                  </>
-                )}
-              </button>
-
-              {showWriterDropdown && (
-                <div
-                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
+                {languages.map((lang) => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+              {event?.key && (
+                <button
+                  type="button"
+                  onClick={handleLoadTranslation}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                  title={t("Load translation for selected language")}
                 >
-                  Search Box
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                          value={writerSearchValue}
-                          onChange={(e) => setWriterSearchValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleWriterSearch();
-                            }
-                          }}
-                          placeholder={t("Search writers...")}
-                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        />
-                        {writerSearchValue && (
-                          <button
-                            type="button"
-                            onClick={handleClearWriterSearch}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleWriterSearch}
-                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        title={t("Search")}
-                      >
-                        <Search className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  Writers List
-                  <div className="max-h-60 overflow-y-auto">
-                    {writersList.length > 0 ? (
-                      writersList.map((writer) => (
-                        <button
-                          key={writer.id}
-                          type="button"
-                          onClick={() => handleWriterSelect(writer)}
-                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        >
-                          <img
-                            src={
-                              writer.avatar ||
-                              writer?.avatar_url ||
-                              "/fake-user.png"
-                            }
-                            alt={writer.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">
-                              {writer.name}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {writer.position}
-                            </div>
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                        {t("No writers found")}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  🌐 {t("Load")}
+                </button>
               )}
             </div>
-            {errors.writer && (
-              <p className="text-red-500 text-xs mt-1">{errors.writer}</p>
+          </div>
+
+          {/* <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Language")} *
+            </label>
+            <select
+              name="language"
+              value={formData.language}
+              onChange={handleInputChange}
+              className={`w-full p-3 border rounded-lg outline-none ${
+                errors.language ? "border-red-500" : "border-gray-300"
+              }`}
+            >
+              <option value="" disabled hidden>
+                {t("Select Language")}
+              </option>
+              {languages.map((lang) => (
+                <option key={lang.code} value={lang}>
+                  {t(lang)}
+                </option>
+              ))}
+            </select>
+            {errors.language && (
+              <p className="text-red-500 text-xs mt-1">{errors.language}</p>
             )}
           </div> */}
-          {/* End Writer Selection */}
-
+          {/* End Language */}
           {/* Start Report Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1000,135 +726,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
           </div>
           {/* End Status */}
 
-          {/* Start Section */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("Section")} *
-            </label>
-            <div className="relative" ref={sectionDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowSectionDropdown(!showSectionDropdown)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  i18n?.language === "ar" ? "text-right" : "text-left"
-                } flex items-center gap-3 ${
-                  errors.section ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                {formData?.section ? (
-                  <>
-                    <Tag className="w-5 h-5 text-blue-600" />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {sectionsList.find(
-                          (sec) =>
-                            sec.id ===
-                            (formData.section?.id || formData.section)
-                        )?.name || t("Select Section")}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Tag className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-500">{t("Select Section")}</span>
-                  </>
-                )}
-              </button>
-
-              {showSectionDropdown && (
-                <div
-                  dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                  className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden"
-                >
-                   Search Box 
-                  <div className="p-3 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-                          value={sectionSearchValue}
-                          onChange={(e) =>
-                            setSectionSearchValue(e.target.value)
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              getSections(sectionSearchValue);
-                            }
-                          }}
-                          placeholder={t("Search sections...")}
-                          className={`w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        />
-                        {sectionSearchValue && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSectionSearchValue("");
-                              getSections("");
-                            }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          getSections(sectionSearchValue);
-                        }}
-                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                        title={t("Search")}
-                      >
-                        <Search className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  Sections List
-                  <div className="max-h-60 overflow-y-auto">
-                    {sectionsList.length > 0 ? (
-                      sectionsList.map((section) => (
-                        <button
-                          key={section.id}
-                          type="button"
-                          onClick={() => handleSectionSelect(section)}
-                          className={`w-full px-3 py-2 hover:bg-gray-50 flex items-center gap-3 ${
-                            i18n?.language === "ar" ? "text-right" : "text-left"
-                          }`}
-                        >
-                          <Tag className="w-5 h-5 text-blue-600" />
-                          <div className="flex-1">
-                            <div className="font-medium text-sm">
-                              {section.name}
-                            </div>
-                            {section.description && (
-                              <div className="text-xs text-gray-500">
-                                {section.description}
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                        {t("No sections found")}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            {errors.section && (
-              <p className="text-red-500 text-xs mt-1">{errors.section}</p>
-            )}
-          </div> */}
-          {/* End Section */}
-
           {/* Start Country */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1156,58 +753,6 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             )}
           </div>
           {/* End Country */}
-
-          {/* Start Language */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Language")} *
-            </label>
-            <select
-              name="language"
-              value={formData.language}
-              onChange={handleInputChange}
-              className={`w-full p-3 border rounded-lg outline-none ${
-                errors.language ? "border-red-500" : "border-gray-300"
-              }`}
-            >
-              <option value="" disabled hidden>
-                {t("Select Language")}
-              </option>
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang}>
-                  {t(lang)}
-                </option>
-              ))}
-            </select>
-            {errors.language && (
-              <p className="text-red-500 text-xs mt-1">{errors.language}</p>
-            )}
-          </div>
-          {/* End Language */}
-
-          {/* Start Duration Minutes */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Duration (Minutes)")} *
-            </label>
-            <input
-              type="number"
-              name="duration_minutes"
-              value={formData.duration_minutes}
-              onChange={handleInputChange}
-              min="0"
-              className={`w-full p-3 border rounded-lg outline-none ${
-                errors.duration_minutes ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder={t("Enter duration in minutes")}
-            />
-            {errors.duration_minutes && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.duration_minutes}
-              </p>
-            )}
-          </div> */}
-          {/* End Duration Minutes */}
 
           {/* Start Happened At */}
           <div className="">
@@ -1257,156 +802,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
             )}
           </div>
           {/* End External Link */}
-          {/* Start Video Fields - Only show if report_type is videos */}
-          {/* {formData.report_type === "videos" && (
-            <>
-              Start Video URL
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("Video URL")} *
-                </label>
-                <input
-                  type="text"
-                  name="video_url"
-                  value={formData.video_url}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-lg outline-none ${
-                    errors.video_url ? "border-red-500" : "border-gray-300"
-                  }`}
-                  placeholder={t("Enter video URL (YouTube)")}
-                />
-                {errors.video_url && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.video_url}
-                  </p>
-                )}
-              </div>
-              End Video URL
-
-              Start Cast
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("Cast")} *
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={castInput}
-                    onChange={(e) => setCastInput(e.target.value)}
-                    onKeyPress={handleCastInput}
-                    className={`flex-1 p-3 border rounded-lg outline-none ${
-                      errors.cast ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder={t("Add cast member (press Enter)")}
-                  />
-                </div>
-                {formData.cast && formData.cast.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.cast.map((cast, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
-                      >
-                        <span>{cast}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeCast(cast)}
-                          className="text-blue-800 hover:text-red-600"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {errors.cast && (
-                  <p className="text-red-500 text-xs mt-1">{errors.cast}</p>
-                )}
-              </div>
-              End Cast
-
-              Start Tags
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("Tags")} *
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tagsInput}
-                    onChange={(e) => setTagsInput(e.target.value)}
-                    onKeyPress={handleTagsInput}
-                    className={`flex-1 p-3 border rounded-lg outline-none ${
-                      errors.tags ? "border-red-500" : "border-gray-300"
-                    }`}
-                    placeholder={t("Add tags (press Enter)")}
-                  />
-                </div>
-                {formData.tags && formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {formData.tags.map((tag, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full"
-                      >
-                        <Tag size={14} />
-                        <span>{tag}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="text-purple-800 hover:text-red-600"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {errors.tags && (
-                  <p className="text-red-500 text-xs mt-1">{errors.tags}</p>
-                )}
-              </div>
-              End Tags
-            </>
-          )} */}
-          {/* End Video Fields */}
-
-          {/* End Air Date */}
         </div>
-        {/* End Two-Column Grid */}
-        {/* Start Summary */}
-        {/* <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Summary")} *
-          </label>
-          <div
-            className={`border rounded-lg ${
-              errors.summary ? "border-red-500" : "border-gray-300"
-            }`}
-          >
-            <CKEditor
-              editor={ClassicEditor}
-              data={formData.summary || ""}
-              config={{
-                placeholder: t("Enter report summary"),
-                language: i18n?.language === "ar" ? "ar" : "en",
-                extraPlugins: [MyCustomUploadAdapterPlugin],
-                removePlugins: ["MediaEmbedToolbar"],
-              }}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                setFormData((prev) => ({ ...prev, summary: data }));
-                if (errors.summary) {
-                  setErrors((prev) => ({ ...prev, summary: "" }));
-                }
-              }}
-            />
-          </div>
-          {errors.summary && (
-            <p className="text-red-500 text-xs mt-1">{errors.summary}</p>
-          )}
-        </div> */}
-        {/* End Summary */}
 
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">

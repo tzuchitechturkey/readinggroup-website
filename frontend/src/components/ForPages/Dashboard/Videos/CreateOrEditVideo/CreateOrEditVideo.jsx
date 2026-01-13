@@ -14,14 +14,14 @@ import {
   CreateVideo,
   EditVideoById,
   GetVideoCategories,
-  // GetSeries,
-  // GetSeasonsBySeriesId,
+  GetVideoById,
 } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { languages, postStatusOptions } from "@/constants/constants";
+import { postStatusOptions } from "@/constants/constants";
 import { processImageFile } from "@/Utility/imageConverter";
+import { languages, getCurrentLanguage } from "@/constants";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import DatePickerWithYearMonth from "./DatePickerWithYearMonth";
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
@@ -29,10 +29,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [categoriesList, setCategoriesList] = useState([]);
-  // const [seriesList, setSeriesList] = useState([]);
-  // const [seasonsList, setSeasonsList] = useState([]);
-  // const [selectedSeries, setSelectedSeries] = useState(null);
-  // const [selectedSeason, setSelectedSeason] = useState(null);
+
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -45,7 +42,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     title: "",
     category: "",
     video_type: "",
-    language: "",
     thumbnail: null,
     thumbnail_url: "",
     is_featured: false,
@@ -57,7 +53,41 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     cast: [],
     tags: [],
     status: "",
+    language: getCurrentLanguage(i18n),
   });
+  const handleLoadTranslation = async () => {
+    if (!video?.id || !formData.language) return;
+
+    setIsLoading(true);
+    try {
+      const response = await GetVideoById(video.id, formData.language);
+      if (response?.data) {
+        setFormData((prev) => ({
+          ...prev,
+          title: response.data.title || "",
+          category: response.data.category || "",
+          language: response.data.language || "",
+          thumbnail: response.data.thumbnail, // Reset file input
+          thumbnail_url: response.data.thumbnail_url || "",
+          is_featured: response.data.is_featured || false,
+          reference_code: response.data.reference_code || "",
+          video_url: response.data.video_url || "",
+          season_name: response.data.season_name?.id || "", // ID الـ season
+          happened_at: response.data.happened_at || "",
+          description: response.data.description || "",
+          cast: response.data.cast || [],
+          tags: response.data.tags || [],
+          status: response.data.status || "",
+        }));
+        toast.success(t("Translation loaded successfully"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Initialize form data when editing
   useEffect(() => {
     if (video) {
@@ -112,87 +142,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     }
   };
 
-  // Fetch Series with search support for AutoComplete
-  // const fetchSeries = async (searchVal = "") => {
-  //   try {
-  //     const res = await GetSeries(searchVal); // Pass search value to API
-  //     setSeriesList(res?.data?.results || []);
-  //   } catch (err) {
-  //     setErrorFn(err, t);
-  //   }
-  // };
-
-  // Fetch Seasons by Series ID
-  // const fetchSeasonsBySeries = async (seriesId) => {
-  //   if (!seriesId) {
-  //     setSeasonsList([]);
-  //     return;
-  //   }
-  //   try {
-  //     const res = await GetSeasonsBySeriesId(seriesId);
-  //     setSeasonsList(res?.data?.results || []);
-  //   } catch (err) {
-  //     setErrorFn(err, t);
-  //     setSeasonsList([]);
-  //   }
-  // };
-
-  // Handle Series Selection from AutoComplete
-  // const handleSeriesSelect = (series) => {
-  //   setSelectedSeries(series);
-  //   setSelectedSeason(null); // Reset selected season object
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     season_name: "", // Reset season when series changes
-  //   }));
-  //   fetchSeasonsBySeries(series?.id);
-
-  //   // Clear error if exists
-  //   if (errors.season_name) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       season_name: "",
-  //     }));
-  //   }
-  // };
-
-  // Handle Clear Series Selection
-  // const handleClearSeries = () => {
-  //   setSelectedSeries(null);
-  //   setSelectedSeason(null); // Clear selected season object
-  //   setSeasonsList([]);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     season_name: "",
-  //   }));
-  // };
-
-  // Handle Season Selection from AutoComplete
-  // const handleSeasonSelect = (season) => {
-  //   setSelectedSeason(season);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     season_name: season.id,
-  //   }));
-
-  //   // Clear error if exists
-  //   if (errors.season_name) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       season_name: "",
-  //     }));
-  //   }
-  // };
-
-  // Handle Clear Season Selection
-  // const handleClearSeason = () => {
-  //   setSelectedSeason(null);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     season_name: "",
-  //   }));
-  // };
-
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -208,16 +157,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         [name]: "",
       }));
     }
-
-    // If thumbnail_url is provided, update preview
-    // if (name === "thumbnail_url" && value) {
-    //   setImagePreview(value);
-    //   // Clear the file thumbnail if URL is provided
-    //   setFormData((prev) => ({
-    //     ...prev,
-    //     thumbnail: null,
-    //   }));
-    // }
   };
   // Handle category selection
   const handleCategorySelect = (category) => {
@@ -325,11 +264,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       newErrors.video_url = t("Please enter a valid YouTube URL");
     }
 
-    // Series and Season are optional
-    // if (selectedSeries && !formData?.season_name) {
-    //   newErrors.season_name = t("Season is required when Series is selected");
-    // }
-
     if (!formData?.happened_at) {
       newErrors.happened_at = t("Happened At is required");
     }
@@ -378,7 +312,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formDataToSend.append("is_featured", formData?.is_featured);
     formDataToSend.append("reference_code", formData?.reference_code);
     formDataToSend.append("video_url", formData?.video_url);
-    formDataToSend.append("season_name", formData?.season_name);
+    if (video?.key) {
+      formDataToSend.append("key", video.key);
+    }
     // Format happened_at to ISO 8601 format (YYYY-MM-DDThh:mm:ss)
     if (formData?.happened_at) {
       const formattedDate = format(
@@ -438,8 +374,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
   }, [formData, video, initialFormData]);
 
   useEffect(() => {
+    // Update language in formData when i18n language changes
+    setFormData((prev) => ({
+      ...prev,
+      language: getCurrentLanguage(i18n),
+    }));
+  }, [i18n.language]);
+  useEffect(() => {
     getCategories();
-    // fetchSeries();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -889,32 +831,30 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Language")} *
               </label>
-              <select
-                name="language"
-                value={formData?.language}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.language
-                    ? "border-red-500 text-red-500"
-                    : !formData?.language
-                    ? "border-gray-300 text-gray-400"
-                    : "border-gray-300 text-black"
-                }`}
-              >
-                <option value="" hidden disabled>
-                  {t("Select Language")}
-                </option>
-
-                {languages.map((lang) => (
-                  <option key={lang} className="text-black" value={lang}>
-                    {t(lang)}
-                  </option>
-                ))}
-              </select>
-
-              {errors.language && (
-                <p className="text-red-500 text-xs mt-1">{errors.language}</p>
-              )}
+              <div className="flex gap-2">
+                <select
+                  name="language"
+                  value={formData.language}
+                  onChange={handleInputChange}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                {video?.key && (
+                  <button
+                    type="button"
+                    onClick={handleLoadTranslation}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    title={t("Load translation for selected language")}
+                  >
+                    🌐 {t("Load")}
+                  </button>
+                )}
+              </div>
             </div>
             {/* End Language */}
 

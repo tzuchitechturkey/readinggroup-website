@@ -9,14 +9,15 @@ import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteCon
 import Loader from "@/components/Global/Loader/Loader";
 import {
   GetVideoCategories,
+  GetVideoCategoryById,
   AddVideoCategory,
   EditVideoCategoryById,
   DeleteVideoCategory,
   SortVideoCategories,
 } from "@/api/videos";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
-
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import { languages, getCurrentLanguage } from "@/constants";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 function VideosCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -33,6 +34,7 @@ function VideosCategoriesContent({ onSectionChange }) {
     description: "",
     is_active: false,
     video_count: 0,
+    language: getCurrentLanguage(i18n),
   });
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,6 +44,31 @@ function VideosCategoriesContent({ onSectionChange }) {
   const [hasChanges, setHasChanges] = useState(false);
   const nameInputRef = React.useRef(null);
   const limit = 10;
+  const handleLoadTranslation = async () => {
+    if (!editingCategory?.id || !form.language) return;
+    setIsLoading(true);
+    try {
+      const response = await GetVideoCategoryById(
+        editingCategory.id,
+        form.language
+      );
+      if (response?.data) {
+        setForm((prev) => ({
+          ...prev,
+          name: response.data.name || "",
+          description: response.data.description || "",
+          key: response.data.key || null,
+        }));
+        toast.success(t("Translation loaded successfully"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
@@ -70,7 +97,13 @@ function VideosCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setForm({ name: "", description: "", is_active: false, video_count: 0 });
+    setForm({
+      name: "",
+      description: "",
+      is_active: false,
+      video_count: 0,
+      language: getCurrentLanguage(i18n),
+    });
     setErrors({});
     setShowModal(true);
   };
@@ -82,6 +115,8 @@ function VideosCategoriesContent({ onSectionChange }) {
       description: cat.description || "",
       is_active: cat.is_active !== undefined ? cat.is_active : false,
       video_count: cat.video_count !== undefined ? cat.video_count : 0,
+      language: cat.language || getCurrentLanguage(i18n),
+      key: cat.key || null,
     });
     setErrors({});
     setShowModal(true);
@@ -213,6 +248,14 @@ function VideosCategoriesContent({ onSectionChange }) {
     }
   };
   const totalPages = Math.ceil(totalRecords / limit);
+
+  useEffect(() => {
+    // Update language in formData when i18n language changes
+    setForm((prev) => ({
+      ...prev,
+      language: getCurrentLanguage(i18n),
+    }));
+  }, [i18n.language]);
 
   // Focus on name input when modal opens
   useEffect(() => {
@@ -504,6 +547,44 @@ function VideosCategoriesContent({ onSectionChange }) {
           width="600px"
         >
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Start Language */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("Language")} <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-2">
+                <select
+                  name="language"
+                  value={form.language}
+                  onChange={handleInputChange}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                {editingCategory && (
+                  <button
+                    type="button"
+                    onClick={handleLoadTranslation}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    title={t("Load translation for selected language")}
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className="inline-block animate-spin">⟳</span>
+                        {t("Loading")}
+                      </>
+                    ) : (
+                      <>🌐 {t("Load")}</>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* End Language */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 {t("Name")} <span className="text-red-500">*</span>

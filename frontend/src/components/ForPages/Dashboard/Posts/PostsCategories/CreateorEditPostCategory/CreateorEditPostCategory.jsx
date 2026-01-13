@@ -4,9 +4,11 @@ import { toast } from "react-toastify";
 import { ToggleRight, ToggleLeft } from "lucide-react";
 
 import Modal from "@/components/Global/Modal/Modal";
-
-import { LANGUAGES, LANGUAGE_CODE_MAP } from "../../../../../../Utility/Posts/constants";
-import { validateForm, validateCategoryStatus } from "../../../../../../Utility/Posts/validation";
+import { LANGUAGES } from "@/Utility/Posts/constants";
+import {
+  validateForm,
+  validateCategoryStatus,
+} from "@/Utility/Posts/validation";
 
 function CategoryModal({
   isOpen,
@@ -45,12 +47,12 @@ function CategoryModal({
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const validation = validateForm(form, t);
-    
+
     if (!validation.isValid) {
       setErrors(validation.errors);
       return;
     }
-    
+
     onSubmit(e);
   };
 
@@ -91,9 +93,7 @@ function CategoryModal({
         )}
 
         {isLoadingTranslation && (
-          <p className="text-sm text-blue-600">
-            {t("Loading translation...")}
-          </p>
+          <p className="text-sm text-blue-600">{t("Loading translation...")}</p>
         )}
 
         <div>
@@ -107,9 +107,7 @@ function CategoryModal({
             disabled={isLoadingTranslation}
             className={`w-full p-2 border rounded ${
               errors.name ? "border-red-500" : "border-gray-300"
-            } ${
-              isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
           />
           {errors.name && (
             <p className="text-red-500 text-sm mt-1">{errors.name}</p>
@@ -145,9 +143,7 @@ function CategoryModal({
               form.is_active
                 ? "bg-green-100 text-green-600 hover:bg-green-200"
                 : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-            } ${
-              isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {form.is_active ? (
               <ToggleRight className="h-8 w-12" />

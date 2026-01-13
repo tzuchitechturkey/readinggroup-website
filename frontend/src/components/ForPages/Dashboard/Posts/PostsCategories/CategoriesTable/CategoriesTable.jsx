@@ -5,13 +5,12 @@ import { toast } from "react-toastify";
 
 import { EditPostCategoryById } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-
 import {
   handleDragStart,
   handleDragOver,
   handleDrop,
   handleDragEnd,
-} from "../../../../../../Utility/Posts/dragDropHandler";
+} from "@/Utility/Posts/dragDropHandler";
 
 function CategoriesTable({
   categories,
@@ -95,9 +94,7 @@ function CategoriesTable({
               <tr
                 key={cat.id}
                 draggable
-                onDragStart={(e) =>
-                  handleDragStart(e, cat, setDraggedItem)
-                }
+                onDragStart={(e) => handleDragStart(e, cat, setDraggedItem)}
                 onDragOver={handleDragOver}
                 onDrop={(e) =>
                   handleDrop(

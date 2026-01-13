@@ -1313,5 +1313,10 @@
   "You need to log in to interact. Please log in to continue.": "You need to log in to interact. Please log in to continue.",
   "Log In": "Log In",
   "Cancel": "Cancel",
+  "Load translation for selected language": "Load translation for selected language",
+  "Load": "Load",
+  "Loading": "Loading",
+  "Translation loaded successfully": "Translation loaded successfully",
+  "Failed to load translation": "Failed to load translation",
   "-------------------------------------------------------------": "-------------------------------------------------------------"
 }

@@ -29,8 +29,10 @@ export async function CreatePost(data) {
   return await axios.post(`/posts/`, data);
 }
 
-export async function GetPostById(id) {
-  return await axios.get(`/posts/${id}/`);
+export async function GetPostById(id, language = null) {
+  return await axios.get(
+    `/posts/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function EditPostById(id, data) {
@@ -46,7 +48,12 @@ export async function DeletePostById(id) {
 }
 
 // Categories
-export async function GetPostCategories(limit, offset, search = "") {
+export async function GetPostCategories(
+  limit,
+  offset,
+  search = "",
+  language = "ar"
+) {
   return await axios.get(
     `/post-categories/?limit=${limit}&offset=${offset}&search=${search}`
   );
@@ -234,7 +241,7 @@ export async function WeeklyMomentPosts(type, limit = 5, offset = 0) {
 //   .then(res => res.json())
 //   .then(data => console.log(data))
 
-// // Response: 
+// // Response:
 // [
 //   {id: 2, key: "technology", name: "Technology", language: "en"},
 //   {id: 3, key: "technology", name: "Teknoloji", language: "tr"}

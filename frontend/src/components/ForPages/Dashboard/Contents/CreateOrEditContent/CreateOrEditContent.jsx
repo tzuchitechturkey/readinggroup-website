@@ -14,14 +14,16 @@ import { processImageFile } from "@/Utility/imageConverter";
 import {
   CreateContent,
   EditContentById,
+  GetContentById,
   GetContentCategories,
 } from "@/api/contents";
 import countries from "@/constants/countries.json";
-import { languages, postStatusOptions } from "@/constants/constants";
+import { postStatusOptions } from "@/constants/constants";
 import Modal from "@/components/Global/Modal/Modal";
 import { GetAuthors } from "@/api/authors";
+import { languages, getCurrentLanguage } from "@/constants";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import AttachmentsModal from "./AttachmentsModal";
 
 function CreateOrEditContent({ onSectionChange, content = null }) {
@@ -38,22 +40,20 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
-    // excerpt: "",
     body: "",
     writer: "",
     writer_avatar: "",
     category: "",
     status: "",
-    is_active: true,
     read_time: "",
     tags: "",
-    language: "",
     image: null,
-    images: [], // الصور المرفوعة كملفات (File objects) أو الصور الموجودة من الـ Backend
-    images_url: [], // روابط الصور كنصوص (Array of strings) - يُرسل للـ Backend في مفتاح images_url
+    images: [],
+    images_url: [],
     metadata: "",
     country: "",
-    attachments: [], // الملفات المرفوعة (PDF, Word, PowerPoint)
+    attachments: [],
+    language: getCurrentLanguage(i18n),
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -67,6 +67,43 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
   const [previewFile, setPreviewFile] = useState(null); // Store file for preview
   const [previewUrl, setPreviewUrl] = useState(null); // Store preview URL
   const [showAttachmentsModal, setShowAttachmentsModal] = useState(false);
+
+  const handleLoadTranslation = async () => {
+    if (!content?.id || !formData.language) return;
+
+    setIsLoading(true);
+    try {
+      const response = await GetContentById(content.id, formData.language);
+      if (response?.data) {
+        setFormData((prev) => ({
+          ...prev,
+          title: response.data.title || "",
+          subtitle: response.data.subtitle || "",
+          body: response.data.body || "",
+          writer: response.data.writer || "",
+          writer_avatar: response.data.writer_avatar || "",
+          category: response.data.category || "",
+          status: response.data.status || "draft",
+          read_time: response.data.read_time || "",
+          tags: response.data.tags || "",
+          language: response.data.language || "",
+          image: response.data.image || null,
+          images: response.data.images || [],
+          images_url: response.data.images_url || [],
+          metadata: response.data.metadata || "",
+          country: response.data.country || "",
+          attachments:
+            response.data.attachments_data || response.data.attachments || [],
+        }));
+        toast.success(t("Translation loaded successfully"));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getWriters = async (searchVal = "") => {
     try {
@@ -114,7 +151,6 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
         writer_avatar: content?.writer_avatar || "",
         category: content?.category || "",
         status: content?.status || "draft",
-        is_active: content?.is_active !== undefined ? content?.is_active : true,
         read_time: content?.read_time || "",
         tags: content?.tags || "",
         language: content?.language || "",
@@ -350,8 +386,10 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       "category",
       formData?.category?.id || formData?.category
     );
+    if (content?.key) {
+      contentData.append("key", content.key);
+    }
     contentData.append("status", formData.status);
-    contentData.append("is_active", formData.is_active);
     contentData.append("read_time", formData.read_time);
     contentData.append("tags", JSON.stringify(formData.tags));
     contentData.append("language", formData.language);
@@ -412,6 +450,8 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
       setIsLoading(false);
     }
   };
+
+  
   useEffect(() => {
     getWriters();
     getCategories();
@@ -1043,6 +1083,35 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t("Language")} *
               </label>
+              <div className="flex gap-2">
+                <select
+                  name="language"
+                  value={formData.language}
+                  onChange={handleInputChange}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                {content?.key && (
+                  <button
+                    type="button"
+                    onClick={handleLoadTranslation}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    title={t("Load translation for selected language")}
+                  >
+                    🌐 {t("Load")}
+                  </button>
+                )}
+              </div>
+            </div>
+            {/*<div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("Language")} *
+              </label>
               <select
                 name="language"
                 value={formData.language}
@@ -1065,7 +1134,7 @@ function CreateOrEditContent({ onSectionChange, content = null }) {
               {errors.language && (
                 <p className="text-red-500 text-xs mt-1">{errors.language}</p>
               )}
-            </div>
+            </div> */}
             {/* End Language */}
             {/* Start Country */}
             <div>

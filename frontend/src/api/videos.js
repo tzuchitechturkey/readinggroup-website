@@ -45,8 +45,10 @@ export async function CreateVideo(data) {
   return await axios.post(`/videos/`, data);
 }
 
-export async function GetVideoById(id) {
-  return await axios.get(`/videos/${id}/`);
+export async function GetVideoById(id, language = null) {
+  return await axios.get(
+    `/videos/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function EditVideoById(id, data) {
@@ -80,8 +82,10 @@ export async function EditVideoCategoryById(id, data) {
   return await axios.put(`/video-categories/${id}/`, data);
 }
 
-export async function GetVideoCategoryById(id) {
-  return await axios.get(`/video-categories/${id}/`);
+export async function GetVideoCategoryById(id, language = null) {
+  return await axios.get(
+    `/video-categories/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function DeleteVideoCategory(id) {

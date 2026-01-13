@@ -1434,6 +1434,10 @@
   "Read More": "اقرأ المزيد",
   "Books of Study": "  كتب الدراسة",
   "Book Description": "وصف الكتاب",
+  "Load translation for selected language": "تحميل ترجمة اللغة المحددة",
+  "Load": "تحميل",
+  "Translation loaded successfully": "تم تحميل الترجمة بنجاح",
+  "Failed to load translation": "فشل في تحميل الترجمة",
   "": "",
   "": ""
 }

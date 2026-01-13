@@ -17,8 +17,8 @@ import {
 } from "@/api/posts";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import { languages, getCurrentLanguage } from "@/constants";
 
 function PostsCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -35,10 +35,8 @@ function PostsCategoriesContent({ onSectionChange }) {
     description: "",
     is_active: false,
     post_count: 0,
+    language: getCurrentLanguage(i18n),
   });
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
-  const [categoryKey, setCategoryKey] = useState(null);
-  const [isLoadingTranslation, setIsLoadingTranslation] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [draggedItem, setDraggedItem] = useState(null);
@@ -46,31 +44,46 @@ function PostsCategoriesContent({ onSectionChange }) {
   const [originalCategories, setOriginalCategories] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
   const limit = 10;
-  const languages = [
-    { label: "Arabic", value: "ar" },
-    { label: "English", value: "en" },
-    { label: "Turkish", value: "tr" },
-    { label: "Chinese (Simp)", value: "zh-hans" },
-    { label: "Chinese (Trad)", value: "zh-hant" },
-    { label: "Spanish", value: "es" },
-    { label: "French", value: "fr" },
-  ];
-  // Map language names to language codes
-  const languageCodeMap = {
-    ar: "ar",
-    en: "en",
-    tr: "tr",
-    ch: "ch",
-    chsi: "chsi",
-    fr: "fr",
+
+  const handleLoadTranslation = async (categoryId) => {
+    if (!categoryId) return;
+
+    setIsLoading(true);
+    try {
+      const res = await GetPostCategoryById(categoryId, form.language);
+      const categoryData = res?.data;
+      setForm({
+        name: categoryData.name,
+        description: categoryData.description,
+        is_active:
+          categoryData.is_active !== undefined ? categoryData.is_active : false,
+        post_count: categoryData.post_count || 0,
+        language: categoryData.language || getCurrentLanguage(i18n),
+        key: categoryData.key,
+      });
+    } catch (err) {
+      console.error("Error loading translation:", err);
+      toast.error(t("Failed to load translation"));
+    } finally {
+      setIsLoading(false);
+    }
   };
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
       const res = searchValue
-        ? await GetPostCategories(limit, offset, searchValue)
-        : await GetPostCategories(limit, offset);
+        ? await GetPostCategories(
+            limit,
+            offset,
+            searchValue
+            // selectedLanguage ? selectedLanguage : i18n?.language
+          )
+        : await GetPostCategories(
+            limit,
+            offset
+            // selectedLanguage ? selectedLanguage : i18n?.language
+          );
       const results = res?.data?.results || [];
       setCategories(results);
       setOriginalCategories(JSON.parse(JSON.stringify(results)));
@@ -82,6 +95,7 @@ function PostsCategoriesContent({ onSectionChange }) {
       setIsLoading(false);
     }
   };
+
   // Handle Pagination
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -90,67 +104,41 @@ function PostsCategoriesContent({ onSectionChange }) {
 
   const openAddModal = () => {
     setEditingCategory(null);
-    setCategoryKey(null);
-    setSelectedLanguage(i18n?.language || "en");
-    setForm({ name: "", description: "", is_active: false, post_count: 0 });
+
+    setForm({
+      name: "",
+      description: "",
+      is_active: false,
+      post_count: 0,
+      language: getCurrentLanguage(i18n),
+    });
     setErrors({});
     setShowModal(true);
   };
 
   const openEditModal = (cat) => {
     setEditingCategory(cat);
-    setCategoryKey(cat.key || null);
-    console.log(i18n?.language || "en");
-    setSelectedLanguage(i18n?.language || "en");
     setForm({
       name: cat.name || "",
       description: cat.description || "",
       is_active: cat.is_active !== undefined ? cat.is_active : false,
       post_count: cat.post_count !== undefined ? cat.post_count : 0,
+      language: languageCodeMap[cat.language] || "en",
+      key: cat.key || null,
     });
     setErrors({});
     setShowModal(true);
   };
 
-  // Load category data in selected language
-  const loadCategoryByLanguage = async (categoryId) => {
-    if (!categoryId) return;
-
-    setIsLoadingTranslation(true);
-    try {
-      const res = await GetPostCategoryById(categoryId);
-
-      const categoryData = res?.data;
-      setCategoryKey(categoryData.key || null);
-      setForm({
-        name: categoryData.name || "",
-        description: categoryData.description || "",
-        is_active:
-          categoryData.is_active !== undefined ? categoryData.is_active : false,
-        post_count: categoryData.post_count || 0,
-      });
-    } catch (err) {
-      console.error("Error loading translation:", err);
-      toast.error(t("Failed to load translation"));
-    } finally {
-      setIsLoadingTranslation(false);
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === "name" || name === "description") {
-      setCategoryKey(null);
-    }
-    if (categoryKey && editingCategory) {
-      setCategoryKey(null);
-    }
-    // إزالة الخطأ عند الإدخال
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -180,7 +168,6 @@ function PostsCategoriesContent({ onSectionChange }) {
       return;
     }
 
-    // إنشاء array جديد مع الترتيب الجديد
     const newCategories = [...categories];
     const draggedIndex = newCategories.findIndex(
       (cat) => cat.id === draggedItem.id
@@ -189,7 +176,6 @@ function PostsCategoriesContent({ onSectionChange }) {
       (cat) => cat.id === targetItem.id
     );
 
-    // تبديل العناصر
     [newCategories[draggedIndex], newCategories[targetIndex]] = [
       newCategories[targetIndex],
       newCategories[draggedIndex],
@@ -206,12 +192,10 @@ function PostsCategoriesContent({ onSectionChange }) {
   const handleSaveOrder = async () => {
     setIsSorting(true);
     try {
-      // إنشاء البيانات المرسلة
       const sortData = categories.map((cat, index) => ({
         id: cat.id,
         order: index,
       }));
-      // استدعاء API
       await SortPostCategories({ categories: sortData });
       toast.success(t("Categories reordered successfully"));
       setHasChanges(false);
@@ -236,28 +220,8 @@ function PostsCategoriesContent({ onSectionChange }) {
     if (!validateForm()) {
       return;
     }
-    const languageCode = languageCodeMap[selectedLanguage];
     const submitData = { ...form };
-    console.log(languageCodeMap);
 
-    // إذا كانت عملية إنشاء جديدة، أرسل اللغة
-    if (!editingCategory || !editingCategory.id) {
-      submitData.language = languageCode;
-    } else {
-      // إذا كان تعديل:
-      // إذا كان هناك key (ترجمة موجودة) ولم نعدل اللغة، أرسل الـ key
-      // إذا أردنا تعديل الترجمات (اسم أو وصف)، لا نرسل الـ key
-      if (categoryKey) {
-        submitData.key = categoryKey;
-        console.log("if", categoryKey);
-      } else {
-        submitData.key = null;
-        console.log("else", categoryKey);
-      }
-      submitData.language = languageCode;
-    }
-    // submitData.key = languageCode;
-    console.log("Submitting data:", submitData);
     setIsLoading(true);
     try {
       if (editingCategory && editingCategory.id) {
@@ -294,7 +258,13 @@ function PostsCategoriesContent({ onSectionChange }) {
   };
 
   const totalPages = Math.ceil(totalRecords / limit);
-
+  useEffect(() => {
+    // Update language in formData when i18n language changes
+    setForm((prev) => ({
+      ...prev,
+      language: getCurrentLanguage(i18n),
+    }));
+  }, [i18n.language]);
   useEffect(() => {
     getCategoriesData(0);
   }, []);
@@ -502,7 +472,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                             if (cat?.key) {
                               setSelectedCategory(cat);
                             } else {
-                              loadCategoryByLanguage(cat.id);
+                              handleLoadTranslation(cat.id);
                             }
                             setShowDeleteModal(true);
                           }}
@@ -570,34 +540,29 @@ function PostsCategoriesContent({ onSectionChange }) {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Language Selection - Only for editing */}
-            {editingCategory && editingCategory.id && (
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {t("Language")} <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={selectedLanguage || ""}
-                  onChange={(e) => {
-                    const newLanguage = e.target.value;
-                    setSelectedLanguage(newLanguage);
-                    loadCategoryByLanguage(editingCategory.id);
-                  }}
-                  disabled={isLoadingTranslation}
-                  className="w-full p-2 border border-gray-300 rounded bg-white"
-                >
-                  <option value="" hidden disabled>
-                    {t("Select Language")}
+            {/* {editingCategory && editingCategory.id && ( */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {t("Language")} <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={form.language}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded bg-white"
+              >
+                <option value="" hidden disabled>
+                  {t("Select Language")}
+                </option>
+                {languages.map((lang) => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.label}
                   </option>
-                  {languages.map((lang) => (
-                    <option key={lang?.value} value={lang?.value}>
-                      {lang?.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+                ))}
+              </select>
+            </div>
+            {/* )} */}
 
-            {isLoadingTranslation && (
+            {isLoading && (
               <p className="text-sm text-blue-600">
                 {t("Loading translation...")}
               </p>
@@ -611,12 +576,9 @@ function PostsCategoriesContent({ onSectionChange }) {
                 name="name"
                 value={form.name}
                 onChange={handleInputChange}
-                disabled={isLoadingTranslation}
                 className={`w-full p-2 border rounded ${
                   errors.name ? "border-red-500" : "border-gray-300"
-                } ${
-                  isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                }  `}
               />
               {errors.name && (
                 <p className="text-red-500 text-sm mt-1">{errors.name}</p>
@@ -630,10 +592,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                 name="description"
                 value={form.description}
                 onChange={handleInputChange}
-                disabled={isLoadingTranslation}
-                className={`w-full p-2 border border-gray-300 rounded ${
-                  isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full p-2 border border-gray-300 rounded `}
                 rows={4}
               />
             </div>
@@ -645,7 +604,6 @@ function PostsCategoriesContent({ onSectionChange }) {
               </label>
               <button
                 type="button"
-                disabled={isLoadingTranslation}
                 onClick={() => {
                   if (!form.is_active && form.post_count === 0) {
                     toast.info(
@@ -661,9 +619,7 @@ function PostsCategoriesContent({ onSectionChange }) {
                   form.is_active
                     ? "bg-green-100 text-green-600 hover:bg-green-200"
                     : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                } ${
-                  isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                }  `}
               >
                 {form.is_active ? (
                   <ToggleRight className="h-8 w-12" />
@@ -680,14 +636,12 @@ function PostsCategoriesContent({ onSectionChange }) {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                disabled={isLoadingTranslation}
                 className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t("Cancel")}
               </button>
               <button
                 type="submit"
-                disabled={isLoadingTranslation}
                 className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {editingCategory ? t("Save Changes") : t("Add Category")}

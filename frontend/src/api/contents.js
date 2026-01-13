@@ -28,8 +28,10 @@ export async function CreateContent(data) {
   return await axios.post(`/contents/`, data);
 }
 
-export async function GetContentById(id) {
-  return await axios.get(`/contents/${id}/`);
+export async function GetContentById(id, language = null) {
+  return await axios.get(
+    `/contents/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function EditContentById(id, data) {
@@ -63,8 +65,10 @@ export async function EditContentCategoryById(id, data) {
   return await axios.put(`/content-categories/${id}/`, data);
 }
 
-export async function GetContentCategoryById(id) {
-  return await axios.get(`/content-categories/${id}/`);
+export async function GetContentCategoryById(id, language = null) {
+  return await axios.get(
+    `/content-categories/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function DeleteContentCategory(id) {

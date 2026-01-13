@@ -26,8 +26,10 @@ export async function CreateEvent(data) {
   return await axios.post(`/events/`, data);
 }
 
-export async function GetEventById(id) {
-  return await axios.get(`/events/${id}/`);
+export async function GetEventById(id, language = null) {
+  return await axios.get(
+    `/events/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function EditEventById(id, data) {
@@ -81,8 +83,10 @@ export async function EditEventCategoryById(id, data) {
   return await axios.put(`/event-categories/${id}/`, data);
 }
 
-export async function GetEventCategoryById(id) {
-  return await axios.get(`/event-categories/${id}/`);
+export async function GetEventCategoryById(id, language = null) {
+  return await axios.get(
+    `/event-categories/${id}/${language ? `?language=${language}` : ""}`
+  );
 }
 
 export async function DeleteEventCategory(id) {
