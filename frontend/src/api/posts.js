@@ -48,7 +48,7 @@ export async function DeletePostById(id) {
 // Categories
 export async function GetPostCategories(limit, offset, search = "") {
   return await axios.get(
-    `/post-categories/?limit=${limit}&offset=${offset}&search=${search}`
+    `/post-categories/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 
@@ -64,8 +64,10 @@ export async function EditPostCategoryById(id, data) {
   return await axios.put(`/post-categories/${id}/`, data);
 }
 
-export async function GetPostCategoryById(id) {
-  return await axios.get(`/post-categories/${id}/`);
+export async function GetPostCategoryById(id, language) {
+  return await axios.get(
+    `/post-categories/${id}${language ? `?language=${language}` : ""}`,
+  );
 }
 
 export async function DeletePostCategory(id) {
@@ -75,14 +77,14 @@ export async function DeletePostCategory(id) {
 // Get All Item By Category Id
 export async function GetPostsByCategoryId(categoryId, limit = 10, offset = 0) {
   return await axios.get(
-    `/post-categories/${categoryId}/posts/?limit=${limit}&offset=${offset}`
+    `/post-categories/${categoryId}/posts/?limit=${limit}&offset=${offset}`,
   );
 }
 
 // Comments management for posts
 export async function GetPostComments(limit = 10, offset = 0, postId) {
   return await axios.get(
-    `/comments/?limit=${limit}&offset=${offset}&object_id=${postId}&content_type=post`
+    `/comments/?limit=${limit}&offset=${offset}&object_id=${postId}&content_type=post`,
   );
 }
 
@@ -166,7 +168,7 @@ export async function RatingPosts(postId, rating) {
 // Weekly Moment Posts
 export async function WeeklyMomentPosts(type, limit = 5, offset = 0) {
   return await axios.get(
-    `/posts/weekly-moments/?post_type=${type}&limit=${limit}&offset=${offset}`
+    `/posts/weekly-moments/?post_type=${type}&limit=${limit}&offset=${offset}`,
   );
 }
 
@@ -234,7 +236,7 @@ export async function WeeklyMomentPosts(type, limit = 5, offset = 0) {
 //   .then(res => res.json())
 //   .then(data => console.log(data))
 
-// // Response: 
+// // Response:
 // [
 //   {id: 2, key: "technology", name: "Technology", language: "en"},
 //   {id: 3, key: "technology", name: "Teknoloji", language: "tr"}

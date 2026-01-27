@@ -14,7 +14,6 @@ function DeleteConfirmation({
   itemName,
 }) {
   const { t } = useTranslation();
-
   if (!isOpen) return null;
 
   return (
@@ -36,7 +35,7 @@ function DeleteConfirmation({
             <p>
               {message ||
                 t(
-                  "This action cannot be undone. This will permanently delete the selected item."
+                  "This action cannot be undone. This will permanently delete the selected item.",
                 )}
             </p>
 
