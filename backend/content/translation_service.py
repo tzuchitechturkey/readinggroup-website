@@ -4,8 +4,7 @@ Translation service using Google Gemini API for multilingual content translation
 import os
 import logging
 from typing import Dict, List, Optional
-from google import genai
-from google.genai import types
+import google.genai as genai
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

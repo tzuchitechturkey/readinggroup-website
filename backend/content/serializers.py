@@ -5,6 +5,7 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db.models import Avg, Count
+from .translation_service import get_translation_service
 
 from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -161,7 +162,6 @@ class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     
     def create(self, validated_data):
         """Create a new PostCategory and auto-translate to all languages."""
-        from .translation_service import get_translation_service
         
         # Get the source language
         source_language = validated_data.get('language', 'en')
