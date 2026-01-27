@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.db.models import Avg, Count
 
 from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -127,12 +128,54 @@ class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 
 class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for PostCategory with multilingual translation support."""
     datetime_fields = ("created_at", "updated_at")
     post_count = serializers.IntegerField(read_only=True)
+    request_language = serializers.CharField(write_only=True, required=False, help_text="Language code for this request")
+    auto_translate = serializers.BooleanField(write_only=True, default=False, required=False, help_text="Whether to auto-translate using GeminAI")
+    is_source = serializers.BooleanField(write_only=True, default=False, required=False, help_text="Whether this is the source language")
+    translated_name = serializers.SerializerMethodField(read_only=True)
+    translated_description = serializers.SerializerMethodField(read_only=True)
+    available_languages = serializers.SerializerMethodField(read_only=True)
+    is_auto_translated = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = PostCategory
         fields = "__all__"
+    
+    def get_translated_name(self, obj):
+        """Return the name in the requested language."""
+        request = self.context.get('request')
+        if not request:
+            return obj.name
+        
+        language = request.query_params.get('language', obj.source_language)
+        translation = obj.get_translation(language)
+        return translation.get('name', obj.name) if translation else obj.name
+    
+    def get_translated_description(self, obj):
+        """Return the description in the requested language."""
+        request = self.context.get('request')
+        if not request:
+            return obj.description
+        
+        language = request.query_params.get('language', obj.source_language)
+        translation = obj.get_translation(language)
+        return translation.get('description', obj.description) if translation else obj.description
+    
+    def get_available_languages(self, obj):
+        """Return list of available language codes."""
+        return list(obj.translations.keys()) if obj.translations else [obj.source_language]
+    
+    def get_is_auto_translated(self, obj):
+        """Return whether the current language translation is auto-translated."""
+        request = self.context.get('request')
+        if not request:
+            return False
+        
+        language = request.query_params.get('language', obj.source_language)
+        translation = obj.get_translation(language)
+        return translation.get('auto_translated', False) if translation else False
 
 
 class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -512,7 +555,6 @@ class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             avg = getattr(instance, "annotated_rating_avg", None)
             count = getattr(instance, "annotated_rating_count", None)
             if avg is None or count is None:
-                from django.db.models import Avg, Count
 
                 agg = PostRating.objects.filter(post=instance).aggregate(
                     avg=Avg("rating"), count=Count("id")

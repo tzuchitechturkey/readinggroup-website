@@ -648,12 +648,47 @@ class PostCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
+    
+    # Multilingual translation storage
+    translations = models.JSONField(
+        default=dict, 
+        blank=True,
+        help_text="Stores translations for all languages: {lang: {name, description, is_source, auto_translated}}"
+    )
+    source_language = models.CharField(
+        max_length=10,
+        choices=LanguageChoices.choices,
+        default=LanguageChoices.ENGLISH,
+        help_text="The source language for this category"
+    )
 
     class Meta:
         ordering = ("order", "-created_at")
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
+    
+    def get_translation(self, language: str):
+        """Get translation for a specific language."""
+        return self.translations.get(language, {})
+    
+    def set_translation(self, language: str, name: str, description: str, is_source: bool = False, auto_translated: bool = False):
+        """Set translation for a specific language."""
+        if not self.translations:
+            self.translations = {}
+        self.translations[language] = {
+            'name': name,
+            'description': description,
+            'is_source': is_source,
+            'auto_translated': auto_translated
+        }
+    
+    def get_source_translation(self):
+        """Get the source language translation."""
+        for lang, trans in self.translations.items():
+            if trans.get('is_source'):
+                return lang, trans
+        return self.source_language, self.translations.get(self.source_language, {})
 
 
 class EventCategory(TimestampedModel):

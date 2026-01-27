@@ -85,6 +85,10 @@ from .views_helpers import (
     annotate_likes_queryset,
     _filter_published,
 )
+from .translation_service import get_translation_service, SUPPORTED_LANGUAGES
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class VideoViewSet(BaseContentViewSet):
@@ -1370,7 +1374,7 @@ class HistoryEntryViewSet(BaseContentViewSet):
 
 
 class PostCategoryViewSet(BaseCRUDViewSet):
-    """ViewSet for managing PostCategory content with multi-language support."""
+    """ViewSet for managing PostCategory content with multilingual translation support."""
 
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
@@ -1387,6 +1391,240 @@ class PostCategoryViewSet(BaseCRUDViewSet):
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieve a PostCategory in a specific language.
+        If ?language=xx is provided and translation doesn't exist, auto-translate from source.
+        """
+        instance = self.get_object()
+        requested_language = request.query_params.get('language')
+        
+        if requested_language and requested_language in SUPPORTED_LANGUAGES:
+            translation = instance.get_translation(requested_language)
+            
+            # If translation doesn't exist, generate it from source using GeminAI
+            if not translation or not translation.get('name'):
+                source_lang, source_translation = instance.get_source_translation()
+                
+                if source_translation and source_translation.get('name'):
+                    try:
+                        translation_service = get_translation_service()
+                        translated_name = translation_service.translate_text(
+                            source_translation['name'], 
+                            source_lang, 
+                            requested_language
+                        )
+                        translated_description = translation_service.translate_text(
+                            source_translation.get('description', ''), 
+                            source_lang, 
+                            requested_language
+                        ) if source_translation.get('description') else ''
+                        
+                        # Save the new translation
+                        instance.set_translation(
+                            requested_language,
+                            translated_name,
+                            translated_description,
+                            is_source=False,
+                            auto_translated=True
+                        )
+                        instance.save()
+                        
+                        logger.info(f"Auto-generated translation for PostCategory {instance.id} in {requested_language}")
+                    except Exception as e:
+                        logger.error(f"Failed to auto-translate PostCategory {instance.id}: {e}")
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
+    def create(self, request, *args, **kwargs):
+        """
+        Create a PostCategory with source language translation.
+        Automatically translates to all other supported languages using GeminAI.
+        
+        Payload: { name, description, request_language, is_source: true, ... }
+        """
+        data = request.data.copy()
+        language = data.get('request_language', data.get('language', 'en'))
+        name = data.get('name', '')
+        description = data.get('description', '')
+        is_source = data.get('is_source', True)
+        
+        # Validate language
+        if language not in SUPPORTED_LANGUAGES:
+            return Response(
+                {'detail': f'Unsupported language: {language}. Supported: {list(SUPPORTED_LANGUAGES.keys())}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create the category
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        category = serializer.save(source_language=language)
+        
+        # Initialize translations dictionary
+        if not category.translations:
+            category.translations = {}
+        
+        # Save source translation
+        category.set_translation(
+            language,
+            name,
+            description,
+            is_source=True,
+            auto_translated=False
+        )
+        
+        # Auto-translate to all other supported languages
+        try:
+            translation_service = get_translation_service()
+            translations = translation_service.translate_all_languages(
+                name,
+                description,
+                language
+            )
+            
+            for lang, trans in translations.items():
+                category.set_translation(
+                    lang,
+                    trans['name'],
+                    trans['description'],
+                    is_source=False,
+                    auto_translated=True
+                )
+            
+            category.save()
+            logger.info(f"Created PostCategory {category.id} with translations in {len(translations) + 1} languages")
+            
+        except Exception as e:
+            logger.error(f"Failed to auto-translate new PostCategory {category.id}: {e}")
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            self.get_serializer(category).data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update a PostCategory translation.
+        
+        Payload: { id, name, description, request_language, auto_translate, is_source }
+        
+        Logic:
+        - If editing source language + auto_translate=true: update source and re-translate all
+        - If editing source language + auto_translate=false: update source only
+        - If editing non-source language + auto_translate=false: update that language manually
+        - If editing non-source language + auto_translate=true: ignore provided text, re-translate from source
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = request.data.copy()
+        
+        language = data.get('request_language', request.query_params.get('language', instance.source_language))
+        name = data.get('name', '')
+        description = data.get('description', '')
+        auto_translate = data.get('auto_translate', False)
+        is_source = data.get('is_source', False)
+        
+        # Validate language
+        if language not in SUPPORTED_LANGUAGES:
+            return Response(
+                {'detail': f'Unsupported language: {language}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get current translation
+        current_translation = instance.get_translation(language)
+        is_editing_source = current_translation.get('is_source', False) or language == instance.source_language
+        
+        if is_editing_source:
+            # Editing source language
+            instance.set_translation(
+                language,
+                name,
+                description,
+                is_source=True,
+                auto_translated=False
+            )
+            
+            if auto_translate:
+                # Re-translate all other languages from updated source
+                try:
+                    translation_service = get_translation_service()
+                    translations = translation_service.translate_all_languages(
+                        name,
+                        description,
+                        language
+                    )
+                    
+                    for lang, trans in translations.items():
+                        # Only update auto-translated translations, preserve manual ones
+                        existing_trans = instance.get_translation(lang)
+                        if not existing_trans or existing_trans.get('auto_translated', True):
+                            instance.set_translation(
+                                lang,
+                                trans['name'],
+                                trans['description'],
+                                is_source=False,
+                                auto_translated=True
+                            )
+                    
+                    logger.info(f"Re-translated PostCategory {instance.id} from source language {language}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to re-translate PostCategory {instance.id}: {e}")
+        else:
+            # Editing non-source language
+            if auto_translate:
+                # Ignore provided text, re-translate from source
+                source_lang, source_translation = instance.get_source_translation()
+                
+                if source_translation and source_translation.get('name'):
+                    try:
+                        translation_service = get_translation_service()
+                        translated_name = translation_service.translate_text(
+                            source_translation['name'],
+                            source_lang,
+                            language
+                        )
+                        translated_description = translation_service.translate_text(
+                            source_translation.get('description', ''),
+                            source_lang,
+                            language
+                        ) if source_translation.get('description') else ''
+                        
+                        instance.set_translation(
+                            language,
+                            translated_name,
+                            translated_description,
+                            is_source=False,
+                            auto_translated=True
+                        )
+                        
+                        logger.info(f"Re-translated PostCategory {instance.id} to {language} from source")
+                        
+                    except Exception as e:
+                        logger.error(f"Failed to re-translate PostCategory {instance.id} to {language}: {e}")
+            else:
+                # Manual edit - save provided text
+                instance.set_translation(
+                    language,
+                    name,
+                    description,
+                    is_source=False,
+                    auto_translated=False
+                )
+                logger.info(f"Manually updated PostCategory {instance.id} translation in {language}")
+        
+        # Update other fields from serializer
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(serializer.data)
 
     def get_serializer_context(self):
         """Add include_translations flag to serializer context."""
