@@ -111,103 +111,46 @@ class LikeSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
 class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     book_count = serializers.IntegerField(read_only=True)
-    translations = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = BookCategory
         fields = "__all__"
 
-    def get_translations(self, obj):
-        """Return all translations for this category key."""
-        if self.context.get("include_translations", False):
-            translations = BookCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [
-                {"id": t.id, "language": t.language, "name": t.name}
-                for t in translations
-            ]
-        return None
-
 
 class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     video_count = serializers.IntegerField(read_only=True)
-    translations = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = VideoCategory
         fields = "__all__"
 
-    def get_translations(self, obj):
-        """Return all translations for this category key."""
-        if self.context.get("include_translations", False):
-            translations = VideoCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [
-                {"id": t.id, "language": t.language, "name": t.name}
-                for t in translations
-            ]
-        return None
-
 
 class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     post_count = serializers.IntegerField(read_only=True)
-    translations = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = PostCategory
         fields = "__all__"
 
-    def get_translations(self, obj):
-        """Return all translations for this category key."""
-        if self.context.get("include_translations", False):
-            translations = PostCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [
-                {"id": t.id, "language": t.language, "name": t.name}
-                for t in translations
-            ]
-        return None
-
 
 class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     event_count = serializers.IntegerField(read_only=True)
-    translations = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = EventCategory
         fields = "__all__"
 
-    def get_translations(self, obj):
-        """Return all translations for this category key."""
-        if self.context.get("include_translations", False):
-            translations = EventCategory.objects.filter(key=obj.key).exclude(id=obj.id)
-            return [
-                {"id": t.id, "language": t.language, "name": t.name}
-                for t in translations
-            ]
-        return None
-
 
 class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     content_count = serializers.IntegerField(read_only=True)
-    translations = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ContentCategory
         fields = "__all__"
-
-    def get_translations(self, obj):
-        """Return all translations for this category key."""
-        if self.context.get("include_translations", False):
-            translations = ContentCategory.objects.filter(key=obj.key).exclude(
-                id=obj.id
-            )
-            return [
-                {"id": t.id, "language": t.language, "name": t.name}
-                for t in translations
-            ]
-        return None
 
 
 class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

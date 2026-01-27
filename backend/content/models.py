@@ -152,11 +152,6 @@ class Video(LikableMixin, TimestampedModel):
     description = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     is_weekly_moment = models.BooleanField(default=False)
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same video",
-    )
     comments = GenericRelation(
         "Comments",
         content_type_field="content_type",
@@ -630,30 +625,18 @@ class SectionOrder(models.Model):
     numeric position. Lower numbers appear earlier.
     """
 
-    key = models.CharField(max_length=100, unique=True)
     position = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("position",)
 
     def __str__(self) -> str:
-        return f"SectionOrder<{self.key}:{self.position}>"
+        return f"SectionOrder<{self.position}>"
 
 
 class PostCategory(TimestampedModel):
-    """Categories for organizing posts with multi-language support.
+    """Categories for organizing posts with multi-language support."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
     name = models.CharField(
         max_length=100, help_text="Category name in the specified language"
     )
@@ -665,59 +648,17 @@ class PostCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
 
     class Meta:
         ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
 
 
 class EventCategory(TimestampedModel):
-    """Categories for organizing events with multi-language support.
+    """Categories for organizing events with multi-language support."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
     name = models.CharField(
         max_length=100, help_text="Category name in the specified language"
     )
@@ -729,59 +670,17 @@ class EventCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
 
     class Meta:
         ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
 
 
 class ContentCategory(TimestampedModel):
-    """Categories for organizing content with multi-language support.
+    """Categories for organizing content with multi-language support."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
     name = models.CharField(
         max_length=100, help_text="Category name in the specified language"
     )
@@ -793,59 +692,17 @@ class ContentCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
 
     class Meta:
         ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
 
 
 class VideoCategory(TimestampedModel):
-    """Categories for organizing videos with multi-language support.
+    """Categories for organizing videos with multi-language support."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
     name = models.CharField(
         max_length=100, help_text="Category name in the specified language"
     )
@@ -857,59 +714,17 @@ class VideoCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
 
     class Meta:
         ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
 
 
 class BookCategory(TimestampedModel):
-    """Categories for organizing books with multi-language support.
+    """Categories for organizing books with multi-language support."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
     name = models.CharField(
         max_length=100, help_text="Category name in the specified language"
     )
@@ -921,40 +736,9 @@ class BookCategory(TimestampedModel):
     language = models.CharField(
         max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
     )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
 
     class Meta:
         ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"

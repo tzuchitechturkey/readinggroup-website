@@ -102,26 +102,23 @@ class HistoryEntryAdmin(admin.ModelAdmin):
 
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
+    list_display = ("id", "name", "language", "description", "created_at")
+    search_fields = ("name",)
     list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
 
 
 @admin.register(PostCategory)
 class PostCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
+    list_display = ("id", "name", "language", "description", "created_at")
+    search_fields = ("name",)
     list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
 
 
 @admin.register(EventCategory)
 class EventCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
+    list_display = ("id", "name", "language", "description", "created_at")
+    search_fields = ("name",)
     list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
 
 
 @admin.register(PositionTeamMember)
@@ -194,10 +191,9 @@ class NavbarLogoAdmin(admin.ModelAdmin):
 
 @admin.register(ContentCategory)
 class ContentCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
+    list_display = ("id", "name", "language", "description", "created_at")
+    search_fields = ("name",)
     list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
 
 
 @admin.register(Authors)
@@ -214,10 +210,9 @@ class ContentAttachmentAdmin(admin.ModelAdmin):
 
 @admin.register(BookCategory)
 class BookCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
+    list_display = ("id", "name", "language", "description", "created_at")
+    search_fields = ("name",)
     list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
 
 
 @admin.register(Book)
