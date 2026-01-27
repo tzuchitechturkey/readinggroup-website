@@ -246,7 +246,6 @@ function PostsCategoriesContent({ onSectionChange }) {
     if (!validateForm()) {
       return;
     }
-    console.log("Selected Language:", selectedLanguage);
     const languageCode = languageCodeMap[selectedLanguage];
     const submitData = { ...form };
 
