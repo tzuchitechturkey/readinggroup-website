@@ -59,7 +59,7 @@ function PostsCategoriesContent({ onSectionChange }) {
   // Map language names to language codes
   const languageCodeMap = {
     ar: "ar",
-    eng: "en",
+    en: "en",
     tr: "tr",
     ch: "ch",
     chsi: "chsi",
@@ -260,10 +260,10 @@ function PostsCategoriesContent({ onSectionChange }) {
       // if (categoryKey) {
       //   submitData.key = categoryKey;
       // }
-      submitData.language = languageCode;
     }
+    submitData.language = languageCode;
     // submitData.key = languageCode;
-    // console.log("Submitting data:", submitData);
+    console.log("Submitting data:", submitData);
     setIsLoading(true);
     try {
       if (editingCategory && editingCategory.id) {
