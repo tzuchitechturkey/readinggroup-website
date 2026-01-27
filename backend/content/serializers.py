@@ -176,6 +176,52 @@ class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         language = request.query_params.get('language', obj.source_language)
         translation = obj.get_translation(language)
         return translation.get('auto_translated', False) if translation else False
+    
+    def create(self, validated_data):
+        """Create a new PostCategory with translation handling."""
+        # Extract write-only fields
+        request_language = validated_data.pop('request_language', None)
+        auto_translate = validated_data.pop('auto_translate', False)
+        is_source = validated_data.pop('is_source', False)
+        
+        # Create the instance
+        instance = super().create(validated_data)
+        
+        # If request_language is provided, save translation
+        if request_language:
+            instance.set_translation(
+                request_language,
+                validated_data.get('name'),
+                validated_data.get('description', ''),
+                is_source=is_source,
+                auto_translated=auto_translate
+            )
+            instance.save()
+        
+        return instance
+    
+    def update(self, instance, validated_data):
+        """Update a PostCategory with translation handling."""
+        # Extract write-only fields
+        request_language = validated_data.pop('request_language', None)
+        auto_translate = validated_data.pop('auto_translate', False)
+        is_source = validated_data.pop('is_source', False)
+        
+        # Update the instance
+        instance = super().update(instance, validated_data)
+        
+        # If request_language is provided, save translation
+        if request_language:
+            instance.set_translation(
+                request_language,
+                validated_data.get('name', instance.name),
+                validated_data.get('description', instance.description),
+                is_source=is_source,
+                auto_translated=auto_translate
+            )
+            instance.save()
+        
+        return instance
 
 
 class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
