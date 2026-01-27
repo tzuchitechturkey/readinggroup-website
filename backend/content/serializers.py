@@ -131,94 +131,152 @@ class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for PostCategory with multilingual translation support."""
     datetime_fields = ("created_at", "updated_at")
     post_count = serializers.IntegerField(read_only=True)
-    request_language = serializers.CharField(write_only=True, required=False, help_text="Language code for this request")
-    auto_translate = serializers.BooleanField(write_only=True, default=False, required=False, help_text="Whether to auto-translate using GeminAI")
-    is_source = serializers.BooleanField(write_only=True, default=False, required=False, help_text="Whether this is the source language")
-    translated_name = serializers.SerializerMethodField(read_only=True)
-    translated_description = serializers.SerializerMethodField(read_only=True)
-    available_languages = serializers.SerializerMethodField(read_only=True)
-    is_auto_translated = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = PostCategory
-        fields = "__all__"
+        fields = ('id', 'name', 'description', 'is_active', 'order', 'language', 
+                  'source_language', 'created_at', 'updated_at', 'post_count')
+    class Meta:
+        model = PostCategory
+        fields = ('id', 'name', 'description', 'is_active', 'order', 'language', 
+                  'source_language', 'created_at', 'updated_at', 'post_count')
     
-    def get_translated_name(self, obj):
-        """Return the name in the requested language."""
-        request = self.context.get('request')
-        if not request:
-            return obj.name
+    def to_representation(self, instance):
+        """Return data based on requested language in query params."""
+        representation = super().to_representation(instance)
         
-        language = request.query_params.get('language', obj.source_language)
-        translation = obj.get_translation(language)
-        return translation.get('name', obj.name) if translation else obj.name
-    
-    def get_translated_description(self, obj):
-        """Return the description in the requested language."""
+        # Get requested language from query params
         request = self.context.get('request')
-        if not request:
-            return obj.description
+        if request and request.method == 'GET':
+            requested_lang = request.query_params.get('language')
+            
+            # If a specific language is requested and it exists in translations
+            if requested_lang and requested_lang in instance.translations:
+                translation = instance.translations[requested_lang]
+                representation['name'] = translation.get('name', instance.name)
+                representation['description'] = translation.get('description', instance.description)
+                representation['language'] = requested_lang
         
-        language = request.query_params.get('language', obj.source_language)
-        translation = obj.get_translation(language)
-        return translation.get('description', obj.description) if translation else obj.description
-    
-    def get_available_languages(self, obj):
-        """Return list of available language codes."""
-        return list(obj.translations.keys()) if obj.translations else [obj.source_language]
-    
-    def get_is_auto_translated(self, obj):
-        """Return whether the current language translation is auto-translated."""
-        request = self.context.get('request')
-        if not request:
-            return False
-        
-        language = request.query_params.get('language', obj.source_language)
-        translation = obj.get_translation(language)
-        return translation.get('auto_translated', False) if translation else False
+        return representation
     
     def create(self, validated_data):
-        """Create a new PostCategory with translation handling."""
-        # Extract write-only fields
-        request_language = validated_data.pop('request_language', None)
-        auto_translate = validated_data.pop('auto_translate', False)
-        is_source = validated_data.pop('is_source', False)
+        """Create a new PostCategory and auto-translate to all languages."""
+        from .translation_service import get_translation_service
+        
+        # Get the source language
+        source_language = validated_data.get('language', 'en')
+        name = validated_data.get('name')
+        description = validated_data.get('description', '')
+        
+        # Set source_language field
+        validated_data['source_language'] = source_language
         
         # Create the instance
         instance = super().create(validated_data)
         
-        # If request_language is provided, save translation
-        if request_language:
-            instance.set_translation(
-                request_language,
-                validated_data.get('name'),
-                validated_data.get('description', ''),
-                is_source=is_source,
-                auto_translated=auto_translate
-            )
-            instance.save()
+        # Initialize translations with source language
+        instance.translations = {
+            source_language: {
+                'name': name,
+                'description': description,
+                'is_source': True,
+                'auto_translated': False
+            }
+        }
         
+        # Auto-translate to all other languages using Gemini AI
+        try:
+            translation_service = get_translation_service()
+            translations = translation_service.translate_all_languages(
+                name=name,
+                description=description,
+                source_lang=source_language
+            )
+            
+            # Add translations to the instance
+            for lang_code, trans_data in translations.items():
+                instance.translations[lang_code] = {
+                    'name': trans_data['name'],
+                    'description': trans_data['description'],
+                    'is_source': False,
+                    'auto_translated': True
+                }
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to auto-translate category: {e}")
+        
+        instance.save()
         return instance
     
     def update(self, instance, validated_data):
-        """Update a PostCategory with translation handling."""
-        # Extract write-only fields
-        request_language = validated_data.pop('request_language', None)
-        auto_translate = validated_data.pop('auto_translate', False)
-        is_source = validated_data.pop('is_source', False)
+        """Update a PostCategory and update translations if needed."""
+        from .translation_service import get_translation_service
+        
+        # Get the requested language from query params
+        request = self.context.get('request')
+        requested_lang = None
+        if request:
+            requested_lang = request.query_params.get('language')
+        
+        # If updating a specific language translation
+        if requested_lang and requested_lang != instance.source_language:
+            # Update only the specific language translation
+            if not instance.translations:
+                instance.translations = {}
+            
+            instance.translations[requested_lang] = {
+                'name': validated_data.get('name', instance.name),
+                'description': validated_data.get('description', instance.description),
+                'is_source': False,
+                'auto_translated': False  # Manual edit, not auto-translated
+            }
+            instance.save()
+            return instance
+        
+        # If updating the source language
+        name_changed = 'name' in validated_data and validated_data['name'] != instance.name
+        desc_changed = 'description' in validated_data and validated_data['description'] != instance.description
         
         # Update the instance
         instance = super().update(instance, validated_data)
         
-        # If request_language is provided, save translation
-        if request_language:
-            instance.set_translation(
-                request_language,
-                validated_data.get('name', instance.name),
-                validated_data.get('description', instance.description),
-                is_source=is_source,
-                auto_translated=auto_translate
-            )
+        # If source content changed, re-translate to all languages
+        if name_changed or desc_changed:
+            source_language = instance.source_language
+            
+            # Update source language in translations
+            if not instance.translations:
+                instance.translations = {}
+            
+            instance.translations[source_language] = {
+                'name': instance.name,
+                'description': instance.description,
+                'is_source': True,
+                'auto_translated': False
+            }
+            
+            # Re-translate to all other languages
+            try:
+                translation_service = get_translation_service()
+                translations = translation_service.translate_all_languages(
+                    name=instance.name,
+                    description=instance.description,
+                    source_lang=source_language
+                )
+                
+                for lang_code, trans_data in translations.items():
+                    instance.translations[lang_code] = {
+                        'name': trans_data['name'],
+                        'description': trans_data['description'],
+                        'is_source': False,
+                        'auto_translated': True
+                    }
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Failed to auto-translate category: {e}")
+            
             instance.save()
         
         return instance

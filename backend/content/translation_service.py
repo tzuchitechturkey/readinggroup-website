@@ -1,10 +1,11 @@
 """
-Translation service using GeminAI API for multilingual content translation.
+Translation service using Google Gemini API for multilingual content translation.
 """
 import os
 import logging
 from typing import Dict, List, Optional
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -21,22 +22,21 @@ SUPPORTED_LANGUAGES = {
 
 
 class TranslationService:
-    """Service for translating text using GeminAI API."""
+    """Service for translating text using Google Gemini API."""
     
     def __init__(self):
-        """Initialize the GeminAI translation service."""
+        """Initialize the Google Gemini translation service."""
         api_key = getattr(settings, 'GEMINI_API_KEY', os.environ.get('GEMINI_API_KEY'))
         if not api_key:
             logger.warning("GEMINI_API_KEY not configured. Translation service will not work.")
-            self.model = None
+            self.client = None
         else:
             try:
-                genai.configure(api_key=api_key)
-                self.model = genai.GenerativeModel('gemini-pro')
-                logger.info("GeminAI translation service initialized successfully")
+                self.client = genai.Client(api_key=api_key)
+                logger.info("Google Gemini translation service initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize GeminAI: {e}")
-                self.model = None
+                logger.error(f"Failed to initialize Google Gemini: {e}")
+                self.client = None
     
     def translate_text(self, text: str, source_lang: str, target_lang: str) -> str:
         """
@@ -50,8 +50,8 @@ class TranslationService:
         Returns:
             Translated text
         """
-        if not self.model:
-            logger.error("Translation model not initialized")
+        if not self.client:
+            logger.error("Translation client not initialized")
             return text
         
         if source_lang not in SUPPORTED_LANGUAGES or target_lang not in SUPPORTED_LANGUAGES:
@@ -73,7 +73,10 @@ Text to translate:
 
 Translation:"""
             
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model='gemini-1.5-flash',
+                contents=prompt
+            )
             translated_text = response.text.strip()
             
             logger.info(f"Successfully translated text from {source_lang} to {target_lang}")
