@@ -31,11 +31,11 @@ function UserIcons() {
       />
 
       {/* Start Search Section */}
-      <SearchItem
+      {/* <SearchItem
         t={t}
         isSearchOpen={isSearchOpen}
         setIsSearchOpen={setIsSearchOpen}
-      />
+      /> */}
       {/* End Search Section */}
       {!isSearchOpen && (
         <>
@@ -48,7 +48,7 @@ function UserIcons() {
               onClick={() => {
                 navigate("/auth/login");
               }}
-              className="p-1 px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+              className="text-sm p-[6px] px-2 border-[1px] border-gray-300 rounded-2xl bg-white  hover:text-primary transition-colors duration-200"
             >
               {t("Login")}
             </button>
@@ -74,7 +74,7 @@ function UserIcons() {
           )}
         </>
       )}
-      
+
       {isSearchOpen && !isMobile && (
         <>
           <LanguageDropdown />
@@ -86,7 +86,7 @@ function UserIcons() {
               onClick={() => {
                 navigate("/auth/login");
               }}
-              className="p-1 px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+              className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl bg-white  hover:text-primary transition-colors duration-200"
             >
               {t("Login")}
             </button>

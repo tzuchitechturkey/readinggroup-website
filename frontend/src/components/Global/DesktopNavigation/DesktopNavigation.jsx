@@ -21,79 +21,83 @@ function DesktopNavigation({
   shouldOpenInNewTab,
 }) {
   return (
-    <div className="hidden lg:flex lg:items-center lg:justify-center flex-1 mx-8">
+    <div className="hidden  lg:flex lg:items-center lg:justify-center flex-1">
       <ul className="flex items-center ">
         {navigationItems.map((item, idx) => (
           <li key={idx} className="relative group">
-            {item.hasDropdown ? (
+            {item?.hasDropdown ? (
               <>
                 <NavLink
-                  to={item.href}
+                  to={item?.href}
                   onClick={(e) => {
-                    if (item.href === "/about") {
+                    if (item?.href === "/about") {
                       localStorage.removeItem("aboutUsMainTab");
                     }
-                    if (item.scrollToId) {
+                    if (item?.scrollToId) {
                       handleNavClick(e, item);
                     }
                   }}
                   className={({ isActive }) =>
-                    `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium px-4 py-2 rounded-sm flex gap-[2px] items-center ${
+                    `text-white transition-all duration-200 text-sm xl:text-base font-normal px-4 py-2 rounded-sm flex gap-[2px] items-center ${
                       isActive
                         ? "border-b-2 border-primary text-primary"
                         : "text-gray-700"
                     }`
                   }
                 >
-                  {item.name}
-                  <svg
-                    className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+                  {item?.name}
+                  {item?.subItems?.length && (
+                    <svg
+                      className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  )}
                 </NavLink>
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="min-w-[240px] bg-white rounded-xl shadow-xl border border-gray-200 py-3 px-2 animate-in fade-in-0 zoom-in-95">
+                <div
+                  className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible ${item?.subItems?.length && "group-hover:opacity-100 "} group-hover:visible transition-all duration-200 z-50`}
+                >
+                  <div className="min-w-[240px] bg-[var(--color-primary)] shadow-xl py-3 px-2 animate-in fade-in-0 zoom-in-95">
                     <ul className="space-y-1">
-                      {item.subItems.map((subItem, subIdx) => (
+                      {item?.subItems?.map((subItem, subIdx) => (
                         <li
                           key={subIdx}
                           className="relative group/submenu"
                           onMouseEnter={() => {
                             if (
-                              subItem.content_count > 0 &&
-                              item.categoryType
+                              subItem?.content_count > 0 &&
+                              item?.categoryType
                             ) {
                               fetchCategoryContents(
                                 categoryContents,
                                 loadingContents,
                                 setLoadingContents,
                                 setCategoryContents,
-                                subItem.categoryId,
-                                item.categoryType
+                                subItem?.categoryId,
+                                item?.categoryType,
                               );
                             }
                           }}
                         >
                           <Link
-                            to={subItem.href}
+                            to={subItem?.href}
                             onClick={(e) => handleNavClick(e, subItem)}
-                            className="px-4 py-3 text-sm text-gray-700 hover:text-primary hover:bg-gradient-to-r hover:from-blue-50 hover:to-primary/5 rounded-lg transition-all duration-200 group/item relative flex items-center justify-between"
+                            className="px-4 py-3 text-sm    text-white hover:scale-105 rounded-lg transition-all duration-200 group/item relative flex items-center justify-between"
                           >
                             <span className="flex items-center">
-                              {subItem.name}
+                              {subItem?.name}
                             </span>
                             {/* Show arrow if has nested content */}
-                            {subItem.content_count > 0 && (
+                            {subItem?.content_count > 0 && (
                               <svg
                                 className="w-4 h-4 -rotate-90"
                                 fill="none"
@@ -111,13 +115,13 @@ function DesktopNavigation({
                           </Link>
 
                           {/* Nested Dropdown for content items - Horizontal Grid */}
-                          {subItem.content_count > 0 && item.categoryType && (
+                          {subItem?.content_count > 0 && item?.categoryType && (
                             <div className="absolute left-full top-0 ml-2 opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200 z-50">
-                              <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4">
+                              <div className="bg-[var(--color-primary)] rounded-xl shadow-xl p-4">
                                 {loadingContents[
-                                  `${item.categoryType}-${subItem.categoryId}`
+                                  `${item?.categoryType}-${subItem?.categoryId}`
                                 ] ? (
-                                  <div className="px-4 py-8 text-sm text-gray-500 text-center">
+                                  <div className="px-4 py-8 text-sm text-white text-center">
                                     {t("Loading...")}
                                   </div>
                                 ) : (
@@ -130,12 +134,12 @@ function DesktopNavigation({
                                   >
                                     {(
                                       categoryContents[
-                                        `${item.categoryType}-${subItem.categoryId}`
+                                        `${item?.categoryType}-${subItem?.categoryId}`
                                       ] || []
                                     ).map((contentItem, contentIdx) => {
                                       const itemCount =
                                         categoryContents[
-                                          `${item.categoryType}-${subItem.categoryId}`
+                                          `${item?.categoryType}-${subItem?.categoryId}`
                                         ]?.length || 0;
                                       const sizeClass =
                                         getItemSizeClass(itemCount);
@@ -151,12 +155,12 @@ function DesktopNavigation({
                                         >
                                           {shouldOpenInNewTab(
                                             contentItem,
-                                            item.categoryType
+                                            item?.categoryType,
                                           ) ? (
                                             <a
                                               href={getContentHref(
                                                 contentItem,
-                                                item.categoryType
+                                                item?.categoryType,
                                               )}
                                               target="_blank"
                                               rel="noopener noreferrer"
@@ -232,7 +236,7 @@ function DesktopNavigation({
                                             <Link
                                               to={getContentHref(
                                                 contentItem,
-                                                item.categoryType
+                                                item?.categoryType,
                                               )}
                                               className="flex flex-col h-full hover:no-underline"
                                             >
@@ -287,7 +291,7 @@ function DesktopNavigation({
               </>
             ) : (
               <NavLink
-                to={item.href}
+                to={item?.href}
                 className={({ isActive }) =>
                   `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
                     isActive
@@ -296,7 +300,7 @@ function DesktopNavigation({
                   }`
                 }
               >
-                {item.name}
+                {item?.name}
               </NavLink>
             )}
           </li>

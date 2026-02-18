@@ -131,15 +131,15 @@ function Usernavbar() {
 
   const navigationItems = useMemo(
     () => buildNavigationItems(t, siteInfo),
-    [t, siteInfo]
+    [t, siteInfo],
   );
 
   return (
-    <nav className="relative  shadow-sm" dir={i18n.dir()}>
+    <nav className=" max-w-7xl mx-auto relative  shadow-sm" dir={i18n.dir()}>
       <div className="  mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 lg:h-20">
+        <div className="flex justify-between items-center h-16 lg:h-[72px]">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 ">
             <Link to="/" className="flex items-center">
               <img
                 src={siteInfo?.logo?.logo || defaultLogo}
@@ -166,12 +166,12 @@ function Usernavbar() {
             shouldOpenInNewTab={shouldOpenInNewTab}
           />
           {/* Desktop User Icons */}
-          <div className="hidden lg:flex lg:items-center">
+          <div className="hidden w-52 lg:flex lg:items-center justify-end ">
             <UserIcons />
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center space-x-4">
+          <div className="lg:hidden  flex items-center space-x-4">
             {/* Mobile User Icons - simplified */}
             <div className=" flex">
               <UserIcons />

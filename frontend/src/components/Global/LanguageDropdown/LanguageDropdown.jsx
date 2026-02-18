@@ -28,10 +28,13 @@ export default function LanguageDropdown({ iconColor }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="px-2 py-2 border-none outline-none rounded-md  ">
-        <GrLanguage
-          className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
-          style={{ color: iconColor || undefined }}
-        />
+        <div className="flex bg-white hover:text-primary rounded-full p-1 px-3 items-center gap-1">
+          <GrLanguage
+            className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
+            style={{ color: iconColor || undefined }}
+          />
+          {selectedLang.toUpperCase()}
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[160px] rounded-xl shadow-lg border border-gray-100 bg-white/95 py-2 px-1">
         {Object.keys(languages).map((key) => {

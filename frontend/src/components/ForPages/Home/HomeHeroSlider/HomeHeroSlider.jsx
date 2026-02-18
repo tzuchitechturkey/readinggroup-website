@@ -1,10 +1,17 @@
-import * as React from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Play, Info, Plus, SquareDashedMousePointer } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
+import FeaturedVideoPlayer from "@/components/ForPages/Home/HomeHeroSlider/FeaturedVideoPlayer";
 import {
   Carousel,
   CarouselContent,
@@ -17,7 +24,8 @@ import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 export default function HomePageHeroSlider({ data = null }) {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile(1024);
-  const sliders = React.useMemo(() => {
+  const navigate = useNavigate();
+  const sliders = useMemo(() => {
     if (!data) return [];
 
     const slides = [];
@@ -34,7 +42,7 @@ export default function HomePageHeroSlider({ data = null }) {
         description:
           mainVideo.description ||
           t(
-            "Watch this week's featured videos — stories, reports, and highlights captured in motion."
+            "Watch this week's featured videos — stories, reports, and highlights captured in motion.",
           ),
         primaryTo: `/videos/${mainVideo.id}`,
         secondaryTo: "/videos",
@@ -102,36 +110,36 @@ export default function HomePageHeroSlider({ data = null }) {
     return slides;
   }, [data, t]);
 
-  const [api, setApi] = React.useState(null);
-  const timerRef = React.useRef(null);
-  const pausedRef = React.useRef(false);
+  const [api, setApi] = useState(null);
+  const timerRef = useRef(null);
+  const pausedRef = useRef(false);
 
-  const startAuto = React.useCallback(() => {
+  const startAuto = useCallback(() => {
     if (!api || pausedRef.current) return;
     timerRef.current = window.setInterval(() => {
       if (!pausedRef.current) api.scrollNext();
     }, 9000);
   }, [api]);
 
-  const stopAuto = React.useCallback(() => {
+  const stopAuto = useCallback(() => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
   }, []);
 
-  const onEnter = React.useCallback(() => {
+  const onEnter = useCallback(() => {
     pausedRef.current = true;
     stopAuto();
   }, [stopAuto]);
 
-  const onLeave = React.useCallback(() => {
+  const onLeave = useCallback(() => {
     pausedRef.current = false;
     stopAuto();
     startAuto();
   }, [startAuto, stopAuto]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (api) {
       startAuto();
     }
@@ -144,8 +152,19 @@ export default function HomePageHeroSlider({ data = null }) {
   }, [api, startAuto]);
 
   return (
-    <div className="w-full lg:pt-8">
-      <Carousel
+    <div className="w-full ">
+      {/* Start Featured Video */}
+      <div className="h-0vh]">
+        <FeaturedVideoPlayer
+          videoId="iUF3p_l1DfY"
+          title="أشهى تجربة غذائية - محفوض بتراث والتاريخ"
+          description="شاهد هذا الفيديو المميز حول التراث الثقافي والتاريخ"
+          t={t}
+          navigate={navigate}
+        />
+      </div>
+      {/* End Featured Video */}
+      {/* <Carousel
         className="w-full"
         opts={{ align: "center", loop: true, skipSnaps: false }}
         setApi={setApi}
@@ -175,7 +194,7 @@ export default function HomePageHeroSlider({ data = null }) {
                   <div className="absolute inset-0 bg-black/70" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
-                  {/* Start Title && Actions */}
+                   Start Title && Actions 
                   <div className="absolute inset-0 flex items-center">
                     <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
                       <div className="pb-24 md:pb-32 lg:pb-40">
@@ -189,7 +208,7 @@ export default function HomePageHeroSlider({ data = null }) {
                           titleClassName={""}
                         />
 
-                        {/* Start Actions */}
+                          Start Actions 
                         <div className="mt-4">
                           <div className="flex items-center gap-3">
                             <Link
@@ -223,17 +242,17 @@ export default function HomePageHeroSlider({ data = null }) {
                             </Link>
                           </div>
                         </div>
-                        {/* Start Actions */}
+                        Start Actions
                       </div>
                     </div>
                   </div>
-                  {/* End Title && Actions */}
+                   End Title && Actions
 
-                  {/* Start Top Five Section */}
+                  Start Top Five Section
                   <div className="pointer-events-auto absolute left-1 right-1 bottom-3 md:bottom-10 z-10">
                     <TopFiveSection data={slide.allData} />
                   </div>
-                  {/* End Top Five Section */}
+                  End Top Five Section
                 </div>
               </CarouselItem>
             ))}
@@ -262,7 +281,7 @@ export default function HomePageHeroSlider({ data = null }) {
             </>
           )}
         </div>
-      </Carousel>
+      </Carousel> */}
     </div>
   );
 }
