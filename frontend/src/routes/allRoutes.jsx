@@ -1,50 +1,52 @@
 import { lazy } from "react";
 
-const CategoryContentPage = lazy(() =>
-  import("@/pages/CategoryContentPage/CategoryContentPage")
+const CategoryContentPage = lazy(
+  () => import("@/pages/CategoryContentPage/CategoryContentPage"),
 );
 // Lazy load all page components
 const BooksContent = lazy(() => import("@/pages/AboutUs/Books/BooksContent"));
-const ContentPage = lazy(() =>
-  import("../pages/Contents/ContentPage/ContentPage")
+const ContentPage = lazy(
+  () => import("../pages/Contents/ContentPage/ContentPage"),
 );
 const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
 const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
 const Register = lazy(() => import("@/pages/Auth/Register/RegisterContent"));
 const Home = lazy(() => import("@/pages/Home/HomeContent"));
 const AboutUs = lazy(() => import("@/pages/AboutUs/AboutUsContent"));
-const AboutMemberContent = lazy(() =>
-  import("@/pages/AboutUs/Member/MemberContent")
+const AboutMemberContent = lazy(
+  () => import("@/pages/AboutUs/Member/MemberContent"),
 );
-const VideosPageContent = lazy(() =>
-  import("@/pages/Videos/VideosPage/VideosPageContent")
+const VideosPageContent = lazy(
+  () => import("@/pages/Videos/VideosPage/VideosPageContent"),
 );
-const VideoPage = lazy(() =>
-  import("@/pages/Videos/VideoPage/VideoPageContent")
+const VideoPage = lazy(
+  () => import("@/pages/Videos/VideoPage/VideoPageContent"),
 );
 const PostsContent = lazy(() => import("@/pages/Posts/PostsContent"));
-const ContentsContent = lazy(() =>
-  import("@/pages/Contents/ContentsPageContent")
+const ContentsContent = lazy(
+  () => import("@/pages/Contents/ContentsPageContent"),
 );
-const PostDetailsPageContent = lazy(() =>
-  import("@/components/Global/PostDetailsPageContent/PostDetailsPageContent")
+const PostDetailsPageContent = lazy(
+  () =>
+    import("@/components/Global/PostDetailsPageContent/PostDetailsPageContent"),
 );
 const EventsContent = lazy(() => import("@/pages/Events/EventsPageContent"));
-const UserProfileContent = lazy(() =>
-  import("@/pages/UserProfile/UserProfileContent")
+const UserProfileContent = lazy(
+  () => import("@/pages/UserProfile/UserProfileContent"),
 );
-const UserSettingContent = lazy(() =>
-  import("@/pages/Auth/UserSetting/UserSettingContent")
+const UserSettingContent = lazy(
+  () => import("@/pages/Auth/UserSetting/UserSettingContent"),
 );
 const EventPageContent = lazy(() => import("@/pages/Events/EventPageContent"));
 const Pages404 = lazy(() => import("@/pages/NotFound/NotFound"));
-const EventsVideoPage = lazy(() =>
-  import("@/components/ForPages/Events/EventsVideoPage/EventsVideoPage")
+const EventsVideoPage = lazy(
+  () => import("@/components/ForPages/Events/EventsVideoPage/EventsVideoPage"),
 );
-const TOTPSetup = lazy(() =>
-  import("@/components/ForPages/Auth/TOTPSetup/TOTPSetup")
+const TOTPSetup = lazy(
+  () => import("@/components/ForPages/Auth/TOTPSetup/TOTPSetup"),
 );
 const MyListContent = lazy(() => import("@/pages/MyList/MyListContent"));
+const LearnPageContent = lazy(() => import("@/pages/Learn/LearnPageContent"));
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -57,6 +59,7 @@ export const userRoutes = [
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/my-list", element: <MyListContent /> },
+  { path: "/learn", element: <LearnPageContent /> },
   // Contents Routes
   { path: "/contents", element: <ContentsContent /> },
   { path: "/contents/content/:id", element: <ContentPage /> },

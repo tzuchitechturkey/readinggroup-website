@@ -34,7 +34,7 @@ export default function ScrollToTop() {
       title="Scroll to top"
       onClick={scrollToTop}
       onKeyDown={onKeyDown}
-      className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 p-2 shadow-lg transition-transform duration-150 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+      className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 p-2 shadow-lg transition-transform duration-150 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary scroll-to-top-btn"
     >
       <i className="fa fa-chevron-up text-gray-800  " aria-hidden="true" />
     </button>
