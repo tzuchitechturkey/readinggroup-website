@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { Save, X, Search } from "lucide-react";
+import { Save, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -162,7 +162,7 @@ function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
       toast.success(
         selectedBook?.id
           ? t("Book updated successfully")
-          : t("Book created successfully")
+          : t("Book created successfully"),
       );
       onSectionChange("books");
     } catch (error) {
@@ -390,7 +390,7 @@ class Base64UploadAdapter {
           };
           reader.onerror = (err) => reject(err);
           reader.readAsDataURL(file);
-        })
+        }),
     );
   }
   abort() {

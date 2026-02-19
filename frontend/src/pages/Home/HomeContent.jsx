@@ -11,6 +11,13 @@ import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics } from "@/api/dashboard";
 import DynamicHomeCard from "@/components/ForPages/Home/DynamicHomeCard/DynamicHomeCard";
+import NewClips from "@/components/homepage/NewClips";
+import UpcomingLivestream from "@/components/homepage/UpcomingLivestream";
+import GoodEffectsPoster from "@/components/homepage/GoodEffectsPoster";
+import RevisitCards from "@/components/homepage/RevisitCards";
+import PhotoCollections from "@/components/homepage/PhotoCollections";
+
+import VideoSection from "./VideoSection";
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();
@@ -48,7 +55,7 @@ export default function HomeContent() {
     return Object.entries(top1Data)
       .filter(
         ([key]) =>
-          key !== "top_posts" && key !== "weekly_moment" && key !== "event"
+          key !== "top_posts" && key !== "weekly_moment" && key !== "event",
       )
       .map(([key, sec]) => ({
         key,
@@ -57,72 +64,80 @@ export default function HomeContent() {
           key === "video"
             ? t("This Week's Video")
             : key === "content"
-            ? t("This Week's Contents")
-            : key === "post_card"
-            ? t("This Week's Card")
-            : key === "post_photo"
-            ? t("This Week's Photo")
-            : "",
+              ? t("This Week's Contents")
+              : key === "post_card"
+                ? t("This Week's Card")
+                : key === "post_photo"
+                  ? t("This Week's Photo")
+                  : "",
         description:
           key === "video"
             ? t("Watch this week's featured video")
             : key === "content"
-            ? t("Master Cheng Yen's Daily Journal")
-            : key === "post_card"
-            ? t("Explore this week's card")
-            : key === "post_photo"
-            ? t("Check this week's photo post")
-            : "",
+              ? t("Master Cheng Yen's Daily Journal")
+              : key === "post_card"
+                ? t("Explore this week's card")
+                : key === "post_photo"
+                  ? t("Check this week's photo post")
+                  : "",
         href:
           key === "video"
             ? "/videos"
             : key === "content"
-            ? "/contents"
-            : key === "post_card" || key === "post_photo"
-            ? "/cards-photos"
-            : "",
+              ? "/contents"
+              : key === "post_card" || key === "post_photo"
+                ? "/cards-photos"
+                : "",
         cardName:
           key === "video"
             ? VideoCard
             : key === "content"
-            ? GlobalCard
-            : key === "post_card"
-            ? WeeklyMomentsCard
-            : key === "post_photo"
-            ? WeekPhotosCard
-            : null,
+              ? GlobalCard
+              : key === "post_card"
+                ? WeeklyMomentsCard
+                : key === "post_photo"
+                  ? WeekPhotosCard
+                  : null,
         propsToCard:
           key === "video" ? { className: "h-full w-full", bigCart: true } : {},
       }));
   }, [top1Data, t]);
 
   return (
-    <div dir={i18n?.language === "ar" ? "rtl" : "ltr"} className="min-h-screen">
+    <div
+      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
+      className="min-h-screen bg-[#C8DDF4]"
+    >
       {/* Start Hero Slider */}
       <div>
-        <HomeHeroSlider data={sliderData} />
+        <HomeHeroSlider data={sliderData} t={t} />
       </div>
       {/* End Hero Slider */}
 
-      {/* Dynamic Sections */}
-      {filteredSections.map(
-        (
-          { key, sec, title, description, href, cardName, propsToCard },
-          index
-        ) => (
-          <div key={`${sec?.id}-${key}`}>
-            <DynamicHomeCard
-              index={index}
-              title={title}
-              description={description}
-              href={href}
-              cardName={cardName}
-              item={sec}
-              propsToCard={propsToCard}
-            />
-          </div>
-        )
-      )}
+      {/* New Clips Section */}
+      <div className="py-16">
+        <NewClips t={t} />
+      </div>
+
+      {/* Upcoming Livestream Section */}
+      <div>
+        <UpcomingLivestream t={t} />
+      </div>
+
+      {/* Good Effects Poster Section */}
+      <div className="py-16 pb-10">
+        <GoodEffectsPoster t={t} />
+      </div>
+
+      {/* Revisit Cards Section */}
+      <div>
+        <RevisitCards t={t} />
+      </div>
+
+      {/* Photo Collections Section */}
+      <div className="py-16 pb-12  bg-[#91ADCB]">
+        <PhotoCollections t={t} />
+      </div>
     </div>
   );
 }

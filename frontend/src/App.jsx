@@ -9,7 +9,9 @@ import ScrollToTop from "@/components/Global/ScrollToTop/ScrollToTop";
 import { userRoutes, authRoutes } from "./routes/allRoutes";
 
 // Lazy load components
-const NonAuthLayout = lazy(() => import("@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout"));
+const NonAuthLayout = lazy(
+  () => import("@/components/ForPages/Auth/NonAuthLayout/NonAuthLayout"),
+);
 const Navbar = lazy(() => import("@/components/Global/Navbar/Navbar"));
 const Footer = lazy(() => import("./components/Global/Footer/Footer"));
 
@@ -44,7 +46,7 @@ function App() {
                   {!isDashboard && <Navbar />}
                   {route.element}
                   {!isDashboard && (
-                    <div className="md:12 lg:mt-24">
+                    <div className="">
                       <Footer />
                     </div>
                   )}

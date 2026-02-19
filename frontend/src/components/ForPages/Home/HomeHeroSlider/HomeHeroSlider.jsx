@@ -1,29 +1,12 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useMemo } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
-import { Play, Info, Plus, SquareDashedMousePointer } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import HeroTitle from "@/components/Global/HeroTitle/HeroTitle";
 import FeaturedVideoPlayer from "@/components/ForPages/Home/HomeHeroSlider/FeaturedVideoPlayer";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import TopFiveSection from "@/components/ForPages/Home/TopFiveSection/TopFiveSection";
-import { useIsMobile } from "@/hooks/use-mobile";
-import ArrowButton from "@/components/Global/ArrowButton/ArrowButton";
 
 export default function HomePageHeroSlider({ data = null }) {
-  const { t, i18n } = useTranslation();
-  const isMobile = useIsMobile(1024);
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const sliders = useMemo(() => {
     if (!data) return [];
@@ -88,200 +71,27 @@ export default function HomePageHeroSlider({ data = null }) {
         allData: data?.posts_card_photo,
       });
     }
-    // Slide 4: Top Section Events
-    // if (data?.top_section?.id && data?.top_section?.events?.length > 0) {
-    //   const mainCard = data?.top_section?.events[0];
-    //   slides.push({
-    //     id: "events",
-    //     image: mainCard.image || mainCard.image_url,
-    //     h1Line1: mainCard.title,
-    //     h1Line2Prefix: "",
-    //     h1Line2Under: t("— Events weekly"),
-    //     description: mainCard.description,
-    //     primaryTo:
-    //       mainCard?.report_type === "videos"
-    //         ? `/events/video/${mainCard.id}`
-    //         : `/events/report/${mainCard.id}`,
-    //     secondaryTo: "/events",
-    //     allData: data?.top_section?.events,
-    //   });
-    // }
 
     return slides;
   }, [data, t]);
 
-  const [api, setApi] = useState(null);
-  const timerRef = useRef(null);
-  const pausedRef = useRef(false);
-
-  const startAuto = useCallback(() => {
-    if (!api || pausedRef.current) return;
-    timerRef.current = window.setInterval(() => {
-      if (!pausedRef.current) api.scrollNext();
-    }, 9000);
-  }, [api]);
-
-  const stopAuto = useCallback(() => {
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  const onEnter = useCallback(() => {
-    pausedRef.current = true;
-    stopAuto();
-  }, [stopAuto]);
-
-  const onLeave = useCallback(() => {
-    pausedRef.current = false;
-    stopAuto();
-    startAuto();
-  }, [startAuto, stopAuto]);
-
-  useEffect(() => {
-    if (api) {
-      startAuto();
-    }
-    return () => {
-      if (timerRef.current) {
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [api, startAuto]);
+  const mainSlide = sliders[0];
 
   return (
-    <div className="w-full ">
+    <div className="w-full">
       {/* Start Featured Video */}
-      <div className="h-0vh]">
-        <FeaturedVideoPlayer
-          videoId="iUF3p_l1DfY"
-          title="أشهى تجربة غذائية - محفوض بتراث والتاريخ"
-          description="شاهد هذا الفيديو المميز حول التراث الثقافي والتاريخ"
-          t={t}
-          navigate={navigate}
-        />
-      </div>
+      <FeaturedVideoPlayer
+        videoId="iUF3p_l1DfY"
+        title={mainSlide?.h1Line1 || "أشهى تجربة غذائية - محفوض بتراث والتاريخ"}
+        description={
+          mainSlide?.description ||
+          "شاهد هذا الفيديو المميز حول التراث الثقافي والتاريخ"
+        }
+        item={mainSlide || {}}
+        t={t}
+        navigate={navigate}
+      />
       {/* End Featured Video */}
-      {/* <Carousel
-        className="w-full"
-        opts={{ align: "center", loop: true, skipSnaps: false }}
-        setApi={setApi}
-      >
-        <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-          <CarouselContent
-            className={` ${
-              i18n.language === "ar"
-                ? "flex-row-reverse"
-                : "flex-row -ml-2 md:-ml-4"
-            }`}
-          >
-            {sliders.map((slide) => (
-              <CarouselItem
-                key={slide.id}
-                className={"pl-2 md:pl-4 md:basis-4/5 lg:basis-11/12"}
-              >
-                <div
-                  className={`relative w-full min-h-[600px] md:min-h-[660px]  lg:min-h-[700px]  py-8 md:py-12 overflow-hidden rounded-2xl shadow-2xl group`}
-                >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${slide.image})` }}
-                    role="img"
-                    aria-label={slide.h1Line1}
-                  />
-                  <div className="absolute inset-0 bg-black/70" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
-                   Start Title && Actions 
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="text-white px-7 md:px-12 w-full max-w-6xl ">
-                      <div className="pb-24 md:pb-32 lg:pb-40">
-                        <HeroTitle
-                          i18n={i18n}
-                          t={t}
-                          h1Line1={slide.h1Line1}
-                          h1Line2Prefix={slide.h1Line2Prefix}
-                          h1Line2Under={slide.h1Line2Under}
-                          description={slide.description}
-                          titleClassName={""}
-                        />
-
-                          Start Actions 
-                        <div className="mt-4">
-                          <div className="flex items-center gap-3">
-                            <Link
-                              to={slide.primaryTo}
-                              className="inline-flex items-center gap-2 rounded-md bg-white text-black px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold shadow hover:brightness-95"
-                              aria-label={t("Play")}
-                            >
-                              {slide?.id === "videos" ? (
-                                <Play
-                                  className="h-4 w-4 md:h-5 md:w-5 fill-black text-black"
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <SquareDashedMousePointer className="h-4 w-4 md:h-5 md:w-5 text-black" />
-                              )}
-                              {slide?.id === "videos"
-                                ? t("Play")
-                                : t("Browse Now")}
-                            </Link>
-
-                            <Link
-                              to={slide.secondaryTo}
-                              className="inline-flex items-center gap-2 rounded-md bg-white/20 text-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/30"
-                              aria-label={t("More Info")}
-                            >
-                              <Info
-                                className="h-4 w-4 md:h-5 md:w-5"
-                                aria-hidden="true"
-                              />
-                              {t("More Info")}
-                            </Link>
-                          </div>
-                        </div>
-                        Start Actions
-                      </div>
-                    </div>
-                  </div>
-                   End Title && Actions
-
-                  Start Top Five Section
-                  <div className="pointer-events-auto absolute left-1 right-1 bottom-3 md:bottom-10 z-10">
-                    <TopFiveSection data={slide.allData} />
-                  </div>
-                  End Top Five Section
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-
-          {!isMobile && (
-            <>
-              <ArrowButton
-                side="left"
-                label={t("Previous slide")}
-                onClick={() => {
-                  stopAuto();
-                  api?.scrollPrev();
-                  startAuto();
-                }}
-              />
-              <ArrowButton
-                side="right"
-                label={t("Next slide")}
-                onClick={() => {
-                  stopAuto();
-                  api?.scrollNext();
-                  startAuto();
-                }}
-              />
-            </>
-          )}
-        </div>
-      </Carousel> */}
     </div>
   );
 }
