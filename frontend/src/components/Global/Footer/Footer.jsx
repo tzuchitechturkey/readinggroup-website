@@ -52,84 +52,84 @@ function Footer() {
 
   return (
     <div
-      className="bg-[#5E82AB] w-full pt-[24px] sm:pt-[32px] md:pt-[40px] lg:pt-[48px] pb-[20px] sm:pb-[24px] md:pb-[28px] lg:pb-[32px]"
+      className="bg-[#5E82AB] w-full pt-[40px] pb-[32px] font-noto"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-[120px]">
         {/* Main Footer Content */}
-        <div className="flex flex-col md:flex-row items-start justify-between gap-8 sm:gap-10 md:gap-12 lg:gap-0 mb-[20px] sm:mb-[24px] md:mb-[28px] lg:mb-[32px]">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-12 mb-[32px]">
           {/* Left Column - Community & Events */}
-          <div className="flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] items-start leading-[1.5] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] w-full sm:w-auto md:w-[236px]">
-            <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal text-black">
+          <div className="flex flex-col gap-[16px] items-start w-full sm:w-auto md:w-[236px]">
+            <p className="text-[14px] font-normal text-black tracking-wide">
               COMMUNITY & EVENTS
             </p>
-            {communityEventsLinks.map((link, index) => (
-              <a
-                key={index}
-                href={link.href}
-                className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold text-white hover:text-[#8FABCA] transition-colors duration-300"
-              >
-                {link.name}
-              </a>
-            ))}
+            <div className="flex flex-col gap-[12px]">
+              {communityEventsLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.href}
+                  className="text-[16px] font-bold text-white hover:text-white/80 transition-colors"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Second Column - About Us */}
-          <div className="flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] items-start leading-[1.5] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] w-full sm:w-auto md:w-[168px]">
-            <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal text-black">
+          <div className="flex flex-col gap-[16px] items-start w-full sm:w-auto md:w-[168px]">
+            <p className="text-[14px] font-normal text-black tracking-wide">
               ABOUT US
             </p>
-            {aboutUsLinks.map((link, index) => (
-              <a
-                key={index}
-                href={link.href}
-                className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold text-white hover:text-[#8FABCA] transition-colors duration-300"
-              >
-                {link.name}
-              </a>
-            ))}
+            <div className="flex flex-col gap-[12px]">
+              {aboutUsLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.href}
+                  className="text-[16px] font-bold text-white hover:text-white/80 transition-colors"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Third Column - Brands Logos and Social Media */}
-          <div className="flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] items-start md:items-center w-full md:w-auto">
+          <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* Jing Si Logo Section */}
-            <div className="flex gap-[12px] sm:gap-[16px] md:gap-[20px] lg:gap-[20px] items-center justify-start md:justify-between w-full md:w-[225px]">
-              <div className="flex flex-col gap-[2px] sm:gap-[3px] md:gap-[4px] lg:gap-[4px] items-start">
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px] text-black">
+            <div className="flex gap-[20px] items-center justify-between w-full md:w-[250px]">
+              <div className="flex flex-col items-start">
+                <p className="text-[14px] font-normal text-black tracking-wide">
                   JING SI
                 </p>
                 <a
                   href="https://www.jingsi.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px] text-white hover:text-[#8FABCA] transition-colors"
+                  className="text-[16px] font-bold text-white hover:text-white/80 transition-colors"
                 >
                   靜思淨斯
                 </a>
               </div>
-              <div className="flex items-center justify-center px-[2px] sm:px-[3px] md:px-[4px] lg:px-[4px] py-[0] rounded-[5px]">
-                <img
-                  alt="Jing Si Logo"
-                  className="w-[80px] sm:w-[100px] md:w-[120px] lg:w-[128px] h-auto"
-                  src={logoImages.jingSi}
-                />
-              </div>
+              <img
+                alt="Jing Si Logo"
+                className="w-[110px] h-auto"
+                src={logoImages.jingSi}
+              />
             </div>
 
             {/* DA AI TV Logo Section */}
-            <div className="flex gap-[12px] sm:gap-[16px] md:gap-[20px] lg:gap-[20px] items-center justify-start w-full">
-              <div className="flex flex-col gap-[2px] sm:gap-[3px] md:gap-[4px] lg:gap-[4px] items-start text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px]">
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-black">
+            <div className="flex gap-[20px] items-center justify-between w-full md:w-[250px]">
+              <div className="flex flex-col items-start">
+                <p className="text-[14px] font-normal text-black tracking-wide">
                   DA AI TV
                 </p>
-                <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-white">
-                  大愛電視
-                </p>
+                <p className="text-[16px] font-bold text-white">大愛電視</p>
               </div>
-              <div className="flex items-center justify-center p-[4px] sm:p-[6px] md:p-[8px] lg:p-[8px] rounded-[5px] bg-white">
+              <div className="bg-white p-1 rounded-sm">
                 <img
                   alt="Da Ai TV Logo"
-                  className="w-[80px] sm:w-[100px] md:w-[120px] lg:w-[128px] h-auto"
+                  className="w-[110px] h-auto"
                   src={logoImages.daAiTv}
                 />
               </div>
@@ -137,18 +137,18 @@ function Footer() {
           </div>
 
           {/* Right Column - Social Media */}
-          <div className="flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] items-start justify-center w-full md:w-auto">
+          <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* YouTube Section */}
-            <div className="flex gap-[12px] sm:gap-[16px] md:gap-[18px] lg:gap-[20px] items-center w-full">
-              <div className="border border-solid border-white rounded-full size-[45px] sm:size-[50px] md:size-[54px] lg:size-[57px] overflow-hidden flex-shrink-0">
+            <div className="flex gap-[16px] items-center">
+              <div className="border-[1.5px] border-solid border-white rounded-full w-[54px] h-[54px] overflow-hidden flex-shrink-0">
                 <img
                   alt="YouTube"
                   className="w-full h-full object-cover"
                   src={logoImages.youtube}
                 />
               </div>
-              <div className="flex flex-col font-['Noto_Sans_TC:Bold',sans-serif] font-bold justify-end leading-[1.5] text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px] text-white">
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal text-black mb-0.5 sm:mb-1 lg:mb-1">
+              <div className="flex flex-col">
+                <p className="text-[14px] font-normal text-black tracking-wide">
                   YOUTUBE
                 </p>
                 <a
@@ -159,7 +159,7 @@ function Footer() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#8FABCA] transition-colors duration-300 underline break-words"
+                  className="text-[16px] font-bold text-white underline underline-offset-4 hover:text-white/80 transition-colors"
                 >
                   @慈濟高雄線上讀書會
                 </a>
@@ -167,16 +167,16 @@ function Footer() {
             </div>
 
             {/* Facebook Section */}
-            <div className="flex gap-[12px] sm:gap-[16px] md:gap-[18px] lg:gap-[20px] items-center w-full">
-              <div className="border border-solid border-white rounded-full size-[45px] sm:size-[50px] md:size-[54px] lg:size-[57px] overflow-hidden flex-shrink-0">
+            <div className="flex gap-[16px] items-center">
+              <div className="border-[1.5px] border-solid border-white rounded-full w-[54px] h-[54px] overflow-hidden flex-shrink-0">
                 <img
                   alt="Facebook"
                   className="w-full h-full object-cover"
                   src={logoImages.facebook}
                 />
               </div>
-              <div className="flex flex-col font-['Noto_Sans_TC:Bold',sans-serif] font-bold justify-end leading-[1.5] text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px] text-white">
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal text-black mb-0.5 sm:mb-1 lg:mb-1">
+              <div className="flex flex-col">
+                <p className="text-[14px] font-normal text-black tracking-wide">
                   FACEBOOK
                 </p>
                 <a
@@ -187,7 +187,7 @@ function Footer() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#8FABCA] transition-colors duration-300 underline break-words"
+                  className="text-[16px] font-bold text-white underline underline-offset-4 hover:text-white/80 transition-colors"
                 >
                   @閱上雲端 - 慈濟高雄線上讀書會
                 </a>
@@ -197,23 +197,27 @@ function Footer() {
         </div>
 
         {/* Main Logo */}
-        <div className="flex justify-center mb-[16px] sm:mb-[20px] md:mb-[24px] lg:mb-[24px]">
+        <div className="flex justify-center mb-[24px]">
           <img
             alt="Main Logo"
-            className="w-[280px] sm:w-[380px] md:w-[480px] lg:w-[575px] h-auto"
+            className="w-full max-w-[650px] h-auto"
             src={logoImages.mainLogo}
           />
         </div>
 
         {/* Copyright and Links */}
-        <div className="flex flex-col items-center">
-          <div className="text-center">
-            <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[11px] sm:text-[12px] md:text-[14px] lg:text-[16px] text-white whitespace-pre-wrap break-words">
-              ©2026 Buddhist Tzu Chi Foundation is a 501(c)(3) nonprofit
-              organization. <span className="text-white">Privacy Policy</span> |{" "}
-              <span className="text-white">Terms & Conditions</span>
-            </p>
-          </div>
+        <div className="text-center">
+          <p className="text-[15px] font-bold text-white leading-relaxed">
+            ©2026 Buddhist Tzu Chi Foundation is a 501(c)(3) nonprofit
+            organization.{" "}
+            <span className="cursor-pointer hover:underline">
+              Privacy Policy
+            </span>{" "}
+            |{" "}
+            <span className="cursor-pointer hover:underline">
+              Terms & Conditions
+            </span>
+          </p>
         </div>
       </div>
     </div>

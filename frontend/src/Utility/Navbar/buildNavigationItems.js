@@ -7,6 +7,11 @@ const buildNavigationItems = (t, siteInfo) => {
       hasDropdown: false,
     },
     {
+      name: t("Learn"),
+      href: "/learn",
+      hasDropdown: false,
+    },
+    {
       name: t("Contents"),
       href: "/contents",
       hasDropdown: true,
