@@ -1,9 +1,9 @@
 import React from "react";
 
 import RevisitCard from "../shared/RevisitCard";
-import BigRevisitCard from "../../../assets/bigrevisitCard2.jpg";
-import RevisitCard1 from "../../../assets/revisitCard1.png";
-import RevisitCard2 from "../../../assets/revisitCard.jpg";
+import BigRevisitCard from "../../../../assets/bigrevisitCard2.jpg";
+import RevisitCard1 from "../../../../assets/revisitCard1.png";
+import RevisitCard2 from "../../../../assets/revisitCard.jpg";
 // Mock data for revisit cards
 const mockCardsData = [
   {

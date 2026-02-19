@@ -6,20 +6,20 @@ const buildNavigationItems = (t, siteInfo) => {
       href: "/",
       hasDropdown: false,
     },
+    // {
+    //   name: t("Contents"),
+    //   href: "/contents",
+    //   hasDropdown: true,
+    //   categoryType: "content",
+    //   // subItems: (siteInfo?.content_categories || []).map((category) => ({
+    //   //   name: category.name,
+    //   //   href: `/contents/category/${category.id}`,
+    //   //   categoryId: category.id,
+    //   //   content_count: category.content_count || 0,
+    //   // })),
+    // },
     {
-      name: t("Contents"),
-      href: "/contents",
-      hasDropdown: true,
-      categoryType: "content",
-      // subItems: (siteInfo?.content_categories || []).map((category) => ({
-      //   name: category.name,
-      //   href: `/contents/category/${category.id}`,
-      //   categoryId: category.id,
-      //   content_count: category.content_count || 0,
-      // })),
-    },
-    {
-      name: t("Videos"),
+      name: t("Watch"),
       href: "/videos",
       hasDropdown: true,
       categoryType: "video",

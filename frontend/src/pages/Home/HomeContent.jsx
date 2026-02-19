@@ -10,14 +10,11 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics } from "@/api/dashboard";
-import DynamicHomeCard from "@/components/ForPages/Home/DynamicHomeCard/DynamicHomeCard";
-import NewClips from "@/components/homepage/NewClips";
-import UpcomingLivestream from "@/components/homepage/UpcomingLivestream";
-import GoodEffectsPoster from "@/components/homepage/GoodEffectsPoster";
-import RevisitCards from "@/components/homepage/RevisitCards";
-import PhotoCollections from "@/components/homepage/PhotoCollections";
-
-import VideoSection from "./VideoSection";
+import PhotoCollections from "@/components/ForPages/home/PhotoCollections/PhotoCollections";
+import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
+import UpcomingLivestream from "@/components/ForPages/home/UpcomingLivestream/UpcomingLivestream";
+import GoodEffectsPoster from "@/components/ForPages/home/GoodEffectsPoster/GoodEffectsPoster";
+import RevisitCards from "@/components/ForPages/home/RevisitCards/RevisitCards";
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();

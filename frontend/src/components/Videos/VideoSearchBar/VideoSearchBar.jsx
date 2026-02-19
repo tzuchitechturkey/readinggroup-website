@@ -1,0 +1,45 @@
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Search } from "lucide-react";
+
+const VideoSearchBar = ({ searchTerm, onSearch }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="relative flex-1 max-w-[340px]">
+      <div className="relative flex items-center gap-2 border-b border-black pb-1">
+        <Search />
+        <input
+          type="text"
+          placeholder={t("Search video")}
+          value={searchTerm}
+          onChange={(e) => onSearch(e.target.value)}
+          className="flex-1 bg-transparent border-none outline-none text-base text-gray-800 placeholder-gray-500"
+        />
+        {/* Clear Search Button */}
+        {searchTerm && (
+          <button
+            onClick={() => onSearch("")}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default VideoSearchBar;

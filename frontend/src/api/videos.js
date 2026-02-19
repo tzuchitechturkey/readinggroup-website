@@ -5,7 +5,7 @@ export async function GetVideos(
   offset,
   status = "published",
   search = "",
-  filters = {}
+  filters = {},
 ) {
   const params = {
     limit,
@@ -14,7 +14,7 @@ export async function GetVideos(
     search,
     ...filters,
   };
-
+  console.log("GetVideos params:", params);
   const queryString = Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
@@ -68,7 +68,7 @@ export async function DeleteVideoById(id) {
 // /video-categories/
 export async function GetVideoCategories(limit = 10, offset = 0, search = "") {
   return await axios.get(
-    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`
+    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 
@@ -96,10 +96,10 @@ export async function DeleteVideoCategory(id) {
 export async function GetVideosByCategoryId(
   categoryId,
   limit = 10,
-  offset = 0
+  offset = 0,
 ) {
   return await axios.get(
-    `/video-categories/${categoryId}/videos/?limit=${limit}&offset=${offset}`
+    `/video-categories/${categoryId}/videos/?limit=${limit}&offset=${offset}`,
   );
 }
 
@@ -135,7 +135,7 @@ export async function UnlikeVideo(data) {
 // Comments management for videos
 export async function GetVideoComments(videoId, limit = 10, offset = 0, type) {
   return await axios.get(
-    `/comments/?limit=${limit}&offset=${offset}&object_id=${videoId}&content_type=${type}`
+    `/comments/?limit=${limit}&offset=${offset}&object_id=${videoId}&content_type=${type}`,
   );
 }
 
@@ -209,65 +209,6 @@ export async function AddToMyList(videoId) {
 
 export async function RemoveFromMyList(videoId) {
   return await axios.delete(`/videos/${videoId}/my-list/`);
-}
-
-// Series
-export async function GetSeries(search = "") {
-  return await axios.get(`/season-titles/?search=${search}`);
-}
-
-export async function GetSeasonsBySeriesId(seriesId) {
-  return await axios.get(`/season-titles/${seriesId}/season-ids/`);
-}
-
-export async function CreateSeries(data) {
-  return await axios.post(`/season-titles/`, data);
-}
-
-export async function GetSeriesById(id) {
-  return await axios.get(`/season-titles/${id}/`);
-}
-
-export async function EditSeriesById(id, data) {
-  return await axios.put(`/season-titles/${id}/`, data);
-}
-
-export async function PatchSeriesById(id, data) {
-  return await axios.patch(`/season-titles/${id}/`, data);
-}
-
-export async function DeleteSeriesById(id) {
-  return await axios.delete(`/season-titles/${id}/`);
-}
-
-// Season
-export async function GetSeasons() {
-  return await axios.get(`/season-ids/`);
-}
-export async function CreateSeason(data) {
-  return await axios.post(`/season-ids/`, data);
-}
-
-export async function GetSeasonById(id) {
-  return await axios.get(`/season-ids/${id}/`);
-}
-
-export async function EditSeasonById(id, data) {
-  return await axios.put(`/season-ids/${id}/`, data);
-}
-
-export async function PatchSeasonById(id, data) {
-  return await axios.patch(`/season-ids/${id}/`, data);
-}
-
-export async function DeleteSeasonById(id) {
-  return await axios.delete(`/season-ids/${id}/`);
-}
-
-export async function GetVideosBySeasonId(limit, offset, seasonId) {
-  return await axios.get(
-    `/season-ids/${seasonId}/videos/?limit=${limit}&offset=${offset}`
-  );
 }
 
 // Random Published Videos

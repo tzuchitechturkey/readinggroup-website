@@ -2,7 +2,7 @@ import React from "react";
 
 import SectionHeader from "../shared/SectionHeader";
 import PosterCard from "../shared/PosterCard";
-import GoodEfect from "../../../assets/goodEfect.png";
+import GoodEfect from "../../../../assets/goodEfect.png";
 // Mock data for good effects poster
 const mockPosterData = {
   id: 1,

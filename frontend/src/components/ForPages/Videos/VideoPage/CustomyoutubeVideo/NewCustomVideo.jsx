@@ -16,7 +16,7 @@ import {
 import { PatchEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-function CustomyoutubeVideo({ videoData }) {
+function NewCustomVideo({ videoData }) {
   const { t, i18n } = useTranslation();
   const [videoItem, setVideoItem] = useState(videoData);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,9 +51,7 @@ function CustomyoutubeVideo({ videoData }) {
   }, []);
 
   const isYouTubeUrl = (url) =>
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
-      url || "",
-    );
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(url || "");
 
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return "";
@@ -105,12 +103,8 @@ function CustomyoutubeVideo({ videoData }) {
   };
 
   const formatTime = (sec = 0) => {
-    const s = Math.floor(sec % 60)
-      .toString()
-      .padStart(2, "0");
-    const m = Math.floor((sec / 60) % 60)
-      .toString()
-      .padStart(2, "0");
+    const s = Math.floor(sec % 60).toString().padStart(2, "0");
+    const m = Math.floor((sec / 60) % 60).toString().padStart(2, "0");
     const h = Math.floor(sec / 3600);
     return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
   };
@@ -183,13 +177,10 @@ function CustomyoutubeVideo({ videoData }) {
   };
 
   return (
-    <div
-      className=" max-w-[1200px] mx-auto  bg-white min-h-screen"
-      dir={i18n.language === "ar" ? "rtl" : "ltr"}
-    >
+    <div className="bg-white min-h-screen" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
       {/* Back Button */}
-      <div className="pt-8">
-        <button
+      <div className="max-w-[1200px] mx-auto px-[120px] pt-8">
+        <button 
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-black hover:text-gray-600 text-sm"
         >
@@ -199,7 +190,7 @@ function CustomyoutubeVideo({ videoData }) {
       </div>
 
       {/* Video Player Section */}
-      <div className="mt-6">
+      <div className="max-w-[1199px] mx-auto px-[120px] mt-6">
         <div className="relative bg-black rounded-xl overflow-hidden h-[675px]">
           {videoData?.video_url ? (
             youTube ? (
@@ -255,9 +246,7 @@ function CustomyoutubeVideo({ videoData }) {
                     <div
                       className="bg-red-600 h-1 rounded-full transition-all duration-100"
                       style={{
-                        width: duration
-                          ? `${(currentTime / duration) * 100}%`
-                          : "0%",
+                        width: duration ? `${(currentTime / duration) * 100}%` : "0%",
                       }}
                     />
                   </div>
@@ -284,7 +273,7 @@ function CustomyoutubeVideo({ videoData }) {
       </div>
 
       {/* Title and Content Section */}
-      <div className="mt-4">
+      <div className="max-w-[1200px] mx-auto px-[120px] mt-4">
         {/* Video Title */}
         <h1 className="text-[32px] font-bold text-black leading-[1.5] mb-4">
           {videoData?.title}
@@ -296,19 +285,21 @@ function CustomyoutubeVideo({ videoData }) {
           <div className="flex-1 bg-[#e4e4e4] rounded-[10px] p-4">
             <div className="mb-4">
               <p className="text-base font-bold text-black mb-0">
-                {videoData?.created_at
-                  ? new Date(videoData.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "November 26, 2025"}
+                {videoData?.created_at ? 
+                  new Date(videoData.created_at).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  }) : 
+                  "November 26, 2025"
+                }
               </p>
             </div>
             <div>
               <p className="text-[20px] font-normal text-black leading-[1.5]">
-                {videoData?.description ||
-                  "「學海遼闊 有緣同航」象徵慈濟教育中知識與人文並重的精神。慈濟教育志業始於1989年花蓮慈濟護專。隨後發展為慈濟科技大學與慈濟大學，兩校於2024年合校，整合資源、提升教育品質與國際競爭力。慈濟教育的理想是「少年的心如蓮花綻放。「學海遼闊」寓意學習無止境，「有緣同航」則象徵師生與同仁們志同道合，共同在教育的大海中前行。"}
+                {videoData?.description || 
+                  "「學海遼闊 有緣同航」象徵慈濟教育中知識與人文並重的精神。慈濟教育志業始於1989年花蓮慈濟護專。隨後發展為慈濟科技大學與慈濟大學，兩校於2024年合校，整合資源、提升教育品質與國際競爭力。慈濟教育的理想是「少年的心如蓮花綻放。「學海遼闊」寓意學習無止境，「有緣同航」則象徵師生與同仁們志同道合，共同在教育的大海中前行。"
+                }
               </p>
             </div>
           </div>
@@ -358,16 +349,16 @@ function CustomyoutubeVideo({ videoData }) {
               {/* Supplemental Materials */}
               <div className="flex gap-1 items-start">
                 <div className="font-bold text-black w-[135px]">
-                  <p className="mb-0">Supplemental</p>
+                  <p className="mb-0">Supplemental</p>  
                   <p>Materials</p>
                 </div>
                 <div className="flex-1 flex flex-col gap-4">
                   {videoData?.materials && videoData.materials.length > 0 ? (
                     videoData.materials.map((material, index) => (
-                      <a
+                      <a 
                         key={index}
-                        href={material.url}
-                        target="_blank"
+                        href={material.url} 
+                        target="_blank" 
                         rel="noopener noreferrer"
                         className="font-normal text-black underline hover:text-gray-700"
                       >
@@ -376,17 +367,17 @@ function CustomyoutubeVideo({ videoData }) {
                     ))
                   ) : (
                     <>
-                      <a
-                        href="#"
+                      <a 
+                        href="#" 
                         className="font-normal text-black underline hover:text-gray-700"
                       >
                         20251203 導讀衲履足跡 Guided Reading.ppt
                       </a>
-                      <a
-                        href="#"
+                      <a 
+                        href="#" 
                         className="font-normal text-black underline hover:text-gray-700"
                       >
-                        20251203 導讀衲履足跡 Guided Reading.doc
+                        20251203 導讀衲履足跡 Guided Reading.doc  
                       </a>
                     </>
                   )}
@@ -404,7 +395,11 @@ function CustomyoutubeVideo({ videoData }) {
           <div className="grid grid-cols-4 gap-3">
             {relatedVideos.slice(0, 4).map((video, index) => (
               <div key={video.id || index} className="flex flex-col gap-1">
-                <VideoCard video={video} showDate={true} size="small" />
+                <VideoCard
+                  video={video}
+                  showDate={true}
+                  size="small"
+                />
               </div>
             ))}
           </div>
@@ -423,14 +418,18 @@ function CustomyoutubeVideo({ videoData }) {
         >
           <ThumbsUp size={20} />
         </button>
-
+        
         <button
           onClick={() => setIsShareOpen(true)}
           className="p-3 bg-white text-gray-700 hover:bg-gray-50 rounded-full shadow-lg"
         >
-          <img src="/icons/share_icon.png" alt="share" className="w-5 h-5" />
+          <img
+            src="/icons/share_icon.png"
+            alt="share"
+            className="w-5 h-5"
+          />
         </button>
-
+        
         <button
           onClick={handleAddToMyList}
           className="p-3 bg-white text-gray-700 hover:bg-gray-50 rounded-full shadow-lg"
@@ -456,4 +455,4 @@ function CustomyoutubeVideo({ videoData }) {
   );
 }
 
-export default CustomyoutubeVideo;
+export default NewCustomVideo;

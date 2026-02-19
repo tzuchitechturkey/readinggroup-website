@@ -2,7 +2,7 @@ import React from "react";
 
 import SectionHeader from "../shared/SectionHeader";
 import PhotoCard from "../shared/PhotoCard";
-import Image from "../../../assets/photocard.png";
+import Image from "../../../../assets/photocard.png";
 // Mock data for photo collections
 const mockPhotosData = [
   {

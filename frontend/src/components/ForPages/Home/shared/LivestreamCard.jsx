@@ -10,7 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import Image from "../../../assets/livestreen.png";
+import Image from "../../../../assets/livestreen.png";
 
 const LivestreamCard = ({ livestream, t }) => {
   const [current, setCurrent] = useState(0);

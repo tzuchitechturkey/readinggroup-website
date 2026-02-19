@@ -1,8 +1,9 @@
 import React from "react";
 
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
+
 import SectionHeader from "../shared/SectionHeader";
-import VideoClipCard from "../shared/VideoClipCard";
-import videoCard from "../../../assets/videoCard.png";
+import videoCard from "../../../../assets/videoCard.png";
 // Mock data for new clips
 const mockClipsData = {
   mainVideo: {
@@ -53,12 +54,12 @@ const NewClips = () => {
       {/* Videos Grid */}
       <div className="flex flex-col md:flex-row gap-[16px] sm:gap-[20px] md:gap-[24px] items-start justify-center w-full md:w-[1200px]">
         {/* Main Large Video */}
-        <VideoClipCard video={mockClipsData.mainVideo} size="large" />
+        <VideoCard video={mockClipsData.mainVideo} size="large" />
 
         {/* Side Videos Column */}
         <div className="flex flex-col gap-[12px] sm:gap-[14px] md:gap-[16px] items-start justify-center w-full md:w-auto">
           {mockClipsData.sideVideos.map((video) => (
-            <VideoClipCard key={video.id} video={video} size="small" />
+            <VideoCard key={video.id} video={video} size="small" />
           ))}
         </div>
       </div>

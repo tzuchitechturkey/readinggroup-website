@@ -1,6 +1,6 @@
 import React from "react";
 
-import Image from "../../../assets/4-top5.jpg";
+import Image from "../../../../assets/4-top5.jpg";
 
 const PosterCard = ({ poster }) => {
   return (
