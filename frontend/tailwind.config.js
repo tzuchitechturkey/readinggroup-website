@@ -4,8 +4,11 @@ export default {
   darkMode: ["class", "class"],
   theme: {
     extend: {
+      fontFamily: {
+        noto: ['"Noto Sans TC"', "sans-serif"],
+      },
       screens: {
-        'xs': '475px',
+        xs: "475px",
       },
       colors: {
         primary: {
@@ -75,10 +78,16 @@ export default {
       keyframes: {
         "collapsible-down": {
           from: { height: "0", opacity: "0" },
-          to: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+          to: {
+            height: "var(--radix-collapsible-content-height)",
+            opacity: "1",
+          },
         },
         "collapsible-up": {
-          from: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+          from: {
+            height: "var(--radix-collapsible-content-height)",
+            opacity: "1",
+          },
           to: { height: "0", opacity: "0" },
         },
       },
@@ -90,71 +99,71 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       addUtilities({
         // Line clamp utilities
-        '.line-clamp-1': {
-          display: '-webkit-box',
-          '-webkit-box-orient': 'vertical',
-          '-webkit-line-clamp': '1',
-          'line-clamp': '1',
-          overflow: 'hidden',
+        ".line-clamp-1": {
+          display: "-webkit-box",
+          "-webkit-box-orient": "vertical",
+          "-webkit-line-clamp": "1",
+          "line-clamp": "1",
+          overflow: "hidden",
         },
-        '.line-clamp-2': {
-          display: '-webkit-box',
-          '-webkit-box-orient': 'vertical',
-          '-webkit-line-clamp': '2',
-          'line-clamp': '2',
-          overflow: 'hidden',
+        ".line-clamp-2": {
+          display: "-webkit-box",
+          "-webkit-box-orient": "vertical",
+          "-webkit-line-clamp": "2",
+          "line-clamp": "2",
+          overflow: "hidden",
         },
-        '.line-clamp-3': {
-          display: '-webkit-box',
-          '-webkit-box-orient': 'vertical',
-          '-webkit-line-clamp': '3',
-          'line-clamp': '3',
-          overflow: 'hidden',
+        ".line-clamp-3": {
+          display: "-webkit-box",
+          "-webkit-box-orient": "vertical",
+          "-webkit-line-clamp": "3",
+          "line-clamp": "3",
+          overflow: "hidden",
         },
-        '.line-clamp-none': {
-          display: 'block',
-          '-webkit-box-orient': 'unset',
-          '-webkit-line-clamp': 'unset',
-          'line-clamp': 'unset',
-          overflow: 'visible',
+        ".line-clamp-none": {
+          display: "block",
+          "-webkit-box-orient": "unset",
+          "-webkit-line-clamp": "unset",
+          "line-clamp": "unset",
+          overflow: "visible",
         },
         // Scrollbar utilities
-        '.scrollbar-thin': {
-          'scrollbar-width': 'thin',
-          'scrollbar-color': 'rgba(255, 255, 255, 0.3) transparent',
+        ".scrollbar-thin": {
+          "scrollbar-width": "thin",
+          "scrollbar-color": "rgba(255, 255, 255, 0.3) transparent",
         },
-        '.scrollbar-thin::-webkit-scrollbar': {
-          'width': '4px',
+        ".scrollbar-thin::-webkit-scrollbar": {
+          width: "4px",
         },
-        '.scrollbar-thin::-webkit-scrollbar-track': {
-          'background': 'transparent',
+        ".scrollbar-thin::-webkit-scrollbar-track": {
+          background: "transparent",
         },
-        '.scrollbar-thin::-webkit-scrollbar-thumb': {
-          'background': 'rgba(255, 255, 255, 0.3)',
-          'border-radius': '2px',
+        ".scrollbar-thin::-webkit-scrollbar-thumb": {
+          background: "rgba(255, 255, 255, 0.3)",
+          "border-radius": "2px",
         },
-        '.scrollbar-thin:hover::-webkit-scrollbar-thumb': {
-          'background': 'rgba(255, 255, 255, 0.5)',
+        ".scrollbar-thin:hover::-webkit-scrollbar-thumb": {
+          background: "rgba(255, 255, 255, 0.5)",
         },
         // Performance utilities
-        '.will-change-transform': {
-          'will-change': 'transform',
+        ".will-change-transform": {
+          "will-change": "transform",
         },
         // Print utilities
-        '.print-hidden': {
-          '@media print': {
-            display: 'none !important',
+        ".print-hidden": {
+          "@media print": {
+            display: "none !important",
           },
         },
-        '.print-visible': {
-          '@media print': {
-            display: 'block !important',
+        ".print-visible": {
+          "@media print": {
+            display: "block !important",
           },
-        }
-      })
-    }
+        },
+      });
+    },
   ],
 };
