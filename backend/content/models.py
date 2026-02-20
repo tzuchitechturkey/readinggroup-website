@@ -17,6 +17,7 @@ from .enums import (
     PostType,
     ReportType,
     VideoStatus,
+    VideoType,
     LanguageChoices,
 )
 
@@ -132,7 +133,7 @@ class Video(LikableMixin, TimestampedModel):
     category = models.ForeignKey(
         "VideoCategory", on_delete=models.SET_NULL, null=True, blank=True
     )
-    video_type = models.CharField(max_length=100, blank=True, null=True)
+    video_type = models.CharField(max_length=100, blank=True, null=True, choices=VideoType.choices)
     language = models.CharField(max_length=50)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
