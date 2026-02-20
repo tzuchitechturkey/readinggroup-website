@@ -29,13 +29,13 @@ export const socialPlatforms = [
 ];
 
 export const languages = [
-  "Arabic",
-  "English",
-  "Turkish",
-  "Chinese (Simp)",
-  "Chinese (Trad)",
-  "Spanish",
-  "French",
+  { label: "Arabic", code: "ar" },
+  { label: "English", code: "en" },
+  { label: "Turkish", code: "tr" },
+  { label: "Chinese (Simp)", code: "zh-hans" },
+  { label: "Chinese (Trad)", code: "zh-hant" },
+  { label: "Spanish", code: "es" },
+  { label: "French", code: "fr" },
 ];
 
 export const postStatusOptions = [

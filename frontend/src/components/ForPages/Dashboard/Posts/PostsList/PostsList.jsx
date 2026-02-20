@@ -1,658 +1,164 @@
 import React, { useState, useEffect } from "react";
 
-import {
-  Eye,
-  Edit,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Search,
-  X,
-  ToggleRight,
-  ToggleLeft,
-} from "lucide-react";
-import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
-import { DeletePostById, GetPosts, PatchPostById } from "@/api/posts";
 import Loader from "@/components/Global/Loader/Loader";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
+import { usePostsData } from "@/hooks/usePostsData";
+import { useSorting } from "@/hooks/useSorting";
+import { usePagination } from "@/hooks/usePagination";
 
 import PostDetails from "../PostDetails/PostDetails";
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import PostsSearch from "./components/PostsSearch";
+import PostsFilters from "./components/PostsFilters";
+import PostsTable from "./components/PostsTable";
+import PostsPagination from "./components/PostsPagination";
 
 function PostsList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  // Custom hooks
+  const {
+    isLoading,
+    postData,
+    totalRecords,
+    getPostData,
+    handleWeeklyPostToggle,
+    handleDeletePost,
+  } = usePostsData();
+
+  const { sortData, getSortedData, sortConfig } = useSorting(postData);
+  const { currentPage, handlePageChange, resetPage, getPaginationInfo } =
+    usePagination(10);
+
+  // Local state
   const [selectedPost, setSelectedPost] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const limit = 10;
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [postData, setPostData] = useState([]);
   const [search, setSearch] = useState("");
-  const [update, setUpdate] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
-  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null); // State for weekly moment filter (null = show all, true = weekly, false = not weekly)
+  const [statusFilter, setStatusFilter] = useState("published");
+  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
 
-  // Handle Pagination
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    getPostData(newPage - 1, search, statusFilter, isWeeklyMomentFilter);
+  // Functions
+  const fetchData = (page = 0) => {
+    getPostData(page, search, statusFilter, isWeeklyMomentFilter);
   };
 
-  const getPostData = async (
-    page = 0,
-    searchVal = search,
-    status = statusFilter,
-    isWeekly = isWeeklyMomentFilter
-  ) => {
-    setIsLoading(true);
-    const offset = page * 10;
-    const params = searchVal ? { search: searchVal } : {};
-
-    // إضافة فلتر is_weekly_moment إذا كان محدداً
-    if (isWeekly !== null) {
-      params.is_weekly_moment = isWeekly;
-    }
-
-    try {
-      const res = await GetPosts(limit, offset, status, params);
-      setPostData(res?.data?.results || []);
-      setTotalRecords(res?.data?.count || 0);
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSearch = () => {
+    resetPage();
+    fetchData(0);
   };
 
-  // دالة ترتيب البيانات
-  const sortData = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  };
-
-  // فرز البيانات المعروضة محليا
-  const getSortedData = () => {
-    if (!postData || !sortConfig.key) return postData || [];
-
-    const sorted = [...postData].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-
-      // numeric fields
-      if (sortConfig.key === "id" || sortConfig.key === "views") {
-        return sortConfig.direction === "asc"
-          ? aValue - bValue
-          : bValue - aValue;
-      }
-
-      // date-like fields
-      if (sortConfig.key === "createdAt" || sortConfig.key === "published_at") {
-        const dateA = new Date(aValue);
-        const dateB = new Date(bValue);
-        return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
-      }
-
-      // string fallback
-      const strA = String(aValue).toLowerCase();
-      const strB = String(bValue).toLowerCase();
-      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
-      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    return sorted;
-  };
-
-  // أيقونة الترتيب
-  const getSortIcon = (columnKey) => {
-    if (sortConfig.key !== columnKey) {
-      return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
-    }
-
-    if (sortConfig.direction === "asc") {
-      return <LuArrowUpDown className="h-3 w-3 text-blue-600 rotate-180" />;
-    }
-
-    if (sortConfig.direction === "desc") {
-      return <LuArrowUpDown className="h-3 w-3 text-blue-600" />;
-    }
-
-    return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
-  };
-
-  // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyPostToggle = async (postId, currentStatus, postStatus) => {
-    // Prevent adding draft/archived posts to weekly moments
-    if (
-      !currentStatus &&
-      (postStatus === "draft" || postStatus === "archived")
-    ) {
-      toast.info(
-        t(
-          "Cannot add post to weekly list. Only published posts can be added to the weekly list."
-        )
-      );
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await PatchPostById(postId, { is_weekly_moment: !currentStatus });
-      const message = !currentStatus
-        ? t("Post added to weekly list successfully")
-        : t("Post removed from weekly list successfully");
-      toast.success(message);
-      setUpdate((prev) => !prev);
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // تأكيد حذف المنشور
-  const handleConfirmDelete = async () => {
-    setIsLoading(true);
-    try {
-      await DeletePostById(selectedPost?.id);
-      toast.success(t("Post deleted successfully"));
-      setShowDeleteModal(false);
-      setSelectedPost(null);
-      setUpdate(!update);
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Clear search
   const clearSearch = () => {
     setSearch("");
-    setCurrentPage(1);
+    resetPage();
     getPostData(0, "", statusFilter, isWeeklyMomentFilter);
   };
 
-  // Handle status filter change
   const handleStatusChange = (newStatus) => {
     setStatusFilter(newStatus);
-    setCurrentPage(1);
     setSearch("");
+    resetPage();
     getPostData(0, "", newStatus, isWeeklyMomentFilter);
   };
 
-  // Handle weekly moment filter change
   const handleWeeklyMomentFilterChange = (value) => {
     setIsWeeklyMomentFilter(value);
-    setCurrentPage(1);
     setSearch("");
+    resetPage();
     getPostData(0, "", statusFilter, value);
   };
 
-  // حساب عدد الصفحات
-  const totalPages = Math.ceil(totalRecords / limit);
+  const handlePageChangeWithFetch = (newPage) => {
+    handlePageChange(newPage, fetchData);
+  };
+
+  const handleView = (post) => {
+    setSelectedPost(post);
+    setShowDetailsModal(true);
+  };
+
+  const handleEdit = (post) => {
+    setSelectedPost(post);
+    onSectionChange("createOrEditPost", post);
+  };
+
+  const handleDeleteClick = (post) => {
+    setSelectedPost(post);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const success = await handleDeletePost(selectedPost?.id);
+    if (success) {
+      setShowDeleteModal(false);
+      setSelectedPost(null);
+    }
+  };
+
+  // Effects
   useEffect(() => {
-    getPostData(currentPage - 1, search, statusFilter, isWeeklyMomentFilter);
-  }, [update, statusFilter, isWeeklyMomentFilter]);
+    fetchData(currentPage - 1);
+  }, [statusFilter, isWeeklyMomentFilter]);
+
+  // Computed values
+  const sortedData = getSortedData(postData);
+  const paginationInfo = getPaginationInfo(totalRecords);
   return (
     <div
       className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      {/* Start Breadcrumb */}
-      <CustomBreadcrumb
+
+      {/* Header */}
+      <DashboardSectionHeader
+        title={t("Posts List")}
+        subtitle={`${t("Total")}: ${totalRecords} ${t("posts")}`}
+        onBack={() => onSectionChange("dashboard")}
         backTitle={t("Back to Dashboard")}
-        onBack={() => {
-          onSectionChange("dashboard");
-        }}
-        page={t("Posts List")}
+        onAdd={() => onSectionChange("createOrEditPost", null)}
+        addTitle={t("Add New")}
       />
-      {/* End Breadcrumb */}
-      {/* Start Header */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">
-          {t("Posts List")}
-        </h2>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
-            {t("Total")}: {totalRecords} {t("posts")}
-          </span>
 
-          {/* Start Add Button */}
-          <div>
-            <button
-              onClick={() => {
-                setSelectedPost(null);
-                onSectionChange("createOrEditPost", null);
-              }}
-              className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
-            >
-              {t("Add New")}
-            </button>
-          </div>
-          {/* End Add Button */}
-        </div>
-      </div>
-      {/* End Header */}
-      {/* Start Search */}
-      <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
-        <div className="relative max-w-md flex">
-          <input
-            type="text"
-            placeholder={t("Search posts...")}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
-            className={`flex-1 px-4 py-2 border border-gray-300 ${
-              i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
-            } text-sm pr-8`}
-          />
+      {/* Search */}
+      <PostsSearch
+        search={search}
+        onSearchChange={setSearch}
+        onSearch={handleSearch}
+        onClear={clearSearch}
+      />
 
-          {search && (
-            <button
-              onClick={() => {
-                setSearch("");
-                getPostData(0, "");
-              }}
-              className={` absolute ${
-                i18n?.language === "ar" ? " left-20" : " right-20"
-              } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
-            >
-              ✕
-            </button>
-          )}
+      {/* Filters */}
+      <PostsFilters
+        statusFilter={statusFilter}
+        isWeeklyMomentFilter={isWeeklyMomentFilter}
+        onStatusChange={handleStatusChange}
+        onWeeklyMomentFilterChange={handleWeeklyMomentFilterChange}
+      />
 
-          <button
-            onClick={() =>
-              getPostData(0, search, statusFilter, isWeeklyMomentFilter)
-            }
-            className={`px-4 py-2 bg-[#4680ff] text-white ${
-              i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
-            }  text-sm font-semibold hover:bg-blue-600`}
-          >
-            {t("Search")}
-          </button>
-        </div>
-      </div>
-      {/* End Search */}
-      <div className="flex items-center justify-between">
-        {/* Start Status Tabs Filter */}
-        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
-              {t("Status")}:
-            </span>
-            <div className="flex gap-2 flex-wrap">
-              {["published", "draft", "archived"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => handleStatusChange(status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    statusFilter === status
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {t(status.charAt(0).toUpperCase() + status.slice(1))}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* End Status Tabs Filter */}
+      {/* Table */}
+      <PostsTable
+        posts={sortedData}
+        search={search}
+        sortConfig={sortConfig}
+        sortData={sortData}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDeleteClick}
+        onWeeklyToggle={handleWeeklyPostToggle}
+        onClearSearch={clearSearch}
+      />
 
-        {/* Start Weekly Moment Filter */}
-        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm border-b">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
-              {t("Weekly List")}:
-            </span>
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => handleWeeklyMomentFilterChange(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isWeeklyMomentFilter === null
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {t("All")}
-              </button>
-              <button
-                onClick={() => handleWeeklyMomentFilterChange(true)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isWeeklyMomentFilter === true
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {t("Weekly")}
-              </button>
-              <button
-                onClick={() => handleWeeklyMomentFilterChange(false)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isWeeklyMomentFilter === false
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {t("Not Weekly")}
-              </button>
-            </div>
-          </div>
-        </div>
-        {/* End Weekly Moment Filter */}
-      </div>
+      {/* Pagination */}
+      <PostsPagination
+        paginationInfo={paginationInfo}
+        onPageChange={handlePageChangeWithFetch}
+      />
 
-      {/* Start Table */}
-      <Table>
-        <TableHeader className="bg-[#FAFAFA] h-14">
-          <TableRow className="border-b">
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs px-3">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("id")}
-              >
-                {t("ID")}
-                {getSortIcon("id")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("title")}
-              >
-                {t("Title")}
-                {getSortIcon("title")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                {t("Image")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                {t("Date")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("category")}
-              >
-                {t("Category")}
-                {getSortIcon("category")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("type")}
-              >
-                {t("Type")}
-                {getSortIcon("type")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("writer")}
-              >
-                {t("Writer")}
-                {getSortIcon("writer")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div
-                className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-                onClick={() => sortData("views")}
-              >
-                {t("Views")}
-                {getSortIcon("views")}
-              </div>
-            </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                {t("Weekly List")}
-              </div>
-            </TableHead>
-
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              {t("Actions")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="text-[11px]">
-          {postData.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan="7" className="text-center py-8">
-                <div className="flex flex-col items-center justify-center text-gray-500">
-                  <Search className="w-8 h-8 mb-2 text-gray-300" />
-                  <p className="text-sm">
-                    {search
-                      ? t("No posts found matching your search")
-                      : t("No posts available")}
-                  </p>
-                  {search && (
-                    <button
-                      onClick={clearSearch}
-                      className="mt-2 text-blue-600 text-sm hover:text-blue-800"
-                    >
-                      {t("Clear Search")}
-                    </button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          ) : (
-            getSortedData().map((post) => (
-              <TableRow key={post?.id} className="hover:bg-gray-50/60 border-b">
-                <TableCell className="text-center text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                  {post?.id}
-                </TableCell>
-                <TableCell className="text-center py-4">
-                  <div className="flex flex-col">
-                    <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-1">
-                      {post?.title}
-                    </span>
-                    <span className="text-[#9FA2AA] text-[10px]">
-                      {post?.subtitle}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-center py-4">
-                  <img
-                    src={post?.image || post?.image_url}
-                    alt={post?.title}
-                    className="w-12 h-8 object-cover rounded-md mx-auto"
-                  />
-                </TableCell>
-                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                  <div className="flex flex-col items-center">
-                    <span className="font-medium">
-                      {new Date(post?.created_at).toLocaleDateString("en-GB", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })}
-                    </span>
-                    <span className="text-[#9FA2AA] text-[10px]">
-                      {post?.created_at
-                        ? new Date(post?.created_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : ""}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {post?.category?.name}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                    {t(post?.post_type)}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{post?.writer}</span>
-                    <span className="text-[#9FA2AA] text-[10px]">
-                      {post?.createdAt}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-center text-[#1E1E1E]  text-[11px] py-4">
-                  <span className="font-medium">{post?.views}</span>
-                </TableCell>
-                <TableCell className="text-center py-4">
-                  <button
-                    onClick={() =>
-                      handleWeeklyPostToggle(
-                        post?.id,
-                        post?.is_weekly_moment,
-                        post?.status
-                      )
-                    }
-                    className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                      post?.is_weekly_moment
-                        ? "bg-green-100 text-green-800 hover:bg-green-200"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                    }`}
-                  >
-                    {post?.is_weekly_moment ? (
-                      <ToggleRight className="h-8 w-12" />
-                    ) : (
-                      <ToggleLeft className="h-8 w-12" />
-                    )}
-                  </button>
-                </TableCell>
-
-                <TableCell className="text-center py-4">
-                  <div className="flex justify-center items-center gap-2 text-[#5B6B79]">
-                    <button
-                      title={t("View Details")}
-                      onClick={() => {
-                        setSelectedPost(post);
-                        setShowDetailsModal(true);
-                      }}
-                      className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                      title={t("Edit")}
-                      onClick={() => {
-                        setSelectedPost(post);
-                        onSectionChange("createOrEditPost", post);
-                      }}
-                      className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      title={t("Delete")}
-                      onClick={() => {
-                        setSelectedPost(post);
-                        setShowDeleteModal(true);
-                      }}
-                      className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-
-      {/* Start Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t bg-gray-50">
-          <div className="text-sm text-gray-700">
-            {t("Showing")} {(currentPage - 1) * limit + 1} {t("to")}{" "}
-            {Math.min(currentPage * limit, totalRecords)} {t("of")}{" "}
-            {totalRecords} {t("posts")}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              {t("Previous")}
-            </button>
-
-            <div className="flex items-center justify-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const pageNum = i + 1; // يبدأ من 1 ويزيد
-                const isActive = pageNum === currentPage;
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-2 text-sm font-medium rounded-md disabled:opacity-50 ${
-                      isActive
-                        ? "bg-blue-600 text-white border border-blue-600"
-                        : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t("Next")}
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
-      {/* End Pagination */}
-
-      {/* Start Post Details Modal */}
+      {/* Post Details Modal */}
       <Modal
         isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
@@ -667,7 +173,6 @@ function PostsList({ onSectionChange }) {
           }}
         />
       </Modal>
-      {/* End Post Details Modal */}
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -688,7 +193,7 @@ function PostsList({ onSectionChange }) {
           onConfirm={handleConfirmDelete}
           title={t("Delete Post")}
           message={t(
-            "Are you sure you want to delete this Post? This action cannot be undone."
+            "Are you sure you want to delete this Post? This action cannot be undone.",
           )}
           itemName={selectedPost?.title}
         />

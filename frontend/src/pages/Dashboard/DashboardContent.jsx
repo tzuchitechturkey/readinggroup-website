@@ -14,7 +14,6 @@ import DashboardFooter from "@/components/ForPages/Dashboard/DashboardFooter/Das
 import DashboardSections from "@/components/ForPages/Dashboard/DashboardSections/DashboardSections";
 import VideosList from "@/components/ForPages/Dashboard/Videos/VideosList/VideosList";
 import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/CreateOrEditVideo";
-import SeriesAndSeasonsList from "@/components/ForPages/Dashboard/Videos/SeriesAndSeasons/SeriesAndSeasonsList";
 import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
 import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
@@ -25,7 +24,6 @@ import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/Vide
 import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
 import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
 import EventCategoriesContent from "@/components/ForPages/Dashboard/Events/EventsCategories/EventCategoriesContent";
-import EventSectionsContent from "@/components/ForPages/Dashboard/Events/EventsSections/EventSectionsContent";
 import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
 import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
@@ -100,7 +98,7 @@ export default function Page() {
     if (selectedPost) {
       localStorage.setItem(
         "dashboardSelectedPost",
-        JSON.stringify(selectedPost)
+        JSON.stringify(selectedPost),
       );
     }
   }, [selectedPost]);
@@ -109,7 +107,7 @@ export default function Page() {
     if (selectedVideo) {
       localStorage.setItem(
         "dashboardSelectedVideo",
-        JSON.stringify(selectedVideo)
+        JSON.stringify(selectedVideo),
       );
     }
   }, [selectedVideo]);
@@ -118,7 +116,7 @@ export default function Page() {
     if (selectedEvent) {
       localStorage.setItem(
         "dashboardSelectedEvent",
-        JSON.stringify(selectedEvent)
+        JSON.stringify(selectedEvent),
       );
     }
   }, [selectedEvent]);
@@ -126,7 +124,7 @@ export default function Page() {
     if (selectedWriter) {
       localStorage.setItem(
         "dashboardSelectedWriter",
-        JSON.stringify(selectedWriter)
+        JSON.stringify(selectedWriter),
       );
     }
   }, [selectedWriter]);
@@ -135,7 +133,7 @@ export default function Page() {
     if (selectedBook) {
       localStorage.setItem(
         "dashboardSelectedBook",
-        JSON.stringify(selectedBook)
+        JSON.stringify(selectedBook),
       );
     }
   }, [selectedBook]);
@@ -242,8 +240,7 @@ export default function Page() {
         return (
           <VideosCategoriesContent onSectionChange={handleSectionChange} />
         );
-      case "seriesAndSeasons":
-        return <SeriesAndSeasonsList onSectionChange={handleSectionChange} />;
+
       case "createOrEditVideo":
         return (
           <CreateOrEditVideo
@@ -277,8 +274,6 @@ export default function Page() {
         );
       case "eventsCategories":
         return <EventCategoriesContent onSectionChange={handleSectionChange} />;
-      case "eventsSections":
-        return <EventSectionsContent onSectionChange={handleSectionChange} />;
       // Writers
       case "writers":
         return <WritersList onSectionChange={handleSectionChange} />;

@@ -1,51 +1,49 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "react-toastify";
 
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
-import {
-  GetVideoCategories,
-  AddVideoCategory,
-  EditVideoCategoryById,
-  DeleteVideoCategory,
-  SortVideoCategories,
-} from "@/api/videos";
-import TableButtons from "@/components/Global/TableButtons/TableButtons";
+import { GetVideoCategories, DeleteVideoCategory } from "@/api/videos";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CreateorEditVideoCategory from "./CreateorEditVideoCategory/CreateorEditVideoCategory";
+import VideoCategoriesTable from "./VideoCategoriesTable/VideoCategoriesTable";
 
 function VideosCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [showCreateEditModal, setShowCreateEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const limit = 10;
+  const [originalCategories, setOriginalCategories] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
   const [form, setForm] = useState({
     name: "",
     description: "",
     is_active: false,
     video_count: 0,
   });
-  const [errors, setErrors] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [isSorting, setIsSorting] = useState(false);
-  const [originalCategories, setOriginalCategories] = useState([]);
-  const [hasChanges, setHasChanges] = useState(false);
-  const nameInputRef = React.useRef(null);
-  const limit = 10;
+
+  const [originalForm, setOriginalForm] = useState({
+    name: "",
+    description: "",
+  });
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [originalLanguage, setOriginalLanguage] = useState(null);
+  const [isAutoTranslated, setIsAutoTranslated] = useState(false);
+  const [update, setUpdate] = useState(0);
   const getCategoriesData = async (page, searchValue = searchTerm) => {
     setIsLoading(true);
     const offset = page * 10;
-
     try {
       const res = searchValue
         ? await GetVideoCategories(limit, offset, searchValue)
@@ -56,151 +54,21 @@ function VideosCategoriesContent({ onSectionChange }) {
       setHasChanges(false);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
-      console.error(err);
-      toast.error(t("Failed to load categories"));
+      setErrorFn(err, t);
     } finally {
       setIsLoading(false);
     }
   };
-  // Handle Pagination
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    getCategoriesData(newPage - 1);
-  };
-
   const openAddModal = () => {
-    setEditingCategory(null);
+    setSelectedLanguage(i18n?.language || "en");
+    setOriginalLanguage(i18n?.language || "en");
     setForm({ name: "", description: "", is_active: false, video_count: 0 });
-    setErrors({});
-    setShowModal(true);
-  };
-
-  const openEditModal = (cat) => {
-    setEditingCategory(cat);
-    setForm({
-      name: cat.name || "",
-      description: cat.description || "",
-      is_active: cat.is_active !== undefined ? cat.is_active : false,
-      video_count: cat.video_count !== undefined ? cat.video_count : 0,
-    });
-    setErrors({});
-    setShowModal(true);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-
-    // إزالة الخطأ عند الإدخال
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!form.name || !form.name.trim()) {
-      newErrors.name = t("Name is required");
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleDragStart = (e, item) => {
-    setDraggedItem(item);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDrop = (e, targetItem) => {
-    e.preventDefault();
-
-    if (!draggedItem || draggedItem.id === targetItem.id) {
-      setDraggedItem(null);
-      return;
-    }
-
-    // إنشاء array جديد مع الترتيب الجديد
-    const newCategories = [...categories];
-    const draggedIndex = newCategories.findIndex(
-      (cat) => cat.id === draggedItem.id
-    );
-    const targetIndex = newCategories.findIndex(
-      (cat) => cat.id === targetItem.id
-    );
-
-    // تبديل العناصر
-    [newCategories[draggedIndex], newCategories[targetIndex]] = [
-      newCategories[targetIndex],
-      newCategories[draggedIndex],
-    ];
-
-    setCategories(newCategories);
-    setHasChanges(true);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-  };
-
-  const handleSaveOrder = async () => {
-    setIsSorting(true);
-    try {
-      // إنشاء البيانات المرسلة
-      const sortData = categories.map((cat, index) => ({
-        id: cat.id,
-        order: index,
-      }));
-      // استدعاء API
-      await SortVideoCategories({ categories: sortData });
-      toast.success(t("Categories reordered successfully"));
-      setHasChanges(false);
-      setOriginalCategories(JSON.parse(JSON.stringify(categories)));
-    } catch (err) {
-      console.error(err);
-      toast.error(t("Failed to reorder categories"));
-    } finally {
-      setIsSorting(false);
-    }
-  };
-
-  const handleCancelOrder = () => {
-    setCategories(JSON.parse(JSON.stringify(originalCategories)));
-    setHasChanges(false);
-    toast.info(t("Changes cancelled"));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      if (editingCategory && editingCategory.id) {
-        await EditVideoCategoryById(editingCategory.id, form);
-        toast.success(t("Category updated"));
-      } else {
-        await AddVideoCategory(form);
-        toast.success(t("Category created"));
-      }
-      setShowModal(false);
-      getCategoriesData();
-    } catch (err) {
-      console.error(err);
-      toast.error(t("Operation failed"));
-    }
+    setShowCreateEditModal(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!selectedCategory?.id) return;
+    setIsLoading(true);
     try {
       await DeleteVideoCategory(selectedCategory.id);
       toast.success(t("Category deleted"));
@@ -210,20 +78,14 @@ function VideosCategoriesContent({ onSectionChange }) {
     } catch (err) {
       console.error(err);
       toast.error(t("Delete failed"));
+    } finally {
+      setIsLoading(false);
     }
   };
-  const totalPages = Math.ceil(totalRecords / limit);
-
-  // Focus on name input when modal opens
-  useEffect(() => {
-    if (showModal && nameInputRef.current) {
-      setTimeout(() => nameInputRef.current?.focus(), 100);
-    }
-  }, [showModal]);
 
   useEffect(() => {
     getCategoriesData(0);
-  }, []);
+  }, [update]);
 
   return (
     <div
@@ -242,351 +104,61 @@ function VideosCategoriesContent({ onSectionChange }) {
       {/* End Breadcrumb */}
 
       <div className="flex-1">
-        {/* Header */}
-        <div className="flex items-center justify-between lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-6">
-          <h2 className="text-lg font-medium text-[#1D2630]">
-            {t("Videos Categories")}
-          </h2>
+        {/* Start Header */}
+        <DashboardSectionHeader
+          title={t("Videos Categories")}
+          subtitle={t("categories")}
+          addText={t("Add Category")}
+          totalRecords={totalRecords}
+          onAddClick={openAddModal}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          getData={getCategoriesData}
+          t={t}
+          i18n={i18n}
+        />
+        {/* End Header */}
 
-          <div className="flex items-center justify-end gap-1">
-            <span className="text-sm text-gray-500">
-              {t("Total")}: {totalRecords} {t("categories")}
-            </span>
-            <button
-              onClick={openAddModal}
-              className="flex items-center gap-2 text-xs md:text-sm bg-primary border border-primary hover:bg-white transition-all duration-200 text-white hover:text-primary px-3 py-1.5 rounded"
-            >
-              <Plus className="h-4 w-4" />
-              {t("Add Category")}
-            </button>
-          </div>
-        </div>
-
-        {/* Start Search */}
-        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
-          <div className="relative max-w-md flex">
-            <input
-              type="text"
-              placeholder={t("Search Categories")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`flex-1 px-4 py-2 border border-gray-300 ${
-                i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
-              } text-sm pr-8`}
-            />
-
-            {searchTerm && (
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  getCategoriesData(0, "");
-                }}
-                className={` absolute ${
-                  i18n?.language === "ar" ? " left-20" : " right-20"
-                } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
-              >
-                ✕
-              </button>
-            )}
-
-            <button
-              onClick={() => {
-                if (searchTerm.trim()) {
-                  getCategoriesData(0);
-                }
-              }}
-              className={`px-4 py-2 bg-[#4680ff] text-white ${
-                i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
-              }  text-sm font-semibold hover:bg-blue-600`}
-            >
-              {t("Search")}
-            </button>
-          </div>
-        </div>
-        {/* End Search */}
-
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr
-                  className={`${
-                    i18n?.language === "ar" ? "text-right " : "text-left"
-                  }text-sm text-gray-600`}
-                >
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
-                  >
-                    {t("Name")}
-                  </th>
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
-                  >
-                    {t("Description")}
-                  </th>
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3`}
-                  >
-                    {t("Active")}
-                  </th>
-                  <th
-                    className={`${
-                      i18n?.language === "ar" ? "text-right " : "  text-left"
-                    } py-2 px-3 w-[160px]`}
-                  >
-                    {t("Actions")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories?.map((cat) => (
-                  <tr
-                    key={cat.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, cat)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, cat)}
-                    onDragEnd={handleDragEnd}
-                    className={`border-t transition-all duration-200 ${
-                      draggedItem?.id === cat.id
-                        ? "opacity-50 bg-blue-50"
-                        : "cursor-move hover:bg-gray-50"
-                    } ${isSorting ? "opacity-75" : ""}`}
-                    style={{
-                      cursor: isSorting ? "not-allowed" : "move",
-                    }}
-                  >
-                    <td
-                      className={` ${
-                        i18n?.language === "ar" ? "text-right " : "  text-left"
-                      }  py-3 px-3`}
-                    >
-                      {cat.name}
-                    </td>
-                    <td
-                      className={` ${
-                        i18n?.language === "ar" ? "text-right " : "  text-left"
-                      }  py-3 px-3`}
-                    >
-                      {cat.description || "-"}
-                    </td>
-                    <td
-                      className={` ${
-                        i18n?.language === "ar" ? "text-right " : "  text-left"
-                      }  py-3 px-3`}
-                    >
-                      <button
-                        onClick={async () => {
-                          if (!cat.is_active && cat.video_count === 0) {
-                            toast.info(
-                              t(
-                                "You cannot activate this category because it does not contain any videos. Please add videos first."
-                              )
-                            );
-                            return;
-                          }
-                          try {
-                            await EditVideoCategoryById(cat.id, {
-                              ...cat,
-                              is_active: !cat.is_active,
-                            });
-                            toast.success(
-                              cat.is_active
-                                ? t("Category disabled")
-                                : t("Category enabled")
-                            );
-                            getCategoriesData(currentPage - 1);
-                          } catch (err) {
-                            console.error(err);
-                            toast.error(t("Update failed"));
-                          }
-                        }}
-                        className={`p-1 rounded-lg transition-all duration-200 ${
-                          cat.is_active
-                            ? "bg-green-100 text-green-600 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                        } `}
-                        title={
-                          !cat.is_active && cat.video_count === 0
-                            ? t("Cannot activate category with no videos.")
-                            : cat.is_active
-                            ? t("Click to disable")
-                            : t("Click to enable")
-                        }
-                      >
-                        {cat.is_active ? (
-                          <ToggleRight className="h-8 w-12" />
-                        ) : (
-                          <ToggleLeft className="h-8 w-12" />
-                        )}
-                      </button>
-                    </td>
-                    <td className="py-3 px-3">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openEditModal(cat)}
-                          className="p-1 rounded hover:bg-gray-100"
-                          title={t("Edit")}
-                        >
-                          <Edit className="h-4 w-4 text-green-600" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedCategory(cat);
-                            setShowDeleteModal(true);
-                          }}
-                          className="p-1 rounded hover:bg-gray-100"
-                          title={t("Delete")}
-                        >
-                          <Trash2 className="h-4 w-4 text-rose-600" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <TableButtons
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              t={t}
-            />
-          </div>
-
-          {/* Save/Cancel Order Buttons */}
-          {hasChanges && (
-            <div className="flex gap-3 p-4 bg-yellow-50 border-t border-yellow-200">
-              <div className="flex-1 flex items-center gap-2">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                <span className="text-sm text-yellow-700">
-                  {t("You have unsaved changes in the category order")}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCancelOrder}
-                  disabled={isSorting}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {t("Cancel")}
-                </button>
-                <button
-                  onClick={handleSaveOrder}
-                  disabled={isSorting}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                >
-                  {isSorting ? (
-                    <>
-                      <span className="inline-block animate-spin">⟳</span>
-                      {t("Saving...")}
-                    </>
-                  ) : (
-                    `✓ ${t("Save Changes")}`
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Start Table */}
+        <VideoCategoriesTable
+          t={t}
+          i18n={i18n}
+          categories={categories}
+          setCategories={setCategories}
+          setOriginalForm={setOriginalForm}
+          setIsAutoTranslated={setIsAutoTranslated}
+          setShowCreateEditModal={setShowCreateEditModal}
+          setSelectedLanguage={setSelectedLanguage}
+          setOriginalLanguage={setOriginalLanguage}
+          setForm={setForm}
+          totalRecords={totalRecords}
+          originalCategories={originalCategories}
+          setOriginalCategories={setOriginalCategories}
+          hasChanges={hasChanges}
+          setHasChanges={setHasChanges}
+          getCategoriesData={getCategoriesData}
+          setErrorFn={setErrorFn}
+          setSelectedCategory={setSelectedCategory}
+          setShowDeleteModal={setShowDeleteModal}
+        />
+        {/* End Table */}
 
         {/* Create / Edit Modal */}
-        <Modal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-          title={editingCategory ? t("Edit Category") : t("Add Category")}
-          width="600px"
-        >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                {t("Name")} <span className="text-red-500">*</span>
-              </label>
-              <input
-                ref={nameInputRef}
-                id="name"
-                name="name"
-                value={form.name}
-                onChange={handleInputChange}
-                className={`w-full p-2 border rounded ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                {t("Description")}
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                rows={4}
-              />
-            </div>
-
-            {/* Is Active Toggle */}
-            <div>
-              <label className="block text-sm font-medium mb-3">
-                {t("Status")}
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  if (form.video_count === 0) {
-                    toast.info(
-                      t(
-                        "You cannot activate this category because it does not contain any videos. Please add videos first."
-                      )
-                    );
-                    return;
-                  }
-                  setForm((prev) => ({ ...prev, is_active: !prev.is_active }));
-                }}
-                className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  form.is_active
-                    ? "bg-green-100 text-green-600 hover:bg-green-200"
-                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                }`}
-              >
-                {form.is_active ? (
-                  <ToggleRight className="h-8 w-12" />
-                ) : (
-                  <ToggleLeft className="h-8 w-12" />
-                )}
-                <span className="text-base font-medium">
-                  {form?.is_active ? t("Active") : t("Inactive")}
-                </span>
-              </button>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border rounded"
-              >
-                {t("Cancel")}
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                {editingCategory ? t("Save Changes") : t("Add Category")}
-              </button>
-            </div>
-          </form>
-        </Modal>
+        <CreateorEditVideoCategory
+          showModal={showCreateEditModal}
+          setShowModal={setShowCreateEditModal}
+          t={t}
+          selectedLanguage={selectedLanguage}
+          originalLanguage={originalLanguage}
+          form={form}
+          originalForm={originalForm}
+          isAutoTranslated={isAutoTranslated}
+          setSelectedLanguage={setSelectedLanguage}
+          setIsAutoTranslated={setIsAutoTranslated}
+          setForm={setForm}
+          setIsLoading={setIsLoading}
+          setUpdate={setUpdate}
+        />
 
         {/* Delete Confirmation */}
         <Modal
@@ -601,7 +173,7 @@ function VideosCategoriesContent({ onSectionChange }) {
             onConfirm={handleConfirmDelete}
             title={t("Delete Category")}
             message={t(
-              "Are you sure you want to delete this category? This action cannot be undone."
+              "Are you sure you want to delete this category? This action cannot be undone.",
             )}
             itemName={selectedCategory?.name}
           />

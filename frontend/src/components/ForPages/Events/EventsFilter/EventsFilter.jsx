@@ -170,8 +170,8 @@ function EventsFilter({
             selected={Array.isArray(filters.language) ? filters.language : []}
             onChange={(selected) => updateFilter("language", selected)}
             placeholder={t("Select Language")}
-            renderLabel={(item) => t(item)}
-            renderValue={(item) => t(item)}
+            renderLabel={(item) => t(item.label)}
+            renderValue={(item) => t(item.label)}
             searchable={true}
           />
         </div>

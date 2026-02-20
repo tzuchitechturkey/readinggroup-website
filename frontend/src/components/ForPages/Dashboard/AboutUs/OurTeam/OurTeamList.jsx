@@ -20,7 +20,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
 import CreateOrEditMember from "./CreateOrEditMember";
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 function OurTeamList({ onSectionChange }) {
   const { t, i18n } = useTranslation();

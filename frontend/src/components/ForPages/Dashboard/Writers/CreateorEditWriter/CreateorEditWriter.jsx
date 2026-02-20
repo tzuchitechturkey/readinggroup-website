@@ -10,7 +10,7 @@ import { CreateAuthor, EditAuthorById } from "@/api/authors";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { processImageFile } from "@/Utility/imageConverter";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 function CreateOrEditWriter({
   onSectionChange,

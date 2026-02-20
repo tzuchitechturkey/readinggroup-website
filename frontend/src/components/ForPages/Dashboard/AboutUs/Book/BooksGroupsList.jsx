@@ -25,7 +25,7 @@ import {
   SortBooksGroups,
 } from "@/api/books";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 const BooksGroupsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
