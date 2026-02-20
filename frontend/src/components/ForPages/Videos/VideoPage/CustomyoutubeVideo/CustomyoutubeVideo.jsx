@@ -431,7 +431,7 @@ function CustomyoutubeVideo({ videoData }) {
       </div>
 
       {/* Action Buttons - Like, Share, Save */}
-      <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
+      {/* <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
         <button
           onClick={handleLike}
           className={`p-3 rounded-full shadow-lg transition-colors ${
@@ -456,7 +456,7 @@ function CustomyoutubeVideo({ videoData }) {
         >
           <ListPlus size={20} />
         </button>
-      </div>
+      </div> */}
 
       {/* Share Modal */}
       <ShareModal
