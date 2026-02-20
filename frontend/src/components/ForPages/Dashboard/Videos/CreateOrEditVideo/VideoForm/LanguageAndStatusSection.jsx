@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "lucide-react";
 
+import { languages, postStatusOptions } from "@/constants/constants";
+
 export const LanguageAndStatusSection = ({
   formData,
   onInputChange,
   errors,
-  languages,
-  statuses,
 }) => {
   const { t } = useTranslation();
 
@@ -21,14 +21,14 @@ export const LanguageAndStatusSection = ({
           name="language"
           value={formData?.language}
           onChange={onInputChange}
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none text-black${
             errors?.language ? "border-red-500" : "border-gray-300"
           }`}
         >
           <option value="">{t("Select language")}</option>
           {languages?.map((lang) => (
-            <option key={lang?.code} value={lang?.code}>
-              {lang?.name}
+            <option className="text-black" key={lang?.code} value={lang?.code}>
+              {lang?.name || lang?.label}
             </option>
           ))}
         </select>
@@ -54,9 +54,9 @@ export const LanguageAndStatusSection = ({
           }`}
         >
           <option value="">{t("Select status")}</option>
-          {statuses?.map((status) => (
+          {postStatusOptions?.map((status) => (
             <option key={status?.id} value={status?.id}>
-              {t(status?.name)}
+              {t(status?.name || status?.value)}
             </option>
           ))}
         </select>

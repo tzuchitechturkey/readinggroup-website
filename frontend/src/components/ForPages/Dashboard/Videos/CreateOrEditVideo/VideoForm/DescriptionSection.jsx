@@ -3,35 +3,22 @@ import { AlertCircle } from "lucide-react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
-import { Base64UploadAdapter } from "@/components/ForPages/Dashboard/_common/utils/shared/ckeditorAdapter";
+import { Base64UploadAdapterPlugin } from "@/components/ForPages/Dashboard/_common/utils/shared/ckeditorAdapter";
 
-export const DescriptionSection = ({ formData, onInputChange, error }) => {
-  const { t } = useTranslation();
+export const DescriptionSection = ({
+  formData,
+  onBodyChange,
+  onBodyBlur,
+  error,
+}) => {
+  const { t, i18n } = useTranslation();
 
-  const editorConfig = {
-    toolbar: [
-      "heading",
-      "|",
-      "bold",
-      "italic",
-      "link",
-      "|",
-      "bulletedList",
-      "numberedList",
-      "|",
-      "undo",
-      "redo",
-    ],
-    plugins: [
-      "heading",
-      "bold",
-      "italic",
-      "link",
-      "bulletedList",
-      "numberedList",
-      "undo",
-      "redo",
-    ],
+  const handleEditorBlur = () => {
+    // CKEditor blur doesn't need to call onBodyBlur
+    // as onChange already updates the data
+    if (onBodyBlur && typeof onBodyBlur === "function") {
+      onBodyBlur();
+    }
   };
 
   return (
@@ -42,23 +29,19 @@ export const DescriptionSection = ({ formData, onInputChange, error }) => {
 
       <CKEditor
         editor={ClassicEditor}
-        data={formData?.description}
-        config={editorConfig}
+        data={formData.body}
+        config={{
+          placeholder: t("Enter the full content of the post"),
+          language: i18n.language === "ar" ? "ar" : "en",
+          extraPlugins: [Base64UploadAdapterPlugin],
+          removePlugins: ["MediaEmbedToolbar"],
+        }}
         onChange={(event, editor) => {
           const data = editor.getData();
-          onInputChange({
-            target: { name: "description", value: data },
-          });
+          onBodyChange(data);
         }}
-        onReady={(editor) => {
-          editor.plugins.get("FileRepository").createUploadAdapter = (
-            loader,
-          ) => {
-            return new Base64UploadAdapter(loader);
-          };
-        }}
+        onBlur={handleEditorBlur}
       />
-
       {error && (
         <div className="flex items-center gap-2 text-red-600 text-sm">
           <AlertCircle size={16} />

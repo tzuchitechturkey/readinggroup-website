@@ -25,11 +25,13 @@ const SortByFilter = ({
         </p>
         <p className="text-base font-normal text-black leading-tight">
           {t(
-            filters.sortBy === "newest"
-              ? "Newest"
-              : filters.sortBy === "oldest"
-                ? "Oldest"
-                : "Most Popular",
+            filters.sortBy === "all"
+              ? "All"
+              : filters.sortBy === "newest"
+                ? "Newest"
+                : filters.sortBy === "oldest"
+                  ? "Oldest"
+                  : "Most Popular",
           )}
         </p>
       </div>

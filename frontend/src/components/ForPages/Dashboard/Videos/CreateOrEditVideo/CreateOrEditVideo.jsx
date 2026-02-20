@@ -2,7 +2,6 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { languages, postStatusOptions } from "@/constants/constants";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import { useCreateOrEditVideo } from "@/components/ForPages/Dashboard/_common/hooks/useVideoForm";
 
@@ -176,8 +175,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               formData={formData}
               onInputChange={handleInputChange}
               errors={errors}
-              languages={languages}
-              statuses={postStatusOptions}
             />
           </div>
         </div>
@@ -185,7 +182,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         {/* Description - Full Width */}
         <DescriptionSection
           formData={formData}
-          onInputChange={handleInputChange}
+          onBodyChange={(data) => {
+            handleInputChange({
+              target: { name: "body", value: data },
+            });
+          }}
+          onBodyBlur={() => {
+            // No need to do anything on blur, onChange already handles updates
+          }}
           error={errors?.description}
         />
 
