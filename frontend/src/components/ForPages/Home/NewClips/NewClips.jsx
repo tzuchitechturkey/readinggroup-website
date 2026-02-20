@@ -1,5 +1,7 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 
 import SectionHeader from "../shared/SectionHeader";
@@ -9,7 +11,7 @@ const mockClipsData = {
   mainVideo: {
     id: 1,
     title: "GUIDED READING",
-    category: "GUIDED READING",
+    category: { name: "GUIDED READING" },
     duration: "15:38",
     thumbnail: videoCard,
     description: "Latest guided reading session",
@@ -19,7 +21,7 @@ const mockClipsData = {
     {
       id: 2,
       title: "EDUCATION",
-      category: "EDUCATION",
+      category: { name: "EDUCATION" },
       duration: "12:45",
       thumbnail: videoCard,
       description: "Educational content",
@@ -28,7 +30,7 @@ const mockClipsData = {
     {
       id: 3,
       title: "HEALTH",
-      category: "HEALTH",
+      category: { name: "HEALTH" },
       duration: "10:32",
       thumbnail: videoCard,
       description: "Health and wellness tips",
@@ -38,10 +40,10 @@ const mockClipsData = {
 };
 
 const NewClips = () => {
+  const navigate = useNavigate();
   const handleMoreClipsClick = () => {
     // Navigate to full clips page - implement navigation logic here
   };
-
   return (
     <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-[120px] w-full sm:w-full md:w-full lg:w-[1440px] mx-auto">
       {/* Section Header */}
@@ -54,12 +56,23 @@ const NewClips = () => {
       {/* Videos Grid */}
       <div className="flex flex-col md:flex-row gap-[16px] sm:gap-[20px] md:gap-[24px] items-start justify-center w-full md:w-[1200px]">
         {/* Main Large Video */}
-        <VideoCard video={mockClipsData.mainVideo} size="large" />
+        <VideoCard
+          item={mockClipsData.mainVideo}
+          size="large"
+          navigate={navigate}
+          rounded={true}
+        />
 
         {/* Side Videos Column */}
         <div className="flex flex-col gap-[12px] sm:gap-[14px] md:gap-[16px] items-start justify-center w-full md:w-auto">
           {mockClipsData.sideVideos.map((video) => (
-            <VideoCard key={video.id} video={video} size="small" />
+            <VideoCard
+              key={video.id}
+              item={video}
+              size="small"
+              navigate={navigate}
+              rounded={true}
+            />
           ))}
         </div>
       </div>

@@ -23,6 +23,7 @@ function MobileSidebar({
   loadingContents,
   setLoadingContents,
   setCategoryContents,
+  isHome = false,
 }) {
   const [expandedSubItems, setExpandedSubItems] = React.useState({});
 
@@ -49,14 +50,14 @@ function MobileSidebar({
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full overflow-y-scroll bg-white w-80 max-w-[85vw] shadow-2xl border-l border-gray-100 transform transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full overflow-y-scroll ${isHome ? "bg-[var(--color-primary)]" : "bg-white"} w-80 max-w-[85vw] shadow-2xl ${isHome ? "border-l border-blue-400" : "border-l border-gray-100"} transform transition-all duration-300 ease-in-out ${
           isMenuOpen
             ? "translate-x-0 opacity-100"
             : "translate-x-full opacity-0"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className={`flex items-center justify-between p-4 ${isHome ? "border-b border-blue-400" : "border-b border-gray-200"}`}>
           <Link to="/" onClick={closeMenu} className="flex items-center">
             <img
               src={siteInfo?.logo?.logo || defaultLogo}
@@ -71,7 +72,7 @@ function MobileSidebar({
           </Link>
           <button
             onClick={closeMenu}
-            className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+            className={`p-2 rounded-md transition-colors duration-200 ${isHome ? "text-white/70 hover:text-white hover:bg-white/10" : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"}`}
           >
             <HiX className="h-6 w-6" />
           </button>
@@ -82,7 +83,7 @@ function MobileSidebar({
           {/* Navigation Links */}
           <nav className="flex-1 px-6 py-8 space-y-3">
             <div className="mb-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className={`text-xs font-semibold ${isHome ? "text-white/50" : "text-gray-500"} uppercase tracking-wider mb-4`}>
                 {t("Navigation")}
               </h3>
             </div>
@@ -99,9 +100,13 @@ function MobileSidebar({
                         {({ isActive }) => (
                           <span
                             className={`block transition-all duration-200 ${
-                              isActive
-                                ? "text-primary font-semibold"
-                                : "text-gray-700 group-hover:text-primary"
+                              isHome
+                                ? isActive
+                                  ? "text-white font-semibold"
+                                  : "text-white/70 group-hover:text-white"
+                                : isActive
+                                  ? "text-black font-semibold bg-gray-200 px-2 py-1 rounded"
+                                  : "text-black group-hover:text-gray-600"
                             }`}
                           >
                             {item.name}
@@ -114,9 +119,13 @@ function MobileSidebar({
                           toggleMobileSubmenu(item.name);
                         }}
                         className={`p-2 rounded-lg transition-all duration-200 flex-shrink-0 ml-2 ${
-                          expandedMenus[item.name]
-                            ? "bg-gradient-to-r from-primary to-blue-600 text-white shadow-lg shadow-primary/25"
-                            : "text-gray-700 hover:bg-gray-100 group-hover:text-primary"
+                          isHome
+                            ? expandedMenus[item.name]
+                              ? "bg-white/20 text-white"
+                              : "text-white/70 hover:text-white hover:bg-white/10"
+                            : expandedMenus[item.name]
+                              ? "bg-gray-200 text-black"
+                              : "text-black hover:bg-gray-100"
                         }`}
                       >
                         <svg
@@ -156,9 +165,13 @@ function MobileSidebar({
                                   {({ isActive }) => (
                                     <span
                                       className={`block transition-all duration-200 ${
-                                        isActive
-                                          ? "text-primary font-semibold"
-                                          : "text-gray-700 group-hover:text-primary"
+                                        isHome
+                                          ? isActive
+                                            ? "text-white font-semibold"
+                                            : "text-white/70 group-hover:text-white"
+                                          : isActive
+                                            ? "text-black font-semibold bg-gray-200 px-2 py-1 rounded"
+                                            : "text-black group-hover:text-gray-600"
                                       }`}
                                     >
                                       {subItem.name}

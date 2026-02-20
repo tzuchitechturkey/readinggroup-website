@@ -18,6 +18,7 @@ function BrokenCarousel({
   cardName = null,
   nextArrowClassname = "",
   prevArrowClassname = "",
+  cardProps = {},
 }) {
   const { i18n } = useTranslation();
   const Card = cardName;
@@ -26,22 +27,22 @@ function BrokenCarousel({
   // التحقق من صحة البيانات
   if (cardName && typeof cardName !== "function") {
     console.error(
-      "DynamicSection: cardName must be a valid React component function"
+      "DynamicSection: cardName must be a valid React component function",
     );
   }
   // حساب الـ basis classes حسب عدد العناصر
   const getItemBasisClass = () => {
     const itemCount = data?.length || 0;
 
-    if (itemCount === 1) {
-      return "basis-full sm:basis-full md:basis-full lg:basis-full xl:basis-[100%]";
-    } else if (itemCount === 2) {
-      return "basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/2";
-    } else if (itemCount === 3) {
-      return "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4";
-    }
+    // if (itemCount === 1) {
+    //   return "basis-full sm:basis-full md:basis-full lg:basis-full xl:basis-[100%]";
+    // } else if (itemCount === 2) {
+    //   return "basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/2";
+    // } else if (itemCount === 3) {
+    //   return "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4";
+    // }
     return `basis-full sm:basis-1/2 md:basis-[28.57%] lg:basis-[28.57%] ${
-      showCount === 4 ? "xl:basis-[19.99%]" : "xl:basis-[35.57%]"
+      showCount === 4 ? "xl:basis-[19.99%]" : "xl:basis-[25%]"
     }`;
   };
 
@@ -63,9 +64,9 @@ function BrokenCarousel({
           {data?.map((item) => (
             <CarouselItem
               key={item.id}
-              className={`py-2 ${getItemBasisClass()} overflow-visible  `}
+              className={`py-2  ${getItemBasisClass()} overflow-visible  `}
             >
-              <Card item={item} />
+              <Card item={item} {...cardProps} />
             </CarouselItem>
           ))}
         </CarouselContent>

@@ -13,7 +13,7 @@ import UserIcons from "../UserIcons/UserIcons";
 import DesktopNavigation from "../DesktopNavigation/DesktopNavigation";
 import MobileSidebar from "../MobileSidebar/MobileSidebar";
 
-function Usernavbar() {
+function Usernavbar({ isHome = false }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -164,6 +164,7 @@ function Usernavbar() {
             setCategoryContents={setCategoryContents}
             t={t}
             shouldOpenInNewTab={shouldOpenInNewTab}
+            isHome={isHome}
           />
           {/* Desktop User Icons */}
           <div className="hidden w-52 lg:flex lg:items-center justify-end ">
@@ -208,6 +209,7 @@ function Usernavbar() {
         loadingContents={loadingContents}
         setLoadingContents={setLoadingContents}
         setCategoryContents={setCategoryContents}
+        isHome={isHome}
       />
     </nav>
   );

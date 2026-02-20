@@ -1,14 +1,20 @@
 import React from "react";
 
-const VideoCard = ({ video, size = "default", showDate = false }) => {
+const VideoCard = ({
+  item,
+  size = "default",
+  navigate,
+  showDate = false,
+  rounded = false,
+}) => {
   const getSizeClasses = () => {
     switch (size) {
       case "large":
         return {
           container:
-            "w-full sm:w-[95%] md:w-[90%] lg:w-[792px] h-auto sm:h-[200px] md:h-[300px] lg:h-[446px]",
+            "w-full sm:w-[95%] md:w-[90%]  h-auto sm:h-[200px]   md:h-[300px] lg:h-[450px]",
           image:
-            "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[446px] w-full sm:w-[95%] md:w-[90%] lg:w-[792px]",
+            "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[450px] w-full sm:w-[95%] md:w-[90%] lg:w-full",
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
           categoryText:
             "text-[14px] sm:text-[15px] md:text-[16px] lg:text-[18px]",
@@ -19,9 +25,9 @@ const VideoCard = ({ video, size = "default", showDate = false }) => {
       case "medium":
         return {
           container:
-            "w-full sm:w-[48%] md:w-[45%] lg:w-[354px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
+            "w-full sm:w-[48%] md:w-[45%] lg:w-[554px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
           image:
-            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[354px]",
+            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[554px]",
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
@@ -32,9 +38,9 @@ const VideoCard = ({ video, size = "default", showDate = false }) => {
       case "small":
         return {
           container:
-            "w-full sm:w-[48%] md:w-[45%] lg:w-[300px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
+            "w-full sm:w-[48%] md:w-[45%] lg:w-[290px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
           image:
-            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[300px]",
+            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px]",
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
@@ -45,9 +51,9 @@ const VideoCard = ({ video, size = "default", showDate = false }) => {
       default:
         return {
           container:
-            "w-full sm:w-[48%] md:w-[45%] lg:w-[354px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
+            "w-full sm:w-[48%] md:w-[45%] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
           image:
-            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[354px]",
+            "h-[150px] sm:h-[120px] md:h-[160px]  lg:h-[199px] w-full  sm:w-[48%] md:w-[45%] ",
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
           categoryText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
@@ -61,14 +67,17 @@ const VideoCard = ({ video, size = "default", showDate = false }) => {
   const { image, categoryText, durationText, gap } = getSizeClasses();
 
   return (
-    <div className="flex flex-col gap-[3px] sm:gap-[4px] md:gap-[4px] lg:gap-[4px] items-start w-full">
+    <div
+      onClick={() => navigate(`/videos/${item.id}`)}
+      className={`flex flex-col gap-[3px] sm:gap-[4px] md:gap-[4px] lg:gap-[4px] items-start w-full ${rounded ? "rounded-xl" : ""}`}
+    >
       <div
-        className={`${image} relative shrink-0 rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-2xl overflow-hidden cursor-pointer group`}
+        className={`${image} ${rounded ? "rounded-xl" : ""} relative shrink-0 overflow-hidden cursor-pointer group`}
       >
         <img
-          alt={video.title}
+          alt={item.title}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
-          src={video.thumbnail}
+          src={item.thumbnail}
         />
 
         {/* Play Button Overlay */}
@@ -91,19 +100,19 @@ const VideoCard = ({ video, size = "default", showDate = false }) => {
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${categoryText} text-black uppercase`}
         >
-          {video.category?.name}
+          {item.category?.name}
         </p>
         <div className="h-[12px] sm:h-[14px] md:h-[15px] lg:h-[16px] w-0 border-r border-gray-400" />
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${durationText} text-black`}
         >
-          {video.duration}
+          {item.duration}
         </p>
       </div>
       {showDate && (
         <div className="mx-1 -mt-1">
           <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px]">
-            {video?.date || "2012-23-32"}
+            {item?.date || "2012-23-32"}
           </p>
         </div>
       )}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
@@ -17,7 +18,7 @@ import {
 
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
-
+  const navigate = useNavigate();
   // State management
   const [allVideos, setAllVideos] = useState([]);
   const [filteredVideos, setFilteredVideos] = useState([]);
@@ -184,15 +185,15 @@ function VideosPageContent() {
   // Handle date filter changes
   const handleDateYearChange = (direction) => {
     const currentYear = new Date().getFullYear(); // 2026
-    
+
     setFilters((prev) => {
       const newYear = prev.date.year + direction;
-      
+
       // منع التقدم بعد السنة الحالية
       if (direction > 0 && newYear > currentYear) {
         return prev;
       }
-      
+
       return {
         ...prev,
         date: {
@@ -215,10 +216,10 @@ function VideosPageContent() {
 
   const applyDateFilter = () => {
     closeAllDropdowns();
-    
+
     // Generate date format yyyy-mm if both year and month are selected
     if (filters.date.year && filters.date.month) {
-      const formattedDate = `${filters.date.year}-${String(filters.date.month).padStart(2, '0')}`;
+      const formattedDate = `${filters.date.year}-${String(filters.date.month).padStart(2, "0")}`;
       console.log("Applied date filter:", formattedDate);
       // TODO: Implement actual filtering logic with formattedDate
     }
@@ -324,9 +325,10 @@ function VideosPageContent() {
                 : filteredVideos.map((video, index) => (
                     <VideoCard
                       key={video.id || index}
-                      video={video}
+                      item={video}
                       showDate={true}
                       size="small"
+                      navigate={navigate}
                     />
                   ))}
             </div>
@@ -335,7 +337,7 @@ function VideosPageContent() {
             {!isLoading && filteredVideos.length > 0 && (
               <div className="flex justify-center mt-8">
                 <TableButtons
-                t={t}
+                  t={t}
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
                   onPageChange={handlePageChange}

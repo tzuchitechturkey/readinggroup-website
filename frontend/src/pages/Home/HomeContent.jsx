@@ -10,11 +10,12 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics } from "@/api/dashboard";
-import PhotoCollections from "@/components/ForPages/home/PhotoCollections/PhotoCollections";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
 import UpcomingLivestream from "@/components/ForPages/home/UpcomingLivestream/UpcomingLivestream";
 import GoodEffectsPoster from "@/components/ForPages/home/GoodEffectsPoster/GoodEffectsPoster";
 import RevisitCards from "@/components/ForPages/home/RevisitCards/RevisitCards";
+
+import PhotoCollections from "../../components/ForPages/home/PhotoCollections/PhotoCollections";
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();
@@ -45,60 +46,6 @@ export default function HomeContent() {
     });
     localStorage.removeItem("redirectAfterLogin");
   }, [getSliderData, getTop1Data, t]);
-
-  const filteredSections = useMemo(() => {
-    if (!top1Data) return [];
-
-    return Object.entries(top1Data)
-      .filter(
-        ([key]) =>
-          key !== "top_posts" && key !== "weekly_moment" && key !== "event",
-      )
-      .map(([key, sec]) => ({
-        key,
-        sec,
-        title:
-          key === "video"
-            ? t("This Week's Video")
-            : key === "content"
-              ? t("This Week's Contents")
-              : key === "post_card"
-                ? t("This Week's Card")
-                : key === "post_photo"
-                  ? t("This Week's Photo")
-                  : "",
-        description:
-          key === "video"
-            ? t("Watch this week's featured video")
-            : key === "content"
-              ? t("Master Cheng Yen's Daily Journal")
-              : key === "post_card"
-                ? t("Explore this week's card")
-                : key === "post_photo"
-                  ? t("Check this week's photo post")
-                  : "",
-        href:
-          key === "video"
-            ? "/videos"
-            : key === "content"
-              ? "/contents"
-              : key === "post_card" || key === "post_photo"
-                ? "/cards-photos"
-                : "",
-        cardName:
-          key === "video"
-            ? VideoCard
-            : key === "content"
-              ? GlobalCard
-              : key === "post_card"
-                ? WeeklyMomentsCard
-                : key === "post_photo"
-                  ? WeekPhotosCard
-                  : null,
-        propsToCard:
-          key === "video" ? { className: "h-full w-full", bigCart: true } : {},
-      }));
-  }, [top1Data, t]);
 
   return (
     <div

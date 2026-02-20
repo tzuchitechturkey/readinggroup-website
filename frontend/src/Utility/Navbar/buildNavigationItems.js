@@ -31,10 +31,10 @@ const buildNavigationItems = (t, siteInfo) => {
       // })),
     },
     {
-      name: t("Cards & Photos"),
-      href: "/cards-photos",
-      hasDropdown: true,
-      categoryType: "post",
+      name: t("Learn"),
+      href: "/learn",
+      hasDropdown: false,
+      // categoryType: "post",
       // subItems: (siteInfo?.post_categories || []).map((category) => ({
       //   name: category.name,
       //   categoryId: category.id,

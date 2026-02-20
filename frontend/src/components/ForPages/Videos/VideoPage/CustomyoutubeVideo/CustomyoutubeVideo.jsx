@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ThumbsUp, ListPlus, ChevronLeft } from "lucide-react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -15,9 +16,11 @@ import {
 } from "@/api/videos";
 import { PatchEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 
 function CustomyoutubeVideo({ videoData }) {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [videoItem, setVideoItem] = useState(videoData);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -191,7 +194,7 @@ function CustomyoutubeVideo({ videoData }) {
       <div className="pt-8">
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-black hover:text-gray-600 text-sm"
+          className="flex items-center gap-2 text-black border-[1px] border-black rounded-full p-1 px-3 hover:text-gray-600 text-sm"
         >
           <ChevronLeft size={16} />
           {t("Back")}
@@ -199,7 +202,7 @@ function CustomyoutubeVideo({ videoData }) {
       </div>
 
       {/* Video Player Section */}
-      <div className="mt-6">
+      <div className="mt-4">
         <div className="relative bg-black rounded-xl overflow-hidden h-[675px]">
           {videoData?.video_url ? (
             youTube ? (
@@ -397,17 +400,33 @@ function CustomyoutubeVideo({ videoData }) {
         </div>
 
         {/* Related Videos Section */}
-        <div className="pt-14">
-          <h2 className="text-[24px] font-bold text-black leading-[1.5] mb-[10px]">
+        <div className="pb-12">
+          <BrokenCarousel
+            data={relatedVideos}
+            title={t("Other Guided Reading Videos")}
+            showArrows={true}
+            showCount={false}
+            cardName={VideoCard}
+            cardProps={{ navigate, size: "small", showDate: true }}
+            // nextArrowClassname={nextArrowClassname}
+            // prevArrowClassname={prevArrowClassname}
+          />
+          {/* <h2 className="text-[24px] font-bold text-black leading-[1.5] mb-[10px]">
             {t("Other Guided Reading Videos")}
           </h2>
           <div className="grid grid-cols-4 gap-3">
             {relatedVideos.slice(0, 4).map((video, index) => (
               <div key={video.id || index} className="flex flex-col gap-1">
-                <VideoCard video={video} showDate={true} size="small" />
+                <VideoCard
+                  video={video}
+                  showDate={true}
+                  size="small"
+                  navigate={navigate}
+                />
               </div>
             ))}
           </div>
+        </div> */}
         </div>
       </div>
 

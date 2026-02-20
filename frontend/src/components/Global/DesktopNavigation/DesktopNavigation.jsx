@@ -19,10 +19,11 @@ function DesktopNavigation({
   setCategoryContents,
   t,
   shouldOpenInNewTab,
+  isHome = false,
 }) {
   return (
     <div className="hidden  lg:flex lg:items-center lg:justify-center flex-1">
-      <ul className="flex items-center ">
+      <ul className="flex items-center gap-3 ">
         {navigationItems.map((item, idx) => (
           <li key={idx} className="relative group">
             {item?.hasDropdown ? (
@@ -38,15 +39,19 @@ function DesktopNavigation({
                     }
                   }}
                   className={({ isActive }) =>
-                    `text-white transition-all duration-200 text-sm xl:text-base font-normal px-4 py-2 rounded-sm flex gap-[2px] items-center ${
-                      isActive
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-gray-700"
+                    `transition-all duration-200 text-sm lg:text-lg  px-4 py-2 rounded-sm flex gap-[2px] items-center ${
+                      isHome
+                        ? isActive
+                          ? "border-b-2 border-white text-white"
+                          : "text-white hover:text-gray-200"
+                        : isActive
+                          ? "bg-gray-200 font-bold  text-black "
+                          : "text-black hover:text-gray-600 "
                     }`
                   }
                 >
                   {item?.name}
-                  {item?.subItems?.length && (
+                  {item?.subItems?.length ? (
                     <svg
                       className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
                       fill="none"
@@ -60,6 +65,8 @@ function DesktopNavigation({
                         d="M19 9l-7 7-7-7"
                       />
                     </svg>
+                  ) : (
+                    ""
                   )}
                 </NavLink>
                 {/* Dropdown Menu */}
@@ -293,10 +300,14 @@ function DesktopNavigation({
               <NavLink
                 to={item?.href}
                 className={({ isActive }) =>
-                  `hover:text-primary transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
-                    isActive
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-gray-700 hover:text-primary"
+                  `transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
+                    isHome
+                      ? isActive
+                        ? "border-b-2 border-white text-white"
+                        : "text-white hover:text-gray-200"
+                      : isActive
+                        ? "bg-gray-200 text-black border-b-2 border-black"
+                        : "text-black hover:text-gray-600"
                   }`
                 }
               >
