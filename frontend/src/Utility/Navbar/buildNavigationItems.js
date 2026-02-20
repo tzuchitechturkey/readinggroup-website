@@ -21,7 +21,7 @@ const buildNavigationItems = (t, siteInfo) => {
     {
       name: t("Watch"),
       href: "/videos",
-      hasDropdown: true,
+      hasDropdown: false,
       categoryType: "video",
       // subItems: (siteInfo?.video_categories || []).map((category) => ({
       //   name: category.name,
@@ -34,6 +34,7 @@ const buildNavigationItems = (t, siteInfo) => {
       name: t("Learn"),
       href: "/learn",
       hasDropdown: false,
+      categoryType: "learn",
       // categoryType: "post",
       // subItems: (siteInfo?.post_categories || []).map((category) => ({
       //   name: category.name,
@@ -45,7 +46,7 @@ const buildNavigationItems = (t, siteInfo) => {
     {
       name: t("Events & Community"),
       href: "/events",
-      hasDropdown: true,
+      hasDropdown: false,
       categoryType: "event",
       subItems: (siteInfo?.event_categories || []).map((category) => ({
         name: category.name,

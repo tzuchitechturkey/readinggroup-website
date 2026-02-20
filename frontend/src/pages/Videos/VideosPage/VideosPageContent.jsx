@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import TableButtons from "@/components/Global/TableButtons/TableButtons";
+import Pagination from "@/components/Global/PagePagination/PagePagination";
 import VideoTypeFilter from "@/components/Videos/VideoTypeFilter/VideoTypeFilter";
 import DateFilter from "@/components/Videos/DateFilter/DateFilter";
 import SortByFilter from "@/components/Videos/SortByFilter/SortByFilter";
@@ -267,11 +267,11 @@ function VideosPageContent() {
           </p>
         </div>
 
-        <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
-          <div className="">
+        <div className="flex items-end  justify-between mb-6 gap-4 flex-wrap">
+          <div className="w-full">
             {/* Filters and Search */}
             <div
-              className="flex gap-3 relative justify-between"
+              className="flex w-full  gap-3 relative justify-between"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Filters */}
@@ -336,15 +336,10 @@ function VideosPageContent() {
             {/* Pagination */}
             {!isLoading && filteredVideos.length > 0 && (
               <div className="flex justify-center mt-8">
-                <TableButtons
-                  t={t}
+                <Pagination
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
                   onPageChange={handlePageChange}
-                  onPrevPage={handlePreviousPage}
-                  onNextPage={handleNextPage}
-                  hasNext={Boolean(pagination.next)}
-                  hasPrev={Boolean(pagination.previous)}
                 />
               </div>
             )}
@@ -352,7 +347,10 @@ function VideosPageContent() {
             {/* Show message if no videos found */}
             {!isLoading && filteredVideos.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">{t("No videos found")}</p>
+                <p className="text-[#8E8E8E] text-3xl font-bold">{t("No videos found")}</p>
+                {searchTerm && (
+                  <button className="p-2 ">{t("Reset Search")}</button>
+                )}
               </div>
             )}
           </div>

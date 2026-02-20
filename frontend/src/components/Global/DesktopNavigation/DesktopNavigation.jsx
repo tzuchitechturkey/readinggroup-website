@@ -300,13 +300,13 @@ function DesktopNavigation({
               <NavLink
                 to={item?.href}
                 className={({ isActive }) =>
-                  `transition-all duration-200 text-sm xl:text-base font-medium rounded-sm px-4 py-2 block ${
+                  `transition-all duration-200 text-sm lg:text-lg rounded-sm px-4 py-2 block ${
                     isHome
                       ? isActive
                         ? "border-b-2 border-white text-white"
                         : "text-white hover:text-gray-200"
                       : isActive
-                        ? "bg-gray-200 text-black border-b-2 border-black"
+                        ? "bg-gray-200 text-black font-bold  "
                         : "text-black hover:text-gray-600"
                   }`
                 }
