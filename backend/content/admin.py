@@ -12,11 +12,10 @@ from .models import (
     EventCategory,
     PositionTeamMember,
     EventSection,
-    Comments,
-    Reply,
+    Learn,
+    LearnCategory,
     MyListEntry,
     SeasonTitle,
-    Like,
     SeasonId,
     SocialMedia,
     NavbarLogo,
@@ -136,18 +135,22 @@ class EventSectionAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
-    list_display = ("user", "content_type", "object_id", "created_at")
-    # 'Comments' model uses the field name 'text'
-    search_fields = ("user__username", "text")
+@admin.register(LearnCategory)
+class LearnCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name","description", "created_at")
+    search_fields = ["name",]
+    list_filter = ["is_active"]
 
+@admin.register(Learn)
+class LearnAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "category_name", "language", "writer", "created_at")
+    list_filter = ("category__name", "language", "writer")
+    search_fields = ("title", "category__name", "writer")
 
-@admin.register(Reply)
-class ReplyAdmin(admin.ModelAdmin):
-    list_display = ("user", "comment", "created_at")
-    # 'Reply' model uses the field name 'text'
-    search_fields = ("user__username", "text")
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+
+    category_name.short_description = "category"
 
 
 @admin.register(MyListEntry)
@@ -172,12 +175,6 @@ class SeasonIdAdmin(admin.ModelAdmin):
         return obj.season_name.name if obj.season_name else None
 
     season_name.short_description = "season_name"
-
-
-@admin.register(Like)
-class LikeAdmin(admin.ModelAdmin):
-    list_display = ("user",)
-    search_fields = ("user__username", "content_type__model")
 
 
 @admin.register(SocialMedia)

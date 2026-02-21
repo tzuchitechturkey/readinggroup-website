@@ -26,6 +26,8 @@ from .swagger_parameters import (
 from .models import (
     Event,
     HistoryEntry,
+    Learn,
+    LearnCategory,
     Post,
     TeamMember,
     Video,
@@ -38,16 +40,12 @@ from .models import (
     ContentCategory,
     PositionTeamMember,
     EventSection,
-    Comments,
-    Reply,
-    Like,
     MyListEntry,
     SeasonTitle,
     SeasonId,
     SectionOrder,
     SocialMedia,
     NavbarLogo,
-    PostRating,
     Authors,
     Book,
     BookCategory,
@@ -56,18 +54,17 @@ from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
     PostSerializer,
+    LearnSerializer,
     ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
     PostCategorySerializer,
+    LearnCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
     ContentCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
-    CommentsSerializer,
-    ReplySerializer,
-    LikeSerializer,
     SeasonTitleSerializer,
     SeasonIdSerializer,
     SocialMediaSerializer,
@@ -79,15 +76,11 @@ from .serializers import (
 )
 from .youtube import YouTubeAPIError, fetch_video_info
 from .views_helpers import (
-    BaseContentViewSet,
-    BaseCRUDViewSet,
-    IsStaffOrReadOnly,
-    annotate_likes_queryset,
     _filter_published,
 )
 
 
-class VideoViewSet(BaseContentViewSet):
+class VideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     search_fields = ("title",)
@@ -321,71 +314,8 @@ class VideoViewSet(BaseContentViewSet):
         serializer = VideoSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
 
-    @action(detail=False, methods=("get",), url_path="top-rated", url_name="top_rated")
-    def top_rated(self, request):
-        """Return top N videos ordered by average user rating (if ratings exist).
 
-        Query params:
-        - limit: int default 5
-
-        Behavior:
-        - If a related `ratings` relation exists on Video (e.g. a VideoRating or similar
-          with related_name='ratings'), the view will compute average rating and return
-          videos ordered by average rating desc, then by number of ratings, then created_at.
-        - If no ratings relation is present, falls back to ordering by likes (annotated)
-          and then by views/created_at.
-        """
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
-        qs = Video.objects.all()
-        # only consider published videos for top-rated computation
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            pass
-
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        try:
-            # Annotate average rating and ratings count if a related `ratings` exists
-            qs = qs.annotate(
-                avg_rating=Avg("ratings__rating"), ratings_count=Count("ratings")
-            )
-            # Prefer items that actually have ratings
-            rated_qs = qs.filter(ratings_count__gt=0).order_by(
-                "-avg_rating", "-ratings_count", "-created_at"
-            )[:limit]
-
-            if rated_qs and len(rated_qs) > 0:
-                # annotate likes so serializer can include likes_count/has_liked
-                rated_qs = self.annotate_likes(rated_qs)
-                serializer = self.get_serializer(
-                    rated_qs, many=True, context={"request": request}
-                )
-                return Response(serializer.data)
-        except Exception:
-            # If annotation fails (no related ratings or other DB error), fall back
-            pass
-
-        # Fallback: order by likes (and views) if no rating system is available
-        try:
-            qs = qs.annotate(annotated_likes_count=Count("likes"))
-            qs = qs.order_by("-annotated_likes_count", "-views", "-created_at")[:limit]
-            qs = self.annotate_likes(qs)
-        except Exception:
-            qs = Video.objects.order_by("-views", "-created_at")[:limit]
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
-class PostViewSet(BaseContentViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
@@ -490,58 +420,6 @@ class PostViewSet(BaseContentViewSet):
         return queryset.order_by("-created_at")
 
     @action(
-        detail=True, methods=("post", "delete"), url_path="rating", url_name="rating"
-    )
-    def rating(self, request, pk=None):
-        """POST to set/update rating (body: { "rating": 1-5 }), DELETE to remove user's rating.
-        Returns the serialized Post (with updated average/count/user_rating).
-        """
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response(
-                {"detail": "Authentication required."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        try:
-            post = Post.objects.get(pk=pk)
-        except Post.DoesNotExist:
-            return Response(
-                {"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if request.method == "POST":
-            # Accept either a JSON object { "rating": X } or a primitive body containing the number.
-            raw = None
-            try:
-                if isinstance(request.data, dict):
-                    raw = request.data.get("rating")
-                else:
-                    # request.data may be a primitive (int/str) when the client sends a bare value
-                    raw = request.data
-
-                rating_value = int(raw)
-                if rating_value < 1 or rating_value > 5:
-                    raise ValueError()
-            except Exception:
-                return Response(
-                    {"detail": "Invalid rating. Must be integer 1-5."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # create or update rating
-            PostRating.objects.update_or_create(
-                user=user, post=post, defaults={"rating": rating_value}
-            )
-            serializer = PostSerializer(post, context={"request": request})
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        # DELETE: remove user's rating if exists
-        PostRating.objects.filter(user=user, post=post).delete()
-        serializer = PostSerializer(post, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
         detail=False,
         methods=("get",),
         url_path="weekly-moments",
@@ -586,7 +464,24 @@ class PostViewSet(BaseContentViewSet):
         return Response(serializer.data)
 
 
-class ContentViewSet(BaseContentViewSet):
+class LearnViewSet(viewsets.ModelViewSet):
+    queryset = Learn.objects.all()
+    serializer_class = LearnSerializer
+    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
+    ordering_fields = ("views", "created_at")
+    filterset_fields = (
+        "created_at",
+        "writer",
+        "category__name",
+        "language",
+        "learn_type",
+        "status",
+    )
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    pagination_class = LimitOffsetPagination
+
+
+class ContentViewSet(viewsets.ModelViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
     search_fields = ("title",)
@@ -727,7 +622,6 @@ class ContentViewSet(BaseContentViewSet):
         # ربط المرفقات بالـ Content الجديد إذا أرسلت IDs فقط
         attachment_ids = request.data.get("attachments", [])
         if isinstance(attachment_ids, list) and attachment_ids:
-            from .models import ContentAttachment
 
             ContentAttachment.objects.filter(id__in=attachment_ids).update(
                 content=content
@@ -944,64 +838,8 @@ class ContentViewSet(BaseContentViewSet):
 
         return Response(self.get_serializer(content, context={"request": request}).data)
 
-    @action(
-        detail=True, methods=("post", "delete"), url_path="rating", url_name="rating"
-    )
-    def rating(self, request, pk=None):
-        """POST to set/update rating (body: { "rating": 1-5 }), DELETE to remove user's rating.
-        Returns the serialized Content (with updated average/count/user_rating).
-        """
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response(
-                {"detail": "Authentication required."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
 
-        try:
-            content = Content.objects.get(pk=pk)
-        except Content.DoesNotExist:
-            return Response(
-                {"detail": "Content not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if request.method == "POST":
-            # Accept either a JSON object { "rating": X } or a primitive body containing the number.
-            raw = None
-            try:
-                if isinstance(request.data, dict):
-                    raw = request.data.get("rating")
-                else:
-                    # request.data may be a primitive (int/str) when the client sends a bare value
-                    raw = request.data
-
-                rating_value = int(raw)
-                if rating_value < 1 or rating_value > 5:
-                    raise ValueError()
-            except Exception:
-                return Response(
-                    {"detail": "Invalid rating. Must be integer 1-5."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # create or update rating (ContentRating)
-            from .models import ContentRating
-
-            ContentRating.objects.update_or_create(
-                user=user, content=content, defaults={"rating": rating_value}
-            )
-            serializer = ContentSerializer(content, context={"request": request})
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        # DELETE: remove user's rating if exists
-        from .models import ContentRating
-
-        ContentRating.objects.filter(user=user, content=content).delete()
-        serializer = ContentSerializer(content, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class EventViewSet(BaseContentViewSet):
+class EventViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Event content."""
 
     queryset = Event.objects.all()
@@ -1230,7 +1068,7 @@ class EventViewSet(BaseContentViewSet):
         return Response(serializer.data)
 
 
-class BookViewSet(BaseContentViewSet):
+class BookViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Book content."""
 
     queryset = Book.objects.all()
@@ -1247,7 +1085,7 @@ class BookViewSet(BaseContentViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class TeamMemberViewSet(BaseContentViewSet):
+class TeamMemberViewSet(viewsets.ModelViewSet):
     """ViewSet for managing TeamMember content."""
 
     queryset = TeamMember.objects.all()
@@ -1281,86 +1119,7 @@ class TeamMemberViewSet(BaseContentViewSet):
         return queryset
 
 
-class CommentsViewSet(BaseContentViewSet):
-    """ViewSet for managing Comments content."""
-
-    queryset = Comments.objects.all()
-    serializer_class = CommentsSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    pagination_class = LimitOffsetPagination
-    search_fields = ("user__username", "content_type", "object_id", "text")
-    ordering_fields = ("created_at",)
-
-    def get_queryset(self):
-        """Filter comments by object_id and content_type if provided, then annotate likes."""
-        queryset = super().get_queryset()
-        object_id = self.request.query_params.get("object_id")
-        content_type_name = self.request.query_params.get("content_type")
-
-        if object_id:
-            queryset = queryset.filter(object_id=object_id)
-
-        if content_type_name:
-            # Convert content_type string (e.g., 'video', 'post') to ContentType object
-            try:
-                content_type = ContentType.objects.get(model__iexact=content_type_name)
-                queryset = queryset.filter(content_type=content_type)
-            except ContentType.DoesNotExist:
-                # If content_type not found, return empty queryset
-                queryset = queryset.none()
-
-        # annotate likes info (uses annotated_* fields to avoid model property collisions)
-        queryset = self.annotate_likes(queryset)
-        return queryset.order_by("-created_at")
-
-    @action(
-        detail=True, methods=("get", "post"), url_path="replies", url_name="replies"
-    )
-    def replies(self, request, pk=None):
-        """List all replies for a specific comment (no pagination), or create a reply tied to that comment.
-
-        GET  /api/v1/comments/{id}/replies/  -> all replies (no pagination)
-        POST /api/v1/comments/{id}/replies/  -> create a reply (body: {"text": "..."})
-        """
-        comment = self.get_object()
-        if request.method == "POST":
-            data = request.data.copy()
-            # ensure the reply is attached to this comment
-            data["comment"] = comment.pk
-            serializer = ReplySerializer(data=data, context={"request": request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # GET: return ALL replies without pagination (annotate likes on replies too)
-        qs = comment.replies.all().order_by("-created_at")
-        qs = self.annotate_likes(qs)
-        serializer = ReplySerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
-class ReplyViewSet(BaseContentViewSet):
-    """ViewSet for managing Reply content."""
-
-    queryset = Reply.objects.all()
-    serializer_class = ReplySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    search_fields = ("user__username", "comment__id", "text")
-    ordering_fields = ("created_at",)
-
-    def get_queryset(self):
-        """Filter replies by comment if provided, then annotate likes."""
-        queryset = super().get_queryset()
-        comment_id = self.request.query_params.get("comment")
-
-        if comment_id:
-            queryset = queryset.filter(comment_id=comment_id)
-
-        queryset = self.annotate_likes(queryset)
-        return queryset.order_by("-created_at")
-
-
-class HistoryEntryViewSet(BaseContentViewSet):
+class HistoryEntryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing HistoryEntry content."""
 
     queryset = HistoryEntry.objects.all()
@@ -1369,7 +1128,7 @@ class HistoryEntryViewSet(BaseContentViewSet):
     ordering_fields = ("story_date", "created_at")
 
 
-class PostCategoryViewSet(BaseCRUDViewSet):
+class PostCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing PostCategory content with multi-language support."""
 
     queryset = PostCategory.objects.all()
@@ -1512,7 +1271,22 @@ class PostCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class ContentCategoryViewSet(BaseCRUDViewSet):
+class LearnCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing LearnCategory content with multi-language support."""
+
+    queryset = LearnCategory.objects.all()
+    serializer_class = LearnCategorySerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name", "key")
+    ordering_fields = ("order", "created_at")
+    queryset = LearnCategory.objects.all().order_by("order", "-created_at")
+
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+
+
+class ContentCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing ContentCategory content with multi-language support."""
 
     queryset = ContentCategory.objects.all()
@@ -1634,7 +1408,7 @@ class ContentCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class ContentAttachmentViewSet(BaseCRUDViewSet):
+class ContentAttachmentViewSet(viewsets.ModelViewSet):
     """ViewSet for managing ContentAttachment content."""
 
     queryset = ContentAttachment.objects.all()
@@ -1661,7 +1435,7 @@ class ContentAttachmentViewSet(BaseCRUDViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class EventCategoryViewSet(BaseCRUDViewSet):
+class EventCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing EventCategory content with multi-language support."""
 
     queryset = EventCategory.objects.all()
@@ -1803,7 +1577,7 @@ class EventCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class BookCategoryViewSet(BaseCRUDViewSet):
+class BookCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing BookCategory content with multi-language support."""
 
     queryset = BookCategory.objects.all()
@@ -1898,7 +1672,7 @@ class BookCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class PositionTeamMemberViewSet(BaseCRUDViewSet):
+class PositionTeamMemberViewSet(viewsets.ModelViewSet):
     """ViewSet for managing PositionTeamMember content."""
 
     queryset = PositionTeamMember.objects.all()
@@ -1907,7 +1681,7 @@ class PositionTeamMemberViewSet(BaseCRUDViewSet):
     ordering_fields = ("created_at",)
 
 
-class SeasonIdViewSet(BaseCRUDViewSet):
+class SeasonIdViewSet(viewsets.ModelViewSet):
     """ViewSet for managing SeasonId content."""
 
     queryset = SeasonId.objects.all()
@@ -1960,7 +1734,7 @@ class SeasonIdViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class SeasonTitleViewSet(BaseCRUDViewSet):
+class SeasonTitleViewSet(viewsets.ModelViewSet):
     """ViewSet for managing SeasonTitle content."""
 
     queryset = SeasonTitle.objects.all()
@@ -1996,16 +1770,7 @@ class SeasonTitleViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class LikeViewSet(BaseContentViewSet):
-    """ViewSet for managing Like content."""
-
-    queryset = Like.objects.all()
-    serializer_class = LikeSerializer
-    search_fields = ("user__username", "content_type", "object_id")
-    ordering_fields = ("created_at",)
-
-
-class VideoCategoryViewSet(BaseCRUDViewSet):
+class VideoCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing VideoCategory content with multi-language support."""
 
     queryset = VideoCategory.objects.all()
@@ -2153,7 +1918,7 @@ class VideoCategoryViewSet(BaseCRUDViewSet):
         return Response(serializer.data)
 
 
-class EventSectionViewSet(BaseCRUDViewSet):
+class EventSectionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing EventSection content."""
 
     queryset = EventSection.objects.all()
@@ -2259,14 +2024,9 @@ class EventSectionViewSet(BaseCRUDViewSet):
             except Exception:
                 pass
 
-            # annotate likes info so EventSerializer can include likes_count/has_liked
-            events_qs = annotate_likes_queryset(events_qs, request)
-
             # order by annotated likes count (fallback to created_at)
             try:
-                events_qs = events_qs.order_by("-annotated_likes_count", "-created_at")[
-                    :events_limit
-                ]
+                events_qs = events_qs.order_by("-created_at")[:events_limit]
             except Exception:
                 events_qs = events_qs[:events_limit]
 
@@ -2285,385 +2045,6 @@ class EventSectionViewSet(BaseCRUDViewSet):
             )
 
         return Response(result)
-
-
-class CombinedTopLikedView(viewsets.ViewSet):
-    """Return a combined payload with several top-liked groups in a single response.
-
-    Response shape:
-    {
-      "posts_card_photo": [...],
-      "videos": [...],
-      "top_section": { "id": <id>, "name": <name>, "events": [...] }
-    }
-
-    Query params:
-    - limit: int default 5 (number of items per group)
-    - events_limit: int default 5 (number of events inside the top section)
-    """
-
-    def list(self, request):
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
-        try:
-            events_limit = int(request.query_params.get("events_limit", 5))
-        except Exception:
-            events_limit = 5
-
-        groups = Post.top_liked(limit=limit)
-        card_photo_qs = groups.get("card_photo") or Post.objects.none()
-        # ensure posts are published and belong to active categories
-        try:
-            card_photo_qs = _filter_published(card_photo_qs)
-        except Exception:
-            try:
-                card_photo_qs = card_photo_qs.filter(status="published")
-            except Exception:
-                pass
-        try:
-            card_photo_qs = card_photo_qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        videos_qs = Video.objects.all()
-        try:
-            videos_qs = _filter_published(videos_qs)
-        except Exception:
-            pass
-        # only include videos with active category
-        try:
-            videos_qs = videos_qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        # Top section by number of events, then its top liked events
-        top_section = None
-        events_in_top_section = []
-
-        section = (
-            EventSection.objects.annotate(events_count=DjCount("event"))
-            .order_by("-events_count")
-            .first()
-        )
-        if section:
-            top_section = section
-            events_qs = Event.objects.filter(section=section)
-            try:
-                events_qs = _filter_published(events_qs)
-            except Exception:
-                pass
-            # only include events whose category is active
-            try:
-                events_qs = events_qs.filter(category__is_active=True)
-            except Exception:
-                pass
-            # annotate and order by likes similar to other uses
-            events_qs = annotate_likes_queryset(events_qs, request)
-            try:
-                events_qs = events_qs.order_by("-annotated_likes_count", "-created_at")[
-                    :events_limit
-                ]
-            except Exception:
-                events_qs = events_qs[:events_limit]
-            events_in_top_section = events_qs
-
-        # Annotate likes/has_liked for posts & videos, then order & slice to respect limit
-        card_photo_qs = annotate_likes_queryset(card_photo_qs, request)
-        try:
-            card_photo_qs = card_photo_qs.order_by(
-                "-annotated_likes_count", "-created_at"
-            )[:limit]
-        except Exception:
-            card_photo_qs = card_photo_qs[:limit]
-
-        videos_qs = annotate_likes_queryset(videos_qs, request)
-        try:
-            videos_qs = videos_qs.order_by("-annotated_likes_count", "-created_at")[
-                :limit
-            ]
-        except Exception:
-            videos_qs = videos_qs[:limit]
-
-        # Serialize
-        card_photo_data = PostSerializer(
-            card_photo_qs, many=True, context={"request": request}
-        ).data
-        videos_data = VideoSerializer(
-            videos_qs, many=True, context={"request": request}
-        ).data
-
-        top_section_data = None
-        if top_section:
-            events_data = EventSerializer(
-                events_in_top_section, many=True, context={"request": request}
-            ).data
-            top_section_data = {
-                "id": top_section.pk,
-                "name": top_section.name,
-                "events": events_data,
-            }
-
-        return Response(
-            {
-                "posts_card_photo": card_photo_data,
-                "videos": videos_data,
-                "top_section": top_section_data,
-            }
-        )
-
-
-class TopStatsViewSet(viewsets.ViewSet):
-    """
-    Endpoints:
-      Returns top-liked objects per type in the requested order.
-      If no 'order' param, uses default order.
-      If user is staff, persists the order for future requests.
-    """
-
-    DEFAULT_KEYS: List[str] = [
-        "video",
-        "post_card",
-        "post_photo",
-        "event",
-        "content",
-    ]
-
-    # -----------------------
-    # Helpers: Query building
-    # -----------------------
-    def _get_top_liked_object(self, queryset, request):
-        """return single top liked object from the given queryset."""
-        # ensure we only consider published items when the model supports it
-        try:
-            qs = _filter_published(queryset)
-        except Exception:
-            qs = queryset
-
-        # also ensure the related category (if present) is active
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            # model may not have a category relation
-            pass
-
-        qs = annotate_likes_queryset(qs, request)
-        try:
-            qs = qs.order_by("-annotated_likes_count", "-created_at")
-        except Exception:
-            try:
-                qs = qs.order_by("-created_at")
-            except Exception:
-                pass
-        return qs.first()
-
-    def _get_top_posts_queryset(self, request, limit: int):
-        """return queryset of top liked Posts limited to 'limit'."""
-        try:
-            qs = Post.objects.all()
-            try:
-                qs = _filter_published(qs)
-            except Exception:
-                pass
-
-            # only consider posts whose category is active
-            try:
-                qs = qs.filter(category__is_active=True)
-            except Exception:
-                pass
-
-            qs = annotate_likes_queryset(qs, request)
-            try:
-                return qs.order_by("-annotated_likes_count", "-created_at")[:limit]
-            except Exception:
-                return qs[:limit]
-        except Exception:
-            return Post.objects.none()
-
-    # -----------------------
-    # Helpers: Serialization
-    # -----------------------
-    def _serialize_any(self, obj, request):
-        """return serialized data for any supported object type, or None if unsupported."""
-        if obj is None:
-            return None
-        if isinstance(obj, Video):
-            return VideoSerializer(obj, context={"request": request}).data
-        if isinstance(obj, Post):
-            return PostSerializer(obj, context={"request": request}).data
-        if isinstance(obj, Event):
-            return EventSerializer(obj, context={"request": request}).data
-        if isinstance(obj, Content):
-            return ContentSerializer(obj, context={"request": request}).data
-        return None
-
-    # -----------------------
-    # Helpers: Ordering
-    # -----------------------
-    def _parse_order_query(self, order_query: Optional[str]) -> Dict[str, int]:
-        """
-        check if order_query is like 'video=1,post_card=2,...' and parse it into a dict.
-        returns {'video': 1, 'post_card': 2, ...} or {} if invalid.
-        """
-        if not order_query:
-            return {}
-
-        order_pairs: Dict[str, int] = {}
-        parts = [part.strip() for part in order_query.split(",") if part.strip()]
-
-        for part in parts:
-            if "=" not in part:
-                continue
-
-            key_text, position_text = part.split("=", 1)
-            key = key_text.strip()
-            try:
-                position = int(position_text.strip())
-            except Exception:
-                continue
-
-            order_pairs[key] = position
-
-        return order_pairs
-
-    def _persist_order_if_staff(
-        self, request, order_by_key: Dict[str, int], all_keys: List[str]
-    ) -> None:
-        """
-        if the request user is staff, persist the given order_by_key into SectionOrder model.
-        order_by_key: {'video': 1, 'post_card': 2, ...}
-        all_keys: list of all possible keys to complete the order.
-        """
-        user = getattr(request, "user", None)
-        if not (user and user.is_authenticated and user.is_staff):
-            return
-
-        # order_by_key: {'video': 1, 'post_card': 2, ...}
-        for key, position in order_by_key.items():
-            if key in all_keys:
-                SectionOrder.objects.update_or_create(
-                    key=key,
-                    defaults={"position": int(position)},
-                )
-
-        # complete with remaining keys
-        remaining_keys = [key for key in all_keys if key not in order_by_key]
-        start_position = (max(order_by_key.values()) + 1) if order_by_key else 1000
-        for offset, key in enumerate(remaining_keys, start=start_position):
-            SectionOrder.objects.update_or_create(
-                key=key,
-                defaults={"position": int(offset)},
-            )
-
-    def _load_persisted_order(self) -> Dict[str, int]:
-        """
-        read persisted order from SectionOrder model.
-        returns dict like {'video': 1, 'post_card': 2, ...} or {} if none found.
-        """
-        try:
-            stored = SectionOrder.objects.all()
-            if stored.exists():
-                return {row.key: row.position for row in stored}
-        except Exception:
-            pass
-        return {}
-
-    def _build_final_key_order(
-        self, base_keys: List[str], order_by_key: Dict[str, int]
-    ) -> List[str]:
-        """
-        order base_keys according to order_by_key dict.
-        any keys in base_keys not in order_by_key are appended at the end in original order
-        returns ordered list of keys.
-        """
-        if not order_by_key:
-            return list(base_keys)
-
-        # filter and sort keys present in order_by_key
-        sorted_by_position = sorted(order_by_key.items(), key=lambda item: item[1])
-        ordered_keys = [key for key, _ in sorted_by_position if key in base_keys]
-
-        # append any missing keys from base_keys
-        for key in base_keys:
-            if key not in ordered_keys:
-                ordered_keys.append(key)
-
-        return ordered_keys
-
-    # -----------------------
-    # Main endpoint
-    # -----------------------
-    def list(self, request):
-        # 1) limit
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
-        # 2) maximized liked objects per type
-        top_video = self._get_top_liked_object(Video.objects.all(), request)
-        top_event = self._get_top_liked_object(Event.objects.all(), request)
-        top_content = self._get_top_liked_object(Content.objects.all(), request)
-
-        top_post_card = self._get_top_liked_object(
-            Post.objects.filter(post_type=PostType.CARD), request
-        )
-        top_post_photo = self._get_top_liked_object(
-            Post.objects.filter(post_type=PostType.PHOTO), request
-        )
-
-        # 3) maximized liked posts queryset
-        top_posts_qs = self._get_top_posts_queryset(request, limit)
-        top_posts_data = PostSerializer(
-            top_posts_qs, many=True, context={"request": request}
-        ).data
-
-        # 4) assemble base payload
-        base_payload: Dict[str, object] = {
-            "video": self._serialize_any(top_video, request),
-            "post_card": self._serialize_any(top_post_card, request),
-            "post_photo": self._serialize_any(top_post_photo, request),
-            "event": self._serialize_any(top_event, request),
-            "content": self._serialize_any(top_content, request),
-            "top_posts": top_posts_data,
-        }
-
-        # 5) ordering
-        order_query_text = request.query_params.get("order")
-        order_pairs_from_query = self._parse_order_query(order_query_text)
-
-        if order_pairs_from_query:
-            # request has order → save it if staff
-            self._persist_order_if_staff(
-                request, order_pairs_from_query, self.DEFAULT_KEYS
-            )
-            final_key_order = self._build_final_key_order(
-                self.DEFAULT_KEYS, order_pairs_from_query
-            )
-        else:
-            # no order in request → load persisted order
-            order_pairs_from_db = self._load_persisted_order()
-            final_key_order = self._build_final_key_order(
-                self.DEFAULT_KEYS, order_pairs_from_db
-            )
-
-        # 6) reorder base_payload according to final_key_order
-        ordered_section_keys = [
-            key for key in final_key_order if key in base_payload and key != "top_posts"
-        ]
-        ordered_payload = {key: base_payload[key] for key in ordered_section_keys}
-        ordered_payload["top_posts"] = base_payload["top_posts"]
-
-        return Response(
-            {
-                "top_liked": ordered_payload,
-                "order_used": ordered_section_keys,
-                "limit": limit,
-            },
-            status=status.HTTP_200_OK,
-        )
 
 
 class GlobalSearchViewSet(viewsets.ViewSet):
@@ -2792,14 +2173,14 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(results)
 
 
-class NavbarLogoViewSet(BaseContentViewSet):
+class NavbarLogoViewSet(viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
 
     queryset = NavbarLogo.objects.all()
     serializer_class = NavbarLogoSerializer
 
 
-class SocialMediaViewSet(BaseContentViewSet):
+class SocialMediaViewSet(viewsets.ModelViewSet):
     """ViewSet for retrieving SocialMedia links."""
 
     queryset = SocialMedia.objects.all()
@@ -2819,8 +2200,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
     POST semantics: upsert socialmedia items (create if no id, update if id present) and create a new NavbarLogo row when `logo` is provided.
     By default POST will also remove SocialMedia rows not present in the payload (synchronize). If you want to avoid deletions send `?replace=false`.
     """
-
-    permission_classes = [IsStaffOrReadOnly]
 
     def list(self, request):
         # latest logo
@@ -2934,7 +2313,7 @@ class SiteInfoViewSet(viewsets.ViewSet):
         )
 
 
-class AuthorsViewSet(BaseCRUDViewSet):
+class AuthorsViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Authors content."""
 
     queryset = Authors.objects.all()

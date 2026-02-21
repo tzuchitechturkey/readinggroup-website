@@ -14,10 +14,12 @@ class VideoStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     PUBLISHED = "published", "Published"
     ARCHIVED = "archived", "Archived"
-    
+
+
 class VideoType(models.TextChoices):
     NEW_CLIP = "new_clip", "New Clip"
     FULL_LIVE_STREAM = "full_live_stream", "Full Live Stream"
+
 
 # ======================================================= Video Model End =======================================================
 # ======================================================= Event Model Start =======================================================
@@ -49,6 +51,7 @@ class PostStatus(models.TextChoices):
 # ======================================================= Post Model End =======================================================
 
 
+# ======================================================= Language Choices Start =======================================================
 class LanguageChoices(models.TextChoices):
     ENGLISH = "en", "English"
     TURKISH = "tr", "Turkish"
@@ -56,3 +59,18 @@ class LanguageChoices(models.TextChoices):
     CHINESE = "ch", "Chinese"
     JAPANESE = "jp", "Japanese"
     CHINESE_SIMPLIFIED = "chsi", "Chinese Simplified"
+
+
+# ======================================================= Language Choices End =======================================================
+
+
+# =======================================================  Learn Model Start =======================================================
+class LearnType(models.TextChoices):
+    CARDS = "cards", "Cards"
+    POSTERS = "posters", "Posters"
+
+
+class LearnStatus(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    PUBLISHED = "published", "Published"
+    ARCHIVED = "archived", "Archived"
