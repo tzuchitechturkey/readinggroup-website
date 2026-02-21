@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
-from .enums import PostType, PostStatus
+from .enums import PostType, PostStatus, VideoType
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import (
@@ -43,7 +43,6 @@ from .models import (
     MyListEntry,
     SeasonTitle,
     SeasonId,
-    SectionOrder,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -141,7 +140,6 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         language = params.getlist("language")
@@ -303,7 +301,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        qs = self.annotate_likes(qs)
         qs = qs.order_by("-created_at")
 
         page = self.paginate_queryset(qs)
@@ -313,6 +310,61 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         serializer = VideoSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=("get",),
+        url_path="last-published-by-type",
+        url_name="last_published_by_type",
+    )
+    def last_published_by_type(self, request):
+        """
+        Return:
+        - last 1 FULL_LIVE_STREAM
+        - last 3 NEW_CLIP
+        ordered newest → oldest
+        """
+
+        def base_queryset(video_type_value):
+            qs = Video.objects.filter(video_type=video_type_value)
+
+            # published filter
+            try:
+                qs = _filter_published(qs)
+            except Exception:
+                qs = qs.filter(status="published")
+
+            # active category (optional safety)
+            try:
+                qs = qs.filter(category__is_active=True)
+            except Exception:
+                pass
+
+            return qs.order_by("-created_at")
+
+        # ⭐ اخر 1 live stream
+        live_stream_qs = base_queryset(VideoType.FULL_LIVE_STREAM)[:1]
+
+        # ⭐ اخر 3 new clip
+        new_clip_qs = base_queryset(VideoType.NEW_CLIP)[:3]
+
+        payload = {
+            "full_live_stream": VideoSerializer(
+                live_stream_qs, many=True, context={"request": request}
+            ).data,
+            "new_clip": VideoSerializer(
+                new_clip_qs, many=True, context={"request": request}
+            ).data,
+        }
+
+        # اذا الاثنين فاضيين
+        if not payload["full_live_stream"] and not payload["new_clip"]:
+            return Response(
+                {"detail": "No published videos found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -349,7 +401,6 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         queryset = super().get_queryset()
-        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         created_at = params.get("created_at")
@@ -436,7 +487,6 @@ class PostViewSet(viewsets.ModelViewSet):
         queryset = Post.objects.filter(
             is_weekly_moment=True, status=PostStatus.PUBLISHED
         )
-        queryset = self.annotate_likes(queryset)
 
         # Filter by post_type if provided
         post_type = request.query_params.get("post_type")
@@ -508,7 +558,6 @@ class ContentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         queryset = super().get_queryset()
-        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         writer = params.get("writer")
@@ -591,8 +640,6 @@ class ContentViewSet(viewsets.ModelViewSet):
             pass
 
         qs = qs.order_by("-created_at")[:limit]
-        qs = annotate_likes_queryset(qs, request)
-
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = self.get_serializer(
@@ -872,7 +919,6 @@ class EventViewSet(viewsets.ModelViewSet):
 
         queryset = super().get_queryset()
         # annotate likes info
-        queryset = self.annotate_likes(queryset)
         params = self.request.query_params
 
         section = params.get("section")
@@ -1036,7 +1082,6 @@ class EventViewSet(viewsets.ModelViewSet):
         qs = qs.order_by("-created_at")[:limit]
 
         # annotate likes info as well so serializers can show likes_count/has_liked
-        qs = self.annotate_likes(qs)
         serializer = self.get_serializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
 
@@ -1055,7 +1100,6 @@ class EventViewSet(viewsets.ModelViewSet):
             pass
 
         qs = _filter_published(qs)
-        qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1260,7 +1304,6 @@ class PostCategoryViewSet(viewsets.ModelViewSet):
             pass
 
         qs = qs.order_by("-created_at")
-        qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1395,7 +1438,6 @@ class ContentCategoryViewSet(viewsets.ModelViewSet):
             )
 
         qs = Content.objects.filter(category=category).order_by("-created_at")
-        qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1566,7 +1608,6 @@ class EventCategoryViewSet(viewsets.ModelViewSet):
             )
 
         qs = published_qs.order_by("-happened_at", "-created_at")
-        qs = annotate_likes_queryset(qs, request)
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1722,7 +1763,6 @@ class SeasonIdViewSet(viewsets.ModelViewSet):
 
         # Order season videos by creation time (newest first)
         qs = qs.order_by("-created_at")
-        qs = annotate_likes_queryset(qs, request)
 
         # paginate if pagination is configured on the view
         page = self.paginate_queryset(qs)
@@ -1907,8 +1947,6 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
             )
 
         qs = published_qs.order_by("-created_at")
-        qs = annotate_likes_queryset(qs, request)
-
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = VideoSerializer(page, many=True, context={"request": request})
@@ -1965,9 +2003,6 @@ class EventSectionViewSet(viewsets.ModelViewSet):
                 pass
             if events_limit is not None:
                 events_qs = events_qs[:events_limit]
-
-            # annotate likes on events so EventSerializer can include likes_count/has_liked
-            events_qs = annotate_likes_queryset(events_qs, request)
 
             section_data = EventSectionSerializer(
                 section, context={"request": request}
@@ -2093,7 +2128,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             video_q = video_q.filter(category__is_active=True)
         except Exception:
             pass
-        video_queryset = annotate_likes_queryset(video_q, request)
 
         post_q = Post.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
@@ -2107,7 +2141,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             post_q = post_q.filter(category__is_active=True)
         except Exception:
             pass
-        post_queryset = annotate_likes_queryset(post_q, request)
 
         event_q = Event.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
@@ -2121,7 +2154,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             event_q = event_q.filter(category__is_active=True)
         except Exception:
             pass
-        event_queryset = annotate_likes_queryset(event_q, request)
 
         content_q = Content.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
@@ -2135,13 +2167,8 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             content_q = content_q.filter(category__is_active=True)
         except Exception:
             pass
-        content_queryset = annotate_likes_queryset(content_q, request)
 
         combined = []
-        combined += [(obj, "video") for obj in video_queryset]
-        combined += [(obj, "post") for obj in post_queryset]
-        combined += [(obj, "event") for obj in event_queryset]
-        combined += [(obj, "content") for obj in content_queryset]
 
         # sort by created_at (newest first)
         combined.sort(

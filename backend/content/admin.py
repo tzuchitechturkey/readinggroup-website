@@ -137,9 +137,12 @@ class EventSectionAdmin(admin.ModelAdmin):
 
 @admin.register(LearnCategory)
 class LearnCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name","description", "created_at")
-    search_fields = ["name",]
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = [
+        "name",
+    ]
     list_filter = ["is_active"]
+
 
 @admin.register(Learn)
 class LearnAdmin(admin.ModelAdmin):
