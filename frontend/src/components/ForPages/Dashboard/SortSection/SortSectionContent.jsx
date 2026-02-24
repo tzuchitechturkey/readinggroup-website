@@ -22,27 +22,27 @@ function SortSectionContent({ onSectionChange }) {
   const fetchSections = async () => {
     setIsLoading(true);
     try {
-      const response = await GetStatistics();
-      const topLikedData = response?.data?.top_liked;
+      // const response = await GetStatistics();
+      // const topLikedData = response?.data?.top_liked;
       // استبعاد weekly_moment و top_posts لأنهما لا يحتاجان لترتيب
-      const sectionsArray = Object.entries(topLikedData || {})
-        .filter(
-          ([sectionName]) =>
-            sectionName !== "weekly_moment" && sectionName !== "top_posts"
-        )
-        .map(([sectionName, itemData]) => ({
-          sectionName,
-          id: itemData?.id,
-          name: itemData?.name || itemData?.title || "",
-          image:
-            itemData?.image || itemData?.image_url || itemData?.cover || "",
-          likes_count: itemData?.likes_count || 0,
-          has_liked: itemData?.has_liked || false,
-          ...itemData,
-        }));
+      // const sectionsArray = Object.entries(topLikedData || {})
+      //   .filter(
+      //     ([sectionName]) =>
+      //       sectionName !== "weekly_moment" && sectionName !== "top_posts"
+      //   )
+      //   .map(([sectionName, itemData]) => ({
+      //     sectionName,
+      //     id: itemData?.id,
+      //     name: itemData?.name || itemData?.title || "",
+      //     image:
+      //       itemData?.image || itemData?.image_url || itemData?.cover || "",
+      //     likes_count: itemData?.likes_count || 0,
+      //     has_liked: itemData?.has_liked || false,
+      //     ...itemData,
+      //   }));
 
-      setSections(sectionsArray);
-      setIsModified(false);
+      // setSections(sectionsArray);
+      // setIsModified(false);
     } catch (error) {
       setErrorFn(error, t);
     } finally {

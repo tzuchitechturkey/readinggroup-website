@@ -83,21 +83,21 @@ export default function AppSidebar({
         ],
       },
       {
-        title: "Posts",
+        title: "Learn",
         onClick: "#",
         icon: Posts,
         items: [
           {
-            title: "All Posts",
-            onClick: () => onSectionChange("posts"),
+            title: "All Learn",
+            onClick: () => onSectionChange("learn"),
           },
           {
-            title: "Add/Edit Post",
-            onClick: () => onSectionChange("add-post"),
+            title: "Add/Edit Learn",
+            onClick: () => onSectionChange("createOrEditLearn"),
           },
           {
-            title: "Posts Categories",
-            onClick: () => onSectionChange("postsCategories"),
+            title: "Learn Categories",
+            onClick: () => onSectionChange("learnCategories"),
           },
         ],
       },
@@ -119,10 +119,6 @@ export default function AppSidebar({
             title: "Videos Categories",
             onClick: () => onSectionChange("videosCategories"),
           },
-          // {
-          //   title: "Series & Seasons",
-          //   onClick: () => onSectionChange("seriesAndSeasons"),
-          // },
         ],
       },
       {
@@ -142,10 +138,6 @@ export default function AppSidebar({
             title: "Events Categories",
             onClick: () => onSectionChange("eventsCategories"),
           },
-          // {
-          //   title: "Events Sections",
-          //   onClick: () => onSectionChange("eventsSections"),
-          // },
         ],
       },
       {

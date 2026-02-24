@@ -7,7 +7,7 @@ import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomen
 import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
 import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import { HomeData } from "@/api/home";
+// import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics } from "@/api/dashboard";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
@@ -24,8 +24,8 @@ export default function HomeContent() {
 
   const getSliderData = useCallback(async () => {
     try {
-      const res = await HomeData();
-      setSliderData(res.data);
+      // const res = await HomeData();
+      // setSliderData(res.data);
     } catch (error) {
       setErrorFn(error, t);
     }
@@ -33,8 +33,8 @@ export default function HomeContent() {
 
   const getTop1Data = useCallback(async () => {
     try {
-      const res = await GetStatistics();
-      setTop1Data(res.data?.top_liked);
+      // const res = await GetStatistics();
+      // setTop1Data(res.data?.top_liked);
     } catch (error) {
       setErrorFn(error, t);
     }

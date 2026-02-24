@@ -6,7 +6,7 @@ import { Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { EditPostCategoryById, SortPostCategories } from "@/api/posts";
 import DraggableTable from "@/components/ForPages/Dashboard/DraggableTable/DraggableTable";
 
-function PostCategoriesTable({
+function LearnCategoriesTable({
   t,
   i18n,
   categories,
@@ -163,4 +163,4 @@ function PostCategoriesTable({
   );
 }
 
-export default PostCategoriesTable;
+export default LearnCategoriesTable;

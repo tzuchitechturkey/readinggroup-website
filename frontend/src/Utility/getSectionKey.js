@@ -1,11 +1,10 @@
 export const getSectionKey = (title) => {
   const titleMap = {
     Home: "home",
-    // Posts
-    "All Posts": "posts",
-    "Add/Edit Post": "createOrEditPost",
-    "Posts Categories": "postsCategories",
-    "All Cards": "cards",
+    // Learn Posts
+    "All Learn": "learn",
+    "Add/Edit Learn": "createOrEditLearn",
+    "Learn Categories": "learnCategories",
     // Videos
     "All Videos": "videos",
     Videos: "videos",

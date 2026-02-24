@@ -13,44 +13,16 @@ export const validateForm = (formData, t, post) => {
     newErrors.subtitle = t("Subtitle is required");
   }
 
-  if (!formData.excerpt.trim()) {
-    newErrors.excerpt = t("Excerpt is required");
-  }
-
-  if (!formData.body.trim()) {
-    newErrors.body = t("Body content is required");
-  }
-
-  if (!formData.writer.trim()) {
-    newErrors.writer = t("Writer is required");
-  }
-
   if (!formData.category) {
     newErrors.category = t("Category is required");
   }
 
-  if (!formData.status) {
-    newErrors.status = t("Status is required");
-  }
+  // if (!formData.status) {
+  //   newErrors.status = t("Status is required");
+  // }
 
-  if (!formData.read_time) {
-    newErrors.read_time = t("Read time is required");
-  }
-
-  if (!formData.tags || formData.tags.length === 0) {
-    newErrors.tags = t("Tags are required");
-  }
-
-  if (!formData.language || !formData.language.trim()) {
-    newErrors.language = t("Language is required");
-  }
-
-  if (!formData.post_type) {
-    newErrors.post_type = t("Type is required");
-  }
-
-  if (!formData.country) {
-    newErrors.country = t("Country is required");
+  if (!formData.learn_type) {
+    newErrors.learn_type = t("Type is required");
   }
 
   if (!formData.image && !formData.image_url && !post) {

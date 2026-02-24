@@ -11,10 +11,10 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
 
-import CreateorEditPostCategory from "./CreateorEditPostCategory/CreateorEditPostCategory";
-import PostCategoriesTable from "./PostCategoriesTable/PostCategoriesTable";
+import CreateorEditLearnCategory from "./CreateorEditLearnCategory/CreateorEditPostCategory";
+import LearnCategoriesTable from "./LearnCategoriesTable/LearnCategoriesTable";
 
-function PostsCategoriesContent({ onSectionChange }) {
+function LearnCategoriesContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -95,18 +95,18 @@ function PostsCategoriesContent({ onSectionChange }) {
       {isLoading && <Loader />}
       {/* Start Breadcrumb */}
       <CustomBreadcrumb
-        backTitle={t("Back to Posts List")}
+        backTitle={t("Back to Learn List")}
         onBack={() => {
-          onSectionChange("posts");
+          onSectionChange("learn");
         }}
-        page={t("Posts Categories")}
+        page={t("Learn Categories")}
       />
       {/* End Breadcrumb */}
 
       <div className="flex-1">
         {/* Start Header */}
         <DashboardSectionHeader
-          title={t("Posts Categories")}
+          title={t("Learn Categories")}
           subtitle={t("categories")}
           addText={t("Add Category")}
           totalRecords={totalRecords}
@@ -120,7 +120,7 @@ function PostsCategoriesContent({ onSectionChange }) {
         {/* End Header */}
 
         {/* Start Table */}
-        <PostCategoriesTable
+        <LearnCategoriesTable
           t={t}
           i18n={i18n}
           categories={categories}
@@ -140,7 +140,7 @@ function PostsCategoriesContent({ onSectionChange }) {
         {/* End Table */}
 
         {/* Create / Edit Modal */}
-        <CreateorEditPostCategory
+        <CreateorEditLearnCategory
           showModal={showCreateEditModal}
           setShowModal={setShowCreateEditModal}
           t={t}
@@ -178,4 +178,4 @@ function PostsCategoriesContent({ onSectionChange }) {
   );
 }
 
-export default PostsCategoriesContent;
+export default LearnCategoriesContent;

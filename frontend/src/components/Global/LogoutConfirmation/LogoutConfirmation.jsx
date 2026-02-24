@@ -15,7 +15,7 @@ function LogoutConfirmation({ onCancel }) {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("dashboardActiveSection");
     localStorage.removeItem("dashboardActiveParent");
-    localStorage.removeItem("dashboardSelectedPost");
+    localStorage.removeItem("dashboardSelectedLearn");
     localStorage.removeItem("dashboardSelectedVideo");
     localStorage.removeItem("dashboardSelectedNews");
     localStorage.removeItem("userType");

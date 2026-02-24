@@ -3,10 +3,6 @@ import React from "react";
 import { Search, X, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-/**
- * CategorySelectionDropdown Component
- * Reusable dropdown for selecting a category
- */
 function CategorySelectionDropdown({
   showDropdown,
   onToggleDropdown,
@@ -106,9 +102,7 @@ function CategorySelectionDropdown({
                 >
                   <Tag className="w-5 h-5 text-blue-600" />
                   <div className="flex-1">
-                    <div className="font-medium text-sm">
-                      {category.name}
-                    </div>
+                    <div className="font-medium text-sm">{category.name}</div>
                     {category.description && (
                       <div className="text-xs text-gray-500">
                         {category.description}

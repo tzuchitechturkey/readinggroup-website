@@ -21,15 +21,15 @@ function CreateorEditCategoryModal({
   // Language & Translation
   selectedLanguage,
   setSelectedLanguage,
-  originalLanguage,
+  // originalLanguage,
   isAutoTranslated,
   setIsAutoTranslated,
 
   // API & Loading
   onSubmit,
   isLoading,
-  onFetchTranslation,
-  isLoadingTranslation = false,
+  // onFetchTranslation,
+  // isLoadingTranslation = false,
 
   // Form Fields Configuration
   fields = [], // مثال: [{name: "name", label: "Name", type: "text", required: true}, ...]
@@ -146,7 +146,7 @@ function CreateorEditCategoryModal({
             </div>
 
             {/* Fetch Translation Button */}
-            {selectedLanguage && selectedLanguage !== originalLanguage && (
+            {/* {selectedLanguage && selectedLanguage !== originalLanguage && (
               <button
                 type="button"
                 onClick={() => onFetchTranslation?.(selectedLanguage)}
@@ -155,7 +155,7 @@ function CreateorEditCategoryModal({
               >
                 {t("Fetch Translation")}
               </button>
-            )}
+            )} */}
           </div>
         )}
 
@@ -181,7 +181,7 @@ function CreateorEditCategoryModal({
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
                 } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
               />
-            ) : (
+            ) : field.type === "text" ? (
               <input
                 type={field.type || "text"}
                 name={field.name}
@@ -192,7 +192,29 @@ function CreateorEditCategoryModal({
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
                 } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
               />
+            ) : field.type === "select" ? (
+              <select
+                name={field.name}
+                value={form[field.name] || ""}
+                onChange={handleInputChange}
+                disabled={isLoadingTranslation}
+                className={`w-full p-2 border rounded ${
+                  errorState[field.name] ? "border-red-500" : "border-gray-300"
+                } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <option value="" hidden disabled>
+                  {t("Select an option")}
+                </option>
+                {field.options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              ""
             )}
+
             {errorState[field.name] && (
               <p className="text-red-500 text-sm mt-1">
                 {errorState[field.name]}

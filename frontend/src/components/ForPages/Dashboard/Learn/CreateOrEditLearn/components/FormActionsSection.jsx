@@ -1,13 +1,17 @@
 import React from "react";
+
 import { Save } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 
-/**
- * FormActionsSection Component
- * Handles form submit and cancel actions
- */
-function FormActionsSection({ isLoading, hasChanges, post, onCancel, onSubmit }) {
+function FormActionsSection({
+  isLoading,
+  hasChanges,
+  learn,
+  onCancel,
+  onSubmit,
+}) {
   const { t } = useTranslation();
 
   return (
@@ -18,15 +22,15 @@ function FormActionsSection({ isLoading, hasChanges, post, onCancel, onSubmit })
       <Button
         type="submit"
         className="flex items-center gap-2"
-        disabled={post && !hasChanges}
+        disabled={learn && !hasChanges}
         onClick={onSubmit}
       >
         <Save className="h-4 w-4" />
         {isLoading
           ? t("Saving...")
-          : post
-            ? t("Update Post")
-            : t("Create Post")}
+          : learn
+            ? t("Update Learn")
+            : t("Create Learn")}
       </Button>
     </div>
   );
