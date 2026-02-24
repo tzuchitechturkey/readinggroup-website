@@ -10,6 +10,7 @@ import { GetPostCategories, DeletePostCategory } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
+import { GetLearnCategories } from "@/api/learn";
 
 import CreateorEditLearnCategory from "./CreateorEditLearnCategory/CreateorEditPostCategory";
 import LearnCategoriesTable from "./LearnCategoriesTable/LearnCategoriesTable";
@@ -45,8 +46,8 @@ function LearnCategoriesContent({ onSectionChange }) {
     const offset = page * 10;
     try {
       const res = searchValue
-        ? await GetPostCategories(limit, offset, searchValue)
-        : await GetPostCategories(limit, offset);
+        ? await GetLearnCategories(limit, offset, searchValue)
+        : await GetLearnCategories(limit, offset);
       const results = res?.data?.results || [];
       setCategories(results);
       setOriginalCategories(JSON.parse(JSON.stringify(results)));

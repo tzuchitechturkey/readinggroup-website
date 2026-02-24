@@ -6,15 +6,13 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
-import { usePostsData } from "@/hooks/usePostsData";
+import { useLearnData } from "@/hooks/useLearnData";
 import { useSorting } from "@/hooks/useSorting";
 import { usePagination } from "@/hooks/usePagination";
 
 import PostDetails from "../PostDetails/PostDetails";
-import PostsSearch from "./components/PostsSearch";
-import PostsFilters from "./components/PostsFilters";
-import PostsTable from "./components/PostsTable";
-import PostsPagination from "./components/PostsPagination";
+import PostsPagination from "./components/LearnPagination";
+import LearnTable from "./components/LearnTable";
 
 function LearnList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -24,10 +22,10 @@ function LearnList({ onSectionChange }) {
     isLoading,
     postData,
     totalRecords,
-    getPostData,
+    getLearnData,
     handleWeeklyPostToggle,
     handleDeletePost,
-  } = usePostsData();
+  } = useLearnData();
 
   const { sortData, getSortedData, sortConfig } = useSorting(postData);
   const { currentPage, handlePageChange, resetPage, getPaginationInfo } =
@@ -39,11 +37,10 @@ function LearnList({ onSectionChange }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("published");
-  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
 
   // Functions
   const fetchData = (page = 0) => {
-    getPostData(page, search, statusFilter, isWeeklyMomentFilter);
+    getLearnData(page, search, statusFilter);
   };
 
   const handleSearch = () => {
@@ -54,21 +51,7 @@ function LearnList({ onSectionChange }) {
   const clearSearch = () => {
     setSearch("");
     resetPage();
-    getPostData(0, "", statusFilter, isWeeklyMomentFilter);
-  };
-
-  const handleStatusChange = (newStatus) => {
-    setStatusFilter(newStatus);
-    setSearch("");
-    resetPage();
-    getPostData(0, "", newStatus, isWeeklyMomentFilter);
-  };
-
-  const handleWeeklyMomentFilterChange = (value) => {
-    setIsWeeklyMomentFilter(value);
-    setSearch("");
-    resetPage();
-    getPostData(0, "", statusFilter, value);
+    getLearnData(0, "", statusFilter);
   };
 
   const handlePageChangeWithFetch = (newPage) => {
@@ -82,7 +65,7 @@ function LearnList({ onSectionChange }) {
 
   const handleEdit = (post) => {
     setSelectedPost(post);
-    onSectionChange("createOrEditPost", post);
+    onSectionChange("createOrEditLearn", post);
   };
 
   const handleDeleteClick = (post) => {
@@ -101,7 +84,7 @@ function LearnList({ onSectionChange }) {
   // Effects
   useEffect(() => {
     fetchData(currentPage - 1);
-  }, [statusFilter, isWeeklyMomentFilter]);
+  }, [statusFilter]);
 
   // Computed values
   const sortedData = getSortedData(postData);
@@ -120,28 +103,16 @@ function LearnList({ onSectionChange }) {
         subtitle={`${t("Total")}: ${totalRecords} ${t("posts")}`}
         onBack={() => onSectionChange("dashboard")}
         backTitle={t("Back to Dashboard")}
-        onAdd={() => onSectionChange("createOrEditPost", null)}
-        addTitle={t("Add New")}
+        onAdd={() => onSectionChange("createOrEditLearn", null)}
+        addText={t("Add New")}
+        onAddClick={() => onSectionChange("createOrEditLearn", null)}
+        searchTerm={search}
+        setSearchTerm={setSearch}
+        getData={fetchData}
       />
 
-      {/* Search */}
-      {/* <PostsSearch
-        search={search}
-        onSearchChange={setSearch}
-        onSearch={handleSearch}
-        onClear={clearSearch}
-      /> */}
-
-      {/* Filters */}
-      {/* <PostsFilters
-        statusFilter={statusFilter}
-        isWeeklyMomentFilter={isWeeklyMomentFilter}
-        onStatusChange={handleStatusChange}
-        onWeeklyMomentFilterChange={handleWeeklyMomentFilterChange}
-      /> */}
-
       {/* Table */}
-      <PostsTable
+      <LearnTable
         posts={sortedData}
         search={search}
         sortConfig={sortConfig}
@@ -170,7 +141,7 @@ function LearnList({ onSectionChange }) {
           post={selectedPost}
           onClose={() => setShowDetailsModal(false)}
           onEdit={() => {
-            onSectionChange("createOrEditPost", selectedPost);
+            onSectionChange("createOrEditLearn", selectedPost);
           }}
         />
       </Modal>

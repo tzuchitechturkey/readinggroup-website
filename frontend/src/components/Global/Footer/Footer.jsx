@@ -47,7 +47,7 @@ function Footer() {
   };
 
   useEffect(() => {
-    fetchSocialLinks();
+    // fetchSocialLinks();
   }, [t]);
 
   return (

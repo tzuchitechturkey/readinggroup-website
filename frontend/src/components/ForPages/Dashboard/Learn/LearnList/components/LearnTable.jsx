@@ -1,12 +1,12 @@
 import React from "react";
 
-import { 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Search, 
-  ToggleRight, 
-  ToggleLeft 
+import {
+  Eye,
+  Edit,
+  Trash2,
+  Search,
+  ToggleRight,
+  ToggleLeft,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import SortIcon from "@/components/Global/SortIcon/SortIcon";
 
-const PostsTable = ({
+const LearnTable = ({
   posts,
   search,
   sortConfig,
@@ -112,15 +112,7 @@ const PostsTable = ({
               <SortIcon sortConfig={sortConfig} columnKey="type" />
             </div>
           </TableHead>
-          <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
-            <div
-              className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-              onClick={() => sortData("writer")}
-            >
-              {t("Writer")}
-              <SortIcon sortConfig={sortConfig} columnKey="writer" />
-            </div>
-          </TableHead>
+
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
             <div
               className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
@@ -130,11 +122,7 @@ const PostsTable = ({
               <SortIcon sortConfig={sortConfig} columnKey="views" />
             </div>
           </TableHead>
-          <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
-            <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-              {t("Weekly List")}
-            </div>
-          </TableHead>
+
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
             {t("Actions")}
           </TableHead>
@@ -192,35 +180,11 @@ const PostsTable = ({
                 {t(post?.post_type)}
               </span>
             </TableCell>
-            <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-              <div className="flex flex-col">
-                <span className="font-medium">{post?.writer}</span>
-                <span className="text-[#9FA2AA] text-[10px]">
-                  {post?.createdAt}
-                </span>
-              </div>
-            </TableCell>
+
             <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
               <span className="font-medium">{post?.views}</span>
             </TableCell>
-            <TableCell className="text-center py-4">
-              <button
-                onClick={() =>
-                  onWeeklyToggle(post?.id, post?.is_weekly_moment, post?.status)
-                }
-                className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                  post?.is_weekly_moment
-                    ? "bg-green-100 text-green-800 hover:bg-green-200"
-                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                }`}
-              >
-                {post?.is_weekly_moment ? (
-                  <ToggleRight className="h-8 w-12" />
-                ) : (
-                  <ToggleLeft className="h-8 w-12" />
-                )}
-              </button>
-            </TableCell>
+
             <TableCell className="text-center py-4">
               <div className="flex justify-center items-center gap-2 text-[#5B6B79]">
                 <button
@@ -253,4 +217,4 @@ const PostsTable = ({
   );
 };
 
-export default PostsTable;
+export default LearnTable;
