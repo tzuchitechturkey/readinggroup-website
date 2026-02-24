@@ -131,7 +131,7 @@ function CreateorEditCategoryModal({
               <select
                 value={selectedLanguage || ""}
                 onChange={(e) => setSelectedLanguage(e.target.value)}
-                disabled={isLoadingTranslation}
+                // disabled={isLoadingTranslation}
                 className="w-full p-2 border border-gray-300 rounded bg-white"
               >
                 <option value="" hidden disabled>
@@ -159,9 +159,9 @@ function CreateorEditCategoryModal({
           </div>
         )}
 
-        {isLoadingTranslation && (
+        {/* {isLoadingTranslation && (
           <p className="text-sm text-blue-600">{t("Loading translation...")}</p>
-        )}
+        )} */}
 
         {/* Dynamic Fields */}
         {fields.map((field) => (
@@ -175,11 +175,13 @@ function CreateorEditCategoryModal({
                 name={field.name}
                 value={form[field.name] || ""}
                 onChange={handleInputChange}
-                disabled={isLoadingTranslation}
+                // disabled={isLoadingTranslation}
                 rows={field.rows || 4}
                 className={`w-full p-2 border rounded ${
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
-                } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
+                } 
+                `}
+                // ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}
               />
             ) : field.type === "text" ? (
               <input
@@ -187,20 +189,24 @@ function CreateorEditCategoryModal({
                 name={field.name}
                 value={form[field.name] || ""}
                 onChange={handleInputChange}
-                disabled={isLoadingTranslation}
+                // disabled={isLoadingTranslation}
                 className={`w-full p-2 border rounded ${
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
-                } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
+                }
+                `}
+                // ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}
               />
             ) : field.type === "select" ? (
               <select
                 name={field.name}
                 value={form[field.name] || ""}
                 onChange={handleInputChange}
-                disabled={isLoadingTranslation}
+                // disabled={isLoadingTranslation}
                 className={`w-full p-2 border rounded ${
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
-                } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
+                }
+                `}
+                // ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}
               >
                 <option value="" hidden disabled>
                   {t("Select an option")}
@@ -232,10 +238,9 @@ function CreateorEditCategoryModal({
             <button
               type="button"
               onClick={() => handleToggleChange(field.name)}
-              disabled={isLoadingTranslation}
-              className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all ${getToggleColor(field.name)} ${
-                isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              // disabled={isLoadingTranslation}
+              className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all ${getToggleColor(field.name)} `}
+              // isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""
             >
               {form[field.name] ? (
                 <ToggleRight className="h-8 w-12" />
@@ -260,12 +265,14 @@ function CreateorEditCategoryModal({
             <button
               type="button"
               onClick={() => setIsAutoTranslated(!isAutoTranslated)}
-              disabled={isLoadingTranslation}
+              // disabled={isLoadingTranslation}
               className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all ${
                 isAutoTranslated
                   ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
                   : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-              } ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}`}
+              } 
+              `}
+              // ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}
             >
               {isAutoTranslated ? (
                 <ToggleRight className="h-8 w-12" />
@@ -284,14 +291,14 @@ function CreateorEditCategoryModal({
           <button
             type="button"
             onClick={onClose}
-            disabled={isLoadingTranslation || isLoading}
+            // disabled={isLoadingTranslation || isLoading}
             className="px-4 py-2 border rounded disabled:opacity-50"
           >
             {t("Cancel")}
           </button>
           <button
             type="submit"
-            disabled={isLoadingTranslation || isLoading}
+            // disabled={isLoadingTranslation || isLoading}
             className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
           >
             {t(form?.id ? "Save Changes" : "Add")}

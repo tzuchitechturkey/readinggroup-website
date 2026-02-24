@@ -109,7 +109,7 @@ function CreateorEditLearnCategory({
     }
 
     // const languageCode = languageCodeMap[selectedLanguage];
-    // const submitData = { ...form };
+    const submitData = { ...form };
 
     // // إذا كانت عملية إنشاء جديدة، أرسل اللغة
     // if (!form || !form.id) {
