@@ -1,9 +1,7 @@
 from accounts.serializers import UserSerializer
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info

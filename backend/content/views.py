@@ -1,26 +1,14 @@
 from django.conf import settings
-from django.db.models import Count as DjCount
-from django.db.models import Count, Avg
-from django.contrib.contenttypes.models import ContentType
-
+from django.db.models import Count
 from django.db.models import F
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
-
-from .models import Learn
-from .serializers import LearnSerializer
-from rest_framework.pagination import LimitOffsetPagination
-from typing import Dict, List, Optional
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.response import Response
-from rest_framework import filters, viewsets, status
-from .enums import VideoType
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
+
 from .swagger_parameters import (
     video_manual_parameters,
     event_manual_parameters,
@@ -80,6 +68,7 @@ from .serializers import (
     BookCategorySerializer,
 )
 from .youtube import YouTubeAPIError, fetch_video_info
+from .enums import VideoType
 from .views_helpers import (
     _filter_published,
 )

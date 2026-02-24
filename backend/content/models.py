@@ -1,10 +1,10 @@
 from datetime import timedelta
+import uuid
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
-import uuid
 from django.utils.text import slugify
 
 from .enums import (
