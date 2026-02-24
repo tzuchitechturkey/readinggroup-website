@@ -377,7 +377,7 @@ class LearnViewSet(viewsets.ModelViewSet):
     queryset = Learn.objects.all()
     serializer_class = LearnSerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
+    search_fields = ("title", "category__name")
     ordering_fields = ("views", "created_at", "happened_at")
     ordering = ("-created_at",)
     filter_backends = [
@@ -388,10 +388,7 @@ class LearnViewSet(viewsets.ModelViewSet):
 
     filterset_fields = (
         "created_at",
-        "writer",
         "category__name",
-        "language",
-        "status",
     )
 
     @swagger_auto_schema(
@@ -422,49 +419,12 @@ class LearnViewSet(viewsets.ModelViewSet):
         if happened_at:
             queryset = queryset.filter(happened_at__date=happened_at)
 
-        writer = params.get("writer")
-        if writer:
-            values = [item.strip() for item in writer.split(",") if item.strip()]
-            if values:
-                queryset = queryset.filter(writer__in=values)
-
         category = params.get("category")
         if category:
             values = [item.strip() for item in category.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(category__name__in=values)
-
-        language = params.get("language")
-        if language:
-            values = [item.strip() for item in language.split(",") if item.strip()]
-            if values:
-                queryset = queryset.filter(language__in=values)
-
-        status_param = params.get("status")
-        if status_param:
-            values = [item.strip() for item in status_param.split(",") if item.strip()]
-            if values:
-                queryset = queryset.filter(status__in=values)
-
-        is_weekly_moment = params.get("is_weekly_moment")
-        if is_weekly_moment is not None:
-            if is_weekly_moment.lower() == "true":
-                queryset = queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() == "false":
-                queryset = queryset.filter(is_weekly_moment=False)
-
-        is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
-        if not is_detail and not params.get("status"):
-            try:
-                queryset = _filter_published(queryset)
-            except Exception:
-                queryset = queryset.filter(status="published")
-
-            try:
-                queryset = queryset.filter(category__is_active=True)
-            except Exception:
-                pass
-
+                
         return queryset
 
     @action(detail=True, methods=["post"], url_path="increase-view")
@@ -1142,6 +1102,26 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset().filter(learn_type=learn_type)
 
         serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path="learns")
+    def learns(self, request, pk=None):
+        """
+        Return learn objects belonging to this LearnCategory.
+        """
+
+        category = self.get_object()
+
+        learns = Learn.objects.filter(
+            category=category
+        ).select_related("category")
+
+        # دعم ordering من URL
+        ordering = request.query_params.get("ordering")
+        if ordering:
+            learns = learns.order_by(ordering)
+
+        serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):

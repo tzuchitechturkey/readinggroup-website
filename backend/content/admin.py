@@ -124,15 +124,14 @@ class LearnCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Learn)
 class LearnAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category_name", "language", "writer", "created_at")
-    list_filter = ("category__name", "language", "writer")
-    search_fields = ("title", "category__name", "writer")
+    list_display = ("id", "title", "category_name", "created_at")
+    list_filter = ("category",)
+    search_fields = ("title", "category__name")
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
 
-    category_name.short_description = "category"
-
+    category_name.short_description = "Category"
 
 @admin.register(MyListEntry)
 class MyListEntryAdmin(admin.ModelAdmin):

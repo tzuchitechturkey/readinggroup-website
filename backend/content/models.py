@@ -120,10 +120,6 @@ class Video(TimestampedModel):
 class Learn(TimestampedModel):
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255, blank=True)
-    excerpt = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255, blank=True)
-    writer_avatar = models.URLField(blank=True)
     category = models.ForeignKey(
         "LearnCategory",
         on_delete=models.SET_NULL,
@@ -131,19 +127,8 @@ class Learn(TimestampedModel):
         blank=True,
         related_name="learns",
     )
-    status = models.CharField(
-        max_length=16, choices=LearnStatus.choices, default=LearnStatus.PUBLISHED
-    )
-    is_active = models.BooleanField(default=True)
-    views = models.PositiveIntegerField(default=0)
-    read_time = models.CharField(max_length=32, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    language = models.CharField(max_length=50, blank=True)
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    camera_name = models.CharField(max_length=255, blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
 
