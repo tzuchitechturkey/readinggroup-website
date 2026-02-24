@@ -18,8 +18,8 @@ import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteCon
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetEvents, DeleteEventById, PatchEventById } from "@/api/events";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import VideoDetails from "../../Videos/VideoDetails/VideoDetails";
 
 const EventsList = ({ onSectionChange }) => {
@@ -45,7 +45,7 @@ const EventsList = ({ onSectionChange }) => {
     page = 0,
     searchVal = search,
     status = statusFilter,
-    filters = {}
+    filters = {},
   ) => {
     setIsLoading(true);
     const offset = page * limit;
@@ -182,7 +182,7 @@ const EventsList = ({ onSectionChange }) => {
   const handleWeeklyEventToggle = async (
     eventId,
     currentStatus,
-    eventStatus
+    eventStatus,
   ) => {
     // Prevent adding draft/archived events to weekly moments
     if (
@@ -191,8 +191,8 @@ const EventsList = ({ onSectionChange }) => {
     ) {
       toast.info(
         t(
-          "Cannot add event to weekly list. Only published events can be added to the weekly list."
-        )
+          "Cannot add event to weekly list. Only published events can be added to the weekly list.",
+        ),
       );
       return;
     }
@@ -524,7 +524,7 @@ const EventsList = ({ onSectionChange }) => {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
-                          }
+                          },
                         )}
                       </span>
                     </div>
@@ -545,7 +545,7 @@ const EventsList = ({ onSectionChange }) => {
                         handleWeeklyEventToggle(
                           event?.id,
                           event?.is_weekly_moment,
-                          event?.status
+                          event?.status,
                         )
                       }
                       className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
@@ -711,7 +711,7 @@ const EventsList = ({ onSectionChange }) => {
           onConfirm={handleConfirmDelete}
           title={t("Delete Post")}
           message={t(
-            "Are you sure you want to delete this Post? This action cannot be undone."
+            "Are you sure you want to delete this Post? This action cannot be undone.",
           )}
           itemName={selectedEvent?.title}
         />

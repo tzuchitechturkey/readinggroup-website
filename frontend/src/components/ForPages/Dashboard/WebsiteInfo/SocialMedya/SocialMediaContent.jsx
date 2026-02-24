@@ -17,7 +17,7 @@ import {
 } from "@/api/info";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 function SocialMediaContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();

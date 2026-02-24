@@ -30,11 +30,18 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
 
   if (params.search) queryParams.append("search", params.search);
   if (params.video_type) queryParams.append("video_type", params.video_type);
-  if (params.language) queryParams.append("language", params.language);
-  if (params.category) queryParams.append("category", params.category);
+  // if (params.language) queryParams.append("language", params.language);
+  if (params.category) {
+    // Handle categories as array or single value
+    if (Array.isArray(params.category)) {
+      params.category.forEach(catId => queryParams.append("category", catId));
+    } else {
+      queryParams.append("category", params.category);
+    }
+  }
   if (params.happened_at) queryParams.append("happened_at", params.happened_at);
-  if (params.is_featured) queryParams.append("is_featured", params.is_featured);
-  if (params.is_new) queryParams.append("is_new", params.is_new);
+  // if (params.is_featured) queryParams.append("is_featured", params.is_featured);
+  // if (params.is_new) queryParams.append("is_new", params.is_new);
   if (params.is_weekly_moment !== undefined && params.is_weekly_moment !== null)
     queryParams.append("is_weekly_moment", params.is_weekly_moment);
 

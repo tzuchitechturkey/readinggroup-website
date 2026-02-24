@@ -14,7 +14,7 @@ import {
   DeleteDepartmentById,
 } from "@/api/aboutUs";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 export default function DepartmentsContent({ onSectionChange }) {
   const { t, i18n } = useTranslation();

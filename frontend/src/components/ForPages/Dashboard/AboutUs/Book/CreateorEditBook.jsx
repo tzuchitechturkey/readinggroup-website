@@ -11,7 +11,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { CreateBook, EditBookById, GetBooksGroups } from "@/api/books";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 function CreateOrEditBook({ onSectionChange, selectedBook = null }) {
   const { t, i18n } = useTranslation();

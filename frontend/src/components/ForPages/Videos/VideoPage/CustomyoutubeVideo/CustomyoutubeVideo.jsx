@@ -309,10 +309,10 @@ function CustomyoutubeVideo({ videoData }) {
               </p>
             </div>
             <div>
-              <p className="text-[20px] font-normal text-black leading-[1.5]">
-                {videoData?.description ||
-                  "「學海遼闊 有緣同航」象徵慈濟教育中知識與人文並重的精神。慈濟教育志業始於1989年花蓮慈濟護專。隨後發展為慈濟科技大學與慈濟大學，兩校於2024年合校，整合資源、提升教育品質與國際競爭力。慈濟教育的理想是「少年的心如蓮花綻放。「學海遼闊」寓意學習無止境，「有緣同航」則象徵師生與同仁們志同道合，共同在教育的大海中前行。"}
-              </p>
+              <p
+                className="text-[20px] font-normal text-black leading-[1.5]"
+                dangerouslySetInnerHTML={{ __html: videoData?.description }}
+              />
             </div>
           </div>
 
@@ -321,7 +321,9 @@ function CustomyoutubeVideo({ videoData }) {
             <div className="flex flex-col gap-8 text-base">
               {/* Category */}
               <div className="flex gap-1 items-center">
-                <p className="font-bold text-black w-[135px]">Category</p>
+                <p className="font-bold text-black w-[135px]">
+                  {t("Category")}
+                </p>
                 <p className="flex-1 font-normal text-black">
                   {videoData?.category?.name || "Guided Reading"}
                 </p>
@@ -329,7 +331,9 @@ function CustomyoutubeVideo({ videoData }) {
 
               {/* Language */}
               <div className="flex gap-1 items-center">
-                <p className="font-bold text-black w-[135px]">Language</p>
+                <p className="font-bold text-black w-[135px]">
+                  {t("Language")}
+                </p>
                 <p className="flex-1 font-normal text-black">
                   {videoData?.language || "English"}
                 </p>
@@ -338,8 +342,8 @@ function CustomyoutubeVideo({ videoData }) {
               {/* Guest Speakers */}
               <div className="flex gap-1 items-start">
                 <div className="font-bold text-black w-[135px]">
-                  <p className="mb-0">Guest</p>
-                  <p>Speaker(s)</p>
+                  <p className="mb-0">{t("Guest")}</p>
+                  <p>{t("Speaker(s)")}</p>
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
                   {videoData?.speakers && videoData.speakers.length > 0 ? (
@@ -349,11 +353,9 @@ function CustomyoutubeVideo({ videoData }) {
                       </p>
                     ))
                   ) : (
-                    <>
-                      <p className="font-normal text-black">Speaker Name</p>
-                      <p className="font-normal text-black">Speaker Name</p>
-                      <p className="font-normal text-black">Speaker Name</p>
-                    </>
+                    <p className="font-normal text-black">
+                      {t("No guest speakers")}
+                    </p>
                   )}
                 </div>
               </div>
@@ -361,38 +363,23 @@ function CustomyoutubeVideo({ videoData }) {
               {/* Supplemental Materials */}
               <div className="flex gap-1 items-start">
                 <div className="font-bold text-black w-[135px]">
-                  <p className="mb-0">Supplemental</p>
-                  <p>Materials</p>
+                  <p className="mb-0">{t("Supplemental")}</p>
+                  <p>{t("Materials")}</p>
                 </div>
                 <div className="flex-1 flex flex-col gap-4">
-                  {videoData?.materials && videoData.materials.length > 0 ? (
-                    videoData.materials.map((material, index) => (
-                      <a
-                        key={index}
-                        href={material.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-normal text-black underline hover:text-gray-700"
-                      >
-                        {material.name}
-                      </a>
-                    ))
-                  ) : (
-                    <>
-                      <a
-                        href="#"
-                        className="font-normal text-black underline hover:text-gray-700"
-                      >
-                        20251203 導讀衲履足跡 Guided Reading.ppt
-                      </a>
-                      <a
-                        href="#"
-                        className="font-normal text-black underline hover:text-gray-700"
-                      >
-                        20251203 導讀衲履足跡 Guided Reading.doc
-                      </a>
-                    </>
-                  )}
+                  {videoData?.materials && videoData.materials.length > 0
+                    ? videoData.materials.map((material, index) => (
+                        <a
+                          key={index}
+                          href={material.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-normal text-black underline hover:text-gray-700"
+                        >
+                          {material.name}
+                        </a>
+                      ))
+                    : "-"}
                 </div>
               </div>
             </div>

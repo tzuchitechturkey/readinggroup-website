@@ -1,25 +1,37 @@
 import React from "react";
+
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 
 const VideoSearchBar = ({ searchTerm, onSearch }) => {
   const { t } = useTranslation();
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      onSearch(e.target.value, true); // true indicates search should be triggered
+    }
+  };
+
+  const handleInputChange = (value) => {
+    onSearch(value, false); // false indicates just updating the input
+  };
+
   return (
     <div className="relative flex-1 max-w-[340px]">
       <div className="relative flex items-center gap-2 border-b border-black pb-1">
-        <Search />
+        <Search onClick={() => onSearch(searchTerm, true)} />
         <input
           type="text"
           placeholder={t("Search video")}
           value={searchTerm}
-          onChange={(e) => onSearch(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onKeyPress={handleKeyPress}
           className="flex-1 bg-transparent border-none outline-none text-base text-gray-800 placeholder-gray-500"
         />
         {/* Clear Search Button */}
         {searchTerm && (
           <button
-            onClick={() => onSearch("")}
+            onClick={() => onSearch("", true)} // Clear and search
             className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2"
           >
             <svg

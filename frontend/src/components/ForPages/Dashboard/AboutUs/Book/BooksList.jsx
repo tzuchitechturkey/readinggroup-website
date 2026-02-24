@@ -19,7 +19,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetBooks, DeleteBookById } from "@/api/books";
 
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 const BooksList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();

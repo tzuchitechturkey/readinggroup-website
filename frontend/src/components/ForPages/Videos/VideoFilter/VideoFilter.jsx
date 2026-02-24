@@ -134,8 +134,8 @@ function VideoFilter({
             }
             onChange={(selected) => updateFilter("languageContent", selected)}
             placeholder={t("Select Language")}
-            renderLabel={(item) => t(item?.name || item)}
-            renderValue={(item) => t(item?.name) || item}
+            renderLabel={(item) => t(item?.label || item)}
+            renderValue={(item) => t(item?.label) || item}
             searchable={true}
           />
         </div>

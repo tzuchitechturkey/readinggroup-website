@@ -133,7 +133,7 @@ function ContentPostsFilter({
       case "writer":
         if (Array.isArray(updatedFilters.writer)) {
           updatedFilters.writer = updatedFilters.writer.filter(
-            (w) => (w?.name || "") !== filterValue
+            (w) => (w?.name || "") !== filterValue,
           );
         } else {
           updatedFilters.writer = [];
@@ -143,7 +143,7 @@ function ContentPostsFilter({
         // If it's an array of categories, remove the specific one
         if (Array.isArray(updatedFilters.category)) {
           updatedFilters.category = updatedFilters.category.filter(
-            (cat) => (cat?.name || cat) !== filterValue
+            (cat) => (cat?.name || cat) !== filterValue,
           );
         } else {
           updatedFilters.category = "";
@@ -155,7 +155,7 @@ function ContentPostsFilter({
       case "type":
         if (Array.isArray(updatedFilters.type)) {
           updatedFilters.type = updatedFilters.type.filter(
-            (t) => (t?.name || t) !== filterValue
+            (t) => (t?.name || t) !== filterValue,
           );
         } else {
           updatedFilters.type = "";
@@ -175,7 +175,7 @@ function ContentPostsFilter({
           if (Array.isArray(writer)) {
             updateFilter(
               "writer",
-              writer.filter((w) => (w?.name || "") !== filterValue)
+              writer.filter((w) => (w?.name || "") !== filterValue),
             );
           } else {
             updateFilter("writer", []);
@@ -185,7 +185,7 @@ function ContentPostsFilter({
           if (Array.isArray(category)) {
             updateFilter(
               "category",
-              category.filter((cat) => (cat?.name || cat) !== filterValue)
+              category.filter((cat) => (cat?.name || cat) !== filterValue),
             );
           } else {
             updateFilter("category", "");
@@ -198,7 +198,7 @@ function ContentPostsFilter({
           if (Array.isArray(type)) {
             updateFilter(
               "type",
-              type.filter((t) => (t?.name || t) !== filterValue)
+              type.filter((t) => (t?.name || t) !== filterValue),
             );
           } else {
             updateFilter("type", "");
@@ -342,8 +342,8 @@ function ContentPostsFilter({
                         Array.isArray(category)
                           ? category
                           : category
-                          ? [{ name: category }]
-                          : []
+                            ? [{ name: category }]
+                            : []
                       }
                       onChange={(selected) =>
                         updateFilter("category", selected)
@@ -364,8 +364,8 @@ function ContentPostsFilter({
                         updateFilter("language", selected)
                       }
                       placeholder={t("Language")}
-                      renderLabel={(item) => t(item)}
-                      renderValue={(item) => t(item)}
+                      renderLabel={(item) => t(item.label)}
+                      renderValue={(item) => t(item.label)}
                       searchable={true}
                     />
                     {/* End Language */}
@@ -380,8 +380,8 @@ function ContentPostsFilter({
                           Array.isArray(type)
                             ? type
                             : type
-                            ? [{ name: type, id: type }]
-                            : []
+                              ? [{ name: type, id: type }]
+                              : []
                         }
                         onChange={(selected) => updateFilter("type", selected)}
                         placeholder={t("Type")}

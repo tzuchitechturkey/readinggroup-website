@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 const CategoryCarousel = ({
   activeCategories,
   selectedCategory,
+  selectedCategories = [],
   onCategorySelect,
 }) => {
   return (
@@ -15,7 +16,7 @@ const CategoryCarousel = ({
             key={category.id}
             onClick={() => onCategorySelect(category.id)}
             className={`flex-shrink-0 text-black px-4 py-2 rounded-full border border-black font-normal text-base whitespace-nowrap transition-all duration-200 ${
-              selectedCategory === category.id
+              selectedCategories.includes(category.id)
                 ? "bg-[#B0B0B0] "
                 : " hover:bg-gray-50"
             }`}

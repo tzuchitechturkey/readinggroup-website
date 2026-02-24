@@ -26,9 +26,9 @@ import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteCon
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { DeleteVideoById, GetVideos, PatchVideoById } from "@/api/videos";
+import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
-import CustomBreadcrumb from "../../CustomBreadcrumb/CustomBreadcrumb";
 import VideoDetails from "../VideoDetails/VideoDetails";
 
 function VideosList({ onSectionChange }) {
