@@ -53,9 +53,3 @@ class LanguageChoices(models.TextChoices):
 class LearnType(models.TextChoices):
     CARDS = "cards", "Cards"
     POSTERS = "posters", "Posters"
-
-
-class LearnStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"

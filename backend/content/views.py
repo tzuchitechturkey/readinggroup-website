@@ -424,7 +424,7 @@ class LearnViewSet(viewsets.ModelViewSet):
             values = [item.strip() for item in category.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(category__name__in=values)
-                
+
         return queryset
 
     @action(detail=True, methods=["post"], url_path="increase-view")
@@ -1103,7 +1103,7 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=["get"], url_path="learns")
     def learns(self, request, pk=None):
         """
@@ -1112,9 +1112,7 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
         category = self.get_object()
 
-        learns = Learn.objects.filter(
-            category=category
-        ).select_related("category")
+        learns = Learn.objects.filter(category=category).select_related("category")
 
         # دعم ordering من URL
         ordering = request.query_params.get("ordering")
@@ -1880,14 +1878,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             video_q = video_q.filter(category__is_active=True)
         except Exception:
             pass
-
-        post_q = Post.objects.filter(title__icontains=search_term).order_by(
-            "-created_at"
-        )[:per_model_cap]
-        try:
-            post_q = _filter_published(post_q)
-        except Exception:
-            pass
         # only include posts whose category is active
         try:
             post_q = post_q.filter(category__is_active=True)
@@ -1937,8 +1927,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
             obj, kind = item
             if kind == "video":
                 data = VideoSerializer(obj, context={"request": request}).data
-            elif kind == "post":
-                data = PostSerializer(obj, context={"request": request}).data
             elif kind == "event":
                 data = EventSerializer(obj, context={"request": request}).data
             elif kind == "content":
@@ -1995,12 +1983,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
             socials, many=True, context={"request": request}
         ).data
 
-        # only include categories that are active (is_active == True)
-        post_categories = (
-            PostCategory.objects.filter(is_active=True)
-            .annotate(post_count=Count("post"))
-            .order_by("name")
-        )
         video_categories = (
             VideoCategory.objects.filter(is_active=True)
             .annotate(video_count=Count("video"))
@@ -2017,10 +1999,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
             .order_by("name")
         )
 
-        # serialize categories
-        post_categories_data = PostCategorySerializer(
-            post_categories, many=True, context={"request": request}
-        ).data
         video_categories_data = VideoCategorySerializer(
             video_categories, many=True, context={"request": request}
         ).data
@@ -2035,7 +2013,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
             {
                 "logo": logo_data,
                 "socialmedia": socials_data,
-                "post_categories": post_categories_data,
                 "video_categories": video_categories_data,
                 "event_categories": event_categories_data,
                 "content_categories": content_categories_data,

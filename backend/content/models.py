@@ -10,7 +10,6 @@ from django.utils.text import slugify
 from .enums import (
     ContentStatus,
     EventStatus,
-    LearnStatus,
     LearnType,
     ReportType,
     VideoStatus,

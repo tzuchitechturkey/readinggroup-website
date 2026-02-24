@@ -133,6 +133,7 @@ class LearnAdmin(admin.ModelAdmin):
 
     category_name.short_description = "Category"
 
+
 @admin.register(MyListEntry)
 class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
