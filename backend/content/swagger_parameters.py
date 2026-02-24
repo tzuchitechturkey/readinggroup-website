@@ -262,3 +262,13 @@ learn_manual_parameters = [
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
 ]
+
+learn_category_manual_parameters = [
+    openapi.Parameter(
+        "type",
+        openapi.IN_QUERY,
+        description="Filter by learn_type (JSON object with 'name' field)",
+        type=openapi.TYPE_STRING,
+        required=True,
+    ),
+]

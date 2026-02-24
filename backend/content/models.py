@@ -125,7 +125,11 @@ class Learn(TimestampedModel):
     writer = models.CharField(max_length=255, blank=True)
     writer_avatar = models.URLField(blank=True)
     category = models.ForeignKey(
-        "LearnCategory", on_delete=models.SET_NULL, null=True, blank=True
+        "LearnCategory",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="learns",
     )
     status = models.CharField(
         max_length=16, choices=LearnStatus.choices, default=LearnStatus.PUBLISHED
@@ -140,6 +144,8 @@ class Learn(TimestampedModel):
     metadata = models.CharField(max_length=255, blank=True)
     country = models.CharField(max_length=100, blank=True)
     camera_name = models.CharField(max_length=255, blank=True)
+    happened_at = models.DateTimeField(blank=True, null=True)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("-created_at",)
@@ -163,6 +169,12 @@ class LearnCategory(TimestampedModel):
 
     class Meta:
         ordering = ("order", "-created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "learn_type"],
+                name="unique_learncategory_name_per_type",
+            )
+        ]
 
 
 class Event(TimestampedModel):

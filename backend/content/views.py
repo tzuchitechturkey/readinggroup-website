@@ -2,6 +2,16 @@ from django.conf import settings
 from django.db.models import Count as DjCount
 from django.db.models import Count, Avg
 from django.contrib.contenttypes.models import ContentType
+
+from django.db.models import F
+from rest_framework import viewsets, filters, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+
+from .models import Learn
+from .serializers import LearnSerializer
+from rest_framework.pagination import LimitOffsetPagination
 from typing import Dict, List, Optional
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -21,6 +31,7 @@ from .swagger_parameters import (
     event_category_manual_parameters,
     video_category_manual_parameters,
     learn_manual_parameters,
+    learn_category_manual_parameters,
 )
 from .models import (
     Event,
@@ -365,22 +376,27 @@ class VideoViewSet(viewsets.ModelViewSet):
 class LearnViewSet(viewsets.ModelViewSet):
     queryset = Learn.objects.all()
     serializer_class = LearnSerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
-    ordering_fields = ("views", "created_at")
+    ordering_fields = ("views", "created_at", "happened_at")
+    ordering = ("-created_at",)
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        DjangoFilterBackend,
+    ]
+
     filterset_fields = (
         "created_at",
         "writer",
         "category__name",
         "language",
-        "learn_type",
         "status",
     )
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    pagination_class = LimitOffsetPagination
 
     @swagger_auto_schema(
         operation_summary="List all learns",
-        operation_description="Retrieve a list of learns with optional filtering by created_at, writer, category, language, learn_type, and status.",
+        operation_description="Retrieve a list of learns with advanced filtering and ordering.",
         manual_parameters=learn_manual_parameters,
     )
     def list(self, request, *args, **kwargs):
@@ -388,65 +404,53 @@ class LearnViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.views = instance.views + 1
-        instance.save(update_fields=["views"])
+        Learn.objects.filter(pk=instance.pk).update(views=F("views") + 1)
+        instance.refresh_from_db()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
     def get_queryset(self):
+        queryset = super().get_queryset().select_related("category")
 
-        queryset = super().get_queryset()
         params = self.request.query_params
 
         created_at = params.get("created_at")
         if created_at:
             queryset = queryset.filter(created_at__date=created_at)
 
+        happened_at = params.get("happened_at")
+        if happened_at:
+            queryset = queryset.filter(happened_at__date=happened_at)
+
         writer = params.get("writer")
         if writer:
-            values = []
-            for item in writer.split(","):
-                values.append(item.strip())
+            values = [item.strip() for item in writer.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(writer__in=values)
 
-        Category = params.get("category")
-        if Category:
-            values = []
-            for item in Category.split(","):
-                values.append(item.strip())
+        category = params.get("category")
+        if category:
+            values = [item.strip() for item in category.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(category__name__in=values)
 
         language = params.get("language")
         if language:
-            values = []
-            for item in language.split(","):
-                values.append(item.strip())
+            values = [item.strip() for item in language.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(language__in=values)
 
-        learn_type = params.get("learn_type")
-        if learn_type:
-            values = []
-            for item in learn_type.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(learn_type__in=values)
-
-        status = params.get("status")
-        if status:
-            values = []
-            for item in status.split(","):
-                values.append(item.strip())
+        status_param = params.get("status")
+        if status_param:
+            values = [item.strip() for item in status_param.split(",") if item.strip()]
             if values:
                 queryset = queryset.filter(status__in=values)
 
         is_weekly_moment = params.get("is_weekly_moment")
         if is_weekly_moment is not None:
-            if is_weekly_moment.lower() in ("true"):
+            if is_weekly_moment.lower() == "true":
                 queryset = queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() in ("false"):
+            elif is_weekly_moment.lower() == "false":
                 queryset = queryset.filter(is_weekly_moment=False)
 
         is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
@@ -454,16 +458,19 @@ class LearnViewSet(viewsets.ModelViewSet):
             try:
                 queryset = _filter_published(queryset)
             except Exception:
-                try:
-                    queryset = queryset.filter(status="published")
-                except Exception:
-                    pass
+                queryset = queryset.filter(status="published")
+
             try:
                 queryset = queryset.filter(category__is_active=True)
             except Exception:
                 pass
 
-        return queryset.order_by("-created_at")
+        return queryset
+
+    @action(detail=True, methods=["post"], url_path="increase-view")
+    def increase_view(self, request, pk=None):
+        Learn.objects.filter(pk=pk).update(views=F("views") + 1)
+        return Response({"detail": "View increased"}, status=status.HTTP_200_OK)
 
 
 class ContentViewSet(viewsets.ModelViewSet):
@@ -1116,6 +1123,26 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     search_fields = ("name", "key")
     ordering_fields = ("order", "created_at")
     queryset = LearnCategory.objects.all().order_by("order", "-created_at")
+
+    @swagger_auto_schema(
+        operation_summary="List all learn categories",
+        operation_description="Retrieve a list of learn categories with optional filtering by is_active status, language, or key.",
+        manual_parameters=learn_category_manual_parameters,
+    )
+    @action(detail=False, methods=["get"], url_path="by-type")
+    def by_type(self, request):
+        learn_type = request.query_params.get("type")
+
+        if not learn_type:
+            return Response(
+                {"detail": "type parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = self.get_queryset().filter(learn_type=learn_type)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
