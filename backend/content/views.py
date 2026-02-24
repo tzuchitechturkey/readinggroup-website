@@ -8,33 +8,30 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import filters, viewsets, status
-from .enums import PostType, PostStatus, VideoType
+from .enums import VideoType
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from .swagger_parameters import (
     video_manual_parameters,
-    post_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
     global_search_manual_parameters,
     content_manual_parameters,
-    post_category_manual_parameters,
     content_category_manual_parameters,
     event_category_manual_parameters,
     video_category_manual_parameters,
+    learn_manual_parameters,
 )
 from .models import (
     Event,
     HistoryEntry,
     Learn,
     LearnCategory,
-    Post,
     TeamMember,
     Video,
     Content,
     ContentImage,
     ContentAttachment,
-    PostCategory,
     VideoCategory,
     EventCategory,
     ContentCategory,
@@ -52,12 +49,10 @@ from .models import (
 from .serializers import (
     EventSerializer,
     HistoryEntrySerializer,
-    PostSerializer,
     LearnSerializer,
     ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
-    PostCategorySerializer,
     LearnCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
@@ -367,9 +362,9 @@ class VideoViewSet(viewsets.ModelViewSet):
         return Response(payload, status=status.HTTP_200_OK)
 
 
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+class LearnViewSet(viewsets.ModelViewSet):
+    queryset = Learn.objects.all()
+    serializer_class = LearnSerializer
     search_fields = ("title", "subtitle", "writer", "category__name", "tags")
     ordering_fields = ("views", "created_at")
     filterset_fields = (
@@ -377,16 +372,16 @@ class PostViewSet(viewsets.ModelViewSet):
         "writer",
         "category__name",
         "language",
-        "post_type",
+        "learn_type",
         "status",
     )
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     pagination_class = LimitOffsetPagination
 
     @swagger_auto_schema(
-        operation_summary="List all posts",
-        operation_description="Retrieve a list of posts with optional filtering by created_at, writer, category, language, post_type, and status.",
-        manual_parameters=post_manual_parameters,
+        operation_summary="List all learns",
+        operation_description="Retrieve a list of learns with optional filtering by created_at, writer, category, language, learn_type, and status.",
+        manual_parameters=learn_manual_parameters,
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -431,13 +426,13 @@ class PostViewSet(viewsets.ModelViewSet):
             if values:
                 queryset = queryset.filter(language__in=values)
 
-        post_type = params.get("post_type")
-        if post_type:
+        learn_type = params.get("learn_type")
+        if learn_type:
             values = []
-            for item in post_type.split(","):
+            for item in learn_type.split(","):
                 values.append(item.strip())
             if values:
-                queryset = queryset.filter(post_type__in=values)
+                queryset = queryset.filter(learn_type__in=values)
 
         status = params.get("status")
         if status:
@@ -469,66 +464,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 pass
 
         return queryset.order_by("-created_at")
-
-    @action(
-        detail=False,
-        methods=("get",),
-        url_path="weekly-moments",
-        url_name="weekly_moments",
-    )
-    def weekly_moments(self, request):
-        """Get weekly moment posts filtered by post_type.
-
-        Query parameters:
-        - post_type: 'card' or 'photo' (optional, defaults to all)
-
-        Returns posts where is_weekly_moment=True filtered by the specified post_type.
-        """
-        queryset = Post.objects.filter(
-            is_weekly_moment=True, status=PostStatus.PUBLISHED
-        )
-
-        # Filter by post_type if provided
-        post_type = request.query_params.get("post_type")
-        if post_type:
-            valid_types = [PostType.CARD, PostType.PHOTO]
-            if post_type in valid_types:
-                queryset = queryset.filter(post_type=post_type)
-            else:
-                return Response(
-                    {
-                        "error": f"Invalid post_type. Must be one of: {', '.join(valid_types)}"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        queryset = queryset.order_by("-created_at")
-
-        # Apply pagination
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class LearnViewSet(viewsets.ModelViewSet):
-    queryset = Learn.objects.all()
-    serializer_class = LearnSerializer
-    search_fields = ("title", "subtitle", "writer", "category__name", "tags")
-    ordering_fields = ("views", "created_at")
-    filterset_fields = (
-        "created_at",
-        "writer",
-        "category__name",
-        "language",
-        "learn_type",
-        "status",
-    )
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    pagination_class = LimitOffsetPagination
 
 
 class ContentViewSet(viewsets.ModelViewSet):
@@ -1172,148 +1107,6 @@ class HistoryEntryViewSet(viewsets.ModelViewSet):
     ordering_fields = ("story_date", "created_at")
 
 
-class PostCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing PostCategory content with multi-language support."""
-
-    queryset = PostCategory.objects.all()
-    serializer_class = PostCategorySerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
-    ordering_fields = ("order", "created_at")
-    queryset = PostCategory.objects.all().order_by("order", "-created_at")
-
-    @swagger_auto_schema(
-        operation_summary="List all post categories",
-        operation_description="Retrieve a list of post categories with optional filtering by is_active status, language, or key.",
-        manual_parameters=post_category_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        """List endpoint documented with is_active filter for Swagger."""
-        return super().list(request, *args, **kwargs)
-
-    def get_serializer_context(self):
-        """Add include_translations flag to serializer context."""
-        context = super().get_serializer_context()
-        context["include_translations"] = (
-            self.request.query_params.get("include_translations", "false").lower()
-            == "true"
-        )
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
-        key = self.request.query_params.get("key")
-
-        if is_active is not None:
-            queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
-        if key:
-            queryset = queryset.filter(key=key)
-        try:
-            queryset = queryset.annotate(post_count=Count("post"))
-        except Exception:
-            pass
-        return queryset
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="by-key/(?P<key>[^/.]+)",
-        url_name="by-key",
-    )
-    def by_key(self, request, key=None):
-        """Get all translations for a specific category key."""
-        categories = PostCategory.objects.filter(key=key).order_by("language")
-        if not categories.exists():
-            return Response(
-                {"detail": "No categories found with this key."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(
-        detail=True, methods=["get"], url_path="translations", url_name="translations"
-    )
-    def translations(self, request, pk=None):
-        """Get all translations for this category."""
-        category = self.get_object()
-        translations = PostCategory.objects.filter(key=category.key).exclude(
-            id=category.id
-        )
-        serializer = self.get_serializer(translations, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder PostCategories based on provided order.
-
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    PostCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=("get",), url_path="posts", url_name="posts")
-    def posts(self, request, pk=None):
-        """Return posts belonging to this PostCategory.
-
-        Supports pagination and annotates likes so serializers can include likes_count/has_liked.
-        """
-        try:
-            category = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "PostCategory not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Ensure category is active; behave like VideoCategory.videos which requires active category
-        if not getattr(category, "is_active", True):
-            return Response(
-                {"detail": "PostCategory not active."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Only include published posts whose category is active
-        qs = Post.objects.filter(category=category)
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            try:
-                qs = qs.filter(status="published")
-            except Exception:
-                pass
-
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        qs = qs.order_by("-created_at")
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = PostSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = PostSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
 class LearnCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing LearnCategory content with multi-language support."""
 
@@ -1390,18 +1183,6 @@ class ContentCategoryViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(
-        detail=True, methods=["get"], url_path="translations", url_name="translations"
-    )
-    def translations(self, request, pk=None):
-        """Get all translations for this category."""
-        category = self.get_object()
-        translations = ContentCategory.objects.filter(key=category.key).exclude(
-            id=category.id
-        )
-        serializer = self.get_serializer(translations, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
@@ -1540,18 +1321,6 @@ class EventCategoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
 
-    @action(
-        detail=True, methods=["get"], url_path="translations", url_name="translations"
-    )
-    def translations(self, request, pk=None):
-        """Get all translations for this category."""
-        category = self.get_object()
-        translations = EventCategory.objects.filter(key=category.key).exclude(
-            id=category.id
-        )
-        serializer = self.get_serializer(translations, many=True)
-        return Response(serializer.data)
-
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
     def reorder(self, request):
         """Reorder EventCategories based on provided order.
@@ -1669,18 +1438,6 @@ class BookCategoryViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(
-        detail=True, methods=["get"], url_path="translations", url_name="translations"
-    )
-    def translations(self, request, pk=None):
-        """Get all translations for this category."""
-        category = self.get_object()
-        translations = BookCategory.objects.filter(key=category.key).exclude(
-            id=category.id
-        )
-        serializer = self.get_serializer(translations, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
@@ -1873,18 +1630,6 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(
-        detail=True, methods=["get"], url_path="translations", url_name="translations"
-    )
-    def translations(self, request, pk=None):
-        """Get all translations for this category."""
-        category = self.get_object()
-        translations = VideoCategory.objects.filter(key=category.key).exclude(
-            id=category.id
-        )
-        serializer = self.get_serializer(translations, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")

@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Exists, OuterRef
 
 
-from .enums import ContentStatus, EventStatus, PostStatus, VideoStatus
+from .enums import ContentStatus, EventStatus, VideoStatus
 
 
 def _filter_published(queryset):
@@ -10,11 +10,6 @@ def _filter_published(queryset):
     to the published value for known enums (Post/Content/Event/Video).
     This helper swallows exceptions to remain safe for models without status.
     """
-    try:
-        return queryset.filter(status=PostStatus.PUBLISHED)
-    except Exception:
-        pass
-
     try:
         return queryset.filter(status=ContentStatus.PUBLISHED)
     except Exception:

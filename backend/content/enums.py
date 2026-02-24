@@ -36,22 +36,9 @@ class EventStatus(models.TextChoices):
 
 
 # ======================================================= Event Model End =======================================================
-# ======================================================= Post Model Start =======================================================
-class PostType(models.TextChoices):
-    CARD = "card", "Card"
-    PHOTO = "photo", "Photo"
 
 
-class PostStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
-
-
-# ======================================================= Post Model End =======================================================
-
-
-# ======================================================= Language Choices Start =======================================================
+# ======================================================= Language Choices Start ================================================
 class LanguageChoices(models.TextChoices):
     ENGLISH = "en", "English"
     TURKISH = "tr", "Turkish"
@@ -61,10 +48,8 @@ class LanguageChoices(models.TextChoices):
     CHINESE_SIMPLIFIED = "chsi", "Chinese Simplified"
 
 
-# ======================================================= Language Choices End =======================================================
-
-
-# =======================================================  Learn Model Start =======================================================
+# ======================================================= Language Choices End ===================================================
+# =======================================================  Learn Model Start =====================================================
 class LearnType(models.TextChoices):
     CARDS = "cards", "Cards"
     POSTERS = "posters", "Posters"

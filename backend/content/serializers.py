@@ -12,7 +12,6 @@ from .models import (
     ContentCategory,
     ContentImage,
     ContentAttachment,
-    ContentRating,
     Event,
     EventCategory,
     EventSection,
@@ -21,10 +20,7 @@ from .models import (
     NavbarLogo,
     PositionTeamMember,
     Learn,
-    Post,
     LearnCategory,
-    PostCategory,
-    PostRating,
     SeasonId,
     SeasonTitle,
     SocialMedia,
@@ -52,15 +48,6 @@ class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = VideoCategory
-        fields = "__all__"
-
-
-class PostCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    post_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = PostCategory
         fields = "__all__"
 
 
@@ -274,51 +261,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-
-
-class PostSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for Post model with absolute URL handling for file fields."""
-
-    datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=PostCategory.objects.all(), write_only=True, required=False
-    )
-    user = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Post
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["category"] = (
-            PostCategorySerializer(instance.category, context=self.context).data
-            if instance.category
-            else None
-        )
-
-    def get_user_rating(self, obj):
-        """Return the requesting user's rating for the post, or None."""
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        if not user or not user.is_authenticated:
-            return None
-        try:
-            pr = PostRating.objects.filter(post=obj, user=user).first()
-            return pr.rating if pr else None
-        except Exception:
-            return None
-
-    def get_user(self, obj):
-        """Return the user associated with the post, or None."""
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        if not user or not user.is_authenticated:
-            return None
-        try:
-            return UserSerializer(user, context=self.context).data
-        except Exception:
-            return None
 
 
 class LearnSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

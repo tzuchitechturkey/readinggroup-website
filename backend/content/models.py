@@ -10,10 +10,8 @@ from django.utils.text import slugify
 from .enums import (
     ContentStatus,
     EventStatus,
-    PostStatus,
     LearnStatus,
     LearnType,
-    PostType,
     ReportType,
     VideoStatus,
     VideoType,
@@ -119,49 +117,12 @@ class Video(TimestampedModel):
         return self.title
 
 
-class Post(TimestampedModel):
-    """Landing posts that appear across the application."""
-
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
-    excerpt = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255)
-    writer_avatar = models.URLField(blank=True)
-    category = models.ForeignKey(
-        "PostCategory", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    status = models.CharField(
-        max_length=16, choices=PostStatus.choices, default=PostStatus.PUBLISHED
-    )
-    is_active = models.BooleanField(default=True)
-    views = models.PositiveIntegerField(default=0)
-    read_time = models.CharField(max_length=32, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    post_type = models.CharField(
-        max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD
-    )
-    language = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    camera_name = models.CharField(max_length=255, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class Learn(TimestampedModel):
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255, blank=True)
     excerpt = models.TextField(blank=True)
     body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255)
+    writer = models.CharField(max_length=255, blank=True)
     writer_avatar = models.URLField(blank=True)
     category = models.ForeignKey(
         "LearnCategory", on_delete=models.SET_NULL, null=True, blank=True
@@ -383,23 +344,6 @@ class HistoryEntry(TimestampedModel):
 
 
 # =====================================================Auxiliary classes========================================================
-class PostRating(TimestampedModel):
-    """User rating for a Post (1-5 stars). Each user may rate a post once."""
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_ratings"
-    )
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="ratings")
-    rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-
-    class Meta:
-        unique_together = (("user", "post"),)
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
 
 
 class ContentRating(TimestampedModel):
@@ -439,70 +383,6 @@ class SectionOrder(models.Model):
 
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
-
-
-class PostCategory(TimestampedModel):
-    """Categories for organizing posts with multi-language support.
-
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
 
 
 class EventCategory(TimestampedModel):

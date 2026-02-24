@@ -2,11 +2,9 @@ from django.contrib import admin
 from .models import (
     Event,
     HistoryEntry,
-    Post,
     Content,
     TeamMember,
     Video,
-    PostCategory,
     VideoCategory,
     ContentCategory,
     EventCategory,
@@ -31,18 +29,6 @@ class VideoAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "category_name", "language", "views", "is_featured")
     list_filter = ("category__name", "is_featured", "is_new")
     search_fields = ("title", "category__name")
-
-    def category_name(self, obj):
-        return obj.category.name if obj.category else None
-
-    category_name.short_description = "category"
-
-
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "writer", "category_name", "status", "is_active")
-    list_filter = ("status", "category__name", "is_active")
-    search_fields = ("title", "writer", "category__name")
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
@@ -101,14 +87,6 @@ class HistoryEntryAdmin(admin.ModelAdmin):
 
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
-
-
-@admin.register(PostCategory)
-class PostCategoryAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "key", "language", "description", "created_at")
     search_fields = ("name", "key")
     list_filter = ("language", "is_active")
