@@ -33,6 +33,7 @@ import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/Createor
 import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
 import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/CreateorEditBook";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
+import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";

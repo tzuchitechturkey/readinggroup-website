@@ -16,7 +16,7 @@ import PostsFilters from "./components/PostsFilters";
 import PostsTable from "./components/PostsTable";
 import PostsPagination from "./components/PostsPagination";
 
-function PostsList({ onSectionChange }) {
+function LearnList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
 
   // Custom hooks
@@ -115,6 +115,7 @@ function PostsList({ onSectionChange }) {
 
       {/* Header */}
       <DashboardSectionHeader
+        t={t}
         title={t("Posts List")}
         subtitle={`${t("Total")}: ${totalRecords} ${t("posts")}`}
         onBack={() => onSectionChange("dashboard")}
@@ -124,20 +125,20 @@ function PostsList({ onSectionChange }) {
       />
 
       {/* Search */}
-      <PostsSearch
+      {/* <PostsSearch
         search={search}
         onSearchChange={setSearch}
         onSearch={handleSearch}
         onClear={clearSearch}
-      />
+      /> */}
 
       {/* Filters */}
-      <PostsFilters
+      {/* <PostsFilters
         statusFilter={statusFilter}
         isWeeklyMomentFilter={isWeeklyMomentFilter}
         onStatusChange={handleStatusChange}
         onWeeklyMomentFilterChange={handleWeeklyMomentFilterChange}
-      />
+      /> */}
 
       {/* Table */}
       <PostsTable
@@ -202,4 +203,4 @@ function PostsList({ onSectionChange }) {
   );
 }
 
-export default PostsList;
+export default LearnList;
