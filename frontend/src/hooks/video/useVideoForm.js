@@ -302,6 +302,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     setErrors(newErrors);
 
     if (!isFormValid(newErrors)) {
+      console.log("Form validation errors:", newErrors);
       toast.error(t("Please fix the errors in the form"));
       return;
     }
@@ -313,7 +314,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
       "category",
       formData?.category?.id || formData?.category,
     );
-    formDataToSend.append("video_type", "video");
+    formDataToSend.append("video_type", formData?.video_type);
     formDataToSend.append("language", formData?.language);
     formDataToSend.append("video_url", formData?.video_url);
 
