@@ -111,6 +111,62 @@
     line-height: 1.6;
   }
 }
+
+@layer components {
+  .tzuchi-table-container {
+    @apply overflow-x-auto bg-transparent;
+  }
+  .tzuchi-table {
+    @apply w-full text-left border-collapse table-fixed min-w-[1150px];
+  }
+  .tzuchi-table-header-tr {
+    @apply border-b border-[#5E82AB];
+  }
+  .tzuchi-table-th {
+    @apply py-2 px-4 text-[#081945] font-bold text-[16px];
+  }
+  .tzuchi-table-row {
+    @apply transition-colors;
+  }
+  .tzuchi-table-row:not(:last-child) {
+    @apply border-b border-[#D0D9E7];
+  }
+  .tzuchi-table-td {
+    @apply py-8 px-4 align-middle text-[#081945] text-base;
+  }
+  .tzuchi-table-td-top {
+    @apply py-8 px-4 align-top text-[#081945] text-base;
+  }
+  .tzuchi-table-date {
+    @apply text-[24px] font-bold uppercase leading-[1.2] mb-1;
+  }
+  .tzuchi-table-time {
+    @apply text-[16px] font-normal leading-normal text-[#081945];
+  }
+  .tzuchi-table-title {
+    @apply text-[18px] font-bold leading-[1.5] max-w-[275px] text-[#081945];
+  }
+
+  /* Buttons */
+  .tzuchi-table-btn-base {
+    @apply px-6 py-3 rounded-[4px] text-[14px] font-normal transition-all w-full text-center flex items-center justify-center min-h-[40px];
+  }
+
+  .tzuchi-btn-resources {
+    @apply tzuchi-table-btn-base bg-[#FCFDFF] text-[#285688] hover:bg-[#F0F4F8] border border-transparent shadow-sm max-w-[134px];
+  }
+  .tzuchi-btn-resources-disabled {
+    @apply tzuchi-table-btn-base bg-[#ECF5FF] text-[#9FB3E1] cursor-not-allowed max-w-[134px];
+  }
+
+  .tzuchi-btn-link {
+    @apply tzuchi-table-btn-base bg-[#285688] text-[#FCFDFF] hover:bg-[#1C3D62] max-w-[174px];
+  }
+  .tzuchi-btn-link-disabled {
+    @apply tzuchi-table-btn-base bg-[#C2DCF7] text-[#92A5B8] cursor-not-allowed max-w-[174px];
+  }
+}
+
 /* custom scrollbar */
 .custom-scroll {
   scrollbar-width: thin; /* Firefox */
