@@ -1,14 +1,13 @@
 from django.conf import settings
-from django.db.models import Count
-from django.db.models import F
+from django.db.models import Count, F
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.parsers import MultiPartParser, FormParser
 from collections import defaultdict
 
 from .swagger_parameters import (
@@ -83,7 +82,7 @@ class VideoViewSet(viewsets.ModelViewSet):
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
     pagination_class = LimitOffsetPagination
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @swagger_auto_schema(
         operation_summary="all List videos",
@@ -93,7 +92,12 @@ class VideoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @action(detail=False, methods=("post",), url_path="fetch-youtube-info")
+    @action(
+        detail=False,
+        methods=("post",),
+        url_path="fetch-youtube-info",
+        parser_classes=(MultiPartParser, FormParser, JSONParser),
+    )
     def fetch_youtube_info(self, request):
         video_url = request.data.get("video_url") or request.data.get("url")
         if not video_url:
