@@ -1,11 +1,12 @@
 import React from "react";
+
 import { useTranslation } from "react-i18next";
 
 const LearnSidebar = ({ categories, activeCategory, onCategoryClick }) => {
   const { t } = useTranslation();
 
   return (
-    <aside className="h-full bg-white">
+    <aside className="h-full">
       <div className="py-10 px-6">
         <h1 className="text-3xl font-bold mb-10 text-gray-900 leading-none">
           {t("Learn")}
@@ -22,13 +23,13 @@ const LearnSidebar = ({ categories, activeCategory, onCategoryClick }) => {
                   <li key={item}>
                     <button
                       onClick={() => onCategoryClick(item)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-all text-sm ${
+                      className={`w-full text-left px-4 py-2 rounded-lg transition-all text-sm ${
                         activeCategory === item
-                          ? "bg-gray-300 text-gray-900 font-bold"
-                          : "text-gray-700 hover:bg-gray-50"
+                          ? "bg-[#285688] text-white "
+                          : "text-[#081945] hover:bg-gray-50"
                       }`}
                     >
-                      {t(item)}
+                      {t(item?.name)}
                     </button>
                   </li>
                 ))}

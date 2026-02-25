@@ -17,7 +17,7 @@ import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEd
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
 import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeamList";
 import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departments/DepartmentsContent";
-import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/PostsCategories/LearnCategoriesContent";
+import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
 import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
@@ -159,7 +159,7 @@ export default function Page() {
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
-    if (section === "createOrEditPost") {
+    if (section === "createOrEditLearn") {
       setSelectedLearn(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);

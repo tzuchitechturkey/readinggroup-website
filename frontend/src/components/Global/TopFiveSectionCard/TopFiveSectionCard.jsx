@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
 import Modal from "../Modal/Modal";

@@ -1,55 +1,41 @@
 import React from "react";
 
-import { useTranslation } from "react-i18next";
-
 import Loader from "@/components/Global/Loader/Loader";
-import { useCreateOrEditLearn } from "@/components/ForPages/Dashboard/_common/hooks/Content/useLearnForm";
+import { useCreateOrEditLearn } from "@/hooks/learn/useLearnForm";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import ImageUploadSection from "./components/ImageUploadSection";
-import BasicDetailsSection from "./components/BasicDetailsSection";
-import FormActionsSection from "./components/FormActionsSection";
+import ImageUploadSection from "./ImageUploadSection";
+import BasicDetailsSection from "./BasicDetailsSection";
+import FormActionsSection from "./FormActionsSection";
 
 function CreateOrEditLearn({ onSectionChange, learn = null }) {
   const {
     // Form state
     formData,
-    setFormData,
     hasChanges,
     errors,
-
     // Dropdown state
     showCategoryDropdown,
     setShowCategoryDropdown,
     categoriesList,
     categorySearchValue,
     setCategorySearchValue,
-
     // Loading state
     isLoading,
-
     // Refs
     categoryDropdownRef,
-
     // Handlers
     handleInputChange,
     handleImageUpload,
     handleCategorySelect,
     handleSubmit,
-
     // API Functions
     getCategories,
-    t,
     i18n,
   } = useCreateOrEditLearn(learn, onSectionChange);
-
   // Handler for learn type change (resets writer selection)
   const handleLearnTypeChange = (e) => {
     handleInputChange(e);
-    setFormData((prev) => ({
-      ...prev,
-      writer: "",
-    }));
   };
 
   // Handler for category search clear

@@ -6,13 +6,13 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import DashboardSectionHeader from "@/components/ForPages/Dashboard/DashboardSectionHeader/DashboardSectionHeader";
-import { useLearnData } from "@/hooks/useLearnData";
+import PagePagination from "@/components/Global/PagePagination/PagePagination";
+import { useLearnData } from "@/hooks/learn/useLearnData";
 import { useSorting } from "@/hooks/useSorting";
 import { usePagination } from "@/hooks/usePagination";
 
-import PostDetails from "../PostDetails/PostDetails";
-import PostsPagination from "./components/LearnPagination";
-import LearnTable from "./components/LearnTable";
+import PostDetails from "../LearnDetails/LearnDetails";
+import LearnTable from "./LearnTable";
 
 function LearnList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -36,11 +36,10 @@ function LearnList({ onSectionChange }) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("published");
 
   // Functions
   const fetchData = (page = 0) => {
-    getLearnData(page, search, statusFilter);
+    getLearnData(page, search);
   };
 
   const handleSearch = () => {
@@ -51,7 +50,7 @@ function LearnList({ onSectionChange }) {
   const clearSearch = () => {
     setSearch("");
     resetPage();
-    getLearnData(0, "", statusFilter);
+    getLearnData(0, "");
   };
 
   const handlePageChangeWithFetch = (newPage) => {
@@ -63,9 +62,9 @@ function LearnList({ onSectionChange }) {
     setShowDetailsModal(true);
   };
 
-  const handleEdit = (post) => {
-    setSelectedPost(post);
-    onSectionChange("createOrEditLearn", post);
+  const handleEdit = (learn) => {
+    setSelectedPost(learn);
+    onSectionChange("createOrEditLearn", learn);
   };
 
   const handleDeleteClick = (post) => {
@@ -84,7 +83,7 @@ function LearnList({ onSectionChange }) {
   // Effects
   useEffect(() => {
     fetchData(currentPage - 1);
-  }, [statusFilter]);
+  }, []);
 
   // Computed values
   const sortedData = getSortedData(postData);
@@ -99,8 +98,8 @@ function LearnList({ onSectionChange }) {
       {/* Header */}
       <DashboardSectionHeader
         t={t}
-        title={t("Posts List")}
-        subtitle={`${t("Total")}: ${totalRecords} ${t("posts")}`}
+        title={t("Learn List")}
+        subtitle={`${t("Total")}: ${totalRecords} ${t("learn")}`}
         onBack={() => onSectionChange("dashboard")}
         backTitle={t("Back to Dashboard")}
         onAdd={() => onSectionChange("createOrEditLearn", null)}
@@ -113,7 +112,7 @@ function LearnList({ onSectionChange }) {
 
       {/* Table */}
       <LearnTable
-        posts={sortedData}
+        learnData={sortedData}
         search={search}
         sortConfig={sortConfig}
         sortData={sortData}
@@ -125,8 +124,9 @@ function LearnList({ onSectionChange }) {
       />
 
       {/* Pagination */}
-      <PostsPagination
-        paginationInfo={paginationInfo}
+      <PagePagination
+        currentPage={paginationInfo.currentPage}
+        totalPages={paginationInfo.totalPages}
         onPageChange={handlePageChangeWithFetch}
       />
 
@@ -163,9 +163,9 @@ function LearnList({ onSectionChange }) {
             setShowDeleteModal(false);
           }}
           onConfirm={handleConfirmDelete}
-          title={t("Delete Post")}
+          title={t("Delete Learn")}
           message={t(
-            "Are you sure you want to delete this Post? This action cannot be undone.",
+            "Are you sure you want to delete this Learn? This action cannot be undone.",
           )}
           itemName={selectedPost?.title}
         />

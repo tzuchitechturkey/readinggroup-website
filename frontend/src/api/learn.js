@@ -1,6 +1,6 @@
 import axios from "./axios";
 
-export async function GetLearn(limit, offset = 0, status, filters = {}) {
+export async function GetLearn(limit, offset = 0, filters = {}) {
   // Build query string from filters
   const params = new URLSearchParams();
   // Add pagination
@@ -15,9 +15,8 @@ export async function GetLearn(limit, offset = 0, status, filters = {}) {
   if (filters.category) params.append("category", filters.category);
   if (filters.learn_type) params.append("learn_type", filters.learn_type);
 
-  return await axios.get(`/learn/?status=${status}&${params.toString()}`);
+  return await axios.get(`/learn/?${params.toString()}`);
 }
-
 
 export async function CreateLearn(data) {
   return await axios.post(`/learn/`, data);
@@ -40,7 +39,7 @@ export async function DeleteLearnById(id) {
 }
 
 // Categories
-export async function GetLearnCategories(limit, offset, search = "") {
+export async function GetLearnCategories(limit = 20, offset = 0, search = "") {
   return await axios.get(
     `/learn-categories/?limit=${limit}&offset=${offset}&search=${search}`,
   );
@@ -71,8 +70,14 @@ export async function GetLearnsByCategoryId(
   categoryId,
   limit = 10,
   offset = 0,
+  params = {},
 ) {
   return await axios.get(
     `/learn-categories/${categoryId}/learns/?limit=${limit}&offset=${offset}`,
+    { params },
   );
+}
+
+export async function GetLearnCategoriesByType(type) {
+  return await axios.get(`/learn-categories/by-type/?type=${type}`);
 }

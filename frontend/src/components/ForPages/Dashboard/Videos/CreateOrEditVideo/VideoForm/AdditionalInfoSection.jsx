@@ -9,7 +9,7 @@ export const AdditionalInfoSection = ({
   return (
     <div className="space-y-4">
       {/* Reference Code */}
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {t("Reference Code")}
         </label>
@@ -21,10 +21,10 @@ export const AdditionalInfoSection = ({
           placeholder={t("Enter reference code (optional)")}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-      </div>
+      </div> */}
 
       {/* Is Featured */}
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <input
           type="checkbox"
           name="is_featured"
@@ -36,7 +36,7 @@ export const AdditionalInfoSection = ({
         <label htmlFor="is_featured" className="text-sm font-medium text-gray-700 cursor-pointer">
           {t("Featured Video")}
         </label>
-      </div>
+      </div> */}
 
       {/* Duration (Read-only) */}
       {formData?.duration && (

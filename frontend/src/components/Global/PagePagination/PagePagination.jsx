@@ -1,7 +1,8 @@
 import React from "react";
+
 import { HiOutlineChevronRight } from "react-icons/hi";
 
-const Pagination = ({ currentPage = 1, totalPages = 4, onPageChange }) => {
+const Pagination = ({ currentPage = 1, totalPages = 1, onPageChange }) => {
   return (
     <div className="mt-20 flex justify-center items-center gap-6">
       {[...Array(totalPages)].map((_, i) => {

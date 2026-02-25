@@ -10,7 +10,7 @@ import { useContentsData } from "@/hooks/useContentsData";
 import { useSorting } from "@/hooks/useSorting";
 import { usePagination } from "@/hooks/usePagination";
 
-import PostDetails from "../../Learn/PostDetails/PostDetails";
+import PostDetails from "../../Learn/LearnDetails/LearnDetails";
 import ContentsSearch from "./components/ContentsSearch";
 import ContentsFilters from "./components/ContentsFilters";
 import ContentsTable from "./components/ContentsTable";

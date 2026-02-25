@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
 import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import { GetPostCategories, GetPostsByCategoryId } from "@/api/posts";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import UserProfileDropdown from "@/components/Global/UserProfileDropdown/UserProfileDropdown";
 
