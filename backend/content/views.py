@@ -9,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import MultiPartParser, FormParser
+from collections import defaultdict
 
 from .swagger_parameters import (
     video_manual_parameters,
@@ -22,6 +23,7 @@ from .swagger_parameters import (
     learn_manual_parameters,
     learn_category_manual_parameters,
     attachments_for_video_manual_parameters,
+    learn_grouped_by_type_manual_parameters,
 )
 from .models import (
     Event,
@@ -998,6 +1000,51 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
         serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Get learns grouped by type",
+        operation_description="Return learns grouped by LearnCategory.learn_type. Optional ordering parameter can be applied to each group.",
+        manual_parameters=learn_grouped_by_type_manual_parameters,
+    )
+    @action(detail=False, methods=["get"], url_path="grouped-by-type")
+    def grouped_by_type(self, request):
+        """
+        Return learns grouped by LearnCategory.learn_type
+        """
+
+        learn_type_filter = request.query_params.get("learn_type")
+
+        learns = Learn.objects.select_related("category")
+
+        if learn_type_filter:
+            learns = learns.filter(category__learn_type=learn_type_filter)
+
+        ordering = request.query_params.get("ordering")
+        if ordering:
+            learns = learns.order_by(ordering)
+
+        grouped = defaultdict(list)
+
+        for learn in learns:
+            key = (
+                learn.category.learn_type
+                if learn.category and learn.category.learn_type
+                else "unknown"
+            )
+
+            grouped[key].append(learn)
+
+        result = {}
+
+        for key, items in grouped.items():
+            serializer = LearnSerializer(
+                items,
+                many=True,
+                context={"request": request},
+            )
+            result[key] = serializer.data
+
+        return Response(result)
 
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""

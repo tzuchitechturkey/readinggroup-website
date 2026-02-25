@@ -253,3 +253,13 @@ attachments_for_video_manual_parameters = [
         items=openapi.Items(type=openapi.TYPE_FILE),
     )
 ]
+
+learn_grouped_by_type_manual_parameters = [
+    openapi.Parameter(
+        "learn_type",
+        openapi.IN_QUERY,
+        description="Filter by learn_type (JSON object with 'name' field)",
+        type=openapi.TYPE_STRING,
+        required=False,
+    ),
+]
