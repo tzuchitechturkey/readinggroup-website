@@ -1,4 +1,4 @@
-from .enums import ContentStatus, EventStatus, VideoStatus
+from .enums import ContentStatus, EventStatus
 
 
 def _filter_published(queryset):
@@ -13,11 +13,6 @@ def _filter_published(queryset):
 
     try:
         return queryset.filter(status=EventStatus.PUBLISHED)
-    except Exception:
-        pass
-
-    try:
-        return queryset.filter(status=VideoStatus.PUBLISHED)
     except Exception:
         pass
 

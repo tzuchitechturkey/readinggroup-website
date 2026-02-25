@@ -10,11 +10,6 @@ class ContentStatus(models.TextChoices):
 
 # ======================================================= Content Model End =======================================================
 # ======================================================= Video Model Start =======================================================
-class VideoStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
-
 
 class VideoType(models.TextChoices):
     NEW_CLIP = "new_clip", "New Clip"
@@ -36,8 +31,6 @@ class EventStatus(models.TextChoices):
 
 
 # ======================================================= Event Model End =======================================================
-
-
 # ======================================================= Language Choices Start ================================================
 class LanguageChoices(models.TextChoices):
     ENGLISH = "en", "English"

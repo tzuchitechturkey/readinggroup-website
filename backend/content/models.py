@@ -12,7 +12,6 @@ from .enums import (
     EventStatus,
     LearnType,
     ReportType,
-    VideoStatus,
     VideoType,
     LanguageChoices,
 )
@@ -52,28 +51,18 @@ class Video(TimestampedModel):
     category = models.ForeignKey(
         "VideoCategory", on_delete=models.SET_NULL, null=True, blank=True
     )
+    description = models.TextField(blank=True)
     video_type = models.CharField(
         max_length=100, blank=True, null=True, choices=VideoType.choices
     )
     language = models.CharField(max_length=50)
-    thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
     views = models.PositiveIntegerField(default=0)
-    status = models.CharField(
-        max_length=16, choices=VideoStatus.choices, default=VideoStatus.PUBLISHED
-    )
     happened_at = models.DateTimeField(blank=True, null=True)
-    is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
-    cast = models.JSONField(default=list, blank=True)
-    season_name = models.ForeignKey(
-        "SeasonId", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    description = models.TextField(blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
+    guest_speakers = models.JSONField(default=list, blank=True)
+    live_stream_link = models.URLField(blank=True)
 
     @property
     def is_new_computed(self) -> bool:

@@ -36,7 +36,6 @@ from .models import (
     ContentCategory,
     PositionTeamMember,
     EventSection,
-    MyListEntry,
     SeasonTitle,
     SeasonId,
     SocialMedia,
@@ -168,151 +167,16 @@ class VideoViewSet(viewsets.ModelViewSet):
             elif is_new.lower() in ("false"):
                 queryset = queryset.filter(is_new=False)
 
-        is_featured = params.get("is_featured")
-        if is_featured is not None:
-            if is_featured.lower() in ("true"):
-                queryset = queryset.filter(is_featured=True)
-            elif is_featured.lower() in ("false"):
-                queryset = queryset.filter(is_featured=False)
-
-        status = params.get("status")
-        if status:
-            values = []
-            for item in status.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(status__in=values)
-
-        is_weekly_moment = params.get("is_weekly_moment")
-        if is_weekly_moment is not None:
-            if is_weekly_moment.lower() in ("true"):
-                queryset = queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() in ("false"):
-                queryset = queryset.filter(is_weekly_moment=False)
-
-        is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
-        if not is_detail and not params.get("status"):
-            try:
-                queryset = _filter_published(queryset)
-            except Exception:
-                try:
-                    queryset = queryset.filter(status="published")
-                except Exception:
-                    pass
-            try:
-                queryset = queryset.filter(category__is_active=True)
-            except Exception:
-                pass
-
         return queryset.order_by("-created_at")
 
-    @action(
-        detail=True,
-        methods=("post", "delete"),
-        url_path="my-list",
-        url_name="my_list_item",
-    )
-    def my_list_item(self, request, pk=None):
-        """Add or remove a video from the requesting user's My List.
-        POST -> add (idempotent)
-        DELETE -> remove (idempotent)
-        """
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response(
-                {"detail": "Authentication required."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        try:
-            video = Video.objects.get(pk=pk)
-        except Video.DoesNotExist:
-            return Response(
-                {"detail": "Video not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if request.method == "POST":
-            # create if not exists
-            MyListEntry.objects.get_or_create(user=user, video=video)
-            serializer = self.get_serializer(video, context={"request": request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # DELETE: remove if exists
-        MyListEntry.objects.filter(user=user, video=video).delete()
-        serializer = self.get_serializer(video, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=("get",), url_path="my-list", url_name="my_list")
-    def my_list(self, request):
-        """Return the list of videos saved by the requesting user."""
-        user = request.user
-        if not user or not user.is_authenticated:
-            return Response(
-                {"detail": "Authentication required."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        # get videos via MyListEntry, preserve ordering by created_at in MyListEntry
-        entries = (
-            MyListEntry.objects.filter(user=user)
-            .select_related("video")
-            .order_by("-created_at")
-        )
-        # Extract videos preserving ordering from the MyListEntry records
-        videos = [e.video for e in entries]
-
-        # Use the view's pagination if configured. paginate_queryset accepts lists as well as querysets.
-        page = self.paginate_queryset(videos)
-        if page is not None:
-            serializer = VideoSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = VideoSerializer(videos, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_summary="List published videos",
-        operation_description="Return videos with status='published' and whose category is active.",
-        manual_parameters=video_manual_parameters,
-    )
-    @action(detail=False, methods=("get",), url_path="published", url_name="published")
-    def published(self, request):
-        """Return videos that are published and whose category is active.
-
-        URL: /api/v1/videos/published/
-        Supports pagination and includes likes annotation so serializers can show likes_count/has_liked.
-        """
-        qs = Video.objects.all()
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            try:
-                qs = qs.filter(status="published")
-            except Exception:
-                pass
-
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        qs = qs.order_by("-created_at")
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = VideoSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = VideoSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
 
     @action(
         detail=False,
         methods=("get",),
-        url_path="last-published-by-type",
-        url_name="last_published_by_type",
+        url_path="by_type_video",
+        url_name="by_type_video",
     )
-    def last_published_by_type(self, request):
+    def by_type_video(self, request):
         """
         Return:
         - last 1 FULL_LIVE_STREAM
@@ -323,13 +187,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         def base_queryset(video_type_value):
             qs = Video.objects.filter(video_type=video_type_value)
 
-            # published filter
-            try:
-                qs = _filter_published(qs)
-            except Exception:
-                qs = qs.filter(status="published")
-
-            # active category (optional safety)
+            # optional: فقط category active
             try:
                 qs = qs.filter(category__is_active=True)
             except Exception:
@@ -337,10 +195,8 @@ class VideoViewSet(viewsets.ModelViewSet):
 
             return qs.order_by("-created_at")
 
-        # ⭐ اخر 1 live stream
         live_stream_qs = base_queryset(VideoType.FULL_LIVE_STREAM)[:1]
 
-        # ⭐ اخر 3 new clip
         new_clip_qs = base_queryset(VideoType.NEW_CLIP)[:3]
 
         payload = {
@@ -352,10 +208,9 @@ class VideoViewSet(viewsets.ModelViewSet):
             ).data,
         }
 
-        # اذا الاثنين فاضيين
         if not payload["full_live_stream"] and not payload["new_clip"]:
             return Response(
-                {"detail": "No published videos found."},
+                {"detail": "No videos found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -1096,17 +951,22 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="learns")
     def learns(self, request, pk=None):
         """
-        Return learn objects belonging to this LearnCategory.
+        Return learn objects belonging to this LearnCategory with pagination.
         """
 
         category = self.get_object()
 
         learns = Learn.objects.filter(category=category).select_related("category")
 
-        # دعم ordering من URL
+        # ordering من URL
         ordering = request.query_params.get("ordering")
         if ordering:
             learns = learns.order_by(ordering)
+
+        page = self.paginate_queryset(learns)
+        if page is not None:
+            serializer = LearnSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
 
         serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)

@@ -161,10 +161,6 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     category = serializers.PrimaryKeyRelatedField(
         queryset=VideoCategory.objects.all(), write_only=True, required=False
     )
-    season_name = serializers.PrimaryKeyRelatedField(
-        queryset=SeasonId.objects.all(), write_only=True, required=False
-    )
-    has_in_my_list = serializers.SerializerMethodField(read_only=True)
     user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -222,34 +218,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             if instance.category
             else None
         )
-        data["season_name"] = (
-            SeasonIdSerializer(instance.season_name, context=self.context).data
-            if instance.season_name
-            else None
-        )
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        # has_in_my_list indicates if the requesting user has saved this video
-        try:
-            if user and user.is_authenticated:
-                data["has_in_my_list"] = MyListEntry.objects.filter(
-                    user=user, video=instance
-                ).exists()
-            else:
-                data["has_in_my_list"] = False
-        except Exception:
-            data["has_in_my_list"] = False
         return data
-
-    def get_has_in_my_list(self, obj):
-        request = self.context.get("request")
-        user = getattr(request, "user", None)
-        if not user or not user.is_authenticated:
-            return False
-        try:
-            return MyListEntry.objects.filter(user=user, video=obj).exists()
-        except Exception:
-            return False
 
     def get_user(self, obj):
         try:
