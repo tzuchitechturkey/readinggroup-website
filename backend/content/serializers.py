@@ -164,7 +164,12 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
 
     datetime_fields = ("happened_at", "created_at", "updated_at")
-    attachments = VideoAttachmentSerializer(many=True, read_only=True)
+    attachments = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
+    attachments_data = VideoAttachmentSerializer(
+        many=True, read_only=True, source="attachments"
+    )
     category = serializers.PrimaryKeyRelatedField(
         queryset=VideoCategory.objects.all(), write_only=True, required=False
     )
@@ -176,6 +181,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         file_fields = ("thumbnail",)
 
     def create(self, validated_data):
+        attachments_ids = validated_data.pop("attachments", [])
         youtube_url = validated_data.get("video_url")
         api_key = getattr(settings, "YOUTUBE_API_KEY", None)
         should_enrich = bool(youtube_url and api_key)
@@ -216,7 +222,13 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
                     if thumb_url:
                         validated_data["thumbnail_url"] = thumb_url
 
-        return super().create(validated_data)
+        instance = super().create(validated_data)
+        if attachments_ids:
+            attachment_instances = VideoAttachment.objects.filter(
+                id__in=attachments_ids
+            )
+            instance.attachments.set(attachment_instances)
+        return instance
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -225,7 +237,24 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             if instance.category
             else None
         )
+        # include associated VideoAttachment rows as 'attachments_data'
+        try:
+            data["attachments_data"] = VideoAttachmentSerializer(
+                instance.attachments.all(), many=True, context=self.context
+            ).data
+        except Exception:
+            data["attachments_data"] = []
         return data
+
+    def update(self, instance, validated_data):
+        attachments_ids = validated_data.pop("attachments", None)
+        instance = super().update(instance, validated_data)
+        if attachments_ids is not None:
+            attachment_instances = VideoAttachment.objects.filter(
+                id__in=attachments_ids
+            )
+            instance.attachments.set(attachment_instances)
+        return instance
 
     def get_user(self, obj):
         try:

@@ -21,7 +21,6 @@ from .swagger_parameters import (
     video_category_manual_parameters,
     learn_manual_parameters,
     learn_category_manual_parameters,
-    attachments_for_video_manual_parameters,
     learn_grouped_by_type_manual_parameters,
 )
 from .models import (
@@ -227,8 +226,7 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="Upload attachments to a video",
-        operation_description="Upload one or more files to be attached to a video. Accepts multipart/form-data with 'attachments' as the file field (can be multiple).",
-        manual_parameters=attachments_for_video_manual_parameters,
+        operation_description="Upload one or more files to a video.",
     )
     @action(
         detail=True,
@@ -1517,7 +1515,7 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
     queryset = VideoCategory.objects.all()
     serializer_class = VideoCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
+    search_fields = ("name",)
     ordering_fields = ("order", "created_at")
     queryset = VideoCategory.objects.all().order_by("order", "-created_at")
 
@@ -1796,11 +1794,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         # only include videos whose category is active
         try:
             video_q = video_q.filter(category__is_active=True)
-        except Exception:
-            pass
-        # only include posts whose category is active
-        try:
-            post_q = post_q.filter(category__is_active=True)
         except Exception:
             pass
 

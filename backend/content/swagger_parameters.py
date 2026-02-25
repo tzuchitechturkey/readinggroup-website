@@ -244,15 +244,6 @@ learn_category_manual_parameters = [
     ),
 ]
 
-attachments_for_video_manual_parameters = [
-    openapi.Parameter(
-        "attachments",
-        openapi.IN_FORM,
-        description="Files to attach (multipart/form-data, can be multiple)",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_FILE),
-    )
-]
 
 learn_grouped_by_type_manual_parameters = [
     openapi.Parameter(
