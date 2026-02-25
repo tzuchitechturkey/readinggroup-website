@@ -96,7 +96,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         detail=False,
         methods=("post",),
         url_path="fetch-youtube-info",
-        parser_classes=(MultiPartParser, FormParser, JSONParser),
     )
     def fetch_youtube_info(self, request):
         video_url = request.data.get("video_url") or request.data.get("url")
@@ -235,7 +234,6 @@ class VideoViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=["post"],
         url_path="attachments",
-        parser_classes=(MultiPartParser, FormParser),
     )
     def upload_attachments(self, request, pk=None):
         """
