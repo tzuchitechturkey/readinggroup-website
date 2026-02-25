@@ -87,10 +87,9 @@ class HistoryEntryAdmin(admin.ModelAdmin):
 
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = ("name",)
+    list_filter = ("is_active",)
 
 
 @admin.register(EventCategory)

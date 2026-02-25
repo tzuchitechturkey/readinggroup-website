@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db.models import Count
 from django.db.models import F
-from fastapi import params
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +8,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .swagger_parameters import (
     video_manual_parameters,
@@ -21,6 +21,7 @@ from .swagger_parameters import (
     video_category_manual_parameters,
     learn_manual_parameters,
     learn_category_manual_parameters,
+    attachments_for_video_manual_parameters,
 )
 from .models import (
     Event,
@@ -44,6 +45,7 @@ from .models import (
     Authors,
     Book,
     BookCategory,
+    VideoAttachment,
 )
 from .serializers import (
     EventSerializer,
@@ -52,6 +54,7 @@ from .serializers import (
     ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
+    VideoAttachmentSerializer,
     LearnCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
@@ -78,6 +81,7 @@ class VideoViewSet(viewsets.ModelViewSet):
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
     pagination_class = LimitOffsetPagination
+    parser_classes = (MultiPartParser, FormParser)
 
     @swagger_auto_schema(
         operation_summary="all List videos",
@@ -215,6 +219,47 @@ class VideoViewSet(viewsets.ModelViewSet):
             )
 
         return Response(payload, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Upload attachments to a video",
+        operation_description="Upload one or more files to be attached to a video. Accepts multipart/form-data with 'attachments' as the file field (can be multiple).",
+        manual_parameters=attachments_for_video_manual_parameters,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="attachments",
+        parser_classes=(MultiPartParser, FormParser),
+    )
+    def upload_attachments(self, request, pk=None):
+        """
+        Upload multiple files to a video.
+        """
+
+        video = self.get_object()
+
+        files = request.FILES.getlist("attachments")
+
+        if not files:
+            return Response(
+                {"detail": "No files provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        created = []
+
+        for f in files:
+            obj = VideoAttachment.objects.create(
+                video=video,
+                file=f,
+            )
+            created.append(obj)
+
+        serializer = VideoAttachmentSerializer(
+            created, many=True, context={"request": request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LearnViewSet(viewsets.ModelViewSet):
@@ -957,6 +1002,33 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
+
+
+class VideoAttachmentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing VideoAttachment content."""
+
+    queryset = VideoAttachment.objects.all()
+    serializer_class = VideoAttachmentSerializer
+    search_fields = ("file_name",)
+    ordering_fields = ("created_at",)
+
+    def create(self, request, *args, **kwargs):
+        """Create a VideoAttachment with uploaded file."""
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        attachment = VideoAttachment.objects.create(
+            file=file,
+            file_name=request.data.get("file_name", file.name),
+            file_size=file.size,
+            description=request.data.get("description", ""),
+        )
+
+        serializer = self.get_serializer(attachment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ContentCategoryViewSet(viewsets.ModelViewSet):

@@ -27,22 +27,6 @@ class TimestampedModel(models.Model):
         abstract = True
 
 
-class Authors(TimestampedModel):
-    """Authors for videos and posts."""
-
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    position = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
-    avatar_url = models.URLField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Video(TimestampedModel):
     """Video content that powers the dashboard listings."""
 
@@ -105,8 +89,52 @@ class Video(TimestampedModel):
         return self.title
 
 
+class VideoAttachment(TimestampedModel):
+    video = models.ForeignKey(
+        "Video",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(upload_to="videos/materials/")
+    file_name = models.CharField(max_length=255, blank=True)
+    file_size = models.PositiveIntegerField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.file:
+            self.file_name = self.file.name
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"VideoAttachment<{self.video_id}:{self.pk}>"
+
+
+class VideoCategory(TimestampedModel):
+    """Categories for organizing videos with multi-language support.
+
+    Each category has a unique key that identifies it across all languages.
+    The combination of (key, language) must be unique.
+    """
+
+    name = models.CharField(
+        max_length=100, help_text="Category name in the specified language"
+    )
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Manual ordering (lower values appear first)"
+    )
+
+    class Meta:
+        ordering = ("order", "-created_at")
+
+    def __str__(self) -> str:
+        return
+
+
 class Learn(TimestampedModel):
     title = models.CharField(max_length=255)
+    direction = models.CharField(max_length=255, blank=True)
     subtitle = models.CharField(max_length=255, blank=True)
     category = models.ForeignKey(
         "LearnCategory",
@@ -498,68 +526,20 @@ class ContentCategory(TimestampedModel):
         return f"{self.name} ({self.language})"
 
 
-class VideoCategory(TimestampedModel):
-    """Categories for organizing videos with multi-language support.
+class Authors(TimestampedModel):
+    """Authors for videos and posts."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
+    position = models.CharField(max_length=255, blank=True)
+    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
+    avatar_url = models.URLField(blank=True)
 
     class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
+        ordering = ("name",)
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
+        return self.name
 
 
 class BookCategory(TimestampedModel):

@@ -14,7 +14,7 @@ from .models import (
     EventCategory,
     EventSection,
     HistoryEntry,
-    MyListEntry,
+    VideoAttachment,
     NavbarLogo,
     PositionTeamMember,
     Learn,
@@ -130,6 +130,12 @@ class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
 
 
+class VideoAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VideoAttachment
+        fields = "__all__"
+
+
 class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     # allow writing by primary key and represent as object in output
@@ -158,6 +164,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
 
     datetime_fields = ("happened_at", "created_at", "updated_at")
+    attachments = VideoAttachmentSerializer(many=True, read_only=True)
     category = serializers.PrimaryKeyRelatedField(
         queryset=VideoCategory.objects.all(), write_only=True, required=False
     )
