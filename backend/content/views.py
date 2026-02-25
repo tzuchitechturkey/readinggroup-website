@@ -1009,12 +1009,13 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="grouped-by-type")
     def grouped_by_type(self, request):
         """
-        Return learns grouped by LearnCategory.learn_type
+        Return EVENT learns grouped by LearnCategory.learn_type
         """
 
         learn_type_filter = request.query_params.get("learn_type")
 
-        learns = Learn.objects.select_related("category")
+        # ⭐ فقط events
+        learns = Learn.objects.select_related("category").filter(is_event=True)
 
         if learn_type_filter:
             learns = learns.filter(category__learn_type=learn_type_filter)
@@ -1031,7 +1032,6 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
                 if learn.category and learn.category.learn_type
                 else "unknown"
             )
-
             grouped[key].append(learn)
 
         result = {}
