@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models import Count
 from django.db.models import F
+from fastapi import params
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -68,9 +69,6 @@ from .serializers import (
 )
 from .youtube import YouTubeAPIError, fetch_video_info
 from .enums import VideoType
-from .views_helpers import (
-    _filter_published,
-)
 
 
 class VideoViewSet(viewsets.ModelViewSet):
@@ -155,10 +153,13 @@ class VideoViewSet(viewsets.ModelViewSet):
         happened_at = params.get("happened_at")
         if happened_at:
             try:
-                parsed = date.fromisoformat(happened_at)
-                queryset = queryset.filter(happened_at=parsed)
+                year, month = happened_at.split("-")
+                queryset = queryset.filter(
+                    happened_at__year=int(year),
+                    happened_at__month=int(month),
+                )
             except Exception:
-                queryset = queryset.filter(happened_at=happened_at)
+                pass
 
         is_new = params.get("is_new")
         if is_new is not None:
@@ -168,7 +169,6 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(is_new=False)
 
         return queryset.order_by("-created_at")
-
 
     @action(
         detail=False,
@@ -261,7 +261,14 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         happened_at = params.get("happened_at")
         if happened_at:
-            queryset = queryset.filter(happened_at__date=happened_at)
+            try:
+                year, month = happened_at.split("-")
+                queryset = queryset.filter(
+                    happened_at__year=int(year),
+                    happened_at__month=int(month),
+                )
+            except Exception:
+                pass
 
         category = params.get("category")
         if category:
@@ -348,13 +355,6 @@ class ContentViewSet(viewsets.ModelViewSet):
         is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
         if not is_detail and not params.get("status"):
             try:
-                queryset = _filter_published(queryset)
-            except Exception:
-                try:
-                    queryset = queryset.filter(status="published")
-                except Exception:
-                    pass
-            try:
                 queryset = queryset.filter(category__is_active=True)
             except Exception:
                 pass
@@ -372,14 +372,6 @@ class ContentViewSet(viewsets.ModelViewSet):
             limit = 5
 
         qs = Content.objects.all()
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            try:
-                qs = qs.filter(status="published")
-            except Exception:
-                pass
-
         try:
             qs = qs.filter(category__is_active=True)
         except Exception:
@@ -749,13 +741,6 @@ class EventViewSet(viewsets.ModelViewSet):
         is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
         if not is_detail and not params.get("status"):
             try:
-                queryset = _filter_published(queryset)
-            except Exception:
-                try:
-                    queryset = queryset.filter(status="published")
-                except Exception:
-                    pass
-            try:
                 queryset = queryset.filter(category__is_active=True)
             except Exception:
                 pass
@@ -844,8 +829,6 @@ class EventViewSet(viewsets.ModelViewSet):
             qs = qs.filter(is_weekly_moment=True)
         except Exception:
             pass
-
-        qs = _filter_published(qs)
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -1216,13 +1199,6 @@ class EventCategoryViewSet(viewsets.ModelViewSet):
 
         # Only include published events in this category
         published_qs = Event.objects.filter(category=category)
-        try:
-            published_qs = _filter_published(published_qs)
-        except Exception:
-            try:
-                published_qs = published_qs.filter(status="published")
-            except Exception:
-                pass
 
         if not published_qs.exists():
             return Response(
@@ -1358,13 +1334,6 @@ class SeasonIdViewSet(viewsets.ModelViewSet):
         # Videos point to SeasonId via Video.season_name
         # Only include published videos whose related category is active.
         qs = Video.objects.filter(season_name=season)
-        try:
-            qs = _filter_published(qs)
-        except Exception:
-            try:
-                qs = qs.filter(status="published")
-            except Exception:
-                pass
 
         try:
             qs = qs.filter(category__is_active=True)
@@ -1526,13 +1495,6 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
 
         # Only expose the category when it has at least one published video.
         published_qs = Video.objects.filter(category=category)
-        try:
-            published_qs = _filter_published(published_qs)
-        except Exception:
-            try:
-                published_qs = published_qs.filter(status="published")
-            except Exception:
-                pass
 
         try:
             published_qs = published_qs.filter(category__is_active=True)
@@ -1596,10 +1558,6 @@ class EventSectionViewSet(viewsets.ModelViewSet):
         for section in sections_qs:
             # get events for this section; use section.events() helper
             events_qs = section.events().order_by("-happened_at", "-created_at")
-            try:
-                events_qs = _filter_published(events_qs)
-            except Exception:
-                pass
             if events_limit is not None:
                 events_qs = events_qs[:events_limit]
 
@@ -1653,11 +1611,6 @@ class EventSectionViewSet(viewsets.ModelViewSet):
         for section in sections_qs:
             # get events for this section
             events_qs = section.events().all()
-            try:
-                events_qs = _filter_published(events_qs)
-            except Exception:
-                pass
-
             # order by annotated likes count (fallback to created_at)
             try:
                 events_qs = events_qs.order_by("-created_at")[:events_limit]
@@ -1718,10 +1671,7 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         video_q = Video.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
         )[:per_model_cap]
-        try:
-            video_q = _filter_published(video_q)
-        except Exception:
-            pass
+
         # only include videos whose category is active
         try:
             video_q = video_q.filter(category__is_active=True)
@@ -1736,10 +1686,6 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         event_q = Event.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
         )[:per_model_cap]
-        try:
-            event_q = _filter_published(event_q)
-        except Exception:
-            pass
         # only include events whose category is active
         try:
             event_q = event_q.filter(category__is_active=True)
@@ -1749,10 +1695,7 @@ class GlobalSearchViewSet(viewsets.ViewSet):
         content_q = Content.objects.filter(title__icontains=search_term).order_by(
             "-created_at"
         )[:per_model_cap]
-        try:
-            content_q = _filter_published(content_q)
-        except Exception:
-            pass
+
         # only include contents whose category is active
         try:
             content_q = content_q.filter(category__is_active=True)

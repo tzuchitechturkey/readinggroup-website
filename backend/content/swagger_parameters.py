@@ -18,7 +18,14 @@ video_manual_parameters = [
     openapi.Parameter(
         "happened_at",
         openapi.IN_QUERY,
-        description="Filter by happened date",
+        description=(
+            "Filter by happened_at. "
+            "Formats supported: "
+            "YYYY (year), "
+            "YYYY-MM (year-month), "
+            "YYYY-MM-DD (full date). "
+            "Examples: 2026 | 2026-02 | 2026-02-14"
+        ),
         type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
@@ -28,24 +35,39 @@ video_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
+]
+
+learn_manual_parameters = [
     openapi.Parameter(
-        "is_featured",
+        "created_at",
         openapi.IN_QUERY,
-        description="Filter by is_featured status",
+        description="Filter by created date",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "category",
+        openapi.IN_QUERY,
+        description="Filter by category (JSON object with 'name' field)",
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
     openapi.Parameter(
-        "is_weekly_moment",
+        "happened_at",
         openapi.IN_QUERY,
-        description="Filter by is_weekly_moment status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
+        description=(
+            "Filter by happened_at. "
+            "Formats supported: "
+            "YYYY (year), "
+            "YYYY-MM (year-month), "
+            "YYYY-MM-DD (full date). "
+            "Examples: 2026 | 2026-02 | 2026-02-14"
+        ),
+        type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
-        "status",
+        "learn_type",
         openapi.IN_QUERY,
-        description="Filter by status",
+        description="Filter by Learn Type",
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
@@ -211,57 +233,6 @@ video_category_manual_parameters = [
     ),
 ]
 
-
-learn_manual_parameters = [
-    openapi.Parameter(
-        "created_at",
-        openapi.IN_QUERY,
-        description="Filter by created date",
-        type=openapi.TYPE_STRING,
-    ),
-    openapi.Parameter(
-        "category",
-        openapi.IN_QUERY,
-        description="Filter by category (JSON object with 'name' field)",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "language",
-        openapi.IN_QUERY,
-        description="Filter by language",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "writer",
-        openapi.IN_QUERY,
-        description="Filter by writer",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "learn_type",
-        openapi.IN_QUERY,
-        description="Filter by Learn Type",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "status",
-        openapi.IN_QUERY,
-        description="Filter by status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "is_weekly_moment",
-        openapi.IN_QUERY,
-        description="Filter by is_weekly_moment status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-]
 
 learn_category_manual_parameters = [
     openapi.Parameter(
