@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import LearnSidebar from "@/components/ForPages/Learn/LearnSidebar";
-import DateFilter from "@/components/Videos/DateFilter/DateFilter";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
 import VerticalCard from "@/components/ForPages/Learn/VerticalCard";
 import HorizontalCard from "@/components/ForPages/Learn/HorizontalCard";

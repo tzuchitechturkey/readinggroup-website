@@ -54,7 +54,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     handlePreviewFile,
     handleClosePreview,
   } = useCreateOrEditVideo(video, onSectionChange);
-
+  console.log(errors)
   return (
     <div
       className="bg-white rounded-lg p-3 lg:p-6 w-full mx-4 overflow-y-auto"
