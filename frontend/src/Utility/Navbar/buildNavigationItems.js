@@ -56,6 +56,11 @@ const buildNavigationItems = (t, siteInfo) => {
       })),
     },
     {
+      name: t("Livestream Schedule"),
+      href: "/livestream-schedule",
+      hasDropdown: false,
+    },
+    {
       name: t("About Us"),
       href: "/about",
       hasDropdown: true,

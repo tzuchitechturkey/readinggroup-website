@@ -47,6 +47,9 @@ const TOTPSetup = lazy(
 );
 const MyListContent = lazy(() => import("@/pages/MyList/MyListContent"));
 const LearnPageContent = lazy(() => import("@/pages/Learn/LearnPageContent"));
+const LivestreamScheduleContent = lazy(
+  () => import("@/pages/LivestreamSchedule/LivestreamScheduleContent"),
+);
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -60,6 +63,7 @@ export const userRoutes = [
   { path: "/videos/:id", element: <VideoPage /> },
   { path: "/my-list", element: <MyListContent /> },
   { path: "/learn", element: <LearnPageContent /> },
+  { path: "/livestream-schedule", element: <LivestreamScheduleContent /> },
   // Contents Routes
   { path: "/contents", element: <ContentsContent /> },
   { path: "/contents/content/:id", element: <ContentPage /> },
