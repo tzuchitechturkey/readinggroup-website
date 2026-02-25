@@ -1,0 +1,15 @@
+export const FORM_DATA_INITIAL_STATE = {
+  title: "",
+  category: "",
+  video_type: "",
+  language: "",
+  thumbnail: null,
+  thumbnail_url: "",
+  video_url: "",
+  happened_at: "",
+  description: "",
+  guest_speakers: [],
+  status: "",
+  duration: "",
+  attachments: [],
+};
