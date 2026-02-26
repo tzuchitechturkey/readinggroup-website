@@ -1,15 +1,15 @@
 import React from "react";
+
 import { useTranslation } from "react-i18next";
 
 const HorizontalCard = ({ card, onClick }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-3 group w-full">
-      {/* Aspect Ratio Container for Horizontal Cards (16:9) */}
+    <div className="flex flex-col gap-1 group w-full">
+      {/* Aspect Ratio Container for Horizontal Cards (Figma: 358/201) */}
       <div
-        className="relative w-full bg-[#4a7c59] rounded-sm overflow-hidden cursor-pointer shadow-sm group-hover:shadow-lg transition-all duration-300 border border-gray-100"
-        style={{ paddingBottom: "56.25%" }} // 16:9 Ratio
+        className="relative w-full aspect-[358/201] md:aspect-[240/135] bg-[#4a7c59] overflow-hidden cursor-pointer group-hover:shadow-lg transition-all duration-300"
         onClick={onClick}
       >
         <img
@@ -26,8 +26,8 @@ const HorizontalCard = ({ card, onClick }) => {
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <span className="text-[13px] text-[#8e8e8e] font-medium tracking-tight">
-          {card.date}
+        <span className="text-[14px] md:text-[16px] text-[#285688] font-normal leading-[1.2] md:leading-[1.5]">
+          {card.date || card.happened_at || "—"}
         </span>
       </div>
     </div>

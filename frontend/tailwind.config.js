@@ -6,6 +6,7 @@ export default {
     extend: {
       fontFamily: {
         noto: ['"Noto Sans TC"', "sans-serif"],
+        "noto-sans": ["'Noto Sans'", "sans-serif"],
       },
       screens: {
         xs: "475px",
