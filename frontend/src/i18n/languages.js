@@ -16,11 +16,11 @@ const languages = {
     shortLabel: "JP",
     code: "jp",
   },
-  ar: {
-    label: "العربية",
-    shortLabel: "AR",
-    code: "ar",
-  },
+  // ar: {
+  //   label: "العربية",
+  //   shortLabel: "AR",
+  //   code: "ar",
+  // },
   tr: {
     label: "Türkçe",
     shortLabel: "TR",
