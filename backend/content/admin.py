@@ -13,8 +13,6 @@ from .models import (
     Learn,
     LearnCategory,
     MyListEntry,
-    SeasonTitle,
-    SeasonId,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -138,23 +136,6 @@ class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
     list_display = ("id", "user", "video", "created_at")
     search_fields = ("user__username", "video__title")
-
-
-@admin.register(SeasonTitle)
-class SeasonTitleAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description")
-    search_fields = ("name", "description")
-
-
-@admin.register(SeasonId)
-class SeasonIdAdmin(admin.ModelAdmin):
-    list_display = ("id", "season_name", "season_id")
-    search_fields = ("season_name__name", "season_id")
-
-    def season_name(self, obj):
-        return obj.season_name.name if obj.season_name else None
-
-    season_name.short_description = "season_name"
 
 
 @admin.register(SocialMedia)

@@ -11,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 from collections import defaultdict
 from django.utils import timezone
 from .enums import LearnType, VideoType
-
+from .youtube import YouTubeAPIError, fetch_video_info
 from .swagger_parameters import (
     video_manual_parameters,
     learn_manual_parameters,
@@ -21,7 +21,6 @@ from .swagger_parameters import (
     by_type_learn_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
-    global_search_manual_parameters,
     content_manual_parameters,
     content_category_manual_parameters,
     event_category_manual_parameters,
@@ -41,8 +40,6 @@ from .models import (
     ContentCategory,
     PositionTeamMember,
     EventSection,
-    SeasonTitle,
-    SeasonId,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -62,8 +59,6 @@ from .serializers import (
     ContentCategorySerializer,
     PositionTeamMemberSerializer,
     EventSectionSerializer,
-    SeasonTitleSerializer,
-    SeasonIdSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
     ContentAttachmentSerializer,
@@ -71,7 +66,6 @@ from .serializers import (
     BookSerializer,
     BookCategorySerializer,
 )
-from .youtube import YouTubeAPIError, fetch_video_info
 
 
 class VideoViewSet(viewsets.ModelViewSet):
@@ -1543,87 +1537,6 @@ class PositionTeamMemberViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at",)
 
 
-class SeasonIdViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing SeasonId content."""
-
-    queryset = SeasonId.objects.all()
-    serializer_class = SeasonIdSerializer
-    search_fields = ("season_title__name",)
-    ordering_fields = ("-created_at",)
-
-    @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
-    def videos(self, request, pk=None):
-        """Return all Video objects associated with this SeasonId.
-        URL: /.../seasonid/{id}/videos/
-        Videos are ordered by happened_at (newest first) then created_at.
-        Supports pagination if the viewset/router has pagination configured.
-        """
-        try:
-            season = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "SeasonId not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Videos point to SeasonId via Video.season_name
-        # Only include published videos whose related category is active.
-        qs = Video.objects.filter(season_name=season)
-
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            # model may not have category relation in some edge cases
-            pass
-
-        # Order season videos by creation time (newest first)
-        qs = qs.order_by("-created_at")
-
-        # paginate if pagination is configured on the view
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = VideoSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = VideoSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
-class SeasonTitleViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing SeasonTitle content."""
-
-    queryset = SeasonTitle.objects.all()
-    serializer_class = SeasonTitleSerializer
-    search_fields = ("name",)
-    # SeasonTitle model does not have created_at; allow ordering by name instead
-    ordering_fields = ("name",)
-
-    @action(detail=True, methods=("get",), url_path="season-ids", url_name="season_ids")
-    def season_ids(self, request, pk=None):
-        """Return SeasonId objects linked to this SeasonTitle.
-
-        GET /api/v1/season-titles/{pk}/season-ids/
-        """
-        try:
-            season_title = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "SeasonTitle not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # SeasonId doesn't have a created_at timestamp; order by the season_id field instead
-        qs = SeasonId.objects.filter(season_title=season_title).order_by("season_id")
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = SeasonIdSerializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = SeasonIdSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
 class EventSectionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing EventSection content."""
 
@@ -1739,99 +1652,6 @@ class EventSectionViewSet(viewsets.ModelViewSet):
             )
 
         return Response(result)
-
-
-class GlobalSearchViewSet(viewsets.ViewSet):
-    """
-    ViewSet for searching across multiple content models by title.
-    Query parameters:
-    - q: search term (required)
-    - limit: per-type result limit (optional, default is 5)
-    Returns a JSON object with keys:
-    - videos
-    - posts
-    - events
-    - weekly_moments
-    - contents
-    Each key contains a list of serialized objects.
-    """
-
-    @swagger_auto_schema(
-        description="Search across Videos, Posts, Events, and Weekly Moments by title.",
-        manual_parameters=global_search_manual_parameters,
-    )
-    def list(self, request):
-        search_term = request.query_params.get("q", "")
-        if not search_term:
-            return Response(
-                {"detail": "Query parameter 'q' is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # safety cap per model to avoid huge queries; page size is controlled by paginator
-        try:
-            per_model_cap = int(request.query_params.get("per_model", 50))
-        except Exception:
-            per_model_cap = 50
-
-        # build per-model querysets and ensure only published items are considered
-        video_q = Video.objects.filter(title__icontains=search_term).order_by(
-            "-created_at"
-        )[:per_model_cap]
-
-        # only include videos whose category is active
-        try:
-            video_q = video_q.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        event_q = Event.objects.filter(title__icontains=search_term).order_by(
-            "-created_at"
-        )[:per_model_cap]
-        # only include events whose category is active
-        try:
-            event_q = event_q.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        content_q = Content.objects.filter(title__icontains=search_term).order_by(
-            "-created_at"
-        )[:per_model_cap]
-
-        # only include contents whose category is active
-        try:
-            content_q = content_q.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        combined = []
-
-        # sort by created_at (newest first)
-        combined.sort(
-            key=lambda t: getattr(t[0], "created_at", None) or 0, reverse=True
-        )
-
-        # paginate combined list using LimitOffsetPagination; default page size = 10
-        paginator = LimitOffsetPagination()
-        paginator.default_limit = 10
-        page = paginator.paginate_queryset(combined, request, view=self)
-
-        results = []
-        for item in page or []:
-            obj, kind = item
-            if kind == "video":
-                data = VideoSerializer(obj, context={"request": request}).data
-            elif kind == "event":
-                data = EventSerializer(obj, context={"request": request}).data
-            elif kind == "content":
-                data = ContentSerializer(obj, context={"request": request}).data
-            else:
-                continue
-
-            data["_type"] = kind
-            results.append(data)
-
-        return paginator.get_paginated_response(results)
 
 
 class NavbarLogoViewSet(viewsets.ModelViewSet):
