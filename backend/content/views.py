@@ -245,11 +245,16 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="Top viewed videos",
-        operation_description="Return top 5 videos ordered by views desc.",
+        operation_description="Return videos ordered by views desc with pagination support.",
     )
     @action(detail=False, methods=["get"], url_path="top-views")
     def top_views(self, request):
-        qs = self.get_queryset().filter(category__is_active=True).order_by("-views")[:5]
+        qs = self.get_queryset().filter(category__is_active=True).order_by("-views")
+
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
