@@ -5,8 +5,6 @@ import { HiOutlineChevronDown, HiOutlineSearch } from "react-icons/hi";
 const LearnFilterBar = ({
   activeCategory,
   onSearch,
-  onDateChange,
-  onSortChange,
 }) => {
   const { t } = useTranslation();
 
