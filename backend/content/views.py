@@ -140,6 +140,7 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        queryset = queryset.filter(category__is_active=True)
         params = self.request.query_params
 
         # Allow search filter to work before custom filtering

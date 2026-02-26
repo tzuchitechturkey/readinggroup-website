@@ -50,7 +50,13 @@ class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 
 class LearnCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
+    datetime_fields = (
+        "created_at",
+        "updated_at",
+        "event_date",
+        "event_time",
+        "happened_at",
+    )
     learn_count = serializers.IntegerField(read_only=True)
 
     class Meta:
