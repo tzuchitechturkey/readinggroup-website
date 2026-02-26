@@ -21,7 +21,6 @@ from .views import (
     ContentAttachmentViewSet,
     AuthorsViewSet,
     BookViewSet,
-    VideoAttachmentViewSet,
     BookCategoryViewSet,
 )
 
@@ -42,9 +41,6 @@ router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
 router.register(
     r"position-team-members", PositionTeamMemberViewSet, basename="position-team-member"
-)
-router.register(
-    r"video-attachments", VideoAttachmentViewSet, basename="video-attachment"
 )
 router.register(r"event-sections", EventSectionViewSet, basename="event-section")
 router.register(r"global-search", GlobalSearchViewSet, basename="global-search")

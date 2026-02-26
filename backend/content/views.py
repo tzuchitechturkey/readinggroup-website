@@ -45,7 +45,6 @@ from .models import (
     Authors,
     Book,
     BookCategory,
-    VideoAttachment,
 )
 from .serializers import (
     EventSerializer,
@@ -54,7 +53,6 @@ from .serializers import (
     ContentSerializer,
     TeamMemberSerializer,
     VideoSerializer,
-    VideoAttachmentSerializer,
     LearnCategorySerializer,
     VideoCategorySerializer,
     EventCategorySerializer,
@@ -276,13 +274,13 @@ class VideoViewSet(viewsets.ModelViewSet):
         created = []
 
         for f in files:
-            obj = VideoAttachment.objects.create(
-                video=video,
+            obj = ContentAttachment.objects.create(
+                content=video,
                 file=f,
             )
             created.append(obj)
 
-        serializer = VideoAttachmentSerializer(
+        serializer = ContentAttachmentSerializer(
             created, many=True, context={"request": request}
         )
 
@@ -1074,33 +1072,6 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         """List endpoint documented with is_active filter for Swagger."""
         return super().list(request, *args, **kwargs)
-
-
-class VideoAttachmentViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing VideoAttachment content."""
-
-    queryset = VideoAttachment.objects.all()
-    serializer_class = VideoAttachmentSerializer
-    search_fields = ("file_name",)
-    ordering_fields = ("created_at",)
-
-    def create(self, request, *args, **kwargs):
-        """Create a VideoAttachment with uploaded file."""
-        file = request.FILES.get("file")
-        if not file:
-            return Response(
-                {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        attachment = VideoAttachment.objects.create(
-            file=file,
-            file_name=request.data.get("file_name", file.name),
-            file_size=file.size,
-            description=request.data.get("description", ""),
-        )
-
-        serializer = self.get_serializer(attachment)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ContentCategoryViewSet(viewsets.ModelViewSet):

@@ -90,26 +90,6 @@ class Video(TimestampedModel):
         return self.title
 
 
-class VideoAttachment(TimestampedModel):
-    video = models.ForeignKey(
-        "Video",
-        on_delete=models.CASCADE,
-        related_name="attachments",
-    )
-    file = models.FileField(upload_to="videos/materials/")
-    file_name = models.CharField(max_length=255, blank=True)
-    file_size = models.PositiveIntegerField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        if self.file:
-            self.file_name = self.file.name
-            self.file_size = self.file.size
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"VideoAttachment<{self.video_id}:{self.pk}>"
-
-
 class VideoCategory(TimestampedModel):
     """Categories for organizing videos with multi-language support.
 
@@ -307,6 +287,15 @@ class ContentAttachment(TimestampedModel):
         null=True,
         blank=True,
     )
+
+    Video = models.ForeignKey(
+        "Video",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        null=True,
+        blank=True,
+    )
+
     file = models.FileField(
         upload_to="content/attachments/",
         help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats",

@@ -14,7 +14,6 @@ from .models import (
     EventCategory,
     EventSection,
     HistoryEntry,
-    VideoAttachment,
     NavbarLogo,
     PositionTeamMember,
     Learn,
@@ -136,12 +135,6 @@ class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         fields = "__all__"
 
 
-class VideoAttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VideoAttachment
-        fields = "__all__"
-
-
 class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
     # allow writing by primary key and represent as object in output
@@ -173,7 +166,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     attachments = serializers.ListField(
         child=serializers.IntegerField(), write_only=True, required=False
     )
-    attachments_data = VideoAttachmentSerializer(
+    attachments_data = ContentAttachmentSerializer(
         many=True, read_only=True, source="attachments"
     )
     category = serializers.PrimaryKeyRelatedField(
@@ -230,7 +223,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
         instance = super().create(validated_data)
         if attachments_ids:
-            attachment_instances = VideoAttachment.objects.filter(
+            attachment_instances = ContentAttachment.objects.filter(
                 id__in=attachments_ids
             )
             instance.attachments.set(attachment_instances)
@@ -243,9 +236,9 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             if instance.category
             else None
         )
-        # include associated VideoAttachment rows as 'attachments_data'
+        # include associated ContentAttachment rows as 'attachments_data'
         try:
-            data["attachments_data"] = VideoAttachmentSerializer(
+            data["attachments_data"] = ContentAttachmentSerializer(
                 instance.attachments.all(), many=True, context=self.context
             ).data
         except Exception:
@@ -256,7 +249,7 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         attachments_ids = validated_data.pop("attachments", None)
         instance = super().update(instance, validated_data)
         if attachments_ids is not None:
-            attachment_instances = VideoAttachment.objects.filter(
+            attachment_instances = ContentAttachment.objects.filter(
                 id__in=attachments_ids
             )
             instance.attachments.set(attachment_instances)
