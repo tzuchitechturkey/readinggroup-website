@@ -17,6 +17,7 @@ const LearnFilterBar = ({
   onDateMonthSelect,
   onApplyDateFilter,
   onSortChange,
+  onOpenFilter,
   totalrecord = 0,
 }) => {
   const { t } = useTranslation();
@@ -56,21 +57,24 @@ const LearnFilterBar = ({
   }, [onToggleDropdown, openDropdowns]);
 
   return (
-    <div className="flex flex-col gap-6 md:gap-0 mb-8 md:mb-10" data-filter-bar>
+    <div
+      className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-4 mb-8 md:mb-10"
+      data-filter-bar
+    >
       {/* Title and Count Row - Responsive */}
-      <div className="flex flex-row items-end gap-3 md:gap-3">
-        <h2 className="font-noto-sans text-[24px] md:text-[24px] font-black md:font-bold text-[#081945] leading-[1.2] md:leading-[1.5] uppercase md:uppercase">
+      <div className="flex flex-row items-center gap-3">
+        <h2 className="font-noto-sans text-[20px] md:text-[24px] font-bold text-[#081945] leading-[1.5] uppercase">
           {t(activeCategory?.name || "Learn")}
         </h2>
         <div className="flex items-center self-stretch py-[4px]">
-          <span className="font-noto-sans text-[14px] md:text-[16px] text-[#081945] font-normal leading-[1.2] md:leading-[1.5]">
+          <span className="font-noto-sans text-[14px] md:text-[16px] text-[#081945] font-normal leading-[1.5]">
             {totalrecord} {t("images")}
           </span>
         </div>
       </div>
 
       {/* Main Filter Bar Container */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         {/* Mobile-Only Category Selector and Toggle Button */}
         <div className="flex md:hidden items-center justify-between w-full relative">
           {/* Mobile Category Dropdown */}
@@ -115,8 +119,8 @@ const LearnFilterBar = ({
 
           {/* Mobile Filter Toggle Button */}
           <button
-            onClick={() => setIsMobileFiltersVisible(!isMobileFiltersVisible)}
-            className={`bg-[#fcfdff] h-[33px] flex items-center gap-1.5 px-[16px] rounded-[4px] transition-colors ${isMobileFiltersVisible ? "ring-1 ring-[#285688]" : ""}`}
+            onClick={() => onOpenFilter?.()}
+            className="bg-[#fcfdff] h-[33px] flex items-center gap-1.5 px-[16px] rounded-[4px] transition-colors"
           >
             <span className="text-[12px] text-[#285688] font-normal">
               {t("Filter")}
@@ -126,9 +130,7 @@ const LearnFilterBar = ({
         </div>
 
         {/* Filters (Desktop Always Visible, Mobile Toggleable) */}
-        <div
-          className={`${isMobileFiltersVisible ? "flex" : "hidden"} md:flex w-full md:w-auto flex-col md:flex-row gap-[12px] relative z-40`}
-        >
+        <div className="hidden md:flex w-full md:w-auto flex-col md:flex-row gap-[12px] relative z-40">
           <DateFilter
             filters={filters}
             openDropdowns={openDropdowns}

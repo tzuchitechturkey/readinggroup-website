@@ -11,14 +11,16 @@ import { GetLearnCategories, GetLearnsByCategoryId } from "@/api/learn";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import LearnFilterBar from "@/components/ForPages/Learn/LearnFilterBar";
+import MobileFilterModal from "@/components/Videos/MobileFilterModal/MobileFilterModal";
 
 const LearnPageContent = () => {
   const { t, i18n } = useTranslation();
-  const [activeCategory, setActiveCategory] = useState("cards");
+  const [activeCategory, setActiveCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState([]);
   // Image Viewer State
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [categories, setCategories] = useState({
     cards: [],
@@ -65,7 +67,7 @@ const LearnPageContent = () => {
     setIsLoading(true);
     try {
       const params = { happened_at: happenedAt };
-      const res = await GetLearnsByCategoryId(categoryId, params);
+      const res = await GetLearnsByCategoryId(categoryId, 100, 0, params);
       setItems(res.data.results || []);
     } catch (err) {
       setErrorFn(err, t);
@@ -74,14 +76,17 @@ const LearnPageContent = () => {
     }
   };
 
-  const handleDateYearChange = (direction) => {
-    setFilters((prev) => ({
-      ...prev,
-      date: {
-        ...prev.date,
-        year: prev.date.year + direction,
-      },
-    }));
+  const handleDateYearChange = (value) => {
+    setFilters((prev) => {
+      const newYear = Math.abs(value) < 100 ? prev.date.year + value : value;
+      return {
+        ...prev,
+        date: {
+          ...prev.date,
+          year: newYear,
+        },
+      };
+    });
   };
 
   const handleDateMonthSelect = (month) => {
@@ -129,6 +134,31 @@ const LearnPageContent = () => {
     });
   };
 
+  const handleApplyFilters = (newFilters) => {
+    setFilters({
+      date: newFilters.date,
+      sort: newFilters.sortBy,
+    });
+
+    let happenedAt = null;
+    if (newFilters.date.month) {
+      const month = String(newFilters.date.month).padStart(2, "0");
+      happenedAt = `${newFilters.date.year}-${month}`;
+    } else if (newFilters.date.year) {
+      happenedAt = `${newFilters.date.year}`;
+    }
+    handleGetItemsByCategoryId(activeCategory?.id, happenedAt);
+  };
+
+  const handleResetFilters = () => {
+    const initialFilters = {
+      date: { month: null, year: new Date().getFullYear() },
+      sort: "newest",
+    };
+    setFilters(initialFilters);
+    handleGetItemsByCategoryId(activeCategory?.id, null);
+  };
+
   // Image Viewer Handlers
   const openViewer = (index) => {
     setCurrentImageIndex(index);
@@ -137,6 +167,18 @@ const LearnPageContent = () => {
 
   const closeViewer = () => {
     setIsViewerOpen(false);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === sortedAndFilteredItems.length - 1 ? 0 : prev + 1,
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? sortedAndFilteredItems.length - 1 : prev - 1,
+    );
   };
 
   // Apply Sorting Logic - Local Sorting
@@ -196,12 +238,17 @@ const LearnPageContent = () => {
               onDateMonthSelect={handleDateMonthSelect}
               onApplyDateFilter={handleApplyDateFilter}
               onSortChange={handleSortChange}
+              onOpenFilter={() => setIsFilterModalOpen(true)}
               totalrecord={items.length}
             />
 
             {/* Grid switching between Horizontal and Vertical layouts */}
             <div
-              className={`grid ${activeCategory?.learn_type === "cards" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"}`}
+              className={`grid ${
+                sortedAndFilteredItems[0]?.direction === "vertical"
+                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+              }`}
               style={{ columnGap: "12px", rowGap: "16px" }}
             >
               {sortedAndFilteredItems.map((item, index) =>
@@ -233,14 +280,32 @@ const LearnPageContent = () => {
         </div>
       </main>
 
+      {/* Mobile Filter Modal */}
+      <MobileFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        filters={{
+          videoType: ["all"],
+          date: filters.date,
+          sortBy: filters.sort,
+          categories: [],
+        }}
+        onApplyFilters={handleApplyFilters}
+        onResetFilters={handleResetFilters}
+        // Learn page categories are handled by the sidebar/tab bar,
+        // but if we want them in the modal too:
+        activeCategories={[]}
+        selectedCategories={[]}
+      />
+
       {/* Image Viewer Modal */}
       <ImageViewerModal
         isOpen={isViewerOpen}
         onClose={closeViewer}
-        images={sortedAndFilteredItems.map((item) => item.image)}
+        images={sortedAndFilteredItems}
         currentIndex={currentImageIndex}
-        // onNext={nextImage}
-        // onPrev={prevImage}
+        onNext={nextImage}
+        onPrev={prevImage}
       />
     </div>
   );
