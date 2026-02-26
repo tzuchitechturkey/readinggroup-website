@@ -18,8 +18,6 @@ from .models import (
     PositionTeamMember,
     Learn,
     LearnCategory,
-    SeasonId,
-    SeasonTitle,
     SocialMedia,
     TeamMember,
     Video,
@@ -125,38 +123,6 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
     class Meta:
         model = PositionTeamMember
         fields = ["id", "name", "description"]
-
-
-class SeasonTitleSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = SeasonTitle
-        fields = "__all__"
-
-
-class SeasonIdSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    # allow writing by primary key and represent as object in output
-    season_title = serializers.PrimaryKeyRelatedField(
-        queryset=SeasonTitle.objects.all()
-    )
-
-    class Meta:
-        model = SeasonId
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # replace season_title pk with detailed object
-        try:
-            st = instance.season_title
-            data["season_title"] = (
-                {"id": st.pk, "name": st.name} if st is not None else None
-            )
-        except Exception:
-            data["season_title"] = None
-        return data
 
 
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

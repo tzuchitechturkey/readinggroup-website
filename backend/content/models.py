@@ -16,6 +16,8 @@ from .enums import (
     LanguageChoices,
 )
 
+# ======================================================= New Models Start =======================================================
+
 
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""
@@ -165,6 +167,49 @@ class LearnCategory(TimestampedModel):
         ]
 
 
+class ContentAttachment(TimestampedModel):
+    """Multiple file attachments for a Content instance.
+    Supports documents (Word, PDF, PowerPoint) and other file types.
+    """
+
+    content = models.ForeignKey(
+        "Content",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        null=True,
+        blank=True,
+    )
+
+    Video = models.ForeignKey(
+        "Video",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        null=True,
+        blank=True,
+    )
+
+    file = models.FileField(
+        upload_to="content/attachments/",
+        help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats",
+    )
+    file_name = models.CharField(
+        max_length=255, blank=True, help_text="Original filename"
+    )
+    file_size = models.PositiveIntegerField(
+        blank=True, null=True, help_text="File size in bytes"
+    )
+    description = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"ContentAttachment<{self.content_id}:{self.pk}>"
+
+
+# ======================================================= New Models end =======================================================
+
+
 class Event(TimestampedModel):
     """Represent events and news items grouped by section."""
 
@@ -275,46 +320,6 @@ class ContentImage(TimestampedModel):
         return f"ContentImage<{self.content_id}:{self.pk}>"
 
 
-class ContentAttachment(TimestampedModel):
-    """Multiple file attachments for a Content instance.
-    Supports documents (Word, PDF, PowerPoint) and other file types.
-    """
-
-    content = models.ForeignKey(
-        "Content",
-        on_delete=models.CASCADE,
-        related_name="attachments",
-        null=True,
-        blank=True,
-    )
-
-    Video = models.ForeignKey(
-        "Video",
-        on_delete=models.CASCADE,
-        related_name="attachments",
-        null=True,
-        blank=True,
-    )
-
-    file = models.FileField(
-        upload_to="content/attachments/",
-        help_text="Accepts: .doc, .docx, .pdf, .ppt, .pptx, and other document formats",
-    )
-    file_name = models.CharField(
-        max_length=255, blank=True, help_text="Original filename"
-    )
-    file_size = models.PositiveIntegerField(
-        blank=True, null=True, help_text="File size in bytes"
-    )
-    description = models.CharField(max_length=500, blank=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"ContentAttachment<{self.content_id}:{self.pk}>"
-
-
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
 
@@ -350,32 +355,6 @@ class HistoryEntry(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.title} ({self.story_date} - present)"
-
-
-# =====================================================Auxiliary classes========================================================
-
-
-class ContentRating(TimestampedModel):
-    """User rating for a Content instance (1-5 stars). Each user may rate a content once."""
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="content_ratings",
-    )
-    content = models.ForeignKey(
-        "Content", on_delete=models.CASCADE, related_name="ratings"
-    )
-    rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-
-    class Meta:
-        unique_together = (("user", "content"),)
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"ContentRating<{self.user_id}:{self.content_id}:{self.rating}>"
 
 
 class SectionOrder(models.Model):
@@ -600,34 +579,6 @@ class BookCategory(TimestampedModel):
 
     def __str__(self) -> str:
         return f"{self.name} ({self.language})"
-
-
-class SeasonTitle(models.Model):
-    """Season and Title mapping for Videos."""
-
-    name = models.CharField(max_length=255, blank=True, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class SeasonId(models.Model):
-    """Season ID mapping for Videos."""
-
-    season_title = models.ForeignKey(
-        "SeasonTitle", on_delete=models.CASCADE, related_name="season_ids"
-    )
-    season_id = models.CharField(max_length=100)
-
-    class Meta:
-        ordering = ("season_title__name",)
-
-    def __str__(self) -> str:
-        return self.season_id
 
 
 class MyListEntry(TimestampedModel):
