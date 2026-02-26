@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { GrLanguage } from "react-icons/gr";
+import { Globe, Check } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import languages from "@/i18n/languages";
 
 export default function LanguageDropdown({ iconColor }) {
   const [selectedLang, setSelectedLang] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const currentLanguage = localStorage.getItem("I18N_LANGUAGE") || "en";
@@ -23,58 +24,53 @@ export default function LanguageDropdown({ iconColor }) {
     i18n.changeLanguage(lang);
     localStorage.setItem("I18N_LANGUAGE", lang);
     setSelectedLang(lang);
+    setIsOpen(false);
   };
 
+  const selectedLabel = languages[selectedLang]?.label || "English";
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="px-2 py-2 border-none outline-none rounded-md  ">
-        <div className="flex bg-white hover:text-primary rounded-full p-1 px-3 items-center gap-1">
-          <GrLanguage
-            className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
-            style={{ color: iconColor || undefined }}
-          />
-          {selectedLang.toUpperCase()}
+    <DropdownMenu onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger className="outline-none border-none ring-0 focus:ring-0">
+        <div
+          className="flex items-center gap-[8px] bg-[#fcfdff] rounded-[38px] cursor-pointer transition-all duration-200 px-[12px] py-[8px]"
+          style={{
+            boxShadow: isOpen ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
+          }}
+        >
+          <div className="w-[24px] h-[24px] flex items-center justify-center text-[#285688]">
+            <Globe size={24} strokeWidth={1} />
+          </div>
+          <span className="text-[#285688] text-[18px] font-normal leading-[1.5] font-['Noto_Sans']">
+            {selectedLabel}
+          </span>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-[160px] rounded-xl shadow-lg border border-gray-100 bg-white/95 py-2 px-1">
+
+      <DropdownMenuContent
+        className="min-w-[200px] bg-[#fcfdff] rounded-[16px] p-[8px] flex flex-col gap-[8px] shadow-lg border-none mt-2"
+        align="end"
+      >
         {Object.keys(languages).map((key) => {
           const lang = languages[key];
           const isSelected = selectedLang === lang.code;
+
           return (
             <DropdownMenuItem
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
-              className={`flex items-center gap-2 justify-between px-4 py-2 rounded-lg text-[16px] font-medium cursor-pointer transition-colors duration-150
-                hover:bg-[var(--color-primary)] focus:bg-[var(--color-primary)]
-                ${
-                  isSelected
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "text-gray-800"
-                }
-              `}
+              className="flex items-center gap-[8px] p-[8px] rounded-lg cursor-pointer outline-none focus:bg-[#f3f4f6]"
             >
-              <span className="flex-1">{lang.label}</span>
-              {isSelected && (
-                <span className="w-5 h-5 flex items-center justify-center rounded-full border-2 border-white bg-white/80">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle
-                      cx="8"
-                      cy="8"
-                      r="7"
-                      stroke="#4680FF"
-                      strokeWidth="2"
-                      fill="white"
-                    />
-                    <circle cx="8" cy="8" r="3" fill="#4680FF" />
-                  </svg>
-                </span>
-              )}
+              <div className="w-[24px] h-[24px] flex-shrink-0 flex items-center justify-center text-[#285688]">
+                {isSelected && <Check size={24} strokeWidth={1.5} />}
+              </div>
+              <span
+                className={`text-[16px] font-normal leading-[1.5] font-['Noto_Sans'] ${
+                  isSelected ? "text-[#285688]" : "text-[#081945]"
+                }`}
+              >
+                {lang.label}
+              </span>
             </DropdownMenuItem>
           );
         })}

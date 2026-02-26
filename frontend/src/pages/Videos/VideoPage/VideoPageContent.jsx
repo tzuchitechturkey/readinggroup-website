@@ -50,7 +50,10 @@ function VideoPageContent() {
   // }, []);
 
   return (
-    <div className="bg-white" dir={i18n.language === "ar" ? "rtl" : "ltr"}>
+    <div
+      className="bg-background min-h-screen"
+      dir={i18n.language === "ar" ? "rtl" : "ltr"}
+    >
       {isLoading && <Loader />}
       {/* Start Show Video */}
       <CustomyoutubeVideo videoData={videoData} />

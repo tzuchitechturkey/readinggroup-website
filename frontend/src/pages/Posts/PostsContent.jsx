@@ -46,7 +46,7 @@ function PostsContent() {
   useEffect(() => {
     if (targetCategoryId && activeCategories.length > 0) {
       const categoryExists = activeCategories.some(
-        (cat) => cat.id === targetCategoryId
+        (cat) => cat.id === targetCategoryId,
       );
       if (categoryExists) {
         setTimeout(() => {
@@ -66,7 +66,7 @@ function PostsContent() {
 
   return (
     <div
-      className="min-h-screen w-full bg-white text-gray-900"
+      className="min-h-screen w-full bg-background text-[var(--livestream-text)]"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Header with hero image */}

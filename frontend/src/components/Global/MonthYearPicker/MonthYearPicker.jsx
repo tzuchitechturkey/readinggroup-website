@@ -104,14 +104,14 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
     <div
       ref={containerRef}
       className={cn(
-        "inline-flex flex-col bg-[#FCFDFF] rounded-[17px] p-[10px] shadow-sm transition-all duration-300",
-        isExpanded ? "w-[300px]" : "w-auto",
+        "relative inline-flex flex-col bg-[var(--livestream-btn-white)] rounded-[17px] p-[10px] shadow-sm transition-all duration-300 z-50 min-w-[300px]",
+        isExpanded ? "rounded-b-none" : "",
         className,
       )}
     >
       {/* Header - Always visible */}
       <div
-        className="flex items-center justify-center gap-[16px] px-2 py-1 cursor-pointer select-none w-full"
+        className="flex items-center justify-center gap-[16px] py-[4px] cursor-pointer select-none w-full"
         onClick={() => {
           setIsExpanded(!isExpanded);
           if (!isExpanded) setViewYear(year);
@@ -121,23 +121,29 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
       >
         <button
           onClick={handlePrevMonthYear}
-          className="p-1 hover:opacity-60 transition-opacity"
+          className="hover:opacity-60 transition-opacity flex items-center justify-center size-[24px]"
           aria-label="Previous Month"
         >
-          <ChevronLeft className="w-6 h-6 text-[#285688]" strokeWidth={2.5} />
+          <ChevronLeft
+            className="w-6 h-6 text-[#285688]" // Deep Blue from Figma
+            strokeWidth={2.5}
+          />
         </button>
 
-        <div className="flex font-bold gap-[8px] items-center justify-center text-[#285688] text-[24px] uppercase min-w-[210px] truncate">
+        <div className="flex font-bold gap-[8px] items-center justify-center text-[#285688] text-[24px] uppercase w-[198px] truncate font-noto">
           <span>{t(monthNames[month - 1])}</span>
           <span>{year}</span>
         </div>
 
         <button
           onClick={handleNextMonthYear}
-          className="p-1 hover:opacity-60 transition-opacity"
+          className="hover:opacity-60 transition-opacity flex items-center justify-center size-[24px]"
           aria-label="Next Month"
         >
-          <ChevronRight className="w-6 h-6 text-[#285688]" strokeWidth={2.5} />
+          <ChevronRight
+            className="w-6 h-6 text-[#285688]" // Deep Blue from Figma
+            strokeWidth={2.5}
+          />
         </button>
       </div>
 
@@ -148,62 +154,61 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
+            className="overflow-hidden absolute top-full left-0 w-full bg-[var(--livestream-btn-white)] rounded-b-[17px] shadow-sm px-[10px] pb-[10px] z-50 rounded-t-none flex flex-col gap-[12px]"
           >
             {/* Divider */}
-            <div className="h-[1px] bg-[#E5E5E5] w-full mt-2 mb-3" />
+            {/* Design uses a vector, approximating with border */}
+            <div className="h-[1px] bg-[#E5E5E5] w-full" />
 
-            <div className="flex flex-col gap-[12px] px-2 pb-2">
-              {/* Year Selection Row */}
-              <div className="flex items-center justify-center gap-[16px] w-full py-[4px]">
-                <button
-                  onClick={handlePrevYear}
-                  className="p-1 hover:opacity-60 transition-opacity"
-                >
-                  <ChevronLeft
-                    className="w-6 h-6 text-[#285688]"
-                    strokeWidth={2.5}
-                  />
-                </button>
-                <span className="font-bold text-[#081945] text-[24px] uppercase min-w-[120px] text-center">
-                  {viewYear}
-                </span>
-                <button
-                  onClick={handleNextYear}
-                  className="p-1 hover:opacity-60 transition-opacity"
-                >
-                  <ChevronRight
-                    className="w-6 h-6 text-[#285688]"
-                    strokeWidth={2.5}
-                  />
-                </button>
-              </div>
+            {/* Year Selection Row */}
+            <div className="flex items-center justify-between w-full py-[4px]">
+              <button
+                onClick={handlePrevYear}
+                className="hover:opacity-60 transition-opacity flex items-center justify-center size-[24px]"
+              >
+                <ChevronLeft
+                  className="w-6 h-6 text-[#285688]"
+                  strokeWidth={2.5}
+                />
+              </button>
+              <span className="font-bold text-[#081945] text-[24px] uppercase text-center font-noto">
+                {viewYear}
+              </span>
+              <button
+                onClick={handleNextYear}
+                className="hover:opacity-60 transition-opacity flex items-center justify-center size-[24px]"
+              >
+                <ChevronRight
+                  className="w-6 h-6 text-[#285688]"
+                  strokeWidth={2.5}
+                />
+              </button>
+            </div>
 
-              {/* Month Grid */}
-              <div className="grid grid-cols-3 gap-[8px]">
-                {monthShortNames.map((mShort, index) => {
-                  const isSelected = month === index + 1 && year === viewYear;
-                  return (
-                    <button
-                      key={mShort}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMonthSelect(index);
-                      }}
-                      className={cn(
-                        "flex items-center justify-center px-[10px] py-[4px] rounded-[42px] transition-all border border-transparent",
-                        isSelected
-                          ? "border-[#285688] text-[#285688] font-semibold"
-                          : "text-[#081945] hover:bg-[#F0F7FF] hover:text-[#285688]",
-                      )}
-                    >
-                      <span className="text-[16px] font-normal leading-[1.5]">
-                        {t(mShort)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Month Grid */}
+            <div className="grid grid-cols-3 gap-[8px] w-full">
+              {monthShortNames.map((mShort, index) => {
+                const isSelected = month === index + 1 && year === viewYear;
+                return (
+                  <button
+                    key={mShort}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMonthSelect(index);
+                    }}
+                    className={cn(
+                      "flex items-center justify-center px-[10px] py-[4px] rounded-[42px] transition-all border w-full h-[32px]", // Fixed height/width approximation
+                      isSelected
+                        ? "border-[#285688] text-[#285688] font-semibold border-solid"
+                        : "border-transparent text-[#081945] hover:bg-gray-100 hover:text-[#285688]",
+                    )}
+                  >
+                    <span className="text-[16px] font-normal leading-[1.5] font-noto">
+                      {t(mShort)}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
         )}

@@ -314,13 +314,15 @@ function VideosPageContent() {
 
   return (
     <div
-      className="min-h-screen bg-white"
+      className="min-h-screen bg-background"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Title Section */}
         <div className="flex items-end gap-3 mb-8">
-          <h1 className="text-4xl font-bold text-black">{t("Watch")}</h1>
+          <h1 className="text-4xl font-bold text-[var(--livestream-title)]">
+            {t("Watch")}
+          </h1>
           <p className="text-sm text-gray-500 mb-1">
             {pagination.count} {t("videos")}
           </p>

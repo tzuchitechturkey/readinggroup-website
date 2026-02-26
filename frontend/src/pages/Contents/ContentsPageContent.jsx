@@ -37,7 +37,7 @@ function ContentsPageContent() {
       const res = await GetContentCategories(100, 0);
       // Filter only active categories
       const active = (res?.data?.results || []).filter(
-        (cat) => cat.is_active === true
+        (cat) => cat.is_active === true,
       );
       setActiveCategories(active);
 
@@ -50,7 +50,7 @@ function ContentsPageContent() {
         } catch (error) {
           console.error(
             `Error fetching items for category ${category.id}:`,
-            error
+            error,
           );
           itemsMap[category.id] = [];
         }
@@ -89,7 +89,7 @@ function ContentsPageContent() {
   useEffect(() => {
     if (targetCategoryId && activeCategories.length > 0) {
       const categoryExists = activeCategories.some(
-        (cat) => cat.id === targetCategoryId
+        (cat) => cat.id === targetCategoryId,
       );
       if (categoryExists) {
         setTimeout(() => {
@@ -102,7 +102,7 @@ function ContentsPageContent() {
     }
   }, [targetCategoryId, activeCategories]);
   return (
-    <div className="min-h-screen bg-gray-50" dir={i18n.dir()}>
+    <div className="min-h-screen bg-background" dir={i18n.dir()}>
       {/* Start Header */}
       <div
         className="min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] bg-cover bg-center sm:bg-bottom px-4 sm:px-6 md:px-8"
@@ -117,7 +117,7 @@ function ContentsPageContent() {
           </h1>
           <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-medium sm:font-semibold lg:font-bold mt-4 sm:mt-6 md:mt-8 text-center leading-relaxed sm:leading-loose px-4 sm:px-0">
             {t(
-              "Explore inspirational stories, picture cards, and photo albums that connect hearts across the world"
+              "Explore inspirational stories, picture cards, and photo albums that connect hearts across the world",
             )}
           </p>
         </div>

@@ -6,7 +6,7 @@ const LearnSidebar = ({ categories, activeCategory, onCategoryClick }) => {
   const { t } = useTranslation();
 
   return (
-    <aside className="h-full">
+    <aside className="h-full bg-transparent">
       <div className="py-10 px-6">
         <h1 className="text-3xl font-bold mb-10 text-gray-900 leading-none">
           {t("Learn")}
