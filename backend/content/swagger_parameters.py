@@ -1,6 +1,34 @@
 from drf_yasg import openapi
 
+# ========================================== video swagger parameters start ============================================
+video_category_manual_parameters = [
+    openapi.Parameter(
+        "search",
+        openapi.IN_QUERY,
+        description="Search term for filtering video categories by name",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "is_active",
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "language",
+        openapi.IN_QUERY,
+        description="Filter by language",
+        type=openapi.TYPE_STRING,
+    ),
+]
+
 video_manual_parameters = [
+    openapi.Parameter(
+        "search",
+        openapi.IN_QUERY,
+        description="Search term for filtering videos by title or subtitle",
+        type=openapi.TYPE_STRING,
+    ),
     openapi.Parameter(
         "language",
         openapi.IN_QUERY,
@@ -44,19 +72,51 @@ video_manual_parameters = [
     ),
 ]
 
+by_type_video_manual_parameters = [
+    openapi.Parameter(
+        "video_type",
+        openapi.IN_QUERY,
+        description="Filter by Video Type",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING),
+    ),
+]
+
+# ========================================== video swagger parameters end ============================================
+# ========================================== learn swagger parameters start ============================================
+learn_category_manual_parameters = [
+    openapi.Parameter(
+        "search",
+        openapi.IN_QUERY,
+        description="Search term for filtering learn categories by name",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "is_active",
+        openapi.IN_QUERY,
+        description="Filter by is_active status",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "language",
+        openapi.IN_QUERY,
+        description="Filter by language",
+        type=openapi.TYPE_STRING,
+    ),
+]
+
 learn_manual_parameters = [
+    openapi.Parameter(
+        "search",
+        openapi.IN_QUERY,
+        description="Search term for filtering learn items by title or subtitle",
+        type=openapi.TYPE_STRING,
+    ),
     openapi.Parameter(
         "created_at",
         openapi.IN_QUERY,
         description="Filter by created date",
         type=openapi.TYPE_STRING,
-    ),
-    openapi.Parameter(
-        "category",
-        openapi.IN_QUERY,
-        description="Filter by category (JSON object with 'name' field)",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
     ),
     openapi.Parameter(
         "happened_at",
@@ -78,7 +138,26 @@ learn_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
+    openapi.Parameter(
+        "category",
+        openapi.IN_QUERY,
+        description="Filter by category (JSON object with 'name' field)",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING),
+    ),
 ]
+
+by_type_learn_manual_parameters = [
+    openapi.Parameter(
+        "learn_type",
+        openapi.IN_QUERY,
+        description="Filter by Learn Type",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING),
+    ),
+]
+
+# ========================================== learn swagger parameters end ============================================
 
 event_manual_parameters = [
     openapi.Parameter(
@@ -205,7 +284,6 @@ global_search_manual_parameters = [
     ),
 ]
 
-
 content_category_manual_parameters = [
     openapi.Parameter(
         "is_active",
@@ -215,49 +293,11 @@ content_category_manual_parameters = [
     ),
 ]
 
-post_category_manual_parameters = [
-    openapi.Parameter(
-        "is_active",
-        openapi.IN_QUERY,
-        description="Filter by is_active status",
-        type=openapi.TYPE_STRING,
-    ),
-]
 event_category_manual_parameters = [
     openapi.Parameter(
         "is_active",
         openapi.IN_QUERY,
         description="Filter by is_active status",
         type=openapi.TYPE_STRING,
-    ),
-]
-video_category_manual_parameters = [
-    openapi.Parameter(
-        "is_active",
-        openapi.IN_QUERY,
-        description="Filter by is_active status",
-        type=openapi.TYPE_STRING,
-    ),
-]
-
-
-learn_category_manual_parameters = [
-    openapi.Parameter(
-        "type",
-        openapi.IN_QUERY,
-        description="Filter by learn_type (JSON object with 'name' field)",
-        type=openapi.TYPE_STRING,
-        required=True,
-    ),
-]
-
-
-learn_grouped_by_type_manual_parameters = [
-    openapi.Parameter(
-        "learn_type",
-        openapi.IN_QUERY,
-        description="Filter by learn_type (JSON object with 'name' field)",
-        type=openapi.TYPE_STRING,
-        required=False,
     ),
 ]

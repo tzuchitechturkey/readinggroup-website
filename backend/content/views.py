@@ -14,16 +14,17 @@ from .enums import LearnType, VideoType
 
 from .swagger_parameters import (
     video_manual_parameters,
+    learn_manual_parameters,
+    video_category_manual_parameters,
+    learn_category_manual_parameters,
+    by_type_video_manual_parameters,
+    by_type_learn_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
     global_search_manual_parameters,
     content_manual_parameters,
     content_category_manual_parameters,
     event_category_manual_parameters,
-    video_category_manual_parameters,
-    learn_manual_parameters,
-    learn_category_manual_parameters,
-    learn_grouped_by_type_manual_parameters,
 )
 from .models import (
     Event,
@@ -87,55 +88,15 @@ class VideoViewSet(viewsets.ModelViewSet):
         operation_description="Retrieve a list of videos with optional filtering by language, category, and happened_at date.",
         manual_parameters=video_manual_parameters,
     )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @action(
-        detail=False,
-        methods=("post",),
-        url_path="fetch-youtube-info",
-    )
-    def fetch_youtube_info(self, request):
-        video_url = request.data.get("video_url") or request.data.get("url")
-        if not video_url:
-            return Response(
-                {"detail": "video_url is required."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
-        if not api_key:
-            return Response(
-                {"detail": "YouTube API key is not configured."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-
-        try:
-            info = fetch_video_info(video_url, api_key)
-        except YouTubeAPIError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-
-        response_payload = {
-            "title": info.title,
-            "description": info.description,
-            "duration_seconds": info.duration_seconds,
-            "duration_formatted": info.duration_formatted,
-            "reference_code": info.video_id,
-            "default_language": info.default_language,
-            "channel_title": info.channel_title,
-            "thumbnails": info.thumbnails,
-            "published_at": (
-                info.published_at.isoformat() if info.published_at else None
-            ),
-        }
-
-        return Response(response_payload, status=status.HTTP_200_OK)
-
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.views = instance.views + 1
         instance.save(update_fields=["views"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -155,7 +116,6 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(language__in=values)
 
         category = params.get("category")
-
         if category:
             values = [v.strip() for v in category.split(",") if v.strip()]
             if values:
@@ -202,9 +162,50 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by("-created_at")
 
+    @action(
+        detail=False,
+        methods=("post",),
+        url_path="fetch-youtube-info",
+    )
+    def fetch_youtube_info(self, request):
+        video_url = request.data.get("video_url") or request.data.get("url")
+        if not video_url:
+            return Response(
+                {"detail": "video_url is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
+        if not api_key:
+            return Response(
+                {"detail": "YouTube API key is not configured."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        try:
+            info = fetch_video_info(video_url, api_key)
+        except YouTubeAPIError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_payload = {
+            "title": info.title,
+            "description": info.description,
+            "duration_seconds": info.duration_seconds,
+            "duration_formatted": info.duration_formatted,
+            "reference_code": info.video_id,
+            "default_language": info.default_language,
+            "channel_title": info.channel_title,
+            "thumbnails": info.thumbnails,
+            "published_at": (
+                info.published_at.isoformat() if info.published_at else None
+            ),
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
     @swagger_auto_schema(
         operation_summary="Videos by type",
         operation_description="Return last 1 FULL_VIDEO and last 3 CLIP_VIDEO ordered newest → oldest.",
+        manual_parameters=by_type_video_manual_parameters,
     )
     @action(
         detail=False,
@@ -212,8 +213,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         url_path="by_type_video",
     )
     def by_type_video(self, request):
-        """
-        Return:
+        """Return:
         - last 1 FULL_VIDEO
         - last 3 CLIP_VIDEO
         """
@@ -224,12 +224,8 @@ class VideoViewSet(viewsets.ModelViewSet):
                 category__is_active=True,
             ).order_by("-created_at")
 
-        # ✅ آخر Full Video
         full_video_qs = base_queryset(VideoType.FULL_VIDEO)[:1]
-
-        # ✅ آخر 3 Clip Video
         clip_video_qs = base_queryset(VideoType.CLIP_VIDEO)[:3]
-
         payload = {
             "full_video": VideoSerializer(
                 full_video_qs, many=True, context={"request": request}
@@ -248,43 +244,85 @@ class VideoViewSet(viewsets.ModelViewSet):
         return Response(payload, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_summary="Upload attachments to a video",
-        operation_description="Upload one or more files to a video.",
+        operation_summary="Top viewed videos",
+        operation_description="Return top 5 videos ordered by views desc.",
     )
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="attachments",
+    @action(detail=False, methods=["get"], url_path="top-views")
+    def top_views(self, request):
+        qs = self.get_queryset().filter(category__is_active=True).order_by("-views")[:5]
+
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VideoCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing VideoCategory content with multi-language support."""
+
+    queryset = VideoCategory.objects.all()
+    serializer_class = VideoCategorySerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name",)
+    ordering_fields = ("order", "created_at")
+    queryset = VideoCategory.objects.all().order_by("order", "-created_at")
+
+    @swagger_auto_schema(
+        operation_summary="List all video categories",
+        operation_description="Retrieve a list of video categories with optional filtering by is_active status, language, or key.",
+        manual_parameters=video_category_manual_parameters,
     )
-    def upload_attachments(self, request, pk=None):
-        """
-        Upload multiple files to a video.
-        """
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
 
-        video = self.get_object()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+        is_active = self.request.query_params.get("is_active")
+        language = self.request.query_params.get("language")
 
-        files = request.FILES.getlist("attachments")
+        if params.get("search"):
+            return queryset.order_by("-created_at")
 
-        if not files:
-            return Response(
-                {"detail": "No files provided."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        try:
+            queryset = queryset.annotate(video_count=Count("video"))
+        except Exception:
+            pass
 
-        created = []
+        return queryset
 
-        for f in files:
-            obj = ContentAttachment.objects.create(
-                content=video,
-                file=f,
-            )
-            created.append(obj)
-
-        serializer = ContentAttachmentSerializer(
-            created, many=True, context={"request": request}
+    def get_serializer_context(self):
+        """Add include_translations flag to serializer context."""
+        context = super().get_serializer_context()
+        context["include_translations"] = (
+            self.request.query_params.get("include_translations", "false").lower()
+            == "true"
         )
+        return context
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
+    def reorder(self, request):
+        """Reorder VideoCategories based on provided order.
+        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
+        """
+        try:
+            categories_data = request.data.get("categories", [])
+            for item in categories_data:
+                category_id = item.get("id")
+                order_value = item.get("order")
+                if category_id is not None and order_value is not None:
+                    VideoCategory.objects.filter(id=category_id).update(
+                        order=order_value
+                    )
+            return Response(
+                {"detail": "Categories reordered successfully."},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LearnViewSet(viewsets.ModelViewSet):
@@ -299,11 +337,6 @@ class LearnViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
-
-    filterset_fields = (
-        "created_at",
-        "category__name",
-    )
 
     @swagger_auto_schema(
         operation_summary="List all learns",
@@ -322,8 +355,10 @@ class LearnViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("category")
-
         params = self.request.query_params
+
+        if params.get("search"):
+            return queryset.order_by("-created_at")
 
         created_at = params.get("created_at")
         if created_at:
@@ -351,6 +386,7 @@ class LearnViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="List learns by type",
         operation_description="Return learns filtered by type.",
+        manual_parameters=by_type_learn_manual_parameters,
     )
     @action(
         detail=False,
@@ -403,14 +439,136 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         return Response(payload, status=status.HTTP_200_OK)
 
+
+class LearnCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing LearnCategory content with multi-language support."""
+
+    queryset = LearnCategory.objects.all()
+    serializer_class = LearnCategorySerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name", "key")
+    ordering_fields = ("order", "created_at")
+    queryset = LearnCategory.objects.all().order_by("order", "-created_at")
+
     @swagger_auto_schema(
-        operation_summary="Increase view count",
-        operation_description="Increment the view count of a Learn item.",
+        operation_summary="List all learn categories",
+        operation_description="Retrieve a list of learn categories with optional filtering by is_active status, language, or key.",
+        manual_parameters=learn_category_manual_parameters,
     )
-    @action(detail=True, methods=["post"], url_path="increase-view")
-    def increase_view(self, request, pk=None):
-        Learn.objects.filter(pk=pk).update(views=F("views") + 1)
-        return Response({"detail": "View increased"}, status=status.HTTP_200_OK)
+    def list(self, request, *args, **kwargs):
+        """List endpoint documented with is_active filter for Swagger."""
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+        is_active = self.request.query_params.get("is_active")
+        language = self.request.query_params.get("language")
+
+        if params.get("search"):
+            return queryset.order_by("-created_at")
+
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
+        if language:
+            queryset = queryset.filter(language=language)
+        try:
+            queryset = queryset.annotate(learn_count=Count("learn"))
+        except Exception:
+            pass
+
+        return queryset
+
+    @swagger_auto_schema(
+        operation_summary="Get learns by type",
+        operation_description="Return learn categories filtered by LearnCategory.learn_type. Optional ordering parameter can be applied.",
+        manual_parameters=by_type_learn_manual_parameters,
+    )
+    @action(detail=False, methods=["get"], url_path="by-type")
+    def by_type(self, request):
+        learn_type = request.query_params.get("type")
+
+        if not learn_type:
+            return Response(
+                {"detail": "type parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = self.get_queryset().filter(learn_type=learn_type)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Get learns by category",
+        operation_description="Return learn items belonging to this LearnCategory with pagination. Optional ordering parameter can be applied.",
+    )
+    @action(detail=True, methods=["get"], url_path="learns")
+    def learns(self, request, pk=None):
+        """
+        Return learn objects belonging to this LearnCategory with pagination.
+        """
+
+        category = self.get_object()
+
+        learns = Learn.objects.filter(category=category).select_related("category")
+
+        # ordering من URL
+        ordering = request.query_params.get("ordering")
+        if ordering:
+            learns = learns.order_by(ordering)
+
+        page = self.paginate_queryset(learns)
+        if page is not None:
+            serializer = LearnSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = LearnSerializer(learns, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Get learns by type",
+        operation_description="Return learns filtered by LearnCategory.learn_type. Optional ordering parameter can be applied.",
+        manual_parameters=by_type_learn_manual_parameters,
+    )
+    @action(detail=False, methods=["get"], url_path="grouped-by-type")
+    def grouped_by_type(self, request):
+        """
+        Return EVENT learns grouped by LearnCategory.learn_type
+        """
+
+        learn_type_filter = request.query_params.get("learn_type")
+
+        learns = Learn.objects.select_related("category").filter(is_event=True)
+
+        if learn_type_filter:
+            learns = learns.filter(category__learn_type=learn_type_filter)
+
+        ordering = request.query_params.get("ordering")
+        if ordering:
+            learns = learns.order_by(ordering)
+
+        grouped = defaultdict(list)
+
+        for learn in learns:
+            key = (
+                learn.category.learn_type
+                if learn.category and learn.category.learn_type
+                else "unknown"
+            )
+            grouped[key].append(learn)
+
+        result = {}
+
+        for key, items in grouped.items():
+            serializer = LearnSerializer(
+                items,
+                many=True,
+                context={"request": request},
+            )
+            result[key] = serializer.data
+
+        return Response(result)
 
 
 class ContentViewSet(viewsets.ModelViewSet):
@@ -1030,109 +1188,6 @@ class HistoryEntryViewSet(viewsets.ModelViewSet):
     ordering_fields = ("story_date", "created_at")
 
 
-class LearnCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing LearnCategory content with multi-language support."""
-
-    queryset = LearnCategory.objects.all()
-    serializer_class = LearnCategorySerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
-    ordering_fields = ("order", "created_at")
-    queryset = LearnCategory.objects.all().order_by("order", "-created_at")
-
-    @swagger_auto_schema(
-        operation_summary="List all learn categories",
-        operation_description="Retrieve a list of learn categories with optional filtering by is_active status, language, or key.",
-        manual_parameters=learn_category_manual_parameters,
-    )
-    @action(detail=False, methods=["get"], url_path="by-type")
-    def by_type(self, request):
-        learn_type = request.query_params.get("type")
-
-        if not learn_type:
-            return Response(
-                {"detail": "type parameter is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        queryset = self.get_queryset().filter(learn_type=learn_type)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["get"], url_path="learns")
-    def learns(self, request, pk=None):
-        """
-        Return learn objects belonging to this LearnCategory with pagination.
-        """
-
-        category = self.get_object()
-
-        learns = Learn.objects.filter(category=category).select_related("category")
-
-        # ordering من URL
-        ordering = request.query_params.get("ordering")
-        if ordering:
-            learns = learns.order_by(ordering)
-
-        page = self.paginate_queryset(learns)
-        if page is not None:
-            serializer = LearnSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = LearnSerializer(learns, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_summary="Get learns grouped by type",
-        operation_description="Return learns grouped by LearnCategory.learn_type. Optional ordering parameter can be applied to each group.",
-        manual_parameters=learn_grouped_by_type_manual_parameters,
-    )
-    @action(detail=False, methods=["get"], url_path="grouped-by-type")
-    def grouped_by_type(self, request):
-        """
-        Return EVENT learns grouped by LearnCategory.learn_type
-        """
-
-        learn_type_filter = request.query_params.get("learn_type")
-
-        # ⭐ فقط events
-        learns = Learn.objects.select_related("category").filter(is_event=True)
-
-        if learn_type_filter:
-            learns = learns.filter(category__learn_type=learn_type_filter)
-
-        ordering = request.query_params.get("ordering")
-        if ordering:
-            learns = learns.order_by(ordering)
-
-        grouped = defaultdict(list)
-
-        for learn in learns:
-            key = (
-                learn.category.learn_type
-                if learn.category and learn.category.learn_type
-                else "unknown"
-            )
-            grouped[key].append(learn)
-
-        result = {}
-
-        for key, items in grouped.items():
-            serializer = LearnSerializer(
-                items,
-                many=True,
-                context={"request": request},
-            )
-            result[key] = serializer.data
-
-        return Response(result)
-
-    def list(self, request, *args, **kwargs):
-        """List endpoint documented with is_active filter for Swagger."""
-        return super().list(request, *args, **kwargs)
-
-
 class ContentCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing ContentCategory content with multi-language support."""
 
@@ -1561,133 +1616,6 @@ class SeasonTitleViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = SeasonIdSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
-class VideoCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing VideoCategory content with multi-language support."""
-
-    queryset = VideoCategory.objects.all()
-    serializer_class = VideoCategorySerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
-    ordering_fields = ("order", "created_at")
-    queryset = VideoCategory.objects.all().order_by("order", "-created_at")
-
-    @swagger_auto_schema(
-        operation_summary="List all video categories",
-        operation_description="Retrieve a list of video categories with optional filtering by is_active status, language, or key.",
-        manual_parameters=video_category_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        """List endpoint documented with is_active filter for Swagger."""
-        return super().list(request, *args, **kwargs)
-
-    def get_serializer_context(self):
-        """Add include_translations flag to serializer context."""
-        context = super().get_serializer_context()
-        context["include_translations"] = (
-            self.request.query_params.get("include_translations", "false").lower()
-            == "true"
-        )
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
-        key = self.request.query_params.get("key")
-
-        if is_active is not None:
-            queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
-        if key:
-            queryset = queryset.filter(key=key)
-
-        try:
-            queryset = queryset.annotate(video_count=Count("video"))
-        except Exception:
-            pass
-
-        return queryset
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="by-key/(?P<key>[^/.]+)",
-        url_name="by-key",
-    )
-    def by_key(self, request, key=None):
-        """Get all translations for a specific category key."""
-        categories = VideoCategory.objects.filter(key=key).order_by("language")
-        if not categories.exists():
-            return Response(
-                {"detail": "No categories found with this key."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder VideoCategories based on provided order.
-
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    VideoCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=("get",), url_path="videos", url_name="videos")
-    def videos(self, request, pk=None):
-        """Return Video objects belonging to this VideoCategory."""
-        try:
-            category = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "VideoCategory not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-        # Ensure category is active
-        if not getattr(category, "is_active", True):
-            return Response(
-                {"detail": "VideoCategory not active."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Only expose the category when it has at least one published video.
-        published_qs = Video.objects.filter(category=category)
-
-        try:
-            published_qs = published_qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        if not published_qs.exists():
-            return Response(
-                {"detail": "No published videos in this category."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        qs = published_qs.order_by("-created_at")
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = VideoSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = VideoSerializer(qs, many=True, context={"request": request})
         return Response(serializer.data)
 
 
