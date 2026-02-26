@@ -115,7 +115,6 @@ class VideoCategory(TimestampedModel):
 
 class Learn(TimestampedModel):
     title = models.CharField(max_length=255)
-    direction = models.CharField(max_length=255, blank=True)
     subtitle = models.CharField(max_length=255, blank=True)
     category = models.ForeignKey(
         "LearnCategory",
@@ -147,6 +146,7 @@ class LearnCategory(TimestampedModel):
         max_length=100, help_text="Category name in the specified language"
     )
     description = models.TextField(blank=True)
+    direction = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True)
     learn_type = models.CharField(
         max_length=100, blank=True, choices=LearnType.choices, default=LearnType.CARDS
