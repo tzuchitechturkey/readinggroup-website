@@ -1,5 +1,5 @@
 export const LEARN_TYPE_OPTIONS = [
-  { value: "card", label: "Card" },
+  { value: "cards", label: "Card" },
   { value: "posters", label: "Posters" },
 ];
 

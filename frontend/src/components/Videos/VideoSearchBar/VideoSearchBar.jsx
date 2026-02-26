@@ -17,9 +17,12 @@ const VideoSearchBar = ({ searchTerm, onSearch }) => {
   };
 
   return (
-    <div className="relative flex-1 max-w-[340px]">
-      <div className="relative flex items-center gap-2 border-b border-black pb-1">
-        <Search onClick={() => onSearch(searchTerm, true)} />
+    <div className="relative flex-1 w-full lg:max-w-[340px]">
+      <div className="relative flex items-center gap-2 border-b border-[#081945] pb-1">
+        <Search
+          className="text-[#081945]"
+          onClick={() => onSearch(searchTerm, true)}
+        />
         <input
           type="text"
           placeholder={t("Search video")}

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { SlidersHorizontal, SlidersVertical } from "lucide-react";
 
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
 import VideoTypeFilter from "@/components/Videos/VideoTypeFilter/VideoTypeFilter";
@@ -20,13 +22,16 @@ import {
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile(991);
+
   // State management
   const [filteredVideos, setFilteredVideos] = useState([]);
   const [activeCategories, setActiveCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [openFilter, setOpenFilter] = useState(false);
   const [filters, setFilters] = useState({
     videoType: ["all"],
-    date: { year: 2025, month: null },
+    date: { year: 2026, month: null },
     sortBy: "newest",
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,7 +55,7 @@ function VideosPageContent() {
   });
 
   // Apply all filters and fetch videos
-  const fetchFilteredVideos = async (page = 1) => {
+  const fetchFilteredVideos = async (page = 1, dateFilter = null) => {
     try {
       setIsLoading(true);
       const offset = (page - 1) * pagination.limit;
@@ -68,10 +73,10 @@ function VideosPageContent() {
         // Map video types to API parameters
         const typeMapping = {
           livestream: () => {
-            filterParams.video_type = "live_stream";
+            filterParams.video_type = "full_live_stream";
           },
           clips: () => {
-            filterParams.video_type = "clip";
+            filterParams.video_type = "new_clip";
           },
         };
 
@@ -83,8 +88,10 @@ function VideosPageContent() {
       }
 
       // Date filter (only if applied)
-      if (appliedDateFilter) {
-        filterParams.happened_at = appliedDateFilter;
+      const activeDateFilter =
+        dateFilter !== null ? dateFilter : appliedDateFilter;
+      if (activeDateFilter) {
+        filterParams.happened_at = activeDateFilter;
       }
 
       // Category filter (multiple categories as array)
@@ -132,6 +139,7 @@ function VideosPageContent() {
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
+      console.log(res?.data);
     } catch (err) {
       console.error("Failed to fetch video categories:", err);
     }
@@ -253,8 +261,8 @@ function VideosPageContent() {
     if (filters.date.year && filters.date.month) {
       const formattedDate = `${filters.date.year}-${String(filters.date.month).padStart(2, "0")}`;
       setAppliedDateFilter(formattedDate);
-      // Trigger search with the new date filter
-      setTimeout(() => fetchFilteredVideos(1), 0);
+      // Pass the formatted date directly to fetchFilteredVideos
+      fetchFilteredVideos(1, formattedDate);
     }
   };
 
@@ -283,10 +291,10 @@ function VideosPageContent() {
     setAppliedDateFilter(null);
     setFilters({
       videoType: ["all"],
-      date: { year: 2025, month: null },
+      date: { year: 2026, month: null },
       sortBy: "newest",
     });
-    fetchFilteredVideos(1);
+    fetchFilteredVideos(1, null);
   };
 
   // Close dropdowns when clicking outside
@@ -314,16 +322,16 @@ function VideosPageContent() {
 
   return (
     <div
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-[#D7EAFF]"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto md:px-6 lg:px-8 py-6">
         {/* Title Section */}
-        <div className="flex items-end gap-3 mb-8">
-          <h1 className="text-4xl font-bold text-[var(--livestream-title)]">
+        <div className="flex items-end gap-3 mb-8 px-4 md:px-0">
+          <h1 className="text-4xl font-extrabold text-[#081945]">
             {t("Watch")}
           </h1>
-          <p className="text-sm text-gray-500 mb-1">
+          <p className="text-base text-[#081945] ">
             {pagination.count} {t("videos")}
           </p>
         </div>
@@ -336,7 +344,7 @@ function VideosPageContent() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Filters */}
-              <div className="flex items-center gap-3">
+              <div className="hidden lg:flex items-center gap-3">
                 <VideoTypeFilter
                   filters={filters}
                   openDropdowns={openDropdowns}
@@ -430,25 +438,25 @@ function VideosPageContent() {
                   </span>
                 )}
 
-                 Date filter - only show when applied 
-                {appliedDateFilter && (
-                  <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm flex items-center gap-1">
-                    {t("Date")}: {appliedDateFilter}
-                    <button
-                      onClick={() => {
-                        setAppliedDateFilter(null);
-                        setFilters((prev) => ({
-                          ...prev,
-                          date: { year: 2025, month: null },
-                        }));
-                        fetchFilteredVideos(1);
-                      }}
-                      className="ml-1 text-orange-600 hover:text-orange-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )} */}
+                    {/* Date filter - only show when applied */}
+                    {appliedDateFilter && (
+                      <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm flex items-center gap-1">
+                        {t("Date")}: {appliedDateFilter}
+                        <button
+                          onClick={() => {
+                            setAppliedDateFilter(null);
+                            setFilters((prev) => ({
+                              ...prev,
+                              date: { year: 2025, month: null },
+                            }));
+                            fetchFilteredVideos(1, null);
+                          }}
+                          className="ml-1 text-orange-600 hover:text-orange-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )}
 
                     {/* Reset all button */}
                     <button
@@ -462,17 +470,36 @@ function VideosPageContent() {
               </div>
 
               {/* Search */}
-              <VideoSearchBar searchTerm={searchTerm} onSearch={handleSearch} />
+              <div className="mb-8 w-full md:mb-0 px-4 md:px-0">
+                <VideoSearchBar
+                  searchTerm={searchTerm}
+                  onSearch={handleSearch}
+                />
+              </div>
             </div>
 
+            <div className="flex lg:hidden w-full items-center justify-between mb-4 px-4 md:px-0">
+              <p className="text-[#081945] text-lg font-bold">
+                {t("ALL VIDEOS")}
+              </p>
+              <button
+                className=" flex items-center gap-1 px-3 py-1 bg-white rounded-lg hover:bg-[#8E8E8E] transition-colors"
+                onClick={() => {
+                  setOpenFilter(true);
+                }}
+              >
+                <p className="text-[#285688]">{t("Filter")}</p>
+                <SlidersVertical className="text-[#285688]" />
+              </button>
+            </div>
             {/* Category Carousel */}
-            <CategoryCarousel
-              activeCategories={activeCategories}
-              selectedCategory={selectedCategories[0] || null}
-              selectedCategories={selectedCategories}
-              onCategorySelect={handleCategorySelect}
-            />
-
+            <div className="hidden lg:block">
+              <CategoryCarousel
+                activeCategories={activeCategories}
+                selectedCategories={selectedCategories}
+                onCategorySelect={handleCategorySelect}
+              />
+            </div>
             {/* Videos Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {isLoading
@@ -485,13 +512,15 @@ function VideosPageContent() {
                     </div>
                   ))
                 : filteredVideos.map((video, index) => (
-                    <VideoCard
-                      key={video.id || index}
-                      item={video}
-                      showDate={true}
-                      size="small"
-                      navigate={navigate}
-                    />
+                    <div key={video.id || index} className="mb-2">
+                      <VideoCard
+                        item={video}
+                        showDate={true}
+                        size="small"
+                        navigate={navigate}
+                        rounded={isMobile ? false : true}
+                      />
+                    </div>
                   ))}
             </div>
 
@@ -510,14 +539,14 @@ function VideosPageContent() {
             {!isLoading && filteredVideos.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-[#8E8E8E] text-3xl font-bold">
-                  {t("No videos found")}
+                  {t("No results found.")}
                 </p>
                 {(searchTerm ||
                   selectedCategories.length > 0 ||
                   !filters.videoType.includes("all")) && (
                   <button
                     onClick={resetFilters}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-5 py-1 mt-6 bg-[#A8A8A8] rounded-lg hover:bg-[#8E8E8E] transition-colors"
                   >
                     {t("Reset Filters")}
                   </button>

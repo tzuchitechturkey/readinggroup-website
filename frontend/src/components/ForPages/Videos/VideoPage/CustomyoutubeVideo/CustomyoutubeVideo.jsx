@@ -346,8 +346,9 @@ function CustomyoutubeVideo({ videoData }) {
                   <p>{t("Speaker(s)")}</p>
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
-                  {videoData?.speakers && videoData.speakers.length > 0 ? (
-                    videoData.speakers.map((speaker, index) => (
+                  {videoData?.guest_speakers &&
+                  videoData.guest_speakers.length > 0 ? (
+                    videoData.guest_speakers.map((speaker, index) => (
                       <p key={index} className="font-normal text-black">
                         {speaker}
                       </p>

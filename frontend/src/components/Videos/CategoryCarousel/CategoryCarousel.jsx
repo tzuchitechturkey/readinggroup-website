@@ -1,10 +1,9 @@
 import React from "react";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 
 const CategoryCarousel = ({
   activeCategories,
-  selectedCategory,
   selectedCategories = [],
   onCategorySelect,
 }) => {
@@ -15,13 +14,16 @@ const CategoryCarousel = ({
           <button
             key={category.id}
             onClick={() => onCategorySelect(category.id)}
-            className={`flex-shrink-0 text-black px-4 py-2 rounded-full border border-black font-normal text-base whitespace-nowrap transition-all duration-200 ${
+            className={`flex-shrink-0 flex items-center gap-2  px-4 py-1 rounded-full font-normal text-base whitespace-nowrap transition-all duration-200 ${
               selectedCategories.includes(category.id)
-                ? "bg-[#B0B0B0] "
-                : " hover:bg-gray-50"
+                ? "bg-[#285688] text-white border-0"
+                : " bg-white text-[#285688]"
             }`}
           >
-            {category.name}
+            <span>{category.name}</span>
+            {selectedCategories.includes(category.id) && (
+              <X size={16} className="text-white" />
+            )}
           </button>
         ))}
       </div>

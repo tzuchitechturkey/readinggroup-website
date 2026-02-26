@@ -302,7 +302,6 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     setErrors(newErrors);
 
     if (!isFormValid(newErrors)) {
-      console.log("Form validation errors:", newErrors);
       toast.error(t("Please fix the errors in the form"));
       return;
     }
@@ -327,6 +326,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     }
     // Add attachments IDs
     if (formData.attachments && formData.attachments.length > 0) {
+      console.log("Attachments to send:", formData.attachments);
       formData.attachments.forEach((att) => {
         formDataToSend.append("attachments", att.id);
       });
@@ -385,12 +385,13 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
         video_url: video?.video_url || "",
         happened_at: video?.happened_at || "",
         description: video?.description || "",
-        tags: video?.tags || [],
         status: video?.status || "",
         duration: video?.duration || "",
         guest_speakers: video?.guest_speakers || [],
-        video_type: "video",
+        video_type: video?.video_type || "",
+        attachments: video?.attachments || [],
       };
+      console.log(video);
       setFormData(initialData);
       setInitialFormData(initialData);
       setHasChanges(false);

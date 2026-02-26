@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import {
-  Eye,
-  Edit,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  ToggleRight,
-  ToggleLeft,
-} from "lucide-react";
+import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { LuArrowUpDown } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -25,7 +17,7 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { DeleteVideoById, GetVideos, PatchVideoById } from "@/api/videos";
+import { DeleteVideoById, GetVideos } from "@/api/videos";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
@@ -46,20 +38,14 @@ function VideosList({ onSectionChange }) {
   const limit = 10;
   const [videoData, setVideoData] = useState([]);
   const [update, setUpdate] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("published"); // State for status filter
-  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
 
   // Fetch Data
-  const getVideoData = async (
-    page,
-    searchVal = searchTerm,
-    status = statusFilter,
-    filters = {}
-  ) => {
+  const getVideoData = async (page, searchVal = searchTerm, filters = {}) => {
     setIsLoading(true);
     const offset = page * 10;
     try {
-      const res = await GetVideos(limit, offset, status, searchVal, filters);
+      const res = await GetVideos(limit, offset, searchVal, filters);
+      console.log(res?.data);
       setVideoData(res?.data?.results || []);
       setTotalRecords(res?.data?.count);
     } catch (error) {
@@ -127,11 +113,8 @@ function VideosList({ onSectionChange }) {
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      const filters =
-        isWeeklyMomentFilter !== null
-          ? { is_weekly_moment: isWeeklyMomentFilter }
-          : {};
-      getVideoData(page - 1, searchTerm, statusFilter, filters);
+      const filters = {};
+      getVideoData(page - 1, searchTerm, filters);
     }
   };
 
@@ -150,37 +133,6 @@ function VideosList({ onSectionChange }) {
     }
 
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
-  };
-
-  // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyVideoToggle = async (videoId, currentStatus) => {
-    // منع التفعيل إذا كانت الحالة draft أو archived
-    if (
-      (statusFilter === "draft" || statusFilter === "archived") &&
-      !currentStatus
-    ) {
-      toast.info(
-        t(
-          "Cannot add video to weekly list. Only published videos can be added to the weekly list."
-        )
-      );
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await PatchVideoById(videoId, { is_weekly_moment: !currentStatus });
-      setUpdate((prev) => !prev);
-      toast.success(
-        !currentStatus
-          ? t("Video added to weekly list successfully")
-          : t("Video removed from weekly list successfully")
-      );
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // تأكيد حذف الفيديو
@@ -214,30 +166,9 @@ function VideosList({ onSectionChange }) {
     onSectionChange("createOrEditVideo", video);
   };
 
-  // Handle status filter change
-  const handleStatusChange = (newStatus) => {
-    setStatusFilter(newStatus);
-    setCurrentPage(1);
-    setSearchTerm("");
-    getVideoData(0, "", newStatus);
-  };
-
-  // Handle is_weekly_moment filter change
-  const handleWeeklyMomentFilterChange = (value) => {
-    const newFilter = value === isWeeklyMomentFilter ? null : value;
-    setIsWeeklyMomentFilter(newFilter);
-    setCurrentPage(1);
-    const filters = newFilter !== null ? { is_weekly_moment: newFilter } : {};
-    getVideoData(0, "", statusFilter, filters);
-  };
-
   useEffect(() => {
-    const filters =
-      isWeeklyMomentFilter !== null
-        ? { is_weekly_moment: isWeeklyMomentFilter }
-        : {};
-    getVideoData(currentPage - 1, searchTerm, statusFilter, filters);
-  }, [update, statusFilter, isWeeklyMomentFilter]);
+    getVideoData(currentPage - 1, searchTerm);
+  }, [update]);
 
   return (
     <div
@@ -297,11 +228,8 @@ function VideosList({ onSectionChange }) {
             <button
               onClick={() => {
                 setSearchTerm("");
-                const filters =
-                  isWeeklyMomentFilter !== null
-                    ? { is_weekly_moment: isWeeklyMomentFilter }
-                    : {};
-                getVideoData(0, "", statusFilter, filters);
+                const filters = {};
+                getVideoData(0, "", filters);
               }}
               className={` absolute ${
                 i18n?.language === "ar" ? " left-20" : " right-20"
@@ -314,11 +242,8 @@ function VideosList({ onSectionChange }) {
           <button
             onClick={() => {
               if (searchTerm.trim()) {
-                const filters =
-                  isWeeklyMomentFilter !== null
-                    ? { is_weekly_moment: isWeeklyMomentFilter }
-                    : {};
-                getVideoData(0, searchTerm, statusFilter, filters);
+                const filters = {};
+                getVideoData(0, searchTerm, filters);
               }
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
@@ -330,75 +255,7 @@ function VideosList({ onSectionChange }) {
         </div>
       </div>
       {/* End Search */}
-      <div className="flex items-center justify-between">
-        {/* Start Status Tabs Filter */}
-        <div className="bg-white rounded-lg p-4  shadow-sm border-b">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
-              {t("Status")}:
-            </span>
-            <div className="flex gap-2 flex-wrap">
-              {["published", "draft", "archived"].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => handleStatusChange(status)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    statusFilter === status
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {t(status.charAt(0).toUpperCase() + status.slice(1))}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* End Status Tabs Filter */}
-        {/* Start Is Weekly Moment Filter */}
-        <div className="flex gap-4 my-4 px-4 py-3 bg-white rounded-lg border border-gray-200">
-          <div className="w-full">
-            <div className="flex items-center gap-4">
-              <span className="text-gray-600 font-medium text-sm">
-                {t("Weekly List")}:
-              </span>
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => handleWeeklyMomentFilterChange(null)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isWeeklyMomentFilter === null
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {t("All")}
-                </button>
-                <button
-                  onClick={() => handleWeeklyMomentFilterChange(true)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isWeeklyMomentFilter === true
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {t("Weekly")}
-                </button>
-                <button
-                  onClick={() => handleWeeklyMomentFilterChange(false)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isWeeklyMomentFilter === false
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {t("Not Weekly")}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* End Is Weekly Moment Filter */}
-      </div>
+
       {/* Start Table */}
       <Table>
         <TableHeader className="bg-[#FAFAFA] h-14 ">
@@ -436,7 +293,7 @@ function VideosList({ onSectionChange }) {
                 {getSortIcon("category")}
               </div>
             </TableHead>
-            {/* <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
                 className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
                 onClick={() => sortData("video_type")}
@@ -444,7 +301,7 @@ function VideosList({ onSectionChange }) {
                 {t("Type")}
                 {getSortIcon("video_type")}
               </div>
-            </TableHead> */}
+            </TableHead>
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               <div
                 className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
@@ -472,14 +329,7 @@ function VideosList({ onSectionChange }) {
                 {getSortIcon("happened_at")}
               </div>
             </TableHead>
-            <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-              <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                {t("Weekly List")}
-              </div>
-            </TableHead>
-            <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-              {t("Status")}
-            </TableHead>
+
             <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
               {t("Actions")}
             </TableHead>
@@ -520,11 +370,11 @@ function VideosList({ onSectionChange }) {
                   {video.category?.name}
                 </span>
               </TableCell>
-              {/* <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
                   {t(video.video_type)}
                 </span>
-              </TableCell> */}
+              </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
@@ -556,43 +406,7 @@ function VideosList({ onSectionChange }) {
                   </span>
                 </div>
               </TableCell>
-              <TableCell className="text-center py-4">
-                <button
-                  onClick={() =>
-                    handleWeeklyVideoToggle(video?.id, video?.is_weekly_moment)
-                  }
-                  className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                    video?.is_weekly_moment
-                      ? "bg-green-100 text-green-800 hover:bg-green-200"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  }`}
-                >
-                  {video?.is_weekly_moment ? (
-                    <ToggleRight className="h-8 w-12" />
-                  ) : (
-                    <ToggleLeft className="h-8 w-12" />
-                  )}
-                </button>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex items-center justify-center gap-1 flex-wrap">
-                  {video.featured && (
-                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-[10px]">
-                      {t("Featured")}
-                    </span>
-                  )}
-                  {video.is_new && (
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-[10px]">
-                      {t("New")}
-                    </span>
-                  )}
-                  {!video.featured && !video.is_new && (
-                    <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-[10px]">
-                      {t("Normal")}
-                    </span>
-                  )}
-                </div>
-              </TableCell>
+
               <TableCell className="py-4">
                 <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                   <button
@@ -783,7 +597,7 @@ function VideosList({ onSectionChange }) {
           onConfirm={handleConfirmDelete}
           title={t("Delete Video")}
           message={t(
-            "Are you sure you want to delete this video? This action cannot be undone."
+            "Are you sure you want to delete this video? This action cannot be undone.",
           )}
           itemName={selectedVideo?.title}
         />

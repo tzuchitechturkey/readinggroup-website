@@ -29,7 +29,7 @@ export const DescriptionSection = ({
 
       <CKEditor
         editor={ClassicEditor}
-        data={formData.body}
+        data={formData.description}
         config={{
           placeholder: t("Enter the full content of the post"),
           language: i18n.language === "ar" ? "ar" : "en",

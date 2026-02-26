@@ -17,11 +17,20 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
   const { t, i18n } = useTranslation();
 
   // Form state
-  const [formData, setFormData] = useState(LEARN_FORM_DATA_INITIAL_STATE);
+  const [formData, setFormData] = useState({
+    ...LEARN_FORM_DATA_INITIAL_STATE,
+    direction: "horizontal", // Default direction for cards
+    is_event: false,
+    date: "",
+    event_title: "",
+    guest_speakers: [],
+    live_stream_link: "",
+  });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
   const [imageFile, setImageFile] = useState(null);
+  const [guestSpeakerInput, setGuestSpeakerInput] = useState("");
 
   // Dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -60,7 +69,23 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     }
     if (name === "learn_type") {
       getCategories(value);
+      // Reset is_event when changing learn_type
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue,
+        is_event: false,
+        date: "",
+        event_title: "",
+        guest_speakers: [],
+        live_stream_link: "",
+      }));
+      return;
     }
+
+    if (name === "is_event") {
+      newValue = checked;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
@@ -109,6 +134,37 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     }
   };
 
+  const handleGuestSpeakersInput = (e) => {
+    if (e.key === "Enter" && guestSpeakerInput.trim()) {
+      e.preventDefault();
+      if (!(formData?.guest_speakers || []).includes(guestSpeakerInput.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          guest_speakers: [
+            ...(prev.guest_speakers || []),
+            guestSpeakerInput.trim(),
+          ],
+        }));
+      }
+      setGuestSpeakerInput("");
+      if (errors.guest_speakers) {
+        setErrors((prev) => ({
+          ...prev,
+          guest_speakers: "",
+        }));
+      }
+    }
+  };
+
+  const removeGuestSpeaker = (guestToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      guest_speakers: prev.guest_speakers.filter(
+        (item) => item !== guestToRemove,
+      ),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -138,6 +194,20 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     // Add image_url if provided
     if (formData.image_url) {
       learnData.append("image_url", formData.image_url);
+    }
+
+    // Add direction for cards
+    if (formData.learn_type === "cards") {
+      learnData.append("direction", formData.direction);
+    }
+
+    // Add event-related fields for posters
+    if (formData.learn_type === "posters" && formData.is_event) {
+      learnData.append("is_event", true);
+      learnData.append("event_date", formData.date);
+      learnData.append("event_title", formData.event_title);
+      learnData.append("guest_speakers", JSON.stringify(formData.guest_speakers));
+      learnData.append("live_stream_link", formData.live_stream_link);
     }
 
     learnData.append("updated_at", new Date().toISOString());
@@ -176,6 +246,12 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         learn_type: learn.learn_type || "",
         image: learn.image || null,
         image_url: learn.image_url || "",
+        direction: learn.direction || "horizontal",
+        is_event: learn.is_event || false,
+        date: learn.event_date || "",
+        event_title: learn.event_title || "",
+        guest_speakers: learn.guest_speakers || [],
+        live_stream_link: learn.live_stream_link || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -227,7 +303,13 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     handleInputChange,
     handleImageUpload,
     handleCategorySelect,
+    handleGuestSpeakersInput,
+    removeGuestSpeaker,
     handleSubmit,
+
+    // Additional state
+    guestSpeakerInput,
+    setGuestSpeakerInput,
 
     // API Functions
     getCategories,
