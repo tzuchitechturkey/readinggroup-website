@@ -48,7 +48,6 @@ class Video(TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     guest_speakers = models.JSONField(default=list, blank=True)
-    live_stream_link = models.URLField(blank=True, null=True)
 
     @property
     def is_new_computed(self) -> bool:
@@ -150,6 +149,11 @@ class Learn(TimestampedModel):
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
     is_event = models.BooleanField(default=False)
+    event_title = models.CharField(max_length=255, blank=True)
+    guest_speakers = models.JSONField(default=list, blank=True)
+    live_stream_link = models.URLField(blank=True, null=True)
+    event_date = models.DateField(blank=True, null=True)
+    event_time = models.TimeField(blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)
