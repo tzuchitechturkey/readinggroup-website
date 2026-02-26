@@ -94,7 +94,7 @@ const VideoCard = ({
 
       {/* Start Category Name && Duration */}
       <div
-        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 sm:mt-1 mx-0.5 sm:mx-1`}
+        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 sm:mt-1 mx-0.5 sm:mx-1 px-4 lg:px-0`}
       >
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${categoryText} text-black uppercase`}
@@ -109,7 +109,7 @@ const VideoCard = ({
       </div>
       {/* End Category Name && Duration */}
       {showDate && (
-        <div className="mx-1 -mt-1">
+        <div className="mx-1 -mt-1 px-4 lg:px-0">
           <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] text-[#285688]">
             {item?.happened_at}
           </p>
