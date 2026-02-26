@@ -65,11 +65,11 @@ const SortByFilter = ({
             </div>
             {/* Most Popular Option */}
             <div
-              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "popular" ? "text-[#285688]" : ""}`}
-              onClick={() => onSortByChange("popular")}
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "most_popular" ? "text-[#285688]" : ""}`}
+              onClick={() => onSortByChange("most_popular")}
             >
               <div className="w-6 h-6">
-                {filters.sortBy === "popular" && <Check />}
+                {filters.sortBy === "most_popular" && <Check />}
               </div>
               <p className="font-normal text-base  ">{t("Most Popular")}</p>
             </div>

@@ -19,7 +19,6 @@ function BrokenCarousel({
   nextArrowClassname = "",
   prevArrowClassname = "",
   cardProps = {},
-  showPagination = false,
   t,
 }) {
   const Card = cardName;
@@ -32,15 +31,6 @@ function BrokenCarousel({
   }
   // حساب الـ basis classes حسب عدد العناصر
   const getItemBasisClass = () => {
-    const itemCount = data?.length || 0;
-
-    // if (itemCount === 1) {
-    //   return "basis-full sm:basis-full md:basis-full lg:basis-full xl:basis-[100%]";
-    // } else if (itemCount === 2) {
-    //   return "basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/2";
-    // } else if (itemCount === 3) {
-    //   return "basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/3 xl:basis-1/4";
-    // }
     return `basis-full sm:basis-1/2 md:basis-[28.57%] lg:basis-[28.57%] ${
       showCount === 4 ? "xl:basis-[19.99%]" : "xl:basis-[25%]"
     }`;
@@ -49,7 +39,7 @@ function BrokenCarousel({
   return (
     <div>
       {title && (
-        <p className="text-base lg:text-3xl px-5 text-[#081945] font-bold mb-2">
+        <p className="text-base  lg:text-3xl px-5 text-[#081945] font-bold mb-2">
           {title}
         </p>
       )}
@@ -77,13 +67,6 @@ function BrokenCarousel({
           </>
         )}
       </Carousel>
-      {showPagination && (
-        <div className="px-4 mt-6 ">
-          <button className="w-full bg-white rounded-lg text-center py-3 text-[#285688]">
-            {t("load more...")}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

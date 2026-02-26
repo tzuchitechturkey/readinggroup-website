@@ -25,7 +25,7 @@ const VideoTypeFilter = ({
             ? t("All")
             : filters.videoType.length === 1
               ? t(
-                  filters.videoType[0] === "livestream"
+                  filters.videoType[0] === "full_video"
                     ? "Live Stream"
                     : filters.videoType[0] === "clips"
                       ? "Clips"
@@ -51,13 +51,13 @@ const VideoTypeFilter = ({
               </div>
               <p className="font-normal text-base ">{t("All")}</p>
             </div>
-            {/* Livestream Option */}
+            {/* full_video Option */}
             <div
-              className={`flex ${filters.videoType.includes("livestream") ? "text-[#285688]" : ""}  items-center gap-2 cursor-pointer`}
-              onClick={() => onVideoTypeChange("livestream")}
+              className={`flex ${filters.videoType.includes("full_video") ? "text-[#285688]" : ""}  items-center gap-2 cursor-pointer`}
+              onClick={() => onVideoTypeChange("full_video")}
             >
               <div className="w-6 h-6">
-                {filters.videoType.includes("livestream") && <Check />}
+                {filters.videoType.includes("full_video") && <Check />}
               </div>
               <p className="font-normal text-base ">{t("Live Stream")}</p>
             </div>

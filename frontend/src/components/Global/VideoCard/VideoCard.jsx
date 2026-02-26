@@ -6,6 +6,7 @@ const VideoCard = ({
   navigate,
   showDate = false,
   rounded = false,
+  textClassName = "",
 }) => {
   const getSizeClasses = () => {
     switch (size) {
@@ -66,16 +67,16 @@ const VideoCard = ({
 
   return (
     <div
-      onClick={() => navigate(`/videos/${item.id}`)}
+      onClick={() => navigate(`/videos/${item?.id}`)}
       className={`flex flex-col gap-[3px] sm:gap-[4px] md:gap-[4px] lg:gap-[4px] items-start w-full ${rounded ? "rounded-xl" : ""}`}
     >
       <div
         className={`${image} ${rounded ? "rounded-xl" : ""} relative shrink-0 overflow-hidden cursor-pointer group`}
       >
         <img
-          alt={item.title}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
-          src={item.thumbnail || item.thumbnail_url}
+          alt={item?.title}
+          src={item?.thumbnail || item?.thumbnail_url}
         />
 
         {/* Play Button Overlay */}
@@ -94,17 +95,18 @@ const VideoCard = ({
 
       {/* Start Category Name && Duration */}
       <div
-        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 sm:mt-1 mx-0.5 sm:mx-1 px-4 lg:px-0`}
+        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
       >
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${categoryText} text-black uppercase`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal   ${categoryText} text-black uppercase`}
         >
-          {item.category?.name}
+          {item?.category?.name}
         </p>
+        {textClassName && <span className="mb-2">|</span>}
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${durationText} text-[#081945]`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal mb-1   ${durationText} text-[#081945]`}
         >
-          {item.duration}
+          {item?.duration}
         </p>
       </div>
       {/* End Category Name && Duration */}

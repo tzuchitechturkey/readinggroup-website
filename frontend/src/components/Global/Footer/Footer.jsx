@@ -37,15 +37,6 @@ function Footer() {
     { name: t("閱上雲端 Book"), href: "/about/book" },
   ];
 
-  const fetchSocialLinks = async () => {
-    try {
-      const response = await GetWebSiteInfo(100, 0);
-      setSocialLinks(response.data?.socialmedia || []);
-    } catch (error) {
-      setErrorFn(error, t);
-    }
-  };
-
   useEffect(() => {
     // fetchSocialLinks();
   }, [t]);
@@ -97,8 +88,8 @@ function Footer() {
           {/* Third Column - Brands Logos and Social Media */}
           <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* Jing Si Logo Section */}
-            <div className="flex gap-[20px] items-center justify-between w-full md:w-[225px]">
-              <div className="flex flex-col items-start gap-[4px]">
+            <div className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]">
+              <div className="flex flex-col items-start gap-[4px] w-20">
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("JING SI")}
                 </p>
@@ -121,8 +112,8 @@ function Footer() {
             </div>
 
             {/* DA AI TV Logo Section */}
-            <div className="flex gap-[20px] items-center justify-between w-full md:w-[225px]">
-              <div className="flex flex-col items-start gap-[4px]">
+            <div className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]">
+              <div className="flex flex-col items-start gap-[4px] w-20">
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("DA AI TV")}
                 </p>

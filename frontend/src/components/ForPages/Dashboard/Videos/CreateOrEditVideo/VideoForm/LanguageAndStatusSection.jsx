@@ -56,8 +56,8 @@ export const LanguageAndStatusSection = ({
           <option hidden disabled value="">
             {t("Select video type")}
           </option>
-          <option value={"new_clip"}>New Clip</option>
-          <option value={"full_live_stream"}>Full Live Stream</option>
+          <option value={"clip_video"}>New Clip</option>
+          <option value={"full_video"}>Full Live Stream</option>
         </select>
         {errors?.video_type && (
           <div className="flex items-center gap-2 text-red-600 text-sm mt-1">

@@ -1,15 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
 import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
-import WeeklyMomentsCard from "@/components/Global/WeeklyMomentsCard/WeeklyMomentsCard";
-import WeekPhotosCard from "@/components/Global/WeekPhotosCard/WeekPhotosCard";
-import GlobalCard from "@/components/Global/GlobalCard/GlobalCard";
-import VideoCard from "@/components/Global/VideoCard/VideoCard";
 // import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetStatistics } from "@/api/dashboard";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
 import RevisitCards from "@/components/ForPages/Home/RevisitCards/RevisitCards";
 import GoodEffectsPoster from "@/components/ForPages/Home/GoodEffectsPoster/GoodEffectsPoster";
@@ -32,7 +27,6 @@ export default function HomeContent() {
   useEffect(() => {
     fetchData();
   }, []);
-
   return (
     <div
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
@@ -40,13 +34,13 @@ export default function HomeContent() {
     >
       {/* Start Hero Slider */}
       <div>
-        <HomeHeroSlider t={t} fullLiveStream={data?.full_live_stream[0]} />
+        <HomeHeroSlider t={t} fullLiveStream={data?.full_video[0]} />
       </div>
       {/* End Hero Slider */}
 
       {/* New Clips Section */}
       <div className="py-16">
-        <NewClips t={t} />
+        <NewClips clips={data?.clip_video || []} t={t} />
       </div>
 
       {/* Upcoming Livestream Section */}

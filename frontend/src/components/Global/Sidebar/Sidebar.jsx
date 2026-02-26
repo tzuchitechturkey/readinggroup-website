@@ -25,12 +25,9 @@ import {
 import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
-import Content from "@/assets/icons/Page.png";
-import FakeUser from "@/assets/fake-user.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
-import TV from "@/assets/icons/tv.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({

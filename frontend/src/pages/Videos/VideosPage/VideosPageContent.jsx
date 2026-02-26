@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { SlidersHorizontal, SlidersVertical } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { SlidersVertical } from "lucide-react";
 
 import { useIsMobile } from "@/hooks/global/use-mobile";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
@@ -13,17 +13,15 @@ import SortByFilter from "@/components/Videos/SortByFilter/SortByFilter";
 import VideoSearchBar from "@/components/Videos/VideoSearchBar/VideoSearchBar";
 import CategoryCarousel from "@/components/Videos/CategoryCarousel/CategoryCarousel";
 import MobileFilterModal from "@/components/Videos/MobileFilterModal/MobileFilterModal";
-import {
-  GetVideoCategories,
-  GetVideosByCategoryId,
-  GetVideos,
-  GetVideosByFilter,
-} from "@/api/videos";
+import { GetVideoCategories, GetVideosByFilter } from "@/api/videos";
 
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile(991);
+  const initialLoadRef = useRef(false);
+  const allowUrlUpdateRef = useRef(false);
 
   // State management
   const [filteredVideos, setFilteredVideos] = useState([]);
@@ -56,7 +54,11 @@ function VideosPageContent() {
   });
 
   // Apply all filters and fetch videos
-  const fetchFilteredVideos = async (page = 1, dateFilter = null) => {
+  const fetchFilteredVideos = async (
+    page = 1,
+    passedFilters = filters,
+    dateFilter = null,
+  ) => {
     try {
       setIsLoading(true);
       const offset = (page - 1) * pagination.limit;
@@ -70,19 +72,22 @@ function VideosPageContent() {
       }
 
       // Video type filter
-      if (filters.videoType.length > 0 && !filters.videoType.includes("all")) {
+      if (
+        passedFilters.videoType.length > 0 &&
+        !passedFilters.videoType.includes("all")
+      ) {
         // Map video types to API parameters
         const typeMapping = {
-          livestream: () => {
-            filterParams.video_type = "full_live_stream";
+          full_video: () => {
+            filterParams.video_type = "full_video";
           },
           clips: () => {
-            filterParams.video_type = "new_clip";
+            filterParams.video_type = "clip_video";
           },
         };
 
         // Apply the selected type (only one type allowed)
-        const selectedType = filters.videoType[0];
+        const selectedType = passedFilters.videoType[0];
         if (typeMapping[selectedType]) {
           typeMapping[selectedType]();
         }
@@ -99,9 +104,7 @@ function VideosPageContent() {
       if (selectedCategories.length > 0) {
         filterParams.category = selectedCategories;
       }
-
-      console.log("Filter params:", filterParams);
-
+      console.log("Filter parameters being sent to API:", filterParams);
       const res = await GetVideosByFilter(
         pagination.limit,
         offset,
@@ -114,8 +117,105 @@ function VideosPageContent() {
 
       // Apply local sorting
       videos = applySorting(videos);
-
       setFilteredVideos(videos);
+
+      // Update pagination state
+      setPagination((prev) => ({
+        ...prev,
+        count: responseData.count || 0,
+        next: responseData.next || null,
+        previous: responseData.previous || null,
+        currentPage: page,
+        totalPages: Math.ceil((responseData.count || 0) / prev.limit),
+      }));
+    } catch (err) {
+      console.error("Failed to fetch filtered videos:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to fetch with explicit parameters
+  const fetchFilteredVideosWithParams = async (
+    page = 1,
+    passedFilters = {},
+    dateFilter = null,
+    categoriesOverride = null,
+  ) => {
+    try {
+      setIsLoading(true);
+      const offset = (page - 1) * pagination.limit;
+
+      // Build filter parameters
+      const filterParams = {};
+
+      // Only add search if it's not empty
+      if (searchTerm && searchTerm.trim() !== "") {
+        filterParams.search = searchTerm.trim();
+      }
+
+      // Video type filter
+      if (
+        passedFilters.videoType &&
+        passedFilters.videoType.length > 0 &&
+        !passedFilters.videoType.includes("all")
+      ) {
+        // Map video types to API parameters
+        const typeMapping = {
+          full_video: () => {
+            filterParams.video_type = "full_video";
+          },
+          clips: () => {
+            filterParams.video_type = "clip_video";
+          },
+        };
+
+        // Apply the selected type (only one type allowed)
+        const selectedType = passedFilters.videoType[0];
+        if (typeMapping[selectedType]) {
+          typeMapping[selectedType]();
+        }
+      }
+
+      // Date filter (only if applied)
+      if (dateFilter) {
+        filterParams.happened_at = dateFilter;
+      }
+
+      // Category filter (multiple categories as array)
+      const categoriesToUse = categoriesOverride || selectedCategories;
+      if (categoriesToUse.length > 0) {
+        filterParams.category = categoriesToUse;
+      }
+
+      console.log("Filter parameters being sent to API:", filterParams);
+      const res = await GetVideosByFilter(
+        pagination.limit,
+        offset,
+        filterParams,
+      );
+
+      // Handle API response structure
+      const responseData = res.data || {};
+      const videos = responseData.results || [];
+
+      // Apply local sorting
+      const sortedVideos =
+        passedFilters.sortBy === "newest"
+          ? videos.sort(
+              (a, b) =>
+                new Date(b.happened_at) - new Date(a.happened_at),
+            )
+          : passedFilters.sortBy === "oldest"
+            ? videos.sort(
+                (a, b) =>
+                  new Date(a.happened_at) - new Date(b.happened_at),
+              )
+            : passedFilters.sortBy === "most_popular"
+              ? videos.sort((a, b) => (b.views || 0) - (a.views || 0))
+              : videos;
+
+      setFilteredVideos(sortedVideos);
 
       // Update pagination state
       setPagination((prev) => ({
@@ -140,7 +240,6 @@ function VideosPageContent() {
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
-      console.log(res?.data);
     } catch (err) {
       console.error("Failed to fetch video categories:", err);
     }
@@ -153,24 +252,15 @@ function VideosPageContent() {
     switch (filters.sortBy) {
       case "newest":
         return sortedVideos.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at),
+          (a, b) => new Date(b.happened_at) - new Date(a.happened_at),
         );
       case "oldest":
         return sortedVideos.sort(
-          (a, b) => new Date(a.created_at) - new Date(b.created_at),
+          (a, b) => new Date(a.happened_at) - new Date(b.happened_at),
         );
-      case "most_viewed":
-        return sortedVideos.sort(
-          (a, b) => (b.views_count || 0) - (a.views_count || 0),
-        );
-      case "most_liked":
-        return sortedVideos.sort(
-          (a, b) => (b.likes_count || 0) - (a.likes_count || 0),
-        );
-      case "alphabetical":
-        return sortedVideos.sort((a, b) =>
-          (a.title || "").localeCompare(b.title || ""),
-        );
+      case "most_popular":
+        return sortedVideos.sort((a, b) => (b.views || 0) - (a.views || 0));
+
       default:
         return sortedVideos;
     }
@@ -178,6 +268,9 @@ function VideosPageContent() {
 
   // Handle multiple category selection
   const handleCategorySelect = (categoryId) => {
+    // Ensure URL updates are allowed for user interactions
+    allowUrlUpdateRef.current = true;
+    
     setSelectedCategories((prev) => {
       const isSelected = prev.includes(categoryId);
       if (isSelected) {
@@ -191,7 +284,7 @@ function VideosPageContent() {
 
   // Handle pagination
   const handlePageChange = (newPage) => {
-    fetchFilteredVideos(newPage);
+    fetchFilteredVideosWithParams(newPage, filters, appliedDateFilter, selectedCategories);
   };
 
   // Handle dropdown toggles
@@ -214,6 +307,9 @@ function VideosPageContent() {
 
   // Handle video type filter changes (only one type allowed)
   const handleVideoTypeChange = (type) => {
+    // Ensure URL updates are allowed for user interactions
+    allowUrlUpdateRef.current = true;
+    
     setFilters((prev) => {
       if (type === "all") {
         return { ...prev, videoType: ["all"] };
@@ -262,18 +358,20 @@ function VideosPageContent() {
     if (filters.date.year && filters.date.month) {
       const formattedDate = `${filters.date.year}-${String(filters.date.month).padStart(2, "0")}`;
       setAppliedDateFilter(formattedDate);
-      // Pass the formatted date directly to fetchFilteredVideos
-      fetchFilteredVideos(1, formattedDate);
+      // Ensure URL updates are allowed for user interactions
+      allowUrlUpdateRef.current = true;
+      // Pass the formatted date directly with current filters
+      fetchFilteredVideosWithParams(1, filters, formattedDate, selectedCategories);
     }
   };
 
   // Handle sort by filter changes
   const handleSortByChange = (sortValue) => {
+    // Ensure URL updates are allowed for user interactions
+    allowUrlUpdateRef.current = true;
+    
     setFilters((prev) => ({ ...prev, sortBy: sortValue }));
     closeAllDropdowns();
-    // Apply local sorting to current videos
-    const sortedVideos = applySorting(filteredVideos);
-    setFilteredVideos(sortedVideos);
   };
 
   // Handle search (triggered on Enter press)
@@ -281,7 +379,9 @@ function VideosPageContent() {
     setSearchTerm(term);
     // Only search when Enter is pressed or search is explicitly triggered
     if (shouldSearch) {
-      fetchFilteredVideos(1);
+      // Ensure URL updates are allowed for user interactions
+      allowUrlUpdateRef.current = true;
+      fetchFilteredVideosWithParams(1, filters, appliedDateFilter, selectedCategories);
     }
   };
 
@@ -290,12 +390,17 @@ function VideosPageContent() {
     setSearchTerm("");
     setSelectedCategories([]);
     setAppliedDateFilter(null);
-    setFilters({
+    const defaultFilters = {
       videoType: ["all"],
       date: { year: 2026, month: null },
       sortBy: "newest",
-    });
-    fetchFilteredVideos(1, null);
+    };
+    setFilters(defaultFilters);
+    // reset searchParams by navigating without query parameters
+    navigate("/videos", { replace: true });
+    // Allow URL updates for user interactions
+    allowUrlUpdateRef.current = true;
+    fetchFilteredVideosWithParams(1, defaultFilters, null, []);
   };
 
   // Close dropdowns when clicking outside
@@ -309,17 +414,128 @@ function VideosPageContent() {
     };
   }, []);
 
-  // Remove auto-search effect - search only happens on Enter press
-
-  // Effect to trigger filtering when categories or video types change
+  // Load filters from URL on initial mount only
   useEffect(() => {
-    fetchFilteredVideos(1);
-  }, [selectedCategories, filters.videoType]);
+    if (initialLoadRef.current) return; // Prevent re-runs
 
-  useEffect(() => {
-    fetchFilteredVideos(1);
+    const typeParam = searchParams.get("type");
+    const dateParam = searchParams.get("date");
+    const categoriesParam = searchParams.get("categories");
+    const sortParam = searchParams.get("sort");
+
+    console.log("Initial load from URL:", { typeParam, dateParam, categoriesParam, sortParam });
+
+    // Map type from URL format to internal format
+    const typeMapping = {
+      clip_video: "clips",
+      full_video: "full_video",
+      all: "all",
+    };
+    const filterType = typeMapping[typeParam] || "all";
+
+    // Build filters object to pass to fetch
+    const newFilters = {
+      videoType: [filterType],
+      date: { year: 2026, month: null },
+      sortBy: sortParam || "newest",
+    };
+
+    // Parse and set date if present
+    let appliedDate = null;
+    if (dateParam) {
+      const [year, month] = dateParam.split("-");
+      newFilters.date = { year: parseInt(year), month: parseInt(month) };
+      appliedDate = dateParam;
+      setAppliedDateFilter(dateParam);
+    }
+
+    // Parse and set categories if present
+    let cats = [];
+    if (categoriesParam) {
+      cats = categoriesParam.split(",").map((c) => parseInt(c));
+      setSelectedCategories(cats);
+    }
+
+    // Set filters state
+    setFilters(newFilters);
+
+    // Mark as initial load complete
+    initialLoadRef.current = true;
+
+    console.log("Fetching with initial filters:", newFilters, appliedDate, cats);
+    // Fetch videos directly with the new filters
+    fetchFilteredVideosWithParams(1, newFilters, appliedDate, cats);
     getActiveVideoCategories();
-  }, []);
+
+    // Allow URL updates only after initial load is complete
+    // Using setTimeout to ensure state updates are processed first
+    setTimeout(() => {
+      allowUrlUpdateRef.current = true;
+    }, 100);
+  }, [searchParams]); // Only depend on searchParams
+
+  // Update URL when filters change (only after initial load)
+  useEffect(() => {
+    if (!allowUrlUpdateRef.current) {
+      console.log("Skipping URL update - initial load in progress");
+      return; // Don't update URL during initial load
+    }
+
+    const params = new URLSearchParams();
+    console.log("Updating URL with filters:", filters);
+    
+    // Add video type if not "all"
+    if (filters.videoType[0] !== "all") {
+      const typeMap = {
+        clips: "clip_video",
+        full_video: "full_video",
+      };
+      params.set("type", typeMap[filters.videoType[0]]);
+    }
+
+    // Add date if applied
+    if (appliedDateFilter) {
+      params.set("date", appliedDateFilter);
+    }
+
+    // Add categories if selected
+    if (selectedCategories.length > 0) {
+      params.set("categories", selectedCategories.join(","));
+    }
+
+    // Add sort if not default
+    if (filters.sortBy !== "newest") {
+      params.set("sort", filters.sortBy);
+    }
+
+    // Navigate to new URL
+    const queryString = params.toString();
+    const newPath = `/videos${queryString ? "?" + queryString : ""}`;
+    console.log("Navigating to:", newPath);
+    navigate(newPath, { replace: true });
+  }, [
+    filters.videoType,
+    appliedDateFilter,
+    selectedCategories,
+    filters.sortBy,
+  ]);
+
+  // Trigger filtering when filters change (only after initial load)
+  useEffect(() => {
+    if (!allowUrlUpdateRef.current) {
+      console.log("Skipping filter fetch - initial load in progress");
+      return; // Don't fetch during initial load
+    }
+    
+    console.log("Filter changed, fetching with:", filters, appliedDateFilter, selectedCategories);
+    // Pass filters explicitly to avoid closure issues
+    fetchFilteredVideosWithParams(1, filters, appliedDateFilter, selectedCategories);
+  }, [
+    filters.videoType,
+    filters.sortBy,
+    appliedDateFilter,
+    selectedCategories,
+  ]);
 
   return (
     <div
@@ -389,91 +605,6 @@ function VideosPageContent() {
                   !filters.videoType.includes("all") ||
                   appliedDateFilter) && (
                   <div className="flex flex-wrap gap-2 items-end h-full">
-                    {/* <span className="text-sm text-gray-600">
-                  {t("Active Filters")}:
-                </span>
-
-                 Search filter 
-                {searchTerm && (
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-1">
-                    {t("Search")}: "{searchTerm}"
-                    <button
-                      onClick={() => {
-                        setSearchTerm("");
-                        fetchFilteredVideos(1);
-                      }}
-                      className="ml-1 text-blue-600 hover:text-blue-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                 Category filters 
-                {selectedCategories.map((catId) => {
-                  const category = activeCategories.find(
-                    (cat) => cat.id === catId,
-                  );
-                  return category ? (
-                    <span
-                      key={catId}
-                      className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm flex items-center gap-1"
-                    >
-                      {category.name}
-                      <button
-                        onClick={() => handleCategorySelect(catId)}
-                        className="ml-1 text-green-600 hover:text-green-800"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ) : null;
-                })}
-
-                 Video type filters 
-                {!filters.videoType.includes("all") && (
-                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center gap-1">
-                    {t("Types")}:{" "}
-                    {filters.videoType
-                      .map((type) =>
-                        type === "livestream"
-                          ? t("Live Stream")
-                          : type === "clips"
-                            ? t("Clips")
-                            : type,
-                      )
-                      .join(", ")}
-                    <button
-                      onClick={() =>
-                        setFilters((prev) => ({ ...prev, videoType: ["all"] }))
-                      }
-                      className="ml-1 text-purple-600 hover:text-purple-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                    {/* Date filter - only show when applied */}
-                    {appliedDateFilter && (
-                      <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm flex items-center gap-1">
-                        {t("Date")}: {appliedDateFilter}
-                        <button
-                          onClick={() => {
-                            setAppliedDateFilter(null);
-                            setFilters((prev) => ({
-                              ...prev,
-                              date: { year: 2025, month: null },
-                            }));
-                            fetchFilteredVideos(1, null);
-                          }}
-                          className="ml-1 text-orange-600 hover:text-orange-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )}
-
                     {/* Reset all button */}
                     <button
                       onClick={resetFilters}

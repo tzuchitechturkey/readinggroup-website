@@ -1,31 +1,57 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import { GetTop5ViewedVideos } from "@/api/videos";
+import { GetTopViewedVideos } from "@/api/videos";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
+
+import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
 function CustomyoutubeVideo({ t, i18n, videoData }) {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
+
+  const LIMIT = 4;
+
   // Fetch related videos
-  useEffect(() => {
-    const fetchRelated = async () => {
-      try {
-        const res = await GetTop5ViewedVideos();
-        setRelatedVideos(res?.data || []);
-      } catch (e) {
-        console.error("Failed to fetch related videos:", e);
+  const fetchRelated = async (currentOffset = 0) => {
+    try {
+      setIsLoading(true);
+      const res = await GetTopViewedVideos(LIMIT, currentOffset);
+      const data = res?.data || {};
+      const results = data.results || [];
+      const count = data.count || 0;
+
+      // If it's the first load, replace videos; otherwise append
+      if (currentOffset === 0) {
+        setRelatedVideos(results);
+      } else {
+        setRelatedVideos((prev) => [...prev, ...results]);
       }
-    };
-    fetchRelated();
+
+      setTotalCount(count);
+      setOffset(currentOffset + LIMIT);
+
+      // Check if there are more videos to load
+      const loadedCount = currentOffset + results.length;
+      setHasMore(loadedCount < count);
+    } catch (e) {
+      console.error("Failed to fetch related videos:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchRelated(0);
   }, []);
   useEffect(() => {
     if (textRef.current) {
@@ -37,7 +63,6 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
       url || "",
     );
-
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return "";
     try {
@@ -91,7 +116,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-[#285688] p-1 px-3 mt-3 text-sm"
         >
-          <ChevronLeft size={16} className="text-[#285688]" />
+          <img src={UpLeftIcon} alt="Back" className="w-4 h-4" />
           {t("Back")}
         </button>
       </div>
@@ -257,7 +282,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
       </div>
 
       {/* Related Videos Section */}
-      <div className="pb-12">
+      <div className="hidden lg:block pb-12">
         <BrokenCarousel
           data={relatedVideos}
           title={t("Other Guided Reading Videos")}
@@ -266,11 +291,39 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
           cardName={VideoCard}
           cardProps={{ navigate, size: "small", showDate: true }}
           t={t}
-          showPagination={false}
-          // nextArrowClassname={nextArrowClassname}
-          // prevArrowClassname={prevArrowClassname}
         />
       </div>
+
+      {/* Start Show Items In Small Screen */}
+      <div className="lg:hidden pb-12">
+        <h2 className="text-base lg:text-3xl font-bold text-[#081945] mb-6 px-4">
+          {t("Other Guided Reading Videos")}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 mb-6">
+          {relatedVideos.map((video, index) => (
+            <VideoCard
+              key={video.id || index}
+              item={video}
+              navigate={navigate}
+              size="small"
+              showDate={true}
+            />
+          ))}
+        </div>
+
+        {hasMore && (
+          <div className="px-4 mt-6">
+            <button
+              onClick={() => fetchRelated(offset)}
+              disabled={isLoading}
+              className="w-full bg-white rounded-lg text-center py-3 text-[#285688] font-semibold border border-[#285688] hover:bg-[#f0f0f0] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? t("Loading...") : t("load more...")}
+            </button>
+          </div>
+        )}
+      </div>
+      {/* End Show Items In Small Screen */}
     </div>
   );
 }
