@@ -2,22 +2,15 @@ import React from "react";
 
 import { Play } from "lucide-react";
 
-export default function FeaturedVideoPlayer({
-  videoId = "iUF3p_l1DfY",
-  title = "Featured Video",
-  description = "Watch our latest featured video",
-  item = {},
-  t,
-  navigate,
-}) {
+export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
   return (
     <div className="w-full relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[92vh]">
       <div className="relative w-full h-full overflow-hidden shadow-2xl group">
         {/* Video Container */}
         <div className="absolute inset-0 bg-black">
           <img
-            src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-            alt={title}
+            src={`${item?.thumbnail_url || "/assets/default-thumbnail.jpg"}`}
+            alt={item?.title || "Video Thumbnail"}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
@@ -58,13 +51,22 @@ export default function FeaturedVideoPlayer({
             )}
 
             {/* Title and Description */}
-            <div className="text-white">
+            <div className="text-white w-2/5">
               <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-4 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none">
-                {title}
+                {item?.title}
               </h2>
-              <p className="max-w-xl text-xs sm:text-sm md:text-base text-white/80 my-2 sm:my-4 md:my-6 lg:my-7 line-clamp-2 sm:line-clamp-3 lg:line-clamp-none">
-                {description}
-              </p>
+              <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF]">
+                <p className=""> {t("Full Livestream")} </p>|
+                <span>
+                  {item?.happened_at
+                    ? new Date(item.happened_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "2-digit",
+                        year: "numeric",
+                      })
+                    : ""}
+                </span>
+              </div>
             </div>
 
             {/* Watch Button */}

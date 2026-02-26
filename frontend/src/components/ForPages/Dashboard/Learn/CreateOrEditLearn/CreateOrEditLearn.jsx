@@ -45,7 +45,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
   const handleLearnTypeChange = (e) => {
     handleInputChange(e);
   };
-
+  console.log("Learn Form Data:", formData);
   // Handler for category search clear
   const handleCategoryClearSearch = () => {
     setCategorySearchValue("");

@@ -17,7 +17,7 @@ const VideoSearchBar = ({ searchTerm, onSearch }) => {
   };
 
   return (
-    <div className="relative flex-1 w-full lg:max-w-[340px]">
+    <div className="relative flex-1 w-full ">
       <div className="relative flex items-center gap-2 border-b border-[#081945] pb-1">
         <Search
           className="text-[#081945]"

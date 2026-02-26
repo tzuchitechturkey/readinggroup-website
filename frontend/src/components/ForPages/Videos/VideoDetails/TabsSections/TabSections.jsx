@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import CommentsSection from "@/components/Global/CommentsSection/CommentsSection";
-import { GetVideosBySeasonId } from "@/api/videos";
+// import { GetVideosBySeasonId } from "@/api/videos";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
@@ -20,30 +20,30 @@ const TabsSection = ({ videoData, defaultTab = "reviews" }) => {
   const limit = 4;
 
   const getSeasonData = async (page = 1) => {
-    if (!videoData?.season_name?.id) return;
+    // if (!videoData?.season_name?.id) return;
 
-    setIsLoading(true);
-    const offset = (page - 1) * limit;
+    // setIsLoading(true);
+    // const offset = (page - 1) * limit;
 
-    try {
-      const res = await GetVideosBySeasonId(
-        limit,
-        offset,
-        videoData?.season_name?.id
-      );
+    // try {
+    //   const res = await GetVideosBySeasonId(
+    //     limit,
+    //     offset,
+    //     videoData?.season_name?.id
+    //   );
 
-      if (page === 1) {
-        setEpisodes(res.data?.results || []);
-      } else {
-        setEpisodes((prev) => [...prev, ...(res.data?.results || [])]);
-      }
+    //   if (page === 1) {
+    //     setEpisodes(res.data?.results || []);
+    //   } else {
+    //     setEpisodes((prev) => [...prev, ...(res.data?.results || [])]);
+    //   }
 
-      setTotalCount(res.data?.count || 0);
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
+    //   setTotalCount(res.data?.count || 0);
+    // } catch (error) {
+    //   setErrorFn(error, t);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const handleLoadMore = () => {

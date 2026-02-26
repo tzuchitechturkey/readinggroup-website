@@ -31,6 +31,9 @@ export const validateForm = (formData, t) => {
   if (!formData?.happened_at) {
     newErrors.happened_at = t("Happened At is required");
   }
+  if (!formData?.video_type) {
+    newErrors.video_type = t("Video Type is required");
+  }
 
   if (!formData?.description.trim()) {
     newErrors.description = t("Description is required");

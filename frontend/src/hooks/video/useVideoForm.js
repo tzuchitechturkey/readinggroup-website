@@ -21,7 +21,7 @@ import {
   validateForm,
   isFormValid,
   isValidYouTubeUrl,
-} from "@/components/ForPages/Dashboard/_common/utils/videoForm/validation";
+} from "@/Utility/Video/validation";
 
 export const useCreateOrEditVideo = (video, onSectionChange) => {
   const { t } = useTranslation();

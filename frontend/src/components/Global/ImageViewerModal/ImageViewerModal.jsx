@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import ReactDOM from "react-dom";
 import { useTranslation } from "react-i18next";
-import {
-  HiX,
-  HiChevronLeft,
-  HiChevronRight,
-  HiPlus,
-  HiMinus,
-} from "react-icons/hi";
+import { HiX, HiChevronLeft, HiChevronRight } from "react-icons/hi";
+
+import ZoomControls from "./ZoomControls";
 
 const ImageViewerModal = ({
   isOpen,
@@ -25,10 +22,20 @@ const ImageViewerModal = ({
   const imageRef = useRef(null);
   const [mounted, setMounted] = useState(false);
 
+  // Touch tracking states
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [lastTouchDistance, setLastTouchDistance] = useState(null);
+
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+
+  const handleClose = () => {
+    if (zoom === 1) {
+      onClose();
+    }
+  };
 
   // Handle body scroll lock and custom class
   useEffect(() => {
@@ -55,13 +62,13 @@ const ImageViewerModal = ({
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
       if (e.key === "ArrowLeft") onPrev();
       if (e.key === "ArrowRight") onNext();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, onPrev, onNext]);
+  }, [isOpen, handleClose, onPrev, onNext]);
 
   // Handle scroll to zoom
   const handleWheel = (e) => {
@@ -71,14 +78,16 @@ const ImageViewerModal = ({
     setZoom(newZoom);
   };
 
-  // Dragging logic
+  // Dragging and Panning logic
   const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+    if (zoom > 1) {
+      setIsDragging(true);
+      setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
   };
 
   const handleMouseMove = (e) => {
-    if (isDragging) {
+    if (isDragging && zoom > 1) {
       e.preventDefault();
       setPosition({
         x: e.clientX - startPos.x,
@@ -91,52 +100,111 @@ const ImageViewerModal = ({
     setIsDragging(false);
   };
 
+  // Mobile Touch Logic
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      // Single touch for swiping or panning
+      setTouchStartX(e.touches[0].clientX);
+      if (zoom > 1) {
+        setIsDragging(true);
+        setStartPos({
+          x: e.touches[0].clientX - position.x,
+          y: e.touches[0].clientY - position.y,
+        });
+      }
+    } else if (e.touches.length === 2) {
+      // Two fingers for pinch to zoom
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      setLastTouchDistance(distance);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1 && isDragging && zoom > 1) {
+      // Panning while zoomed in
+      setPosition({
+        x: e.touches[0].clientX - startPos.x,
+        y: e.touches[0].clientY - startPos.y,
+      });
+    } else if (e.touches.length === 2 && lastTouchDistance) {
+      // Pinch to zoom
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      const delta = distance - lastTouchDistance;
+      const scaleAmount = delta * 0.01;
+      const newZoom = Math.min(Math.max(1, zoom + scaleAmount), 3);
+      setZoom(newZoom);
+      setLastTouchDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    setIsDragging(false);
+    setLastTouchDistance(null);
+
+    // Only handle swipe if at 1x zoom
+    if (zoom === 1 && touchStartX !== null) {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchStartX - touchEndX;
+
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          onNext(); // swipe left -> next
+        } else {
+          onPrev(); // swipe right -> prev
+        }
+      }
+    }
+    setTouchStartX(null);
+  };
+
   if (!isOpen || !mounted) return null;
 
   const currentImage = images[currentIndex];
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100000] bg-white flex flex-col">
-      {/* Navbar / Header Area - Close Button */}
-      <button
-        onClick={onClose}
-        className="absolute top-6 right-6 p-2 text-black hover:bg-gray-100 rounded-full transition-colors z-[100001]"
-      >
-        <HiX className="w-8 h-8" />
-      </button>
-
-      {/* Main Content Area */}
-      <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-        {/* Previous Button */}
+    <div className="fixed inset-0 z-[100000] bg-[rgba(22,33,58,0.95)] backdrop-blur-[3px] flex items-center justify-center">
+      {/* Container for Arrows and Image */}
+      <div className="relative max-w-[1200px] w-full h-full flex items-center justify-between px-4 md:px-10">
+        {/* Previous Button - hidden on small mobile screen when not zoomed to allow swiping */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onPrev();
           }}
-          className="absolute left-4 md:left-[60px] p-3 rounded-full hover:bg-gray-100 text-black transition-all z-40 disabled:opacity-30"
+          className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
           disabled={images.length <= 1}
         >
-          <HiChevronLeft className="w-8 h-8" />
+          <HiChevronLeft className="w-12 h-12" />
         </button>
 
         {/* Image Container */}
         <div
-          className="relative flex items-center justify-center w-full h-full p-4 md:p-10 select-none"
+          className="relative flex-1 flex items-center justify-center h-full p-0 md:p-10 select-none overflow-hidden touch-none"
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <img
             ref={imageRef}
             src={currentImage.image}
             alt={currentImage.title}
-            className={`max-w-full max-h-full object-contain transition-transform duration-100 ease-out ${
+            className={`max-w-full max-h-full object-contain transition-transform duration-100 ease-out select-none ${
               isDragging ? "cursor-grabbing" : "cursor-grab"
             }`}
             style={{
               transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+              WebkitTouchCallout: "none",
             }}
             draggable={false}
           />
@@ -148,46 +216,30 @@ const ImageViewerModal = ({
             e.stopPropagation();
             onNext();
           }}
-          className="absolute right-4 md:right-[60px] p-3 rounded-full hover:bg-gray-100 text-black transition-all z-40 disabled:opacity-30"
+          className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
           disabled={images.length <= 1}
         >
-          <HiChevronRight className="w-8 h-8" />
+          <HiChevronRight className="w-12 h-12" />
         </button>
       </div>
 
-      {/* Right Side Zoom Controls */}
-      <div className="absolute right-10 bottom-10 flex flex-col items-center gap-3 z-[100001]">
-        {/* Plus Button */}
+      {/* Close and Zoom Controls Side Column */}
+      <div className="absolute top-[29px] right-4 md:right-[68px] h-[calc(100vh-58px)] flex flex-col items-center pointer-events-none z-[100001] w-9 md:w-[37px]">
+        {/* Close Button - needs pointer-events-auto */}
         <button
-          onClick={() => setZoom(Math.min(zoom + 0.5, 3))}
-          className="w-[36px] h-[36px] flex items-center justify-center rounded-full border border-black bg-white hover:bg-gray-50 transition-all shadow-sm"
-          aria-label="Zoom In"
+          onClick={handleClose}
+          disabled={zoom > 1}
+          className={`p-1 text-white hover:bg-white/10 rounded-full transition-all pointer-events-auto mb-auto ${
+            zoom > 1 ? "opacity-20 cursor-not-allowed scale-75" : "opacity-100"
+          }`}
         >
-          <HiPlus className="w-5 h-5 text-black" />
+          <HiX className="w-8 h-8 md:w-[32px] md:h-[32px]" />
         </button>
 
-        {/* Vertical Slider Track */}
-        <div className="h-32 w-4 flex justify-center relative py-2">
-          {/* Track Line */}
-          <div className="h-full w-[1px] bg-black"></div>
-
-          {/* Handle/Thumb */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 w-4 h-4 bg-white border border-black rounded-full shadow-sm transition-all duration-200"
-            style={{
-              bottom: `${((zoom - 1) / 2) * 80 + 10}%`,
-            }}
-          />
+        {/* Zoom Controls Area - only visible on desktop or larger screens */}
+        <div className="hidden md:block pb-0 pointer-events-auto">
+          <ZoomControls zoom={zoom} setZoom={setZoom} />
         </div>
-
-        {/* Minus Button */}
-        <button
-          onClick={() => setZoom(Math.max(1, zoom - 0.5))}
-          className="w-[36px] h-[36px] flex items-center justify-center rounded-full border border-black bg-white hover:bg-gray-50 transition-all shadow-sm"
-          aria-label="Zoom Out"
-        >
-          <HiMinus className="w-5 h-5 text-black" />
-        </button>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ const buildNavigationItems = (t, siteInfo) => {
     },
     {
       name: t("COMMUNITY & EVENTS"),
-      href: "/events",
+      // href: "/events",
       hasDropdown: true,
       categoryType: "event",
       subItems: [
