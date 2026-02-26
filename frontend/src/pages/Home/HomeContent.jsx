@@ -11,41 +11,27 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetStatistics } from "@/api/dashboard";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
-import UpcomingLivestream from "@/components/ForPages/home/UpcomingLivestream/UpcomingLivestream";
-import GoodEffectsPoster from "@/components/ForPages/home/GoodEffectsPoster/GoodEffectsPoster";
-import RevisitCards from "@/components/ForPages/home/RevisitCards/RevisitCards";
-
-import PhotoCollections from "../../components/ForPages/home/PhotoCollections/PhotoCollections";
+import RevisitCards from "@/components/ForPages/Home/RevisitCards/RevisitCards";
+import GoodEffectsPoster from "@/components/ForPages/Home/GoodEffectsPoster/GoodEffectsPoster";
+import UpcomingLivestream from "@/components/ForPages/Home/UpcomingLivestream/UpcomingLivestream";
+import PhotoCollections from "@/components/ForPages/Home/PhotoCollections/PhotoCollections";
+import { GetVideosByTypeVideo } from "@/api/videos";
 
 export default function HomeContent() {
   const { t, i18n } = useTranslation();
-  const [sliderData, setSliderData] = useState(null);
-  const [top1Data, setTop1Data] = useState(null);
+  const [data, setData] = useState(null);
 
-  const getSliderData = useCallback(async () => {
+  const fetchData = async () => {
     try {
-      // const res = await HomeData();
-      // setSliderData(res.data);
+      const res = await GetVideosByTypeVideo();
+      setData(res.data);
     } catch (error) {
       setErrorFn(error, t);
     }
-  }, [t]);
-
-  const getTop1Data = useCallback(async () => {
-    try {
-      // const res = await GetStatistics();
-      // setTop1Data(res.data?.top_liked);
-    } catch (error) {
-      setErrorFn(error, t);
-    }
-  }, [t]);
-
+  };
   useEffect(() => {
-    Promise.all([getSliderData(), getTop1Data()]).catch((err) => {
-      setErrorFn(err, t);
-    });
-    localStorage.removeItem("redirectAfterLogin");
-  }, [getSliderData, getTop1Data, t]);
+    fetchData();
+  }, []);
 
   return (
     <div
@@ -54,7 +40,7 @@ export default function HomeContent() {
     >
       {/* Start Hero Slider */}
       <div>
-        <HomeHeroSlider data={sliderData} t={t} />
+        <HomeHeroSlider t={t} fullLiveStream={data?.full_live_stream[0]} />
       </div>
       {/* End Hero Slider */}
 

@@ -97,10 +97,9 @@ const LivestreamCard = ({ livestream, t }) => {
                     loading="lazy"
                   />
 
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="bg-white bg-opacity-90 text-black px-4 py-2 rounded-lg font-bold text-sm">
-                      {t("View Details")}
-                    </div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" />
+                  <div className="bg-white bg-opacity-90 text-black px-4 py-2 rounded-lg font-bold text-sm">
+                    {t("View Details")}
                   </div>
                 </div>
               </CarouselItem>
@@ -126,10 +125,10 @@ const LivestreamCard = ({ livestream, t }) => {
               <button
                 key={index}
                 onClick={() => imageCarouselApi?.scrollTo(index)}
-                className={`w-2 sm:w-2 md:w-2.5 lg:w-2.5 h-2 sm:h-2 md:h-2.5 lg:h-2.5 rounded-full transition-all ${
+                className={` rounded-xl  transition-all ${
                   current === index
-                    ? "bg-white scale-125"
-                    : "bg-transparent border border-white"
+                    ? "bg-white w-8 h-2.5"
+                    : "w-2.5 h-2.5 bg-[#92A9C3] "
                 }`}
               />
             ))}
