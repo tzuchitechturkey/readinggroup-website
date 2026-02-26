@@ -1,82 +1,57 @@
-// Navigation items with dropdowns - built dynamically from siteInfo
 const buildNavigationItems = (t, siteInfo) => {
   const items = [
     {
-      name: t("Home"),
+      name: t("HOME"),
       href: "/",
       hasDropdown: false,
     },
-    // {
-    //   name: t("Contents"),
-    //   href: "/contents",
-    //   hasDropdown: true,
-    //   categoryType: "content",
-    //   // subItems: (siteInfo?.content_categories || []).map((category) => ({
-    //   //   name: category.name,
-    //   //   href: `/contents/category/${category.id}`,
-    //   //   categoryId: category.id,
-    //   //   content_count: category.content_count || 0,
-    //   // })),
-    // },
     {
-      name: t("Watch"),
+      name: t("WATCH"),
       href: "/videos",
       hasDropdown: false,
       categoryType: "video",
-      // subItems: (siteInfo?.video_categories || []).map((category) => ({
-      //   name: category.name,
-      //   categoryId: category.id,
-      //   href: `/videos/category/${category.id}`,
-      //   content_count: category.video_count || 0,
-      // })),
     },
     {
-      name: t("Learn"),
+      name: t("LEARN"),
       href: "/learn",
       hasDropdown: false,
       categoryType: "learn",
-      // categoryType: "post",
-      // subItems: (siteInfo?.post_categories || []).map((category) => ({
-      //   name: category.name,
-      //   categoryId: category.id,
-      //   href: `/cards-photos/category/${category.id}`,
-      //   content_count: category.post_count || 0,
-      // })),
     },
     {
-      name: t("Events & Community"),
+      name: t("COMMUNITY & EVENTS"),
       href: "/events",
-      hasDropdown: false,
+      hasDropdown: true,
       categoryType: "event",
-      subItems: (siteInfo?.event_categories || []).map((category) => ({
-        name: category.name,
-        categoryId: category.id,
-        href: `/events/category/${category.id}`,
-        content_count: category.event_count || 0,
-      })),
+      subItems: [
+        {
+          name: t("LIVESTREAM SCHEDULE"),
+          href: "/livestream-schedule",
+        },
+        ...(siteInfo?.event_categories || []).map((category) => ({
+          name: category.name,
+          categoryId: category.id,
+          href: `/events/category/${category.id}`,
+          content_count: category.event_count || 0,
+        })),
+      ],
     },
     {
-      name: t("Livestream Schedule"),
-      href: "/livestream-schedule",
-      hasDropdown: false,
-    },
-    {
-      name: t("About Us"),
+      name: t("ABOUT US"),
       href: "/about",
       hasDropdown: true,
       subItems: [
         {
-          name: t("History"),
+          name: t("OUR HISTORY"),
           href: "/about",
           tab: "history",
         },
         {
-          name: t("Our Team"),
+          name: t("TEAM FUNCTIONS"),
           href: "/about",
           tab: "our_team",
         },
         {
-          name: t("Book of Study"),
+          name: t("SPECIAL BOOK OF 10 YEARS"),
           href: "/about/books",
           tab: "book_of_study",
         },

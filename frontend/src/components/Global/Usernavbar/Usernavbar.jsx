@@ -9,7 +9,7 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import defaultLogo from "@/assets/logo.jpg";
 import buildNavigationItems from "@/Utility/Navbar/buildNavigationItems";
 
-import UserIcons from "../UserIcons/UserIcons";
+import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import DesktopNavigation from "../DesktopNavigation/DesktopNavigation";
 import MobileSidebar from "../MobileSidebar/MobileSidebar";
 
@@ -135,26 +135,29 @@ function Usernavbar({ isHome = false }) {
   );
 
   return (
-    <nav className=" max-w-7xl mx-auto relative  shadow-sm" dir={i18n.dir()}>
-      <div className="  mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 lg:h-[72px]">
-          {/* Logo */}
-          <div className="flex-shrink-0 ">
-            <Link to="/" className="flex items-center">
-              <img
-                src={siteInfo?.logo?.logo || defaultLogo}
-                alt="logo"
-                className="w-28 h-10 sm:w-36 sm:h-12 object-cover"
-                onError={(e) => {
-                  if (e.currentTarget.src !== defaultLogo) {
-                    e.currentTarget.src = defaultLogo;
-                  }
-                }}
-              />
-            </Link>
-          </div>
+    <nav
+      className="w-full relative shadow-[0px_5px_8.9px_0px_rgba(0,0,0,0.25)] h-[62px] flex items-center justify-center z-50 bg-[#5e82ab]"
+      dir={i18n.dir()}
+    >
+      <div className="w-[1440px] px-[120px] h-full flex items-center bg-[#5e82ab]">
+        {/* Logo */}
+        <div className="flex-shrink-0 h-full flex items-center mr-[31px]">
+          <Link to="/" className="flex items-center h-full">
+            <img
+              src={siteInfo?.logo?.logo || defaultLogo}
+              alt="logo"
+              className="h-[40px] w-auto object-contain"
+              onError={(e) => {
+                if (e.currentTarget.src !== defaultLogo) {
+                  e.currentTarget.src = defaultLogo;
+                }
+              }}
+            />
+          </Link>
+        </div>
 
-          {/* Desktop Navigation */}
+        {/* Desktop Navigation */}
+        <div className="flex-1 flex justify-center h-full">
           <DesktopNavigation
             navigationItems={navigationItems}
             handleNavClick={handleNavClick}
@@ -166,31 +169,31 @@ function Usernavbar({ isHome = false }) {
             shouldOpenInNewTab={shouldOpenInNewTab}
             isHome={isHome}
           />
-          {/* Desktop User Icons */}
-          <div className="hidden w-52 lg:flex lg:items-center justify-end ">
-            <UserIcons />
+        </div>
+
+        {/* Desktop User Icons & Lang */}
+        <div className="hidden lg:flex items-center justify-end h-full ml-[31px]">
+          <LanguageDropdown />
+        </div>
+
+        {/* Mobile menu button */}
+        <div className="lg:hidden flex items-center space-x-4">
+          <div className="flex">
+            <LanguageDropdown />
           </div>
 
-          {/* Mobile menu button */}
-          <div className="lg:hidden  flex items-center space-x-4">
-            {/* Mobile User Icons - simplified */}
-            <div className=" flex">
-              <UserIcons />
-            </div>
-
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center rounded-md text-gray-700 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
-              aria-expanded="false"
-            >
-              <span className="sr-only">{t("Open main menu")}</span>
-              {isMenuOpen ? (
-                <HiX className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <HiMenuAlt3 className="block h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
-          </div>
+          <button
+            onClick={toggleMenu}
+            className="inline-flex items-center justify-center rounded-md text-white hover:text-white/80 focus:outline-none transition-colors duration-200"
+            aria-expanded="false"
+          >
+            <span className="sr-only">{t("Open main menu")}</span>
+            {isMenuOpen ? (
+              <HiX className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <HiMenuAlt3 className="block h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
         </div>
       </div>
 

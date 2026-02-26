@@ -22,10 +22,10 @@ function DesktopNavigation({
   isHome = false,
 }) {
   return (
-    <div className="hidden  lg:flex lg:items-center lg:justify-center flex-1">
-      <ul className="flex items-center gap-3 ">
+    <div className="hidden lg:flex lg:items-center h-full">
+      <ul className="flex items-center gap-[31px] h-full">
         {navigationItems.map((item, idx) => (
-          <li key={idx} className="relative group">
+          <li key={idx} className="relative group h-full flex items-center">
             {item?.hasDropdown ? (
               <>
                 <NavLink
@@ -39,46 +39,45 @@ function DesktopNavigation({
                     }
                   }}
                   className={({ isActive }) =>
-                    `transition-all duration-200 text-sm lg:text-lg  px-4 py-2 rounded-sm flex gap-[2px] items-center ${
-                      isHome
-                        ? isActive
-                          ? "border-b-2 border-white text-white"
-                          : "text-white hover:text-gray-200"
-                        : isActive
-                          ? "bg-gray-200 font-bold  text-black "
-                          : "text-black hover:text-gray-600 "
+                    `transition-all duration-200 text-[18px] uppercase font-['Noto_Sans'] font-regular h-full flex gap-[8px] items-center justify-center border-b-[3px] border-b-transparent ${
+                      isActive
+                        ? "border-b-[#fcfdff] text-[#fcfdff]"
+                        : "text-[#fcfdff] hover:text-white/90"
                     }`
                   }
                 >
                   {item?.name}
                   {item?.subItems?.length ? (
-                    <svg
-                      className="w-4 h-4 ml-1 transition-transform group-hover:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    <div className="w-[16px] h-[16px] flex items-center justify-center relative">
+                      <svg
+                        className="w-[12px] h-[6px] transition-transform duration-200 group-hover:rotate-180"
+                        viewBox="0 0 12 7"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M1 1L6 6L11 1"
+                          stroke="#FCFDFF"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
                   ) : (
                     ""
                   )}
                 </NavLink>
                 {/* Dropdown Menu */}
                 <div
-                  className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 invisible ${item?.subItems?.length && "group-hover:opacity-100 "} group-hover:visible transition-all duration-200 z-50`}
+                  className={`absolute top-full left-1/2 -translate-x-1/2 pt-0 opacity-0 invisible ${item?.subItems?.length && "group-hover:opacity-100 "} group-hover:visible transition-all duration-200 z-50`}
                 >
-                  <div className="min-w-[240px] bg-[var(--color-primary)] shadow-xl py-3 px-2 animate-in fade-in-0 zoom-in-95">
-                    <ul className="space-y-1">
+                  <div className="min-w-[240px] bg-[var(--color-primary)] shadow-xl py-0 px-0 animate-in fade-in-0 zoom-in-95">
+                    <ul className="flex flex-col">
                       {item?.subItems?.map((subItem, subIdx) => (
                         <li
                           key={subIdx}
-                          className="relative group/submenu"
+                          className={`relative group/submenu ${subIdx !== item.subItems.length - 1 ? "border-b border-white/20" : ""}`}
                           onMouseEnter={() => {
                             if (
                               subItem?.content_count > 0 &&
@@ -98,9 +97,9 @@ function DesktopNavigation({
                           <Link
                             to={subItem?.href}
                             onClick={(e) => handleNavClick(e, subItem)}
-                            className="px-4 py-3 text-sm    text-white hover:scale-105 rounded-lg transition-all duration-200 group/item relative flex items-center justify-between"
+                            className="block w-full px-6 py-4 text-[16px] uppercase font-['Noto_Sans'] text-white hover:bg-white/10 transition-colors duration-200 group/item relative flex items-center justify-between"
                           >
-                            <span className="flex items-center">
+                            <span className="flex items-center text-left w-full">
                               {subItem?.name}
                             </span>
                             {/* Show arrow if has nested content */}
@@ -300,14 +299,10 @@ function DesktopNavigation({
               <NavLink
                 to={item?.href}
                 className={({ isActive }) =>
-                  `transition-all duration-200 text-sm lg:text-lg rounded-sm px-4 py-2 block ${
-                    isHome
-                      ? isActive
-                        ? "border-b-2 border-white text-white"
-                        : "text-white hover:text-gray-200"
-                      : isActive
-                        ? "bg-gray-200 text-black font-bold  "
-                        : "text-black hover:text-gray-600"
+                  `transition-all duration-200 text-[18px] uppercase font-['Noto_Sans'] px-[8px] h-full flex items-center justify-center border-b-4 ${
+                    isActive
+                      ? "border-[#fcfdff] text-[#fcfdff]"
+                      : "border-transparent text-[#fcfdff] hover:text-white/90"
                   }`
                 }
               >

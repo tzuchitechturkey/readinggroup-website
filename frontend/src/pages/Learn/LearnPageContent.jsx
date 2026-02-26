@@ -78,11 +78,10 @@ const LearnPageContent = () => {
 
   return (
     <div
-      className="bg-white"
+      className="bg-background min-h-screen w-full"
       style={{
         display: "flex",
         flexDirection: "row",
-        minHeight: "100vh",
         width: "100%",
       }}
       dir={i18n.dir()}
@@ -105,7 +104,6 @@ const LearnPageContent = () => {
       <main
         style={{
           flex: 1,
-          backgroundColor: "#fff",
           minWidth: 0,
         }}
       >
