@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from collections import defaultdict
+from django.utils import timezone
+from .enums import LearnType, VideoType
 
 from .swagger_parameters import (
     video_manual_parameters,
@@ -69,7 +71,6 @@ from .serializers import (
     BookCategorySerializer,
 )
 from .youtube import YouTubeAPIError, fetch_video_info
-from .enums import VideoType
 
 
 class VideoViewSet(viewsets.ModelViewSet):
@@ -201,45 +202,44 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by("-created_at")
 
+    @swagger_auto_schema(
+        operation_summary="Videos by type",
+        operation_description="Return last 1 FULL_VIDEO and last 3 CLIP_VIDEO ordered newest → oldest.",
+    )
     @action(
         detail=False,
-        methods=("get",),
+        methods=["get"],
         url_path="by_type_video",
-        url_name="by_type_video",
     )
     def by_type_video(self, request):
         """
         Return:
-        - last 1 FULL_LIVE_STREAM
-        - last 3 NEW_CLIP
-        ordered newest → oldest
+        - last 1 FULL_VIDEO
+        - last 3 CLIP_VIDEO
         """
 
         def base_queryset(video_type_value):
-            qs = Video.objects.filter(video_type=video_type_value)
+            return Video.objects.filter(
+                video_type=video_type_value,
+                category__is_active=True,
+            ).order_by("-created_at")
 
-            # optional: فقط category active
-            try:
-                qs = qs.filter(category__is_active=True)
-            except Exception:
-                pass
+        # ✅ آخر Full Video
+        full_video_qs = base_queryset(VideoType.FULL_VIDEO)[:1]
 
-            return qs.order_by("-created_at")
-
-        live_stream_qs = base_queryset(VideoType.FULL_LIVE_STREAM)[:1]
-
-        new_clip_qs = base_queryset(VideoType.NEW_CLIP)[:3]
+        # ✅ آخر 3 Clip Video
+        clip_video_qs = base_queryset(VideoType.CLIP_VIDEO)[:3]
 
         payload = {
-            "full_live_stream": VideoSerializer(
-                live_stream_qs, many=True, context={"request": request}
+            "full_video": VideoSerializer(
+                full_video_qs, many=True, context={"request": request}
             ).data,
-            "new_clip": VideoSerializer(
-                new_clip_qs, many=True, context={"request": request}
+            "clip_video": VideoSerializer(
+                clip_video_qs, many=True, context={"request": request}
             ).data,
         }
 
-        if not payload["full_live_stream"] and not payload["new_clip"]:
+        if not payload["full_video"] and not payload["clip_video"]:
             return Response(
                 {"detail": "No videos found."},
                 status=status.HTTP_404_NOT_FOUND,
@@ -348,6 +348,65 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @swagger_auto_schema(
+        operation_summary="List learns by type",
+        operation_description="Return learns filtered by type.",
+    )
+    @action(
+        detail=False,
+        methods=("get",),
+        url_path="by_type_learn",
+        url_name="by_type_learn",
+    )
+    def by_type_learn(self, request):
+        """
+        Return:
+        - most viewed 1 posters (only upcoming events)
+        - last 3 cards
+        """
+
+        now = timezone.localtime()
+        today = now.date()
+        current_time = now.time()
+
+        def base_queryset(learn_type_value):
+            return Learn.objects.filter(
+                learn_type=learn_type_value, category__is_active=True
+            )
+
+        posters_qs = (
+            base_queryset(LearnType.POSTERS)
+            .filter(is_event=True, event_date__isnull=False, event_time__isnull=False)
+            .filter(
+                Q(event_date__gt=today)
+                | Q(event_date=today, event_time__gte=current_time)
+            )
+            .order_by("-views")[:1]
+        )
+
+        cards_qs = base_queryset(LearnType.CARDS).order_by("-created_at")[:3]
+
+        payload = {
+            "posters": LearnSerializer(
+                posters_qs, many=True, context={"request": request}
+            ).data,
+            "cards": LearnSerializer(
+                cards_qs, many=True, context={"request": request}
+            ).data,
+        }
+
+        if not payload["posters"] and not payload["cards"]:
+            return Response(
+                {"detail": "No learn items found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(payload, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Increase view count",
+        operation_description="Increment the view count of a Learn item.",
+    )
     @action(detail=True, methods=["post"], url_path="increase-view")
     def increase_view(self, request, pk=None):
         Learn.objects.filter(pk=pk).update(views=F("views") + 1)
