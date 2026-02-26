@@ -142,6 +142,10 @@ class VideoViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         params = self.request.query_params
 
+        # Allow search filter to work before custom filtering
+        if params.get("search"):
+            return queryset.order_by("-created_at")
+
         language = params.getlist("language")
         if language:
             values = []
@@ -151,12 +155,25 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(language__in=values)
 
         category = params.get("category")
+
         if category:
-            values = []
-            for item in category.split(","):
-                values.append(item.strip())
+            values = [v.strip() for v in category.split(",") if v.strip()]
             if values:
-                queryset = queryset.filter(category__name__in=values)
+                ids = [v for v in values if v.isdigit()]
+                names = [v for v in values if not v.isdigit()]
+
+                filters = []
+
+                if ids:
+                    filters.append(queryset.filter(category_id__in=ids))
+
+                if names:
+                    filters.append(queryset.filter(category__name__in=names))
+
+                if filters:
+                    queryset = filters[0]
+                    for q in filters[1:]:
+                        queryset = queryset.union(q)
 
         happened_at = params.get("happened_at")
         if happened_at:
