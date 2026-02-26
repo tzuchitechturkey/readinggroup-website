@@ -11,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 from collections import defaultdict
 from django.utils import timezone
 from .enums import LearnType, VideoType
-
+from .youtube import YouTubeAPIError, fetch_video_info
 from .swagger_parameters import (
     video_manual_parameters,
     learn_manual_parameters,
@@ -66,7 +66,6 @@ from .serializers import (
     BookSerializer,
     BookCategorySerializer,
 )
-from .youtube import YouTubeAPIError, fetch_video_info
 
 
 class VideoViewSet(viewsets.ModelViewSet):
