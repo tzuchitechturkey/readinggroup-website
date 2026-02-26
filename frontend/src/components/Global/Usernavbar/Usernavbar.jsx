@@ -139,7 +139,8 @@ function Usernavbar({ isHome = false }) {
       className="w-full relative shadow-[0px_5px_8.9px_0px_rgba(0,0,0,0.25)] h-[62px] flex items-center justify-center z-50 bg-[#5e82ab]"
       dir={i18n.dir()}
     >
-      <div className="w-[1440px] px-[120px] h-full flex items-center bg-[#5e82ab]">
+      {/* Desktop Navbar */}
+      <div className="hidden lg:flex w-[1440px] px-[120px] h-full items-center bg-[#5e82ab]">
         {/* Logo */}
         <div className="flex-shrink-0 h-full flex items-center mr-[31px]">
           <Link to="/" className="flex items-center h-full">
@@ -155,7 +156,6 @@ function Usernavbar({ isHome = false }) {
             />
           </Link>
         </div>
-
         {/* Desktop Navigation */}
         <div className="flex-1 flex justify-center h-full">
           <DesktopNavigation
@@ -170,31 +170,78 @@ function Usernavbar({ isHome = false }) {
             isHome={isHome}
           />
         </div>
-
         {/* Desktop User Icons & Lang */}
-        <div className="hidden lg:flex items-center justify-end h-full ml-[31px]">
+        <div className="flex items-center justify-end h-full ml-[31px]">
           <LanguageDropdown />
         </div>
+      </div>
 
-        {/* Mobile menu button */}
-        <div className="lg:hidden flex items-center space-x-4">
-          <div className="flex">
-            <LanguageDropdown />
+      {/* Mobile Navbar */}
+      <div className="lg:hidden flex w-full h-full items-center justify-between px-4 bg-[#5e82ab]">
+        {/* Logo (left for LTR, right for RTL) */}
+        {i18n.dir() === "rtl" ? (
+          <div className="flex-1 flex items-center justify-end">
+            <Link to="/" className="flex items-center h-full">
+              <img
+                src={siteInfo?.logo?.logo || defaultLogo}
+                alt="logo"
+                className="h-[32px] w-auto object-contain"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultLogo) {
+                    e.currentTarget.src = defaultLogo;
+                  }
+                }}
+              />
+            </Link>
           </div>
-
-          <button
-            onClick={toggleMenu}
-            className="inline-flex items-center justify-center rounded-md text-white hover:text-white/80 focus:outline-none transition-colors duration-200"
-            aria-expanded="false"
-          >
-            <span className="sr-only">{t("Open main menu")}</span>
-            {isMenuOpen ? (
-              <HiX className="block h-6 w-6" aria-hidden="true" />
-            ) : (
-              <HiMenuAlt3 className="block h-6 w-6" aria-hidden="true" />
-            )}
-          </button>
-        </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-start">
+            <Link to="/" className="flex items-center h-full">
+              <img
+                src={siteInfo?.logo?.logo || defaultLogo}
+                alt="logo"
+                className="h-[32px] w-auto object-contain"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultLogo) {
+                    e.currentTarget.src = defaultLogo;
+                  }
+                }}
+              />
+            </Link>
+          </div>
+        )}
+        {/* Hamburger (left for RTL, right for LTR) */}
+        {i18n.dir() === "rtl" ? (
+          <div className="flex items-center justify-start">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center rounded-md text-white hover:text-white/80 focus:outline-none transition-colors duration-200 ml-2"
+              aria-expanded="false"
+            >
+              <span className="sr-only">{t("Open main menu")}</span>
+              {isMenuOpen ? (
+                <HiX className="block h-8 w-8" aria-hidden="true" />
+              ) : (
+                <HiMenuAlt3 className="block h-8 w-8" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-end">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center rounded-md text-white hover:text-white/80 focus:outline-none transition-colors duration-200 ml-2"
+              aria-expanded="false"
+            >
+              <span className="sr-only">{t("Open main menu")}</span>
+              {isMenuOpen ? (
+                <HiX className="block h-8 w-8" aria-hidden="true" />
+              ) : (
+                <HiMenuAlt3 className="block h-8 w-8" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile Sidebar Menu */}
