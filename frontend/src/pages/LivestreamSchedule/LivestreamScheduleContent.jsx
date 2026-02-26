@@ -74,7 +74,7 @@ const LivestreamScheduleContent = () => {
   ]);
 
   return (
-    <div className="min-h-screen bg-background pt-[110px] pb-32 px-4 select-none">
+    <div className="min-h-screen bg-background pt-[50px] pb-32 px-4 select-none">
       <div className="max-w-[1200px] mx-auto px-0 md:px-0">
         {/* Title Node 1:2309 */}
         <h1 className="text-[40px] font-black text-[var(--Page-title)] leading-[1.2] mb-[52px]">
