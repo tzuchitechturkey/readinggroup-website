@@ -1,40 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { useTranslation } from "react-i18next";
-import { ThumbsUp, ListPlus, ChevronLeft } from "lucide-react";
-import { toast } from "react-toastify";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import LoginModal from "@/components/Global/LoginModal";
-import {
-  GetTop5ViewedVideos,
-} from "@/api/videos";
+import { GetTop5ViewedVideos } from "@/api/videos";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 
-function CustomyoutubeVideo({ videoData }) {
-  const { t, i18n } = useTranslation();
+function CustomyoutubeVideo({ t, i18n, videoData }) {
   const navigate = useNavigate();
-  const [videoItem, setVideoItem] = useState(videoData);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showControls, setShowControls] = useState(true);
   const [relatedVideos, setRelatedVideos] = useState([]);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isShareOpen, setIsShareOpen] = useState(false);
   const videoRef = useRef(null);
-
-  // دالة للتحقق من تسجيل الدخول
-  const isLoggedIn = () => {
-    return Boolean(localStorage.getItem("accessToken"));
-  };
-
-  useEffect(() => {
-    setVideoItem(videoData);
-  }, [videoData]);
-
+  const [expanded, setExpanded] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const textRef = useRef(null);
   // Fetch related videos
   useEffect(() => {
     const fetchRelated = async () => {
@@ -47,7 +27,12 @@ function CustomyoutubeVideo({ videoData }) {
     };
     fetchRelated();
   }, []);
-
+  useEffect(() => {
+    if (textRef.current) {
+      const el = textRef.current;
+      setHasMore(el.scrollHeight > el.clientHeight);
+    }
+  }, [videoData?.description]);
   const isYouTubeUrl = (url) =>
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
       url || "",
@@ -89,53 +74,31 @@ function CustomyoutubeVideo({ videoData }) {
 
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
-    setCurrentTime(videoRef.current.currentTime || 0);
-    setDuration(videoRef.current.duration || 0);
-  };
-
-  const handleProgressClick = (e) => {
-    if (!videoRef.current || !duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickRatio = (e.clientX - rect.left) / rect.width;
-    const newTime = Math.max(0, Math.min(1, clickRatio)) * duration;
-    videoRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
-  const formatTime = (sec = 0) => {
-    const s = Math.floor(sec % 60)
-      .toString()
-      .padStart(2, "0");
-    const m = Math.floor((sec / 60) % 60)
-      .toString()
-      .padStart(2, "0");
-    const h = Math.floor(sec / 3600);
-    return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+    // setCurrentTime(videoRef.current.currentTime || 0);
+    // setDuration(videoRef.current.duration || 0);
   };
 
   const youTube = isYouTubeUrl(videoData?.video_url);
 
- 
-
   return (
     <div
-      className=" max-w-[1200px] mx-auto  bg-white min-h-screen"
+      className=" max-w-[1200px] mx-auto "
       dir={i18n.language === "ar" ? "rtl" : "ltr"}
     >
       {/* Back Button */}
-      <div className="pt-8">
+      <div className="pt-3">
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-black border-[1px] border-black rounded-full p-1 px-3 hover:text-gray-600 text-sm"
+          className="flex items-center gap-2 text-[#285688] p-1 px-3 mt-3 text-sm"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={16} className="text-[#285688]" />
           {t("Back")}
         </button>
       </div>
 
       {/* Video Player Section */}
       <div className="mt-4">
-        <div className="relative bg-black rounded-xl overflow-hidden h-[675px]">
+        <div className="relative bg-black md:rounded-xl overflow-hidden h-[220px] lg:h-[675px]">
           {videoData?.video_url ? (
             youTube ? (
               <iframe
@@ -176,61 +139,22 @@ function CustomyoutubeVideo({ videoData }) {
               </div>
             </div>
           )}
-
-          {/* Custom Video Controls for non-YouTube videos */}
-          {!youTube && showControls && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent">
-              <div className="px-4 pb-4 pt-8">
-                {/* Progress Bar */}
-                <div className="mb-4">
-                  <div
-                    className="w-full bg-white/30 rounded-full h-1 cursor-pointer"
-                    onClick={handleProgressClick}
-                  >
-                    <div
-                      className="bg-red-600 h-1 rounded-full transition-all duration-100"
-                      style={{
-                        width: duration
-                          ? `${(currentTime / duration) * 100}%`
-                          : "0%",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center justify-between text-white">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={handlePlayPause}
-                      className="hover:text-gray-300"
-                    >
-                      {isPlaying ? t("pause") : t("play")}
-                    </button>
-                    <span className="text-sm">
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Title and Content Section */}
-      <div className="mt-4">
+      <div className="mt-4 px-4">
         {/* Video Title */}
-        <h1 className="text-[32px] font-bold text-black leading-[1.5] mb-4">
+        <h1 className="text-xl font-bold lg:text-[32px] text-[#081945] leading-[1.5] mb-4 line-clamp-2">
           {videoData?.title}
         </h1>
 
         {/* Content Layout - Description + Info Sidebar */}
-        <div className="flex gap-3 mb-14">
+        <div className="lg:flex gap-3 mb-14">
           {/* Description Section */}
-          <div className="flex-1 bg-[#e4e4e4] rounded-[10px] p-4">
+          <div className="flex-1 bg-[#C4DBF5] rounded-[10px] p-4 mb-2">
             <div className="mb-4">
-              <p className="text-base font-bold text-black mb-0">
+              <p className="text-base font-bold text-[#081945] mb-0">
                 {videoData?.created_at
                   ? new Date(videoData.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -240,20 +164,32 @@ function CustomyoutubeVideo({ videoData }) {
                   : "November 26, 2025"}
               </p>
             </div>
-            <div>
+            <div className="flex items-end ">
               <p
-                className="text-[20px] font-normal text-black leading-[1.5]"
+                ref={textRef}
+                className={`text-[20px] font-normal text-[#081945] leading-[1.5] ${
+                  expanded ? "" : "line-clamp-2"
+                }`}
                 dangerouslySetInnerHTML={{ __html: videoData?.description }}
               />
+
+              {hasMore && (
+                <button
+                  onClick={() => setExpanded((prev) => !prev)}
+                  className={`text-blue-600 mt-2 block`}
+                >
+                  {expanded ? "less" : "more..."}
+                </button>
+              )}
             </div>
           </div>
 
           {/* Info Sidebar */}
-          <div className="w-[396px] bg-[#e4e4e4] rounded-[10px] p-4">
+          <div className="w-[396px] bg-[#C4DBF5] rounded-[10px] p-4">
             <div className="flex flex-col gap-8 text-base">
               {/* Category */}
               <div className="flex gap-1 items-center">
-                <p className="font-bold text-black w-[135px]">
+                <p className="font-bold text-[#081945] w-[135px]">
                   {t("Category")}
                 </p>
                 <p className="flex-1 font-normal text-black">
@@ -263,7 +199,7 @@ function CustomyoutubeVideo({ videoData }) {
 
               {/* Language */}
               <div className="flex gap-1 items-center">
-                <p className="font-bold text-black w-[135px]">
+                <p className="font-bold text-[#081945] w-[135px]">
                   {t("Language")}
                 </p>
                 <p className="flex-1 font-normal text-black">
@@ -273,7 +209,7 @@ function CustomyoutubeVideo({ videoData }) {
 
               {/* Guest Speakers */}
               <div className="flex gap-1 items-start">
-                <div className="font-bold text-black w-[135px]">
+                <div className="font-bold text-[#081945] w-[135px]">
                   <p className="mb-0">{t("Guest")}</p>
                   <p>{t("Speaker(s)")}</p>
                 </div>
@@ -295,7 +231,7 @@ function CustomyoutubeVideo({ videoData }) {
 
               {/* Supplemental Materials */}
               <div className="flex gap-1 items-start">
-                <div className="font-bold text-black w-[135px]">
+                <div className="font-bold text-[#081945] w-[135px]">
                   <p className="mb-0">{t("Supplemental")}</p>
                   <p>{t("Materials")}</p>
                 </div>
@@ -318,79 +254,23 @@ function CustomyoutubeVideo({ videoData }) {
             </div>
           </div>
         </div>
-
-        {/* Related Videos Section */}
-        <div className="pb-12">
-          <BrokenCarousel
-            data={relatedVideos}
-            title={t("Other Guided Reading Videos")}
-            showArrows={true}
-            showCount={false}
-            cardName={VideoCard}
-            cardProps={{ navigate, size: "small", showDate: true }}
-            // nextArrowClassname={nextArrowClassname}
-            // prevArrowClassname={prevArrowClassname}
-          />
-          {/* <h2 className="text-[24px] font-bold text-black leading-[1.5] mb-[10px]">
-            {t("Other Guided Reading Videos")}
-          </h2>
-          <div className="grid grid-cols-4 gap-3">
-            {relatedVideos.slice(0, 4).map((video, index) => (
-              <div key={video.id || index} className="flex flex-col gap-1">
-                <VideoCard
-                  video={video}
-                  showDate={true}
-                  size="small"
-                  navigate={navigate}
-                />
-              </div>
-            ))}
-          </div>
-        </div> */}
-        </div>
       </div>
 
-      {/* Action Buttons - Like, Share, Save */}
-      {/* <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
-        <button
-          onClick={handleLike}
-          className={`p-3 rounded-full shadow-lg transition-colors ${
-            videoItem?.has_liked
-              ? "bg-blue-600 text-white"
-              : "bg-white text-gray-700 hover:bg-gray-50"
-          }`}
-        >
-          <ThumbsUp size={20} />
-        </button>
-
-        <button
-          onClick={() => setIsShareOpen(true)}
-          className="p-3 bg-white text-gray-700 hover:bg-gray-50 rounded-full shadow-lg"
-        >
-          <img src="/icons/share_icon.png" alt="share" className="w-5 h-5" />
-        </button>
-
-        <button
-          onClick={handleAddToMyList}
-          className="p-3 bg-white text-gray-700 hover:bg-gray-50 rounded-full shadow-lg"
-        >
-          <ListPlus size={20} />
-        </button>
-      </div> */}
-
-      {/* Share Modal */}
-      <ShareModal
-        isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
-        url={videoData?.video_url || window.location.href}
-        title={videoData?.title}
-      />
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
+      {/* Related Videos Section */}
+      <div className="pb-12">
+        <BrokenCarousel
+          data={relatedVideos}
+          title={t("Other Guided Reading Videos")}
+          showArrows={true}
+          showCount={false}
+          cardName={VideoCard}
+          cardProps={{ navigate, size: "small", showDate: true }}
+          t={t}
+          showPagination={false}
+          // nextArrowClassname={nextArrowClassname}
+          // prevArrowClassname={prevArrowClassname}
+        />
+      </div>
     </div>
   );
 }

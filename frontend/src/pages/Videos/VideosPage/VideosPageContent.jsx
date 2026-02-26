@@ -12,6 +12,7 @@ import DateFilter from "@/components/Videos/DateFilter/DateFilter";
 import SortByFilter from "@/components/Videos/SortByFilter/SortByFilter";
 import VideoSearchBar from "@/components/Videos/VideoSearchBar/VideoSearchBar";
 import CategoryCarousel from "@/components/Videos/CategoryCarousel/CategoryCarousel";
+import MobileFilterModal from "@/components/Videos/MobileFilterModal/MobileFilterModal";
 import {
   GetVideoCategories,
   GetVideosByCategoryId,
@@ -325,6 +326,21 @@ function VideosPageContent() {
       className="min-h-screen bg-[#D7EAFF]"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
+      <MobileFilterModal
+        isOpen={openFilter}
+        onClose={() => setOpenFilter(false)}
+        filters={filters}
+        onVideoTypeChange={handleVideoTypeChange}
+        onDateYearChange={handleDateYearChange}
+        onDateMonthSelect={handleDateMonthSelect}
+        onApplyDateFilter={applyDateFilter}
+        onSortByChange={handleSortByChange}
+        activeCategories={activeCategories}
+        selectedCategories={selectedCategories}
+        onCategorySelect={handleCategorySelect}
+        appliedDateFilter={appliedDateFilter}
+        onResetFilters={resetFilters}
+      />
       <div className="max-w-7xl mx-auto md:px-6 lg:px-8 py-6">
         {/* Title Section */}
         <div className="flex items-end gap-3 mb-8 px-4 md:px-0">
