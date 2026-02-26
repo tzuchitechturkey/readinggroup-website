@@ -176,6 +176,13 @@ class VideoViewSet(viewsets.ModelViewSet):
             elif is_new.lower() in ("false"):
                 queryset = queryset.filter(is_new=False)
 
+        # Add video_type filtering
+        video_type = params.get("video_type")
+        if video_type:
+            values = [v.strip() for v in video_type.split(",") if v.strip()]
+            if values:
+                queryset = queryset.filter(video_type__in=values)
+
         return queryset.order_by("-created_at")
 
     @action(
