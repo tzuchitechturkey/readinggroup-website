@@ -122,7 +122,7 @@ function CreateorEditCategoryModal({
     <Modal isOpen={isOpen} onClose={onClose} title={title} width={width}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Language Selector */}
-        {showLanguageSelector && form?.id && (
+        {/* {showLanguageSelector && form?.id && (
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <label className="block text-sm font-medium mb-1">
@@ -145,8 +145,8 @@ function CreateorEditCategoryModal({
               </select>
             </div>
 
-            {/* Fetch Translation Button */}
-            {/* {selectedLanguage && selectedLanguage !== originalLanguage && (
+            Fetch Translation Button
+            {selectedLanguage && selectedLanguage !== originalLanguage && (
               <button
                 type="button"
                 onClick={() => onFetchTranslation?.(selectedLanguage)}
@@ -155,9 +155,9 @@ function CreateorEditCategoryModal({
               >
                 {t("Fetch Translation")}
               </button>
-            )} */}
+            )}  
           </div>
-        )}
+        )} */}
 
         {/* {isLoadingTranslation && (
           <p className="text-sm text-blue-600">{t("Loading translation...")}</p>
@@ -257,7 +257,7 @@ function CreateorEditCategoryModal({
         ))}
 
         {/* Auto-Translate */}
-        {showAutoTranslate && form?.id && isContentChanged && (
+        {/* {showAutoTranslate && form?.id && isContentChanged && (
           <div>
             <label className="block text-sm font-medium mb-3">
               {t("Auto-Translate")}
@@ -284,7 +284,7 @@ function CreateorEditCategoryModal({
               </span>
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Buttons */}
         <div className="flex justify-end gap-2">

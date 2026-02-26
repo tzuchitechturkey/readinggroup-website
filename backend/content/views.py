@@ -140,7 +140,12 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        queryset = queryset.filter(category__is_active=True)
         params = self.request.query_params
+
+        # Allow search filter to work before custom filtering
+        if params.get("search"):
+            return queryset.order_by("-created_at")
 
         language = params.getlist("language")
         if language:
@@ -151,12 +156,25 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(language__in=values)
 
         category = params.get("category")
+
         if category:
-            values = []
-            for item in category.split(","):
-                values.append(item.strip())
+            values = [v.strip() for v in category.split(",") if v.strip()]
             if values:
-                queryset = queryset.filter(category__name__in=values)
+                ids = [v for v in values if v.isdigit()]
+                names = [v for v in values if not v.isdigit()]
+
+                filters = []
+
+                if ids:
+                    filters.append(queryset.filter(category_id__in=ids))
+
+                if names:
+                    filters.append(queryset.filter(category__name__in=names))
+
+                if filters:
+                    queryset = filters[0]
+                    for q in filters[1:]:
+                        queryset = queryset.union(q)
 
         happened_at = params.get("happened_at")
         if happened_at:
@@ -175,6 +193,13 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(is_new=True)
             elif is_new.lower() in ("false"):
                 queryset = queryset.filter(is_new=False)
+
+        # Add video_type filtering
+        video_type = params.get("video_type")
+        if video_type:
+            values = [v.strip() for v in video_type.split(",") if v.strip()]
+            if values:
+                queryset = queryset.filter(video_type__in=values)
 
         return queryset.order_by("-created_at")
 

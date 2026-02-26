@@ -19,10 +19,10 @@ function BrokenCarousel({
   nextArrowClassname = "",
   prevArrowClassname = "",
   cardProps = {},
+  showPagination = false,
+  t,
 }) {
-  const { i18n } = useTranslation();
   const Card = cardName;
-  const isRTL = i18n?.language === "ar";
 
   // التحقق من صحة البيانات
   if (cardName && typeof cardName !== "function") {
@@ -49,14 +49,14 @@ function BrokenCarousel({
   return (
     <div>
       {title && (
-        <p className="text-2xl lg:text-3xl px-4 text-white font-bold mb-2">
+        <p className="text-base lg:text-3xl px-5 text-[#081945] font-bold mb-2">
           {title}
         </p>
       )}
       <Carousel
         className="w-full overflow-visible"
         opts={{
-          direction: isRTL ? "rtl" : "ltr",
+          direction: "ltr",
           align: "start",
         }}
       >
@@ -77,6 +77,13 @@ function BrokenCarousel({
           </>
         )}
       </Carousel>
+      {showPagination && (
+        <div className="px-4 mt-6 ">
+          <button className="w-full bg-white rounded-lg text-center py-3 text-[#285688]">
+            {t("load more...")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -140,21 +140,21 @@ export default function AppSidebar({
       //     },
       //   ],
       // },
-      {
-        title: "Writers",
-        onClick: "#",
-        icon: FakeUser,
-        items: [
-          {
-            title: "All Writers",
-            onClick: () => onSectionChange("writers"),
-          },
-          {
-            title: "Add/Edit Writer",
-            onClick: () => onSectionChange("createOrEditWriter"),
-          },
-        ],
-      },
+      // {
+      //   title: "Writers",
+      //   onClick: "#",
+      //   icon: FakeUser,
+      //   items: [
+      //     {
+      //       title: "All Writers",
+      //       onClick: () => onSectionChange("writers"),
+      //     },
+      //     {
+      //       title: "Add/Edit Writer",
+      //       onClick: () => onSectionChange("createOrEditWriter"),
+      //     },
+      //   ],
+      // },
       {
         title: "About Us",
         onClick: () => onSectionChange("about"),

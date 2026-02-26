@@ -29,6 +29,13 @@ video_manual_parameters = [
         type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
+        "video_type",
+        openapi.IN_QUERY,
+        description="Filter by Video Type",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING),
+    ),
+    openapi.Parameter(
         "is_new",
         openapi.IN_QUERY,
         description="Filter by is_new status",
