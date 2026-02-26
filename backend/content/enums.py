@@ -13,8 +13,8 @@ class ContentStatus(models.TextChoices):
 
 
 class VideoType(models.TextChoices):
-    NEW_CLIP = "new_clip", "New Clip"
-    FULL_LIVE_STREAM = "full_live_stream", "Full Live Stream"
+    CLIP_VIDEO = "clip_video", "Clip Video"
+    FULL_VIDEO = "full_video", "Full Video"
 
 
 # ======================================================= Video Model End =======================================================
