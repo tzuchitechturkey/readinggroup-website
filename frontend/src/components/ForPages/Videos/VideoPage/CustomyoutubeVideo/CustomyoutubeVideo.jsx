@@ -9,13 +9,8 @@ import ShareModal from "@/components/Global/ShareModal/ShareModal";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import LoginModal from "@/components/Global/LoginModal";
 import {
-  AddToMyList,
-  RemoveFromMyList,
-  PatchVideoById,
   GetTop5ViewedVideos,
 } from "@/api/videos";
-import { PatchEventById } from "@/api/events";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 
 function CustomyoutubeVideo({ videoData }) {
@@ -120,70 +115,7 @@ function CustomyoutubeVideo({ videoData }) {
 
   const youTube = isYouTubeUrl(videoData?.video_url);
 
-  // دالة الإعجاب
-  const handleLike = async () => {
-    if (!isLoggedIn()) {
-      setShowLoginModal(true);
-      return;
-    }
-
-    try {
-      const newLikedState = !videoItem?.has_liked;
-      if (videoData?.report_type) {
-        await PatchEventById(videoItem.id, {
-          has_liked: newLikedState,
-        });
-      } else {
-        await PatchVideoById(videoItem.id, {
-          has_liked: newLikedState,
-        });
-      }
-
-      setVideoItem({
-        ...videoItem,
-        has_liked: newLikedState,
-        likes_count: newLikedState
-          ? videoItem?.likes_count + 1
-          : videoItem?.likes_count - 1,
-      });
-    } catch {
-      toast.error(t("Failed to update like status"));
-    }
-  };
-
-  const handleAddToMyList = async () => {
-    if (!isLoggedIn()) {
-      setShowLoginModal(true);
-      return;
-    }
-
-    try {
-      const currentlySaved = Boolean(videoItem?.has_in_my_list);
-      if (currentlySaved) {
-        const res = await RemoveFromMyList(videoItem.id);
-        const serverHas =
-          res && res.data && typeof res.data.has_in_my_list !== "undefined"
-            ? res.data.has_in_my_list
-            : false;
-        setVideoItem((prev) => ({
-          ...prev,
-          has_in_my_list: Boolean(serverHas),
-        }));
-      } else {
-        const res = await AddToMyList(videoItem.id);
-        const serverHas =
-          res && res.data && typeof res.data.has_in_my_list !== "undefined"
-            ? res.data.has_in_my_list
-            : true;
-        setVideoItem((prev) => ({
-          ...prev,
-          has_in_my_list: Boolean(serverHas),
-        }));
-      }
-    } catch (err) {
-      setErrorFn(err, t);
-    }
-  };
+ 
 
   return (
     <div
