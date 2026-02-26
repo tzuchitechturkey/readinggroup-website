@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import UserProfileDropdown from "@/components/Global/UserProfileDropdown/UserProfileDropdown";
 
@@ -56,7 +56,7 @@ function UserIcons() {
           {isLoggedIn && userType === "admin" && (
             <div
               onClick={() => {
-                localStorage.removeItem("dashboardSelectedPost");
+                localStorage.removeItem("dashboardSelectedLearn");
                 localStorage.removeItem("dashboardSelectedVideo");
                 localStorage.removeItem("dashboardSelectedNews");
                 localStorage.removeItem("dashboardSelectedEvent");
@@ -65,7 +65,7 @@ function UserIcons() {
               }}
             >
               <Link
-                className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+                className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary text-white transition-colors duration-200"
                 to="/dashboard"
               >
                 {t("Dashboard")}
@@ -94,7 +94,7 @@ function UserIcons() {
           {isLoggedIn && userType === "admin" && (
             <div
               onClick={() => {
-                localStorage.removeItem("dashboardSelectedPost");
+                localStorage.removeItem("dashboardSelectedLearn");
                 localStorage.removeItem("dashboardSelectedVideo");
                 localStorage.removeItem("dashboardSelectedNews");
                 localStorage.removeItem("dashboardSelectedEvent");
@@ -103,7 +103,7 @@ function UserIcons() {
               }}
             >
               <Link
-                className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+                className="text-sm p-1 text-white px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
                 to="/dashboard"
               >
                 {t("Dashboard")}

@@ -2,7 +2,7 @@ import React from "react";
 
 import { useTranslation } from "react-i18next";
 
-import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
+import PostsList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
 
 function PostsManagement() {
   const { t } = useTranslation();

@@ -37,7 +37,7 @@ export default function AdminIcons() {
         <div
           className="lg:mx-4 "
           onClick={() => {
-            localStorage.removeItem("dashboardSelectedPost");
+            localStorage.removeItem("dashboardSelectedLearn");
             localStorage.removeItem("dashboardSelectedVideo");
             localStorage.removeItem("dashboardSelectedNews");
             localStorage.removeItem("dashboardSelectedEvent");

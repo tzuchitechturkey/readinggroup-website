@@ -2,21 +2,18 @@ from django.contrib import admin
 from .models import (
     Event,
     HistoryEntry,
-    Post,
     Content,
     TeamMember,
     Video,
-    PostCategory,
     VideoCategory,
     ContentCategory,
     EventCategory,
     PositionTeamMember,
     EventSection,
-    Comments,
-    Reply,
+    Learn,
+    LearnCategory,
     MyListEntry,
     SeasonTitle,
-    Like,
     SeasonId,
     SocialMedia,
     NavbarLogo,
@@ -29,21 +26,9 @@ from .models import (
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category_name", "language", "views", "is_featured")
-    list_filter = ("category__name", "is_featured", "is_new")
+    list_display = ("id", "title", "category_name", "views")
+    list_filter = ("category__name", "is_new")
     search_fields = ("title", "category__name")
-
-    def category_name(self, obj):
-        return obj.category.name if obj.category else None
-
-    category_name.short_description = "category"
-
-
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "writer", "category_name", "status", "is_active")
-    list_filter = ("status", "category__name", "is_active")
-    search_fields = ("title", "writer", "category__name")
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
@@ -102,18 +87,9 @@ class HistoryEntryAdmin(admin.ModelAdmin):
 
 @admin.register(VideoCategory)
 class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
-
-
-@admin.register(PostCategory)
-class PostCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = ("name",)
+    list_filter = ("is_active",)
 
 
 @admin.register(EventCategory)
@@ -136,18 +112,25 @@ class EventSectionAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
-    list_display = ("user", "content_type", "object_id", "created_at")
-    # 'Comments' model uses the field name 'text'
-    search_fields = ("user__username", "text")
+@admin.register(LearnCategory)
+class LearnCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = [
+        "name",
+    ]
+    list_filter = ["is_active"]
 
 
-@admin.register(Reply)
-class ReplyAdmin(admin.ModelAdmin):
-    list_display = ("user", "comment", "created_at")
-    # 'Reply' model uses the field name 'text'
-    search_fields = ("user__username", "text")
+@admin.register(Learn)
+class LearnAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "category_name", "created_at")
+    list_filter = ("category",)
+    search_fields = ("title", "category__name")
+
+    def category_name(self, obj):
+        return obj.category.name if obj.category else None
+
+    category_name.short_description = "Category"
 
 
 @admin.register(MyListEntry)
@@ -172,12 +155,6 @@ class SeasonIdAdmin(admin.ModelAdmin):
         return obj.season_name.name if obj.season_name else None
 
     season_name.short_description = "season_name"
-
-
-@admin.register(Like)
-class LikeAdmin(admin.ModelAdmin):
-    list_display = ("user",)
-    search_fields = ("user__username", "content_type__model")
 
 
 @admin.register(SocialMedia)

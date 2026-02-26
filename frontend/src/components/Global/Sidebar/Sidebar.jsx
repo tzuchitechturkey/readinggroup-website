@@ -63,41 +63,41 @@ export default function AppSidebar({
         onClick: () => onSectionChange("Home"),
         icon: DashboardIcon,
       },
+      // {
+      //   title: "Contents",
+      //   onClick: () => onSectionChange("contents"),
+      //   icon: Content,
+      //   items: [
+      //     {
+      //       title: "All Contents",
+      //       onClick: () => onSectionChange("contents"),
+      //     },
+      //     {
+      //       title: "Add/Edit Content",
+      //       onClick: () => onSectionChange("createOrEditContent"),
+      //     },
+      //     {
+      //       title: "Contents Categories",
+      //       onClick: () => onSectionChange("contentsCategories"),
+      //     },
+      //   ],
+      // },
       {
-        title: "Contents",
-        onClick: () => onSectionChange("contents"),
-        icon: Content,
-        items: [
-          {
-            title: "All Contents",
-            onClick: () => onSectionChange("contents"),
-          },
-          {
-            title: "Add/Edit Content",
-            onClick: () => onSectionChange("createOrEditContent"),
-          },
-          {
-            title: "Contents Categories",
-            onClick: () => onSectionChange("contentsCategories"),
-          },
-        ],
-      },
-      {
-        title: "Posts",
+        title: "Learn",
         onClick: "#",
         icon: Posts,
         items: [
           {
-            title: "All Posts",
-            onClick: () => onSectionChange("posts"),
+            title: "All Learn",
+            onClick: () => onSectionChange("learn"),
           },
           {
-            title: "Add/Edit Post",
-            onClick: () => onSectionChange("add-post"),
+            title: "Add/Edit Learn",
+            onClick: () => onSectionChange("createOrEditLearn"),
           },
           {
-            title: "Posts Categories",
-            onClick: () => onSectionChange("postsCategories"),
+            title: "Learn Categories",
+            onClick: () => onSectionChange("learnCategories"),
           },
         ],
       },
@@ -119,35 +119,27 @@ export default function AppSidebar({
             title: "Videos Categories",
             onClick: () => onSectionChange("videosCategories"),
           },
-          // {
-          //   title: "Series & Seasons",
-          //   onClick: () => onSectionChange("seriesAndSeasons"),
-          // },
         ],
       },
-      {
-        title: "Events",
-        onClick: "#",
-        icon: TV,
-        items: [
-          {
-            title: "All Events",
-            onClick: () => onSectionChange("events"),
-          },
-          {
-            title: "Add/Edit Event",
-            onClick: () => onSectionChange("createOrEditEvent"),
-          },
-          {
-            title: "Events Categories",
-            onClick: () => onSectionChange("eventsCategories"),
-          },
-          // {
-          //   title: "Events Sections",
-          //   onClick: () => onSectionChange("eventsSections"),
-          // },
-        ],
-      },
+      // {
+      //   title: "Events",
+      //   onClick: "#",
+      //   icon: TV,
+      //   items: [
+      //     {
+      //       title: "All Events",
+      //       onClick: () => onSectionChange("events"),
+      //     },
+      //     {
+      //       title: "Add/Edit Event",
+      //       onClick: () => onSectionChange("createOrEditEvent"),
+      //     },
+      //     {
+      //       title: "Events Categories",
+      //       onClick: () => onSectionChange("eventsCategories"),
+      //     },
+      //   ],
+      // },
       {
         title: "Writers",
         onClick: "#",

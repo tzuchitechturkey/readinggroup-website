@@ -6,7 +6,7 @@ import { cva } from "class-variance-authority";
 import { IoIosArrowForward } from "react-icons/io";
 import { useTranslation } from "react-i18next";
 
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

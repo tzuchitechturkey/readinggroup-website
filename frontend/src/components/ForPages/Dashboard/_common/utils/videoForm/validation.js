@@ -22,10 +22,6 @@ export const validateForm = (formData, t) => {
     newErrors.language = t("Language is required");
   }
 
-  if (!formData?.status) {
-    newErrors.status = t("Status is required");
-  }
-
   if (!formData?.video_url.trim()) {
     newErrors.video_url = t("Video URL is required");
   } else if (!isValidYouTubeUrl(formData?.video_url)) {
@@ -38,10 +34,6 @@ export const validateForm = (formData, t) => {
 
   if (!formData?.description.trim()) {
     newErrors.description = t("Description is required");
-  }
-
-  if (!formData?.tags || formData?.tags.length === 0) {
-    newErrors.tags = t("Tags are required");
   }
 
   return newErrors;

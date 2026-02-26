@@ -1,22 +1,18 @@
 from datetime import timedelta
+import uuid
 
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Count
 from django.utils import timezone
-import uuid
 from django.utils.text import slugify
 
 from .enums import (
     ContentStatus,
     EventStatus,
-    PostStatus,
-    PostType,
+    LearnType,
     ReportType,
-    VideoStatus,
+    VideoType,
     LanguageChoices,
 )
 
@@ -31,100 +27,7 @@ class TimestampedModel(models.Model):
         abstract = True
 
 
-class Like(models.Model):
-    """Generic like model for any entity (Video/Post/Event/...)"""
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
-    )
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey("content_type", "object_id")
-    created_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        unique_together = (("user", "content_type", "object_id"),)
-        indexes = [
-            models.Index(fields=["content_type", "object_id"]),
-            models.Index(fields=["user"]),
-        ]
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return f"Like<{self.user_id}:{self.content_type_id}:{self.object_id}>"
-
-
-class LikableMixin(models.Model):
-    """Mixin to add liking functionality to any model."""
-
-    likes = GenericRelation(
-        Like,
-        content_type_field="content_type",
-        object_id_field="object_id",
-        related_query_name="likes",
-    )
-
-    class Meta:
-        abstract = True
-
-    @property
-    def likes_count(self) -> int:
-        return self.likes.count()
-
-    def has_liked(self, user) -> bool:
-        if not user or not user.is_authenticated:
-            return False
-        return self.likes.filter(user=user).exists()
-
-    def add_like(self, user):
-        if user and user.is_authenticated:
-            Like.objects.get_or_create(
-                user=user,
-                content_type=ContentType.objects.get_for_model(self),
-                object_id=self.pk,
-            )
-
-    def remove_like(self, user):
-        if user and user.is_authenticated:
-            self.likes.filter(user=user).delete()
-
-    def toggle_like(self, user):
-        if self.has_liked(user):
-            self.remove_like(user)
-            return False
-        else:
-            self.add_like(user)
-            return True
-
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """Return top `limit` instances of this model ordered by number of likes.
-
-        Uses an aggregate Count on the related `likes` GenericRelation and orders
-        by `-annotated_likes_count` then `-created_at` as a tiebreaker.
-        """
-        return cls.objects.annotate(annotated_likes_count=Count("likes")).order_by(
-            "-annotated_likes_count", "-created_at"
-        )[:limit]
-
-
-class Authors(TimestampedModel):
-    """Authors for videos and posts."""
-
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    position = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
-    avatar_url = models.URLField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Video(LikableMixin, TimestampedModel):
+class Video(TimestampedModel):
     """Video content that powers the dashboard listings."""
 
     title = models.CharField(max_length=255)
@@ -132,37 +35,20 @@ class Video(LikableMixin, TimestampedModel):
     category = models.ForeignKey(
         "VideoCategory", on_delete=models.SET_NULL, null=True, blank=True
     )
-    video_type = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True)
+    video_type = models.CharField(
+        max_length=100, blank=True, null=True, choices=VideoType.choices
+    )
     language = models.CharField(max_length=50)
+    views = models.PositiveIntegerField(default=0)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
     thumbnail_url = models.URLField(blank=True)
-    views = models.PositiveIntegerField(default=0)
-    status = models.CharField(
-        max_length=16, choices=VideoStatus.choices, default=VideoStatus.PUBLISHED
-    )
     happened_at = models.DateTimeField(blank=True, null=True)
-    is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
-    cast = models.JSONField(default=list, blank=True)
-    season_name = models.ForeignKey(
-        "SeasonId", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    description = models.TextField(blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same video",
-    )
-    comments = GenericRelation(
-        "Comments",
-        content_type_field="content_type",
-        object_id_field="object_id",
-        related_query_name="comments",
-    )
+    guest_speakers = models.JSONField(default=list, blank=True)
+    live_stream_link = models.URLField(blank=True, null=True)
 
     @property
     def is_new_computed(self) -> bool:
@@ -198,38 +84,6 @@ class Video(LikableMixin, TimestampedModel):
             except Exception:
                 pass
 
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """Return top `limit` videos ordered by number of likes (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_likes_count` to
-        """
-        qs = (
-            cls.objects.filter(status=VideoStatus.PUBLISHED)
-            .annotate(annotated_likes_count=Count("likes"))
-            .order_by("-annotated_likes_count", "-created_at")
-        )
-        return qs
-
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """Return top `limit` videos ordered by views."""
-        qs = cls.objects.filter(status=VideoStatus.PUBLISHED).order_by(
-            "-views", "-created_at"
-        )
-        return qs
-
-    @classmethod
-    def top_commented(cls, limit: int = 5):
-        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_comments_count` to
-        """
-        qs = (
-            cls.objects.filter(status=VideoStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count("comments"))
-            .order_by("-annotated_comments_count", "-created_at")
-        )
-        return qs
-
     class Meta:
         ordering = ("-happened_at", "-created_at")
 
@@ -237,86 +91,65 @@ class Video(LikableMixin, TimestampedModel):
         return self.title
 
 
-class Post(LikableMixin, TimestampedModel):
-    """Landing posts that appear across the application."""
+class VideoAttachment(TimestampedModel):
+    video = models.ForeignKey(
+        "Video",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(upload_to="videos/materials/")
+    file_name = models.CharField(max_length=255, blank=True)
+    file_size = models.PositiveIntegerField(null=True, blank=True)
 
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
-    excerpt = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255)
-    writer_avatar = models.URLField(blank=True)
-    category = models.ForeignKey(
-        "PostCategory", on_delete=models.SET_NULL, null=True, blank=True
+    def save(self, *args, **kwargs):
+        if self.file:
+            self.file_name = self.file.name
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"VideoAttachment<{self.video_id}:{self.pk}>"
+
+
+class VideoCategory(TimestampedModel):
+    """Categories for organizing videos with multi-language support.
+
+    Each category has a unique key that identifies it across all languages.
+    The combination of (key, language) must be unique.
+    """
+
+    name = models.CharField(
+        max_length=100, help_text="Category name in the specified language"
     )
-    status = models.CharField(
-        max_length=16, choices=PostStatus.choices, default=PostStatus.PUBLISHED
-    )
+    description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
-    views = models.PositiveIntegerField(default=0)
-    read_time = models.CharField(max_length=32, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    post_type = models.CharField(
-        max_length=100, blank=True, choices=PostType.choices, default=PostType.CARD
+    order = models.PositiveIntegerField(
+        default=0, help_text="Manual ordering (lower values appear first)"
     )
-    language = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        ordering = ("order", "-created_at")
+
+    def __str__(self) -> str:
+        return
+
+
+class Learn(TimestampedModel):
+    title = models.CharField(max_length=255)
+    direction = models.CharField(max_length=255, blank=True)
+    subtitle = models.CharField(max_length=255, blank=True)
+    category = models.ForeignKey(
+        "LearnCategory",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="learns",
+    )
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=255, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    camera_name = models.CharField(max_length=255, blank=True)
-    comments = GenericRelation(
-        "Comments",
-        content_type_field="content_type",
-        object_id_field="object_id",
-        related_query_name="posts",
-    )
-    is_weekly_moment = models.BooleanField(default=False)
-
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """
-        Return top `limit` posts where post_type is Card or Photo,
-        ordered by number of likes (descending) then created_at as tiebreaker.
-        """
-        qs = (
-            cls.objects.filter(
-                post_type__in=[PostType.CARD, PostType.PHOTO],
-                status=PostStatus.PUBLISHED,
-            )
-            .annotate(annotated_likes_count=Count("likes"))
-            .order_by("-annotated_likes_count", "-created_at")
-        )
-        # Return grouped shape to match callers that expect a dict with 'card_photo'
-        return {"card_photo": qs}
-
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """
-        The returned querysets are ordered by `-views` then `-created_at`.
-        The view will call `annotate_likes` on these querysets before serialization
-        so we intentionally do not annotate likes here.
-        """
-        card_photo_qs = cls.objects.filter(
-            post_type__in=[PostType.CARD, PostType.PHOTO], status=PostStatus.PUBLISHED
-        ).order_by("-views", "-created_at")
-        return {"card_photo": card_photo_qs}
-
-    @classmethod
-    def top_commented_by_types(cls, types: list, limit: int = 5):
-        """
-        Return top `limit` posts filtered by `post_type` in `types`, ordered by
-        number of comments (descending) then created_at as tiebreaker.
-
-        The returned queryset is annotated with `annotated_comments_count` to
-        match the annotate_* naming convention used elsewhere.
-        """
-        qs = (
-            cls.objects.filter(post_type__in=types, status=PostStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count("comments"))
-            .order_by("-annotated_comments_count", "-created_at")
-        )
-        return qs
+    happened_at = models.DateTimeField(blank=True, null=True)
+    views = models.PositiveIntegerField(default=0)
+    is_event = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_at",)
@@ -325,7 +158,30 @@ class Post(LikableMixin, TimestampedModel):
         return self.title
 
 
-class Event(LikableMixin, TimestampedModel):
+class LearnCategory(TimestampedModel):
+    name = models.CharField(
+        max_length=100, help_text="Category name in the specified language"
+    )
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    learn_type = models.CharField(
+        max_length=100, blank=True, choices=LearnType.choices, default=LearnType.CARDS
+    )
+    order = models.PositiveIntegerField(
+        default=0, help_text="Manual ordering (lower values appear first)"
+    )
+
+    class Meta:
+        ordering = ("order", "-created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "learn_type"],
+                name="unique_learncategory_name_per_type",
+            )
+        ]
+
+
+class Event(TimestampedModel):
     """Represent events and news items grouped by section."""
 
     title = models.CharField(max_length=255)
@@ -355,47 +211,8 @@ class Event(LikableMixin, TimestampedModel):
     video_url = models.CharField(max_length=255, blank=True)
     cast = models.JSONField(default=list, blank=True)
     tags = models.JSONField(default=list, blank=True)
-    comments = GenericRelation(
-        "Comments",
-        content_type_field="content_type",
-        object_id_field="object_id",
-        related_query_name="events",
-    )
     is_weekly_moment = models.BooleanField(default=False)
     external_link = models.URLField(max_length=1000, blank=True)
-
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """
-        Return top `limit` posts ordered by number of likes (descending) then created_at as tiebreaker.
-        """
-        qs = (
-            cls.objects.filter(status=EventStatus.PUBLISHED)
-            .annotate(annotated_likes_count=Count("likes"))
-            .order_by("-annotated_likes_count", "-created_at")
-        )
-        return qs
-
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """Return top `limit` videos ordered by views."""
-        qs = cls.objects.filter(status=EventStatus.PUBLISHED).order_by(
-            "-views", "-created_at"
-        )
-        return qs
-
-    @classmethod
-    def top_commented(cls, limit: int = 5):
-        """Return top `limit` videos ordered by number of comments (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_comments_count` to
-        match the annotate_* naming convention used elsewhere.
-        """
-        qs = (
-            cls.objects.filter(status=EventStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count("comments"))
-            .order_by("-annotated_comments_count", "-created_at")
-        )
-        return qs
 
     class Meta:
         ordering = ("-happened_at", "title")
@@ -404,7 +221,7 @@ class Event(LikableMixin, TimestampedModel):
         return f"{self.title} ({self.section.name if self.section else ''})"
 
 
-class Content(LikableMixin, TimestampedModel):
+class Content(TimestampedModel):
     """Landing posts that appear across the application."""
 
     title = models.CharField(max_length=255)
@@ -429,46 +246,7 @@ class Content(LikableMixin, TimestampedModel):
     image_url = models.URLField(max_length=1000, blank=True)
     metadata = models.CharField(max_length=1000, blank=True)
     country = models.CharField(max_length=100, blank=True)
-    comments = GenericRelation(
-        "Comments",
-        content_type_field="content_type",
-        object_id_field="object_id",
-        related_query_name="posts",
-    )
     is_weekly_moment = models.BooleanField(default=False)
-
-    @classmethod
-    def top_liked(cls, limit: int = 5):
-        """
-        Return top `limit` Content ordered by number of likes (descending) then created_at as tiebreaker.
-        """
-        qs = (
-            cls.objects.filter(status=ContentStatus.PUBLISHED)
-            .annotate(annotated_likes_count=Count("likes"))
-            .order_by("-annotated_likes_count", "-created_at")
-        )
-        return qs
-
-    @classmethod
-    def top_viewed(cls, limit: int = 5):
-        """Return top `limit` Content ordered by views."""
-        qs = cls.objects.filter(status=ContentStatus.PUBLISHED).order_by(
-            "-views", "-created_at"
-        )
-        return qs
-
-    @classmethod
-    def top_commented(cls, limit: int = 5):
-        """Return top `limit` Content ordered by number of comments (descending) then created_at as tiebreaker.
-        The returned queryset is annotated with `annotated_comments_count` to
-        match the annotate_* naming convention used elsewhere.
-        """
-        qs = (
-            cls.objects.filter(status=ContentStatus.PUBLISHED)
-            .annotate(annotated_comments_count=Count("comments"))
-            .order_by("-annotated_comments_count", "-created_at")
-        )
-        return qs
 
     class Meta:
         ordering = ("-created_at",)
@@ -564,7 +342,7 @@ class TeamMember(TimestampedModel):
         return self.name
 
 
-class HistoryEntry(LikableMixin, TimestampedModel):
+class HistoryEntry(TimestampedModel):
     """Timeline entries for the organisation history section."""
 
     title = models.CharField(max_length=255)
@@ -582,23 +360,6 @@ class HistoryEntry(LikableMixin, TimestampedModel):
 
 
 # =====================================================Auxiliary classes========================================================
-class PostRating(TimestampedModel):
-    """User rating for a Post (1-5 stars). Each user may rate a post once."""
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_ratings"
-    )
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="ratings")
-    rating = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-
-    class Meta:
-        unique_together = (("user", "post"),)
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"PostRating<{self.user_id}:{self.post_id}:{self.rating}>"
 
 
 class ContentRating(TimestampedModel):
@@ -638,70 +399,6 @@ class SectionOrder(models.Model):
 
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
-
-
-class PostCategory(TimestampedModel):
-    """Categories for organizing posts with multi-language support.
-
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
 
 
 class EventCategory(TimestampedModel):
@@ -832,68 +529,20 @@ class ContentCategory(TimestampedModel):
         return f"{self.name} ({self.language})"
 
 
-class VideoCategory(TimestampedModel):
-    """Categories for organizing videos with multi-language support.
+class Authors(TimestampedModel):
+    """Authors for videos and posts."""
 
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
+    position = models.CharField(max_length=255, blank=True)
+    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
+    avatar_url = models.URLField(blank=True)
 
     class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
+        ordering = ("name",)
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
+        return self.name
 
 
 class BookCategory(TimestampedModel):
@@ -1034,39 +683,6 @@ class EventSection(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name
-
-
-class Comments(LikableMixin, TimestampedModel):
-    """Comments for all models."""
-
-    content_type = models.ForeignKey(
-        "contenttypes.ContentType", on_delete=models.CASCADE
-    )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    text = models.CharField(max_length=1000)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return f"Comment<{self.user_id}:{self.object_id}>"
-
-
-class Reply(LikableMixin, TimestampedModel):
-    """Replies to comments."""
-
-    comment = models.ForeignKey(
-        Comments, related_name="replies", on_delete=models.CASCADE
-    )
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    text = models.CharField(max_length=1000)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return f"Reply<{self.user_id}:{self.comment_id}>"
 
 
 class NavbarLogo(TimestampedModel):

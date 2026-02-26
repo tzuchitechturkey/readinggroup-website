@@ -3,17 +3,21 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
-import { useCreateOrEditVideo } from "@/components/ForPages/Dashboard/_common/hooks/useVideoForm";
+import { useCreateOrEditVideo } from "@/hooks/video/useVideoForm";
 
 import { ThumbnailSection } from "./VideoForm/ThumbnailSection";
 import { BasicDetailsSection } from "./VideoForm/BasicDetailsSection";
 import { VideoUrlAndDateSection } from "./VideoForm/VideoUrlAndDateSection";
 import { CastSection } from "./VideoForm/CastSection";
-import { TagsSection } from "./VideoForm/TagsSection";
 import { LanguageAndStatusSection } from "./VideoForm/LanguageAndStatusSection";
 import { DescriptionSection } from "./VideoForm/DescriptionSection";
 import { AdditionalInfoSection } from "./VideoForm/AdditionalInfoSection";
 import { FormActionsSection } from "./VideoForm/FormActionsSection";
+import AttachmentsModal from "../../Contents/CreateOrEditContent/ContentForm/AttachmentsModal";
+import {
+  AttachmentsSection,
+  FilePreviewModal,
+} from "../../Contents/CreateOrEditContent/ContentForm";
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();
@@ -22,10 +26,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     formData,
     hasChanges,
     errors,
-    tagInput,
-    setTagInput,
-    castInput,
-    setCastInput,
+    previewFile,
+    previewUrl,
+    guestSpeakersInput,
+    showAttachmentsModal,
+    setShowAttachmentsModal,
+    setGuestSpeakersInput,
     imagePreview,
     showCategoryDropdown,
     setShowCategoryDropdown,
@@ -37,16 +43,17 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     isFetchingYoutube,
     handleInputChange,
     handleCategorySelect,
-    handleTagsInput,
-    removeTag,
-    handleCastInput,
-    removeCast,
+    handleGuestSpeakersInput,
+    removeGuestSpeaker,
     handleThumbnailUpload,
     handleFetchYouTubeInfo,
     handleSubmit,
     getCategories,
+    handleConfirmAttachments,
+    handleRemoveAttachment,
+    handlePreviewFile,
+    handleClosePreview,
   } = useCreateOrEditVideo(video, onSectionChange);
-
   return (
     <div
       className="bg-white rounded-lg p-3 lg:p-6 w-full mx-4 overflow-y-auto"
@@ -99,6 +106,19 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           </p>
         </div>
 
+        {/* Attachments Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            {t("Attachments")}
+          </h2>
+          <AttachmentsSection
+            t={t}
+            formData={formData}
+            setShowAttachmentsModal={setShowAttachmentsModal}
+            handleRemoveAttachment={handleRemoveAttachment}
+            handlePreviewFile={handlePreviewFile}
+          />
+        </div>
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -119,38 +139,20 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               onCategoryDropdownToggle={setShowCategoryDropdown}
               errors={errors}
             />
-
-            {/* Tags */}
-            <TagsSection
-              tags={formData?.tags}
-              tagInput={tagInput}
-              onTagInputChange={setTagInput}
-              onTagInputKeyPress={handleTagsInput}
-              onTagRemove={removeTag}
-              error={errors?.tags}
+            {/* Start Guest Speakers */}
+            <CastSection
+              guestSpeakers={formData?.guest_speakers}
+              guestSpeakersInput={guestSpeakersInput}
+              onGuestSpeakersInputChange={setGuestSpeakersInput}
+              onGuestSpeakersInputKeyPress={handleGuestSpeakersInput}
+              onGuestSpeakersRemove={removeGuestSpeaker}
+              error={errors?.guest_speakers}
             />
-
-            {/* Featured Toggle */}
-            <div className="flex items-center gap-2 pt-4">
-              <input
-                type="checkbox"
-                name="is_featured"
-                id="is_featured"
-                checked={formData?.is_featured}
-                onChange={handleInputChange}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              />
-              <label
-                htmlFor="is_featured"
-                className="text-sm font-medium text-gray-700 cursor-pointer"
-              >
-                {t("Featured Video")}
-              </label>
-            </div>
+            {/* End Guest Speakers */}
           </div>
 
           {/* Right Column */}
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {/* Video URL and Date */}
             <VideoUrlAndDateSection
               formData={formData}
@@ -160,22 +162,14 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               errors={errors}
             />
 
-            {/* Cast */}
-            <CastSection
-              cast={formData?.cast}
-              castInput={castInput}
-              onCastInputChange={setCastInput}
-              onCastInputKeyPress={handleCastInput}
-              onCastRemove={removeCast}
-              error={errors?.cast}
-            />
-
             {/* Language and Status */}
-            <LanguageAndStatusSection
-              formData={formData}
-              onInputChange={handleInputChange}
-              errors={errors}
-            />
+            <div className="">
+              <LanguageAndStatusSection
+                formData={formData}
+                onInputChange={handleInputChange}
+                errors={errors}
+              />
+            </div>
           </div>
         </div>
 
@@ -212,6 +206,22 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           isEditMode={Boolean(video)}
         />
       </form>
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        isOpen={Boolean(previewFile) && Boolean(previewUrl)}
+        previewFile={previewFile}
+        previewUrl={previewUrl}
+        t={t}
+        handleClosePreview={handleClosePreview}
+      />
+      {/* Attachments Modal */}
+      <AttachmentsModal
+        isOpen={showAttachmentsModal}
+        onClose={() => setShowAttachmentsModal(false)}
+        selectedAttachments={formData.attachments}
+        onConfirm={handleConfirmAttachments}
+      />
     </div>
   );
 }

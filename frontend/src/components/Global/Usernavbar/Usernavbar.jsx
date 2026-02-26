@@ -87,7 +87,7 @@ function Usernavbar({ isHome = false }) {
 
   // إغلاق القائمة عند تغيير حجم الشاشة إلى أكبر من lg
   useEffect(() => {
-    fetchWebSiteInfo();
+    // fetchWebSiteInfo();
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         // lg breakpoint

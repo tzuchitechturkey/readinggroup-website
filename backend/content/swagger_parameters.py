@@ -18,7 +18,14 @@ video_manual_parameters = [
     openapi.Parameter(
         "happened_at",
         openapi.IN_QUERY,
-        description="Filter by happened date",
+        description=(
+            "Filter by happened_at. "
+            "Formats supported: "
+            "YYYY (year), "
+            "YYYY-MM (year-month), "
+            "YYYY-MM-DD (full date). "
+            "Examples: 2026 | 2026-02 | 2026-02-14"
+        ),
         type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
@@ -28,30 +35,9 @@ video_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
-    openapi.Parameter(
-        "is_featured",
-        openapi.IN_QUERY,
-        description="Filter by is_featured status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "is_weekly_moment",
-        openapi.IN_QUERY,
-        description="Filter by is_weekly_moment status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "status",
-        openapi.IN_QUERY,
-        description="Filter by status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
 ]
 
-post_manual_parameters = [
+learn_manual_parameters = [
     openapi.Parameter(
         "created_at",
         openapi.IN_QUERY,
@@ -66,37 +52,22 @@ post_manual_parameters = [
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
     openapi.Parameter(
-        "language",
+        "happened_at",
         openapi.IN_QUERY,
-        description="Filter by language",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
+        description=(
+            "Filter by happened_at. "
+            "Formats supported: "
+            "YYYY (year), "
+            "YYYY-MM (year-month), "
+            "YYYY-MM-DD (full date). "
+            "Examples: 2026 | 2026-02 | 2026-02-14"
+        ),
+        type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
-        "writer",
+        "learn_type",
         openapi.IN_QUERY,
-        description="Filter by writer",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "post_type",
-        openapi.IN_QUERY,
-        description="Filter by Post Type",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "status",
-        openapi.IN_QUERY,
-        description="Filter by status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "is_weekly_moment",
-        openapi.IN_QUERY,
-        description="Filter by is_weekly_moment status",
+        description="Filter by Learn Type",
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
@@ -259,5 +230,27 @@ video_category_manual_parameters = [
         openapi.IN_QUERY,
         description="Filter by is_active status",
         type=openapi.TYPE_STRING,
+    ),
+]
+
+
+learn_category_manual_parameters = [
+    openapi.Parameter(
+        "type",
+        openapi.IN_QUERY,
+        description="Filter by learn_type (JSON object with 'name' field)",
+        type=openapi.TYPE_STRING,
+        required=True,
+    ),
+]
+
+
+learn_grouped_by_type_manual_parameters = [
+    openapi.Parameter(
+        "learn_type",
+        openapi.IN_QUERY,
+        description="Filter by learn_type (JSON object with 'name' field)",
+        type=openapi.TYPE_STRING,
+        required=False,
     ),
 ]

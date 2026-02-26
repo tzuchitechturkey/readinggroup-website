@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import TopFiveSectionCard from "@/components/Global/TopFiveSectionCard/TopFiveSectionCard";
 import DynamicSection from "@/components/Global/DynamicSection/DynamicSection";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/global/use-mobile";
 
 const TopFiveSection = ({ data }) => {
   const isMobile = useIsMobile(1224);

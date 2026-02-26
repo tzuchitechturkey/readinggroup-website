@@ -16,8 +16,8 @@ export default function DashboardSections({ onSectionChange }) {
   const getData = async () => {
     setIsLoading(true);
     try {
-      const response = await GetStatistics();
-      setData(response.data);
+      // const response = await GetStatistics();
+      // setData(response.data);
     } catch (error) {
       setErrorFn(error, t);
     } finally {

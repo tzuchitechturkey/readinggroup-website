@@ -13,17 +13,17 @@ const SortByFilter = ({
 
   return (
     <div
-      className="min-w-[170px] min-h-[56px] relative flex items-center justify-between cursor-pointer px-4 py-2 border border-black rounded-[17px] hover:bg-gray-50 transition-colors"
+      className={`min-w-[200px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4    ${openDropdowns.sortBy ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
       onClick={(e) => {
         e.stopPropagation();
         onToggleDropdown("sortBy");
       }}
     >
-      <div className="flex-1">
-        <p className="text-xs font-bold text-black leading-tight">
+      <div className="flex-1  flex items-center gap-2">
+        <p className="text-lg font-bold text-[#081945] leading-tight">
           {t("Sort by")}
         </p>
-        <p className="text-base font-normal text-black leading-tight">
+        <p className="text-base font-normal text-[#285688] leading-tight">
           {t(
             filters.sortBy === "all"
               ? "All"
@@ -35,43 +35,43 @@ const SortByFilter = ({
           )}
         </p>
       </div>
-      <ChevronDown />
+      <ChevronDown className="text-[#081945] font-bold " />
 
       {/* Sort By Dropdown */}
       {openDropdowns.sortBy && (
-        <div className="absolute top-full left-0 mt-2 w-full bg-white border border-black rounded-[17px] shadow-lg z-50 p-4">
+        <div className="absolute top-full left-0 -mt-2  w-full bg-white  rounded-b-[17px] z-50 p-4">
+          <hr className="bg-[#FCFDFF] rounded-2xl mb-3 " />
+
           <div className="flex flex-col gap-2.5">
             {/* Newest Option */}
             <div
-              className="flex items-center gap-2 cursor-pointer"
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "newest" ? "text-[#285688]" : ""}`}
               onClick={() => onSortByChange("newest")}
             >
               <div className="w-6 h-6 ">
                 {filters.sortBy === "newest" && <Check />}
               </div>
-              <p className="font-normal text-base text-black">{t("Newest")}</p>
+              <p className="font-normal text-base  ">{t("Newest")}</p>
             </div>
             {/* Oldest Option */}
             <div
-              className="flex items-center gap-2 cursor-pointer"
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "oldest" ? "text-[#285688]" : ""}`}
               onClick={() => onSortByChange("oldest")}
             >
               <div className="w-6 h-6 ">
                 {filters.sortBy === "oldest" && <Check />}
               </div>
-              <p className="font-normal text-base text-black">{t("Oldest")}</p>
+              <p className="font-normal text-base  ">{t("Oldest")}</p>
             </div>
             {/* Most Popular Option */}
             <div
-              className="flex items-center gap-2 cursor-pointer"
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "popular" ? "text-[#285688]" : ""}`}
               onClick={() => onSortByChange("popular")}
             >
               <div className="w-6 h-6">
                 {filters.sortBy === "popular" && <Check />}
               </div>
-              <p className="font-normal text-base text-black">
-                {t("Most Popular")}
-              </p>
+              <p className="font-normal text-base  ">{t("Most Popular")}</p>
             </div>
           </div>
         </div>

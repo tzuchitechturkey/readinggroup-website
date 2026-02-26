@@ -1,20 +1,12 @@
 import axios from "./axios";
 
-export async function GetVideos(
-  limit,
-  offset,
-  status = "published",
-  search = "",
-  filters = {},
-) {
+export async function GetVideos(limit, offset, search = "", filters = {}) {
   const params = {
     limit,
     offset,
-    status,
     search,
     ...filters,
   };
-  console.log("GetVideos params:", params);
   const queryString = Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join("&");
@@ -33,11 +25,12 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
   // if (params.language) queryParams.append("language", params.language);
   if (params.category) {
     // Handle categories as array or single value
-    if (Array.isArray(params.category)) {
-      params.category.forEach(catId => queryParams.append("category", catId));
-    } else {
+    // if (Array.isArray(params.category)) {
+    //   params.category.forEach((catId) => queryParams.append("category", catId));
+    // } 
+    // else {
       queryParams.append("category", params.category);
-    }
+    // }
   }
   if (params.happened_at) queryParams.append("happened_at", params.happened_at);
   // if (params.is_featured) queryParams.append("is_featured", params.is_featured);

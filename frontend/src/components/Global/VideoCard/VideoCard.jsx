@@ -37,10 +37,8 @@ const VideoCard = ({
         };
       case "small":
         return {
-          container:
-            "w-full sm:w-[48%] md:w-[45%] lg:w-[290px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
-          image:
-            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px]",
+          container: "w-full sm:w-[48%] md:w-[45%] lg:w-[290px]  h-[199px]",
+          image: "h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px]",
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
@@ -77,7 +75,7 @@ const VideoCard = ({
         <img
           alt={item.title}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
-          src={item.thumbnail}
+          src={item.thumbnail || item.thumbnail_url}
         />
 
         {/* Play Button Overlay */}
@@ -94,25 +92,26 @@ const VideoCard = ({
         </div>
       </div>
 
+      {/* Start Category Name && Duration */}
       <div
-        className={`flex ${gap} items-center w-full mt-0.5 sm:mt-1 mx-0.5 sm:mx-1`}
+        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 sm:mt-1 mx-0.5 sm:mx-1`}
       >
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${categoryText} text-black uppercase`}
         >
           {item.category?.name}
         </p>
-        <div className="h-[12px] sm:h-[14px] md:h-[15px] lg:h-[16px] w-0 border-r border-gray-400" />
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${durationText} text-black`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] ${durationText} text-[#081945]`}
         >
           {item.duration}
         </p>
       </div>
+      {/* End Category Name && Duration */}
       {showDate && (
         <div className="mx-1 -mt-1">
-          <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px]">
-            {item?.date || "2012-23-32"}
+          <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] text-[#285688]">
+            {item?.happened_at}
           </p>
         </div>
       )}

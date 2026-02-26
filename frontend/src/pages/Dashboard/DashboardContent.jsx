@@ -14,12 +14,10 @@ import DashboardFooter from "@/components/ForPages/Dashboard/DashboardFooter/Das
 import DashboardSections from "@/components/ForPages/Dashboard/DashboardSections/DashboardSections";
 import VideosList from "@/components/ForPages/Dashboard/Videos/VideosList/VideosList";
 import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/CreateOrEditVideo";
-import PostsList from "@/components/ForPages/Dashboard/Posts/PostsList/PostsList";
-import CreateOrEditPost from "@/components/ForPages/Dashboard/Posts/CreateOrEditPost/CreateOrEditPost";
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
 import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeamList";
 import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departments/DepartmentsContent";
-import PostsCategoriesContent from "@/components/ForPages/Dashboard/Posts/PostsCategories/PostsCategoriesContent";
+import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
 import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
@@ -34,6 +32,8 @@ import BooksGroupsList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksG
 import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/CreateorEditWriter/CreateorEditWriter";
 import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
 import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/CreateorEditBook";
+import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
+import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -51,9 +51,9 @@ export default function Page() {
     // استرجاع العنصر الأساسي المحفوظ من localStorage
     return localStorage.getItem("dashboardActiveParent") || null;
   });
-  const [selectedPost, setSelectedPost] = useState(() => {
+  const [selectedLearn, setSelectedLearn] = useState(() => {
     // استرجاع المقال المحفوظ إن وجد
-    const saved = localStorage.getItem("dashboardSelectedPost");
+    const saved = localStorage.getItem("dashboardSelectedLearn");
     return saved ? JSON.parse(saved) : null;
   });
   const [selectedVideo, setSelectedVideo] = useState(() => {
@@ -95,13 +95,13 @@ export default function Page() {
   }, [activeParent]);
 
   useEffect(() => {
-    if (selectedPost) {
+    if (selectedLearn) {
       localStorage.setItem(
-        "dashboardSelectedPost",
-        JSON.stringify(selectedPost),
+        "dashboardSelectedLearn",
+        JSON.stringify(selectedLearn),
       );
     }
-  }, [selectedPost]);
+  }, [selectedLearn]);
 
   useEffect(() => {
     if (selectedVideo) {
@@ -144,13 +144,13 @@ export default function Page() {
 
     // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
     if (section === "home" || section === "Home") {
-      localStorage.removeItem("dashboardSelectedPost");
+      localStorage.removeItem("dashboardSelectedLearn");
       localStorage.removeItem("dashboardSelectedVideo");
       localStorage.removeItem("dashboardSelectedContent");
       localStorage.removeItem("dashboardSelectedEvent");
       localStorage.removeItem("dashboardSelectedWriter");
       localStorage.removeItem("dashboardSelectedBook");
-      setSelectedPost(null);
+      setSelectedLearn(null);
       setSelectedVideo(null);
       setSelectedContent(null);
       setSelectedEvent(null);
@@ -159,8 +159,8 @@ export default function Page() {
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
-    if (section === "createOrEditPost") {
-      setSelectedPost(data);
+    if (section === "createOrEditLearn") {
+      setSelectedLearn(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
     } else if (section === "createOrEditContent") {
@@ -179,14 +179,13 @@ export default function Page() {
         // Posts
         cards: "Cards Or Photos",
         // photos: "Cards Or Photos",
-        posts: "Posts",
-        createOrEditPost: "Posts",
-        postsCategories: "Posts",
+        learn: "Learn",
+        createOrEditLearn: "Learn",
+        learnCategories: "Learn",
         // Videos
         videos: "Videos",
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
-        seriesAndSeasons: "Videos",
         // Contents
         contents: "Contents",
         createOrEditContent: "Contents",
@@ -220,18 +219,18 @@ export default function Page() {
     switch (activeSection) {
       case "home":
         return <DashboardSections onSectionChange={handleSectionChange} />;
-      // posts
-      case "posts":
-        return <PostsList onSectionChange={handleSectionChange} />;
-      case "createOrEditPost":
+      // Learn
+      case "learn":
+        return <LearnList onSectionChange={handleSectionChange} />;
+      case "createOrEditLearn":
         return (
-          <CreateOrEditPost
+          <CreateOrEditLearn
             onSectionChange={handleSectionChange}
-            post={selectedPost}
+            learn={selectedLearn}
           />
         );
-      case "postsCategories":
-        return <PostsCategoriesContent onSectionChange={handleSectionChange} />;
+      case "learnCategories":
+        return <LearnCategoriesContent onSectionChange={handleSectionChange} />;
 
       // Videos
       case "videos":
@@ -317,13 +316,13 @@ export default function Page() {
     }
   };
 
-  // useEffect(() => {
-  //   const user = localStorage.getItem("userType");
-  //   if (!user || user !== "admin") {
-  //     localStorage.setItem("redirectAfterLogin", "/dashboard");
-  //     window.location.href = "/auth/login";
-  //   }
-  // }, []);
+  useEffect(() => {
+    const user = localStorage.getItem("userType");
+    if (!user || user !== "admin") {
+      localStorage.setItem("redirectAfterLogin", "/dashboard");
+      window.location.href = "/auth/login";
+    }
+  }, []);
 
   return (
     <div dir={direction} className="min-h-screen">
