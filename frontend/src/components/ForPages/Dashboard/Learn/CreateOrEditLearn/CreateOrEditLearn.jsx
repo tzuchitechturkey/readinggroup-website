@@ -50,7 +50,6 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     setCategorySearchValue("");
     getCategories("");
   };
-console.log(formData, "form data in create or edit learn");
   return (
     <div
       className="bg-white rounded-lg p-6 mx-4 overflow-y-auto"

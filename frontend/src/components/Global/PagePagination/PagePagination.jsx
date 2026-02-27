@@ -31,7 +31,7 @@ const Pagination = ({ currentPage = 1, totalPages = 1, onPageChange }) => {
     <div className="mt-20 flex justify-center items-center gap-[24px]">
       <div className="flex items-center gap-[24px]">
         {/* Page Numbers */}
-        <div className="flex items-center justify-between w-[171px]">
+        <div className="flex w-fit items-center justify-between max-w-[171px]">
           {pageNumbers.map((pageNum, index) => (
             <React.Fragment key={index}>
               {pageNum === "..." ? (

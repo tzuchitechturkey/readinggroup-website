@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
 import { GetTopViewedVideos } from "@/api/videos";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
+import { languages } from "@/constants/constants";
 
 import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
@@ -19,14 +20,13 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const [expanded, setExpanded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
-  console.log("videoData:", videoData);
-  const LIMIT = 4;
+  const limit = 5;
 
   // Fetch related videos
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
-      const res = await GetTopViewedVideos(LIMIT, currentOffset);
+      const res = await GetTopViewedVideos(limit, currentOffset);
       const data = res?.data || {};
       const results = data.results || [];
       const count = data.count || 0;
@@ -39,7 +39,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
       }
 
       setTotalCount(count);
-      setOffset(currentOffset + LIMIT);
+      setOffset(currentOffset + limit);
 
       // Check if there are more videos to load
       const loadedCount = currentOffset + results.length;
@@ -106,10 +106,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const youTube = isYouTubeUrl(videoData?.video_url);
 
   return (
-    <div
-      className=" max-w-[1200px] mx-auto "
-      dir={i18n.language === "ar" ? "rtl" : "ltr"}
-    >
+    <div className=" max-w-[1200px] mx-auto ">
       {/* Back Button */}
       <div className="pt-3">
         <button
@@ -181,12 +178,18 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
             <div className="mb-4">
               <p className="text-base font-bold text-[#081945] mb-0">
                 {videoData?.created_at
-                  ? new Date(videoData.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "November 26, 2025"}
+                  ? (() => {
+                      const parts = new Date(videoData.created_at)
+                        .toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                        .split(" ");
+
+                      return `${parts[0]}. ${parts[1]} ${parts[2]}`;
+                    })()
+                  : "Nov. 26, 2025"}
               </p>
             </div>
             <div className="flex items-end ">
@@ -217,7 +220,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                 <p className="font-bold text-[#081945] w-[135px]">
                   {t("Category")}
                 </p>
-                <p className="flex-1 font-normal text-black">
+                <p className="flex-1 font-normal text-[#081945]">
                   {videoData?.category?.name || "Guided Reading"}
                 </p>
               </div>
@@ -227,8 +230,9 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                 <p className="font-bold text-[#081945] w-[135px]">
                   {t("Language")}
                 </p>
-                <p className="flex-1 font-normal text-black">
-                  {videoData?.language || "English"}
+                <p className="flex-1 font-normal text-[#081945]">
+                  {/* {videoData?.language || "English"} */}
+                  {languages.find((l) => l.code === videoData?.language)?.label}
                 </p>
               </div>
 
@@ -242,12 +246,12 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                   {videoData?.guest_speakers &&
                   videoData.guest_speakers.length > 0 ? (
                     videoData.guest_speakers.map((speaker, index) => (
-                      <p key={index} className="font-normal text-black">
+                      <p key={index} className="font-normal text-[#081945]">
                         {speaker}
                       </p>
                     ))
                   ) : (
-                    <p className="font-normal text-black">
+                    <p className="font-normal text-[#081945]">
                       {t("No guest speakers")}
                     </p>
                   )}
@@ -269,7 +273,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                           href={material.file}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-normal cursor-pointer text-black underline hover:text-gray-700"
+                          className="font-normal cursor-pointer text-[#081945] underline hover:text-gray-700"
                         >
                           {material.file_name ||
                             `${t("Attachment")} ${index + 1}`}

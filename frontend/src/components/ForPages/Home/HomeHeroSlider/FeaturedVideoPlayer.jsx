@@ -1,7 +1,5 @@
 import React from "react";
 
-import { Play } from "lucide-react";
-
 export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
   return (
     <div className="w-full relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[92vh]">
@@ -9,7 +7,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
         {/* Video Container */}
         <div className="absolute inset-0 bg-black">
           <img
-            src={`${item?.thumbnail_url || "/assets/default-thumbnail.jpg"}`}
+            src={`${item?.thumbnail_url?.maxres?.url || item?.thumbnail_url?.standard?.url || "/assets/default-thumbnail.jpg"}`}
             alt={item?.title || "Video Thumbnail"}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />

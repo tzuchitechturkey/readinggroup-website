@@ -31,11 +31,11 @@ export const useLearnData = () => {
     }
   };
 
-  const handleDeletePost = async (postId) => {
+  const handleDeleteLearn = async (learnId) => {
     setIsLoading(true);
     try {
-      await DeleteLearnById(postId);
-      toast.success(t("Post deleted successfully"));
+      await DeleteLearnById(learnId);
+      toast.success(t("Learn deleted successfully"));
       setUpdate(!update);
       return true;
     } catch (error) {
@@ -52,11 +52,11 @@ export const useLearnData = () => {
 
   return {
     isLoading,
-    postData: learnData,
+    learnData,
     totalRecords,
     update,
     getLearnData,
-    handleDeletePost,
+    handleDeleteLearn,
     refreshData,
   };
 };

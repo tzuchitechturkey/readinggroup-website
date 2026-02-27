@@ -53,88 +53,6 @@ function VideosPageContent() {
     sortBy: false,
   });
 
-  // // Apply all filters and fetch videos
-  // const fetchFilteredVideos = async (
-  //   page = 1,
-  //   passedFilters = filters,
-  //   dateFilter = null,
-  // ) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const offset = (page - 1) * pagination.limit;
-
-  //     // Build filter parameters
-  //     const filterParams = {};
-
-  //     // Only add search if it's not empty
-  //     if (searchTerm && searchTerm.trim() !== "") {
-  //       filterParams.search = searchTerm.trim();
-  //     }
-
-  //     // Video type filter
-  //     if (
-  //       passedFilters.videoType.length > 0 &&
-  //       !passedFilters.videoType.includes("all")
-  //     ) {
-  //       // Map video types to API parameters
-  //       const typeMapping = {
-  //         full_video: () => {
-  //           filterParams.video_type = "full_video";
-  //         },
-  //         clips: () => {
-  //           filterParams.video_type = "clip_video";
-  //         },
-  //       };
-
-  //       // Apply the selected type (only one type allowed)
-  //       const selectedType = passedFilters.videoType[0];
-  //       if (typeMapping[selectedType]) {
-  //         typeMapping[selectedType]();
-  //       }
-  //     }
-
-  //     // Date filter (only if applied)
-  //     const activeDateFilter =
-  //       dateFilter !== null ? dateFilter : appliedDateFilter;
-  //     if (activeDateFilter) {
-  //       filterParams.happened_at = activeDateFilter;
-  //     }
-
-  //     // Category filter (multiple categories as array)
-  //     if (selectedCategories.length > 0) {
-  //       filterParams.category = selectedCategories;
-  //     }
-  //     console.log("Filter parameters being sent to API:", filterParams);
-  //     const res = await GetVideosByFilter(
-  //       pagination.limit,
-  //       offset,
-  //       filterParams,
-  //     );
-
-  //     // Handle API response structure
-  //     const responseData = res.data || {};
-  //     let videos = responseData.results || [];
-
-  //     // Apply local sorting
-  //     videos = applySorting(videos);
-  //     setFilteredVideos(videos);
-
-  //     // Update pagination state
-  //     setPagination((prev) => ({
-  //       ...prev,
-  //       count: responseData.count || 0,
-  //       next: responseData.next || null,
-  //       previous: responseData.previous || null,
-  //       currentPage: page,
-  //       totalPages: Math.ceil((responseData.count || 0) / prev.limit),
-  //     }));
-  //   } catch (err) {
-  //     console.error("Failed to fetch filtered videos:", err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   // Helper function to fetch with explicit parameters
   const fetchFilteredVideosWithParams = async (
     page = 1,
@@ -188,7 +106,6 @@ function VideosPageContent() {
         filterParams.category = categoriesToUse;
       }
 
-      console.log("Filter parameters being sent to API:", filterParams);
       const res = await GetVideosByFilter(
         pagination.limit,
         offset,
@@ -240,27 +157,6 @@ function VideosPageContent() {
       setActiveCategories(active);
     } catch (err) {
       console.error("Failed to fetch video categories:", err);
-    }
-  };
-
-  // Apply local sorting to videos
-  const applySorting = (videos) => {
-    const sortedVideos = [...videos];
-
-    switch (filters.sortBy) {
-      case "newest":
-        return sortedVideos.sort(
-          (a, b) => new Date(b.happened_at) - new Date(a.happened_at),
-        );
-      case "oldest":
-        return sortedVideos.sort(
-          (a, b) => new Date(a.happened_at) - new Date(b.happened_at),
-        );
-      case "most_popular":
-        return sortedVideos.sort((a, b) => (b.views || 0) - (a.views || 0));
-
-      default:
-        return sortedVideos;
     }
   };
 
@@ -719,8 +615,8 @@ function VideosPageContent() {
 
             {/* Show message if no videos found */}
             {!isLoading && filteredVideos.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-[#8E8E8E] text-3xl font-bold">
+              <div className="text-center py-28">
+                <p className="text-[#9FB3E1] text-3xl font-bold">
                   {t("No results found.")}
                 </p>
                 {(searchTerm ||
@@ -728,7 +624,7 @@ function VideosPageContent() {
                   !filters.videoType.includes("all")) && (
                   <button
                     onClick={resetFilters}
-                    className="px-5 py-1 mt-6 bg-[#A8A8A8] rounded-lg hover:bg-[#8E8E8E] transition-colors"
+                    className="px-6 py-2 mt-6 bg-[#285688] rounded-lg text-white  transition-colors"
                   >
                     {t("Reset Filters")}
                   </button>

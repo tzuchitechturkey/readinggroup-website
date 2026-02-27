@@ -140,6 +140,8 @@ function LearnCategoriesContent({ onSectionChange }) {
           setErrorFn={setErrorFn}
           getCategoriesData={getCategoriesData}
           setHasChanges={setHasChanges}
+          setSelectedCategory={setSelectedCategory}
+          setShowDeleteModal={setShowDeleteModal} 
         />
         {/* End Table */}
 

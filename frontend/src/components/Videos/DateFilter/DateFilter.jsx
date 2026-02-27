@@ -55,13 +55,13 @@ const DateFilter = ({
           <hr className="bg-[#FCFDFF] rounded-2xl mb-3 " />
 
           {/* Year Selector */}
-          <div className="flex items-center justify-between py-2 mb-4">
+          <div className="flex items-center justify-between mb-1">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDateYearChange(-1);
               }}
-              className="p-1"
+              className="px-1"
             >
               <ChevronLeft />
             </button>
@@ -74,13 +74,13 @@ const DateFilter = ({
                   e.stopPropagation();
                   onDateYearChange(1);
                 }}
-                className="p-1"
+                className="px-1"
               >
                 <ChevronRight />
               </button>
             ) : (
-              <div className="p-1 opacity-40">
-                <ChevronRight />
+              <div className="px-1 opacity-40 w-[30px]">
+                {filters.date.year > currentYear && <ChevronRight />}
               </div>
             )}
           </div>
@@ -107,9 +107,9 @@ const DateFilter = ({
                   e.stopPropagation();
                   onDateMonthSelect(index + 1);
                 }}
-                className={`px-2.5 py-1 rounded-full text-base font-normal capitalize ${
+                className={`px-2.5 py-1 rounded-full text-[#081945] text-base font-normal capitalize ${
                   filters.date.month === index + 1
-                    ? "border border-black bg-gray-100"
+                    ? "border border-[#285688] text-[#285688] "
                     : "hover:bg-gray-50"
                 }`}
               >
@@ -124,7 +124,8 @@ const DateFilter = ({
               e.stopPropagation();
               onApplyDateFilter();
             }}
-            className="w-full bg-black text-white px-2.5 py-1 rounded-full text-base font-normal"
+            //
+            className={`w-full ${filters.date.month ? "bg-[#285688]" : "bg-[#C2DCF7]"} text-white px-2.5 py-1 rounded-lg text-base font-normal`}
           >
             {t("Apply")}
           </button>

@@ -20,14 +20,14 @@ function LearnList({ onSectionChange }) {
   // Custom hooks
   const {
     isLoading,
-    postData,
+    learnData,
     totalRecords,
+    update,
     getLearnData,
-    handleWeeklyPostToggle,
-    handleDeletePost,
+    handleDeleteLearn,
   } = useLearnData();
 
-  const { sortData, getSortedData, sortConfig } = useSorting(postData);
+  const { sortData, getSortedData, sortConfig } = useSorting(learnData);
   const { currentPage, handlePageChange, resetPage, getPaginationInfo } =
     usePagination(10);
 
@@ -40,11 +40,6 @@ function LearnList({ onSectionChange }) {
   // Functions
   const fetchData = (page = 0) => {
     getLearnData(page, search);
-  };
-
-  const handleSearch = () => {
-    resetPage();
-    fetchData(0);
   };
 
   const clearSearch = () => {
@@ -73,7 +68,7 @@ function LearnList({ onSectionChange }) {
   };
 
   const handleConfirmDelete = async () => {
-    const success = await handleDeletePost(selectedPost?.id);
+    const success = await handleDeleteLearn(selectedPost?.id);
     if (success) {
       setShowDeleteModal(false);
       setSelectedPost(null);
@@ -83,10 +78,10 @@ function LearnList({ onSectionChange }) {
   // Effects
   useEffect(() => {
     fetchData(currentPage - 1);
-  }, []);
+  }, [update]);
 
   // Computed values
-  const sortedData = getSortedData(postData);
+  const sortedData = getSortedData(learnData);
   const paginationInfo = getPaginationInfo(totalRecords);
   return (
     <div
@@ -119,7 +114,6 @@ function LearnList({ onSectionChange }) {
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDeleteClick}
-        onWeeklyToggle={handleWeeklyPostToggle}
         onClearSearch={clearSearch}
       />
 

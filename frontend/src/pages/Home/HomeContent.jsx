@@ -13,7 +13,7 @@ import PhotoCollections from "@/components/ForPages/Home/PhotoCollections/PhotoC
 import { GetVideosByTypeVideo } from "@/api/videos";
 
 export default function HomeContent() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
 
   const fetchData = async () => {
@@ -28,10 +28,7 @@ export default function HomeContent() {
     fetchData();
   }, []);
   return (
-    <div
-      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-      className="min-h-screen bg-[#C8DDF4]"
-    >
+    <div className="min-h-screen bg-[#C8DDF4]">
       {/* Start Hero Slider */}
       <div>
         <HomeHeroSlider t={t} fullLiveStream={data?.full_video[0]} />
