@@ -320,14 +320,15 @@ function VideosPageContent() {
   };
 
   // Handle date filter changes
-  const handleDateYearChange = (direction) => {
+  const handleDateYearChange = (value) => {
     const currentYear = new Date().getFullYear(); // 2026
 
     setFilters((prev) => {
-      const newYear = prev.date.year + direction;
+      const isAbsolute = Math.abs(value) > 100;
+      const newYear = isAbsolute ? value : prev.date.year + value;
 
       // منع التقدم بعد السنة الحالية
-      if (direction > 0 && newYear > currentYear) {
+      if (!isAbsolute && value > 0 && newYear > currentYear) {
         return prev;
       }
 

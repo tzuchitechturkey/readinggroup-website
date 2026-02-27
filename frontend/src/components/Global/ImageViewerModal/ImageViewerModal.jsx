@@ -167,6 +167,12 @@ const ImageViewerModal = ({
 
   const currentImage = images[currentIndex];
 
+  // Robustly handle if currentImage is a string or an object with an image property
+  const imgSrc =
+    typeof currentImage === "string" ? currentImage : currentImage?.image;
+  const imgAlt =
+    typeof currentImage === "string" ? "Tzu Chi Content" : currentImage?.title;
+
   const modalContent = (
     <div className="fixed inset-0 z-[100000] bg-[rgba(22,33,58,0.95)] backdrop-blur-[3px] flex items-center justify-center">
       {/* Container for Arrows and Image */}
@@ -197,8 +203,8 @@ const ImageViewerModal = ({
         >
           <img
             ref={imageRef}
-            src={currentImage.image}
-            alt={currentImage.title}
+            src={imgSrc}
+            alt={imgAlt}
             className={`max-w-full max-h-full object-contain transition-transform duration-100 ease-out select-none ${
               isDragging ? "cursor-grabbing" : "cursor-grab"
             }`}

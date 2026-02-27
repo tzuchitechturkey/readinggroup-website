@@ -28,38 +28,42 @@ const Pagination = ({ currentPage = 1, totalPages = 1, onPageChange }) => {
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="mt-20 flex justify-center items-center gap-2">
-      {/* Page Numbers */}
-      {pageNumbers.map((pageNum, index) => (
-        <React.Fragment key={index}>
-          {pageNum === "..." ? (
-            <div className="w-6 h-6 flex items-center justify-center text-[#081945] text-base font-normal">
-              ...
-            </div>
-          ) : (
-            <button
-              onClick={() => onPageChange?.(pageNum)}
-              className={`w-6 h-6 flex items-center justify-center text-base font-normal transition-colors rounded ${
-                currentPage === pageNum
-                  ? "bg-[#285688] text-white"
-                  : "text-[#212121] hover:bg-gray-100"
-              }`}
-            >
-              {pageNum}
-            </button>
-          )}
-        </React.Fragment>
-      ))}
+    <div className="mt-20 flex justify-center items-center gap-[24px]">
+      <div className="flex items-center gap-[24px]">
+        {/* Page Numbers */}
+        <div className="flex items-center justify-between w-[171px]">
+          {pageNumbers.map((pageNum, index) => (
+            <React.Fragment key={index}>
+              {pageNum === "..." ? (
+                <div className="w-6 h-6 flex items-center justify-center text-[#212121] text-base font-normal">
+                  ...
+                </div>
+              ) : (
+                <button
+                  onClick={() => onPageChange?.(pageNum)}
+                  className={`w-6 h-6 flex items-center justify-center text-[16px] font-normal transition-colors rounded-[4px] min-w-6 ${
+                    currentPage === pageNum
+                      ? "bg-[#285688] text-white"
+                      : "text-[#212121] hover:bg-[#285688]/10"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
 
-      {/* Chevron Right Button */}
-      <button
-        onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
-        className="w-6 h-6 flex items-center justify-center ml-2 text-[#081945] hover:bg-gray-100 transition-colors rounded"
-        disabled={currentPage >= totalPages}
-        title="Next page"
-      >
-        <HiOutlineChevronRight className="w-6 h-6" />
-      </button>
+        {/* Chevron Right Button */}
+        <button
+          onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
+          className="w-6 h-6 flex items-center justify-center text-[#081945] hover:bg-[#285688]/10 transition-colors rounded"
+          disabled={currentPage >= totalPages}
+          title="Next page"
+        >
+          <HiOutlineChevronRight className="w-6 h-6" />
+        </button>
+      </div>
     </div>
   );
 };
