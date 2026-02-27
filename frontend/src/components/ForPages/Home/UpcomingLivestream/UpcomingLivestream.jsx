@@ -38,7 +38,7 @@ const UpcomingLivestream = ({ t }) => {
 
   return (
     <div className="px-4 sm:px-6 md:px-12 lg:px-[120px] w-full lg:w-[1440px] mx-auto">
-      <div className="bg-gradient-to-b from-[#1b2d58] from-[47.115%] to-[#5e82ab] w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-8 py-[20px] sm:py-[24px] md:py-[28px] lg:py-[32px]">
+      <div className="bg-[#285688] w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-8 py-[20px] sm:py-[24px] md:py-[28px] lg:py-[32px]">
         <div className=" ">
           {/* Section Header */}
           <LivestreamSectionHeader

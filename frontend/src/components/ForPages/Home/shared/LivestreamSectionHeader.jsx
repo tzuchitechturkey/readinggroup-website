@@ -24,11 +24,11 @@ const LivestreamSectionHeader = ({ title, actionText, onActionClick }) => {
           className="flex gap-[4px] items-center cursor-pointer group"
           onClick={onActionClick}
         >
-          <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.2] text-[16px] text-[#8fabca] group-hover:text-white transition-colors">
+          <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-lg text-[#FCFDFF] group-hover:text-white transition-colors">
             {actionText}
           </p>
-          <div className="flex items-center justify-center size-[23px] group-hover:translate-x-1 transition-transform">
-            <ChevronRight className="text-[#8fabca] group-hover:text-white transition-colors" />
+          <div className="flex items-center justify-center size-[23px] ">
+            <ChevronRight className="text-[#FCFDFF]  " />
           </div>
         </div>
       )}

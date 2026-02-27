@@ -3,15 +3,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
+import { UserIcon } from "lucide-react";
 
 import { GetWebSiteInfo } from "@/api/info";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import defaultLogo from "@/assets/logo.jpg";
+import defaultLogo from "@/assets/icons/newlogo.png";
 import buildNavigationItems from "@/Utility/Navbar/buildNavigationItems";
 
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import DesktopNavigation from "../DesktopNavigation/DesktopNavigation";
 import MobileSidebar from "../MobileSidebar/MobileSidebar";
+import UserIcons from "../UserIcons/UserIcons";
 
 function Usernavbar({ isHome = false }) {
   const { t, i18n } = useTranslation();
@@ -145,7 +147,8 @@ function Usernavbar({ isHome = false }) {
         <div className="flex-shrink-0 h-full flex items-center mr-[31px]">
           <Link to="/" className="flex items-center h-full">
             <img
-              src={siteInfo?.logo?.logo || defaultLogo}
+              // src={siteInfo?.logo?.logo || defaultLogo}
+              src={defaultLogo}
               alt="logo"
               className="h-[40px] w-auto object-contain"
               onError={(e) => {
@@ -172,7 +175,8 @@ function Usernavbar({ isHome = false }) {
         </div>
         {/* Desktop User Icons & Lang */}
         <div className="flex items-center justify-end h-full ml-[31px]">
-          <LanguageDropdown />
+          {/* <LanguageDropdown /> */}
+          <UserIcons />
         </div>
       </div>
 
@@ -243,7 +247,6 @@ function Usernavbar({ isHome = false }) {
           </div>
         )}
       </div>
-
       {/* Mobile Sidebar Menu */}
       <MobileSidebar
         siteInfo={siteInfo}

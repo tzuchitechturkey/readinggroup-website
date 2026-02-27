@@ -12,6 +12,7 @@ const NewClips = ({ clips, t }) => {
     // Add param to path
     navigate("/videos" + "?type=clip_video");
   };
+  console.log(clips);
   return (
     <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-[120px] w-full sm:w-full md:w-full lg:w-[1440px] mx-auto">
       {/* Section Header */}
@@ -29,11 +30,12 @@ const NewClips = ({ clips, t }) => {
           size="large"
           navigate={navigate}
           rounded={true}
+          textClassName="!justify-start gap-[4px] "
         />
 
         {/* Side Videos Column */}
         <div className="flex flex-col gap-[12px] sm:gap-[14px] md:gap-[16px] items-start justify-center w-full md:w-auto">
-          {clips.map((video) => (
+          {clips.slice(1).map((video) => (
             <VideoCard
               key={video.id}
               item={video}

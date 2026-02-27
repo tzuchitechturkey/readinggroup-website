@@ -203,13 +203,11 @@ function VideosPageContent() {
       const sortedVideos =
         passedFilters.sortBy === "newest"
           ? videos.sort(
-              (a, b) =>
-                new Date(b.happened_at) - new Date(a.happened_at),
+              (a, b) => new Date(b.happened_at) - new Date(a.happened_at),
             )
           : passedFilters.sortBy === "oldest"
             ? videos.sort(
-                (a, b) =>
-                  new Date(a.happened_at) - new Date(b.happened_at),
+                (a, b) => new Date(a.happened_at) - new Date(b.happened_at),
               )
             : passedFilters.sortBy === "most_popular"
               ? videos.sort((a, b) => (b.views || 0) - (a.views || 0))
@@ -270,7 +268,7 @@ function VideosPageContent() {
   const handleCategorySelect = (categoryId) => {
     // Ensure URL updates are allowed for user interactions
     allowUrlUpdateRef.current = true;
-    
+
     setSelectedCategories((prev) => {
       const isSelected = prev.includes(categoryId);
       if (isSelected) {
@@ -284,7 +282,12 @@ function VideosPageContent() {
 
   // Handle pagination
   const handlePageChange = (newPage) => {
-    fetchFilteredVideosWithParams(newPage, filters, appliedDateFilter, selectedCategories);
+    fetchFilteredVideosWithParams(
+      newPage,
+      filters,
+      appliedDateFilter,
+      selectedCategories,
+    );
   };
 
   // Handle dropdown toggles
@@ -309,7 +312,7 @@ function VideosPageContent() {
   const handleVideoTypeChange = (type) => {
     // Ensure URL updates are allowed for user interactions
     allowUrlUpdateRef.current = true;
-    
+
     setFilters((prev) => {
       if (type === "all") {
         return { ...prev, videoType: ["all"] };
@@ -362,7 +365,12 @@ function VideosPageContent() {
       // Ensure URL updates are allowed for user interactions
       allowUrlUpdateRef.current = true;
       // Pass the formatted date directly with current filters
-      fetchFilteredVideosWithParams(1, filters, formattedDate, selectedCategories);
+      fetchFilteredVideosWithParams(
+        1,
+        filters,
+        formattedDate,
+        selectedCategories,
+      );
     }
   };
 
@@ -370,7 +378,7 @@ function VideosPageContent() {
   const handleSortByChange = (sortValue) => {
     // Ensure URL updates are allowed for user interactions
     allowUrlUpdateRef.current = true;
-    
+
     setFilters((prev) => ({ ...prev, sortBy: sortValue }));
     closeAllDropdowns();
   };
@@ -382,7 +390,12 @@ function VideosPageContent() {
     if (shouldSearch) {
       // Ensure URL updates are allowed for user interactions
       allowUrlUpdateRef.current = true;
-      fetchFilteredVideosWithParams(1, filters, appliedDateFilter, selectedCategories);
+      fetchFilteredVideosWithParams(
+        1,
+        filters,
+        appliedDateFilter,
+        selectedCategories,
+      );
     }
   };
 
@@ -424,7 +437,12 @@ function VideosPageContent() {
     const categoriesParam = searchParams.get("categories");
     const sortParam = searchParams.get("sort");
 
-    console.log("Initial load from URL:", { typeParam, dateParam, categoriesParam, sortParam });
+    console.log("Initial load from URL:", {
+      typeParam,
+      dateParam,
+      categoriesParam,
+      sortParam,
+    });
 
     // Map type from URL format to internal format
     const typeMapping = {
@@ -463,7 +481,12 @@ function VideosPageContent() {
     // Mark as initial load complete
     initialLoadRef.current = true;
 
-    console.log("Fetching with initial filters:", newFilters, appliedDate, cats);
+    console.log(
+      "Fetching with initial filters:",
+      newFilters,
+      appliedDate,
+      cats,
+    );
     // Fetch videos directly with the new filters
     fetchFilteredVideosWithParams(1, newFilters, appliedDate, cats);
     getActiveVideoCategories();
@@ -484,7 +507,7 @@ function VideosPageContent() {
 
     const params = new URLSearchParams();
     console.log("Updating URL with filters:", filters);
-    
+
     // Add video type if not "all"
     if (filters.videoType[0] !== "all") {
       const typeMap = {
@@ -527,10 +550,20 @@ function VideosPageContent() {
       console.log("Skipping filter fetch - initial load in progress");
       return; // Don't fetch during initial load
     }
-    
-    console.log("Filter changed, fetching with:", filters, appliedDateFilter, selectedCategories);
+
+    console.log(
+      "Filter changed, fetching with:",
+      filters,
+      appliedDateFilter,
+      selectedCategories,
+    );
     // Pass filters explicitly to avoid closure issues
-    fetchFilteredVideosWithParams(1, filters, appliedDateFilter, selectedCategories);
+    fetchFilteredVideosWithParams(
+      1,
+      filters,
+      appliedDateFilter,
+      selectedCategories,
+    );
   }, [
     filters.videoType,
     filters.sortBy,
@@ -599,6 +632,7 @@ function VideosPageContent() {
                   openDropdowns={openDropdowns}
                   onToggleDropdown={toggleDropdown}
                   onSortByChange={handleSortByChange}
+                  showMostPopular={true}
                 />
 
                 {/* Active Filters Display */}

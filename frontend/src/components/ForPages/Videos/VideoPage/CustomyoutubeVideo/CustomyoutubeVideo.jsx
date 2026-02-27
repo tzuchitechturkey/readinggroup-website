@@ -19,7 +19,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const [expanded, setExpanded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
-
+  console.log("videoData:", videoData);
   const LIMIT = 4;
 
   // Fetch related videos
@@ -261,8 +261,9 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                   <p>{t("Materials")}</p>
                 </div>
                 <div className="flex-1 flex flex-col gap-4">
-                  {videoData?.materials && videoData.materials.length > 0
-                    ? videoData.materials.map((material, index) => (
+                  {videoData?.attachments_data &&
+                  videoData.attachments_data.length > 0
+                    ? videoData.attachments_data.map((material, index) => (
                         <a
                           key={index}
                           href={material.url}
@@ -270,7 +271,8 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                           rel="noopener noreferrer"
                           className="font-normal text-black underline hover:text-gray-700"
                         >
-                          {material.name}
+                          {material.file_name ||
+                            `${t("Attachment")} ${index + 1}`}
                         </a>
                       ))
                     : "-"}
