@@ -169,7 +169,9 @@ const ImageViewerModal = ({
 
   // Robustly handle if currentImage is a string or an object with an image property
   const imgSrc =
-    typeof currentImage === "string" ? currentImage : currentImage?.image;
+    typeof currentImage === "string"
+      ? currentImage
+      : currentImage?.image || currentImage?.image_url;
   const imgAlt =
     typeof currentImage === "string" ? "Tzu Chi Content" : currentImage?.title;
 
