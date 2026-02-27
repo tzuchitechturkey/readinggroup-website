@@ -38,7 +38,6 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     handleSubmit,
     // API Functions
     getCategories,
-    i18n,
     t,
   } = useCreateOrEditLearn(learn, onSectionChange);
   // Handler for learn type change (resets writer selection)
@@ -51,10 +50,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     getCategories("");
   };
   return (
-    <div
-      className="bg-white rounded-lg p-6 mx-4 overflow-y-auto"
-      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-    >
+    <div className="bg-white rounded-lg p-6 mx-4 min-h-screen pb-10 overflow-y-auto">
       {isLoading && <Loader />}
 
       {/* Breadcrumb */}

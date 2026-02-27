@@ -46,9 +46,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
 
   // ============ API Functions ============
 
-  const getCategories = async (type) => {
+  const getCategories = async (type, search) => {
     try {
-      const res = await GetLearnCategoriesByType(type);
+      const res = await GetLearnCategoriesByType(type, search);
       setCategoriesList(res?.data?.results || []);
     } catch (error) {
       console.error("Error fetching categories:", error);

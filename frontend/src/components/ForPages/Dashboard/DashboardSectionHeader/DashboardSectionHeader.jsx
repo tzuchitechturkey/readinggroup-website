@@ -18,7 +18,7 @@ function DashboardSectionHeader({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between px-2 lg:px-4 sm:px-6 py-4 border-b bg-white rounded-lg mb-3 md:mb-6">
+      <div className="flex items-center justify-between px-2 lg:px-4 sm:px-6 p-4 border-b bg-white rounded-lg mb-3 md:mb-0">
         <h2 className="text-lg font-medium text-[#1D2630]">{title}</h2>
 
         <div className="flex items-center justify-between gap-1">
@@ -44,6 +44,12 @@ function DashboardSectionHeader({
               placeholder={t(`Search ${subtitle}`)}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              // when press Enter we musr send the search request
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  getData(0);
+                }
+              }}
               className={`flex-1 px-4 py-2 border border-gray-300 ${
                 i18n?.language === "ar" ? "rounded-r-lg" : "rounded-l-lg"
               } text-sm pr-8`}

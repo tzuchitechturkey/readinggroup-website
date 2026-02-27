@@ -72,7 +72,7 @@ function BasicDetailsSection({
             errors.learn_type ? "border-red-500" : "border-gray-300"
           } ${!formData.learn_type ? "text-gray-400" : "text-black"}`}
         >
-          <option value="" hidden disabled>
+          <option value="" disabled>
             {t("Select Type")}
           </option>
           {LEARN_TYPE_OPTIONS.map((option) => (
@@ -104,7 +104,9 @@ function BasicDetailsSection({
             categoriesList={categoriesList}
             categorySearchValue={categorySearchValue}
             onSearchChange={setCategorySearchValue}
-            onSearch={() => getCategories(categorySearchValue)}
+            onSearch={() =>
+              getCategories(formData.learn_type, categorySearchValue)
+            }
             onClearSearch={handleCategoryClearSearch}
             onSelect={handleCategorySelect}
             errors={errors}

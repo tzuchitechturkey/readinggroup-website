@@ -84,10 +84,7 @@ function LearnList({ onSectionChange }) {
   const sortedData = getSortedData(learnData);
   const paginationInfo = getPaginationInfo(totalRecords);
   return (
-    <div
-      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
-      dir={i18n?.language === "ar" ? "rtl" : "ltr"}
-    >
+    <div className="bg-white rounded-lg border border-gray-200 pt-3 px-3">
       {isLoading && <Loader />}
 
       {/* Header */}
