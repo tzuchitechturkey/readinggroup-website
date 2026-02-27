@@ -49,7 +49,7 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
   const getCategories = async (type) => {
     try {
       const res = await GetLearnCategoriesByType(type);
-      setCategoriesList(res?.data);
+      setCategoriesList(res?.data?.results || []);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -138,7 +138,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
   const handleGuestSpeakersInput = (e) => {
     if (e.key === "Enter" && guestSpeakerInput.trim()) {
       e.preventDefault();
-      if (!(formData?.guest_speakers || []).includes(guestSpeakerInput.trim())) {
+      if (
+        !(formData?.guest_speakers || []).includes(guestSpeakerInput.trim())
+      ) {
         setFormData((prev) => ({
           ...prev,
           guest_speakers: [
@@ -210,7 +212,10 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         learnData.append("event_date", formattedDate);
       }
       learnData.append("event_title", formData.event_title);
-      learnData.append("guest_speakers", JSON.stringify(formData.guest_speakers));
+      learnData.append(
+        "guest_speakers",
+        JSON.stringify(formData.guest_speakers),
+      );
       learnData.append("live_stream_link", formData.live_stream_link);
     }
 
