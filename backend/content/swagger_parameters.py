@@ -97,6 +97,13 @@ learn_category_manual_parameters = [
         description="Filter by is_active status",
         type=openapi.TYPE_STRING,
     ),
+    openapi.Parameter(
+        "learn_type",
+        openapi.IN_QUERY,
+        description="Filter by Learn Type",
+        type=openapi.TYPE_ARRAY,
+        items=openapi.Items(type=openapi.TYPE_STRING),
+    ),
 ]
 
 learn_manual_parameters = [
