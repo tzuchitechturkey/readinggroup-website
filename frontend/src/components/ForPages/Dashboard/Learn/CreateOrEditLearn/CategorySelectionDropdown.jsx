@@ -24,7 +24,6 @@ function CategorySelectionDropdown({
   const selectedCategory = categoriesList?.find(
     (cat) => cat.id === selectedCategoryId,
   );
-
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -106,12 +105,17 @@ function CategorySelectionDropdown({
                 <button
                   key={category.id}
                   type="button"
-                  onClick={() => onSelect(category)}
+                  onClick={() => {
+                    console.log(category.id);
+                    onSelect(category);
+                  }}
                   className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
                 >
                   <Tag className="w-5 h-5 text-blue-600" />
                   <div className="flex-1">
-                    <div className="font-medium text-sm">{category.name}</div>
+                    <div className="font-medium text-sm">
+                      {category.name} ({category?.direction || ""})
+                    </div>
                     {category.description && (
                       <div className="text-xs text-gray-500">
                         {category.description}

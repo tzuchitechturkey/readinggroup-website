@@ -263,10 +263,8 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
           reference_code: prev.reference_code || data?.reference_code || "",
           language: prev.language || data?.default_language || "",
           duration: prev.duration || data?.duration_formatted || "",
-          thumbnail_url:
-            prev.thumbnail_url ||
-            thumbnails?.standard?.url ||
-            prev.thumbnail_url,
+          // convert to json
+          thumbnail_url: JSON.stringify(thumbnails),
           happened_at:
             prev.happened_at || data?.published_at || prev.happened_at,
         };

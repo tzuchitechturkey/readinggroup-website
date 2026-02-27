@@ -11,7 +11,7 @@ const SortByFilter = ({
   showMostPopular = false,
 }) => {
   const { t } = useTranslation();
-
+  console.log("SortByFilter rendered with filters:", filters);
   return (
     <div
       className={`min-w-[181px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4    ${openDropdowns.sort ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
@@ -26,11 +26,11 @@ const SortByFilter = ({
         </p>
         <p className="text-base font-normal text-[#285688] leading-tight">
           {t(
-            filters.sort === "all"
+            filters.sortBy === "all"
               ? "All"
-              : filters.sort === "newest"
+              : filters.sortBy === "newest"
                 ? "Newest"
-                : filters.sort === "oldest"
+                : filters.sortBy === "oldest"
                   ? "Oldest"
                   : "Most Popular",
           )}
@@ -46,32 +46,32 @@ const SortByFilter = ({
           <div className="flex flex-col gap-2.5">
             {/* Newest Option */}
             <div
-              className={`flex items-center gap-2 cursor-pointer ${filters.sort === "newest" ? "text-[#285688]" : ""}`}
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "newest" ? "text-[#285688]" : ""}`}
               onClick={() => onSortByChange("newest")}
             >
               <div className="w-6 h-6 ">
-                {filters.sort === "newest" && <Check />}
+                {filters.sortBy === "newest" && <Check />}
               </div>
               <p className="font-normal text-base  ">{t("Newest")}</p>
             </div>
             {/* Oldest Option */}
             <div
-              className={`flex items-center gap-2 cursor-pointer ${filters.sort === "oldest" ? "text-[#285688]" : ""}`}
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "oldest" ? "text-[#285688]" : ""}`}
               onClick={() => onSortByChange("oldest")}
             >
               <div className="w-6 h-6 ">
-                {filters.sort === "oldest" && <Check />}
+                {filters.sortBy === "oldest" && <Check />}
               </div>
               <p className="font-normal text-base  ">{t("Oldest")}</p>
             </div>
             {/* Most Popular Option */}
             {showMostPopular && (
               <div
-                className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "most_popular" ? "text-[#285688]" : ""}`}
+                className={`flex items-center gap-2 cursor-pointer ${filters.sortByBy === "most_popular" ? "text-[#285688]" : ""}`}
                 onClick={() => onSortByChange("most_popular")}
               >
                 <div className="w-6 h-6">
-                  {filters.sortBy === "most_popular" && <Check />}
+                  {filters.sortByBy === "most_popular" && <Check />}
                 </div>
                 <p className="font-normal text-base  ">{t("Most Popular")}</p>
               </div>

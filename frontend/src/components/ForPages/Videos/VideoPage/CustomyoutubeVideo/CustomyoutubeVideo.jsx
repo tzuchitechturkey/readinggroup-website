@@ -266,10 +266,10 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                     ? videoData.attachments_data.map((material, index) => (
                         <a
                           key={index}
-                          href={material.url}
+                          href={material.file}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-normal text-black underline hover:text-gray-700"
+                          className="font-normal cursor-pointer text-black underline hover:text-gray-700"
                         >
                           {material.file_name ||
                             `${t("Attachment")} ${index + 1}`}

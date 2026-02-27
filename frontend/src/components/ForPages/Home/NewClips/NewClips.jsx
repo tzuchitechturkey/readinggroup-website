@@ -12,8 +12,7 @@ const NewClips = ({ clips, t }) => {
     // Add param to path
     navigate("/videos" + "?type=clip_video");
   };
-  console.log(clips);
-  return (
+   return (
     <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-[120px] w-full sm:w-full md:w-full lg:w-[1440px] mx-auto">
       {/* Section Header */}
       <SectionHeader

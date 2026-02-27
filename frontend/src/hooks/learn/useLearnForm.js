@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
 
 import { processImageFile } from "@/Utility/imageConverter";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -204,7 +205,10 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     // Add event-related fields for posters
     if (formData.learn_type === "posters" && formData.is_event) {
       learnData.append("is_event", true);
-      learnData.append("event_date", formData.date);
+      if (formData.date) {
+        const formattedDate = format(new Date(formData.date), "yyyy-MM-dd");
+        learnData.append("event_date", formattedDate);
+      }
       learnData.append("event_title", formData.event_title);
       learnData.append("guest_speakers", JSON.stringify(formData.guest_speakers));
       learnData.append("live_stream_link", formData.live_stream_link);

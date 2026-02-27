@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
@@ -27,7 +27,7 @@ const LearnFilterBar = ({
   // Handle sort by filter changes - local sorting
   const handleSortByChange = (sortValue) => {
     onSortChange?.(sortValue);
-    onToggleDropdown("sort");
+    onToggleDropdown("sortBy");
   };
 
   const handleCategoryItemClick = (category) => {
@@ -36,17 +36,16 @@ const LearnFilterBar = ({
   };
 
   // Flatten categories for mobile dropdown
-  const allCategories = [...categories.cards, ...categories.posters];
 
   // Close dropdowns when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       // Check if click is outside the filter bar
       const filterBar = document.querySelector("[data-filter-bar]");
       if (filterBar && !filterBar.contains(event.target)) {
         // Close all dropdowns by setting them to false
         if (openDropdowns.date) onToggleDropdown("date");
-        if (openDropdowns.sort) onToggleDropdown("sort");
+        if (openDropdowns.sortBy) onToggleDropdown("sortBy");
         setIsMobileCategoryOpen(false);
       }
     };

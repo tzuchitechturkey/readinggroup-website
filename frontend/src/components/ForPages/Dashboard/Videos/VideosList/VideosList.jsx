@@ -137,11 +137,11 @@ function VideosList({ onSectionChange }) {
 
   // تأكيد حذف الفيديو
   const handleConfirmDelete = async () => {
-    if (!selectedVideo.id) return;
+    if (!selectedVideo?.id) return;
 
     setIsLoading(true);
     try {
-      await DeleteVideoById(selectedVideo.id);
+      await DeleteVideoById(selectedVideo?.id);
       setShowDeleteModal(false);
       setSelectedVideo(null);
       toast.success(t("Video deleted successfully"));
@@ -337,20 +337,20 @@ function VideosList({ onSectionChange }) {
         </TableHeader>
         <TableBody className="text-[11px] ">
           {getSortedData().map((video) => (
-            <TableRow key={video.id} className=" hover:bg-gray-50/60 border-b">
+            <TableRow key={video?.id} className=" hover:bg-gray-50/60 border-b">
               <TableCell className="text-[#1E1E1E] text-center font-bold text-[11px] py-4 px-4">
                 <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
-                  {video.id}
+                  {video?.id}
                 </span>
               </TableCell>
               <TableCell className="py-4">
                 <div className="flex items-center justify-center gap-3">
                   <img
-                    src={video.thumbnail_url || video.thumbnail}
-                    alt={video.title}
+                    src={video?.thumbnail_url?.default?.url || video?.thumbnail}
+                    alt={video?.title}
                     className="w-12 h-12 rounded object-cover bg-gray-100"
                     onError={(e) => {
-                      e.target.src = "/placeholder-video.png";
+                      e.target.src = "/placeholder-video?.png";
                     }}
                   />
                 </div>
@@ -358,27 +358,27 @@ function VideosList({ onSectionChange }) {
               <TableCell className="py-4">
                 <div className="flex flex-col items-center">
                   <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
-                    {video.title}
+                    {video?.title}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
-                    • {t(video.language)}
+                    • {t(video?.language)}
                   </span>
                 </div>
               </TableCell>
               <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                  {video.category?.name}
+                  {video?.category?.name}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
-                  {t(video.video_type)}
+                  {t(video?.video_type)}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {video.duration ? video.duration : 0}
+                    {video?.duration ? video?.duration : 0}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
                     {t("minutes")}
@@ -388,7 +388,7 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {video.views ? video.views.toLocaleString() : 0}
+                    {video?.views ? video?.views.toLocaleString() : 0}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
                     {t("views")}
@@ -398,7 +398,7 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {new Date(video.happened_at).toLocaleDateString("en-GB", {
+                    {new Date(video?.happened_at).toLocaleDateString("en-GB", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",

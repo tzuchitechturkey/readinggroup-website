@@ -45,13 +45,12 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
   const handleLearnTypeChange = (e) => {
     handleInputChange(e);
   };
-  console.log("Learn Form Data:", formData);
   // Handler for category search clear
   const handleCategoryClearSearch = () => {
     setCategorySearchValue("");
     getCategories("");
   };
-
+console.log(formData, "form data in create or edit learn");
   return (
     <div
       className="bg-white rounded-lg p-6 mx-4 overflow-y-auto"
@@ -95,25 +94,6 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
           handleCategorySelect={handleCategorySelect}
           categoryDropdownRef={categoryDropdownRef}
         />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Direction Field - For Cards */}
-          {formData.learn_type === "cards" && (
-            <div className="space-y-2 ">
-              <label className="block text-sm font-medium text-gray-700">
-                {t("Direction")}
-              </label>
-              <select
-                name="direction"
-                value={formData.direction || "horizontal"}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="horizontal">{t("Horizontal")}</option>
-                <option value="vertical">{t("Vertical")}</option>
-              </select>
-            </div>
-          )}
-        </div>
 
         {/* Event Section - For Posters */}
         {formData.learn_type === "posters" && (
@@ -160,14 +140,14 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
                     name="date"
                     value={formData.date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border ${errors.date ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                   {errors.date && (
                     <p className="text-red-600 text-sm">{errors.date}</p>
                   )}
                 </div>
                 {/* End Event Title */}
-                
+
                 {/* Start Event Title */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -179,7 +159,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
                     value={formData.event_title || ""}
                     onChange={handleInputChange}
                     placeholder="Enter event title"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border ${errors.event_title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                   {errors.event_title && (
                     <p className="text-red-600 text-sm">{errors.event_title}</p>
@@ -199,7 +179,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
                     onChange={(e) => setGuestSpeakerInput(e.target.value)}
                     onKeyDown={handleGuestSpeakersInput}
                     placeholder="Enter guest speaker name and press Enter"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border ${errors.guest_speakers ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                   {formData.guest_speakers &&
                     formData.guest_speakers.length > 0 && (
@@ -241,7 +221,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
                     value={formData.live_stream_link}
                     onChange={handleInputChange}
                     placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`border ${errors.live_stream_link ? "border-red-500" : " border-gray-300"} w-full px-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   />
                   {errors.live_stream_link && (
                     <p className="text-red-600 text-sm">

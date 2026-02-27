@@ -81,3 +81,4 @@ export async function GetLearnsByCategoryId(
 export async function GetLearnCategoriesByType(type) {
   return await axios.get(`/learn-categories/by-type/?type=${type}`);
 }
+ 

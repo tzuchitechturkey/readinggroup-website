@@ -178,8 +178,9 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           formData={formData}
           onBodyChange={(data) => {
             handleInputChange({
-              target: { name: "body", value: data },
+              target: { name: "description", value: data },
             });
+            // setErrors((prev) => ({ ...prev, des: "" })); // Clear error on change
           }}
           onBodyBlur={() => {
             // No need to do anything on blur, onChange already handles updates

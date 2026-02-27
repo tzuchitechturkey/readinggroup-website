@@ -44,7 +44,7 @@ function VideosPageContent() {
     previous: null,
     currentPage: 1,
     totalPages: 1,
-    limit: 8,
+    limit: 24,
   });
 
   const [openDropdowns, setOpenDropdowns] = useState({
@@ -53,87 +53,87 @@ function VideosPageContent() {
     sortBy: false,
   });
 
-  // Apply all filters and fetch videos
-  const fetchFilteredVideos = async (
-    page = 1,
-    passedFilters = filters,
-    dateFilter = null,
-  ) => {
-    try {
-      setIsLoading(true);
-      const offset = (page - 1) * pagination.limit;
+  // // Apply all filters and fetch videos
+  // const fetchFilteredVideos = async (
+  //   page = 1,
+  //   passedFilters = filters,
+  //   dateFilter = null,
+  // ) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const offset = (page - 1) * pagination.limit;
 
-      // Build filter parameters
-      const filterParams = {};
+  //     // Build filter parameters
+  //     const filterParams = {};
 
-      // Only add search if it's not empty
-      if (searchTerm && searchTerm.trim() !== "") {
-        filterParams.search = searchTerm.trim();
-      }
+  //     // Only add search if it's not empty
+  //     if (searchTerm && searchTerm.trim() !== "") {
+  //       filterParams.search = searchTerm.trim();
+  //     }
 
-      // Video type filter
-      if (
-        passedFilters.videoType.length > 0 &&
-        !passedFilters.videoType.includes("all")
-      ) {
-        // Map video types to API parameters
-        const typeMapping = {
-          full_video: () => {
-            filterParams.video_type = "full_video";
-          },
-          clips: () => {
-            filterParams.video_type = "clip_video";
-          },
-        };
+  //     // Video type filter
+  //     if (
+  //       passedFilters.videoType.length > 0 &&
+  //       !passedFilters.videoType.includes("all")
+  //     ) {
+  //       // Map video types to API parameters
+  //       const typeMapping = {
+  //         full_video: () => {
+  //           filterParams.video_type = "full_video";
+  //         },
+  //         clips: () => {
+  //           filterParams.video_type = "clip_video";
+  //         },
+  //       };
 
-        // Apply the selected type (only one type allowed)
-        const selectedType = passedFilters.videoType[0];
-        if (typeMapping[selectedType]) {
-          typeMapping[selectedType]();
-        }
-      }
+  //       // Apply the selected type (only one type allowed)
+  //       const selectedType = passedFilters.videoType[0];
+  //       if (typeMapping[selectedType]) {
+  //         typeMapping[selectedType]();
+  //       }
+  //     }
 
-      // Date filter (only if applied)
-      const activeDateFilter =
-        dateFilter !== null ? dateFilter : appliedDateFilter;
-      if (activeDateFilter) {
-        filterParams.happened_at = activeDateFilter;
-      }
+  //     // Date filter (only if applied)
+  //     const activeDateFilter =
+  //       dateFilter !== null ? dateFilter : appliedDateFilter;
+  //     if (activeDateFilter) {
+  //       filterParams.happened_at = activeDateFilter;
+  //     }
 
-      // Category filter (multiple categories as array)
-      if (selectedCategories.length > 0) {
-        filterParams.category = selectedCategories;
-      }
-      console.log("Filter parameters being sent to API:", filterParams);
-      const res = await GetVideosByFilter(
-        pagination.limit,
-        offset,
-        filterParams,
-      );
+  //     // Category filter (multiple categories as array)
+  //     if (selectedCategories.length > 0) {
+  //       filterParams.category = selectedCategories;
+  //     }
+  //     console.log("Filter parameters being sent to API:", filterParams);
+  //     const res = await GetVideosByFilter(
+  //       pagination.limit,
+  //       offset,
+  //       filterParams,
+  //     );
 
-      // Handle API response structure
-      const responseData = res.data || {};
-      let videos = responseData.results || [];
+  //     // Handle API response structure
+  //     const responseData = res.data || {};
+  //     let videos = responseData.results || [];
 
-      // Apply local sorting
-      videos = applySorting(videos);
-      setFilteredVideos(videos);
+  //     // Apply local sorting
+  //     videos = applySorting(videos);
+  //     setFilteredVideos(videos);
 
-      // Update pagination state
-      setPagination((prev) => ({
-        ...prev,
-        count: responseData.count || 0,
-        next: responseData.next || null,
-        previous: responseData.previous || null,
-        currentPage: page,
-        totalPages: Math.ceil((responseData.count || 0) / prev.limit),
-      }));
-    } catch (err) {
-      console.error("Failed to fetch filtered videos:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     // Update pagination state
+  //     setPagination((prev) => ({
+  //       ...prev,
+  //       count: responseData.count || 0,
+  //       next: responseData.next || null,
+  //       previous: responseData.previous || null,
+  //       currentPage: page,
+  //       totalPages: Math.ceil((responseData.count || 0) / prev.limit),
+  //     }));
+  //   } catch (err) {
+  //     console.error("Failed to fetch filtered videos:", err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // Helper function to fetch with explicit parameters
   const fetchFilteredVideosWithParams = async (

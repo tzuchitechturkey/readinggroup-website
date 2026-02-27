@@ -67,7 +67,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
               <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-4 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[50px]">
                 {item?.title}
               </h2>
-              <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF]">
+              <div className="mb-5 uppercase flex items-center  gap-1 text-[#FCFDFF] opacity-80">
                 <p className=""> {t("Full Livestream")} </p>|
                 <span>
                   {item?.happened_at

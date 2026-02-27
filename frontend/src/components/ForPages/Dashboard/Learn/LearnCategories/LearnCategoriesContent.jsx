@@ -30,6 +30,7 @@ function LearnCategoriesContent({ onSectionChange }) {
     name: "",
     description: "",
     is_active: false,
+    direction: "vertical",
     learn_type: "",
     post_count: 0,
   });
@@ -136,6 +137,8 @@ function LearnCategoriesContent({ onSectionChange }) {
           originalCategories={originalCategories}
           setOriginalCategories={setOriginalCategories}
           hasChanges={hasChanges}
+          setErrorFn={setErrorFn}
+          getCategoriesData={getCategoriesData}
           setHasChanges={setHasChanges}
         />
         {/* End Table */}

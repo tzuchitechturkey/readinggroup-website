@@ -3,11 +3,7 @@ import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import CreateorEditCategoryModal from "@/components/ForPages/Dashboard/CreateorEditCategoryModal/CreateorEditCategoryModal";
-import {
-  AddLearnCategory,
-  EditLearnCategoryById,
-  GetLearnCategoryById,
-} from "@/api/learn";
+import { AddLearnCategory, EditLearnCategoryById } from "@/api/learn";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function CreateorEditLearnCategory({
@@ -88,6 +84,12 @@ function CreateorEditLearnCategory({
     if (!form.learn_type || !form.learn_type.trim()) {
       newErrors.learn_type = t("Learn Type is required");
     }
+    if (
+      (!form.direction || !form.direction.trim()) &&
+      form.learn_type === "cards"
+    ) {
+      newErrors.direction = t("Direction is required");
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -166,6 +168,19 @@ function CreateorEditLearnCategory({
         { value: "posters", label: t("Poster") },
       ],
       required: true,
+    },
+    // if form.type === "cards" show direction field, else hide it
+    {
+      ...(form.learn_type === "cards" && {
+        name: "direction",
+        label: t("Direction"),
+        type: "select",
+        options: [
+          { value: "vertical", label: t("Vertical") },
+          { value: "horizontal", label: t("Horizontal") },
+        ],
+        required: form.learn_type === "cards",
+      }),
     },
   ];
   const toggleFields = [

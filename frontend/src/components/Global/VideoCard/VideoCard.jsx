@@ -12,10 +12,8 @@ const VideoCard = ({
     switch (size) {
       case "large":
         return {
-          container:
-            "w-full sm:w-[95%] md:w-[90%]  h-auto sm:h-[200px]   md:h-[300px] lg:h-[450px]",
           image:
-            "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[450px] w-full sm:w-[95%] md:w-[90%] lg:w-full",
+            "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[490px] w-full sm:w-[95%] md:w-[90%] lg:w-full",
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
           categoryText:
             "text-[14px] sm:text-[15px] md:text-[16px] lg:text-[18px]",
@@ -23,47 +21,29 @@ const VideoCard = ({
             "text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]",
           gap: "gap-[8px] sm:gap-[10px] md:gap-[12px] lg:gap-[12px]",
         };
-      case "medium":
-        return {
-          container:
-            "w-full sm:w-[48%] md:w-[45%] lg:w-[554px] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
-          image:
-            "h-[150px] sm:h-[120px] md:h-[160px] lg:h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[554px]",
-          titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
-          categoryText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
-          durationText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]",
-          gap: "gap-[6px] sm:gap-[8px] md:gap-[10px] lg:gap-[12px]",
-        };
+
       case "small":
         return {
-          container: "w-full sm:w-[48%] md:w-[45%] lg:w-[290px]  h-[199px]",
-          image: "h-[199px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px]",
+          image: "h-[215px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px] ",
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
           durationText:
             "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]",
           gap: "gap-[6px] sm:gap-[8px] md:gap-[10px] lg:gap-[12px]",
-        };
-      default:
-        return {
-          container:
-            "w-full sm:w-[48%] md:w-[45%] h-auto sm:h-[120px] md:h-[160px] lg:h-[199px]",
-          image:
-            "h-[150px] sm:h-[120px] md:h-[160px]  lg:h-[199px] w-full  sm:w-[48%] md:w-[45%] ",
-          titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
-          categoryText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
-          durationText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]",
-          gap: "gap-[8px] sm:gap-[10px] md:gap-[12px] lg:gap-[12px]",
         };
     }
   };
 
   const { image, categoryText, durationText, gap } = getSizeClasses();
+
+  const getThumbnailUrl = (thumbnails, size) => {
+    const sizeMap = {
+      small: "medium",
+      large: "maxres", // 1280×720 أو 'standard' للـ 640×480
+    };
+    return thumbnails?.[sizeMap[size]]?.url;
+  };
 
   return (
     <div
@@ -71,12 +51,12 @@ const VideoCard = ({
       className={`flex flex-col gap-[3px] sm:gap-[4px] md:gap-[4px] lg:gap-[4px] items-start w-full ${rounded ? "rounded-xl" : ""}`}
     >
       <div
-        className={`${image} ${rounded ? "rounded-xl" : ""} relative shrink-0 overflow-hidden cursor-pointer group`}
+        className={`${image} ${rounded ? "rounded-xl" : ""} relative  shrink-0 overflow-hidden cursor-pointer group`}
       >
         <img
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
+          className={` w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105`}
           alt={item?.title}
-          src={item?.thumbnail || item?.thumbnail_url}
+          src={getThumbnailUrl(item?.thumbnail_url, size)}
         />
 
         {/* Play Button Overlay */}
@@ -98,7 +78,7 @@ const VideoCard = ({
         className={`flex ${gap} items-center w-full flex justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
       >
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal   ${categoryText} text-black uppercase`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal   ${categoryText} text-[#081945] uppercase`}
         >
           {item?.category?.name}
         </p>
@@ -113,7 +93,12 @@ const VideoCard = ({
       {showDate && (
         <div className="mx-1 -mt-1 px-4 lg:px-0">
           <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] text-[#285688]">
-            {item?.happened_at}
+            {item?.happened_at &&
+              new Date(item.happened_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
           </p>
         </div>
       )}

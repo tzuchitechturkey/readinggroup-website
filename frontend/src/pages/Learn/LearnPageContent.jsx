@@ -29,11 +29,11 @@ const LearnPageContent = () => {
   // Date Filter State
   const [filters, setFilters] = useState({
     date: { month: null, year: new Date().getFullYear() },
-    sort: "newest",
+    sortBy: "newest",
   });
   const [openDropdowns, setOpenDropdowns] = useState({
     date: false,
-    sort: false,
+    sortBy: false,
   });
 
   const getCategories = async () => {
@@ -111,7 +111,7 @@ const LearnPageContent = () => {
 
   // Handle Sort Changes - Local Sorting
   const handleSortChange = (sortValue) => {
-    setFilters((prev) => ({ ...prev, sort: sortValue }));
+    setFilters((prev) => ({ ...prev, sortBy: sortValue }));
     // Local sorting will be applied to items based on sortValue
   };
 
@@ -137,7 +137,7 @@ const LearnPageContent = () => {
   const handleApplyFilters = (newFilters) => {
     setFilters({
       date: newFilters.date,
-      sort: newFilters.sortBy,
+      sortBy: newFilters.sortBy,
     });
 
     let happenedAt = null;
@@ -186,7 +186,7 @@ const LearnPageContent = () => {
     if (!items || items?.length === 0) return items;
     const itemsCopy = [...items];
 
-    switch (filters.sort) {
+    switch (filters.sortBy) {
       case "newest":
         return itemsCopy.sort((a, b) => {
           const dateA = new Date(a.created_at || a.published_at || 0);
@@ -245,14 +245,14 @@ const LearnPageContent = () => {
             {/* Grid switching between Horizontal and Vertical layouts */}
             <div
               className={`grid ${
-                sortedAndFilteredItems[0]?.direction === "vertical"
+                sortedAndFilteredItems[0]?.category?.direction === "vertical"
                   ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
                   : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
               }`}
               style={{ columnGap: "12px", rowGap: "16px" }}
             >
               {sortedAndFilteredItems.map((item, index) =>
-                item.direction === "vertical" ? (
+                item?.category?.direction === "vertical" ? (
                   <VerticalCard
                     key={item.id}
                     card={item}
@@ -287,7 +287,7 @@ const LearnPageContent = () => {
         filters={{
           videoType: ["all"],
           date: filters.date,
-          sortBy: filters.sort,
+          sortBy: filters.sortBy,
           categories: [],
         }}
         onApplyFilters={handleApplyFilters}

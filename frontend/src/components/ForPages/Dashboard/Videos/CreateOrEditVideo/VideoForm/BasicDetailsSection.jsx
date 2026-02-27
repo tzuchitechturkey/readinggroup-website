@@ -53,8 +53,10 @@ export const BasicDetailsSection = ({
           }`}
         >
           <span>
-            {categoriesList?.find((cat) => cat?.id === formData?.category?.id)
-              ?.name || t("Select category")}
+            {categoriesList?.find(
+              (cat) =>
+                cat?.id === (formData?.category?.id || formData?.category),
+            )?.name || t("Select category")}
           </span>
           <span className="text-gray-400">▼</span>
         </button>

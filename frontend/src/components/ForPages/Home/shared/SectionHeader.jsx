@@ -38,11 +38,11 @@ const SectionHeader = ({
           className="flex gap-[2px] sm:gap-[3px] md:gap-[4px] items-center cursor-pointer group shrink-0"
           onClick={onActionClick}
         >
-          <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.2] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] text-[#1b2d58] group-hover:text-[#2563eb] transition-colors">
+          <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] text-[#285688] group-hover:text-[#2563eb] transition-colors">
             {actionText}
           </p>
-          <div className="flex items-center justify-center size-[18px] sm:size-[20px] md:size-[22px] lg:size-[23px] group-hover:translate-x-1 transition-transform">
-            <ChevronRight size={"100%"} />
+          <div className="flex items-center justify-center size-[18px] sm:size-[20px] md:size-[22px]  group-hover:translate-x-1 transition-transform">
+            <ChevronRight size={"80%"} />
           </div>
         </div>
       )}

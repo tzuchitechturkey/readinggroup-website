@@ -5,6 +5,7 @@ import { Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 
 import { EditPostCategoryById, SortPostCategories } from "@/api/posts";
 import DraggableTable from "@/components/ForPages/Dashboard/DraggableTable/DraggableTable";
+import { EditLearnCategoryById } from "@/api/learn";
 
 function LearnCategoriesTable({
   t,
@@ -39,6 +40,7 @@ function LearnCategoriesTable({
       description: cat.description || "",
       is_active: cat.is_active !== undefined ? cat.is_active : false,
       learn_type: cat.learn_type || "",
+      direction: cat.direction || "",
       post_count: cat.post_count !== undefined ? cat.post_count : 0,
       id: cat.id,
     };
@@ -79,6 +81,11 @@ function LearnCategoriesTable({
       render: (item) => item.learn_type || "-",
     },
     {
+      title: "Direction",
+      key: "direction",
+      render: (item) => item.direction || "-",
+    },
+    {
       title: "Status",
       key: "is_active",
       render: (item) => (
@@ -93,7 +100,7 @@ function LearnCategoriesTable({
               return;
             }
             try {
-              await EditPostCategoryById(item.id, {
+              await EditLearnCategoryById(item.id, {
                 ...item,
                 is_active: !item.is_active,
               });
