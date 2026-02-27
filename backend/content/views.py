@@ -17,7 +17,6 @@ from .swagger_parameters import (
     video_category_manual_parameters,
     learn_category_manual_parameters,
     by_type_video_manual_parameters,
-    by_type_learn_manual_parameters,
     event_manual_parameters,
     team_member_manual_parameters,
     content_manual_parameters,
@@ -493,12 +492,19 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         params = self.request.query_params
         is_active = self.request.query_params.get("is_active")
+        learn_type = self.request.query_params.get("learn_type")
 
         if params.get("search"):
             return queryset.order_by("-created_at")
 
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
+
+        if learn_type:
+            values = [item.strip() for item in learn_type.split(",") if item.strip()]
+            if values:
+                queryset = queryset.filter(learn_type__in=values)
+
         try:
             queryset = queryset.annotate(learn_count=Count("learn"))
         except Exception:
