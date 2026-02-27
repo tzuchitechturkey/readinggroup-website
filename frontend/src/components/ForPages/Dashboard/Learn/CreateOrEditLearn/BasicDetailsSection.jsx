@@ -72,7 +72,7 @@ function BasicDetailsSection({
             errors.learn_type ? "border-red-500" : "border-gray-300"
           } ${!formData.learn_type ? "text-gray-400" : "text-black"}`}
         >
-          <option value="" disabled>
+          <option value="" hidden>
             {t("Select Type")}
           </option>
           {LEARN_TYPE_OPTIONS.map((option) => (
