@@ -8,9 +8,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from datetime import date
 from drf_yasg.utils import swagger_auto_schema
-from collections import defaultdict
 from django.utils import timezone
-from .enums import LearnType, VideoType
+from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
 from .swagger_parameters import (
     video_manual_parameters,
@@ -389,9 +388,7 @@ class LearnViewSet(viewsets.ModelViewSet):
     @swagger_auto_schema(
         operation_summary="List learns by type",
         operation_description="Return learns filtered by type.",
-        manual_parameters=by_type_learn_manual_parameters,
     )
-    # used for home page
     @action(
         detail=False,
         methods=("get",),
@@ -402,7 +399,9 @@ class LearnViewSet(viewsets.ModelViewSet):
         """
         Return:
         - most viewed 1 posters (only upcoming events)
-        - last 3 cards
+        - last 3 cards:
+            * 2 vertical
+            * 1 horizontal
         """
 
         now = timezone.localtime()
@@ -411,12 +410,17 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         def base_queryset(learn_type_value):
             return Learn.objects.filter(
-                learn_type=learn_type_value, category__is_active=True
+                category__learn_type=learn_type_value,
+                category__is_active=True,
             )
 
         posters_qs = (
             base_queryset(LearnType.POSTERS)
-            .filter(is_event=True, event_date__isnull=False, event_time__isnull=False)
+            .filter(
+                is_event=True,
+                event_date__isnull=False,
+                event_time__isnull=False,
+            )
             .filter(
                 Q(event_date__gt=today)
                 | Q(event_date=today, event_time__gte=current_time)
@@ -424,7 +428,29 @@ class LearnViewSet(viewsets.ModelViewSet):
             .order_by("-views")[:1]
         )
 
-        cards_qs = base_queryset(LearnType.CARDS).order_by("-created_at")[:3]
+        # Last 2 vertical
+        vertical_cards = list(
+            base_queryset(LearnType.CARDS)
+            .filter(category__direction=LearnCategoryDirection.VERTICAL)
+            .order_by("-created_at")[:2]
+        )
+
+        # Last 1 horizontal
+        horizontal_cards = list(
+            base_queryset(LearnType.CARDS)
+            .filter(category__direction=LearnCategoryDirection.HORIZONTAL)
+            .order_by("-created_at")[:1]
+        )
+
+        # Combine
+        cards_combined = vertical_cards + horizontal_cards
+
+        # Sort again by newest (optional but clean)
+        cards_qs = sorted(
+            cards_combined,
+            key=lambda x: x.created_at,
+            reverse=True,
+        )
 
         payload = {
             "posters": LearnSerializer(
