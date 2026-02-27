@@ -11,7 +11,7 @@ const VerticalCard = ({ card, onClick }) => {
         onClick={onClick}
       >
         <img
-          src={card.image}
+          src={card.image || card.image_url}
           alt={card.title || "Tzu Chi Content"}
           className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
         />
