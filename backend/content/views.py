@@ -500,6 +500,17 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
 
+        created_at = params.get("created_at")
+        if created_at:
+            try:
+                year, month = created_at.split("-")
+                queryset = queryset.filter(
+                    created_at__year=int(year),
+                    created_at__month=int(month),
+                )
+            except Exception:
+                pass
+
         if learn_type:
             values = [item.strip() for item in learn_type.split(",") if item.strip()]
             if values:
