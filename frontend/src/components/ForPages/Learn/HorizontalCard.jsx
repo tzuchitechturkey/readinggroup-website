@@ -24,7 +24,13 @@ const HorizontalCard = ({ card, onClick }) => {
       </div>
       <div className="flex flex-col gap-1">
         <span className="text-[14px] md:text-[16px] text-[#285688] font-normal leading-[1.2] md:leading-[1.5]">
-          {card.date || card.happened_at || "—"}
+          {card?.created_at
+            ? new Date(card.created_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              })
+            : "—"}{" "}
         </span>
       </div>
     </div>

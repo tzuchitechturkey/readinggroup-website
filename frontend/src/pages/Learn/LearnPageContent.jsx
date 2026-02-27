@@ -18,6 +18,7 @@ const LearnPageContent = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   // Image Viewer State
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -25,6 +26,13 @@ const LearnPageContent = () => {
   const [categories, setCategories] = useState({
     cards: [],
     posters: [],
+  });
+  // Pagination State
+  const [paginationData, setPaginationData] = useState({
+    page: 0,
+    limit: 24,
+    totalCount: 0,
+    hasMoreItems: false,
   });
   // Date Filter State
   const [filters, setFilters] = useState({
@@ -61,18 +69,62 @@ const LearnPageContent = () => {
 
   const handleCategoryClick = (category) => {
     setActiveCategory(category);
-    handleGetItemsByCategoryId(category?.id, null);
+    setItems([]);
+    setPaginationData({
+      page: 0,
+      limit: 24,
+      totalCount: 0,
+      hasMoreItems: false,
+    });
+    handleGetItemsByCategoryId(category?.id, null, 0);
   };
-  const handleGetItemsByCategoryId = async (categoryId, happenedAt = null) => {
-    setIsLoading(true);
+
+  const handleGetItemsByCategoryId = async (
+    categoryId,
+    happenedAt = null,
+    offset = 0,
+    appendMode = false,
+  ) => {
+    if (!appendMode) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     try {
       const params = { happened_at: happenedAt };
-      const res = await GetLearnsByCategoryId(categoryId, 100, 0, params);
-      setItems(res.data.results || []);
+      const res = await GetLearnsByCategoryId(
+        categoryId,
+        24,
+        offset,
+        params,
+      );
+      const newItems = res.data.results || [];
+      const totalCount = res.data.count || 0;
+      const hasMoreItems =
+        offset + 24 < totalCount;
+
+      if (appendMode) {
+        // Append new items when loading more
+        setItems((prev) => [...prev, ...newItems]);
+      } else {
+        // Replace items for new filter
+        setItems(newItems);
+      }
+
+      setPaginationData({
+        page: Math.floor(offset / 24),
+        limit: 24,
+        totalCount,
+        hasMoreItems,
+      });
     } catch (err) {
       setErrorFn(err, t);
     } finally {
-      setIsLoading(false);
+      if (!appendMode) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   };
 
@@ -105,7 +157,14 @@ const LearnPageContent = () => {
       const month = String(filters.date.month).padStart(2, "0");
       happenedAt = `${filters.date.year}-${month}`;
     }
-    handleGetItemsByCategoryId(activeCategory?.id, happenedAt);
+    setItems([]);
+    setPaginationData({
+      page: 0,
+      limit: 24,
+      totalCount: 0,
+      hasMoreItems: false,
+    });
+    handleGetItemsByCategoryId(activeCategory?.id, happenedAt, 0);
     setOpenDropdowns((prev) => ({ ...prev, date: false }));
   };
 
@@ -147,7 +206,14 @@ const LearnPageContent = () => {
     } else if (newFilters.date.year) {
       happenedAt = `${newFilters.date.year}`;
     }
-    handleGetItemsByCategoryId(activeCategory?.id, happenedAt);
+    setItems([]);
+    setPaginationData({
+      page: 0,
+      limit: 24,
+      totalCount: 0,
+      hasMoreItems: false,
+    });
+    handleGetItemsByCategoryId(activeCategory?.id, happenedAt, 0);
   };
 
   const handleResetFilters = () => {
@@ -156,7 +222,14 @@ const LearnPageContent = () => {
       sort: "newest",
     };
     setFilters(initialFilters);
-    handleGetItemsByCategoryId(activeCategory?.id, null);
+    setItems([]);
+    setPaginationData({
+      page: 0,
+      limit: 24,
+      totalCount: 0,
+      hasMoreItems: false,
+    });
+    handleGetItemsByCategoryId(activeCategory?.id, null, 0);
   };
 
   // Image Viewer Handlers
@@ -169,10 +242,37 @@ const LearnPageContent = () => {
     setIsViewerOpen(false);
   };
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === sortedAndFilteredItems.length - 1 ? 0 : prev + 1,
-    );
+  const nextImage = async () => {
+    const newIndex =
+      currentImageIndex === sortedAndFilteredItems.length - 1
+        ? 0
+        : currentImageIndex + 1;
+    setCurrentImageIndex(newIndex);
+
+    // Check if we need to load more items (when we're within 5 items of the end and there are more items to load)
+    const itemsRemainingThreshold = 5;
+    const itemsRemaining =
+      sortedAndFilteredItems.length - newIndex;
+
+    if (
+      itemsRemaining <= itemsRemainingThreshold &&
+      paginationData.hasMoreItems &&
+      !isLoadingMore
+    ) {
+      // Load next page
+      const nextOffset = (paginationData.page + 1) * paginationData.limit;
+      let happenedAt = null;
+      if (filters.date.month && filters.date.year) {
+        const month = String(filters.date.month).padStart(2, "0");
+        happenedAt = `${filters.date.year}-${month}`;
+      }
+      await handleGetItemsByCategoryId(
+        activeCategory?.id,
+        happenedAt,
+        nextOffset,
+        true, // append mode
+      );
+    }
   };
 
   const prevImage = () => {
@@ -271,8 +371,22 @@ const LearnPageContent = () => {
             {/* Start Pagination */}
             {sortedAndFilteredItems.length > 0 && (
               <Pagination
-                currentPage={1}
-                totalPages={Math.ceil(sortedAndFilteredItems.length / 10) || 1}
+                currentPage={paginationData.page + 1}
+                totalPages={Math.ceil(paginationData.totalCount / 24) || 1}
+                onPageChange={(newPage) => {
+                  const newOffset = (newPage - 1) * 24;
+                  let happenedAt = null;
+                  if (filters.date.month && filters.date.year) {
+                    const month = String(filters.date.month).padStart(2, "0");
+                    happenedAt = `${filters.date.year}-${month}`;
+                  }
+                  handleGetItemsByCategoryId(
+                    activeCategory?.id,
+                    happenedAt,
+                    newOffset,
+                    false,
+                  );
+                }}
               />
             )}
             {/* End Pagination */}

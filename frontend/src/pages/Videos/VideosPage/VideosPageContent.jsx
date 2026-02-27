@@ -615,7 +615,7 @@ function VideosPageContent() {
 
             {/* Show message if no videos found */}
             {!isLoading && filteredVideos.length === 0 && (
-              <div className="text-center py-28">
+              <div className="text-center py-40">
                 <p className="text-[#9FB3E1] text-3xl font-bold">
                   {t("No results found.")}
                 </p>
