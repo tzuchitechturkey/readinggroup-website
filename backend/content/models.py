@@ -7,11 +7,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from .enums import (
+    VideoType,
+    LearnType,
+    LearnCategoryDirection,
     ContentStatus,
     EventStatus,
-    LearnType,
     ReportType,
-    VideoType,
     LanguageChoices,
 )
 
@@ -147,7 +148,9 @@ class LearnCategory(TimestampedModel):
         max_length=100, help_text="Category name in the specified language"
     )
     description = models.TextField(blank=True)
-    direction = models.CharField(max_length=255, blank=True)
+    direction = models.CharField(
+        max_length=255, blank=True, choices=LearnCategoryDirection.choices
+    )
     is_active = models.BooleanField(default=True)
     learn_type = models.CharField(
         max_length=100, blank=True, choices=LearnType.choices, default=LearnType.CARDS

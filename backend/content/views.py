@@ -196,6 +196,7 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         return Response(response_payload, status=status.HTTP_200_OK)
 
+    # used for home page
     @swagger_auto_schema(
         operation_summary="Videos by type",
         operation_description="Return last 1 FULL_VIDEO and last 3 CLIP_VIDEO ordered newest → oldest.",
@@ -237,6 +238,7 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         return Response(payload, status=status.HTTP_200_OK)
 
+    # used for video page
     @swagger_auto_schema(
         operation_summary="Top viewed videos",
         operation_description="Return videos ordered by views desc with pagination support.",
@@ -357,11 +359,7 @@ class LearnViewSet(viewsets.ModelViewSet):
         params = self.request.query_params
 
         if params.get("search"):
-            return queryset.order_by("-created_at")
-
-        created_at = params.get("created_at")
-        if created_at:
-            queryset = queryset.filter(created_at__date=created_at)
+            return queryset.order_by("happened_at")
 
         happened_at = params.get("happened_at")
         if happened_at:
@@ -373,6 +371,12 @@ class LearnViewSet(viewsets.ModelViewSet):
                 )
             except Exception:
                 pass
+
+        learn_type = params.get("learn_type")
+        if learn_type:
+            values = [item.strip() for item in learn_type.split(",") if item.strip()]
+            if values:
+                queryset = queryset.filter(learn_type__in=values)
 
         category = params.get("category")
         if category:
@@ -387,6 +391,7 @@ class LearnViewSet(viewsets.ModelViewSet):
         operation_description="Return learns filtered by type.",
         manual_parameters=by_type_learn_manual_parameters,
     )
+    # used for home page
     @action(
         detail=False,
         methods=("get",),
@@ -462,41 +467,18 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         params = self.request.query_params
         is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
 
         if params.get("search"):
             return queryset.order_by("-created_at")
 
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
         try:
             queryset = queryset.annotate(learn_count=Count("learn"))
         except Exception:
             pass
 
         return queryset
-
-    @swagger_auto_schema(
-        operation_summary="Get learns by type",
-        operation_description="Return learn categories filtered by LearnCategory.learn_type. Optional ordering parameter can be applied.",
-        manual_parameters=by_type_learn_manual_parameters,
-    )
-    @action(detail=False, methods=["get"], url_path="by-type")
-    def by_type(self, request):
-        learn_type = request.query_params.get("type")
-
-        if not learn_type:
-            return Response(
-                {"detail": "type parameter is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        queryset = self.get_queryset().filter(learn_type=learn_type)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="Get learns by category",
@@ -507,12 +489,8 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         """
         Return learn objects belonging to this LearnCategory with pagination.
         """
-
         category = self.get_object()
-
         learns = Learn.objects.filter(category=category).select_related("category")
-
-        # ordering من URL
         ordering = request.query_params.get("ordering")
         if ordering:
             learns = learns.order_by(ordering)
@@ -524,50 +502,6 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
         serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_summary="Get learns by type",
-        operation_description="Return learns filtered by LearnCategory.learn_type. Optional ordering parameter can be applied.",
-        manual_parameters=by_type_learn_manual_parameters,
-    )
-    @action(detail=False, methods=["get"], url_path="grouped-by-type")
-    def grouped_by_type(self, request):
-        """
-        Return EVENT learns grouped by LearnCategory.learn_type
-        """
-
-        learn_type_filter = request.query_params.get("learn_type")
-
-        learns = Learn.objects.select_related("category").filter(is_event=True)
-
-        if learn_type_filter:
-            learns = learns.filter(category__learn_type=learn_type_filter)
-
-        ordering = request.query_params.get("ordering")
-        if ordering:
-            learns = learns.order_by(ordering)
-
-        grouped = defaultdict(list)
-
-        for learn in learns:
-            key = (
-                learn.category.learn_type
-                if learn.category and learn.category.learn_type
-                else "unknown"
-            )
-            grouped[key].append(learn)
-
-        result = {}
-
-        for key, items in grouped.items():
-            serializer = LearnSerializer(
-                items,
-                many=True,
-                context={"request": request},
-            )
-            result[key] = serializer.data
-
-        return Response(result)
 
 
 class ContentViewSet(viewsets.ModelViewSet):

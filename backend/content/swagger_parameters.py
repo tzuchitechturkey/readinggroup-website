@@ -97,12 +97,6 @@ learn_category_manual_parameters = [
         description="Filter by is_active status",
         type=openapi.TYPE_STRING,
     ),
-    openapi.Parameter(
-        "language",
-        openapi.IN_QUERY,
-        description="Filter by language",
-        type=openapi.TYPE_STRING,
-    ),
 ]
 
 learn_manual_parameters = [
@@ -110,12 +104,6 @@ learn_manual_parameters = [
         "search",
         openapi.IN_QUERY,
         description="Search term for filtering learn items by title or subtitle",
-        type=openapi.TYPE_STRING,
-    ),
-    openapi.Parameter(
-        "created_at",
-        openapi.IN_QUERY,
-        description="Filter by created date",
         type=openapi.TYPE_STRING,
     ),
     openapi.Parameter(
