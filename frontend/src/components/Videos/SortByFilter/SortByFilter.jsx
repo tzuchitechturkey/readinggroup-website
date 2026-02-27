@@ -8,10 +8,9 @@ const SortByFilter = ({
   openDropdowns,
   onToggleDropdown,
   onSortByChange,
-  showMostPopular = false,
+  showMostPopular = true,
 }) => {
   const { t } = useTranslation();
-  console.log("SortByFilter rendered with filters:", filters);
   return (
     <div
       className={`min-w-[181px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4    ${openDropdowns.sort ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
