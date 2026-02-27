@@ -475,7 +475,7 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     queryset = LearnCategory.objects.all()
     serializer_class = LearnCategorySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
+    search_fields = ("name",)
     ordering_fields = ("order", "created_at")
     queryset = LearnCategory.objects.all().order_by("order", "-created_at")
 

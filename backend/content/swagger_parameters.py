@@ -142,16 +142,6 @@ learn_manual_parameters = [
     ),
 ]
 
-by_type_learn_manual_parameters = [
-    openapi.Parameter(
-        "learn_type",
-        openapi.IN_QUERY,
-        description="Filter by Learn Type",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-]
-
 # ========================================== learn swagger parameters end ============================================
 
 event_manual_parameters = [
