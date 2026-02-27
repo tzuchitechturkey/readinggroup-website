@@ -1,6 +1,27 @@
 from django.db import models
 
 
+# ======================================================= Video Model Start =====================================================
+class VideoType(models.TextChoices):
+    CLIP_VIDEO = "clip_video", "Clip Video"
+    FULL_VIDEO = "full_video", "Full Video"
+
+
+# ======================================================= Video Model End ========================================================
+# =======================================================  Learn Model Start =====================================================
+class LearnType(models.TextChoices):
+    CARDS = "cards", "Cards"
+    POSTERS = "posters", "Posters"
+
+
+# =======================================================  Learn Model End ========================================================
+
+
+class LearnCategoryDirection(models.TextChoices):
+    HORIZONTAL = "horizontal", "Horizontal"
+    VERTICAL = "vertical", "Vertical"
+
+
 # ======================================================= Content Model Start =======================================================
 class ContentStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
@@ -9,15 +30,8 @@ class ContentStatus(models.TextChoices):
 
 
 # ======================================================= Content Model End =======================================================
-# ======================================================= Video Model Start =======================================================
 
 
-class VideoType(models.TextChoices):
-    CLIP_VIDEO = "clip_video", "Clip Video"
-    FULL_VIDEO = "full_video", "Full Video"
-
-
-# ======================================================= Video Model End =======================================================
 # ======================================================= Event Model Start =======================================================
 class ReportType(models.TextChoices):
     VIDEOS = "videos", "Videos"
@@ -43,7 +57,3 @@ class LanguageChoices(models.TextChoices):
 
 
 # ======================================================= Language Choices End ===================================================
-# =======================================================  Learn Model Start =====================================================
-class LearnType(models.TextChoices):
-    CARDS = "cards", "Cards"
-    POSTERS = "posters", "Posters"

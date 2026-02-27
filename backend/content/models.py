@@ -7,11 +7,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from .enums import (
+    VideoType,
+    LearnType,
+    LearnCategoryDirection,
     ContentStatus,
     EventStatus,
-    LearnType,
     ReportType,
-    VideoType,
     LanguageChoices,
 )
 
@@ -43,7 +44,7 @@ class Video(TimestampedModel):
     language = models.CharField(max_length=50)
     views = models.PositiveIntegerField(default=0)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
+    thumbnail_url = models.JSONField(default=list, blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
@@ -147,7 +148,9 @@ class LearnCategory(TimestampedModel):
         max_length=100, help_text="Category name in the specified language"
     )
     description = models.TextField(blank=True)
-    direction = models.CharField(max_length=255, blank=True)
+    direction = models.CharField(
+        max_length=255, blank=True, choices=LearnCategoryDirection.choices
+    )
     is_active = models.BooleanField(default=True)
     learn_type = models.CharField(
         max_length=100, blank=True, choices=LearnType.choices, default=LearnType.CARDS
