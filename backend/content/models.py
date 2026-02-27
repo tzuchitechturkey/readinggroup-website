@@ -44,7 +44,7 @@ class Video(TimestampedModel):
     language = models.CharField(max_length=50)
     views = models.PositiveIntegerField(default=0)
     thumbnail = models.ImageField(upload_to="videos/thumbnails/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
+    thumbnail_url = models.JSONField(default=list, blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     is_new = models.BooleanField(default=False)
     reference_code = models.CharField(max_length=32, blank=True)
