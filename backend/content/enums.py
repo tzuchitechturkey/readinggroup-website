@@ -5,47 +5,19 @@ from django.db import models
 class VideoType(models.TextChoices):
     CLIP_VIDEO = "clip_video", "Clip Video"
     FULL_VIDEO = "full_video", "Full Video"
-
-
 # ======================================================= Video Model End ========================================================
 # =======================================================  Learn Model Start =====================================================
 class LearnType(models.TextChoices):
     CARDS = "cards", "Cards"
     POSTERS = "posters", "Posters"
-
-
+    
 # =======================================================  Learn Model End ========================================================
-
-
+# =======================================================  LearnCategory Model Start ========================================================
 class LearnCategoryDirection(models.TextChoices):
     HORIZONTAL = "horizontal", "Horizontal"
     VERTICAL = "vertical", "Vertical"
-
-
-# ======================================================= Content Model Start =======================================================
-class ContentStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
-
-
-# ======================================================= Content Model End =======================================================
-
-
-# ======================================================= Event Model Start =======================================================
-class ReportType(models.TextChoices):
-    VIDEOS = "videos", "Videos"
-    REPORTS = "reports", "Reports"
-    NEWS = "news", "News"
-
-
-class EventStatus(models.TextChoices):
-    DRAFT = "draft", "Draft"
-    PUBLISHED = "published", "Published"
-    ARCHIVED = "archived", "Archived"
-
-
-# ======================================================= Event Model End =======================================================
+    
+# =======================================================  LearnCategory Model End ========================================================
 # ======================================================= Language Choices Start ================================================
 class LanguageChoices(models.TextChoices):
     ENGLISH = "en", "English"
@@ -54,6 +26,4 @@ class LanguageChoices(models.TextChoices):
     CHINESE = "ch", "Chinese"
     JAPANESE = "jp", "Japanese"
     CHINESE_SIMPLIFIED = "chsi", "Chinese Simplified"
-
-
 # ======================================================= Language Choices End ===================================================

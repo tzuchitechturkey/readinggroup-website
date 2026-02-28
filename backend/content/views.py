@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
-from datetime import date
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 from .enums import LearnType, VideoType, LearnCategoryDirection
@@ -18,8 +17,6 @@ from .swagger_parameters import (
     learn_category_manual_parameters,
     by_type_video_manual_parameters,
     team_member_manual_parameters,
-    content_manual_parameters,
-    content_category_manual_parameters,
 )
 from .models import (
     ContentAttachment,
@@ -30,9 +27,6 @@ from .models import (
     Video,
     HistoryEntry,
     TeamMember,
-    Content,
-    ContentImage,
-    ContentCategory,
     PositionTeamMember,
     SocialMedia,
     NavbarLogo,
@@ -48,9 +42,7 @@ from .serializers import (
     VideoSerializer,
     LearnSerializer,
     HistoryEntrySerializer,
-    ContentSerializer,
     TeamMemberSerializer,
-    ContentCategorySerializer,
     PositionTeamMemberSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
@@ -60,6 +52,7 @@ from .serializers import (
 )
 
 
+# ========================================== new viewsets start ============================================
 class ContentAttachmentViewSet(viewsets.ModelViewSet):
     """ViewSet for managing ContentAttachment content."""
 
@@ -586,346 +579,8 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
     filterset_fields = ("learn__category__learn_type",)
 
 
-class ContentViewSet(viewsets.ModelViewSet):
-    queryset = Content.objects.all()
-    serializer_class = ContentSerializer
-    search_fields = ("title",)
-    ordering_fields = ("views", "created_at")
-    filterset_fields = ("writer", "category__name", "language", "status")
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    pagination_class = LimitOffsetPagination
 
-    @swagger_auto_schema(
-        operation_summary="List all contents",
-        operation_description="Retrieve a list of contents with optional filtering by writer, category, language, and status.",
-        manual_parameters=content_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.views = instance.views + 1
-        instance.save(update_fields=["views"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def get_queryset(self):
-
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        writer = params.get("writer")
-        if writer:
-            values = []
-            for item in writer.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(writer__in=values)
-
-        Category = params.get("category")
-        if Category:
-            values = []
-            for item in Category.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(category__name__in=values)
-
-        language = params.get("language")
-        if language:
-            values = []
-            for item in language.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(language__in=values)
-
-        status = params.get("status")
-        if status:
-            values = []
-            for item in status.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(status__in=values)
-
-        is_weekly_moment = params.get("is_weekly_moment")
-        if is_weekly_moment is not None:
-            if is_weekly_moment.lower() in ("true"):
-                queryset = queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() in ("false"):
-                queryset = queryset.filter(is_weekly_moment=False)
-
-        is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
-        if not is_detail and not params.get("status"):
-            try:
-                queryset = queryset.filter(category__is_active=True)
-            except Exception:
-                pass
-
-        return queryset.order_by("-created_at")
-
-    @action(
-        detail=False, methods=("get",), url_path="last-posted", url_name="last_posted"
-    )
-    def last_posted(self, request):
-        """Return last published contents (default limit=5)."""
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
-        qs = Content.objects.all()
-        try:
-            qs = qs.filter(category__is_active=True)
-        except Exception:
-            pass
-
-        qs = qs.order_by("-created_at")[:limit]
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        """Create Content and attach uploaded images/urls as ContentImage rows."""
-        if hasattr(request, "data"):
-            if getattr(request, "FILES", None):
-                data = request.data
-            else:
-                try:
-                    data = request.data.copy()
-                except Exception:
-                    data = request.data
-        else:
-            data = {}
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        content = serializer.save()
-
-        # ربط المرفقات بالـ Content الجديد إذا أرسلت IDs فقط
-        attachment_ids = request.data.get("attachments", [])
-        if isinstance(attachment_ids, list) and attachment_ids:
-
-            ContentAttachment.objects.filter(id__in=attachment_ids).update(
-                content=content
-            )
-
-        # handle file uploads and image urls
-        try:
-            # collect uploaded files: support images[] or repeated images key
-            uploaded = []
-            if hasattr(request.FILES, "getlist"):
-                uploaded = list(
-                    request.FILES.getlist("images")
-                    or request.FILES.getlist("images[]")
-                    or []
-                )
-            # fallback numbered keys image_0..image_n
-            if not uploaded and "image_count" in data:
-                try:
-                    cnt = int(data.get("image_count") or 0)
-                except Exception:
-                    cnt = 0
-                for i in range(cnt):
-                    key = f"image_{i}"
-                    if key in request.FILES:
-                        uploaded.append(request.FILES[key])
-
-            # also accept any request.FILES keys that start with image_
-            if not uploaded:
-                for k, v in request.FILES.items():
-                    if k.startswith("image_") or k in ("image",):
-                        uploaded.append(v)
-
-            for f in uploaded:
-                try:
-                    ContentImage.objects.create(content=content, image=f)
-                except Exception:
-                    pass
-
-            # collect image_url_* fields
-            url_items = []
-            for k, v in data.items():
-                if isinstance(k, str) and k.startswith("image_url_") and v:
-                    url_items.append(v)
-
-            # also support image_urls as json/list
-            if not url_items and "image_urls" in data:
-                try:
-                    import json
-
-                    maybe = data.get("image_urls")
-                    if isinstance(maybe, str):
-                        parsed = json.loads(maybe)
-                        if isinstance(parsed, (list, tuple)):
-                            url_items = parsed
-                    elif isinstance(maybe, (list, tuple)):
-                        url_items = list(maybe)
-                except Exception:
-                    url_items = []
-
-            for url in url_items:
-                if url:
-                    try:
-                        ContentImage.objects.create(content=content, image_url=url)
-                    except Exception:
-                        pass
-
-            # handle file attachments
-            attachments = []
-            if hasattr(request.FILES, "getlist"):
-                attachments = list(
-                    request.FILES.getlist("attachments")
-                    or request.FILES.getlist("attachments[]")
-                    or []
-                )
-
-            # fallback numbered keys attachment_0..attachment_n
-            if not attachments and "attachment_count" in data:
-                try:
-                    cnt = int(data.get("attachment_count") or 0)
-                except Exception:
-                    cnt = 0
-                for i in range(cnt):
-                    key = f"attachment_{i}"
-                    if key in request.FILES:
-                        attachments.append(request.FILES[key])
-
-            # also accept any request.FILES keys that start with attachment_
-            if not attachments:
-                for k, v in request.FILES.items():
-                    if k.startswith("attachment_") or k == "attachment":
-                        attachments.append(v)
-
-            for f in attachments:
-                try:
-                    ContentAttachment.objects.create(
-                        content=content, file=f, file_name=f.name, file_size=f.size
-                    )
-                except Exception:
-                    pass
-        except Exception:
-            # don't break creation if image handling fails
-            pass
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            self.get_serializer(content, context={"request": request}).data,
-            status=status.HTTP_201_CREATED,
-            headers=headers,
-        )
-
-    def update(self, request, *args, **kwargs):
-        """Update Content and optionally attach new uploaded images/urls as ContentImage rows."""
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-
-        # same defensive copy logic as in create(): avoid copying when files present
-        if hasattr(request, "data"):
-            if getattr(request, "FILES", None):
-                data = request.data
-            else:
-                try:
-                    data = request.data.copy()
-                except Exception:
-                    data = request.data
-        else:
-            data = {}
-        serializer = self.get_serializer(instance, data=data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        content = serializer.save()
-
-        # Attach any new uploaded images (do not delete existing by default)
-        try:
-            uploaded = []
-            if hasattr(request.FILES, "getlist"):
-                uploaded = list(
-                    request.FILES.getlist("images")
-                    or request.FILES.getlist("images[]")
-                    or []
-                )
-            if not uploaded and "image_count" in data:
-                try:
-                    cnt = int(data.get("image_count") or 0)
-                except Exception:
-                    cnt = 0
-                for i in range(cnt):
-                    key = f"image_{i}"
-                    if key in request.FILES:
-                        uploaded.append(request.FILES[key])
-
-            for f in uploaded:
-                try:
-                    ContentImage.objects.create(content=content, image=f)
-                except Exception:
-                    pass
-
-            url_items = []
-            for k, v in data.items():
-                if isinstance(k, str) and k.startswith("image_url_") and v:
-                    url_items.append(v)
-            if not url_items and "image_urls" in data:
-                try:
-                    import json
-
-                    maybe = data.get("image_urls")
-                    if isinstance(maybe, str):
-                        parsed = json.loads(maybe)
-                        if isinstance(parsed, (list, tuple)):
-                            url_items = parsed
-                    elif isinstance(maybe, (list, tuple)):
-                        url_items = list(maybe)
-                except Exception:
-                    url_items = []
-
-            for url in url_items:
-                if url:
-                    try:
-                        ContentImage.objects.create(content=content, image_url=url)
-                    except Exception:
-                        pass
-
-            # handle file attachments
-            attachments = []
-            if hasattr(request.FILES, "getlist"):
-                attachments = list(
-                    request.FILES.getlist("attachments")
-                    or request.FILES.getlist("attachments[]")
-                    or []
-                )
-
-            if not attachments and "attachment_count" in data:
-                try:
-                    cnt = int(data.get("attachment_count") or 0)
-                except Exception:
-                    cnt = 0
-                for i in range(cnt):
-                    key = f"attachment_{i}"
-                    if key in request.FILES:
-                        attachments.append(request.FILES[key])
-
-            if not attachments:
-                for k, v in request.FILES.items():
-                    if k.startswith("attachment_") or k == "attachment":
-                        attachments.append(v)
-
-            for f in attachments:
-                try:
-                    ContentAttachment.objects.create(
-                        content=content, file=f, file_name=f.name, file_size=f.size
-                    )
-                except Exception:
-                    pass
-        except Exception:
-            pass
-
-        return Response(self.get_serializer(content, context={"request": request}).data)
-
-
+# ========================================== new viewset end============================================
 class BookViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Book content."""
 
@@ -984,116 +639,7 @@ class HistoryEntryViewSet(viewsets.ModelViewSet):
     serializer_class = HistoryEntrySerializer
     search_fields = ("title", "description")
     ordering_fields = ("story_date", "created_at")
-
-
-class ContentCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing ContentCategory content with multi-language support."""
-
-    queryset = ContentCategory.objects.all()
-    serializer_class = ContentCategorySerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
-    ordering_fields = ("order", "created_at")
-    queryset = ContentCategory.objects.all().order_by("order", "-created_at")
-
-    @swagger_auto_schema(
-        operation_summary="List all content categories",
-        operation_description="Retrieve a list of content categories with optional filtering by is_active status, language, or key.",
-        manual_parameters=content_category_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        """List endpoint documented with is_active filter for Swagger."""
-        return super().list(request, *args, **kwargs)
-
-    def get_serializer_context(self):
-        """Add include_translations flag to serializer context."""
-        context = super().get_serializer_context()
-        context["include_translations"] = (
-            self.request.query_params.get("include_translations", "false").lower()
-            == "true"
-        )
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
-        key = self.request.query_params.get("key")
-
-        if is_active is not None:
-            queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
-        if key:
-            queryset = queryset.filter(key=key)
-        try:
-            queryset = queryset.annotate(content_count=Count("content"))
-        except Exception:
-            pass
-        return queryset
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="by-key/(?P<key>[^/.]+)",
-        url_name="by-key",
-    )
-    def by_key(self, request, key=None):
-        """Get all translations for a specific category key."""
-        categories = ContentCategory.objects.filter(key=key).order_by("language")
-        if not categories.exists():
-            return Response(
-                {"detail": "No categories found with this key."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder ContentCategories based on provided order.
-
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    ContentCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=("get",), url_path="contents", url_name="contents")
-    def contents(self, request, pk=None):
-        """Return Content objects belonging to this ContentCategory."""
-        try:
-            category = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "ContentCategory not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        qs = Content.objects.filter(category=category).order_by("-created_at")
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = ContentSerializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ContentSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
+    
 
 class BookCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing BookCategory content with multi-language support."""
@@ -1244,16 +790,12 @@ class SiteInfoViewSet(viewsets.ViewSet):
         video_categories_data = VideoCategorySerializer(
             video_categories, many=True, context={"request": request}
         ).data
-        content_categories_data = ContentCategorySerializer(
-            content_categories, many=True, context={"request": request}
-        ).data
 
         return Response(
             {
                 "logo": logo_data,
                 "socialmedia": socials_data,
                 "video_categories": video_categories_data,
-                "content_categories": content_categories_data,
             }
         )
 

@@ -7,9 +7,6 @@ from rest_framework import serializers
 from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
-    Content,
-    ContentCategory,
-    ContentImage,
     ContentAttachment,
     EventCommunity,
     HistoryEntry,
@@ -217,108 +214,12 @@ class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = BookCategory
         fields = "__all__"
 
-
-class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    content_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = ContentCategory
-        fields = "__all__"
-
-
-class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for the per-Content image rows (file + url + caption)."""
-
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = ContentImage
-        fields = ("id", "image", "image_url", "caption", "created_at", "updated_at")
-        file_fields = ("image",)
-
-
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
 
     class Meta:
         model = PositionTeamMember
         fields = ["id", "name", "description"]
-
-
-class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for Content model with absolute URL handling for file fields."""
-
-    datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=ContentCategory.objects.all(), write_only=True, required=False
-    )
-    user = serializers.SerializerMethodField(read_only=True)
-    images = ContentImageSerializer(many=True, read_only=True)
-    attachments = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False
-    )
-    attachments_data = ContentAttachmentSerializer(
-        many=True, read_only=True, source="attachments"
-    )
-
-    class Meta:
-        model = Content
-        fields = "__all__"
-        file_fields = ("image",)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["category"] = (
-            ContentCategorySerializer(instance.category, context=self.context).data
-            if instance.category
-            else None
-        )
-
-        # include associated ContentImage rows as `images` for slider support
-        try:
-            data["images"] = ContentImageSerializer(
-                instance.images.all(), many=True, context=self.context
-            ).data
-        except Exception:
-            # fall back to empty list if anything goes wrong
-            data["images"] = []
-        return data
-
-    def get_user(self, obj):
-        try:
-            target = get_account_user(obj)
-            if target:
-                return UserSerializer(target, context=self.context).data
-        except Exception:
-            pass
-        return None
-
-    def create(self, validated_data):
-        """Handle creation with attachments field."""
-        attachments_ids = validated_data.pop("attachments", [])
-        instance = super().create(validated_data)
-
-        if attachments_ids:
-            attachment_instances = ContentAttachment.objects.filter(
-                id__in=attachments_ids
-            )
-            instance.attachments.set(attachment_instances)
-
-        return instance
-
-    def update(self, instance, validated_data):
-        """Handle update with attachments field."""
-        attachments_ids = validated_data.pop("attachments", None)
-        instance = super().update(instance, validated_data)
-
-        if attachments_ids is not None:
-            attachment_instances = ContentAttachment.objects.filter(
-                id__in=attachments_ids
-            )
-            instance.attachments.set(attachment_instances)
-
-        return instance
 
 
 class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

@@ -1,12 +1,12 @@
 from django.contrib import admin
+
+from .enums import LearnType
 from .models import (
     EventCommunity,
     HistoryEntry,
-    Content,
     TeamMember,
     Video,
     VideoCategory,
-    ContentCategory,
     PositionTeamMember,
     Learn,
     LearnCategory,
@@ -68,26 +68,14 @@ class EventCommunityAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "learn":
-            kwargs["queryset"] = Learn.objects.filter(category__learn_type="poster")
+            kwargs["queryset"] = Learn.objects.filter(category__learn_type=LearnType.POSTERS)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
-@admin.register(Content)
-class ContentAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category_name", "language", "writer", "created_at")
-    list_filter = ("category__name", "language", "writer")
-    search_fields = ("title", "category__name", "writer")
-
-    def category_name(self, obj):
-        return obj.category.name if obj.category else None
-
-    category_name.short_description = "category"
 
 
 @admin.register(ContentAttachment)
 class ContentAttachmentAdmin(admin.ModelAdmin):
-    list_display = ("id", "content", "file_name", "created_at")
-    search_fields = ("file_name", "content__title")
+    list_display = ("id", "file_name", "created_at")
+    search_fields = ("file_name",)
 
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------
@@ -129,15 +117,6 @@ class SocialMediaAdmin(admin.ModelAdmin):
 class NavbarLogoAdmin(admin.ModelAdmin):
     list_display = ("logo",)
     search_fields = ("logo",)
-
-
-@admin.register(ContentCategory)
-class ContentCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
-
 
 @admin.register(Authors)
 class AuthorsAdmin(admin.ModelAdmin):

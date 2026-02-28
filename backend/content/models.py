@@ -11,9 +11,6 @@ from .enums import (
     VideoType,
     LearnType,
     LearnCategoryDirection,
-    ContentStatus,
-    EventStatus,
-    ReportType,
     LanguageChoices,
 )
 
@@ -185,13 +182,12 @@ class EventCommunity(TimestampedModel):
 
     def clean(self):
         if self.learn and self.learn.category:
-            if self.learn.category.learn_type != "poster":
+            if self.learn.category.learn_type != LearnType.POSTERS:
                 raise ValidationError(
                     {
-                        "learn": "Only Learn objects with learn_type='poster' are allowed."
+                        "learn": "Only Learn objects with learn_type='posters' are allowed."
                     }
                 )
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -201,17 +197,7 @@ class EventCommunity(TimestampedModel):
 
 
 class ContentAttachment(TimestampedModel):
-    """Multiple file attachments for a Content instance.
-    Supports documents (Word, PDF, PowerPoint) and other file types.
-    """
-
-    content = models.ForeignKey(
-        "Content",
-        on_delete=models.CASCADE,
-        related_name="attachments",
-        null=True,
-        blank=True,
-    )
+    """Attachments for all data found in our database (e.g. videos, learns)."""
 
     Video = models.ForeignKey(
         "Video",
@@ -237,44 +223,10 @@ class ContentAttachment(TimestampedModel):
         ordering = ("-created_at",)
 
     def __str__(self) -> str:
-        return f"ContentAttachment<{self.content_id}:{self.pk}>"
+        return f"ContentAttachment<{self.file_name}:{self.pk}>"
 
 
 # ======================================================= New Models end =======================================================
-
-
-class Content(TimestampedModel):
-    """Landing posts that appear across the application."""
-
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=1000, blank=True)
-    excerpt = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    writer = models.CharField(max_length=255)
-    writer_avatar = models.URLField(blank=True)
-    category = models.ForeignKey(
-        "ContentCategory", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    status = models.CharField(
-        max_length=16, choices=ContentStatus.choices, default=ContentStatus.DRAFT
-    )
-    is_active = models.BooleanField(default=True)
-    content_type = models.CharField(max_length=100, blank=True, null=True)
-    views = models.PositiveIntegerField(default=0)
-    read_time = models.CharField(max_length=32, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    language = models.CharField(max_length=50, blank=True)
-    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    metadata = models.CharField(max_length=1000, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return self.title
 
 
 class Book(TimestampedModel):
@@ -289,28 +241,6 @@ class Book(TimestampedModel):
 
     def __str__(self):
         return self.name
-
-
-class ContentImage(TimestampedModel):
-    """Multiple images / image urls attached to a Content instance.
-    This model allows Content to have zero or more images (file uploads)
-    and/or image URLs. Keeping a separate table preserves backward
-    compatibility with the single `Content.image` / `Content.image_url`
-    fields while enabling multi-image support used by a frontend slider.
-    """
-
-    content = models.ForeignKey(
-        "Content", on_delete=models.CASCADE, related_name="images"
-    )
-    image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    caption = models.CharField(max_length=255, blank=True)
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self) -> str:
-        return f"ContentImage<{self.content_id}:{self.pk}>"
 
 
 class TeamMember(TimestampedModel):
@@ -364,71 +294,6 @@ class SectionOrder(models.Model):
 
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
-
-
-class ContentCategory(TimestampedModel):
-    """Categories for organizing content with multi-language support.
-
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
-
 
 class Authors(TimestampedModel):
     """Authors for videos and posts."""

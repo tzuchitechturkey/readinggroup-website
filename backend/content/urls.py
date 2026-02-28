@@ -7,9 +7,7 @@ from .views import (
     LearnViewSet,
     VideoViewSet,
     HistoryEntryViewSet,
-    ContentViewSet,
     TeamMemberViewSet,
-    ContentCategoryViewSet,
     PositionTeamMemberViewSet,
     SocialMediaViewSet,
     NavbarLogoViewSet,
@@ -26,7 +24,6 @@ router.register(r"book", BookViewSet, basename="book")
 router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"authors", AuthorsViewSet, basename="authors")
-router.register(r"contents", ContentViewSet, basename="content")
 router.register(r"team", TeamMemberViewSet, basename="team-member")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
 router.register(r"history", HistoryEntryViewSet, basename="history-entry")
@@ -36,9 +33,6 @@ router.register(r"book-category", BookCategoryViewSet, basename="book-category")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
 router.register(r"event-communities", EventCommunityViewSet, basename="event-community")
-router.register(
-    r"content-categories", ContentCategoryViewSet, basename="content-category"
-)
 router.register(
     r"content-attachments", ContentAttachmentViewSet, basename="content-attachment"
 )
