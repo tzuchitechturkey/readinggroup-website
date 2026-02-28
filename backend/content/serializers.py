@@ -1,5 +1,6 @@
 from accounts.serializers import UserSerializer
 from django.conf import settings
+from .enums import LearnType
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 
@@ -10,9 +11,7 @@ from .models import (
     ContentCategory,
     ContentImage,
     ContentAttachment,
-    Event,
-    EventCategory,
-    EventSection,
+    EventCommunity,
     HistoryEntry,
     NavbarLogo,
     PositionTeamMember,
@@ -26,76 +25,6 @@ from .models import (
     BookCategory,
     Book,
 )
-
-
-class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    book_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = BookCategory
-        fields = "__all__"
-
-
-class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    video_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = VideoCategory
-        fields = "__all__"
-
-
-class LearnCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = (
-        "created_at",
-        "updated_at",
-        "event_date",
-        "event_time",
-        "happened_at",
-    )
-    learn_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = LearnCategory
-        fields = "__all__"
-
-
-class EventCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    event_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = EventCategory
-        fields = "__all__"
-
-
-class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    content_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = ContentCategory
-        fields = "__all__"
-
-
-class EventSectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = EventSection
-        fields = "__all__"
-
-
-class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for the per-Content image rows (file + url + caption)."""
-
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = ContentImage
-        fields = ("id", "image", "image_url", "caption", "created_at", "updated_at")
-        file_fields = ("image",)
 
 
 class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -117,12 +46,26 @@ class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
         file_fields = ("file",)
 
 
-class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
+    video_count = serializers.IntegerField(read_only=True)
 
     class Meta:
-        model = PositionTeamMember
-        fields = ["id", "name", "description"]
+        model = VideoCategory
+        fields = "__all__"
+
+
+class LearnCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = (
+        "created_at",
+        "updated_at",
+        "happened_at",
+    )
+    learn_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = LearnCategory
+        fields = "__all__"
 
 
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -253,6 +196,56 @@ class LearnSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
+class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
+    learn = serializers.PrimaryKeyRelatedField(
+        queryset=Learn.objects.filter(category__learn_type=LearnType.POSTERS),
+        write_only=True,
+        required=False,
+    )
+
+    class Meta:
+        model = EventCommunity
+        fields = "__all__"
+
+
+class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    book_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = BookCategory
+        fields = "__all__"
+
+
+class ContentCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    content_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = ContentCategory
+        fields = "__all__"
+
+
+class ContentImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for the per-Content image rows (file + url + caption)."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = ContentImage
+        fields = ("id", "image", "image_url", "caption", "created_at", "updated_at")
+        file_fields = ("image",)
+
+
+class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = PositionTeamMember
+        fields = ["id", "name", "description"]
+
+
 class ContentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Content model with absolute URL handling for file fields."""
 
@@ -346,45 +339,6 @@ class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             else None
         )
         return data
-
-
-class EventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("start_time", "end_time", "created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=EventCategory.objects.all(), write_only=True, required=False
-    )
-    section = serializers.PrimaryKeyRelatedField(
-        queryset=EventSection.objects.all(), write_only=True, required=False
-    )
-    user = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = Event
-        fields = "__all__"
-        file_fields = ("image",)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["category"] = (
-            EventCategorySerializer(instance.category, context=self.context).data
-            if instance.category
-            else None
-        )
-        data["section"] = (
-            EventSectionSerializer(instance.section, context=self.context).data
-            if instance.section
-            else None
-        )
-        return data
-
-    def get_user(self, obj):
-        try:
-            target = get_account_user(obj)
-            if target:
-                return UserSerializer(target, context=self.context).data
-        except Exception:
-            pass
-        return None
 
 
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

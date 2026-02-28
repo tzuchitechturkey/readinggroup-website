@@ -1,21 +1,19 @@
 from rest_framework.routers import DefaultRouter
 from .views import (
-    EventViewSet,
-    HistoryEntryViewSet,
-    LearnViewSet,
-    ContentViewSet,
-    TeamMemberViewSet,
-    VideoViewSet,
+    ContentAttachmentViewSet,
+    EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
-    EventCategoryViewSet,
+    LearnViewSet,
+    VideoViewSet,
+    HistoryEntryViewSet,
+    ContentViewSet,
+    TeamMemberViewSet,
     ContentCategoryViewSet,
     PositionTeamMemberViewSet,
-    EventSectionViewSet,
     SocialMediaViewSet,
     NavbarLogoViewSet,
     SiteInfoViewSet,
-    ContentAttachmentViewSet,
     AuthorsViewSet,
     BookViewSet,
     BookCategoryViewSet,
@@ -27,7 +25,6 @@ router = DefaultRouter()
 router.register(r"book", BookViewSet, basename="book")
 router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"videos", VideoViewSet, basename="video")
-router.register(r"events", EventViewSet, basename="event")
 router.register(r"authors", AuthorsViewSet, basename="authors")
 router.register(r"contents", ContentViewSet, basename="content")
 router.register(r"team", TeamMemberViewSet, basename="team-member")
@@ -36,10 +33,9 @@ router.register(r"history", HistoryEntryViewSet, basename="history-entry")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 router.register(r"book-category", BookCategoryViewSet, basename="book-category")
-router.register(r"event-sections", EventSectionViewSet, basename="event-section")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
-router.register(r"event-categories", EventCategoryViewSet, basename="event-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
+router.register(r"event-communities", EventCommunityViewSet, basename="event-community")
 router.register(
     r"content-categories", ContentCategoryViewSet, basename="content-category"
 )

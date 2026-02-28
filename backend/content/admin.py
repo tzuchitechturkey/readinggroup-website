@@ -1,15 +1,13 @@
 from django.contrib import admin
 from .models import (
-    Event,
+    EventCommunity,
     HistoryEntry,
     Content,
     TeamMember,
     Video,
     VideoCategory,
     ContentCategory,
-    EventCategory,
     PositionTeamMember,
-    EventSection,
     Learn,
     LearnCategory,
     MyListEntry,
@@ -20,6 +18,9 @@ from .models import (
     Book,
     BookCategory,
 )
+
+
+# ----------------------------------------------------------------new models admin start----------------------------------------------------------------
 
 
 @admin.register(Video)
@@ -34,28 +35,41 @@ class VideoAdmin(admin.ModelAdmin):
     category_name.short_description = "category"
 
 
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "title",
-        "section_name",
-        "category_name",
-        "language",
-        "happened_at",
-    )
-    list_filter = ("section__name", "category__name", "language")
-    search_fields = ("title", "writer", "category__name")
+@admin.register(VideoCategory)
+class VideoCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = ("name",)
+    list_filter = ("is_active",)
 
-    def section_name(self, obj):
-        return obj.section.name if obj.section else None
 
-    section_name.short_description = "section"
+@admin.register(Learn)
+class LearnAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "category_name", "created_at")
+    list_filter = ("category",)
+    search_fields = ("title", "category__name")
 
     def category_name(self, obj):
         return obj.category.name if obj.category else None
 
-    category_name.short_description = "category"
+    category_name.short_description = "Category"
+
+
+@admin.register(LearnCategory)
+class LearnCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "description", "created_at")
+    search_fields = [
+        "name",
+    ]
+    list_filter = ["is_active"]
+
+
+@admin.register(EventCommunity)
+class EventCommunityAdmin(admin.ModelAdmin):
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "learn":
+            kwargs["queryset"] = Learn.objects.filter(category__learn_type="poster")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(Content)
@@ -68,6 +82,15 @@ class ContentAdmin(admin.ModelAdmin):
         return obj.category.name if obj.category else None
 
     category_name.short_description = "category"
+
+
+@admin.register(ContentAttachment)
+class ContentAttachmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "content", "file_name", "created_at")
+    search_fields = ("file_name", "content__title")
+
+
+# ----------------------------------------------------------------new models admin end----------------------------------------------------------------
 
 
 @admin.register(TeamMember)
@@ -83,52 +106,10 @@ class HistoryEntryAdmin(admin.ModelAdmin):
     search_fields = ("title", "description")
 
 
-@admin.register(VideoCategory)
-class VideoCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = ("name",)
-    list_filter = ("is_active",)
-
-
-@admin.register(EventCategory)
-class EventCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
-
-
 @admin.register(PositionTeamMember)
 class PositionTeamMemberAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "description", "created_at")
     search_fields = ("name",)
-
-
-@admin.register(EventSection)
-class EventSectionAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = ("name",)
-
-
-@admin.register(LearnCategory)
-class LearnCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "description", "created_at")
-    search_fields = [
-        "name",
-    ]
-    list_filter = ["is_active"]
-
-
-@admin.register(Learn)
-class LearnAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category_name", "created_at")
-    list_filter = ("category",)
-    search_fields = ("title", "category__name")
-
-    def category_name(self, obj):
-        return obj.category.name if obj.category else None
-
-    category_name.short_description = "Category"
 
 
 @admin.register(MyListEntry)
@@ -162,12 +143,6 @@ class ContentCategoryAdmin(admin.ModelAdmin):
 class AuthorsAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name", "description")
-
-
-@admin.register(ContentAttachment)
-class ContentAttachmentAdmin(admin.ModelAdmin):
-    list_display = ("id", "content", "file_name", "created_at")
-    search_fields = ("file_name", "content__title")
 
 
 @admin.register(BookCategory)

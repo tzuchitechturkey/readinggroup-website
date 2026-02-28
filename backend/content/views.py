@@ -17,27 +17,23 @@ from .swagger_parameters import (
     video_category_manual_parameters,
     learn_category_manual_parameters,
     by_type_video_manual_parameters,
-    event_manual_parameters,
     team_member_manual_parameters,
     content_manual_parameters,
     content_category_manual_parameters,
-    event_category_manual_parameters,
 )
 from .models import (
-    Event,
-    HistoryEntry,
-    Learn,
+    ContentAttachment,
+    EventCommunity,
+    VideoCategory,
     LearnCategory,
-    TeamMember,
+    Learn,
     Video,
+    HistoryEntry,
+    TeamMember,
     Content,
     ContentImage,
-    ContentAttachment,
-    VideoCategory,
-    EventCategory,
     ContentCategory,
     PositionTeamMember,
-    EventSection,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -45,31 +41,59 @@ from .models import (
     BookCategory,
 )
 from .serializers import (
-    EventSerializer,
-    HistoryEntrySerializer,
+    ContentAttachmentSerializer,
+    EventCommunitySerializer,
+    VideoCategorySerializer,
+    LearnCategorySerializer,
+    VideoSerializer,
     LearnSerializer,
+    HistoryEntrySerializer,
     ContentSerializer,
     TeamMemberSerializer,
-    VideoSerializer,
-    LearnCategorySerializer,
-    VideoCategorySerializer,
-    EventCategorySerializer,
     ContentCategorySerializer,
     PositionTeamMemberSerializer,
-    EventSectionSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
-    ContentAttachmentSerializer,
     AuthorsSerializer,
     BookSerializer,
     BookCategorySerializer,
 )
 
 
+class ContentAttachmentViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing ContentAttachment content."""
+
+    queryset = ContentAttachment.objects.all()
+    serializer_class = ContentAttachmentSerializer
+    search_fields = ("file_name",)
+    ordering_fields = ("created_at",)
+
+    def create(self, request, *args, **kwargs):
+        """Create a ContentAttachment with uploaded file."""
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        attachment = ContentAttachment.objects.create(
+            file=file,
+            file_name=request.data.get("file_name", file.name),
+            file_size=file.size,
+            description=request.data.get("description", ""),
+        )
+
+        serializer = self.get_serializer(attachment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 class VideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    search_fields = ("title", "guest_speakers",)
+    search_fields = (
+        "title",
+        "guest_speakers",
+    )
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
     pagination_class = LimitOffsetPagination
@@ -547,30 +571,19 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)
 
-    # add new action to get learns of type poster ordered by event_date desc (for event and home page)
-    @swagger_auto_schema(
-        operation_summary="Get poster learns",
-        operation_description="Return learn items with learn_type=poster sorted by start_event_date desc with pagination support.",
-    )
-    @action(detail=False, methods=["get"], url_path="posters")
-    def posters(self, request):
-        """
-        Return learn objects with learn_type=poster sorted by start_event_date desc with pagination support.
-        """
-        learns = Learn.objects.filter(
-            category__learn_type=LearnType.POSTERS,
-            category__is_active=True,
-            is_event=True,
-            start_event_date__isnull=False,
-        ).order_by("-start_event_date")
 
-        page = self.paginate_queryset(learns)
-        if page is not None:
-            serializer = LearnSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = LearnSerializer(learns, many=True, context={"request": request})
-        return Response(serializer.data)
+class EventCommunityViewSet(viewsets.ModelViewSet):
+    queryset = EventCommunity.objects.all()
+    serializer_class = EventCommunitySerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("name",)
+    ordering_fields = ("-start_event_date",)
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        DjangoFilterBackend,
+    ]
+    filterset_fields = ("learn__category__learn_type",)
 
 
 class ContentViewSet(viewsets.ModelViewSet):
@@ -913,223 +926,6 @@ class ContentViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(content, context={"request": request}).data)
 
 
-class EventViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing Event content."""
-
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    search_fields = ("title",)
-    ordering_fields = ("happened_at", "created_at")
-    filterset_fields = (
-        "section",
-        "category",
-        "country",
-        "language",
-        "report_type",
-        "tags",
-    )
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    pagination_class = LimitOffsetPagination
-
-    @swagger_auto_schema(manual_parameters=event_manual_parameters)
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.views = instance.views + 1
-        instance.save(update_fields=["views"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    def get_queryset(self):
-
-        queryset = super().get_queryset()
-        # annotate likes info
-        params = self.request.query_params
-
-        section = params.get("section")
-        if section:
-            values = []
-            for item in section.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(section__name__in=values)
-
-        writer = params.get("writer")
-        if writer:
-            values = []
-            for item in writer.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(writer__in=values)
-
-        country = params.get("country")
-        if country:
-            values = []
-            for item in country.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(country__in=values)
-
-        language = params.get("language")
-        if language:
-            values = []
-            for item in language.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(language__in=values)
-
-        happened_at = params.get("happened_at")
-        if happened_at:
-            try:
-                parsed = date.fromisoformat(happened_at)
-                queryset = queryset.filter(happened_at=parsed)
-            except Exception:
-                queryset = queryset.filter(happened_at=happened_at)
-
-        report_type = params.get("report_type")
-        if report_type:
-            values = []
-            for item in report_type.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(report_type__in=values)
-
-        tags = params.get("tags")
-        if tags:
-            values = []
-            for item in tags.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(tags__in=values)
-
-        category = params.get("category")
-        if category:
-            values = []
-            for item in category.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(category__name__in=values)
-
-        status = params.get("status")
-        if status:
-            values = []
-            for item in status.split(","):
-                values.append(item.strip())
-            if values:
-                queryset = queryset.filter(status__in=values)
-
-        is_weekly_moment = params.get("is_weekly_moment")
-        if is_weekly_moment is not None:
-            if is_weekly_moment.lower() in ("true"):
-                queryset = queryset.filter(is_weekly_moment=True)
-            elif is_weekly_moment.lower() in ("false"):
-                queryset = queryset.filter(is_weekly_moment=False)
-
-        is_detail = bool(self.kwargs.get("pk")) if hasattr(self, "kwargs") else False
-        if not is_detail and not params.get("status"):
-            try:
-                queryset = queryset.filter(category__is_active=True)
-            except Exception:
-                pass
-
-        return queryset.order_by("-created_at")
-
-    @action(detail=False, methods=("get",), url_path="tags", url_name="tags")
-    def tags(self, request):
-        """Return a list of unique tags used by Event objects.
-        Optional query params:
-        - q: substring to filter tags (case-insensitive)
-        - limit: integer to limit number of returned tags
-        """
-        q = request.query_params.get("q")
-        try:
-            limit = (
-                int(request.query_params.get("limit"))
-                if request.query_params.get("limit")
-                else None
-            )
-        except Exception:
-            limit = None
-
-        # Gather all tags (stored as JSON list on the Event model)
-        all_tag_lists = Event.objects.values_list("tags", flat=True)
-        unique_tags = set()
-        for tag_list in all_tag_lists:
-            if not tag_list:
-                continue
-            # tags stored as list; defensive handling if stored otherwise
-            if isinstance(tag_list, (list, tuple)):
-                for t in tag_list:
-                    if t is None:
-                        continue
-                    s = str(t).strip()
-                    if s:
-                        unique_tags.add(s)
-            else:
-                # fallback: if someone stored a comma-separated string
-                for t in str(tag_list).split(","):
-                    s = t.strip()
-                    if s:
-                        unique_tags.add(s)
-
-        tags = sorted(unique_tags, key=lambda x: x.lower())
-        if q:
-            ql = q.lower()
-            tags = [t for t in tags if ql in t.lower()]
-
-        if limit is not None:
-            tags = tags[:limit]
-
-        return Response({"tags": tags})
-
-    # add new action last 5 posted for Event
-    @action(
-        detail=False, methods=("get",), url_path="last-posted", url_name="last_posted"
-    )
-    def last_posted(self, request):
-        """Return last posted instances for this resource.
-        Query params:
-        - limit: int (default 5)
-        """
-        try:
-            limit = int(request.query_params.get("limit", 5))
-        except Exception:
-            limit = 5
-
-        qs = self.get_queryset()
-        qs = qs.order_by("-created_at")[:limit]
-
-        # annotate likes info as well so serializers can show likes_count/has_liked
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-    @action(
-        detail=False,
-        methods=("get",),
-        url_path="weekly-moments",
-        url_name="weekly_moments",
-    )
-    def weekly_moments(self, request):
-        """Return Event items flagged as weekly moments and published."""
-        qs = self.get_queryset()
-        try:
-            qs = qs.filter(is_weekly_moment=True)
-        except Exception:
-            pass
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = self.get_serializer(
-                page, many=True, context={"request": request}
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
 class BookViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Book content."""
 
@@ -1299,155 +1095,6 @@ class ContentCategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ContentAttachmentViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing ContentAttachment content."""
-
-    queryset = ContentAttachment.objects.all()
-    serializer_class = ContentAttachmentSerializer
-    search_fields = ("file_name",)
-    ordering_fields = ("created_at",)
-
-    def create(self, request, *args, **kwargs):
-        """Create a ContentAttachment with uploaded file."""
-        file = request.FILES.get("file")
-        if not file:
-            return Response(
-                {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        attachment = ContentAttachment.objects.create(
-            file=file,
-            file_name=request.data.get("file_name", file.name),
-            file_size=file.size,
-            description=request.data.get("description", ""),
-        )
-
-        serializer = self.get_serializer(attachment)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class EventCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing EventCategory content with multi-language support."""
-
-    queryset = EventCategory.objects.all()
-    serializer_class = EventCategorySerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name", "key")
-    ordering_fields = ("order", "created_at")
-    queryset = EventCategory.objects.all().order_by("order", "-created_at")
-
-    @swagger_auto_schema(
-        operation_summary="List all event categories",
-        operation_description="Retrieve a list of event categories with optional filtering by is_active status, language, or key.",
-        manual_parameters=event_category_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        """List endpoint documented with is_active filter for Swagger."""
-        return super().list(request, *args, **kwargs)
-
-    def get_serializer_context(self):
-        """Add include_translations flag to serializer context."""
-        context = super().get_serializer_context()
-        context["include_translations"] = (
-            self.request.query_params.get("include_translations", "false").lower()
-            == "true"
-        )
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
-        key = self.request.query_params.get("key")
-
-        if is_active is not None:
-            queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
-        if key:
-            queryset = queryset.filter(key=key)
-        try:
-            queryset = queryset.annotate(event_count=Count("event"))
-        except Exception:
-            pass
-        return queryset
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="by-key/(?P<key>[^/.]+)",
-        url_name="by-key",
-    )
-    def by_key(self, request, key=None):
-        """Get all translations for a specific category key."""
-        categories = EventCategory.objects.filter(key=key).order_by("language")
-        if not categories.exists():
-            return Response(
-                {"detail": "No categories found with this key."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder EventCategories based on provided order.
-
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    EventCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=("get",), url_path="events", url_name="events")
-    def events(self, request, pk=None):
-        """Return Event objects belonging to this EventCategory."""
-        try:
-            category = self.get_object()
-        except Exception:
-            return Response(
-                {"detail": "EventCategory not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Ensure category is active (mirror VideoCategory.videos / PostCategory.posts behavior)
-        if not getattr(category, "is_active", True):
-            return Response(
-                {"detail": "EventCategory not active."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Only include published events in this category
-        published_qs = Event.objects.filter(category=category)
-
-        if not published_qs.exists():
-            return Response(
-                {"detail": "No published events in this category."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        qs = published_qs.order_by("-happened_at", "-created_at")
-
-        page = self.paginate_queryset(qs)
-        if page is not None:
-            serializer = EventSerializer(page, many=True, context={"request": request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = EventSerializer(qs, many=True, context={"request": request})
-        return Response(serializer.data)
-
-
 class BookCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing BookCategory content with multi-language support."""
 
@@ -1540,123 +1187,6 @@ class PositionTeamMemberViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at",)
 
 
-class EventSectionViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing EventSection content."""
-
-    queryset = EventSection.objects.all()
-    serializer_class = EventSectionSerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
-
-    @action(
-        detail=False,
-        methods=("get",),
-        url_path="top-with-events",
-        url_name="top_with_events",
-    )
-    def top_with_events(self, request):
-        """Return top N EventSections ordered by number of events, including their events.
-
-        Query params:
-        - limit: int (default 3) number of sections to return
-        - events_limit: optional int to limit number of events returned per section (default: all)
-        """
-        try:
-            limit = int(request.query_params.get("limit", 3))
-        except Exception:
-            limit = 3
-
-        try:
-            events_limit = request.query_params.get("events_limit")
-            events_limit = int(events_limit) if events_limit is not None else None
-        except Exception:
-            events_limit = None
-
-        # annotate sections by number of related Event objects and pick top N
-        sections_qs = EventSection.objects.annotate(
-            events_count=Count("event")
-        ).order_by("-events_count")[:limit]
-
-        result = []
-        for section in sections_qs:
-            # get events for this section; use section.events() helper
-            events_qs = section.events().order_by("-happened_at", "-created_at")
-            if events_limit is not None:
-                events_qs = events_qs[:events_limit]
-
-            section_data = EventSectionSerializer(
-                section, context={"request": request}
-            ).data
-            events_data = EventSerializer(
-                events_qs, many=True, context={"request": request}
-            ).data
-
-            result.append(
-                {
-                    "section": section_data,
-                    "events": events_data,
-                    "events_count": getattr(section, "events_count", len(events_data)),
-                }
-            )
-
-        return Response(result)
-
-    @action(
-        detail=False,
-        methods=("get",),
-        url_path="top-with-top-liked",
-        url_name="top_with_top_liked",
-    )
-    def top_with_top_liked(self, request):
-        """Return top N EventSections each containing their top M events ordered by likes.
-
-        Query params:
-        - limit: int (default 3) number of sections to return
-        - events_limit: int (default 5) number of top-liked events to include per section
-        """
-        try:
-            limit = int(request.query_params.get("limit", 3))
-        except Exception:
-            limit = 3
-
-        try:
-            events_limit = request.query_params.get("events_limit")
-            events_limit = int(events_limit) if events_limit is not None else 5
-        except Exception:
-            events_limit = 5
-
-        # pick top sections by number of related Event objects (same as top_with_events)
-        sections_qs = EventSection.objects.annotate(
-            events_count=Count("event")
-        ).order_by("-events_count")[:limit]
-
-        result = []
-        for section in sections_qs:
-            # get events for this section
-            events_qs = section.events().all()
-            # order by annotated likes count (fallback to created_at)
-            try:
-                events_qs = events_qs.order_by("-created_at")[:events_limit]
-            except Exception:
-                events_qs = events_qs[:events_limit]
-
-            section_data = EventSectionSerializer(
-                section, context={"request": request}
-            ).data
-            events_data = EventSerializer(
-                events_qs, many=True, context={"request": request}
-            ).data
-
-            result.append(
-                {
-                    "section": section_data,
-                    "top_5": events_data,
-                }
-            )
-
-        return Response(result)
-
-
 class NavbarLogoViewSet(viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
 
@@ -1705,11 +1235,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
             .annotate(video_count=Count("video"))
             .order_by("name")
         )
-        event_categories = (
-            EventCategory.objects.filter(is_active=True)
-            .annotate(event_count=Count("event"))
-            .order_by("name")
-        )
         content_categories = (
             ContentCategory.objects.filter(is_active=True)
             .annotate(content_count=Count("content"))
@@ -1718,9 +1243,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
 
         video_categories_data = VideoCategorySerializer(
             video_categories, many=True, context={"request": request}
-        ).data
-        event_categories_data = EventCategorySerializer(
-            event_categories, many=True, context={"request": request}
         ).data
         content_categories_data = ContentCategorySerializer(
             content_categories, many=True, context={"request": request}
@@ -1731,7 +1253,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
                 "logo": logo_data,
                 "socialmedia": socials_data,
                 "video_categories": video_categories_data,
-                "event_categories": event_categories_data,
                 "content_categories": content_categories_data,
             }
         )

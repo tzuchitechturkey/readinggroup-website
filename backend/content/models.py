@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from jsonschema import ValidationError
 
 from .enums import (
     VideoType,
@@ -130,12 +131,8 @@ class Learn(TimestampedModel):
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
     is_event = models.BooleanField(default=False)
-    event_title = models.CharField(max_length=255, blank=True)
-    guest_speakers = models.JSONField(default=list, blank=True)
     live_stream_link = models.URLField(blank=True, null=True)
-    start_event_date = models.DateField(blank=True, null=True)
-    start_event_time = models.TimeField(blank=True, null=True)
-    duration = models.CharField(max_length=64, blank=True, null=True)
+
     class Meta:
         ordering = ("-created_at",)
 
@@ -167,6 +164,40 @@ class LearnCategory(TimestampedModel):
                 name="unique_learncategory_name_per_type",
             )
         ]
+
+
+class EventCommunity(TimestampedModel):
+    title = models.CharField(max_length=255)
+    guest_speakers = models.JSONField(default=list, blank=True)
+    learn = models.ForeignKey(
+        "Learn",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={"category__learn_type": "posters"},
+    )
+    start_event_date = models.DateField(blank=True, null=True)
+    start_event_time = models.TimeField(blank=True, null=True)
+    duration = models.CharField(max_length=64, blank=True, null=True)
+
+    class Meta:
+        ordering = ("-start_event_date", "-start_event_time")
+
+    def clean(self):
+        if self.learn and self.learn.category:
+            if self.learn.category.learn_type != "poster":
+                raise ValidationError(
+                    {
+                        "learn": "Only Learn objects with learn_type='poster' are allowed."
+                    }
+                )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
 
 
 class ContentAttachment(TimestampedModel):
@@ -210,46 +241,6 @@ class ContentAttachment(TimestampedModel):
 
 
 # ======================================================= New Models end =======================================================
-
-
-class Event(TimestampedModel):
-    """Represent events and news items grouped by section."""
-
-    title = models.CharField(max_length=255)
-    writer = models.CharField(max_length=255)
-    happened_at = models.DateField()
-    image = models.ImageField(upload_to="events/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    category = models.ForeignKey(
-        "EventCategory", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    report_type = models.CharField(
-        max_length=50, choices=ReportType.choices, default=ReportType.NEWS
-    )
-    country = models.CharField(max_length=100, blank=True)
-    language = models.CharField(max_length=50)
-    status = models.CharField(
-        max_length=16, choices=EventStatus.choices, default=EventStatus.PUBLISHED
-    )
-    duration_minutes = models.PositiveIntegerField(blank=True, null=True)
-    section = models.ForeignKey(
-        "EventSection", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    summary = models.TextField(blank=True)
-    thumbnail = models.ImageField(upload_to="events/thumbnails/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
-    views = models.PositiveIntegerField(default=0)
-    video_url = models.CharField(max_length=255, blank=True)
-    cast = models.JSONField(default=list, blank=True)
-    tags = models.JSONField(default=list, blank=True)
-    is_weekly_moment = models.BooleanField(default=False)
-    external_link = models.URLField(max_length=1000, blank=True)
-
-    class Meta:
-        ordering = ("-happened_at", "title")
-
-    def __str__(self) -> str:
-        return f"{self.title} ({self.section.name if self.section else ''})"
 
 
 class Content(TimestampedModel):
@@ -373,70 +364,6 @@ class SectionOrder(models.Model):
 
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
-
-
-class EventCategory(TimestampedModel):
-    """Categories for organizing events with multi-language support.
-
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
 
 
 class ContentCategory(TimestampedModel):
@@ -609,23 +536,6 @@ class PositionTeamMember(TimestampedModel):
 
     class Meta:
         ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class EventSection(TimestampedModel):
-    """Sections for Events."""
-
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def events(self):
-        """Return a queryset of Event objects that belong to this section."""
-        return self.event_set.all()
 
     def __str__(self) -> str:
         return self.name

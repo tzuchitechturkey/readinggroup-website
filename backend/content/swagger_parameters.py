@@ -156,79 +156,6 @@ learn_manual_parameters = [
 ]
 
 # ========================================== learn swagger parameters end ============================================
-
-event_manual_parameters = [
-    openapi.Parameter(
-        "section",
-        openapi.IN_QUERY,
-        description="Filter by Section",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "country",
-        openapi.IN_QUERY,
-        description="Filter by Country",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "writer",
-        openapi.IN_QUERY,
-        description="Filter by Writer",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "language",
-        openapi.IN_QUERY,
-        description="Filter by Language",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "happened_at",
-        openapi.IN_QUERY,
-        description="Filter by Happened At date",
-        type=openapi.TYPE_STRING,
-    ),
-    openapi.Parameter(
-        "report_type",
-        openapi.IN_QUERY,
-        description="Filter by Report Type",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "tags",
-        openapi.IN_QUERY,
-        description="Filter by Tags",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "category",
-        openapi.IN_QUERY,
-        description="Filter by Category (JSON object with 'name' field)",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "is_weekly_moment",
-        openapi.IN_QUERY,
-        description="Filter by is_weekly_moment status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-    openapi.Parameter(
-        "status",
-        openapi.IN_QUERY,
-        description="Filter by status",
-        type=openapi.TYPE_ARRAY,
-        items=openapi.Items(type=openapi.TYPE_STRING),
-    ),
-]
-
 team_member_manual_parameters = [
     openapi.Parameter(
         "Position",
@@ -277,15 +204,6 @@ content_manual_parameters = [
 ]
 
 content_category_manual_parameters = [
-    openapi.Parameter(
-        "is_active",
-        openapi.IN_QUERY,
-        description="Filter by is_active status",
-        type=openapi.TYPE_STRING,
-    ),
-]
-
-event_category_manual_parameters = [
     openapi.Parameter(
         "is_active",
         openapi.IN_QUERY,
