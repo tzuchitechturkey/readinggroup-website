@@ -133,8 +133,10 @@ class Learn(TimestampedModel):
     event_title = models.CharField(max_length=255, blank=True)
     guest_speakers = models.JSONField(default=list, blank=True)
     live_stream_link = models.URLField(blank=True, null=True)
-    event_date = models.DateField(blank=True, null=True)
-    event_time = models.TimeField(blank=True, null=True)
+    start_event_date = models.DateField(blank=True, null=True)
+    end_event_date = models.DateField(blank=True, null=True)
+    start_event_time = models.TimeField(blank=True, null=True)
+    end_event_time = models.TimeField(blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)

@@ -550,19 +550,19 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
     # add new action to get learns of type poster ordered by event_date desc (for event and home page)
     @swagger_auto_schema(
         operation_summary="Get poster learns",
-        operation_description="Return learn items with learn_type=poster sorted by event_date desc with pagination support.",
+        operation_description="Return learn items with learn_type=poster sorted by start_event_date desc with pagination support.",
     )
     @action(detail=False, methods=["get"], url_path="posters")
     def posters(self, request):
         """
-        Return learn objects with learn_type=poster sorted by event_date desc with pagination support.
+        Return learn objects with learn_type=poster sorted by start_event_date desc with pagination support.
         """
         learns = Learn.objects.filter(
             category__learn_type=LearnType.POSTERS,
             category__is_active=True,
             is_event=True,
-            event_date__isnull=False,
-        ).order_by("-event_date")
+            start_event_date__isnull=False,
+        ).order_by("-start_event_date")
 
         page = self.paginate_queryset(learns)
         if page is not None:
