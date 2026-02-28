@@ -370,11 +370,12 @@ class LearnViewSet(viewsets.ModelViewSet):
             except Exception:
                 pass
 
+        # Add LearnCategory.learn_type filtering
         learn_type = params.get("learn_type")
         if learn_type:
             values = [item.strip() for item in learn_type.split(",") if item.strip()]
             if values:
-                queryset = queryset.filter(learn_type__in=values)
+                queryset = queryset.filter(category__learn_type__in=values)
 
         category = params.get("category")
         if category:
@@ -537,6 +538,31 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         ordering = request.query_params.get("ordering")
         if ordering:
             learns = learns.order_by(ordering)
+
+        page = self.paginate_queryset(learns)
+        if page is not None:
+            serializer = LearnSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = LearnSerializer(learns, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    # add new action to get learns of type poster ordered by event_date desc (for event and home page)
+    @swagger_auto_schema(
+        operation_summary="Get poster learns",
+        operation_description="Return learn items with learn_type=poster sorted by event_date desc with pagination support.",
+    )
+    @action(detail=False, methods=["get"], url_path="posters")
+    def posters(self, request):
+        """
+        Return learn objects with learn_type=poster sorted by event_date desc with pagination support.
+        """
+        learns = Learn.objects.filter(
+            category__learn_type=LearnType.POSTERS,
+            category__is_active=True,
+            is_event=True,
+            event_date__isnull=False,
+        ).order_by("-event_date")
 
         page = self.paginate_queryset(learns)
         if page is not None:
