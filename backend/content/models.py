@@ -188,6 +188,7 @@ class EventCommunity(TimestampedModel):
                         "learn": "Only Learn objects with learn_type='posters' are allowed."
                     }
                 )
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -294,6 +295,7 @@ class SectionOrder(models.Model):
 
     def __str__(self) -> str:
         return f"SectionOrder<{self.key}:{self.position}>"
+
 
 class Authors(TimestampedModel):
     """Authors for videos and posts."""

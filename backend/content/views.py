@@ -579,7 +579,6 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
     filterset_fields = ("learn__category__learn_type",)
 
 
-
 # ========================================== new viewset end============================================
 class BookViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Book content."""
@@ -639,7 +638,7 @@ class HistoryEntryViewSet(viewsets.ModelViewSet):
     serializer_class = HistoryEntrySerializer
     search_fields = ("title", "description")
     ordering_fields = ("story_date", "created_at")
-    
+
 
 class BookCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing BookCategory content with multi-language support."""
@@ -779,11 +778,6 @@ class SiteInfoViewSet(viewsets.ViewSet):
         video_categories = (
             VideoCategory.objects.filter(is_active=True)
             .annotate(video_count=Count("video"))
-            .order_by("name")
-        )
-        content_categories = (
-            ContentCategory.objects.filter(is_active=True)
-            .annotate(content_count=Count("content"))
             .order_by("name")
         )
 

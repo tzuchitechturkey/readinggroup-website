@@ -68,7 +68,9 @@ class EventCommunityAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "learn":
-            kwargs["queryset"] = Learn.objects.filter(category__learn_type=LearnType.POSTERS)
+            kwargs["queryset"] = Learn.objects.filter(
+                category__learn_type=LearnType.POSTERS
+            )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
@@ -117,6 +119,7 @@ class SocialMediaAdmin(admin.ModelAdmin):
 class NavbarLogoAdmin(admin.ModelAdmin):
     list_display = ("logo",)
     search_fields = ("logo",)
+
 
 @admin.register(Authors)
 class AuthorsAdmin(admin.ModelAdmin):

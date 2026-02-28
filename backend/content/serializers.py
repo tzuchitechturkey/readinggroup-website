@@ -214,6 +214,7 @@ class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = BookCategory
         fields = "__all__"
 
+
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
 
