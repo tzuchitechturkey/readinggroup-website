@@ -91,17 +91,11 @@ const LearnPageContent = () => {
       setIsLoadingMore(true);
     }
     try {
-      const params = { happened_at: happenedAt };
-      const res = await GetLearnsByCategoryId(
-        categoryId,
-        24,
-        offset,
-        params,
-      );
+      const params = { created_at: happenedAt };
+      const res = await GetLearnsByCategoryId(categoryId, 24, offset, params);
       const newItems = res.data.results || [];
       const totalCount = res.data.count || 0;
-      const hasMoreItems =
-        offset + 24 < totalCount;
+      const hasMoreItems = offset + 24 < totalCount;
 
       if (appendMode) {
         // Append new items when loading more
@@ -251,8 +245,7 @@ const LearnPageContent = () => {
 
     // Check if we need to load more items (when we're within 5 items of the end and there are more items to load)
     const itemsRemainingThreshold = 5;
-    const itemsRemaining =
-      sortedAndFilteredItems.length - newIndex;
+    const itemsRemaining = sortedAndFilteredItems.length - newIndex;
 
     if (
       itemsRemaining <= itemsRemainingThreshold &&
