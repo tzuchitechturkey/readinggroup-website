@@ -69,7 +69,7 @@ from .serializers import (
 class VideoViewSet(viewsets.ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
-    search_fields = ("title",)
+    search_fields = ("title", "guest_speakers",)
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
     pagination_class = LimitOffsetPagination
