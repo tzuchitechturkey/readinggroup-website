@@ -14,9 +14,8 @@ from .enums import (
     LanguageChoices,
 )
 
+
 # ======================================================= New Models Start =======================================================
-
-
 class TimestampedModel(models.Model):
     """Abstract base model that tracks creation and modification times."""
 
@@ -195,6 +194,9 @@ class EventCommunity(TimestampedModel):
 
     def __str__(self):
         return self.title
+
+
+# ======================================================= New Models end =======================================================
 
 
 class ContentAttachment(TimestampedModel):
