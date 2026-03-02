@@ -156,6 +156,30 @@ learn_manual_parameters = [
 ]
 
 # ========================================== learn swagger parameters end ============================================
+# ==================================== team event community swagger parameters start =======================================
+event_community_manual_parameters = [
+    openapi.Parameter(
+        "search",
+        openapi.IN_QUERY,
+        description="Search term for filtering event communities by name",
+        type=openapi.TYPE_STRING,
+    ),
+    openapi.Parameter(
+        "start_event_date",
+        openapi.IN_QUERY,
+        description=(
+            "Filter by start_event_date. "
+            "Formats supported: "
+            "YYYY (year), "
+            "YYYY-MM (year-month), "
+            "YYYY-MM-DD (full date). "
+            "Examples: 2026 | 2026-02 | 2026-02-14"
+        ),
+        type=openapi.TYPE_STRING,
+    ),
+]
+
+
 team_member_manual_parameters = [
     openapi.Parameter(
         "Position",

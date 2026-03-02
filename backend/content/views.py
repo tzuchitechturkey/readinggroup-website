@@ -16,6 +16,7 @@ from .swagger_parameters import (
     video_category_manual_parameters,
     learn_category_manual_parameters,
     by_type_video_manual_parameters,
+    event_community_manual_parameters,
     team_member_manual_parameters,
 )
 from .models import (
@@ -569,14 +570,39 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
     queryset = EventCommunity.objects.all()
     serializer_class = EventCommunitySerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ("name",)
-    ordering_fields = ("-start_event_date",)
+    search_fields = ("title",)
+    ordering_fields = ("-start_event_date", "-start_event_time")
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
     filterset_fields = ("learn__category__learn_type",)
+
+    @swagger_auto_schema(
+        operation_summary="List all event communities",
+        operation_description="Retrieve a list of event communities with optional filtering by start_event_date and learn category type.",
+        manual_parameters=event_community_manual_parameters,
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        params = self.request.query_params
+
+        start_event_date = params.get("start_event_date")
+        if start_event_date:
+            try:
+                year, month = start_event_date.split("-")
+                queryset = queryset.filter(
+                    start_event_date__year=int(year),
+                    start_event_date__month=int(month),
+                )
+            except Exception:
+                pass
+
+        return queryset
 
 
 # ========================================== new viewset end============================================
