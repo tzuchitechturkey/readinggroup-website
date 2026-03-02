@@ -379,6 +379,17 @@ class LearnViewSet(viewsets.ModelViewSet):
         if params.get("search"):
             return queryset.order_by("happened_at")
 
+        created_at = params.get("created_at")
+        if created_at:
+            try:
+                year, month = created_at.split("-")
+                queryset = queryset.filter(
+                    created_at__year=int(year),
+                    created_at__month=int(month),
+                )
+            except Exception:
+                pass
+
         happened_at = params.get("happened_at")
         if happened_at:
             try:
@@ -407,7 +418,7 @@ class LearnViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="List learns by type",
-        operation_description="Return learns filtered by type.",
+        operation_description="Return last 3 cards grouped by direction.",
     )
     @action(
         detail=False,
@@ -418,47 +429,53 @@ class LearnViewSet(viewsets.ModelViewSet):
     def last_three_cards(self, request):
         """
         Return:
-        - last 3 cards:
-            * 2 vertical
-            * 1 horizontal
+        - vertical: last 2 vertical cards
+        - horizontal: last 1 horizontal card
         """
 
-        def base_queryset(learn_type_value):
+        def base_queryset():
             return Learn.objects.filter(
-                category__learn_type=learn_type_value,
+                category__learn_type=LearnType.CARDS,
                 category__is_active=True,
-            )
+            ).select_related("category")
 
         # Last 2 vertical
-        vertical_cards = list(
-            base_queryset(LearnType.CARDS)
+        vertical_qs = (
+            base_queryset()
             .filter(category__direction=LearnCategoryDirection.VERTICAL)
             .order_by("-created_at")[:2]
         )
 
         # Last 1 horizontal
-        horizontal_cards = list(
-            base_queryset(LearnType.CARDS)
+        horizontal_qs = (
+            base_queryset()
             .filter(category__direction=LearnCategoryDirection.HORIZONTAL)
             .order_by("-created_at")[:1]
         )
 
-        # Combine (Vertical first, then Horizontal)
-        cards_qs = vertical_cards + horizontal_cards
+        vertical_data = LearnSerializer(
+            vertical_qs, many=True, context={"request": request}
+        ).data
 
-        payload = {
-            "cards": LearnSerializer(
-                cards_qs, many=True, context={"request": request}
-            ).data,
-        }
+        horizontal_data = (
+            LearnSerializer(horizontal_qs.first(), context={"request": request}).data
+            if horizontal_qs
+            else None
+        )
 
-        if not payload["cards"]:
+        if not vertical_data and not horizontal_data:
             return Response(
                 {"detail": "No learn items found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        return Response(payload, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "vertical": vertical_data,
+                "horizontal": horizontal_data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @swagger_auto_schema(
         operation_summary="Top viewed poster learn",
@@ -509,9 +526,18 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
+        try:
+            queryset = queryset.annotate(learn_count=Count("learn"))
+        except Exception:
+            pass
+
+        if getattr(self, "action", None) != "list":
+            return queryset
+
         params = self.request.query_params
-        is_active = self.request.query_params.get("is_active")
-        learn_type = self.request.query_params.get("learn_type")
+        is_active = params.get("is_active")
+        learn_type = params.get("learn_type")
 
         if params.get("search"):
             return queryset.order_by("-created_at")
@@ -535,11 +561,6 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
             if values:
                 queryset = queryset.filter(learn_type__in=values)
 
-        try:
-            queryset = queryset.annotate(learn_count=Count("learn"))
-        except Exception:
-            pass
-
         return queryset
 
     @swagger_auto_schema(
@@ -553,6 +574,17 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         """
         category = self.get_object()
         learns = Learn.objects.filter(category=category).select_related("category")
+
+        created_at = request.query_params.get("created_at")
+        if created_at:
+            try:
+                year, month = created_at.split("-")
+                learns = learns.filter(
+                    created_at__year=int(year),
+                    created_at__month=int(month),
+                )
+            except Exception:
+                pass
         ordering = request.query_params.get("ordering")
         if ordering:
             learns = learns.order_by(ordering)
