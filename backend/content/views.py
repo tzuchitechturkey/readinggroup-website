@@ -577,6 +577,36 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @swagger_auto_schema(
+        operation_summary="Get most viewed poster event",
+        operation_description="Return one event community linked to a poster learn with highest views.",
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="top-one-poster",
+        url_name="top-one-poster",
+    )
+    def top_one_poster(self, request):
+        event = (
+            EventCommunity.objects.select_related("learn", "learn__category")
+            .filter(
+                learn__category__learn_type=LearnType.POSTERS,
+                learn__category__is_active=True,
+            )
+            .order_by("-learn__views")
+            .first()
+        )
+
+        if not event:
+            return Response(
+                {"detail": "No poster events found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = self.get_serializer(event, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # ========================================== new viewset end============================================
 class BookViewSet(viewsets.ModelViewSet):
