@@ -10,42 +10,31 @@ const isValidUrl = (url) => {
 export const validateForm = (formData, t) => {
   const newErrors = {};
 
-  if (!formData.category) {
-    newErrors.category = t("Category is required");
-  }
-
   if (!formData.title.trim()) {
-    newErrors.title = t("Title is required");
+    newErrors.title = t("Event Title is required");
   }
 
-  if (!formData.image && !formData.image_url) {
-    newErrors.image = t("Image is required");
+  if (!formData.start_event_date) {
+    newErrors.start_event_date = t("Event Date is required");
   }
 
-  if (!formData.status) {
-    newErrors.status = t("Status is required");
+  if (!formData.start_event_time) {
+    newErrors.start_event_time = t("Event Start Time is required");
   }
 
-  if (!formData.country) {
-    newErrors.country = t("Country is required");
+  if (!formData.duration) {
+    newErrors.duration = t("Event Duration is required");
   }
 
-  if (!formData.language) {
-    newErrors.language = t("Language is required");
+  if (!formData.learn || !formData.learn?.id) {
+    newErrors.learn = t("Event Learn is required");
   }
 
-  if (!formData.happened_at) {
-    newErrors.happened_at = t("Happened At is required");
+  if (!formData.guest_speakers || formData.guest_speakers.length === 0) {
+    newErrors.guest_speakers = t("At least one guest speaker is required");
   }
-
-  if (!formData.external_link.trim()) {
-    newErrors.external_link = t("External Link is required");
-  } else if (!isValidUrl(formData.external_link)) {
-    newErrors.external_link = t("Please enter a valid URL");
-  }
-
-  if (!formData.report_type) {
-    newErrors.report_type = t("Report type is required");
+  if (formData.live_stream_link && !isValidUrl(formData.live_stream_link)) {
+    newErrors.live_stream_link = t("Please enter a valid URL");
   }
 
   return newErrors;

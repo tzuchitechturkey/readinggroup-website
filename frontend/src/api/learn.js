@@ -83,3 +83,27 @@ export async function GetLearnCategoriesByType(type, search = "") {
     `/learn-categories/?learn_type=${type}&search=${search}`,
   );
 }
+
+// /learn/by_type_learn/
+// - last 3 cards:
+//     * 2 vertical
+//     * 1 horizontal
+export async function GetCarsdsForHome() {
+  return await axios.get(`/learn/last-three-cards/`);
+}
+
+// event-communities/top-one-poster/
+export async function GetTopOnePoster() {
+  return await axios.get(`/learn/top-one-views-poster/`);
+}
+
+// /learn-categories/posters/
+export async function GetPosterCategories(params) {
+  return await axios.get(`/learn-categories/posters/`, { params });
+}
+// /learn/?learn_type=poster
+export async function GetLearnsByType(type, params) {
+  return await axios.get(`/learn/?learn_type=${type}`, {
+    params,
+  });
+}

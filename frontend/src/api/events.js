@@ -1,54 +1,46 @@
 import axios from "./axios";
 
-export async function GetEvents(limit, offset, status, params = {}) {
+export async function GetEvents(limit, offset, params = {}) {
   const queryParams = new URLSearchParams();
 
   queryParams.append("limit", limit);
   queryParams.append("offset", offset);
-  queryParams.append("status", status);
 
   if (params.search) queryParams.append("search", params.search);
-  if (params.ordering) queryParams.append("ordering", params.ordering);
-  if (params.section) queryParams.append("section", params.section);
-  if (params.report_type) queryParams.append("report_type", params.report_type);
-  if (params.category) queryParams.append("category", params.category);
-  if (params.country) queryParams.append("country", params.country);
-  if (params.writer) queryParams.append("writer", params.writer);
-  if (params.language) queryParams.append("language", params.language);
-  if (params.happened_at) queryParams.append("happened_at", params.happened_at);
-  if (params.is_weekly_moment !== undefined)
-    queryParams.append("is_weekly_moment", params.is_weekly_moment);
-  return await axios.get(`/events/?${queryParams.toString()}`);
+  // if (params.language) queryParams.append("language", params.language);
+  if (params.start_event_date) queryParams.append("start_event_date", params.start_event_date);
+  return await axios.get(`/event-communities/?${queryParams.toString()}`);
 }
 // /events/?limit=10&offset=0&status=published
 
 export async function CreateEvent(data) {
-  return await axios.post(`/events/`, data);
+  return await axios.post(`/event-communities/`, data);
 }
 
 export async function GetEventById(id) {
-  return await axios.get(`/events/${id}/`);
+  return await axios.get(`/event-communities/${id}/`);
 }
 
 export async function EditEventById(id, data) {
-  return await axios.put(`/events/${id}/`, data);
+  return await axios.put(`/event-communities/${id}/`, data);
 }
 
 export async function PatchEventById(id, data) {
-  return await axios.patch(`/events/${id}/`, data);
+  return await axios.patch(`/event-communities/${id}/`, data);
 }
 
 export async function DeleteEventById(id) {
-  return await axios.delete(`/events/${id}/`);
+  return await axios.delete(`/event-communities/${id}/`);
 }
+
 // Get All Item By cAteogir Id
 export async function GetEventsByCategoryId(
   categoryId,
   limit = 10,
-  offset = 0
+  offset = 0,
 ) {
   return await axios.get(
-    `/event-categories/${categoryId}/events/?limit=${limit}&offset=${offset}`
+    `/event-categories/${categoryId}/events/?limit=${limit}&offset=${offset}`,
   );
 }
 
@@ -58,14 +50,14 @@ export async function GetTopSections() {
 
 export async function GetTop5BySections() {
   return await axios.get(
-    `/event-sections/top-with-top-liked/?limit=3&events_limit=5`
+    `/event-sections/top-with-top-liked/?limit=3&events_limit=5`,
   );
 }
 
 // Categories
 export async function GetEventCategories(limit, offset, search = "") {
   return await axios.get(
-    `/event-categories/?limit=${limit}&offset=${offset}&search=${search}`
+    `/event-categories/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 
@@ -92,7 +84,7 @@ export async function DeleteEventCategory(id) {
 // Sections
 export async function GetEventSections(limit, offset, search = "") {
   return await axios.get(
-    `/event-sections/?limit=${limit}&offset=${offset}&search=${search}`
+    `/event-sections/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 

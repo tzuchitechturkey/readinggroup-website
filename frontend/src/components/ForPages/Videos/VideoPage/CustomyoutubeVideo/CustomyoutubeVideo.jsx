@@ -104,7 +104,13 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   };
 
   const youTube = isYouTubeUrl(videoData?.video_url);
+  const plainText = videoData?.description
+    ? videoData.description.replace(/<[^>]+>/g, "")
+    : "";
+  const MAX_LENGTH = 120;
+  const isLong = plainText.length > MAX_LENGTH;
 
+  const displayedText = expanded ? plainText : plainText.slice(0, MAX_LENGTH);
   return (
     <div className=" max-w-[1200px] mx-auto ">
       {/* Back Button */}
@@ -192,24 +198,21 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
                   : "Nov. 26, 2025"}
               </p>
             </div>
-            <div className="flex items-end ">
-              <p
-                ref={textRef}
-                className={`text-[20px] font-normal text-[#081945] leading-[1.5] ${
-                  expanded ? "" : "line-clamp-2"
-                }`}
-                dangerouslySetInnerHTML={{ __html: videoData?.description }}
-              />
+            <p className="text-[20px] text-[#081945] leading-[1.5]">
+              {displayedText}
 
-              {hasMore && (
-                <button
-                  onClick={() => setExpanded((prev) => !prev)}
-                  className={`text-blue-600 mt-2 block`}
-                >
-                  {expanded ? "less" : "more..."}
-                </button>
+              {isLong && (
+                <>
+                  {!expanded && ".. "}
+                  <span
+                    onClick={() => setExpanded((prev) => !prev)}
+                    className="text-blue-600 cursor-pointer ml-1"
+                  >
+                    {expanded ? "less" : "more..."}
+                  </span>
+                </>
               )}
-            </div>
+            </p>
           </div>
 
           {/* Info Sidebar */}

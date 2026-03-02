@@ -20,7 +20,6 @@ function CategorySelectionDropdown({
   disabledMessage,
 }) {
   const { t } = useTranslation();
-
   const selectedCategory = categoriesList?.find(
     (cat) => cat.id === selectedCategoryId,
   );

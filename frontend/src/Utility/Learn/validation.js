@@ -12,7 +12,7 @@ export const validateForm = (formData, t, post) => {
   if (!formData.category) {
     newErrors.category = t("Category is required");
   }
-  if (!formData.learn_type) {
+  if (!formData.learn_type && !formData?.category?.learn_type) {
     newErrors.learn_type = t("Type is required");
   }
 
@@ -22,8 +22,16 @@ export const validateForm = (formData, t, post) => {
 
   // Validation for event fields (when is_event is true and learn_type is posters)
   if (formData.learn_type === "posters" && formData.is_event) {
-    if (!formData.date) {
-      newErrors.date = t("Event date is required");
+    if (!formData.start_event_date) {
+      newErrors.start_event_date = t("Event date is required");
+    }
+
+    if (!formData.start_event_time) {
+      newErrors.start_event_time = t("Event start time is required");
+    }
+
+    if (!formData.duration) {
+      newErrors.duration = t("Event duration is required");
     }
 
     if (!formData.event_title || !formData.event_title.trim()) {

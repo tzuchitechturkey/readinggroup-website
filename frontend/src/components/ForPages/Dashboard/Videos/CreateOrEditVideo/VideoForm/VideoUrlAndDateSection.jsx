@@ -25,6 +25,15 @@ export const VideoUrlAndDateSection = ({
             name="video_url"
             value={formData?.video_url}
             onChange={onInputChange}
+            // when user presses enter key, it should trigger onFetchYouTube
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                if (!isFetchingYoutube && formData?.video_url) {
+                  onFetchYouTube();
+                }
+              }
+            }}
             placeholder={t("Enter YouTube URL")}
             className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors?.video_url ? "border-red-500" : "border-gray-300"

@@ -49,6 +49,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     setCategorySearchValue("");
     getCategories("");
   };
+  console.log("Form Data:", formData);
   return (
     <div className="bg-white rounded-lg p-6 mx-4 min-h-screen pb-10 overflow-y-auto">
       {isLoading && <Loader />}
@@ -91,7 +92,8 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
         />
 
         {/* Event Section - For Posters */}
-        {formData.learn_type === "posters" && (
+        {(formData.learn_type || formData?.category?.learn_type) ===
+          "posters" && (
           <div className="space-y-4 border border-gray-200 rounded-lg p-4 ">
             {/* Is Event Switch */}
             <div className="flex items-center justify-between">
@@ -122,111 +124,9 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
             </div>
 
             {/* Event Fields - Only show if is_event is true */}
-            {formData.is_event && (
-              <div className=" mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Start Event Date */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t("Event Date & Time")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border ${errors.date ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  />
-                  {errors.date && (
-                    <p className="text-red-600 text-sm">{errors.date}</p>
-                  )}
-                </div>
-                {/* End Event Title */}
-
-                {/* Start Event Title */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t("Event Title")} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="event_title"
-                    value={formData.event_title || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter event title"
-                    className={`w-full px-3 py-2 border ${errors.event_title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  />
-                  {errors.event_title && (
-                    <p className="text-red-600 text-sm">{errors.event_title}</p>
-                  )}
-                </div>
-                {/* End Event Title */}
-
-                {/* Start Guest Speakers */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t("Guest Speakers")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={guestSpeakerInput}
-                    onChange={(e) => setGuestSpeakerInput(e.target.value)}
-                    onKeyDown={handleGuestSpeakersInput}
-                    placeholder="Enter guest speaker name and press Enter"
-                    className={`w-full px-3 py-2 border ${errors.guest_speakers ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  />
-                  {formData.guest_speakers &&
-                    formData.guest_speakers.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.guest_speakers.map((speaker, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                          >
-                            <span>{speaker}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeGuestSpeaker(speaker)}
-                              className="hover:text-blue-600"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  {errors.guest_speakers && (
-                    <p className="text-red-600 text-sm">
-                      {errors.guest_speakers}
-                    </p>
-                  )}
-                </div>
-                {/* End Guest Speakers */}
-
-                {/* Start Live Stream Link */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t("Live Stream Link")}{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="url"
-                    name="live_stream_link"
-                    value={formData.live_stream_link}
-                    onChange={handleInputChange}
-                    placeholder="https://..."
-                    className={`border ${errors.live_stream_link ? "border-red-500" : " border-gray-300"} w-full px-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  />
-                  {errors.live_stream_link && (
-                    <p className="text-red-600 text-sm">
-                      {errors.live_stream_link}
-                    </p>
-                  )}
-                </div>
-                {/* End Live Stream Link */}
-              </div>
-            )}
+            {/* {formData.is_event && (
+          
+            )} */}
           </div>
         )}
 

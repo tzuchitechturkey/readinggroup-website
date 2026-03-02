@@ -13,7 +13,6 @@ function UserIcons() {
   const { t, i18n } = useTranslation();
   const isLoggedIn = Boolean(localStorage.getItem("accessToken"));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-console.log("isLoggedIn:", isLoggedIn);
   const navigate = useNavigate();
   const [userType, setUserType] = useState(null);
   const isMobile = useIsMobile();

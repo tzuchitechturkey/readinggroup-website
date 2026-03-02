@@ -10,20 +10,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import Image from "../../../../assets/livestreen.png";
 
-const LivestreamCard = ({ livestream, t }) => {
+const LivestreamCard = ({ data =[], t }) => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
-
   const [imageCarouselApi, setImageCarouselApi] = useState(null);
-  const data = [
-    { image: Image, title: "", description: "" },
-    { image: Image, title: "", description: "" },
-    { image: Image, title: "", description: "" },
-  ];
+  
   useEffect(() => {
     if (!imageCarouselApi) return;
 
@@ -39,6 +33,17 @@ const LivestreamCard = ({ livestream, t }) => {
     imageCarouselApi.on("select", updateButtons);
   }, [imageCarouselApi]);
 
+  // Get current active item from data
+  const activeItem = data[current];
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const day = date.getDate();
+    return `${month}. ${day}`;
+  };
+
   return (
     <div className="flex flex-col md:flex-row px-0 sm:px-2 md:px-4 lg:px-0 gap-4 sm:gap-5 md:gap-5 lg:gap-5 mt-4 sm:mt-6 md:mt-6 lg:mt-4 items-start md:items-center w-full">
       {/* Left Content */}
@@ -47,13 +52,13 @@ const LivestreamCard = ({ livestream, t }) => {
           {/* Date Tag */}
           <div className="border-[1px] border-white flex gap-[6px] sm:gap-[7px] md:gap-[8px] lg:gap-[8px] items-center justify-center py-[6px] sm:py-[7px] md:py-[8px] lg:py-[8px] px-[8px] sm:px-[9px] md:px-3 rounded-full">
             <p className="font-inter font-normal leading-none text-[#f5f5f5] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]">
-              {livestream.date}
+              {activeItem && formatDate(activeItem.start_event_date)}
             </p>
           </div>
 
           {/* Title */}
           <p className="font-['Noto_Sans_TC:Black',sans-serif] font-black leading-[1.5] text-[28px] sm:text-[32px] md:text-[36px] lg:text-[40px] text-white w-full whitespace-pre-wrap">
-            {livestream.title}
+            {activeItem?.title}
           </p>
 
           {/* Speakers List */}
@@ -61,7 +66,7 @@ const LivestreamCard = ({ livestream, t }) => {
             <p className=" font-bold text-lg text-[#FCFDFF] mb-3">
               {t("Guest Speakers")}
             </p>
-            {livestream.speakers.map((speaker, index) => (
+            {activeItem?.guest_speakers?.map((speaker, index) => (
               <ul
                 key={index}
                 className="flex gap-[3px] sm:gap-[3px] md:gap-[4px] lg:gap-[4px] list-none px-3 items-start w-full"
@@ -71,7 +76,7 @@ const LivestreamCard = ({ livestream, t }) => {
                     key={index}
                     className={`w-1.5 h-1.5 rounded-full bg-[#FCFDFF]`}
                   />
-                  {speaker.name}
+                  {typeof speaker === "string" ? speaker : speaker.name}
                 </li>
               </ul>
             ))}

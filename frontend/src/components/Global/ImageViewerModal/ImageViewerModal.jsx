@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import ReactDOM from "react-dom";
-import { useTranslation } from "react-i18next";
 import { HiX, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 import ZoomControls from "./ZoomControls";
@@ -14,7 +13,6 @@ const ImageViewerModal = ({
   onNext,
   onPrev,
 }) => {
-  const { t } = useTranslation();
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -180,16 +178,18 @@ const ImageViewerModal = ({
       {/* Container for Arrows and Image */}
       <div className="relative max-w-[1200px] w-full h-full flex items-center justify-between px-4 md:px-10">
         {/* Previous Button - hidden on small mobile screen when not zoomed to allow swiping */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onPrev();
-          }}
-          className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
-          disabled={images.length <= 1}
-        >
-          <HiChevronLeft className="w-12 h-12" />
-        </button>
+        {onPrev && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrev();
+            }}
+            className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
+            disabled={images.length <= 1}
+          >
+            <HiChevronLeft className="w-12 h-12" />
+          </button>
+        )}
 
         {/* Image Container */}
         <div
@@ -219,16 +219,18 @@ const ImageViewerModal = ({
         </div>
 
         {/* Next Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNext();
-          }}
-          className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
-          disabled={images.length <= 1}
-        >
-          <HiChevronRight className="w-12 h-12" />
-        </button>
+        {onNext && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            className="hidden md:flex p-3 rounded-full hover:bg-white/10 text-white transition-all z-40 disabled:opacity-30"
+            disabled={images.length <= 1}
+          >
+            <HiChevronRight className="w-12 h-12" />
+          </button>
+        )}
       </div>
 
       {/* Close and Zoom Controls Side Column */}

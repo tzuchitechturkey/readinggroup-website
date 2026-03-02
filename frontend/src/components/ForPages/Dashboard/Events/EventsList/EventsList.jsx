@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
-import { Eye, ToggleLeft, ToggleRight, X } from "lucide-react";
 import { toast } from "react-toastify";
+import { Radio } from "lucide-react";
 
 import {
   Table,
@@ -17,23 +17,23 @@ import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetEvents, DeleteEventById, PatchEventById } from "@/api/events";
+import { GetEvents, DeleteEventById } from "@/api/events";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
-
-import VideoDetails from "../../Videos/VideoDetails/VideoDetails";
+import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
 const EventsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
   // State management
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("published");
-  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({
+    key: "start_event_date",
+    direction: "asc",
+  });
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
-  const [isWeeklyMomentFilter, setIsWeeklyMomentFilter] = useState(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,25 +41,15 @@ const EventsList = ({ onSectionChange }) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [eventsData, setEventsData] = useState([]);
   // Fetch Event from API
-  const getEventsData = async (
-    page = 0,
-    searchVal = search,
-    status = statusFilter,
-    filters = {},
-  ) => {
+  const getEventsData = async (page = 0, searchVal = search, filters = {}) => {
     setIsLoading(true);
     const offset = page * limit;
 
     // params سيكون كائن حتى لو كان فقط search
     const params = searchVal ? { search: searchVal } : {};
 
-    // إضافة فلتر is_weekly_moment إذا كان محدداً
-    if (filters.is_weekly_moment !== undefined) {
-      params.is_weekly_moment = filters.is_weekly_moment;
-    }
-
     try {
-      const res = await GetEvents(limit, offset, status, params);
+      const res = await GetEvents(limit, offset, params);
 
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
@@ -81,25 +71,13 @@ const EventsList = ({ onSectionChange }) => {
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
 
-      // numeric fields
-      if (sortConfig.key === "id") {
-        return sortConfig.direction === "asc"
-          ? aValue - bValue
-          : bValue - aValue;
-      }
-
-      // date fields
-      if (sortConfig.key === "happened_at") {
+      // date fields - only sorting by start_event_date
+      if (sortConfig.key === "start_event_date") {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
 
-      // string fallback
-      const strA = String(aValue).toLowerCase();
-      const strB = String(bValue).toLowerCase();
-      if (strA < strB) return sortConfig.direction === "asc" ? -1 : 1;
-      if (strA > strB) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -108,12 +86,8 @@ const EventsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    const filters =
-      isWeeklyMomentFilter !== null
-        ? { is_weekly_moment: isWeeklyMomentFilter }
-        : {};
-    getEventsData(currentPage - 1, search, statusFilter, filters);
-  }, [update, statusFilter, isWeeklyMomentFilter]);
+    getEventsData(currentPage - 1, search);
+  }, [update]);
 
   // Sorting functionality
   const sortData = (key) => {
@@ -141,30 +115,11 @@ const EventsList = ({ onSectionChange }) => {
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
-  const handleStatusChange = (newStatus) => {
-    setStatusFilter(newStatus);
-    setCurrentPage(1);
-    setSearch("");
-    getEventsData(0, "", newStatus);
-  };
-
-  // Handle is_weekly_moment filter change
-  const handleWeeklyMomentFilterChange = (value) => {
-    const newFilter = value === isWeeklyMomentFilter ? null : value;
-    setIsWeeklyMomentFilter(newFilter);
-    setCurrentPage(1);
-    const filters = newFilter !== null ? { is_weekly_moment: newFilter } : {};
-    getEventsData(0, "", statusFilter, filters);
-  };
-
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-      const filters =
-        isWeeklyMomentFilter !== null
-          ? { is_weekly_moment: isWeeklyMomentFilter }
-          : {};
-      getEventsData(newPage - 1, search, statusFilter, filters);
+
+      getEventsData(newPage - 1, search);
     }
   };
 
@@ -172,51 +127,8 @@ const EventsList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-    const filters =
-      isWeeklyMomentFilter !== null
-        ? { is_weekly_moment: isWeeklyMomentFilter }
-        : {};
-    getEventsData(0, "", statusFilter, filters);
-  };
-  // دالة التعامل مع تبديل القائمة الأسبوعية
-  const handleWeeklyEventToggle = async (
-    eventId,
-    currentStatus,
-    eventStatus,
-  ) => {
-    // Prevent adding draft/archived events to weekly moments
-    if (
-      !currentStatus &&
-      (eventStatus === "draft" || eventStatus === "archived")
-    ) {
-      toast.info(
-        t(
-          "Cannot add event to weekly list. Only published events can be added to the weekly list.",
-        ),
-      );
-      return;
-    }
 
-    setIsLoading(true);
-    try {
-      await PatchEventById(eventId, { is_weekly_moment: !currentStatus });
-      const message = !currentStatus
-        ? t("Event added to weekly list successfully")
-        : t("Event removed from weekly list successfully");
-      toast.success(message);
-      setUpdate((prev) => !prev);
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // تعديل الفيديو
-  const handleEdit = (eventId) => {
-    const event = eventsData.find((v) => v.id === eventId);
-    setEditingVideo(event);
-    onSectionChange("createOrEditEvent", event);
+    getEventsData(0, "");
   };
 
   const handleConfirmDelete = async () => {
@@ -238,7 +150,23 @@ const EventsList = ({ onSectionChange }) => {
 
   // Pagination
   const totalPages = Math.ceil(totalRecords / limit);
+  // Helper function to check if event is still live (not ended)
+  const isEventLive = (startEventDate, startEventTime, duration) => {
+    try {
+      // Calculate end time
+      const endTimeString = calculateEndTime(startEventTime, duration);
+      const endDateTime = new Date(`${startEventDate}T${endTimeString}`);
 
+      // Get current time
+      const currentTime = new Date();
+
+      // Event is live if current time is before end time
+      return currentTime < endDateTime;
+    } catch (error) {
+      console.error("Error calculating event live status:", error);
+      return false;
+    }
+  };
   return (
     <div
       className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
@@ -308,11 +236,7 @@ const EventsList = ({ onSectionChange }) => {
 
           <button
             onClick={() => {
-              const filters =
-                isWeeklyMomentFilter !== null
-                  ? { is_weekly_moment: isWeeklyMomentFilter }
-                  : {};
-              getEventsData(0, search, statusFilter, filters);
+              getEventsData(0, search);
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
@@ -323,70 +247,6 @@ const EventsList = ({ onSectionChange }) => {
         </div>
       </div>
       {/* End Search */}
-      <div className="flex items-center justify-between ">
-        {/* Status Tabs Filter */}
-        <div className="bg-white rounded-lg p-4 pt-1 shadow-sm flex gap-3 flex-wrap">
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
-              {t("Status")}:
-            </span>
-            {["published", "draft", "archived"].map((status) => (
-              <button
-                key={status}
-                onClick={() => handleStatusChange(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                  statusFilter === status
-                    ? "bg-primary text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                {t(status.charAt(0).toUpperCase() + status.slice(1))}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* End Status Tabs Filter */}
-
-        {/* Start Is Weekly Moment Filter */}
-        <div className="bg-white rounded-lg p-4 items-center  shadow-sm flex gap-3 flex-wrap">
-          <span className="text-gray-600 font-medium text-sm">
-            {t("Weekly List")}:
-          </span>
-          <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => handleWeeklyMomentFilterChange(null)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isWeeklyMomentFilter === null
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {t("All")}
-            </button>
-            <button
-              onClick={() => handleWeeklyMomentFilterChange(true)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                isWeeklyMomentFilter === true
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {t("Weekly")}
-            </button>
-            <button
-              onClick={() => handleWeeklyMomentFilterChange(false)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                isWeeklyMomentFilter === false
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {t("Not Weekly")}
-            </button>
-          </div>
-        </div>
-        {/* End Is Weekly Moment Filter */}
-      </div>
 
       {/* Start Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -395,78 +255,48 @@ const EventsList = ({ onSectionChange }) => {
             <TableRow>
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
                 <button
-                  onClick={() => sortData("id")}
+                  onClick={() => sortData("start_event_date")}
                   className="flex items-center gap-1 font-medium"
                 >
-                  #{getSortIcon("id")}
+                  {t("Event Date")}
+                  {getSortIcon("start_event_date")}
                 </button>
               </TableHead>
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("title")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Title")}
-                    {getSortIcon("title")}
-                  </button>
+                <div className="flex items-center justify-center gap-1">
+                  {t("Title")}
                 </div>
               </TableHead>
-              <TableHead>
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("title")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Image")}
-                  </button>
-                </div>
-              </TableHead>
-              {/* <TableHead className="hidden md:table-cell">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button className="flex items-center gap-1 font-medium">
-                    {t("Section")}
-                  </button>
-                </div>
-              </TableHead> */}
+
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("happened_at")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Date")}
-                    {getSortIcon("happened_at")}
-                  </button>
+                <div className="flex items-center justify-center gap-1">
+                  {t("Event Start Time")}
                 </div>
               </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("report_type")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Type")}
-                    {getSortIcon("report_type")}
-                  </button>
+
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1">
+                  {t("Event Duration")}
                 </div>
               </TableHead>
-              <TableHead className="hidden sm:table-cell">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  <button
-                    onClick={() => sortData("category")}
-                    className="flex items-center gap-1 font-medium"
-                  >
-                    {t("Category")}
-                    {getSortIcon("category")}
-                  </button>
+
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1">
+                  {t("Guest Speakers")}
                 </div>
               </TableHead>
-              <TableHead className=" text-center text-[#5B6B79] font-medium text-xs">
-                <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-                  {t("Weekly List")}
+
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1">
+                  {t("View Posters")}
                 </div>
               </TableHead>
+              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                <div className="flex items-center justify-center gap-1">
+                  {t("Live Stream Link")}
+                </div>
+              </TableHead>
+
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
               </TableHead>
@@ -485,40 +315,10 @@ const EventsList = ({ onSectionChange }) => {
             ) : getSortedData().length > 0 ? (
               getSortedData().map((event) => (
                 <TableRow key={event?.id} className="hover:bg-gray-50">
-                  <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                    {event?.id}
-                  </TableCell>
-                  <TableCell>
-                    <div className="min-w-0 text-center ">
-                      <p className="font-medium text-gray-900 truncate">
-                        {event?.title}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-3">
-                      <img
-                        src={event?.image || event?.image_url}
-                        alt={event?.title}
-                        className="w-12 h-12 rounded-lg object-cover"
-                        onError={(e) => {
-                          e.target.src = "/placeholder-image.png";
-                        }}
-                      />
-                    </div>
-                  </TableCell>
-                  {/* <TableCell className="hidden md:table-cell">
-                    <p
-                      className="text-gray-600 max-w-xs truncate text-center"
-                      title={event?.section?.name}
-                    >
-                      {event?.section?.name}
-                    </p>
-                  </TableCell> */}
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <div className="flex flex-col items-center ">
+                    <div className="flex flex-col items-start px-2 ">
                       <span className="font-medium">
-                        {new Date(event.happened_at).toLocaleDateString(
+                        {new Date(event.start_event_date).toLocaleDateString(
                           "en-GB",
                           {
                             year: "numeric",
@@ -529,50 +329,69 @@ const EventsList = ({ onSectionChange }) => {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell text-center">
-                    <span className="text-gray-600 ">
-                      {t(event?.report_type)}
+
+                  <TableCell>
+                    <div className="min-w-0 text-center ">
+                      <p className="font-medium text-gray-900 truncate">
+                        {event?.title}
+                      </p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                    <span className="font-medium">
+                      {event?.start_event_time}
                     </span>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {event?.category?.name}
-                    </span>
+
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                    <span className="font-medium">{event?.duration}</span>
                   </TableCell>
-                  <TableCell className="text-center py-4">
-                    <button
-                      onClick={() =>
-                        handleWeeklyEventToggle(
-                          event?.id,
-                          event?.is_weekly_moment,
-                          event?.status,
-                        )
-                      }
-                      className={`py-1 rounded-full text-[10px] font-medium transition-colors ${
-                        event?.is_weekly_moment
-                          ? "bg-green-100 text-green-800 hover:bg-green-200"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                      }`}
-                    >
-                      {event?.is_weekly_moment ? (
-                        <ToggleRight className="h-8 w-12" />
+
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {event?.guest_speakers &&
+                      event.guest_speakers.length > 0 ? (
+                        event.guest_speakers.map((speaker, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
+                          >
+                            {speaker}
+                          </span>
+                        ))
                       ) : (
-                        <ToggleLeft className="h-8 w-12" />
+                        <span className="text-gray-500">-</span>
                       )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4 flex items-center justify-center">
+                    <button
+                      className={`cursor-pointer rounded-md p-3  text-sm ${event?.learn?.id ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setIsViewerOpen(true);
+                      }}
+                    >
+                      {t("View Posters")}
                     </button>
                   </TableCell>
+
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4   ">
+                    <a
+                      className={`flex  items-center w-fit gap-1  mx-auto cursor-pointer rounded-md p-3  text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
+                      href={event.live_stream_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Radio className="w-4 h-4" />
+                      <span>{t("Livestream Link")}</span>
+                    </a>
+                  </TableCell>
+
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <button
-                        title={t("View Details")}
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowDetailsModal(true);
-                        }}
-                        className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
                       <button
                         onClick={() => {
                           setSelectedEvent(event);
@@ -678,21 +497,6 @@ const EventsList = ({ onSectionChange }) => {
         </div>
       )}
 
-      {/* Start Video Details Modal */}
-      <Modal
-        isOpen={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)}
-        title={t("Event Details")}
-        width="700px"
-      >
-        <VideoDetails
-          selectedItem={selectedEvent}
-          setShowDetailsModal={setShowDetailsModal}
-          handleEdit={handleEdit}
-        />
-      </Modal>
-      {/* End Video Details Modal */}
-
       {/* Start Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}
@@ -716,6 +520,19 @@ const EventsList = ({ onSectionChange }) => {
           itemName={selectedEvent?.title}
         />
       </Modal>
+      {/* Image Viewer Modal */}
+      <ImageViewerModal
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        images={
+          selectedEvent?.learn?.image
+            ? [selectedEvent.learn.image]
+            : selectedEvent?.learn?.image_url
+              ? [selectedEvent.learn.image_url]
+              : []
+        }
+        currentIndex={0}
+      />
     </div>
   );
 };

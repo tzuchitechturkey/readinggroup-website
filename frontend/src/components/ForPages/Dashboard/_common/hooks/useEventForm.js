@@ -1,48 +1,45 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
 
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { processImageFile } from "@/Utility/imageConverter";
-import { CreateEvent, EditEventById, GetEventCategories } from "@/api/events";
+import { CreateEvent, EditEventById } from "@/api/events";
+import { GetLearnsByType } from "@/api/learn";
 
 import { FORM_DATA_INITIAL_STATE } from "../utils/eventForm/constants";
 import { validateForm, isFormValid } from "../utils/eventForm/validation";
 
 export const useEventForm = (event = null, onSectionChange) => {
   const { t } = useTranslation();
-  const categoryDropdownRef = useRef(null);
 
   const [formData, setFormData] = useState(FORM_DATA_INITIAL_STATE);
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [categoriesList, setCategoriesList] = useState([]);
-  const [categorySearchValue, setCategorySearchValue] = useState("");
-  const [hasChanges, setHasChanges] = useState(false);
-
-  // Initialize form when editing
+  // const [hasChanges, setHasChanges] = useState(false);
+  const [guestSpeakerInput, setGuestSpeakerInput] = useState("");
+  const [selectedLearn, setSelectedLearn] = useState(null);
+  const [learnsList, setLearnsList] = useState([]);
+  const [learnsSearchValue, setLearnsSearchValue] = useState("");
+   // Initialize form when editing
   useEffect(() => {
     if (event?.id) {
       setFormData({
-        category: event.category || "",
         title: event.title || "",
-        image: null,
-        image_url: event.image_url || "",
-        country: event.country || "",
-        language: event.language || "",
-        happened_at: event.happened_at || "",
-        thumbnail: null,
-        thumbnail_url: event.thumbnail_url || "",
-        status: event.status || "",
-        external_link: event.external_link || "",
-        report_type: event.report_type || "",
+        start_event_date: event.start_event_date
+          ? event.start_event_date.split(" ")[0]
+          : "",
+        start_event_time: event.start_event_time || "",
+        duration: event.duration || "",
+        guest_speakers: event.guest_speakers || [],
+        live_stream_link: event.live_stream_link || "",
+        learn: event.learn || null,
       });
-      setImagePreview(event.image || event.image_url);
-      setHasChanges(false);
+      if (event.learn) {
+        setSelectedLearn(event.learn);
+      }
+      // setHasChanges(false);
     } else {
       resetForm();
     }
@@ -57,42 +54,28 @@ export const useEventForm = (event = null, onSectionChange) => {
     };
   }, [imagePreview]);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        categoryDropdownRef.current &&
-        !categoryDropdownRef.current.contains(event.target)
-      ) {
-        setShowCategoryDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const getCategories = useCallback(async (searchVal = "") => {
+  // Get learns from API
+  const getLearnsList = useCallback(async (searchVal = "") => {
     try {
-      const res = await GetEventCategories(10, 0, searchVal);
-      setCategoriesList(res?.data?.results);
+      const params = searchVal ? { search: searchVal } : {};
+      const res = await GetLearnsByType("event", params);
+      setLearnsList(res?.data?.results || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching learns:", error);
     }
   }, []);
 
-  // Load categories on component mount
+  // Load learns on component mount
   useEffect(() => {
-    getCategories();
-  }, [getCategories]);
+    getLearnsList();
+  }, [getLearnsList]);
 
   const resetForm = useCallback(() => {
     setFormData(FORM_DATA_INITIAL_STATE);
     setErrors({});
     setImagePreview("");
-    setHasChanges(false);
+    setGuestSpeakerInput("");
+    // setHasChanges(false);
 
     if (imagePreview && imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
@@ -100,12 +83,12 @@ export const useEventForm = (event = null, onSectionChange) => {
   }, [imagePreview]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
-    setHasChanges(true);
 
     if (errors[name]) {
       setErrors((prev) => ({
@@ -115,47 +98,51 @@ export const useEventForm = (event = null, onSectionChange) => {
     }
   };
 
-  const handleCategorySelect = (category) => {
-    setFormData((prev) => ({
-      ...prev,
-      category: category.id,
-    }));
-    setShowCategoryDropdown(false);
-    setCategorySearchValue("");
-    setHasChanges(true);
+  const handleGuestSpeakersInput = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const trimmedInput = guestSpeakerInput.trim();
 
-    if (errors.category) {
-      setErrors((prev) => ({
-        ...prev,
-        category: "",
-      }));
+      if (trimmedInput) {
+        setFormData((prev) => ({
+          ...prev,
+          guest_speakers: [...prev.guest_speakers, trimmedInput],
+        }));
+        setGuestSpeakerInput("");
+        // setHasChanges(true);
+
+        if (errors.guest_speakers) {
+          setErrors((prev) => ({
+            ...prev,
+            guest_speakers: "",
+          }));
+        }
+      }
     }
   };
 
-  const handleThumbnailUpload = async (file) => {
-    if (!file) return;
+  const removeGuestSpeaker = (speaker) => {
+    setFormData((prev) => ({
+      ...prev,
+      guest_speakers: prev.guest_speakers.filter((s) => s !== speaker),
+    }));
+    // setHasChanges(true);
+  };
 
-    try {
-      const { file: processedFile, url } = await processImageFile(file);
+  const handleLearnSelect = (learn) => {
+    setSelectedLearn(learn);
+    setFormData((prev) => ({
+      ...prev,
+      learn,
+    }));
+  };
 
-      setFormData((prev) => ({
-        ...prev,
-        image: processedFile,
-      }));
-
-      setImagePreview(url);
-      setHasChanges(true);
-
-      if (errors.image) {
-        setErrors((prev) => ({
-          ...prev,
-          image: "",
-        }));
-      }
-    } catch (error) {
-      console.error("Error processing image:", error);
-      toast.error(t("Failed to process image"));
-    }
+  const handleLearnClear = () => {
+    setSelectedLearn(null);
+    setFormData((prev) => ({
+      ...prev,
+      learn: null,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -170,30 +157,22 @@ export const useEventForm = (event = null, onSectionChange) => {
     }
 
     const submitData = new FormData();
-    submitData.append("category", formData.category?.id || formData.category);
     submitData.append("title", formData.title);
-    submitData.append("status", formData.status);
-    submitData.append("country", formData.country);
-    submitData.append("language", formData.language);
-    submitData.append("report_type", formData.report_type);
+    submitData.append("start_event_date", formData.start_event_date);
+    submitData.append("start_event_time", formData.start_event_time);
+    submitData.append("duration", formData.duration);
+    submitData.append("live_stream_link", formData.live_stream_link);
 
-    if (formData.image) {
-      submitData.append("image", formData.image);
-    }
-
-    if (formData.image_url) {
-      submitData.append("image_url", formData.image_url);
-    }
-
-    if (formData.happened_at) {
-      const formattedDate = format(
-        new Date(formData.happened_at),
-        "yyyy-MM-dd",
+    if (formData.guest_speakers && formData.guest_speakers.length > 0) {
+      submitData.append(
+        "guest_speakers",
+        JSON.stringify(formData.guest_speakers),
       );
-      submitData.append("happened_at", formattedDate);
     }
 
-    submitData.append("external_link", formData.external_link);
+    if (formData.learn?.id) {
+      submitData.append("learn", formData.learn.id);
+    }
 
     setIsLoading(true);
     try {
@@ -216,24 +195,21 @@ export const useEventForm = (event = null, onSectionChange) => {
 
   return {
     formData,
-    setFormData,
     errors,
-    setErrors,
-    imagePreview,
-    setImagePreview,
     isLoading,
-    showCategoryDropdown,
-    setShowCategoryDropdown,
-    categoriesList,
-    categorySearchValue,
-    setCategorySearchValue,
-    categoryDropdownRef,
-    hasChanges,
+    guestSpeakerInput,
+    setGuestSpeakerInput,
+    selectedLearn,
+    learnsList,
+    learnsSearchValue,
+    setLearnsSearchValue,
     handleInputChange,
-    handleCategorySelect,
-    handleThumbnailUpload,
     handleSubmit,
+    handleGuestSpeakersInput,
+    removeGuestSpeaker,
+    handleLearnSelect,
+    handleLearnClear,
+    getLearnsList,
     resetForm,
-    getCategories,
   };
 };

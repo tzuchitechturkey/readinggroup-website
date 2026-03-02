@@ -27,16 +27,16 @@ const RevisitCard = ({ card, size = "medium", t }) => {
 
   return (
     <div
-      className={`   flex flex-col gap-[8px] sm:gap-[9px] md:gap-[10px] lg:gap-[11px] items-center w-full ${size === "large" ? "md:items-start" : ""}`}
+      className={`flex flex-col gap-[8px] sm:gap-[9px] md:gap-[10px] lg:gap-[11px] items-center w-full ${size === "large" ? "md:items-start" : ""}`}
     >
       <div
-        className={`${image} max-w-[580px] relative shadow-[0px_9px_17px_0px_rgba(0,0,0,0.25)] cursor-pointer group overflow-hidden rounded-lg sm:rounded-xl lg:rounded-lg`}
+        className={`${image} max-w-[580px] relative shadow-[0px_9px_17px_0px_rgba(0,0,0,0.25)] cursor-pointer group overflow-hidden  `}
         onClick={() => {}}
       >
         <img
-          alt={card.title}
+          alt={card?.title}
           className="w-full max-w-[580px] h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
-          src={card.image}
+          src={card?.image || card?.image_url}
         />
 
         {/* Hover Overlay */}
@@ -48,9 +48,9 @@ const RevisitCard = ({ card, size = "medium", t }) => {
       </div>
 
       <p
-        className={`font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] text-center text-white w-full whitespace-pre-wrap ${size === "large" ? "text-left" : ""}`}
+        className={`font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.5] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] text-center text-[#FCFDFF] opacity-80 w-full whitespace-pre-wrap ${size === "large" ? "text-left" : ""}`}
       >
-        {card.title}
+        {card?.title}
       </p>
     </div>
   );

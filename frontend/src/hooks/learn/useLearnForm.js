@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { format } from "date-fns";
 
 import { processImageFile } from "@/Utility/imageConverter";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -22,7 +21,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     ...LEARN_FORM_DATA_INITIAL_STATE,
     direction: "horizontal", // Default direction for cards
     is_event: false,
-    date: "",
+    start_event_date: "",
+    start_event_time: "",
+    duration: "", // Duration in HH:MM format
     event_title: "",
     guest_speakers: [],
     live_stream_link: "",
@@ -70,12 +71,17 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     }
     if (name === "learn_type") {
       getCategories(value);
-      // Reset is_event when changing learn_type
+      setErrors((prev) => ({
+        ...prev,
+        learn_type: "",
+      }));
       setFormData((prev) => ({
         ...prev,
         [name]: newValue,
         is_event: false,
-        date: "",
+        start_event_date: "",
+        start_event_time: "",
+        duration: "",
         event_title: "",
         guest_speakers: [],
         live_stream_link: "",
@@ -207,9 +213,14 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     // Add event-related fields for posters
     if (formData.learn_type === "posters" && formData.is_event) {
       learnData.append("is_event", true);
-      if (formData.date) {
-        const formattedDate = format(new Date(formData.date), "yyyy-MM-dd");
-        learnData.append("event_date", formattedDate);
+      if (formData.start_event_date) {
+        learnData.append("start_event_date", formData.start_event_date);
+      }
+      if (formData.start_event_time) {
+        learnData.append("start_event_time", formData.start_event_time);
+      }
+      if (formData.duration) {
+        learnData.append("duration", formData.duration);
       }
       learnData.append("event_title", formData.event_title);
       learnData.append(
@@ -257,7 +268,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         image_url: learn.image_url || "",
         direction: learn.direction || "horizontal",
         is_event: learn.is_event || false,
-        date: learn.event_date || "",
+        start_event_date: learn.start_event_date || "",
+        start_event_time: learn.start_event_time || "",
+        duration: learn.duration || "",
         event_title: learn.event_title || "",
         guest_speakers: learn.guest_speakers || [],
         live_stream_link: learn.live_stream_link || "",
@@ -284,7 +297,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
 
   // Fetch writers and categories on mount
   useEffect(() => {
-    getCategories("cards");
+    if (learn?.category?.learn_type) {
+      getCategories(learn?.category?.learn_type);
+    }
   }, []);
 
   return {

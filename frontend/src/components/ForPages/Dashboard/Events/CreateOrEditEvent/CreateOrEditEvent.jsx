@@ -1,39 +1,33 @@
 import React from "react";
 
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import Loader from "@/components/Global/Loader/Loader";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
 
-import {
-  ImageSection,
-  BasicDetailsSection,
-  CategorySection,
-  LocationLanguageStatusSection,
-  DateAndLinkSection,
-  FormActionsSection,
-} from "./EventForm";
+import { FormActionsSection } from "./EventForm";
 
 const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
   const {
     formData,
     errors,
-    imagePreview,
     isLoading,
-    showCategoryDropdown,
-    setShowCategoryDropdown,
-    categoriesList,
-    categorySearchValue,
-    setCategorySearchValue,
-    categoryDropdownRef,
+    guestSpeakerInput,
+    setGuestSpeakerInput,
+    selectedLearn,
+    learnsList,
     handleInputChange,
-    handleCategorySelect,
-    handleThumbnailUpload,
     handleSubmit,
+    handleGuestSpeakersInput,
+    removeGuestSpeaker,
+    handleLearnSelect,
+    handleLearnClear,
+    getLearnsList,
     resetForm,
-    getCategories,
   } = useEventForm(event, onSectionChange);
 
   const handleCancel = () => {
@@ -52,99 +46,167 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         page={event?.id ? t("Edit Event") : t("Create New Event")}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Image Section */}
-        <ImageSection
-          imagePreview={imagePreview}
-          onFileChange={handleThumbnailUpload}
-          imageUrl={formData.image_url}
-          onImageUrlChange={(e) =>
-            handleInputChange({
-              target: { name: "image_url", value: e.target.value },
-            })
-          }
-          errors={errors}
-        />
+      <form
+        onSubmit={handleSubmit}
+        className=" mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        {/* Start Event Title */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Event Title")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title || ""}
+            onChange={handleInputChange}
+            placeholder="Enter event title"
+            className={`w-full px-3 py-2 border ${errors.title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.title && (
+            <p className="text-red-600 text-sm">{errors.title}</p>
+          )}
+        </div>
+        {/* End Event Title */}
 
-        {/* Basic Details Section */}
-        <BasicDetailsSection
-          title={formData.title}
-          reportType={formData.report_type}
-          onTitleChange={(value) =>
-            handleInputChange({
-              target: { name: "title", value },
-            })
-          }
-          onReportTypeChange={(value) =>
-            handleInputChange({
-              target: { name: "report_type", value },
-            })
-          }
-          errors={errors}
-        />
+        {/* Date & Link & Guest Speakers Section */}
+        {/* Start Event Date */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Event Date")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="start_event_date"
+            value={formData.start_event_date}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border ${errors.start_event_date ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.start_event_date && (
+            <p className="text-red-600 text-sm">{errors.start_event_date}</p>
+          )}
+        </div>
 
-        {/* Category Section */}
-        <CategorySection
-          category={formData.category}
-          categoriesList={categoriesList}
-          showDropdown={showCategoryDropdown}
-          onShowDropdown={setShowCategoryDropdown}
-          searchValue={categorySearchValue}
-          onSearchChange={setCategorySearchValue}
-          onCategorySelect={handleCategorySelect}
-          onSearchSubmit={() => getCategories(categorySearchValue)}
-          dropdownRef={categoryDropdownRef}
-          errors={errors}
-        />
+        {/* Start Event Time */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Event Start Time")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="time"
+            name="start_event_time"
+            value={formData.start_event_time}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border ${errors.start_event_time ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.start_event_time && (
+            <p className="text-red-600 text-sm">{errors.start_event_time}</p>
+          )}
+        </div>
 
-        {/* Location, Language & Status Section */}
-        <LocationLanguageStatusSection
-          country={formData.country}
-          language={formData.language}
-          status={formData.status}
-          onCountryChange={(value) =>
-            handleInputChange({
-              target: { name: "country", value },
-            })
-          }
-          onLanguageChange={(value) =>
-            handleInputChange({
-              target: { name: "language", value },
-            })
-          }
-          onStatusChange={(value) =>
-            handleInputChange({
-              target: { name: "status", value },
-            })
-          }
-          errors={errors}
-        />
+        {/* Event Duration */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Event Duration (HH:MM)")}{" "}
+            <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="time"
+            name="duration"
+            value={formData.duration}
+            onChange={handleInputChange}
+            className={`w-full px-3 py-2 border ${errors.duration ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.duration && (
+            <p className="text-red-600 text-sm">{errors.duration}</p>
+          )}
+        </div>
 
-        {/* Date & Link Section */}
-        <DateAndLinkSection
-          happenedAt={formData.happened_at}
-          externalLink={formData.external_link}
-          onDateChange={(date) =>
-            handleInputChange({
-              target: { name: "happened_at", value: date },
-            })
-          }
-          onLinkChange={(value) =>
-            handleInputChange({
-              target: { name: "external_link", value },
-            })
-          }
-          errors={errors}
-        />
+        {/* Start Guest Speakers */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Guest Speakers")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={guestSpeakerInput}
+            onChange={(e) => setGuestSpeakerInput(e.target.value)}
+            onKeyDown={handleGuestSpeakersInput}
+            placeholder="Enter guest speaker name and press Enter"
+            className={`w-full px-3 py-2 border ${errors.guest_speakers ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {formData.guest_speakers && formData.guest_speakers.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.guest_speakers.map((speaker, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                >
+                  <span>{speaker}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeGuestSpeaker(speaker)}
+                    className="hover:text-blue-600"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {errors.guest_speakers && (
+            <p className="text-red-600 text-sm">{errors.guest_speakers}</p>
+          )}
+        </div>
+        {/* End Guest Speakers */}
 
-        {/* Form Actions Section */}
-        <FormActionsSection
-          isLoading={isLoading}
-          isEditing={Boolean(event?.id)}
-          onCancel={handleCancel}
-          onSubmit={handleSubmit}
-        />
+        {/* Start Live Stream Link */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {t("Live Stream Link")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="url"
+            name="live_stream_link"
+            value={formData.live_stream_link}
+            onChange={handleInputChange}
+            placeholder="https://..."
+            className={`border ${errors.live_stream_link ? "border-red-500" : " border-gray-300"} w-full px-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          {errors.live_stream_link && (
+            <p className="text-red-600 text-sm">{errors.live_stream_link}</p>
+          )}
+        </div>
+        {/* End Live Stream Link */}
+
+        {/* Start Learn Selection */}
+        <div className="space-y-2 md:col-span-2">
+          <AutoComplete
+            label={t("Posters Resource")}
+            placeholder={t("Select posters resource")}
+            selectedItem={selectedLearn}
+            onSelect={handleLearnSelect}
+            onClear={handleLearnClear}
+            list={learnsList}
+            searchMethod={getLearnsList}
+            searchApi={true}
+            searchPlaceholder={t("Search posters resource...")}
+            renderItemLabel={(item) => item.title || item.name}
+            showWriterAvatar={false}
+            error={errors.learn}
+            multiple={false}
+          />
+        </div>
+        {/* End Learn Selection */}
       </form>
+
+      {/* Form Actions Section */}
+      <FormActionsSection
+        isLoading={isLoading}
+        isEditing={Boolean(event?.id)}
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

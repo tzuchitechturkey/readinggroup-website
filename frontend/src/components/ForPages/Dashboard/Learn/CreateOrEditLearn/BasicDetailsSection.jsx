@@ -66,11 +66,11 @@ function BasicDetailsSection({
         </label>
         <select
           name="learn_type"
-          value={formData.learn_type || formData.category?.learn_type}
+          value={formData.learn_type || formData?.category?.learn_type || ""}
           onChange={onLearnTypeChange}
           className={`w-full px-3 py-2 border rounded-md outline-none ${
             errors.learn_type ? "border-red-500" : "border-gray-300"
-          } ${!formData.learn_type ? "text-gray-400" : "text-black"}`}
+          }  `}
         >
           <option value="" hidden>
             {t("Select Type")}
@@ -100,7 +100,7 @@ function BasicDetailsSection({
           <CategorySelectionDropdown
             showDropdown={showCategoryDropdown}
             onToggleDropdown={setShowCategoryDropdown}
-            selectedCategoryId={formData.category}
+            selectedCategoryId={formData.category?.id}
             categoriesList={categoriesList}
             categorySearchValue={categorySearchValue}
             onSearchChange={setCategorySearchValue}
@@ -111,7 +111,7 @@ function BasicDetailsSection({
             onSelect={handleCategorySelect}
             errors={errors}
             dropdownRef={categoryDropdownRef}
-            disabled={!formData.learn_type}
+            disabled={!formData.learn_type && !formData?.category?.learn_type}
             disabledMessage={t("Please select a learn type first")}
           />
         </div>

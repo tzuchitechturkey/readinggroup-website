@@ -28,6 +28,7 @@ import Video from "@/assets/icons/video-icon.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
 import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
+import TV from "@/assets/icons/cardsOrphoto-icon.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
@@ -118,25 +119,25 @@ export default function AppSidebar({
           },
         ],
       },
-      // {
-      //   title: "Events",
-      //   onClick: "#",
-      //   icon: TV,
-      //   items: [
-      //     {
-      //       title: "All Events",
-      //       onClick: () => onSectionChange("events"),
-      //     },
-      //     {
-      //       title: "Add/Edit Event",
-      //       onClick: () => onSectionChange("createOrEditEvent"),
-      //     },
-      //     {
-      //       title: "Events Categories",
-      //       onClick: () => onSectionChange("eventsCategories"),
-      //     },
-      //   ],
-      // },
+      {
+        title: "Events",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "All Events",
+            onClick: () => onSectionChange("events"),
+          },
+          {
+            title: "Add/Edit Event",
+            onClick: () => onSectionChange("createOrEditEvent"),
+          },
+          // {
+          //   title: "Events Categories",
+          //   onClick: () => onSectionChange("eventsCategories"),
+          // },
+        ],
+      },
       // {
       //   title: "Writers",
       //   onClick: "#",
