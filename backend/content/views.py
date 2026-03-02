@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.conf import settings
 from django.db.models import Count, F, Q
 from rest_framework import viewsets, filters, status
@@ -410,41 +412,22 @@ class LearnViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=("get",),
-        url_path="by_type_learn",
-        url_name="by_type_learn",
+        url_path="last-three-cards",
+        url_name="last-three-cards",
     )
-    def by_type_learn(self, request):
+    def last_three_cards(self, request):
         """
         Return:
-        - most viewed 1 posters (only upcoming events)
         - last 3 cards:
             * 2 vertical
             * 1 horizontal
         """
-
-        now = timezone.localtime()
-        today = now.date()
-        current_time = now.time()
 
         def base_queryset(learn_type_value):
             return Learn.objects.filter(
                 category__learn_type=learn_type_value,
                 category__is_active=True,
             )
-
-        posters_qs = (
-            base_queryset(LearnType.POSTERS)
-            .filter(
-                is_event=True,
-                event_date__isnull=False,
-                event_time__isnull=False,
-            )
-            .filter(
-                Q(event_date__gt=today)
-                | Q(event_date=today, event_time__gte=current_time)
-            )
-            .order_by("-views")[:1]
-        )
 
         # Last 2 vertical
         vertical_cards = list(
@@ -460,26 +443,16 @@ class LearnViewSet(viewsets.ModelViewSet):
             .order_by("-created_at")[:1]
         )
 
-        # Combine
-        cards_combined = vertical_cards + horizontal_cards
-
-        # Sort again by newest (optional but clean)
-        cards_qs = sorted(
-            cards_combined,
-            key=lambda x: x.created_at,
-            reverse=True,
-        )
+        # Combine (Vertical first, then Horizontal)
+        cards_qs = vertical_cards + horizontal_cards
 
         payload = {
-            "posters": LearnSerializer(
-                posters_qs, many=True, context={"request": request}
-            ).data,
             "cards": LearnSerializer(
                 cards_qs, many=True, context={"request": request}
             ).data,
         }
 
-        if not payload["posters"] and not payload["cards"]:
+        if not payload["cards"]:
             return Response(
                 {"detail": "No learn items found."},
                 status=status.HTTP_404_NOT_FOUND,
