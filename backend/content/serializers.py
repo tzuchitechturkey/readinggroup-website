@@ -205,6 +205,15 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = EventCommunity
         fields = "__all__"
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["learn"] = (
+            LearnSerializer(instance.learn, context=self.context).data
+            if instance.learn
+            else None
+        )
+        return data
+
 
 class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
