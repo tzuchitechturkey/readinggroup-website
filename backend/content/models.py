@@ -127,7 +127,6 @@ class Learn(TimestampedModel):
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
     is_event = models.BooleanField(default=False)
-    live_stream_link = models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -165,6 +164,7 @@ class LearnCategory(TimestampedModel):
 class EventCommunity(TimestampedModel):
     title = models.CharField(max_length=255)
     guest_speakers = models.JSONField(default=list, blank=True)
+    live_stream_link = models.URLField(blank=True, null=True)
     learn = models.ForeignKey(
         "Learn",
         on_delete=models.SET_NULL,
