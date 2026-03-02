@@ -460,6 +460,33 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         return Response(payload, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary="Top viewed poster learn",
+        operation_description="Return one poster learn with the highest views.",
+    )
+    @action(detail=False, methods=["get"], url_path="top-one-views-poster")
+    def top_one_views_poster(self, request):
+        """
+        Return one poster learn with the highest views.
+        """
+        poster_learn = (
+            Learn.objects.filter(
+                category__learn_type=LearnType.POSTERS,
+                category__is_active=True,
+            )
+            .order_by("-views")
+            .first()
+        )
+
+        if not poster_learn:
+            return Response(
+                {"detail": "No poster learns found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = self.get_serializer(poster_learn, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class LearnCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for managing LearnCategory content with multi-language support."""
@@ -575,37 +602,7 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
             except Exception:
                 pass
 
-        return queryset
-
-    @swagger_auto_schema(
-        operation_summary="Get most viewed poster event",
-        operation_description="Return one event community linked to a poster learn with highest views.",
-    )
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="top-one-poster",
-        url_name="top-one-poster",
-    )
-    def top_one_poster(self, request):
-        event = (
-            EventCommunity.objects.select_related("learn", "learn__category")
-            .filter(
-                learn__category__learn_type=LearnType.POSTERS,
-                learn__category__is_active=True,
-            )
-            .order_by("-learn__views")
-            .first()
-        )
-
-        if not event:
-            return Response(
-                {"detail": "No poster events found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        serializer = self.get_serializer(event, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return queryset.order_by("-start_event_date", "-start_event_time")
 
 
 # ========================================== new viewset end============================================
