@@ -5,7 +5,7 @@ import RevisitCard from "../shared/RevisitCard";
 const RevisitCards = ({ data, t }) => {
   return (
     <div className="bg-[#285688] h-auto md:h-[654px] relative">
-      <div className=" flex-col  gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start w-full max-w-7xl px-4 sm:px-8 md:px-12 lg:px-16 py-6 sm:py-10 md:py-12 lg:py-16 mx-auto">
+      <div className=" flex-col  gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start w-full max-w-7xl px-4 sm:px-8 md:px-12 lg:px-16 py-6 md:py-12 lg:py-16 mx-auto">
         {/* Section Header - White Style */}
         <div className="flex gap-[12px] sm:gap-[14px] md:gap-[16px] lg:gap-[16px] items-center w-full mb-6">
           {/* Icon Line */}
@@ -32,11 +32,11 @@ const RevisitCards = ({ data, t }) => {
           <hr className="h-[1px] sm:h-[1.5px] md:h-[2px] lg:h-[2px] flex-1 bg-[#fff]" />
         </div>
         <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 w-full">
-          <RevisitCard card={data[1]} size="small" t={t} />
-          <RevisitCard card={data[2]} size="small" t={t} />
+          <RevisitCard card={data?.vertical?.[0]} size="small" t={t} />
+          <RevisitCard card={data?.vertical?.[1]} size="small" t={t} />
 
           <div className="col-span-2 lg:col-span-2  ">
-            <RevisitCard card={data[0]} size="large" t={t} />
+            <RevisitCard card={data?.horizontal} size="large" t={t} />
           </div>
         </div>
       </div>

@@ -8,9 +8,9 @@ import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/C
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
 
-import { FormActionsSection } from "./EventForm";
+import { FormActionsSection } from "./LiveStreamForm";
 
-const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
+const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
   const {
     formData,
@@ -107,15 +107,18 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         {/* Event Duration */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            {t("Event Duration (HH:MM)")}{" "}
-            <span className="text-red-500">*</span>
+            {t("Event Duration (HOUR)")} <span className="text-red-500">*</span>
           </label>
           <input
-            type="time"
+            type="text"
             name="duration"
             value={formData.duration}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 border ${errors.duration ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            className={`w-full px-3 py-2 border ${
+              errors.duration ? "border-red-500" : "border-gray-300"
+            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.duration && (
             <p className="text-red-600 text-sm">{errors.duration}</p>
@@ -183,7 +186,7 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
         <div className="space-y-2 md:col-span-2">
           <AutoComplete
             label={t("Posters Resource")}
-            placeholder={t("Select posters resource")}
+            placeholder={t("Posters Resource")}
             selectedItem={selectedLearn}
             onSelect={handleLearnSelect}
             onClear={handleLearnClear}
@@ -211,4 +214,4 @@ const CreateOrEditEvent = ({ onSectionChange, event = null }) => {
   );
 };
 
-export default CreateOrEditEvent;
+export default CreateOrEditLiveStreamSchedule;

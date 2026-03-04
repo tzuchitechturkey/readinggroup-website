@@ -7,21 +7,21 @@ const LivestreamSectionHeader = ({ title, actionText, onActionClick }) => {
     <div className="flex gap-[16px] items-center w-full">
       {/* Date Icon and Title */}
       <div className="flex gap-[8px] items-center">
-        <div className="size-[41px] flex items-center justify-center">
+        <div className="size-[20px] lg:size-[41px] flex items-center justify-center">
           <Calendar className="text-white" />
         </div>
-        <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[24px] text-white">
+        <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-lg lg:text-[24px] text-white">
           {title}
         </p>
       </div>
 
       {/* Horizontal Line */}
-      <hr className="h-[2px] flex-1 bg-[#1B2D58]" />
+      <hr className="h-[1px] flex-1 bg-[#1B2D58]" />
 
       {/* Action Button */}
       {actionText && (
         <div
-          className="flex gap-[4px] items-center cursor-pointer group"
+          className="hidden lg:flex gap-[4px] items-center cursor-pointer group"
           onClick={onActionClick}
         >
           <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-lg text-[#FCFDFF] group-hover:text-white transition-colors">

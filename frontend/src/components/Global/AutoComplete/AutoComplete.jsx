@@ -17,8 +17,8 @@ export default function AutoComplete({
   required = false,
   renderItemLabel,
   // renderItemSubLabel,
+  showWriterAvatar = false,
   customStyle = "",
-  showWriterAvatar = true,
   multiple = false,
   selectedItems = [],
   isRtl = false,
@@ -106,7 +106,7 @@ export default function AutoComplete({
                       onClick={(e) => {
                         e.stopPropagation();
                         const newItems = selectedItems.filter(
-                          (i) => i.id !== item.id
+                          (i) => i.id !== item.id,
                         );
                         onSelect(newItems);
                       }}
@@ -218,11 +218,11 @@ export default function AutoComplete({
                       onClick={() => {
                         if (multiple) {
                           const isAlreadySelected = selectedItems?.some(
-                            (i) => i.id === item.id
+                            (i) => i.id === item.id,
                           );
                           if (isAlreadySelected) {
                             const newItems = selectedItems.filter(
-                              (i) => i.id !== item.id
+                              (i) => i.id !== item.id,
                             );
                             onSelect(newItems);
                           } else {
@@ -246,9 +246,7 @@ export default function AutoComplete({
                         />
                       )}
                       <img
-                        src={
-                          item.profile_image || item.avatar || "/fake-user.png"
-                        }
+                        src={item.image || item.image_url || "/fake-user.png"}
                         alt={item.username}
                         className="w-8 h-8 rounded-full object-cover  text-black"
                       />

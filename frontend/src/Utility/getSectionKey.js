@@ -16,11 +16,20 @@ export const getSectionKey = (title) => {
     "All Contents": "contents",
     "Add/Edit Content": "createOrEditContent",
     "Contents Categories": "contentsCategories",
-    // Events
-    "All Events": "events",
-    "Add/Edit Event": "createOrEditEvent",
-    "Events Categories": "eventsCategories",
-    "Events Sections": "eventsSections",
+    // Photo Collection
+    "All Photo Collections": "photoCollections",
+    "Add/Edit Photo": "createOrEditPhotoCollection",
+    "Photo Collections": "photoCollectionCategories",
+    // Related Reports
+    "All Related Reports": "relatedReports",
+    "Add/Edit Related Report": "createOrEditRelatedReport",
+    "Related Report Categories": "relatedReportCategories",
+    // Latest News
+    "All News": "news",
+    "Add/Edit News": "createOrEditNews",
+    // Live Stream Schedule
+    "Live Stream Schedules": "liveStreamSchedules",
+    "Add/Edit Live Stream Schedule": "createOrEditLiveStreamSchedule",
     // Writers
     "All Writers": "writers",
     "Add/Edit Writer": "createOrEditWriter",

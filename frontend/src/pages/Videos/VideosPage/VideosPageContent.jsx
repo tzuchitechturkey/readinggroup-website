@@ -528,7 +528,6 @@ function VideosPageContent() {
                   openDropdowns={openDropdowns}
                   onToggleDropdown={toggleDropdown}
                   onSortByChange={handleSortByChange}
-                  showMostPopular={true}
                 />
 
                 {/* Active Filters Display */}

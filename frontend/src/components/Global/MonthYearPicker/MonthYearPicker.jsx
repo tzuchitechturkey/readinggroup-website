@@ -104,7 +104,7 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
     <div
       ref={containerRef}
       className={cn(
-        "relative inline-flex flex-col bg-[var(--livestream-btn-white)] rounded-[17px] p-[10px] shadow-sm transition-all duration-300 z-50 min-w-[300px]",
+        "relative inline-flex flex-col bg-[var(--livestream-btn-white)] rounded-[17px] p-[10px] shadow-sm transition-all duration-300 z-50 min-w-full md:min-w-[300px]",
         isExpanded ? "rounded-b-none" : "",
         className,
       )}

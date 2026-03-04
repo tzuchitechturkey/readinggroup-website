@@ -1,5 +1,12 @@
 import { lazy } from "react";
 
+import LatestNewsPageContent from "@/pages/LatestNews/LatestNewsPageContent";
+import RelatedReportsPageContent from "@/pages/RelatedReports/RelatedReportsPageContent";
+
+const NewsDetailsPageContent = lazy(
+  () => import("@/pages/LatestNews/NewsDetailsPageContent"),
+);
+
 const CategoryContentPage = lazy(
   () => import("@/pages/CategoryContentPage/CategoryContentPage"),
 );
@@ -50,6 +57,12 @@ const LearnPageContent = lazy(() => import("@/pages/Learn/LearnPageContent"));
 const LivestreamScheduleContent = lazy(
   () => import("@/pages/LivestreamSchedule/LivestreamScheduleContent"),
 );
+const PhotoCollectionsPageContent = lazy(
+  () => import("@/pages/PhotoCollections/PhotoCollectionsPageContent"),
+);
+const CollectionPhotosPageContent = lazy(
+  () => import("@/pages/PhotoCollections/CollectionPhotosPageContent"),
+);
 
 export const userRoutes = [
   { path: "/", element: <Home /> },
@@ -64,6 +77,14 @@ export const userRoutes = [
   { path: "/my-list", element: <MyListContent /> },
   { path: "/learn", element: <LearnPageContent /> },
   { path: "/livestream-schedule", element: <LivestreamScheduleContent /> },
+  { path: "/photo-collections", element: <PhotoCollectionsPageContent /> },
+  {
+    path: "/photo-collections/:collectionId",
+    element: <CollectionPhotosPageContent />,
+  },
+  { path: "/latest-news", element: <LatestNewsPageContent /> },
+  { path: "/latest-news/:newsId", element: <NewsDetailsPageContent /> },
+  { path: "/related-reports", element: <RelatedReportsPageContent /> },
   // Contents Routes
   { path: "/contents", element: <ContentsContent /> },
   { path: "/contents/content/:id", element: <ContentPage /> },

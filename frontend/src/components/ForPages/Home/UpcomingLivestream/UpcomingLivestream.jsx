@@ -36,8 +36,8 @@ const UpcomingLivestream = ({ t, data }) => {
     // Navigate to full schedule page - implement navigation logic here
   };
   return (
-    <div className="px-4 sm:px-6 md:px-12 lg:px-[120px] w-full lg:w-[1440px] mx-auto">
-      <div className="bg-[#285688] w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-8 py-[20px] sm:py-[24px] md:py-[28px] lg:py-[32px]">
+    <div className="md:px-12 lg:px-[120px] w-full lg:w-[1440px] mx-auto">
+      <div className="bg-[#285688] w-full overflow-hidden px-4 md:px-8 lg:px-8 py-8 md:py-[28px] lg:py-[32px]">
         <div className=" ">
           {/* Section Header */}
           <LivestreamSectionHeader

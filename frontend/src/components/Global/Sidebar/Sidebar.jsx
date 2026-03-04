@@ -120,22 +120,71 @@ export default function AppSidebar({
         ],
       },
       {
-        title: "Events",
+        title: "Photo Collection",
         onClick: "#",
         icon: TV,
         items: [
           {
-            title: "All Events",
-            onClick: () => onSectionChange("events"),
+            title: "All Photo Collections",
+            onClick: () => onSectionChange("photoCollections"),
           },
           {
-            title: "Add/Edit Event",
-            onClick: () => onSectionChange("createOrEditEvent"),
+            title: "Add/Edit Photo",
+            onClick: () => onSectionChange("createOrEditPhotoCollection"),
           },
-          // {
-          //   title: "Events Categories",
-          //   onClick: () => onSectionChange("eventsCategories"),
-          // },
+          {
+            title: "Photo Collections",
+            onClick: () => onSectionChange("photoCollectionCategories"),
+          },
+        ],
+      },
+      {
+        title: "Related Reports",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "All Related Reports",
+            onClick: () => onSectionChange("relatedReports"),
+          },
+          {
+            title: "Add/Edit Related Report",
+            onClick: () => onSectionChange("createOrEditRelatedReport"),
+          },
+          {
+            title: "Related Report Categories",
+            onClick: () => onSectionChange("relatedReportCategories"),
+          },
+        ],
+      },
+      {
+        title: "Live Stream Schedule",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "Live Stream Schedules",
+            onClick: () => onSectionChange("liveStreamSchedules"),
+          },
+          {
+            title: "Add/Edit Live Stream Schedule",
+            onClick: () => onSectionChange("createOrEditLiveStreamSchedule"),
+          },
+        ],
+      },
+      {
+        title: "Latest News",
+        onClick: "#",
+        icon: TV,
+        items: [
+          {
+            title: "All News",
+            onClick: () => onSectionChange("news"),
+          },
+          {
+            title: "Add/Edit News",
+            onClick: () => onSectionChange("createOrEditNews"),
+          },
         ],
       },
       // {

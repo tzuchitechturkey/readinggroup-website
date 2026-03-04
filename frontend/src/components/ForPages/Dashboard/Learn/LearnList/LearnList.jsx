@@ -15,7 +15,7 @@ import PostDetails from "../LearnDetails/LearnDetails";
 import LearnTable from "./LearnTable";
 
 function LearnList({ onSectionChange }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   // Custom hooks
   const {

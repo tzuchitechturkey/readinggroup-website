@@ -324,7 +324,6 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     }
     // Add attachments IDs
     if (formData.attachments && formData.attachments.length > 0) {
-      console.log("Attachments to send:", formData.attachments);
       formData.attachments.forEach((att) => {
         formDataToSend.append("attachments", att.id);
       });
@@ -377,7 +376,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
         category: video?.category || "",
         language: video?.language || "",
         thumbnail: video?.thumbnail,
-        thumbnail_url: video?.thumbnail_url || "",
+        thumbnail_url: JSON.stringify(video?.thumbnail_url) || "",
         is_featured: video?.is_featured || false,
         reference_code: video?.reference_code || "",
         video_url: video?.video_url || "",

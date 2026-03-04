@@ -19,9 +19,8 @@ import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam
 import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departments/DepartmentsContent";
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
-import EventsList from "@/components/ForPages/Dashboard/Events/EventsList/EventsList";
-import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/CreateOrEditEvent/CreateOrEditEvent";
-import EventCategoriesContent from "@/components/ForPages/Dashboard/Events/EventsCategories/EventCategoriesContent";
+import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
+import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
 import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
 import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
@@ -34,6 +33,15 @@ import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
 import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/CreateorEditBook";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
 import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
+import PhotoCollectionsList from "@/components/ForPages/Dashboard/Events/PhotoCollection/PhotoCollectionsList";
+import PhotoCollectionsCategoriesContent from "@/components/ForPages/Dashboard/Events/PhotoCollection/PhotoCollectionsCategories/PhotoCollectionsCategoriesContent";
+import CreateOrEditPhotoCollection from "@/components/ForPages/Dashboard/Events/PhotoCollection/CreateOrEditPhotoCollection/CreateOrEditPhotoCollection";
+import RelatedReportsList from "@/components/ForPages/Dashboard/Events/RelatedReports/RelatedReportsList";
+import RelatedReportsCategoriesContent from "@/components/ForPages/Dashboard/Events/RelatedReports/RelatedReportsCategories/RelatedReportsCategoriesContent";
+import CreateOrEditRelatedReports from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/CreateOrEditRelatedReports";
+import NewsList from "@/components/ForPages/Dashboard/Events/News/NewsList";
+import CreateOrEditNews from "@/components/ForPages/Dashboard/Events/News/CreateOrEditNews/CreateOrEditNews";
+import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -62,14 +70,26 @@ export default function Page() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [selectedContent, setSelectedContent] = useState(() => {
-    // استرجاع المحتوى المحفوظ إن وجد
-    const saved = localStorage.getItem("dashboardSelectedContent");
+  const [selectedLiveStream, setSelectedLiveStream] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedLiveStream");
     return saved ? JSON.parse(saved) : null;
   });
-  const [selectedEvent, setSelectedEvent] = useState(() => {
-    // استرجاع الأحداث المحفوظة إن وجدت
-    const saved = localStorage.getItem("dashboardSelectedEvent");
+  const [selectedNews, setSelectedNews] = useState(() => {
+    // استرجاع الأخبار المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedNews");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedPhotoCollections, setSelectedPhotoCollections] = useState(
+    () => {
+      // استرجاع مجموعات الصور المحفوظة إن وجدت
+      const saved = localStorage.getItem("dashboardSelectedPhotoCollections");
+      return saved ? JSON.parse(saved) : null;
+    },
+  );
+  const [selectedrelatedReports, setSelectedrelatedReports] = useState(() => {
+    // استرجاع التقارير المرتبطة المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedrelatedReports");
     return saved ? JSON.parse(saved) : null;
   });
   const [selectedWriter, setSelectedWriter] = useState(() => {
@@ -113,13 +133,39 @@ export default function Page() {
   }, [selectedVideo]);
 
   useEffect(() => {
-    if (selectedEvent) {
+    if (selectedLiveStream) {
       localStorage.setItem(
-        "dashboardSelectedEvent",
-        JSON.stringify(selectedEvent),
+        "dashboardSelectedLiveStream",
+        JSON.stringify(selectedLiveStream),
       );
     }
-  }, [selectedEvent]);
+  }, [selectedLiveStream]);
+  useEffect(() => {
+    if (selectedNews) {
+      localStorage.setItem(
+        "dashboardSelectedNews",
+        JSON.stringify(selectedNews),
+      );
+    }
+  }, [selectedNews]);
+
+  useEffect(() => {
+    if (selectedPhotoCollections) {
+      localStorage.setItem(
+        "dashboardSelectedPhotoCollections",
+        JSON.stringify(selectedPhotoCollections),
+      );
+    }
+  }, [selectedPhotoCollections]);
+  useEffect(() => {
+    if (selectedrelatedReports) {
+      localStorage.setItem(
+        "dashboardSelectedRelatedReports",
+        JSON.stringify(selectedrelatedReports),
+      );
+    }
+  }, [selectedrelatedReports]);
+
   useEffect(() => {
     if (selectedWriter) {
       localStorage.setItem(
@@ -147,13 +193,19 @@ export default function Page() {
       localStorage.removeItem("dashboardSelectedLearn");
       localStorage.removeItem("dashboardSelectedVideo");
       localStorage.removeItem("dashboardSelectedContent");
-      localStorage.removeItem("dashboardSelectedEvent");
+      localStorage.removeItem("dashboardSelectedLiveStream");
+      localStorage.removeItem("dashboardSelectedNews");
+      localStorage.removeItem("dashboardSelectedPhotoCollections");
+      localStorage.removeItem("dashboardSelectedRelatedReports");
       localStorage.removeItem("dashboardSelectedWriter");
       localStorage.removeItem("dashboardSelectedBook");
       setSelectedLearn(null);
       setSelectedVideo(null);
       setSelectedContent(null);
-      setSelectedEvent(null);
+      setSelectedLiveStream(null);
+      setSelectedNews(null);
+      setSelectedrelatedReports(null);
+      setSelectedPhotoCollections(null);
       setSelectedWriter(null);
       setSelectedBook(null);
     }
@@ -166,9 +218,15 @@ export default function Page() {
     } else if (section === "createOrEditContent") {
       setSelectedContent(data);
     } else if (section === "createOrEditEvent") {
-      setSelectedEvent(data);
+      setSelectedLiveStream(data);
+    } else if (section === "createOrEditNews") {
+      setSelectedNews(data);
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
+    } else if (section === "createOrEditRelatedReport") {
+      setSelectedrelatedReports(data);
+    } else if (section === "createOrEditPhotoCollection") {
+      setSelectedPhotoCollections(data);
     } else if (section === "createOrEditBook") {
       setSelectedBook(data);
     }
@@ -194,7 +252,14 @@ export default function Page() {
         events: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
-        eventsSections: "Events",
+        news: "News",
+        createOrEditNews: "News",
+        photoCollections: "Photo Collections",
+        createOrEditPhotoCollection: "Photo Collections",
+        photoCollectionsCategories: "Photo Collections",
+        relatedReports: "Related Reports",
+        relatedReportsCategories: "Related Reports",
+        createOrEditRelatedReport: "Related Reports",
         // About Us
         history: "About Us",
         team: "About Us",
@@ -215,6 +280,7 @@ export default function Page() {
     setActiveParent(autoParent);
   };
 
+  console.log(activeSection);
   const renderContent = () => {
     switch (activeSection) {
       case "home":
@@ -261,18 +327,61 @@ export default function Page() {
             onSectionChange={handleSectionChange}
           />
         );
-      // Events
-      case "events":
-        return <EventsList onSectionChange={handleSectionChange} />;
-      case "createOrEditEvent":
+      // Live Stream Schedules
+      case "liveStreamSchedules":
         return (
-          <CreateOrEditEvent
-            event={selectedEvent}
+          <LiveStreamSchedulesList onSectionChange={handleSectionChange} />
+        );
+      case "createOrEditLiveStreamSchedule":
+        return (
+          <CreateOrEditLiveStreamSchedule
+            liveStream={selectedLiveStream}
             onSectionChange={handleSectionChange}
           />
         );
-      case "eventsCategories":
-        return <EventCategoriesContent onSectionChange={handleSectionChange} />;
+      // Photo Collection
+      case "photoCollections":
+        return <PhotoCollectionsList onSectionChange={handleSectionChange} />;
+      case "photoCollectionCategories":
+        return (
+          <PhotoCollectionsCategoriesContent
+            onSectionChange={handleSectionChange}
+          />
+        );
+      case "createOrEditPhotoCollection":
+        return (
+          <CreateOrEditPhotoCollection
+            photoCollection={selectedPhotoCollections}
+            onSectionChange={handleSectionChange}
+          />
+        );
+      // Related Reports
+      case "relatedReports":
+        return <RelatedReportsList onSectionChange={handleSectionChange} />;
+      case "relatedReportCategories":
+        return (
+          <RelatedReportsCategoriesContent
+            onSectionChange={handleSectionChange}
+          />
+        );
+      case "createOrEditRelatedReport":
+        return (
+          <CreateOrEditRelatedReports
+            relatedReport={selectedrelatedReports}
+            onSectionChange={handleSectionChange}
+          />
+        );
+      // News
+      case "news":
+        return <NewsList onSectionChange={handleSectionChange} />;
+
+      case "createOrEditNews":
+        return (
+          <CreateOrEditNews
+            news={selectedNews}
+            onSectionChange={handleSectionChange}
+          />
+        );
       // Writers
       case "writers":
         return <WritersList onSectionChange={handleSectionChange} />;

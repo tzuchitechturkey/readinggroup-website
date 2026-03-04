@@ -61,7 +61,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
             )}
 
             {/* Title and Description */}
-            <div className="text-white w-2/5">
+            <div className="text-white w-full lg:w-2/5">
               <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-4 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[50px]">
                 {item?.title}
               </h2>

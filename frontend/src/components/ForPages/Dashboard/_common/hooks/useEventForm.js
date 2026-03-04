@@ -22,7 +22,7 @@ export const useEventForm = (event = null, onSectionChange) => {
   const [selectedLearn, setSelectedLearn] = useState(null);
   const [learnsList, setLearnsList] = useState([]);
   const [learnsSearchValue, setLearnsSearchValue] = useState("");
-   // Initialize form when editing
+  // Initialize form when editing
   useEffect(() => {
     if (event?.id) {
       setFormData({
@@ -85,11 +85,16 @@ export const useEventForm = (event = null, onSectionChange) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === "duration") {
+      if (!/^\d*$/.test(value)) return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
 
+    // إزالة الخطأ عند التعديل
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,

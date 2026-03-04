@@ -60,6 +60,7 @@ export default function HomeContent() {
     fetchCardsData();
     fetchUpcomingLivestream();
   }, []);
+  console.log(cardsData);
   return (
     <div className="min-h-screen bg-[#C8DDF4]">
       {/* Start Hero Slider */}
@@ -79,13 +80,13 @@ export default function HomeContent() {
       </div>
 
       {/* Good Effects Poster Section */}
-      <div className="py-16 pb-10">
+      <div className="pt-12 lg:pt-16 lg:pb-10">
         {posterData?.id && <GoodEffectsPoster poster={posterData} t={t} />}
       </div>
 
       {/* Revisit Cards Section */}
       <div>
-        <RevisitCards data={cardsData?.cards || []} t={t} />
+        <RevisitCards data={cardsData || []} t={t} />
       </div>
 
       {/* Photo Collections Section */}

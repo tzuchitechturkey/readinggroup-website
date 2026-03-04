@@ -83,7 +83,7 @@ function LearnCategoriesTable({
     {
       title: "Direction",
       key: "direction",
-      render: (item) => item.direction || "-",
+      render: (item) => item.direction || t("Vertical"),
     },
     {
       title: "Status",

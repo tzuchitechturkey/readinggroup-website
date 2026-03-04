@@ -54,6 +54,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     handlePreviewFile,
     handleClosePreview,
   } = useCreateOrEditVideo(video, onSectionChange);
+  // console.log("Form Data:", formData); // Debugging line to check form data
   return (
     <div
       className="bg-white rounded-lg p-3 lg:p-6 w-full mx-4 overflow-y-auto"
@@ -68,7 +69,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Thumbnail Section */}
-        <div>
+        {/* <div>
           <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
             <p className="text-xs md:text-sm text-blue-800">
               <strong>{t("Important")}:</strong>{" "}
@@ -87,7 +88,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               error={errors?.thumbnail}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Thumbnail URL Alternative */}
         <div>

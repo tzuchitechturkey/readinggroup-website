@@ -27,12 +27,14 @@ const buildNavigationItems = (t, siteInfo) => {
           name: t("LIVESTREAM SCHEDULE"),
           href: "/livestream-schedule",
         },
-        ...(siteInfo?.event_categories || []).map((category) => ({
-          name: category.name,
-          categoryId: category.id,
-          href: `/events/category/${category.id}`,
-          content_count: category.event_count || 0,
-        })),
+        {
+          name: t("Photo Collections"),
+          href: "/photo-collections",
+        },
+        {
+          name: t("Latest News"),
+          href: "/latest-news",
+        },
       ],
     },
     {

@@ -19,33 +19,42 @@ const formatDate = (dateString) => {
 };
 
 // Helper function to convert 24-hour time to 12-hour format
-const convertTo12Hour = (timeString) => {
-  const [hours] = timeString.split(":").map(Number);
+const convertTo12Hour = (time) => {
+  let [hours, minutes] = time.split(":").map(Number);
   const ampm = hours >= 12 ? "PM" : "AM";
-  const displayHours = hours % 12 || 12;
-  return `${displayHours} ${ampm}`;
-};
 
+  hours = hours % 12 || 12;
+
+  // إذا الدقائق = 0 لا نعرضها
+  if (minutes === 0) {
+    return `${hours} ${ampm}`;
+  }
+
+  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
+};
 // Helper function to add duration to start time
-const calculateEndTime = (startTimeString, durationString) => {
-  const [startHours, startMinutes] = startTimeString.split(":").map(Number);
-  const [durationHours, durationMinutes] = durationString
-    .split(":")
-    .map(Number);
+const calculateEndTime = (startTime, duration) => {
+  const [hours, minutes] = startTime.split(":").map(Number);
 
-  const totalMinutes =
-    startHours * 60 + startMinutes + durationHours * 60 + durationMinutes;
-  const endHours = Math.floor(totalMinutes / 60) % 24;
-  const endMinutes = totalMinutes % 60;
+  const startDate = new Date();
+  startDate.setHours(hours);
+  startDate.setMinutes(minutes);
 
-  return `${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}:00`;
+  // إضافة عدد الساعات
+  startDate.setHours(startDate.getHours() + duration);
+
+  const endHours = String(startDate.getHours()).padStart(2, "0");
+  const endMinutes = String(startDate.getMinutes()).padStart(2, "0");
+
+  return `${endHours}:${endMinutes}`;
 };
-
 // Helper function to format time range
 const formatTimeRange = (startTime, duration) => {
   const endTime = calculateEndTime(startTime, duration);
+
   const startFormatted = convertTo12Hour(startTime);
   const endFormatted = convertTo12Hour(endTime);
+
   return `${startFormatted} - ${endFormatted}`;
 };
 
@@ -91,11 +100,11 @@ const LivestreamScheduleContent = () => {
     fetchScheduleData(filters.date.year, filters.date.month);
   }, [filters.date]);
   return (
-    <div className="min-h-screen bg-background pt-[50px] pb-32 px-4 select-none">
+    <div className="min-h-screen bg-background pt-10 lg:pt-[50px] pb-32 px-4 select-none">
       {isLoading && <Loader />}
       <div className="max-w-[1200px] mx-auto px-0 md:px-0">
         {/* Title Node 1:2309 */}
-        <h1 className="text-[40px] font-black text-[var(--Page-title)] leading-[1.2] mb-[52px]">
+        <h1 className="text-2xl lg:text-[40px] font-black text-[var(--Page-title)] leading-[1.2] mb-8 lg:mb-[52px]">
           {t("Livestream Schedule")}
         </h1>
 
@@ -188,8 +197,8 @@ const LivestreamScheduleContent = () => {
                           }}
                           className={
                             item?.learn?.id
-                              ? "tzuchi-btn-resources outline-none"
-                              : "tzuchi-btn-resources-disabled outline-none"
+                              ? "tzuchi-btn-resources outline-none border-none"
+                              : "tzuchi-btn-resources-disabled outline-none border-none"
                           }
                         >
                           {t("View Posters")}
@@ -234,7 +243,7 @@ const LivestreamScheduleContent = () => {
             data-node-id="1:2411"
           >
             <p
-              className="text-[40px] font-black text-[var(--livestream-muted-blue)] leading-[1.2] text-center"
+              className="text-2xl lg:text-[40px] font-black text-[var(--livestream-muted-blue)] leading-[1.2] text-center"
               data-node-id="1:2412"
             >
               {t("Nothing scheduled yet.")}

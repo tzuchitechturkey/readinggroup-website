@@ -35,7 +35,7 @@ const SectionHeader = ({
       {/* Action Button */}
       {actionText && (
         <div
-          className="flex gap-[2px] sm:gap-[3px] md:gap-[4px] items-center cursor-pointer group shrink-0"
+          className="hidden lg:flex  gap-[2px] sm:gap-[3px] md:gap-[4px] items-center cursor-pointer group shrink-0"
           onClick={onActionClick}
         >
           <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] text-[#285688] group-hover:text-[#2563eb] transition-colors">

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import DatePickerWithYearMonth from "../../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
+import DatePickerWithYearMonth from "../../../../Videos/CreateOrEditVideo/DatePickerWithYearMonth";
 
 const DateAndLinkSection = ({
   happenedAt,

@@ -292,6 +292,12 @@ const LearnPageContent = () => {
           const dateB = new Date(b.created_at || b.published_at || 0);
           return dateA - dateB;
         });
+      case "most_popular":
+        return itemsCopy.sort((a, b) => {
+          const viewsA = a.views || 0;
+          const viewsB = b.views || 0;
+          return viewsB - viewsA;
+        });
       default:
         return itemsCopy;
     }

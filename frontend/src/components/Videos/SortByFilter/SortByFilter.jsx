@@ -64,17 +64,15 @@ const SortByFilter = ({
               <p className="font-normal text-base  ">{t("Oldest")}</p>
             </div>
             {/* Most Popular Option */}
-            {showMostPopular && (
-              <div
-                className={`flex items-center gap-2 cursor-pointer ${filters.sortByBy === "most_popular" ? "text-[#285688]" : ""}`}
-                onClick={() => onSortByChange("most_popular")}
-              >
-                <div className="w-6 h-6">
-                  {filters.sortByBy === "most_popular" && <Check />}
-                </div>
-                <p className="font-normal text-base  ">{t("Most Popular")}</p>
+            <div
+              className={`flex items-center gap-2 cursor-pointer ${filters.sortBy === "most_popular" ? "text-[#285688]" : ""}`}
+              onClick={() => onSortByChange("most_popular")}
+            >
+              <div className="w-6 h-6">
+                {filters.sortBy === "most_popular" && <Check />}
               </div>
-            )}
+              <p className="font-normal text-base  ">{t("Most Popular")}</p>
+            </div>
           </div>
         </div>
       )}

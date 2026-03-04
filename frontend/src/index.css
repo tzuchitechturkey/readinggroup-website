@@ -200,7 +200,7 @@
     @apply flex flex-col gap-6 lg:p-4 rounded-[12px] w-full;
   }
   .livestream-schedule-row {
-    @apply flex flex-col lg:flex-row lg:items-center justify-between min-h-[100px] w-full gap-6 lg:gap-0 bg-white/30 lg:bg-transparent p-4 lg:p-0 rounded-lg lg:rounded-none;
+    @apply flex flex-col lg:flex-row lg:items-center justify-between min-h-[100px] w-full gap-6 lg:gap-0 p-4 lg:p-0 rounded-lg lg:rounded-none;
   }
   .livestream-schedule-col-datetime {
     @apply w-full lg:w-[111px] flex flex-row lg:flex-col gap-4 lg:gap-4 items-baseline lg:items-start;

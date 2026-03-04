@@ -21,7 +21,7 @@ import { GetEvents, DeleteEventById } from "@/api/events";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
-const EventsList = ({ onSectionChange }) => {
+const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
   // State management
   const [search, setSearch] = useState("");
@@ -150,23 +150,7 @@ const EventsList = ({ onSectionChange }) => {
 
   // Pagination
   const totalPages = Math.ceil(totalRecords / limit);
-  // Helper function to check if event is still live (not ended)
-  const isEventLive = (startEventDate, startEventTime, duration) => {
-    try {
-      // Calculate end time
-      const endTimeString = calculateEndTime(startEventTime, duration);
-      const endDateTime = new Date(`${startEventDate}T${endTimeString}`);
 
-      // Get current time
-      const currentTime = new Date();
-
-      // Event is live if current time is before end time
-      return currentTime < endDateTime;
-    } catch (error) {
-      console.error("Error calculating event live status:", error);
-      return false;
-    }
-  };
   return (
     <div
       className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
@@ -345,7 +329,8 @@ const EventsList = ({ onSectionChange }) => {
                   </TableCell>
 
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <span className="font-medium">{event?.duration}</span>
+                    <span className="font-medium">{event?.duration}</span>{" "}
+                    {t("Hours")}
                   </TableCell>
 
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
@@ -391,7 +376,7 @@ const EventsList = ({ onSectionChange }) => {
                   </TableCell>
 
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-center">
                       <button
                         onClick={() => {
                           setSelectedEvent(event);
@@ -537,4 +522,4 @@ const EventsList = ({ onSectionChange }) => {
   );
 };
 
-export default EventsList;
+export default LiveStreamSchedulesList;

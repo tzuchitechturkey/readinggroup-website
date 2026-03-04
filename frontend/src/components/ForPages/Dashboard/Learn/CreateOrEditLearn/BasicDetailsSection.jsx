@@ -100,7 +100,7 @@ function BasicDetailsSection({
           <CategorySelectionDropdown
             showDropdown={showCategoryDropdown}
             onToggleDropdown={setShowCategoryDropdown}
-            selectedCategoryId={formData.category?.id}
+            selectedCategoryId={formData.category||formData.category?.id}
             categoriesList={categoriesList}
             categorySearchValue={categorySearchValue}
             onSearchChange={setCategorySearchValue}

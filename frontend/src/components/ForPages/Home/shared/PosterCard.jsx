@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { ArrowRight } from "lucide-react";
+
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
 const PosterCard = ({ poster, t }) => {
@@ -16,7 +18,6 @@ const PosterCard = ({ poster, t }) => {
       .replace(",", "")
       .replace(/(\w{3})/, "$1.");
   };
-
   return (
     <div className="flex flex-col items-start pb-[40px] sm:pb-[45px] md:pb-[55px] lg:pb-[65px] w-full">
       <div className="flex flex-col md:flex-row gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start md:items-center w-full">
@@ -29,7 +30,7 @@ const PosterCard = ({ poster, t }) => {
             <div className="absolute inset-0 overflow-hidden">
               <img
                 alt={poster?.title}
-                src={poster?.image}
+                src={poster?.image || poster?.image_url}
                 className="w-full h-full object-cover object-top"
               />
             </div>
@@ -52,18 +53,30 @@ const PosterCard = ({ poster, t }) => {
             <p className=" font-['Noto_Sans_TC:Black',sans-serif] font-black leading-[1.5] text-[24px] sm:text-[28px] md:text-[36px] lg:text-[40px] text-[#081945] w-full whitespace-pre-wrap">
               {poster?.title}
             </p>
-
-            {/* Learn More Button */}
-            <button
-              onClick={() => {
-                setIsViewerOpen(true);
-              }}
-              className="bg-[#285688] border border-[#285688] flex gap-[6px] sm:gap-[7px] md:gap-[8px] lg:gap-[8px] items-center justify-center overflow-hidden p-[8px] sm:p-[10px] md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
-            >
-              <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] text-[#f5f5f5]">
-                {t("Learn more")}
-              </p>
-            </button>
+            <div className="flex items-center gap-3  ">
+              {/* Learn More Button */}
+              <button
+                onClick={() => {
+                  setIsViewerOpen(true);
+                }}
+                className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
+              >
+                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-[#f5f5f5]">
+                  {t("Learn more")}
+                </p>
+              </button>
+              <button
+                onClick={() => {
+                  setIsViewerOpen(true);
+                }}
+                className="bg-[#fff] flex items-center gap-1 border-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
+              >
+                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-[#285688]">
+                  {t("More Good Effects Posters")}
+                </p>
+                <ArrowRight className="size-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
