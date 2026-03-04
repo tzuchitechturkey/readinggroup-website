@@ -22,14 +22,3 @@ class LearnCategoryDirection(models.TextChoices):
 
 
 # =======================================================  LearnCategory Model End ========================================================
-# ======================================================= Language Choices Start ================================================
-class LanguageChoices(models.TextChoices):
-    ENGLISH = "en", "English"
-    TURKISH = "tr", "Turkish"
-    ARABIC = "ar", "Arabic"
-    CHINESE = "ch", "Chinese"
-    JAPANESE = "jp", "Japanese"
-    CHINESE_SIMPLIFIED = "chsi", "Chinese Simplified"
-
-
-# ======================================================= Language Choices End ===================================================

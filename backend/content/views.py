@@ -28,8 +28,6 @@ from .models import (
     LearnCategory,
     Learn,
     Video,
-    TeamMember,
-    PositionTeamMember,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -41,8 +39,6 @@ from .serializers import (
     LearnCategorySerializer,
     VideoSerializer,
     LearnSerializer,
-    TeamMemberSerializer,
-    PositionTeamMemberSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
     AuthorsSerializer,
@@ -632,50 +628,6 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
 
 # ========================================== new viewset end============================================
-
-class TeamMemberViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing TeamMember content."""
-
-    queryset = TeamMember.objects.all()
-    serializer_class = TeamMemberSerializer
-    search_fields = ("name", "job_title", "position__name")
-    ordering_fields = ("name", "created_at")
-    filterset_fields = ("name", "job_title", "position__name")
-    pagination_class = LimitOffsetPagination
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-
-    @swagger_auto_schema(
-        operation_summary="List all team members",
-        operation_description="Retrieve a list of team members with optional filtering by name, job title, and position.",
-        manual_parameters=team_member_manual_parameters,
-    )
-    def list(self, request, *args, **kwargs):
-        if "limit" in request.query_params or "offset" in request.query_params:
-            return super().list(request, *args, **kwargs)
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        position = params.get("Position")
-        if position:
-            queryset = queryset.filter(position__name__iexact=position)
-
-        return queryset
-
-
-class PositionTeamMemberViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing PositionTeamMember content."""
-
-    queryset = PositionTeamMember.objects.all()
-    serializer_class = PositionTeamMemberSerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
-
-
 class NavbarLogoViewSet(viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
 

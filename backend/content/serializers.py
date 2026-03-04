@@ -10,11 +10,9 @@ from .models import (
     ContentAttachment,
     EventCommunity,
     NavbarLogo,
-    PositionTeamMember,
     Learn,
     LearnCategory,
     SocialMedia,
-    TeamMember,
     Video,
     VideoCategory,
     Authors,
@@ -210,46 +208,6 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             else None
         )
         return data
-
-
-
-class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = PositionTeamMember
-        fields = ["id", "name", "description"]
-
-
-class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    position = serializers.PrimaryKeyRelatedField(
-        queryset=PositionTeamMember.objects.all(), write_only=True, required=False
-    )
-    user = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = TeamMember
-        fields = "__all__"
-        file_fields = ("avatar",)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["position"] = (
-            PositionTeamMemberSerializer(instance.position, context=self.context).data
-            if instance.position
-            else None
-        )
-        return data
-
-    def get_user(self, obj):
-        try:
-            target = get_account_user(obj)
-            if target:
-                return UserSerializer(target, context=self.context).data
-        except Exception:
-            pass
-        return None
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

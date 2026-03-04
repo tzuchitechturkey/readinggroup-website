@@ -1,17 +1,14 @@
 from datetime import timedelta
-import uuid
 
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from django.utils.text import slugify
 from jsonschema import ValidationError
 
 from .enums import (
     VideoType,
     LearnType,
     LearnCategoryDirection,
-    LanguageChoices,
 )
 
 
@@ -243,26 +240,6 @@ class ContentAttachment(TimestampedModel):
 
 # ======================================================= New Models end =======================================================
 
-class TeamMember(TimestampedModel):
-    """Team member details for the About Us section."""
-
-    name = models.CharField(max_length=255)
-    position = models.ForeignKey(
-        "PositionTeamMember", on_delete=models.SET_NULL, null=True, blank=True
-    )
-    job_title = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to="team/avatars/", blank=True, null=True)
-    avatar_url = models.URLField(blank=True)
-    social_links = models.JSONField(default=list, blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Authors(TimestampedModel):
     """Authors for videos and posts."""
 
@@ -277,7 +254,6 @@ class Authors(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name
-
 
 class MyListEntry(TimestampedModel):
     """User saved videos for later viewing."""
@@ -295,19 +271,6 @@ class MyListEntry(TimestampedModel):
 
     def __str__(self) -> str:
         return f"MyListEntry<{self.user_id}:{self.video_id}>"
-
-
-class PositionTeamMember(TimestampedModel):
-    """Positions for Team Members."""
-
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class NavbarLogo(TimestampedModel):
