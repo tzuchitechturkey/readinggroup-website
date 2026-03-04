@@ -690,13 +690,17 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
     serializer_class = RelatedReportsSerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "category__title")
-    ordering_fields = ("created_at",)
+    ordering_fields = ("created_at", "happened_at")
     ordering = ("-created_at",)
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
+
+    def get_queryset(self):
+        """Optimize queryset with select_related for category."""
+        return RelatedReports.objects.select_related("category").all()
 
     @action(
         detail=False,
@@ -737,6 +741,118 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         }
 
         return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class PhotoCollectionViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing photo collections."""
+
+    queryset = PhotoCollection.objects.all()
+    serializer_class = PhotoCollectionSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title", "description")
+    ordering_fields = ("happened_at", "created_at")
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    filter_backends = [filters.SearchFilter]
+
+    def get_queryset(self):
+        queryset = PhotoCollection.objects.all().order_by("-happened_at", "-created_at")
+        return queryset
+
+    @swagger_auto_schema(
+        operation_summary="Create photos in collection",
+        operation_description="Create photos in this collection by uploading images. Supports multiple image upload with 'images' field or single image upload with 'image' field. Optional captions can be provided with 'caption_{index}' for multiple images or 'caption' for single image.",
+    )
+    @action(detail=True, methods=["post"], url_path="photos")
+    def create_photos(self, request, pk=None):
+        """Create photos for a specific collection.
+
+        POST /photo-collection/{id}/photos/
+        Accepts multiple images and creates photos in the collection.
+        """
+        collection = self.get_object()
+
+        # Check if collection already has 30 photos
+        current_count = collection.photos.count()
+        if current_count >= 30:
+            return Response(
+                {"error": "This collection already has the maximum of 30 photos."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get images from request
+        images = request.FILES.getlist("images")
+        if not images:
+            # Try single image
+            image = request.FILES.get("image")
+            if image:
+                images = [image]
+            else:
+                return Response(
+                    {
+                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Check if adding these photos would exceed the limit
+        if current_count + len(images) > 30:
+            return Response(
+                {
+                    "error": f"Cannot add {len(images)} photos. Collection has {current_count} photos and limit is 30."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create photos
+        created_photos = []
+        for idx, image in enumerate(images):
+            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
+                "caption", ""
+            )
+            order = current_count + idx
+
+            photo = Photo.objects.create(
+                collection=collection,
+                image=image,
+                caption=caption,
+                order=order,
+            )
+            created_photos.append(photo)
+
+        serializer = PhotoSerializer(
+            created_photos, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # get last 4 photos for home page
+    @swagger_auto_schema(
+        operation_summary="Get last 4 photos",
+        operation_description="Return last 4 photos from the most recent photo collections ordered by created_at desc.",
+    )
+    @action(detail=False, methods=["get"], url_path="last-4-photos")
+    def last_four_photos(self, request):
+        # Get the last 4 photo collections ordered by created_at descending
+        collections = PhotoCollection.objects.order_by("-created_at")[:4]
+        # Collect all photos from these collections
+        photos = []
+        for collection in collections:
+            collection_photos = Photo.objects.filter(collection=collection).order_by(
+                "order"
+            )
+            photos.extend(collection_photos)
+        serializer = PhotoSerializer(photos, many=True, context={"request": request})
+        return Response(serializer.data)
+
+
+class PhotoViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual photos."""
+
+    queryset = Photo.objects.all()
+    serializer_class = PhotoSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
 # ========================================== new viewset end============================================
@@ -860,92 +976,3 @@ class AuthorsViewSet(viewsets.ModelViewSet):
     search_fields = ("name", "description")
     ordering_fields = ("created_at", "name")
     queryset = Authors.objects.all().order_by("-created_at")
-
-
-class PhotoCollectionViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing photo collections."""
-
-    queryset = PhotoCollection.objects.all()
-    serializer_class = PhotoCollectionSerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("title", "description")
-    ordering_fields = ("happened_at", "created_at")
-    parser_classes = (MultiPartParser, FormParser, JSONParser)
-    filter_backends = [filters.SearchFilter]
-
-    def get_queryset(self):
-        queryset = PhotoCollection.objects.all().order_by("-happened_at", "-created_at")
-        return queryset
-
-    @action(detail=True, methods=["post"], url_path="photos")
-    def create_photos(self, request, pk=None):
-        """Create photos for a specific collection.
-
-        POST /photo-collection/{id}/photos/
-        Accepts multiple images and creates photos in the collection.
-        """
-        collection = self.get_object()
-
-        # Check if collection already has 30 photos
-        current_count = collection.photos.count()
-        if current_count >= 30:
-            return Response(
-                {"error": "This collection already has the maximum of 30 photos."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Get images from request
-        images = request.FILES.getlist("images")
-        if not images:
-            # Try single image
-            image = request.FILES.get("image")
-            if image:
-                images = [image]
-            else:
-                return Response(
-                    {
-                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        # Check if adding these photos would exceed the limit
-        if current_count + len(images) > 30:
-            return Response(
-                {
-                    "error": f"Cannot add {len(images)} photos. Collection has {current_count} photos and limit is 30."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Create photos
-        created_photos = []
-        for idx, image in enumerate(images):
-            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
-                "caption", ""
-            )
-            order = current_count + idx
-
-            photo = Photo.objects.create(
-                collection=collection,
-                image=image,
-                caption=caption,
-                order=order,
-            )
-            created_photos.append(photo)
-
-        serializer = PhotoSerializer(
-            created_photos, many=True, context={"request": request}
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class PhotoViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing individual photos."""
-
-    queryset = Photo.objects.all()
-    serializer_class = PhotoSerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("caption",)
-    ordering_fields = ("created_at", "order")
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
