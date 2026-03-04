@@ -28,7 +28,6 @@ from .models import (
     LearnCategory,
     Learn,
     Video,
-    HistoryEntry,
     TeamMember,
     PositionTeamMember,
     SocialMedia,
@@ -42,7 +41,6 @@ from .serializers import (
     LearnCategorySerializer,
     VideoSerializer,
     LearnSerializer,
-    HistoryEntrySerializer,
     TeamMemberSerializer,
     PositionTeamMemberSerializer,
     SocialMediaSerializer,
@@ -668,14 +666,6 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-
-class HistoryEntryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing HistoryEntry content."""
-
-    queryset = HistoryEntry.objects.all()
-    serializer_class = HistoryEntrySerializer
-    search_fields = ("title", "description")
-    ordering_fields = ("story_date", "created_at")
 
 class PositionTeamMemberViewSet(viewsets.ModelViewSet):
     """ViewSet for managing PositionTeamMember content."""

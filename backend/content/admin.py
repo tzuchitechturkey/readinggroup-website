@@ -3,7 +3,6 @@ from django.contrib import admin
 from .enums import LearnType
 from .models import (
     EventCommunity,
-    HistoryEntry,
     TeamMember,
     Video,
     VideoCategory,
@@ -85,13 +84,6 @@ class ContentAttachmentAdmin(admin.ModelAdmin):
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "position", "job_title", "created_at")
     search_fields = ("name", "position", "job_title")
-
-
-@admin.register(HistoryEntry)
-class HistoryEntryAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "story_date")
-    list_filter = ("story_date",)
-    search_fields = ("title", "description")
 
 
 @admin.register(PositionTeamMember)

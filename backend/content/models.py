@@ -263,39 +263,6 @@ class TeamMember(TimestampedModel):
         return self.name
 
 
-class HistoryEntry(TimestampedModel):
-    """Timeline entries for the organisation history section."""
-
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    story_date = models.DateField()
-    image = models.ImageField(upload_to="history/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
-    views = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ("story_date", "title")
-
-    def __str__(self) -> str:
-        return f"{self.title} ({self.story_date} - present)"
-
-
-class SectionOrder(models.Model):
-    """Persist global ordering for dashboard/top-stats sections.
-    Each row stores a section key (e.g. 'video', 'post_card') and a
-    numeric position. Lower numbers appear earlier.
-    """
-
-    key = models.CharField(max_length=100, unique=True)
-    position = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ("position",)
-
-    def __str__(self) -> str:
-        return f"SectionOrder<{self.key}:{self.position}>"
-
-
 class Authors(TimestampedModel):
     """Authors for videos and posts."""
 

@@ -9,7 +9,6 @@ from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     ContentAttachment,
     EventCommunity,
-    HistoryEntry,
     NavbarLogo,
     PositionTeamMember,
     Learn,
@@ -251,34 +250,6 @@ class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
-
-
-class HistoryEntrySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("story_date", "created_at", "updated_at")
-    user = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = HistoryEntry
-        fields = "__all__"
-        file_fields = ("image",)
-
-    def get_user(self, obj):
-        try:
-            target = get_account_user(obj)
-            if target:
-                return UserSerializer(target, context=self.context).data
-        except Exception:
-            pass
-        return None
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # include resolved user representation (if present)
-        try:
-            data["user"] = self.get_user(instance)
-        except Exception:
-            data["user"] = None
-        return data
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

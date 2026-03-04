@@ -6,7 +6,6 @@ from .views import (
     LearnCategoryViewSet,
     LearnViewSet,
     VideoViewSet,
-    HistoryEntryViewSet,
     TeamMemberViewSet,
     PositionTeamMemberViewSet,
     SocialMediaViewSet,
@@ -23,7 +22,6 @@ router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"authors", AuthorsViewSet, basename="authors")
 router.register(r"team", TeamMemberViewSet, basename="team-member")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
-router.register(r"history", HistoryEntryViewSet, basename="history-entry")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
