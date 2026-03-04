@@ -18,6 +18,8 @@ from .models import (
     SocialMedia,
     NavbarLogo,
     Authors,
+    PhotoCollection,
+    Photo,
 )
 
 
@@ -241,6 +243,52 @@ class RelatedReportsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             else None
         )
         return data
+
+
+class PhotoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual photos in a collection."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = Photo
+        fields = (
+            "id",
+            "collection",
+            "image",
+            "caption",
+            "order",
+            "created_at",
+            "updated_at",
+        )
+        file_fields = ("image",)
+
+
+class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for photo collections."""
+
+    datetime_fields = ("created_at", "updated_at", "happened_at")
+    photos = PhotoSerializer(many=True, read_only=True)
+    photo_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PhotoCollection
+        fields = (
+            "id",
+            "title",
+            "description",
+            "image",
+            "happened_at",
+            "photos",
+            "photo_count",
+            "created_at",
+            "updated_at",
+        )
+        file_fields = ("image",)
+
+    def get_photo_count(self, obj):
+        """Return the number of photos in the collection."""
+        return obj.photos.count()
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

@@ -31,6 +31,8 @@ from .models import (
     SocialMedia,
     NavbarLogo,
     Authors,
+    PhotoCollection,
+    Photo,
 )
 from .serializers import (
     RelatedReportsCategorySerializer,
@@ -44,6 +46,8 @@ from .serializers import (
     SocialMediaSerializer,
     NavbarLogoSerializer,
     AuthorsSerializer,
+    PhotoCollectionSerializer,
+    PhotoSerializer,
 )
 
 
@@ -856,3 +860,92 @@ class AuthorsViewSet(viewsets.ModelViewSet):
     search_fields = ("name", "description")
     ordering_fields = ("created_at", "name")
     queryset = Authors.objects.all().order_by("-created_at")
+
+
+class PhotoCollectionViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing photo collections."""
+
+    queryset = PhotoCollection.objects.all()
+    serializer_class = PhotoCollectionSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title", "description")
+    ordering_fields = ("happened_at", "created_at")
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+    filter_backends = [filters.SearchFilter]
+
+    def get_queryset(self):
+        queryset = PhotoCollection.objects.all().order_by("-happened_at", "-created_at")
+        return queryset
+
+    @action(detail=True, methods=["post"], url_path="photos")
+    def create_photos(self, request, pk=None):
+        """Create photos for a specific collection.
+
+        POST /photo-collection/{id}/photos/
+        Accepts multiple images and creates photos in the collection.
+        """
+        collection = self.get_object()
+
+        # Check if collection already has 30 photos
+        current_count = collection.photos.count()
+        if current_count >= 30:
+            return Response(
+                {"error": "This collection already has the maximum of 30 photos."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get images from request
+        images = request.FILES.getlist("images")
+        if not images:
+            # Try single image
+            image = request.FILES.get("image")
+            if image:
+                images = [image]
+            else:
+                return Response(
+                    {
+                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Check if adding these photos would exceed the limit
+        if current_count + len(images) > 30:
+            return Response(
+                {
+                    "error": f"Cannot add {len(images)} photos. Collection has {current_count} photos and limit is 30."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create photos
+        created_photos = []
+        for idx, image in enumerate(images):
+            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
+                "caption", ""
+            )
+            order = current_count + idx
+
+            photo = Photo.objects.create(
+                collection=collection,
+                image=image,
+                caption=caption,
+                order=order,
+            )
+            created_photos.append(photo)
+
+        serializer = PhotoSerializer(
+            created_photos, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PhotoViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual photos."""
+
+    queryset = Photo.objects.all()
+    serializer_class = PhotoSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]

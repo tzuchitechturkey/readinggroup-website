@@ -12,6 +12,8 @@ from .models import (
     NavbarLogo,
     Authors,
     ContentAttachment,
+    PhotoCollection,
+    Photo,
 )
 
 
@@ -101,3 +103,32 @@ class NavbarLogoAdmin(admin.ModelAdmin):
 class AuthorsAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name", "description")
+
+
+class PhotoInline(admin.TabularInline):
+    """Inline admin for photos in a collection."""
+
+    model = Photo
+    extra = 1
+    max_num = 30
+    fields = ("image", "caption", "order")
+
+
+@admin.register(PhotoCollection)
+class PhotoCollectionAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "happened_at", "photo_count", "created_at")
+    search_fields = ("title", "description")
+    list_filter = ("happened_at", "created_at")
+    inlines = [PhotoInline]
+
+    def photo_count(self, obj):
+        return obj.photos.count()
+
+    photo_count.short_description = "Photos"
+
+
+@admin.register(Photo)
+class PhotoAdmin(admin.ModelAdmin):
+    list_display = ("id", "collection", "caption", "order", "created_at")
+    search_fields = ("caption", "collection__title")
+    list_filter = ("collection", "created_at")

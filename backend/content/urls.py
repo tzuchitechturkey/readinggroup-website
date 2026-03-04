@@ -1,13 +1,15 @@
 from rest_framework.routers import DefaultRouter
 from .views import (
+    RelatedReportsCategoryViewSet,
     ContentAttachmentViewSet,
+    PhotoCollectionViewSet,
+    RelatedReportsViewSet,
     EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
+    PhotoViewSet,
     LearnViewSet,
     VideoViewSet,
-    RelatedReportsCategoryViewSet,
-    RelatedReportsViewSet,
     SocialMediaViewSet,
     NavbarLogoViewSet,
     SiteInfoViewSet,
@@ -19,6 +21,7 @@ app_name = "content"
 router = DefaultRouter()
 router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"videos", VideoViewSet, basename="video")
+router.register(r"photos", PhotoViewSet, basename="photo")
 router.register(r"authors", AuthorsViewSet, basename="authors")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
@@ -35,5 +38,7 @@ router.register(r"related-reports", RelatedReportsViewSet, basename="related-rep
 router.register(
     r"content-attachments", ContentAttachmentViewSet, basename="content-attachment"
 )
-
+router.register(
+    r"photo-collection", PhotoCollectionViewSet, basename="photo-collection"
+)
 urlpatterns = router.urls

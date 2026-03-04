@@ -328,3 +328,55 @@ class SocialMedia(TimestampedModel):
 
     def __str__(self):
         return f"{self.platform}: {self.url}"
+
+
+class PhotoCollection(TimestampedModel):
+    """Photo collection model for managing photo albums/galleries."""
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image = models.ImageField(
+        upload_to="photo-collections/covers/", blank=True, null=True
+    )
+    happened_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ("-happened_at", "-created_at")
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class Photo(TimestampedModel):
+    """Individual photo in a photo collection."""
+
+    collection = models.ForeignKey(
+        "PhotoCollection", on_delete=models.CASCADE, related_name="photos"
+    )
+    image = models.ImageField(upload_to="photo-collections/photos/")
+    caption = models.CharField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of photo in the collection"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "order"],
+                name="unique_photo_order_per_collection",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Photo {self.order} in {self.collection.title}"
+
+    def save(self, *args, **kwargs):
+        """Ensure a collection doesn't exceed 30 photos."""
+        if not self.pk:  # Only check on creation
+            photo_count = Photo.objects.filter(collection=self.collection).count()
+            if photo_count >= 30:
+                raise ValidationError(
+                    "A photo collection cannot have more than 30 photos."
+                )
+        super().save(*args, **kwargs)
