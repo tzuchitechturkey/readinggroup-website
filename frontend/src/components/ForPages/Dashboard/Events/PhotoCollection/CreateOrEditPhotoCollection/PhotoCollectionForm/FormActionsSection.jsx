@@ -1,11 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-const FormActionsSection = ({ 
-  onSubmit, 
-  isLoading, 
-  isEditMode 
-}) => {
+const FormActionsSection = ({ onSubmit, isLoading, isEditMode }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -21,9 +17,10 @@ const FormActionsSection = ({
         disabled={isLoading}
         className={`
           px-6 py-3 rounded-lg font-medium text-white transition-colors
-          ${isLoading 
-            ? "bg-gray-400 cursor-not-allowed" 
-            : "bg-blue-500 hover:bg-blue-600"
+          ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
           }
         `}
       >

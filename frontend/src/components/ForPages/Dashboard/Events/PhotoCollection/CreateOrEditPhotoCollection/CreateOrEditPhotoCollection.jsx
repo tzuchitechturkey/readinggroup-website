@@ -12,7 +12,8 @@ import {
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import Loader from "@/components/Global/Loader/Loader";
 
-import { ImageSection, FormActionsSection } from "./PhotoCollectionForm";
+import FormActionsSection from "./PhotoCollectionForm/FormActionsSection";
+import ImageSection from "./PhotoCollectionForm/ImageSection";
 
 const CreateOrEditPhotoCollection = () => {
   const { t } = useTranslation();

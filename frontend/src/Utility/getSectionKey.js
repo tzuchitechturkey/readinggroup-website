@@ -22,7 +22,7 @@ export const getSectionKey = (title) => {
     "Photo Collections": "photoCollectionCategories",
     // Related Reports
     "All Related Reports": "relatedReports",
-    "Add/Edit Related Report": "createOrEditRelatedReport",
+    "Add/Edit Related Report": "createOrEditRelatedReports",
     "Related Report Categories": "relatedReportCategories",
     // Latest News
     "All News": "news",

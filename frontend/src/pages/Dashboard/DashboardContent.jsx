@@ -223,7 +223,7 @@ export default function Page() {
       setSelectedNews(data);
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
-    } else if (section === "createOrEditRelatedReport") {
+    } else if (section === "createOrEditRelatedReports") {
       setSelectedrelatedReports(data);
     } else if (section === "createOrEditPhotoCollection") {
       setSelectedPhotoCollections(data);
@@ -259,7 +259,7 @@ export default function Page() {
         photoCollectionsCategories: "Photo Collections",
         relatedReports: "Related Reports",
         relatedReportsCategories: "Related Reports",
-        createOrEditRelatedReport: "Related Reports",
+        createOrEditRelatedReports: "Related Reports",
         // About Us
         history: "About Us",
         team: "About Us",

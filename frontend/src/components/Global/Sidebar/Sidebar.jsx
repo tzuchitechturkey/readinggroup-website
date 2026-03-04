@@ -149,7 +149,7 @@ export default function AppSidebar({
           },
           {
             title: "Add/Edit Related Report",
-            onClick: () => onSectionChange("createOrEditRelatedReport"),
+            onClick: () => onSectionChange("createOrEditRelatedReports"),
           },
           {
             title: "Related Report Categories",
