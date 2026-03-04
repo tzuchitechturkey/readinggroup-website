@@ -7,39 +7,77 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0107_relatedreportscategory_relatedreports'),
+        ("content", "0107_relatedreportscategory_relatedreports"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='PhotoCollection',
+            name="PhotoCollection",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='photo-collections/covers/')),
-                ('happened_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="photo-collections/covers/"
+                    ),
+                ),
+                ("happened_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'ordering': ('-happened_at', '-created_at'),
+                "ordering": ("-happened_at", "-created_at"),
             },
         ),
         migrations.CreateModel(
-            name='Photo',
+            name="Photo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('image', models.ImageField(upload_to='photo-collections/photos/')),
-                ('caption', models.CharField(blank=True, max_length=500)),
-                ('order', models.PositiveIntegerField(default=0, help_text='Order of photo in the collection')),
-                ('collection', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='content.photocollection')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("image", models.ImageField(upload_to="photo-collections/photos/")),
+                ("caption", models.CharField(blank=True, max_length=500)),
+                (
+                    "order",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Order of photo in the collection"
+                    ),
+                ),
+                (
+                    "collection",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="photos",
+                        to="content.photocollection",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('order', 'created_at'),
-                'constraints': [models.UniqueConstraint(fields=('collection', 'order'), name='unique_photo_order_per_collection')],
+                "ordering": ("order", "created_at"),
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("collection", "order"),
+                        name="unique_photo_order_per_collection",
+                    )
+                ],
             },
         ),
     ]

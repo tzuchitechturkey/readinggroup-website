@@ -324,6 +324,20 @@ class Photo(TimestampedModel):
         super().save(*args, **kwargs)
 
 
+class latestNews(TimestampedModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to="latest-news/images/", blank=True, null=True)
+    image_url = models.URLField(max_length=1000, blank=True)
+    happened_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return self.title
+
+
 # ======================================================= New Models end =======================================================
 
 

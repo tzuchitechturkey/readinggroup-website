@@ -9,17 +9,18 @@ from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    PhotoCollection,
     RelatedReports,
     EventCommunity,
     LearnCategory,
     VideoCategory,
+    latestNews,
     Video,
+    Photo,
     Learn,
     SocialMedia,
     NavbarLogo,
     Authors,
-    PhotoCollection,
-    Photo,
 )
 
 
@@ -289,6 +290,14 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     def get_photo_count(self, obj):
         """Return the number of photos in the collection."""
         return obj.photos.count()
+
+
+class latestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = latestNews
+        fields = "__all__"
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

@@ -22,32 +22,35 @@ from .swagger_parameters import (
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    PhotoCollection,
     EventCommunity,
     VideoCategory,
     LearnCategory,
     RelatedReports,
+    latestNews,
     Learn,
     Video,
+    Photo,
     SocialMedia,
     NavbarLogo,
     Authors,
-    PhotoCollection,
-    Photo,
 )
+
 from .serializers import (
     RelatedReportsCategorySerializer,
     ContentAttachmentSerializer,
+    PhotoCollectionSerializer,
     RelatedReportsSerializer,
     EventCommunitySerializer,
     VideoCategorySerializer,
     LearnCategorySerializer,
+    latestNewsSerializer,
     VideoSerializer,
     LearnSerializer,
+    PhotoSerializer,
     SocialMediaSerializer,
     NavbarLogoSerializer,
     AuthorsSerializer,
-    PhotoCollectionSerializer,
-    PhotoSerializer,
 )
 
 
@@ -852,6 +855,17 @@ class PhotoViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("caption",)
     ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+
+class latestNewsViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing latest news items."""
+
+    queryset = latestNews.objects.all()
+    serializer_class = latestNewsSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title", "description")
+    ordering_fields = ("created_at",)
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
