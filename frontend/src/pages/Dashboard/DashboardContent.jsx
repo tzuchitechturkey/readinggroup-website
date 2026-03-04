@@ -187,6 +187,7 @@ export default function Page() {
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
+    
 
     // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
     if (section === "home" || section === "Home") {
@@ -215,8 +216,6 @@ export default function Page() {
       setSelectedLearn(data);
     } else if (section === "createOrEditVideo") {
       setSelectedVideo(data);
-    } else if (section === "createOrEditContent") {
-      setSelectedContent(data);
     } else if (section === "createOrEditEvent") {
       setSelectedLiveStream(data);
     } else if (section === "createOrEditNews") {

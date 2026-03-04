@@ -27,14 +27,15 @@ function PhotoCollectionsCategoriesContent({ onSectionChange }) {
   const [originalCategories, setOriginalCategories] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [form, setForm] = useState({
-    name: "",
-    description: "",
+    image: null,
+    title: "",
+    happened_at: "",
     is_active: false,
     photo_count: 0,
   });
   const [originalForm, setOriginalForm] = useState({
-    name: "",
-    description: "",
+    title: "",
+    happened_at: "",
   });
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [originalLanguage, setOriginalLanguage] = useState(null);
@@ -62,7 +63,7 @@ function PhotoCollectionsCategoriesContent({ onSectionChange }) {
   const openAddModal = () => {
     setSelectedLanguage(i18n?.language || "en");
     setOriginalLanguage(i18n?.language || "en");
-    setForm({ name: "", description: "", is_active: false, photo_count: 0 });
+    setForm({ image: null, title: "", happened_at: "", is_active: false, photo_count: 0 });
     setShowCreateEditModal(true);
   };
 
@@ -140,6 +141,7 @@ function PhotoCollectionsCategoriesContent({ onSectionChange }) {
           setHasChanges={setHasChanges}
           setSelectedCategory={setSelectedCollection}
           setShowDeleteModal={setShowDeleteModal}
+          onSectionChange={onSectionChange}
         />
         {/* End Table */}
 

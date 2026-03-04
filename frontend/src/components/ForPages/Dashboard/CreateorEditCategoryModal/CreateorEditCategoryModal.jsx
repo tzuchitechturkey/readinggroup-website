@@ -64,8 +64,16 @@ function CreateorEditCategoryModal({
   }, [form, originalForm]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, type, files, value } = e.target;
+    
+    if (type === "file") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: files?.[0] || null,
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (errorState[name]) {
       setErrorState((prev) => ({ ...prev, [name]: "" }));
@@ -182,6 +190,33 @@ function CreateorEditCategoryModal({
                 } 
                 `}
                 // ${isLoadingTranslation ? "opacity-50 cursor-not-allowed" : ""}
+              />
+            ) : field.type === "file" ? (
+              <div>
+                <input
+                  type="file"
+                  name={field.name}
+                  onChange={handleInputChange}
+                  accept={field.accept || ""}
+                  className={`w-full p-2 border rounded ${
+                    errorState[field.name] ? "border-red-500" : "border-gray-300"
+                  } `}
+                />
+                {form[field.name] && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>{t("Selected file")}: {form[field.name].name}</p>
+                  </div>
+                )}
+              </div>
+            ) : field.type === "date" ? (
+              <input
+                type="date"
+                name={field.name}
+                value={form[field.name] || ""}
+                onChange={handleInputChange}
+                className={`w-full p-2 border rounded ${
+                  errorState[field.name] ? "border-red-500" : "border-gray-300"
+                }`}
               />
             ) : field.type === "text" ? (
               <input

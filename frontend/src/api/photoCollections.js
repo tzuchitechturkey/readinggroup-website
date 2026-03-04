@@ -33,7 +33,7 @@ export async function DeleteCollectionById(id) {
 
 // /collections/{id}/photos/ data = images.length = 28 we dont need pagination in this endpoints
 export async function GetPhotosByCollectionId(id, data) {
-  return await axios.post(`/photo-collection/${id}/photos/`, data);
+  return await axios.get(`/photo-collection/${id}/photos/`, data);
 }
 
 // /collections/{id}/photos/ data = {images: []}
@@ -47,4 +47,9 @@ export async function EditPhotoInCollection(collection_id, photo_id, data) {
     `/photo-collection/${collection_id}/photos/${photo_id}/`,
     data,
   );
+}
+
+// get ALl Images
+export async function GetAllImages() {
+  return await axios.get(`/photo-collection/images/`);
 }

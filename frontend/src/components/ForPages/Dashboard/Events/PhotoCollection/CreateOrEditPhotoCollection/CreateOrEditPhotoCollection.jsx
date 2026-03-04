@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -8,14 +8,18 @@ import {
   GetCollectionById,
   CreateCollection,
   EditCollectionById,
+  GetCollections,
+  AddPhotoToCollection,
 } from "@/api/photoCollections";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import Loader from "@/components/Global/Loader/Loader";
+import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 import FormActionsSection from "./PhotoCollectionForm/FormActionsSection";
 import ImageSection from "./PhotoCollectionForm/ImageSection";
 
-const CreateOrEditPhotoCollection = () => {
+const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,13 +32,25 @@ const CreateOrEditPhotoCollection = () => {
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [errors, setErrors] = useState({});
-
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  
   // Load data for edit mode
   useEffect(() => {
     if (isEditMode) {
       loadPhotoCollection();
     }
   }, [id, isEditMode]);
+
+  // Set selectedCollection from photoCollection prop
+  useEffect(() => {
+    if (photoCollection?.id && photoCollection?.title) {
+      setSelectedCollection({
+        id: photoCollection.id,
+        title: photoCollection.title,
+      });
+    }
+  }, [photoCollection]);
 
   const loadPhotoCollection = async () => {
     setIsLoading(true);
@@ -58,6 +74,12 @@ const CreateOrEditPhotoCollection = () => {
 
     if (!isEditMode && newImages.length === 0 && images.length === 0) {
       newErrors.images = t("At least one image is required");
+    }
+
+    // في وضع التعديل، الـ collection يكون من photoCollection
+    // في وضع الإنشاء، يجب أن يختار المستخدم
+    if (!isEditMode && !selectedCollection?.id) {
+      newErrors.collection = t("Collection category is required");
     }
 
     setErrors(newErrors);
@@ -96,6 +118,11 @@ const CreateOrEditPhotoCollection = () => {
     try {
       const submitData = new FormData();
 
+      // Add collection ID
+      if (selectedCollection?.id) {
+        submitData.append("collection_id", selectedCollection.id);
+      }
+
       // Add new files if any
       newImages.forEach((file) => {
         submitData.append("images", file);
@@ -110,11 +137,7 @@ const CreateOrEditPhotoCollection = () => {
         });
       }
 
-      if (isEditMode) {
-        await EditCollectionById(id, submitData);
-      } else {
-        await CreateCollection(submitData);
-      }
+      await AddPhotoToCollection(id, submitData);
 
       toast.success(
         t(
@@ -144,16 +167,33 @@ const CreateOrEditPhotoCollection = () => {
     }
   };
 
+  const handleGetCollections = async (search = "") => {
+    try {
+      const res = await GetCollections(10, 0, search);
+      const collectionsData = res.data.results.map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+      }));
+      setCollections(collectionsData);
+    } catch (err) {
+      console.error("Error fetching collections:", err);
+      setErrorFn(err, t);
+    }
+  };
+  useEffect(() => {
+    handleGetCollections();
+  }, []);
+  
   return (
     <div className="bg-white rounded-lg p-6 mx-4 min-h-screen pb-10 overflow-y-auto">
       {isLoading && <Loader />}
       {/* Breadcrumb */}
       <CustomBreadcrumb
-        backTitle="Back to Learn List"
-        onBack={() => {
-          onSectionChange("learn");
-        }}
-        page={isEditMode ? "Edit Learn" : "Create New Learn"}
+        backTitle={t("Back to Photo Collections List")}
+        onBack={() => navigate(-1)}
+        page={
+          isEditMode ? t("Edit Photo Collection") : t("Create Photo Collection")
+        }
       />
       <div className="">
         <form onSubmit={handleSubmit} className="  space-y-6">
@@ -167,6 +207,22 @@ const CreateOrEditPhotoCollection = () => {
           />
           {/* Basic Details */}
 
+          {/* Start Collections */}
+          <AutoComplete
+            label={t("Collection Category")}
+            placeholder={t("Select a collection category")}
+            selectedItem={selectedCollection}
+            onSelect={setSelectedCollection}
+            onClear={() => setSelectedCollection(null)}
+            list={collections}
+            searchMethod={handleGetCollections}
+            searchApi={true}
+            searchPlaceholder={t("Search collections...")}
+            error={errors.collection}
+            required={!isEditMode}
+            renderItemLabel={(item) => item.title || item.name || ""}
+          />
+          {/* End Collections */}
           {/* Form Actions */}
           <FormActionsSection
             onSubmit={handleSubmit}

@@ -15,8 +15,14 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import Loader from "@/components/Global/Loader/Loader";
+import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetCollections, DeleteCollectionById } from "@/api/photoCollections";
+import {
+  GetCollections,
+  DeleteCollectionById,
+  EditCollectionById,
+  GetAllImages,
+} from "@/api/photoCollections";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 const PhotoCollectionsList = ({ onSectionChange }) => {
@@ -32,6 +38,16 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
 
+  // Edit Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    image: null,
+    imageFile: null,
+    collection_id: null,
+  });
+  const [availableCollections, setAvailableCollections] = useState([]);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -42,10 +58,11 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
   const getCollectionsData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * limit;
-    const ordering = sortConfig.direction === "desc" ? `-${sortConfig.key}` : sortConfig.key;
+    const ordering =
+      sortConfig.direction === "desc" ? `-${sortConfig.key}` : sortConfig.key;
 
     try {
-      const res = await GetCollections(limit, offset, searchVal, ordering);
+      const res = await GetAllImages(limit, offset, searchVal, ordering);
       setTotalRecords(res?.data?.count || 0);
       setCollectionsData(res?.data?.results || []);
     } catch (error) {
@@ -55,10 +72,72 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
     }
   };
 
-  // Initial load and refetch on dependencies change
+  // Get available collections for the editing modal
+  const getAvailableCollections = async (search = "") => {
+    try {
+      const res = await GetCollections(100, 0, search);
+      const collectionsData = res.data.results.map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+      }));
+      setAvailableCollections(collectionsData);
+    } catch (err) {
+      console.error("Error fetching collections:", err);
+      setErrorFn(err, t);
+    }
+  };
+
   useEffect(() => {
-    getCollectionsData(currentPage - 1, search);
-  }, [update, sortConfig]);
+    getAvailableCollections();
+  }, []);
+
+  const handleEditClick = (collection) => {
+    setEditingCollection(collection);
+    setEditFormData({
+      image: collection.image || null,
+      imageFile: null,
+      collection_id: collection.id || null,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditFormData((prev) => ({
+        ...prev,
+        imageFile: file,
+        image: URL.createObjectURL(file),
+      }));
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingCollection?.id) return;
+
+    setIsLoading(true);
+    try {
+      const submitData = new FormData();
+
+      if (editFormData.imageFile) {
+        submitData.append("image", editFormData.imageFile);
+      }
+
+      if (editFormData.collection_id) {
+        submitData.append("collection_id", editFormData.collection_id);
+      }
+
+      await EditCollectionById(editingCollection.id, submitData);
+      toast.success(t("Photo collection updated successfully"));
+      setShowEditModal(false);
+      setEditingCollection(null);
+      setUpdate((prev) => !prev);
+    } catch (error) {
+      setErrorFn(error, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Sorting functionality
   const sortData = (key) => {
@@ -123,7 +202,7 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      
+
       {/* Breadcrumb */}
       <CustomBreadcrumb
         backTitle={t("Back to Dashboard")}
@@ -133,7 +212,9 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">{t("Photo Collections")}</h2>
+        <h2 className="text-lg font-medium text-[#1D2630]">
+          {t("Photo Collections")}
+        </h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
             {t("Total")}: {totalRecords} {t("collections")}
@@ -191,9 +272,7 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 {t("Image")}
               </TableHead>
-              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                {t("Title")}
-              </TableHead>
+
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
                 <button
                   onClick={() => sortData("happened_at")}
@@ -202,9 +281,6 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
                   {t("Date")}
                   {getSortIcon("happened_at")}
                 </button>
-              </TableHead>
-              <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                {t("Description")}
               </TableHead>
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
@@ -235,37 +311,27 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
                         />
                       ) : (
                         <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
-                          <span className="text-xs text-gray-500">{t("No Image")}</span>
+                          <span className="text-xs text-gray-500">
+                            {t("No Image")}
+                          </span>
                         </div>
                       )}
                     </div>
                   </TableCell>
 
-                  {/* Title */}
-                  <TableCell className="text-center py-4 max-w-xs">
-                    <p className="font-medium text-gray-900 truncate">
-                      {collection?.title}
-                    </p>
-                  </TableCell>
-
                   {/* Date */}
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <span className="font-medium">
-                      {collection?.happened_at && 
-                        new Date(collection.happened_at).toLocaleDateString("en-GB", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                      }
+                      {collection?.happened_at &&
+                        new Date(collection.happened_at).toLocaleDateString(
+                          "en-GB",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          },
+                        )}
                     </span>
-                  </TableCell>
-
-                  {/* Description */}
-                  <TableCell className="text-center py-4 max-w-md">
-                    <p className="text-sm text-gray-600 truncate">
-                      {collection?.description}
-                    </p>
                   </TableCell>
 
                   {/* Actions */}
@@ -274,7 +340,7 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
                       <button
                         onClick={() => {
                           // Navigate to photos management page
-                          onSectionChange("manageCollectionPhotos", collection);
+                          // onSectionChange("manageCollectionPhotos", collection);
                         }}
                         className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded"
                         title={t("Manage Photos")}
@@ -282,10 +348,7 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
                         <LuEye className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => {
-                          setSelectedCollection(collection);
-                          onSectionChange("createOrEditPhotoCollection", collection);
-                        }}
+                        onClick={() => handleEditClick(collection)}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
                       >
@@ -307,7 +370,10 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-8 text-gray-500"
+                >
                   {search
                     ? t("No collections found matching your search.")
                     : t("No collections available.")}
@@ -369,12 +435,117 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
       <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
         <DeleteConfirmation
           title={t("Delete Photo Collection")}
-          message={t("Are you sure you want to delete this photo collection? This action cannot be undone.")}
+          message={t(
+            "Are you sure you want to delete this photo collection? This action cannot be undone.",
+          )}
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteModal(false)}
           confirmText={t("Delete")}
           cancelText={t("Cancel")}
         />
+      </Modal>
+
+      {/* Edit Collection Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingCollection(null);
+        }}
+        title={t("Edit Photo Collection")}
+        width="600px"
+      >
+        <div className="space-y-4">
+          {/* Image Section */}
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              {t("Collection Image")}
+            </label>
+            <div className="flex flex-col gap-4">
+              {/* Image Preview */}
+              {editFormData.image ? (
+                <div className="relative">
+                  <img
+                    src={editFormData.image}
+                    alt={editingCollection?.title}
+                    className="w-full h-48 object-cover rounded"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-48 bg-gray-200 rounded flex items-center justify-center">
+                  <span className="text-gray-500">{t("No Image")}</span>
+                </div>
+              )}
+
+              {/* File Input */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  {t("Change Image")}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Collection Category */}
+          <div>
+            <AutoComplete
+              label={t("Collection Category")}
+              placeholder={t("Select a collection category")}
+              selectedItem={
+                availableCollections.find(
+                  (c) => c.id === editFormData.collection_id,
+                ) || null
+              }
+              onSelect={(item) =>
+                setEditFormData((prev) => ({
+                  ...prev,
+                  collection_id: item?.id || null,
+                }))
+              }
+              onClear={() =>
+                setEditFormData((prev) => ({
+                  ...prev,
+                  collection_id: null,
+                }))
+              }
+              list={availableCollections}
+              searchMethod={getAvailableCollections}
+              searchApi={true}
+              searchPlaceholder={t("Search collections...")}
+              required={true}
+              renderItemLabel={(item) => item.title || item.name || ""}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingCollection(null);
+              }}
+              disabled={isLoading}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              {t("Cancel")}
+            </button>
+            <button
+              type="button"
+              onClick={handleEditSubmit}
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+            >
+              {isLoading ? t("Saving...") : t("Save Changes")}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

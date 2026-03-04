@@ -20,14 +20,13 @@ function CreateorEditPhotoCollectionsCategory({
   setIsLoading,
   setUpdate,
 }) {
-  // const [isLoadingTranslation, setIsLoadingTranslation] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Check if name or description has changed from original
+  // Check if content has changed from original
   const isContentChanged = useMemo(
     () =>
       form.title !== originalForm.title ||
-      form.description !== originalForm.description,
+      form.happened_at !== originalForm.happened_at,
     [form, originalForm],
   );
 
@@ -36,6 +35,10 @@ function CreateorEditPhotoCollectionsCategory({
 
     if (!form.title || !form.title.trim()) {
       newErrors.title = t("Title is required");
+    }
+
+    if (!form.happened_at) {
+      newErrors.happened_at = t("Date is required");
     }
 
     setErrors(newErrors);
@@ -48,10 +51,15 @@ function CreateorEditPhotoCollectionsCategory({
       return;
     }
 
-    // const languageCode = languageCodeMap[selectedLanguage];
-    const submitData = { ...form };
+    const submitData = new FormData();
+    submitData.append("title", form.title.trim());
+    submitData.append("happened_at", form.happened_at);
+    submitData.append("is_active", form.is_active);
+    
+    if (form.image instanceof File) {
+      submitData.append("image", form.image);
+    }
 
-    // submitData.language = languageCode;
     setIsLoading(true);
     try {
       if (form.id) {
@@ -69,7 +77,26 @@ function CreateorEditPhotoCollectionsCategory({
       setIsLoading(false);
     }
   };
+
+  const resetForm = () => {
+    setForm({
+      image: null,
+      title: "",
+      happened_at: "",
+      is_active: false,
+      photo_count: 0,
+    });
+    setErrors({});
+  };
+
   const fields = [
+    {
+      name: "image",
+      label: t("Image"),
+      type: "file",
+      required: !form.id,
+      accept: "image/*",
+    },
     {
       name: "title",
       label: t("Title"),
@@ -77,10 +104,10 @@ function CreateorEditPhotoCollectionsCategory({
       required: true,
     },
     {
-      name: "description",
-      label: t("Description"),
-      type: "text",
-      required: false,
+      name: "happened_at",
+      label: t("Date"),
+      type: "date",
+      required: true,
     },
   ];
   const toggleFields = [
@@ -99,7 +126,10 @@ function CreateorEditPhotoCollectionsCategory({
   return (
     <CreateorEditCategoryModal
       isOpen={showModal}
-      onClose={() => setShowModal(false)}
+      onClose={() => {
+        setShowModal(false);
+        resetForm();
+      }}
       title={form.id ? t("Edit Category") : t("Add Category")}
       width="600px"
       // Form Data
