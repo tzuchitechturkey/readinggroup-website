@@ -32,7 +32,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     showAttachmentsModal,
     setShowAttachmentsModal,
     setGuestSpeakersInput,
-    imagePreview,
     showCategoryDropdown,
     setShowCategoryDropdown,
     categoriesList,
@@ -45,7 +44,6 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     handleCategorySelect,
     handleGuestSpeakersInput,
     removeGuestSpeaker,
-    handleThumbnailUpload,
     handleFetchYouTubeInfo,
     handleSubmit,
     getCategories,
@@ -90,7 +88,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           </div>
         </div> */}
 
-        {/* Thumbnail URL Alternative */}
+        {/* Start Thumbnail URL Alternative */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Thumbnail URL")} ({t("Alternative to file upload")})
@@ -106,8 +104,8 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
             {t("You can either upload a file above or provide a URL here")}
           </p>
         </div>
-
-        {/* Attachments Section */}
+        {/* End Thumbnail URL Alternative */}
+        {/* Start Attachments Section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             {t("Attachments")}

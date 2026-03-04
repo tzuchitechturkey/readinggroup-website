@@ -12,11 +12,7 @@ import {
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import Loader from "@/components/Global/Loader/Loader";
 
-import {
-  BasicDetailsSection,
-  ImageSection,
-  FormActionsSection,
-} from "./PhotoCollectionForm";
+import { ImageSection, FormActionsSection } from "./PhotoCollectionForm";
 
 const CreateOrEditPhotoCollection = () => {
   const { t } = useTranslation();
@@ -27,21 +23,10 @@ const CreateOrEditPhotoCollection = () => {
   // State
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    happened_at: "",
-  });
+
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [errors, setErrors] = useState({});
-
-  // Breadcrumb items
-  const breadcrumbItems = [
-    { label: t("Dashboard"), href: "/admin" },
-    { label: t("Photo Collections"), href: "/admin/photo-collections" },
-    { label: isEditMode ? t("Edit Collection") : t("Create Collection") },
-  ];
 
   // Load data for edit mode
   useEffect(() => {
@@ -55,12 +40,6 @@ const CreateOrEditPhotoCollection = () => {
     try {
       const response = await GetCollectionById(id);
       const collection = response.data;
-
-      setFormData({
-        title: collection.title || "",
-        description: collection.description || "",
-        happened_at: collection.happened_at || "",
-      });
 
       setImages(collection.images || []);
     } catch (error) {
@@ -76,55 +55,12 @@ const CreateOrEditPhotoCollection = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = t("Title is required");
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = t("Description is required");
-    }
-
-    if (!formData.happened_at) {
-      newErrors.happened_at = t("Event date is required");
-    }
-
     if (!isEditMode && newImages.length === 0 && images.length === 0) {
       newErrors.images = t("At least one image is required");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  // Form handlers
-  const handleTitleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      title: e.target.value,
-    }));
-    if (errors.title) {
-      setErrors((prev) => ({ ...prev, title: null }));
-    }
-  };
-
-  const handleDescriptionChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      description: e.target.value,
-    }));
-    if (errors.description) {
-      setErrors((prev) => ({ ...prev, description: null }));
-    }
-  };
-
-  const handleDateChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      happened_at: e.target.value,
-    }));
-    if (errors.happened_at) {
-      setErrors((prev) => ({ ...prev, happened_at: null }));
-    }
   };
 
   const handleNewImagesChange = (files) => {
@@ -159,11 +95,6 @@ const CreateOrEditPhotoCollection = () => {
     try {
       const submitData = new FormData();
 
-      // Add basic data
-      submitData.append("title", formData.title);
-      submitData.append("description", formData.description);
-      submitData.append("happened_at", formData.happened_at);
-
       // Add new files if any
       newImages.forEach((file) => {
         submitData.append("images", file);
@@ -178,11 +109,10 @@ const CreateOrEditPhotoCollection = () => {
         });
       }
 
-      let response;
       if (isEditMode) {
-        response = await EditCollectionById(id, submitData);
+        await EditCollectionById(id, submitData);
       } else {
-        response = await CreateCollection(submitData);
+        await CreateCollection(submitData);
       }
 
       toast.success(
@@ -224,11 +154,8 @@ const CreateOrEditPhotoCollection = () => {
         }}
         page={isEditMode ? "Edit Learn" : "Create New Learn"}
       />
-      <div className="mt-6">
-        <form
-          onSubmit={handleSubmit}
-          className=" p-6 space-y-8"
-        >
+      <div className="">
+        <form onSubmit={handleSubmit} className="  space-y-6">
           {/* Images */}
           <ImageSection
             images={images}
@@ -238,15 +165,6 @@ const CreateOrEditPhotoCollection = () => {
             errors={errors}
           />
           {/* Basic Details */}
-          <BasicDetailsSection
-            title={formData.title}
-            onTitleChange={handleTitleChange}
-            description={formData.description}
-            onDescriptionChange={handleDescriptionChange}
-            happenedAt={formData.happened_at}
-            onHappenedAtChange={handleDateChange}
-            errors={errors}
-          />
 
           {/* Form Actions */}
           <FormActionsSection

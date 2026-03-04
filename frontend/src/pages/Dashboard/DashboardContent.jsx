@@ -364,7 +364,7 @@ export default function Page() {
             onSectionChange={handleSectionChange}
           />
         );
-      case "createOrEditRelatedReport":
+      case "createOrEditRelatedReports":
         return (
           <CreateOrEditRelatedReports
             relatedReport={selectedrelatedReports}

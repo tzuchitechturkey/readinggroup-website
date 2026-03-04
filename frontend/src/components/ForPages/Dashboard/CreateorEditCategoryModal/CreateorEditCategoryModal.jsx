@@ -96,7 +96,7 @@ function CreateorEditCategoryModal({
     }
 
     await onSubmit(form, selectedLanguage, isAutoTranslated);
-    onClose();
+    // onClose();
   };
 
   const getToggleColor = (fieldName) => {

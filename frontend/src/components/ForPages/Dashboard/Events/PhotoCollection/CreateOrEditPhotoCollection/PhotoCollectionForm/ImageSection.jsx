@@ -61,7 +61,7 @@ const ImageSection = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
         <p className="text-sm text-blue-800">
           <strong>{t("Important")}:</strong>{" "}
