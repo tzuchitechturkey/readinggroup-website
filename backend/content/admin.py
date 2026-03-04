@@ -15,8 +15,6 @@ from .models import (
     NavbarLogo,
     Authors,
     ContentAttachment,
-    Book,
-    BookCategory,
 )
 
 
@@ -125,17 +123,3 @@ class NavbarLogoAdmin(admin.ModelAdmin):
 class AuthorsAdmin(admin.ModelAdmin):
     list_display = ("name", "description")
     search_fields = ("name", "description")
-
-
-@admin.register(BookCategory)
-class BookCategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "key", "language", "description", "created_at")
-    search_fields = ("name", "key")
-    list_filter = ("language", "is_active")
-    exclude = ("key", "translation_group")
-
-
-@admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
-    list_display = ("id", "name")
-    search_fields = ("name",)

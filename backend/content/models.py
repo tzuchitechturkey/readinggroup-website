@@ -211,9 +211,6 @@ class EventCommunity(TimestampedModel):
         return self.title
 
 
-# ======================================================= New Models end =======================================================
-
-
 class ContentAttachment(TimestampedModel):
     """Attachments for all data found in our database (e.g. videos, learns)."""
 
@@ -245,21 +242,6 @@ class ContentAttachment(TimestampedModel):
 
 
 # ======================================================= New Models end =======================================================
-
-
-class Book(TimestampedModel):
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    category = models.ForeignKey(
-        "BookCategory", on_delete=models.SET_NULL, null=True, blank=True
-    )
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return self.name
-
 
 class TeamMember(TimestampedModel):
     """Team member details for the About Us section."""
@@ -328,70 +310,6 @@ class Authors(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name
-
-
-class BookCategory(TimestampedModel):
-    """Categories for organizing books with multi-language support.
-
-    Each category has a unique key that identifies it across all languages.
-    The combination of (key, language) must be unique.
-    """
-
-    key = models.CharField(
-        max_length=100,
-        db_index=True,
-        blank=True,
-        default="",
-        help_text="Unique identifier for this category across all languages",
-    )
-    name = models.CharField(
-        max_length=100, help_text="Category name in the specified language"
-    )
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(
-        default=0, help_text="Manual ordering (lower values appear first)"
-    )
-    language = models.CharField(
-        max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH
-    )
-    translation_group = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
-        help_text="UUID grouping translations of the same category",
-    )
-
-    class Meta:
-        ordering = ("order", "-created_at")
-        unique_together = (("key", "language"),)
-        indexes = [
-            models.Index(fields=["key", "language"]),
-        ]
-
-    def save(self, *args, **kwargs):
-        """Auto-generate unique key on creation if not provided."""
-        if not self.pk and not self.key:
-            # Generate unique key from name and uuid
-            base_key = slugify(self.name) if self.name else "category"
-            unique_suffix = str(uuid.uuid4())[:8]
-            self.key = f"{base_key}-{unique_suffix}"
-        super().save(*args, **kwargs)
-
-    @classmethod
-    def get_translations(cls, key):
-        """Get all translations for a given key."""
-        return cls.objects.filter(key=key)
-
-    @classmethod
-    def get_by_language(cls, key, language):
-        """Get specific translation by key and language."""
-        try:
-            return cls.objects.get(key=key, language=language)
-        except cls.DoesNotExist:
-            return None
-
-    def __str__(self) -> str:
-        return f"{self.name} ({self.language})"
 
 
 class MyListEntry(TimestampedModel):

@@ -19,8 +19,6 @@ from .models import (
     Video,
     VideoCategory,
     Authors,
-    BookCategory,
-    Book,
 )
 
 
@@ -215,14 +213,6 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
-class BookCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    book_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = BookCategory
-        fields = "__all__"
-
 
 class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
@@ -230,26 +220,6 @@ class PositionTeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerialize
     class Meta:
         model = PositionTeamMember
         fields = ["id", "name", "description"]
-
-
-class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=BookCategory.objects.all(), write_only=True, required=False
-    )
-
-    class Meta:
-        model = Book
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["category"] = (
-            BookCategorySerializer(instance.category, context=self.context).data
-            if instance.category
-            else None
-        )
-        return data
 
 
 class TeamMemberSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

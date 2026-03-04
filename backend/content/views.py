@@ -34,8 +34,6 @@ from .models import (
     SocialMedia,
     NavbarLogo,
     Authors,
-    Book,
-    BookCategory,
 )
 from .serializers import (
     ContentAttachmentSerializer,
@@ -50,8 +48,6 @@ from .serializers import (
     SocialMediaSerializer,
     NavbarLogoSerializer,
     AuthorsSerializer,
-    BookSerializer,
-    BookCategorySerializer,
 )
 
 
@@ -638,22 +634,6 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
 
 # ========================================== new viewset end============================================
-class BookViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing Book content."""
-
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    search_fields = ("name",)
-    ordering_fields = ("created_at",)
-    pagination_class = LimitOffsetPagination
-
-    @swagger_auto_schema(
-        operation_summary="List all books",
-        operation_description="Retrieve a list of books with optional filtering by author, publisher, language, and tags.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     """ViewSet for managing TeamMember content."""
@@ -696,90 +676,6 @@ class HistoryEntryViewSet(viewsets.ModelViewSet):
     serializer_class = HistoryEntrySerializer
     search_fields = ("title", "description")
     ordering_fields = ("story_date", "created_at")
-
-
-class BookCategoryViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing BookCategory content with multi-language support."""
-
-    queryset = BookCategory.objects.all()
-    serializer_class = BookCategorySerializer
-    search_fields = ("name", "key")
-    ordering_fields = ("order", "created_at")
-    queryset = BookCategory.objects.all().order_by("order", "-created_at")
-
-    def get_serializer_context(self):
-        """Add include_translations flag to serializer context."""
-        context = super().get_serializer_context()
-        context["include_translations"] = (
-            self.request.query_params.get("include_translations", "false").lower()
-            == "true"
-        )
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        is_active = self.request.query_params.get("is_active")
-        language = self.request.query_params.get("language")
-        key = self.request.query_params.get("key")
-
-        if is_active is not None:
-            queryset = queryset.filter(is_active=is_active)
-        if language:
-            queryset = queryset.filter(language=language)
-        if key:
-            queryset = queryset.filter(key=key)
-        try:
-            queryset = queryset.annotate(book_count=Count("book"))
-        except Exception:
-            pass
-        return queryset
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="by-key/(?P<key>[^/.]+)",
-        url_name="by-key",
-    )
-    def by_key(self, request, key=None):
-        """Get all translations for a specific category key."""
-        categories = BookCategory.objects.filter(key=key).order_by("language")
-        if not categories.exists():
-            return Response(
-                {"detail": "No categories found with this key."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder ContentCategories based on provided order.
-
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    BookCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=("get",), url_path="books", url_name="books")
-    def books(self, request, pk=None):
-        """Return all books related to this BookCategory (by id)."""
-        books = Book.objects.filter(category_id=pk)
-        serializer = BookSerializer(books, many=True, context={"request": request})
-        return Response(serializer.data)
-
 
 class PositionTeamMemberViewSet(viewsets.ModelViewSet):
     """ViewSet for managing PositionTeamMember content."""
