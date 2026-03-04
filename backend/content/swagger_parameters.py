@@ -179,12 +179,4 @@ event_community_manual_parameters = [
     ),
 ]
 
-
-team_member_manual_parameters = [
-    openapi.Parameter(
-        "Position",
-        openapi.IN_QUERY,
-        description="Filter by Position",
-        type=openapi.TYPE_STRING,
-    ),
-]
+# ==================================== team event community swagger parameters end =======================================

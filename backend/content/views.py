@@ -1,7 +1,7 @@
 from urllib import request
 
 from django.conf import settings
-from django.db.models import Count, F, Q
+from django.db.models import Count, F
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,7 +9,6 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
-from django.utils import timezone
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
 from .swagger_parameters import (
@@ -19,13 +18,14 @@ from .swagger_parameters import (
     learn_category_manual_parameters,
     by_type_video_manual_parameters,
     event_community_manual_parameters,
-    team_member_manual_parameters,
 )
 from .models import (
+    RelatedReportsCategory,
     ContentAttachment,
     EventCommunity,
     VideoCategory,
     LearnCategory,
+    RelatedReports,
     Learn,
     Video,
     SocialMedia,
@@ -33,7 +33,9 @@ from .models import (
     Authors,
 )
 from .serializers import (
+    RelatedReportsCategorySerializer,
     ContentAttachmentSerializer,
+    RelatedReportsSerializer,
     EventCommunitySerializer,
     VideoCategorySerializer,
     LearnCategorySerializer,
@@ -625,6 +627,112 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
                 pass
 
         return queryset.order_by("-start_event_date", "-start_event_time")
+
+
+class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
+    queryset = RelatedReportsCategory.objects.all()
+    serializer_class = RelatedReportsCategorySerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title",)
+    ordering_fields = ("created_at",)
+    ordering = ("-created_at",)
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    queryset = RelatedReportsCategory.objects.all().order_by("-created_at")
+
+    @swagger_auto_schema(
+        operation_summary="Get related reports by category",
+        operation_description="Return related reports belonging to this RelatedReportsCategory with pagination. Optional ordering parameter can be applied.",
+    )
+    @action(detail=True, methods=["get"], url_path="related-reports")
+    def related_reports(self, request, pk=None):
+        """
+        Return related reports belonging to this RelatedReportsCategory with pagination.
+        """
+        category = self.get_object()
+        related_reports = RelatedReports.objects.filter(category=category)
+
+        created_at = request.query_params.get("created_at")
+        if created_at:
+            try:
+                year, month = created_at.split("-")
+                related_reports = related_reports.filter(
+                    created_at__year=int(year),
+                    created_at__month=int(month),
+                )
+            except Exception:
+                pass
+        ordering = request.query_params.get("ordering")
+        if ordering:
+            related_reports = related_reports.order_by(ordering)
+
+        page = self.paginate_queryset(related_reports)
+        if page is not None:
+            serializer = RelatedReportsSerializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = RelatedReportsSerializer(
+            related_reports, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RelatedReportsViewSet(viewsets.ModelViewSet):
+    queryset = RelatedReports.objects.all()
+    serializer_class = RelatedReportsSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title", "category__title")
+    ordering_fields = ("created_at",)
+    ordering = ("-created_at",)
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+        DjangoFilterBackend,
+    ]
+
+    @action(
+        detail=False,
+        methods=("post",),
+        url_path="fetch-youtube-info",
+    )
+    def fetch_youtube_info(self, request):
+        video_url = request.data.get("video_url") or request.data.get("url")
+        if not video_url:
+            return Response(
+                {"detail": "video_url is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        api_key = getattr(settings, "YOUTUBE_API_KEY", None)
+        if not api_key:
+            return Response(
+                {"detail": "YouTube API key is not configured."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        try:
+            info = fetch_video_info(video_url, api_key)
+        except YouTubeAPIError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_payload = {
+            "title": info.title,
+            "description": info.description,
+            "duration_seconds": info.duration_seconds,
+            "duration_formatted": info.duration_formatted,
+            "reference_code": info.video_id,
+            "default_language": info.default_language,
+            "channel_title": info.channel_title,
+            "thumbnails": info.thumbnails,
+            "published_at": (
+                info.published_at.isoformat() if info.published_at else None
+            ),
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
 
 
 # ========================================== new viewset end============================================

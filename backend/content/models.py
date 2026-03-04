@@ -106,7 +106,7 @@ class VideoCategory(TimestampedModel):
         ordering = ("order", "-created_at")
 
     def __str__(self) -> str:
-        return
+        return self.name
 
 
 class Learn(TimestampedModel):
@@ -205,6 +205,40 @@ class EventCommunity(TimestampedModel):
                 learn_instance.save(update_fields=["is_event"])
 
     def __str__(self):
+        return self.title
+
+
+class RelatedReports(TimestampedModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    category = models.ForeignKey(
+        "RelatedReportsCategory",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="related_reports",
+    )
+    thumnail_url = models.JSONField(default=list, blank=True)
+    external_link = models.URLField(blank=True, null=True)
+    happened_at = models.DateTimeField(blank=True, null=True)
+    duration = models.CharField(max_length=64, blank=True, null=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class RelatedReportsCategory(TimestampedModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
         return self.title
 
 

@@ -6,6 +6,8 @@ from .views import (
     LearnCategoryViewSet,
     LearnViewSet,
     VideoViewSet,
+    RelatedReportsCategoryViewSet,
+    RelatedReportsViewSet,
     SocialMediaViewSet,
     NavbarLogoViewSet,
     SiteInfoViewSet,
@@ -24,6 +26,12 @@ router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
 router.register(r"event-communities", EventCommunityViewSet, basename="event-community")
+router.register(
+    r"related-reports-categories",
+    RelatedReportsCategoryViewSet,
+    basename="related-reports-category",
+)
+router.register(r"related-reports", RelatedReportsViewSet, basename="related-reports")
 router.register(
     r"content-attachments", ContentAttachmentViewSet, basename="content-attachment"
 )

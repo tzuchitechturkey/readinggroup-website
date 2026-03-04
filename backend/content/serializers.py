@@ -7,14 +7,16 @@ from rest_framework import serializers
 from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
+    RelatedReportsCategory,
     ContentAttachment,
+    RelatedReports,
     EventCommunity,
-    NavbarLogo,
-    Learn,
     LearnCategory,
-    SocialMedia,
-    Video,
     VideoCategory,
+    Video,
+    Learn,
+    SocialMedia,
+    NavbarLogo,
     Authors,
 )
 
@@ -205,6 +207,37 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         data["learn"] = (
             LearnSerializer(instance.learn, context=self.context).data
             if instance.learn
+            else None
+        )
+        return data
+
+
+class RelatedReportsCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    related_reports_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = RelatedReportsCategory
+        fields = "__all__"
+
+
+class RelatedReportsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=RelatedReportsCategory.objects.all(), write_only=True, required=False
+    )
+
+    class Meta:
+        model = RelatedReports
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["category"] = (
+            RelatedReportsCategorySerializer(
+                instance.category, context=self.context
+            ).data
+            if instance.category
             else None
         )
         return data
