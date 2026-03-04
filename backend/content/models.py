@@ -240,6 +240,7 @@ class ContentAttachment(TimestampedModel):
 
 # ======================================================= New Models end =======================================================
 
+
 class Authors(TimestampedModel):
     """Authors for videos and posts."""
 
@@ -254,6 +255,7 @@ class Authors(TimestampedModel):
 
     def __str__(self) -> str:
         return self.name
+
 
 class MyListEntry(TimestampedModel):
     """User saved videos for later viewing."""

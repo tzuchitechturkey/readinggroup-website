@@ -77,6 +77,7 @@ class ContentAttachmentAdmin(admin.ModelAdmin):
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------
 
+
 @admin.register(MyListEntry)
 class MyListEntryAdmin(admin.ModelAdmin):
     # ensure fields listed exist on MyListEntry model
