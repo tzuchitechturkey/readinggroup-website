@@ -14,6 +14,8 @@ from .models import (
     ContentAttachment,
     PhotoCollection,
     Photo,
+    RelatedReports,
+    RelatedReportsCategory,
 )
 
 
@@ -77,32 +79,18 @@ class ContentAttachmentAdmin(admin.ModelAdmin):
     search_fields = ("file_name",)
 
 
-# ----------------------------------------------------------------new models admin end----------------------------------------------------------------
+@admin.register(RelatedReportsCategory)
+class RelatedReportsCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "is_active", "created_at")
+    search_fields = ("title", "description")
+    list_filter = ("is_active", "created_at")
 
 
-@admin.register(MyListEntry)
-class MyListEntryAdmin(admin.ModelAdmin):
-    # ensure fields listed exist on MyListEntry model
-    list_display = ("id", "user", "video", "created_at")
-    search_fields = ("user__username", "video__title")
-
-
-@admin.register(SocialMedia)
-class SocialMediaAdmin(admin.ModelAdmin):
-    list_display = ("platform", "url")
-    search_fields = ("platform", "url")
-
-
-@admin.register(NavbarLogo)
-class NavbarLogoAdmin(admin.ModelAdmin):
-    list_display = ("logo",)
-    search_fields = ("logo",)
-
-
-@admin.register(Authors)
-class AuthorsAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
-    search_fields = ("name", "description")
+@admin.register(RelatedReports)
+class RelatedReportsAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "category", "happened_at", "created_at")
+    search_fields = ("title", "description", "category__title")
+    list_filter = ("category", "happened_at", "created_at")
 
 
 class PhotoInline(admin.TabularInline):
@@ -132,3 +120,31 @@ class PhotoAdmin(admin.ModelAdmin):
     list_display = ("id", "collection", "caption", "order", "created_at")
     search_fields = ("caption", "collection__title")
     list_filter = ("collection", "created_at")
+
+
+# ----------------------------------------------------------------new models admin end----------------------------------------------------------------
+
+
+@admin.register(MyListEntry)
+class MyListEntryAdmin(admin.ModelAdmin):
+    # ensure fields listed exist on MyListEntry model
+    list_display = ("id", "user", "video", "created_at")
+    search_fields = ("user__username", "video__title")
+
+
+@admin.register(SocialMedia)
+class SocialMediaAdmin(admin.ModelAdmin):
+    list_display = ("platform", "url")
+    search_fields = ("platform", "url")
+
+
+@admin.register(NavbarLogo)
+class NavbarLogoAdmin(admin.ModelAdmin):
+    list_display = ("logo",)
+    search_fields = ("logo",)
+
+
+@admin.register(Authors)
+class AuthorsAdmin(admin.ModelAdmin):
+    list_display = ("name", "description")
+    search_fields = ("name", "description")
