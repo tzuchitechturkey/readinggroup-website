@@ -204,7 +204,7 @@ function CreateorEditLearnCategory({
       width="600px"
       // Form Data
       form={form}
-      toggleFields={toggleFields}
+      toggleFields={form?.id ? toggleFields : []}
       fields={fields}
       setForm={setForm}
       originalForm={originalForm}

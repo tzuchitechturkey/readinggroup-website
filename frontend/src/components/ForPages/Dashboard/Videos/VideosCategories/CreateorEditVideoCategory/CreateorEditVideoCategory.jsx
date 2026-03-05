@@ -159,10 +159,10 @@ function CreateorEditVideoCategory({
       color: "green",
       activeLabel: "Active",
       inactiveLabel: "Inactive",
-      validation: (form) => ({
-        isValid: form.is_active || form.video_count > 0,
-        message: t("Cannot activate category with no videos."),
-      }),
+      // validation: (form) => ({
+      //   isValid: form.is_active || form.video_count > 0,
+      //   message: t("Cannot activate category with no videos."),
+      // }),
     },
   ];
 
@@ -176,7 +176,7 @@ function CreateorEditVideoCategory({
       setForm={setForm}
       originalForm={originalForm}
       fields={fields}
-      toggleFields={toggleFields}
+      toggleFields={form?.id ? toggleFields : []}
       // Language & Translation
       selectedLanguage={selectedLanguage}
       setSelectedLanguage={setSelectedLanguage}

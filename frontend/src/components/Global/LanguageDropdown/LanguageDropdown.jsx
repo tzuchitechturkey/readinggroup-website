@@ -31,9 +31,9 @@ export default function LanguageDropdown({ iconColor }) {
 
   return (
     <DropdownMenu onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger className="outline-none border-none ring-0 focus:ring-0">
+      <DropdownMenuTrigger className="outline-none mx-2 border-none ring-0 focus:ring-0">
         <div
-          className="flex items-center gap-[8px] bg-[#fcfdff] rounded-[38px] cursor-pointer transition-all duration-200 px-[12px] py-[8px]"
+          className="flex items-center gap-[8px] bg-[#fcfdff] cursor-pointer transition-all duration-200 rounded-[38px] px-[12px] py-[8px]"
           style={{
             boxShadow: isOpen ? "0px 4px 12px rgba(0, 0, 0, 0.05)" : "none",
           }}

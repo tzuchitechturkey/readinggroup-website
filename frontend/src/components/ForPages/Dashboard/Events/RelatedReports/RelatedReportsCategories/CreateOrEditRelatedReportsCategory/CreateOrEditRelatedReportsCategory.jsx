@@ -126,7 +126,7 @@ function CreateOrEditRelatedReportsCategory({
       errors={errors}
       setErrors={setErrors}
       fields={fields}
-      toggleFields={toggleFields}
+      toggleFields={form?.id ? toggleFields : []}
       selectedLanguage={selectedLanguage}
       setSelectedLanguage={setSelectedLanguage}
       originalLanguage={originalLanguage}

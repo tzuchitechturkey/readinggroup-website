@@ -41,7 +41,7 @@ function LearnCategoriesTable({
       is_active: cat.is_active !== undefined ? cat.is_active : false,
       learn_type: cat.learn_type || "",
       direction: cat.direction || "",
-      post_count: cat.post_count !== undefined ? cat.post_count : 0,
+      learn_count: cat.learn_count !== undefined ? cat.learn_count : 0,
       id: cat.id,
     };
     setForm(formData);
@@ -91,14 +91,14 @@ function LearnCategoriesTable({
       render: (item) => (
         <button
           onClick={async () => {
-            if (!item.is_active && item.post_count === 0) {
-              toast.info(
-                t(
-                  "You cannot activate this category because it does not contain any posts. Please add posts first.",
-                ),
-              );
-              return;
-            }
+            // if (!item.is_active && item.learn_count === 0) {
+            //   toast.info(
+            //     t(
+            //       "You cannot activate this category because it does not contain any posts. Please add posts first.",
+            //     ),
+            //   );
+            //   return;
+            // }
             try {
               await EditLearnCategoryById(item.id, {
                 ...item,
@@ -116,9 +116,9 @@ function LearnCategoriesTable({
             item.is_active
               ? "bg-green-100 text-green-600 hover:bg-green-200"
               : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-          } ${!item.is_active && item.post_count === 0 ? "opacity-50 " : ""}`}
+          } ${!item.is_active && item.learn_count === 0 ? "opacity-50 " : ""}`}
           title={
-            !item.is_active && item.post_count === 0
+            !item.is_active && item.learn_count === 0
               ? t("Cannot activate category with no posts.")
               : item.is_active
                 ? t("Click to disable")

@@ -78,14 +78,14 @@ function VideoCategoriesTable({
       render: (item) => (
         <button
           onClick={async () => {
-            if (!item.is_active && item.video_count === 0) {
-              toast.info(
-                t(
-                  "You cannot activate this category because it does not contain any videos. Please add videos first.",
-                ),
-              );
-              return;
-            }
+            // if (!item.is_active && item.video_count === 0) {
+            //   toast.info(
+            //     t(
+            //       "You cannot activate this category because it does not contain any videos. Please add videos first.",
+            //     ),
+            //   );
+            //   return;
+            // }
             try {
               await EditVideoCategoryById(item.id, {
                 ...item,

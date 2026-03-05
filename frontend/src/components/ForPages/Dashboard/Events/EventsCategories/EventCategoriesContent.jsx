@@ -124,7 +124,7 @@ function EventCategoriesContent({ onSectionChange }) {
           isEditing={Boolean(editingCategory?.id)}
           form={form}
           errors={errors}
-          toggleFields={TOGGLE_FIELDS}
+          toggleFields={form?.id ? TOGGLE_FIELDS : []}
           onInputChange={handleInputChange}
           onToggle={handleToggle}
           onSubmit={handleSubmit}

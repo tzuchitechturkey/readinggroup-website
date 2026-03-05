@@ -163,7 +163,7 @@ function CreateorEditContentCategory({
       title={form.id ? t("Edit Category") : t("Add Category")}
       // Form Data
       fields={fields}
-      toggleFields={toggleFields}
+      toggleFields={form?.id ? toggleFields : []}
       form={form}
       setForm={setForm}
       originalForm={originalForm}
