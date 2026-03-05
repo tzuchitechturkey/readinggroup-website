@@ -28,6 +28,7 @@ from .models import (
     LearnCategory,
     RelatedReports,
     LatestNews,
+    LatestNewsImage,
     Learn,
     Video,
     Photo,
@@ -45,6 +46,7 @@ from .serializers import (
     VideoCategorySerializer,
     LearnCategorySerializer,
     LatestNewsSerializer,
+    LatestNewsImageSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
@@ -861,6 +863,60 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "description")
     ordering_fields = ("created_at",)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    @swagger_auto_schema(
+        operation_summary="Create images for news item",
+        operation_description="Add images to this news item by uploading. Supports multiple image upload with 'images' field or single image upload with 'image' field. Optional captions can be provided with 'caption_{index}' for multiple images or 'caption' for single image.",
+    )
+    @action(detail=True, methods=["post"], url_path="images")
+    def create_images(self, request, pk=None):
+        """Create images for a specific latest news item.
+
+        POST /latest-news/{id}/images/
+        Accepts multiple images and creates images for the news item.
+        """
+        news = self.get_object()
+
+        # Get images from request
+        images = request.FILES.getlist("images")
+        if not images:
+            # Try single image
+            image = request.FILES.get("image")
+            if image:
+                images = [image]
+            else:
+                return Response(
+                    {
+                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Get current count for ordering
+        current_count = news.images.count()
+
+        # Create images
+        created_images = []
+        for idx, image in enumerate(images):
+            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
+                "caption", ""
+            )
+            order = current_count + idx
+
+            news_image = LatestNewsImage.objects.create(
+                latest_news=news,
+                image=image,
+                caption=caption,
+                order=order,
+            )
+            created_images.append(news_image)
+
+        serializer = LatestNewsImageSerializer(
+            created_images, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 

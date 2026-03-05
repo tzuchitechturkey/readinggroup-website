@@ -16,6 +16,8 @@ from .models import (
     Photo,
     RelatedReports,
     RelatedReportsCategory,
+    LatestNews,
+    LatestNewsImage,
 )
 
 
@@ -120,6 +122,41 @@ class PhotoAdmin(admin.ModelAdmin):
     list_display = ("id", "collection", "caption", "order", "created_at")
     search_fields = ("caption", "collection__title")
     list_filter = ("collection", "created_at")
+
+
+class LatestNewsImageInline(admin.TabularInline):
+    """Inline admin for images in latest news."""
+
+    model = LatestNewsImage
+    extra = 1
+    fields = ("image", "caption", "order")
+
+
+@admin.register(LatestNews)
+class LatestNewsAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "title",
+        "happened_at",
+        "is_test",
+        "image_count",
+        "created_at",
+    )
+    search_fields = ("title", "description")
+    list_filter = ("is_test", "happened_at", "created_at")
+    inlines = [LatestNewsImageInline]
+
+    def image_count(self, obj):
+        return obj.images.count()
+
+    image_count.short_description = "Images"
+
+
+@admin.register(LatestNewsImage)
+class LatestNewsImageAdmin(admin.ModelAdmin):
+    list_display = ("id", "latest_news", "caption", "order", "created_at")
+    search_fields = ("caption", "latest_news__title")
+    list_filter = ("latest_news", "created_at")
 
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------

@@ -327,8 +327,6 @@ class Photo(TimestampedModel):
 class LatestNews(TimestampedModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to="latest-news/images/", blank=True, null=True)
-    image_url = models.URLField(max_length=1000, blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     is_test = models.BooleanField(default=False)
 
@@ -337,6 +335,31 @@ class LatestNews(TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
+
+
+class LatestNewsImage(TimestampedModel):
+    """Individual image for a latest news item."""
+
+    latest_news = models.ForeignKey(
+        "LatestNews", on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="latest-news/images/")
+    caption = models.CharField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of image in the news item"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["latest_news", "order"],
+                name="unique_image_order_per_news",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Image {self.order} for {self.latest_news.title}"
 
 
 # ======================================================= New Models end =======================================================

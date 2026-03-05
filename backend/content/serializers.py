@@ -15,6 +15,7 @@ from .models import (
     LearnCategory,
     VideoCategory,
     LatestNews,
+    LatestNewsImage,
     Video,
     Photo,
     Learn,
@@ -292,8 +293,28 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return obj.photos.count()
 
 
-class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual images in latest news."""
+
     datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = LatestNewsImage
+        fields = (
+            "id",
+            "latest_news",
+            "image",
+            "caption",
+            "order",
+            "created_at",
+            "updated_at",
+        )
+        file_fields = ("image",)
+
+
+class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at", "happened_at")
+    images = LatestNewsImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = LatestNews
