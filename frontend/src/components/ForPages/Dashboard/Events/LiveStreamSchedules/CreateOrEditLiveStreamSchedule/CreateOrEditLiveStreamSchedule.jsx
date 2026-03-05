@@ -151,18 +151,23 @@ const CreateOrEditLiveStreamSchedule = ({
             {t("Live Stream Start Time")}{" "}
             <span className="text-red-500">*</span>
           </label>
-          <input
-            type="time"
-            name="start_event_time"
-            value={formData.start_event_time}
-            onChange={handleInputChange}
-            className={`w-full px-3 py-2 border ${errors.start_event_time ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
+
+          <div className="relative time-input-wrapper">
+            <input
+              type="time"
+              name="start_event_time"
+              value={formData.start_event_time}
+              onChange={handleInputChange}
+              className={`time-input w-full px-4 py-3 ${
+                errors.start_event_time ? "border-red-500" : "border-gray-300"
+              } border rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+          </div>
+
           {errors.start_event_time && (
             <p className="text-red-600 text-sm">{errors.start_event_time}</p>
           )}
         </div>
-
         {/* Event Duration */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">

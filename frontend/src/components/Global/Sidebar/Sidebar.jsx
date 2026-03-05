@@ -119,44 +119,44 @@ export default function AppSidebar({
           },
         ],
       },
-      {
-        title: "Photo Collection",
-        onClick: "#",
-        icon: TV,
-        items: [
-          // {
-          //   title: "All Photo Collections",
-          //   onClick: () => onSectionChange("photoCollections"),
-          // },
-          {
-            title: "Add/Edit Photo",
-            onClick: () => onSectionChange("createOrEditPhotoCollection"),
-          },
-          {
-            title: "Photo Collections",
-            onClick: () => onSectionChange("photoCollectionCategories"),
-          },
-        ],
-      },
-      {
-        title: "Related Reports",
-        onClick: "#",
-        icon: TV,
-        items: [
-          {
-            title: "All Related Reports",
-            onClick: () => onSectionChange("relatedReports"),
-          },
-          {
-            title: "Add/Edit Related Report",
-            onClick: () => onSectionChange("createOrEditRelatedReports"),
-          },
-          {
-            title: "Related Report Categories",
-            onClick: () => onSectionChange("relatedReportCategories"),
-          },
-        ],
-      },
+      // {
+      //   title: "Photo Collection",
+      //   onClick: "#",
+      //   icon: TV,
+      //   items: [
+      //     // {
+      //     //   title: "All Photo Collections",
+      //     //   onClick: () => onSectionChange("photoCollections"),
+      //     // },
+      //     {
+      //       title: "Add/Edit Photo",
+      //       onClick: () => onSectionChange("createOrEditPhotoCollection"),
+      //     },
+      //     {
+      //       title: "Photo Collections",
+      //       onClick: () => onSectionChange("photoCollectionCategories"),
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "Related Reports",
+      //   onClick: "#",
+      //   icon: TV,
+      //   items: [
+      //     {
+      //       title: "All Related Reports",
+      //       onClick: () => onSectionChange("relatedReports"),
+      //     },
+      //     {
+      //       title: "Add/Edit Related Report",
+      //       onClick: () => onSectionChange("createOrEditRelatedReports"),
+      //     },
+      //     {
+      //       title: "Related Report Categories",
+      //       onClick: () => onSectionChange("relatedReportCategories"),
+      //     },
+      //   ],
+      // },
       {
         title: "Live Stream Schedule",
         onClick: "#",
@@ -172,21 +172,21 @@ export default function AppSidebar({
           },
         ],
       },
-      {
-        title: "Latest News",
-        onClick: "#",
-        icon: TV,
-        items: [
-          {
-            title: "All News",
-            onClick: () => onSectionChange("news"),
-          },
-          {
-            title: "Add/Edit News",
-            onClick: () => onSectionChange("createOrEditNews"),
-          },
-        ],
-      },
+      // {
+      //   title: "Latest News",
+      //   onClick: "#",
+      //   icon: TV,
+      //   items: [
+      //     {
+      //       title: "All News",
+      //       onClick: () => onSectionChange("news"),
+      //     },
+      //     {
+      //       title: "Add/Edit News",
+      //       onClick: () => onSectionChange("createOrEditNews"),
+      //     },
+      //   ],
+      // },
       // {
       //   title: "Writers",
       //   onClick: "#",
@@ -202,37 +202,37 @@ export default function AppSidebar({
       //     },
       //   ],
       // },
-      {
-        title: "About Us",
-        onClick: () => onSectionChange("about"),
-        icon: WhoWeAre,
-        items: [
-          {
-            title: "History",
-            onClick: () => onSectionChange("history"),
-          },
-          {
-            title: "Our Team",
-            onClick: () => onSectionChange("team"),
-          },
-          {
-            title: "Departments",
-            onClick: () => onSectionChange("departments"),
-          },
-          {
-            title: "The Books Groups",
-            onClick: () => onSectionChange("booksGroups"),
-          },
-          {
-            title: "The Books",
-            onClick: () => onSectionChange("books"),
-          },
-          {
-            title: "Add/Edit Book",
-            onClick: () => onSectionChange("createOrEditBook"),
-          },
-        ],
-      },
+      // {
+      //   title: "About Us",
+      //   onClick: () => onSectionChange("about"),
+      //   icon: WhoWeAre,
+      //   items: [
+      //     {
+      //       title: "History",
+      //       onClick: () => onSectionChange("history"),
+      //     },
+      //     {
+      //       title: "Our Team",
+      //       onClick: () => onSectionChange("team"),
+      //     },
+      //     {
+      //       title: "Departments",
+      //       onClick: () => onSectionChange("departments"),
+      //     },
+      //     {
+      //       title: "The Books Groups",
+      //       onClick: () => onSectionChange("booksGroups"),
+      //     },
+      //     {
+      //       title: "The Books",
+      //       onClick: () => onSectionChange("books"),
+      //     },
+      //     {
+      //       title: "Add/Edit Book",
+      //       onClick: () => onSectionChange("createOrEditBook"),
+      //     },
+      //   ],
+      // },
     ],
 
     settings: [

@@ -29,7 +29,7 @@ export default function UserProfileDropdown({ iconColor }) {
     <DropdownMenu>
       <DropdownMenuTrigger className=" px-3 py-2 border-none outline-none rounded-md  ">
         <CgProfile
-          className="cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
+          className="text-white cursor-pointer text-xl hover:scale-110 transition-all duration-200 "
           style={{ color: iconColor || undefined }}
         />
       </DropdownMenuTrigger>

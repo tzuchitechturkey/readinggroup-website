@@ -24,7 +24,7 @@ function UserIcons() {
   return (
     <div className="flex items-center ">
       <div
-        className={`hidden sm:block border-l border-gray-300 h-6 ${
+        className={`hidden sm:block border-gray-300 h-6 ${
           i18n?.language === "ar" ? "ml-1" : "mr-1"
         } w-[1px] `}
       />

@@ -383,3 +383,34 @@ input[type="number"]::-webkit-inner-spin-button {
 body.modal-open .scroll-to-top-btn {
   display: none !important;
 }
+/* تحسين شكل input time */
+.time-input {
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: #374151;
+}
+
+/* تغيير أيقونة اختيار الوقت */
+.time-input::-webkit-calendar-picker-indicator {
+  background-color: #3b82f6;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* تحسين الأرقام */
+.time-input::-webkit-datetime-edit-hour-field,
+.time-input::-webkit-datetime-edit-minute-field {
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.time-input::-webkit-datetime-edit-hour-field:focus,
+.time-input::-webkit-datetime-edit-minute-field:focus {
+  background-color: #e0f2fe;
+}
+
+/* إزالة الحدود الافتراضية في بعض المتصفحات */
+.time-input::-webkit-inner-spin-button {
+  display: none;
+}
