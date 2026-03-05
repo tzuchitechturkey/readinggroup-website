@@ -27,7 +27,7 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
 
   // Images state
   const [imageFiles, setImageFiles] = useState([]);
-  const [imageUrls, setImageUrls] = useState([""]); 
+  const [imageUrls, setImageUrls] = useState([""]);
   const [imageMode, setImageMode] = useState("files"); // "files" or "urls"
 
   // UI state
@@ -40,13 +40,15 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
       setFormData({
         title: selectedNews.title || "",
         description: selectedNews.description || "",
-        happened_at: selectedNews.happened_at ? selectedNews.happened_at.split('T')[0] : "",
+        happened_at: selectedNews.happened_at
+          ? selectedNews.happened_at.split("T")[0]
+          : "",
       });
 
       // Set images
       if (selectedNews.images && selectedNews.images.length > 0) {
         // If editing, assume URLs mode with existing images
-        const existingUrls = selectedNews.images.map(img => img.image);
+        const existingUrls = selectedNews.images.map((img) => img.image);
         setImageUrls(existingUrls);
         setImageMode("urls");
       }
@@ -80,16 +82,16 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
     }
 
     // Images validation
-    if (imageMode === "files") {
-      if (imageFiles.length === 0) {
-        newErrors.images = t("At least one image is required");
-      }
-    } else {
-      const validUrls = imageUrls.filter(url => url.trim());
-      if (validUrls.length === 0) {
-        newErrors.images = t("At least one image URL is required");
-      }
-    }
+    // if (imageMode === "files") {
+    //   if (imageFiles.length === 0) {
+    //     newErrors.images = t("At least one image is required");
+    //   }
+    // } else {
+    //   const validUrls = imageUrls.filter((url) => url.trim());
+    //   if (validUrls.length === 0) {
+    //     newErrors.images = t("At least one image URL is required");
+    //   }
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -98,7 +100,7 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error(t("Please fill in all required fields"));
       return;
@@ -113,39 +115,52 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
       submitData.append("description", formData.description);
       submitData.append("happened_at", formData.happened_at);
 
-      if (imageMode === "files") {
-        // Append image files
-        imageFiles.forEach((file, index) => {
-          submitData.append("images", file);
-        });
-      } else {
-        // Send as JSON for URLs
-        const jsonData = {
-          ...formData,
-          image_urls: imageUrls.filter(url => url.trim())
-        };
+      // if (imageMode === "files") {
+      //   // Append image files
+      //   imageFiles.forEach((file, index) => {
+      //     submitData.append("images", file);
+      //   });
+      // } else {
 
-        if (isEdit) {
-          await EditLatestNewsById(selectedNews.id, jsonData);
-        } else {
-          await CreateLatestNews(jsonData);
-        }
+      //   // Send as JSON for URLs
+      //   const jsonData = {
+      //     ...formData,
+      //     image_urls: imageUrls.filter((url) => url.trim()),
+      //   };
+      const jsonData = {
+        title: formData.title,
+        description: formData.description,
+        happened_at: formData.happened_at,
+      };
 
-        toast.success(isEdit ? t("News updated successfully") : t("News created successfully"));
-        onSectionChange("newsList");
-        return;
-      }
-
-      // For file uploads
       if (isEdit) {
-        await EditLatestNewsById(selectedNews.id, submitData);
+        await EditLatestNewsById(selectedNews.id, jsonData);
       } else {
-        await CreateLatestNews(submitData);
+        await CreateLatestNews(jsonData);
       }
 
-      toast.success(isEdit ? t("News updated successfully") : t("News created successfully"));
+      toast.success(
+        isEdit
+          ? t("News updated successfully")
+          : t("News created successfully"),
+      );
       onSectionChange("newsList");
 
+      // }
+
+      // For file uploads
+      // if (isEdit) {
+      //   await EditLatestNewsById(selectedNews.id, submitData);
+      // } else {
+      //   await CreateLatestNews(submitData);
+      // }
+
+      // toast.success(
+      //   isEdit
+      //     ? t("News updated successfully")
+      //     : t("News created successfully"),
+      // );
+      // onSectionChange("newsList");
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -166,7 +181,7 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
       setImageFiles([]);
     }
     // Clear errors
-    setErrors(prev => ({ ...prev, images: "" }));
+    setErrors((prev) => ({ ...prev, images: "" }));
   };
 
   return (
@@ -189,10 +204,9 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
           {isEdit ? t("Edit News") : t("Create New News")}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          {isEdit 
-            ? t("Update the news information below") 
-            : t("Fill in the information below to create a new news item")
-          }
+          {isEdit
+            ? t("Update the news information below")
+            : t("Fill in the information below to create a new news item")}
         </p>
       </div>
 
@@ -216,7 +230,7 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
         />
 
         {/* Images */}
-        <ImagesSection
+        {/* <ImagesSection
           imageFiles={imageFiles}
           imageUrls={imageUrls}
           onImageFilesChange={setImageFiles}
@@ -224,7 +238,7 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
           imageMode={imageMode}
           onImageModeChange={handleImageModeChange}
           errors={errors}
-        />
+        /> */}
 
         {/* Actions */}
         <FormActionsSection

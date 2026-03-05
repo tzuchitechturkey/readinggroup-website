@@ -163,15 +163,17 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
         onBack={() => {
           onSectionChange("dashboard");
         }}
-        page={t("Events List")}
+        page={t("Live Stream Schedules")}
       />
       {/* End Breadcrumb */}
       {/* Start Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">{t("Events")}</h2>
+        <h2 className="text-lg font-medium text-[#1D2630]">
+          {t("Live Stream Schedules")}
+        </h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
-            {t("Total")}: {totalRecords} {t("events")}
+            {t("Total")}: {totalRecords} {t("Live Stream Schedule(s)")}
           </span>
 
           {/* Start Add Button */}

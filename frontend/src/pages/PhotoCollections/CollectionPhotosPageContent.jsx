@@ -19,7 +19,6 @@ const CollectionPhotosPageContent = () => {
   const { t, i18n } = useTranslation();
 
   const [collection, setCollection] = useState(null);
-  const [photos, setPhotos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Image Viewer State
@@ -36,8 +35,7 @@ const CollectionPhotosPageContent = () => {
         setCollection(collectionRes.data);
 
         // Fetch photos for this collection - no limit since max 28 photos
-        const photosRes = await GetPhotosByCollectionId(collectionId, {});
-        setPhotos(photosRes.data.results || []);
+        // const photosRes = await GetPhotosByCollectionId(collectionId, {});
       } catch (err) {
         setErrorFn(err, t);
       } finally {
@@ -45,7 +43,7 @@ const CollectionPhotosPageContent = () => {
       }
     };
 
-    // fetchCollectionData();
+    fetchCollectionData();
   }, [collectionId, t]);
 
   // Image Viewer Handlers
@@ -59,13 +57,27 @@ const CollectionPhotosPageContent = () => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === collection?.photos.length - 1 ? 0 : prev + 1,
+    );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? collection?.photos.length - 1 : prev - 1,
+    );
   };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
 
+    const formatted = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    return formatted.replace(",", ".");
+  };
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
@@ -83,29 +95,21 @@ const CollectionPhotosPageContent = () => {
         {/* Collection Header */}
         {collection && (
           <div className="mb-10 md:mb-14">
-            <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl lg:text-5xl text-[#081945] mb-3">
-              {collection.title}
+            <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl  text-[#081945] mb-3">
+              {formatDate(collection.happened_at)}
             </h1>
-            {collection.description && (
-              <p className="text-[#285688] text-base md:text-lg font-normal max-w-2xl">
-                {collection.description}
-              </p>
-            )}
-            <div className="flex items-center gap-2 mt-4 text-[#285688] text-sm">
-              <span className="font-semibold">{photos.length}</span>
-              <span> {t("photos")}</span>
-            </div>
           </div>
         )}
 
         {/* Photos Grid */}
-        {photos.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-5">
-            {photos.map((photo, index) => (
+        {collection?.photos.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
+            {collection.photos.map((photo, index) => (
               <PhotoCard
                 key={photo.id || index}
                 photo={photo}
                 onClick={() => openViewer(index)}
+                t={t}
               />
             ))}
           </div>
@@ -122,7 +126,7 @@ const CollectionPhotosPageContent = () => {
       <ImageViewerModal
         isOpen={isViewerOpen}
         onClose={closeViewer}
-        images={photos}
+        images={collection?.photos || []}
         currentIndex={currentImageIndex}
         onNext={nextImage}
         onPrev={prevImage}

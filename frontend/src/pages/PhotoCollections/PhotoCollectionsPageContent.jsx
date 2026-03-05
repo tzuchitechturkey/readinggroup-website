@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 import { GetCollections } from "@/api/photoCollections";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
-import CollectionCard from "@/components/ForPages/PhotoCollections/CollectionCard";
+// import CollectionCard from "@/components/ForPages/PhotoCollections/CollectionCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import PhotoCard from "@/components/ForPages/Home/shared/PhotoCard";
+import CollectionCard from "@/components/ForPages/Home/shared/CollectionCard";
 
 import Image from "../../assets/photocard.png";
 
@@ -49,7 +49,7 @@ const PhotoCollectionsPageContent = () => {
   };
 
   useEffect(() => {
-    // fetchCollections(1);
+    fetchCollections(1);
   }, []);
 
   const handlePageChange = (newPage) => {
@@ -57,32 +57,32 @@ const PhotoCollectionsPageContent = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   // Mock data for photo collections
-  const mockPhotosData = [
-    {
-      id: 1,
-      date: "Jan. 21, 2026",
-      image: Image,
-      isNew: true,
-    },
-    {
-      id: 2,
-      date: "Dec. 31, 2025",
-      image: Image,
-      isNew: false,
-    },
-    {
-      id: 3,
-      date: "Dec. 24, 2025",
-      image: Image,
-      isNew: false,
-    },
-    {
-      id: 4,
-      date: "Dec. 17, 2025",
-      image: Image,
-      isNew: false,
-    },
-  ];
+  // const mockPhotosData = [
+  //   {
+  //     id: 1,
+  //     date: "Jan. 21, 2026",
+  //     image: Image,
+  //     isNew: true,
+  //   },
+  //   {
+  //     id: 2,
+  //     date: "Dec. 31, 2025",
+  //     image: Image,
+  //     isNew: false,
+  //   },
+  //   {
+  //     id: 3,
+  //     date: "Dec. 24, 2025",
+  //     image: Image,
+  //     isNew: false,
+  //   },
+  //   {
+  //     id: 4,
+  //     date: "Dec. 17, 2025",
+  //     image: Image,
+  //     isNew: false,
+  //   },
+  // ];
 
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
@@ -94,20 +94,20 @@ const PhotoCollectionsPageContent = () => {
           <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl lg:text-5xl text-[#081945] mb-3">
             {t("Photo Collections")}
           </h1>
-          <p className="text-[#285688] text-base md:text-lg font-normal max-w-2xl">
+          <p className="text-[#285688] text-base md:text-lg font-normal ">
             {t(
-              "Explore photos from our community events. Each album features highlights and behind-the-scenes moments from the gathering.",
+              "Explore photos from our weekly livestream sessions. Each album features highlights and behind-the-scenes moments from the gathering. Click any album to view the full collection.",
             )}
           </p>
         </div>
 
         {/* Grid of Collections */}
-        {mockPhotosData.length > 0 ? (
+        {collections.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-10 md:mb-14">
-              {mockPhotosData.map((collection) => (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-10 md:mb-14">
+              {collections.map((collection) => (
                 <div key={collection.id}>
-                  <PhotoCard
+                  <CollectionCard
                     photo={collection}
                     t={t}
                     handleNavigate={(id) => {

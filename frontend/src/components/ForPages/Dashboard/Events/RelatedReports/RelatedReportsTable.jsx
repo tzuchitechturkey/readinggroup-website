@@ -99,25 +99,7 @@ const RelatedReportsTable = ({
               <SortIcon column="category" sortConfig={sortConfig} />
             </div>
           </TableHead>
-          <TableHead>{t("Description")}</TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => sortData("created_at")}
-          >
-            <div className="flex items-center">
-              {t("Created Date")}
-              <SortIcon column="created_at" sortConfig={sortConfig} />
-            </div>
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => sortData("is_active")}
-          >
-            <div className="flex items-center">
-              {t("Status")}
-              <SortIcon column="is_active" sortConfig={sortConfig} />
-            </div>
-          </TableHead>
+
           <TableHead className="w-[150px] text-center">
             {t("Actions")}
           </TableHead>
@@ -147,25 +129,7 @@ const RelatedReportsTable = ({
                 {report.category?.title}
               </span>
             </TableCell>
-            <TableCell className="text-gray-600">
-              {truncateText(report.description, 60)}
-            </TableCell>
-            <TableCell className="text-gray-600">
-              {formatDate(report.created_at)}
-            </TableCell>
-            <TableCell>
-              {report.is_active ? (
-                <div className="flex items-center text-green-600">
-                  <ToggleRight className="w-5 h-5 mr-1" />
-                  <span className="text-sm">{t("Active")}</span>
-                </div>
-              ) : (
-                <div className="flex items-center text-gray-400">
-                  <ToggleLeft className="w-5 h-5 mr-1" />
-                  <span className="text-sm">{t("Inactive")}</span>
-                </div>
-              )}
-            </TableCell>
+
             <TableCell>
               <div className="flex items-center justify-center space-x-2">
                 <button

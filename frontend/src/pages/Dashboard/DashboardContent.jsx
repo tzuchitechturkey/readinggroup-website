@@ -243,14 +243,18 @@ export default function Page() {
         // events: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
-        news: "News",
-        createOrEditNews: "News",
-        photoCollections: "Photo Collections",
-        createOrEditPhotoCollection: "Photo Collections",
-        photoCollectionsCategories: "Photo Collections",
+        news: "Latest News",
+        createOrEditNews: "Latest News",
+        photoCollections: "Photo Collection",
+        createOrEditPhotoCollection: "Photo Collection",
+        photoCollectionsCategories: "Photo Collection",
         relatedReports: "Related Reports",
         relatedReportsCategories: "Related Reports",
         createOrEditRelatedReports: "Related Reports",
+        // Live Stream Schedule
+        liveStreamSchedules: "Live Stream Schedules",
+        createOrEditLiveStreamSchedule: "Live Stream Schedules",
+
         // About Us
         history: "About Us",
         team: "About Us",

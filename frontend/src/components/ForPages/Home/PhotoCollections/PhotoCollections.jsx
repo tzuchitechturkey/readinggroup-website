@@ -2,10 +2,9 @@ import React from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import PhotoCard from "@/components/ForPages/Home/shared/PhotoCard";
+import CollectionCard from "@/components/ForPages/Home/shared/CollectionCard";
 
 import SectionHeader from "../shared/SectionHeader";
-import Image from "../../../../assets/photocard.png";
 
 const PhotoCollections = ({ t, data }) => {
   const navigate = useNavigate();
@@ -23,9 +22,15 @@ const PhotoCollections = ({ t, data }) => {
       />
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-[24px] items-stretch w-full">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-[24px] items-stretch w-full">
         {data.map((photo) => (
-          <PhotoCard key={photo.id} photo={photo} isNew={photo.isNew} t={t} />
+          <CollectionCard
+            key={photo.id}
+            photo={photo}
+            isNew={photo.isNew}
+            handleNavigate={handleMoreCollectionsClick}
+            t={t}
+          />
         ))}
       </div>
     </div>

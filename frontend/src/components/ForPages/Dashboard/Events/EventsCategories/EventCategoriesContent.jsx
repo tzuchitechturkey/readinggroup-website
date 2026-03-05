@@ -71,11 +71,11 @@ function EventCategoriesContent({ onSectionChange }) {
 
       {/* Breadcrumb */}
       <CustomBreadcrumb
-        backTitle={t("Back to Events List")}
+        backTitle={t("Back to LiveStream List")}
         onBack={() => {
-          onSectionChange("events");
+          onSectionChange("liveStreamSchedules");
         }}
-        page={t("Events Categories")}
+        page={t(" LiveStream Categories")}
       />
 
       <div className="flex-1">

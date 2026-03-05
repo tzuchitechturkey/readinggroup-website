@@ -32,7 +32,7 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
 
   const handleCancel = () => {
     resetForm();
-    onSectionChange("events");
+    onSectionChange("liveStreamSchedules");
   };
 
   return (
@@ -41,9 +41,13 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
 
       {/* Breadcrumb */}
       <CustomBreadcrumb
-        backTitle={t("Back to Events List")}
-        onBack={() => onSectionChange("events")}
-        page={event?.id ? t("Edit Event") : t("Create New Event")}
+        backTitle={t("Back to Live Stream Schedules List")}
+        onBack={() => onSectionChange("liveStreamSchedules")}
+        page={
+          event?.id
+            ? t("Edit Live Stream Schedule")
+            : t("Create New Live Stream Schedule")
+        }
       />
 
       <form
@@ -53,14 +57,14 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
         {/* Start Event Title */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            {t("Event Title")} <span className="text-red-500">*</span>
+            {t("Live Stream Title")} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="title"
             value={formData.title || ""}
             onChange={handleInputChange}
-            placeholder="Enter event title"
+            placeholder="Enter Live Stream title"
             className={`w-full px-3 py-2 border ${errors.title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.title && (
@@ -73,7 +77,7 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
         {/* Start Event Date */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            {t("Event Date")} <span className="text-red-500">*</span>
+            {t("Live Stream Date")} <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -87,10 +91,11 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
           )}
         </div>
 
-        {/* Start Event Time */}
+        {/* Start Live Stream Time */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            {t("Event Start Time")} <span className="text-red-500">*</span>
+            {t("Live Stream Start Time")}{" "}
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="time"
