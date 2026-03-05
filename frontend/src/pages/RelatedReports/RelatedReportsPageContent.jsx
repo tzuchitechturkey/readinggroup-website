@@ -1,10 +1,12 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { GetRelatedReports } from "@/api/relatedReports";
+import {
+  GetRelatedReports,
+  GetRelatedReportsByCategoryId,
+} from "@/api/relatedReports";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
-import ReportLargeCard from "@/components/ForPages/RelatedReports/ReportLargeCard";
 import ReportCard from "@/components/ForPages/RelatedReports/ReportCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -16,9 +18,11 @@ const RelatedReportsPageContent = () => {
   const [reportsList, setReportsList] = useState([]);
   const [videoData, setVideoData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [paginationData, setPaginationData] = useState({
     page: 1,
-    limit: 12,
+    limit: 24,
     totalCount: 0,
   });
 
@@ -47,12 +51,66 @@ const RelatedReportsPageContent = () => {
     }
   };
 
+  // Fetch reports filtered by category
+  const fetchReportsByCategory = async (categoryId, page = 1) => {
+    setIsLoading(true);
+    try {
+      const offset = (page - 1) * paginationData.limit;
+      const res = await GetRelatedReportsByCategoryId(
+        categoryId,
+        paginationData.limit,
+        offset,
+        "-happened_at",
+      );
+
+      setReportsList(res.data.results || []);
+      setPaginationData((prev) => ({
+        ...prev,
+        page,
+        totalCount: res.data.count || 0,
+      }));
+    } catch (err) {
+      setErrorFn(err, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await GetRelatedReports(24, 0, "", "-happened_at");
+
+      setCategories(res?.data?.results || []);
+    } catch (err) {
+      setErrorFn(err, t);
+    }
+  };
+
   useEffect(() => {
-    // fetchReports(1);
+    fetchReports(1);
+    fetchCategories();
   }, []);
 
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setPaginationData((prev) => ({
+      ...prev,
+      page: 1,
+    }));
+    if (categoryId) {
+      fetchReportsByCategory(categoryId, 1);
+    } else {
+      fetchReports(1);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handlePageChange = (newPage) => {
-    fetchReports(newPage);
+    if (selectedCategory) {
+      fetchReportsByCategory(selectedCategory, newPage);
+    } else {
+      fetchReports(newPage);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const fetchVideoData = async () => {
@@ -91,11 +149,44 @@ const RelatedReportsPageContent = () => {
         />
         {/* End Grid Cards */}
 
+        <hr className="h-[1px] border-none bg-[#9FB3E1] max-w-7xl mx-auto my-12 " />
+
+        {/* Categories Filter Section */}
+        {categories.length > 0 && (
+          <div className="mb-10">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => handleCategorySelect(null)}
+                className={`px-4 py-2 rounded-full transition-all ${
+                  selectedCategory === null
+                    ? "bg-[#285688] text-white"
+                    : "bg-white text-[#285688] hover:bg-[#285688] hover:text-white"
+                }`}
+              >
+                {t("All")}
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                  className={`px-4 py-2 rounded-full transition-all ${
+                    selectedCategory === category.id
+                      ? "bg-[#285688] text-white"
+                      : "bg-white text-[#285688]  hover:bg-[#285688] hover:text-white"
+                  }`}
+                >
+                  {category.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* More Reports Section */}
         {reportsList.length > 0 ? (
           <>
             <div className="mb-8">
-              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-2xl md:text-3xl text-[#081945] uppercase">
+              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold  lg:text-xl text-[#081945] uppercase">
                 {t("More Reports")}
               </h2>
             </div>
