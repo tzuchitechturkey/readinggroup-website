@@ -7,7 +7,7 @@ from .views import (
     EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
-    latestNewsViewSet,
+    LatestNewsViewSet,
     PhotoViewSet,
     LearnViewSet,
     VideoViewSet,
@@ -25,7 +25,7 @@ router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"photos", PhotoViewSet, basename="photo")
 router.register(r"authors", AuthorsViewSet, basename="authors")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
-router.register(r"latest-news", latestNewsViewSet, basename="latest-news")
+router.register(r"latest-news", LatestNewsViewSet, basename="latest-news")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"social-media", SocialMediaViewSet, basename="social-media")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")

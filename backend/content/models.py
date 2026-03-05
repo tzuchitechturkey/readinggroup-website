@@ -324,7 +324,7 @@ class Photo(TimestampedModel):
         super().save(*args, **kwargs)
 
 
-class latestNews(TimestampedModel):
+class LatestNews(TimestampedModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to="latest-news/images/", blank=True, null=True)

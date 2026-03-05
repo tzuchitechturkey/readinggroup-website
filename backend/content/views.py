@@ -27,7 +27,7 @@ from .models import (
     VideoCategory,
     LearnCategory,
     RelatedReports,
-    latestNews,
+    LatestNews,
     Learn,
     Video,
     Photo,
@@ -44,7 +44,7 @@ from .serializers import (
     EventCommunitySerializer,
     VideoCategorySerializer,
     LearnCategorySerializer,
-    latestNewsSerializer,
+    LatestNewsSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
@@ -853,11 +853,11 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class latestNewsViewSet(viewsets.ModelViewSet):
+class LatestNewsViewSet(viewsets.ModelViewSet):
     """ViewSet for managing latest news items."""
 
-    queryset = latestNews.objects.all()
-    serializer_class = latestNewsSerializer
+    queryset = LatestNews.objects.all()
+    serializer_class = LatestNewsSerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "description")
     ordering_fields = ("created_at",)

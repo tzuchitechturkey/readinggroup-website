@@ -14,7 +14,7 @@ from .models import (
     EventCommunity,
     LearnCategory,
     VideoCategory,
-    latestNews,
+    LatestNews,
     Video,
     Photo,
     Learn,
@@ -292,11 +292,11 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return obj.photos.count()
 
 
-class latestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at")
 
     class Meta:
-        model = latestNews
+        model = LatestNews
         fields = "__all__"
 
 
