@@ -218,7 +218,7 @@ class RelatedReports(TimestampedModel):
         blank=True,
         related_name="related_reports",
     )
-    thumnail_url = models.JSONField(default=list, blank=True)
+    thumbnail_url = models.JSONField(default=list, blank=True)
     external_link = models.URLField(blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     duration = models.CharField(max_length=64, blank=True, null=True)
