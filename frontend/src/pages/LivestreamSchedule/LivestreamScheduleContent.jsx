@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import { Radio } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -60,6 +61,7 @@ const formatTimeRange = (startTime, duration) => {
 
 const LivestreamScheduleContent = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [scheduleData, setScheduleData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -73,6 +75,14 @@ const LivestreamScheduleContent = () => {
   });
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  // Handle navigation state - open modal if coming from home page
+  useEffect(() => {
+    if (location?.state?.openPosterModal && location?.state?.selectedEvent) {
+      setSelectedEvent(location.state.selectedEvent);
+      setIsViewerOpen(true);
+    }
+  }, [location]);
   const fetchScheduleData = async (year, month) => {
     setIsLoading(true);
     try {

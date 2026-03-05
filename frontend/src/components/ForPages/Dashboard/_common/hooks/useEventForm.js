@@ -189,7 +189,7 @@ export const useEventForm = (event = null, onSectionChange) => {
         toast.success(t("Event created successfully"));
       }
 
-      onSectionChange("events");
+      onSectionChange("liveStreamSchedules");
       resetForm();
     } catch (error) {
       setErrorFn(error, t);

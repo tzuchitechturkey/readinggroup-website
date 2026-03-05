@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Carousel,
@@ -11,17 +12,17 @@ import {
 } from "@/components/ui/carousel";
 
 const LivestreamCard = ({ data = [], t }) => {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
   const [imageCarouselApi, setImageCarouselApi] = useState(null);
 
-  
   // Update count when data changes and ensure buttons are enabled
   useEffect(() => {
     setCount(data?.length || 0);
-    
+
     // Force update buttons when data changes
     if (imageCarouselApi && data?.length > 0) {
       setTimeout(() => {
@@ -117,7 +118,17 @@ const LivestreamCard = ({ data = [], t }) => {
           <CarouselContent>
             {data.map((imageItem, index) => (
               <CarouselItem key={index}>
-                <div className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative">
+                <div
+                  onClick={() => {
+                    navigate("/livestream-schedule", {
+                      state: {
+                        selectedEvent: imageItem,
+                        openPosterModal: true,
+                      },
+                    });
+                  }}
+                  className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative"
+                >
                   <img
                     src={imageItem?.learn?.image || imageItem?.learn?.image_url}
                     alt={`${imageItem?.title} - ${index + 1}`}
