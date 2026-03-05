@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { GetCollections } from "@/api/photoCollections";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
 import CollectionCard from "@/components/ForPages/PhotoCollections/CollectionCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import PhotoCard from "@/components/ForPages/Home/shared/PhotoCard";
+
+import Image from "../../assets/photocard.png";
 
 const PhotoCollectionsPageContent = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [collections, setCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [paginationData, setPaginationData] = useState({
@@ -23,8 +28,13 @@ const PhotoCollectionsPageContent = () => {
     setIsLoading(true);
     try {
       const offset = (page - 1) * paginationData.limit;
-      const res = await GetCollections(paginationData.limit, offset, "", "-created_at");
-      
+      const res = await GetCollections(
+        paginationData.limit,
+        offset,
+        "",
+        "-created_at",
+      );
+
       setCollections(res.data.results || []);
       setPaginationData((prev) => ({
         ...prev,
@@ -39,19 +49,43 @@ const PhotoCollectionsPageContent = () => {
   };
 
   useEffect(() => {
-    fetchCollections(1);
+    // fetchCollections(1);
   }, []);
 
   const handlePageChange = (newPage) => {
     fetchCollections(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  // Mock data for photo collections
+  const mockPhotosData = [
+    {
+      id: 1,
+      date: "Jan. 21, 2026",
+      image: Image,
+      isNew: true,
+    },
+    {
+      id: 2,
+      date: "Dec. 31, 2025",
+      image: Image,
+      isNew: false,
+    },
+    {
+      id: 3,
+      date: "Dec. 24, 2025",
+      image: Image,
+      isNew: false,
+    },
+    {
+      id: 4,
+      date: "Dec. 17, 2025",
+      image: Image,
+      isNew: false,
+    },
+  ];
 
   return (
-    <div
-      className="min-h-screen bg-[#D7EAFF] py-8 md:py-12"
-      dir={i18n.dir()}
-    >
+    <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -61,25 +95,38 @@ const PhotoCollectionsPageContent = () => {
             {t("Photo Collections")}
           </h1>
           <p className="text-[#285688] text-base md:text-lg font-normal max-w-2xl">
-            {t("Explore photos from our community events. Each album features highlights and behind-the-scenes moments from the gathering.")}
+            {t(
+              "Explore photos from our community events. Each album features highlights and behind-the-scenes moments from the gathering.",
+            )}
           </p>
         </div>
 
         {/* Grid of Collections */}
-        {collections.length > 0 ? (
+        {mockPhotosData.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-10 md:mb-14">
-              {collections.map((collection) => (
-                <CollectionCard key={collection.id} collection={collection} />
+              {mockPhotosData.map((collection) => (
+                <div key={collection.id}>
+                  <PhotoCard
+                    photo={collection}
+                    t={t}
+                    handleNavigate={(id) => {
+                      navigate(`/photo-collections/${id}`);
+                    }}
+                  />
+                </div>
               ))}
             </div>
 
             {/* Pagination */}
-            {Math.ceil(paginationData.totalCount / paginationData.limit) > 1 && (
+            {Math.ceil(paginationData.totalCount / paginationData.limit) >
+              1 && (
               <div className="flex justify-center">
                 <Pagination
                   currentPage={paginationData.page}
-                  totalPages={Math.ceil(paginationData.totalCount / paginationData.limit)}
+                  totalPages={Math.ceil(
+                    paginationData.totalCount / paginationData.limit,
+                  )}
                   onPageChange={handlePageChange}
                 />
               </div>

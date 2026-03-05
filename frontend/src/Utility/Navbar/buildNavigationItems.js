@@ -35,6 +35,10 @@ const buildNavigationItems = (t, siteInfo) => {
           name: t("Latest News"),
           href: "/latest-news",
         },
+        {
+          name: t("Realted Reports"),
+          href: "/related-reports",
+        },
       ],
     },
     {

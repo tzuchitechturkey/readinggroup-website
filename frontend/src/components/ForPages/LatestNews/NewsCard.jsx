@@ -1,8 +1,9 @@
 import React from "react";
 
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const NewsCard = ({ news }) => {
+const NewsCard = ({ news, t }) => {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -12,23 +13,28 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleNavigate}
-      className="group cursor-pointer bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow flex gap-3 md:gap-4"
+      className="group cursor-pointer  rounded-lg overflow-hidden  transition-shadow flex gap-3 md:gap-6"
     >
-      {/* Image */}
-      <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 overflow-hidden bg-gray-200 rounded">
+      {/* Start Image */}
+      <div className="relative w-[480px] h-[270px] flex-shrink-0 overflow-hidden  rounded">
         <img
-          src={news?.images?.[0]?.image || news?.image_url}
+          src={news?.image || news?.image_url}
           alt={news.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover  "
           loading="lazy"
         />
       </div>
-
-      {/* Content */}
-      <div className="flex-1 py-2 md:py-3 pr-3 md:pr-4 flex flex-col justify-between">
+      {/* End Image */}
+      {/* Start Content */}
+      <div className="flex-1 py-2 md:py-4 pr-3 md:pr-4 flex flex-col gap-4">
+        {/* Start Is New */}
+        <div className="px-3 py-1 w-fit rounded-full border-[1px] border-[#081945]">
+          <p className="text-[#081945]">{t("NEW")}</p>
+        </div>
+        {/* End Is New */}
         <div>
           {news.happened_at && (
-            <span className="inline-block bg-[#285688] text-white text-[10px] md:text-xs px-2 py-1 rounded mb-1">
+            <span className="inline-block  text-[#081945] text-[10px] md:text-lg font-bold rounded mb-1">
               {new Date(news.happened_at).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
@@ -36,13 +42,24 @@ const NewsCard = ({ news }) => {
               })}
             </span>
           )}
-          <h3 className="font-bold text-[#081945] text-sm md:text-base line-clamp-2">
+          <h3 className="font-bold text-[#081945] text-sm md:text-2xl line-clamp-2">
             {news.title}
           </h3>
         </div>
-        <p className="text-xs md:text-sm text-[#285688] line-clamp-1">
+        <p className="text-xs md:text-base text-[#285688] line-clamp-2">
           {news.description}
         </p>
+        {/* Start Button */}
+        <button
+          className="w-fit flex items-center gap-1 rounded-md px-4 py-2 bg-[#285688] text-white"
+          onClick={() => {
+            handleNavigate(news.id);
+          }}
+        >
+          <span>{t("Read More")}</span>
+          <ArrowRight />
+        </button>
+        {/* End Button */}
       </div>
     </div>
   );

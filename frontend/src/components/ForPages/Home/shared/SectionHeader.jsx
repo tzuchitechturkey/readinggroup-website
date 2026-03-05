@@ -30,7 +30,7 @@ const SectionHeader = ({
       <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px] text-[#1b2d58] shrink-0">
         {title}
       </p>
-      <hr className="h-[2px] flex-1 bg-[#1B2D58]" />
+      <hr className="h-[1px] border-0 flex-1 bg-[#1B2D58]" />
 
       {/* Action Button */}
       {actionText && (

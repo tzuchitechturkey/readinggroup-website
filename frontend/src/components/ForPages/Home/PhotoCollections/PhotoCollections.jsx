@@ -1,7 +1,10 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
+
+import PhotoCard from "@/components/ForPages/Home/shared/PhotoCard";
+
 import SectionHeader from "../shared/SectionHeader";
-import PhotoCard from "../shared/PhotoCard";
 import Image from "../../../../assets/photocard.png";
 // Mock data for photo collections
 const mockPhotosData = [
@@ -32,8 +35,10 @@ const mockPhotosData = [
 ];
 
 const PhotoCollections = ({ t }) => {
+  const navigate = useNavigate();
+
   const handleMoreCollectionsClick = () => {
-    // Navigate to more collections page - implement navigation logic here
+    navigate("/photo-collections");
   };
 
   return (

@@ -60,7 +60,6 @@ export default function HomeContent() {
     fetchCardsData();
     fetchUpcomingLivestream();
   }, []);
-  console.log(cardsData);
   return (
     <div className="min-h-screen bg-[#C8DDF4]">
       {/* Start Hero Slider */}

@@ -6,14 +6,14 @@ import VideoCard from "@/components/Global/VideoCard/VideoCard";
 
 import SectionHeader from "../shared/SectionHeader";
 
-const NewClips = ({ clips, t }) => {
+const NewClips = ({ clips, t , fromHomePage = true}) => {
   const navigate = useNavigate();
   const handleMoreClipsClick = () => {
     // Add param to path
     navigate("/videos" + "?type=clip_video");
   };
    return (
-    <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-[120px] w-full sm:w-full md:w-full lg:w-[1440px] mx-auto">
+    <div className={`flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] items-start px-4 ${fromHomePage ? " sm:px-6 md:px-8 lg:px-[120px] w-full sm:w-full md:w-full lg:w-[1440px] mx-auto" :""}`}>
       {/* Section Header */}
       <SectionHeader
         title={t("NEW CLIPS")}

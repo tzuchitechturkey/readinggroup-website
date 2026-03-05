@@ -1,9 +1,8 @@
 import React from "react";
 
-const PhotoCard = ({ photo, isNew = false, t }) => {
+const PhotoCard = ({ photo, isNew = false, t, handleNavigate }) => {
   return (
-    <div
-      className="flex-1 h-[120px] sm:h-[140px] md:h-[160px] lg:h-[189px] min-h-px relative overflow-hidden cursor-pointer group rounded-lg sm:rounded-xl lg:rounded-lg">
+    <div className="flex-1 h-[120px] sm:h-[140px] md:h-[160px] lg:h-[189px] min-h-px relative overflow-hidden cursor-pointer group rounded-lg sm:rounded-xl lg:rounded-lg">
       {/* Background Image */}
       <div className="">
         <div aria-hidden="true" className=" ">
@@ -31,11 +30,16 @@ const PhotoCard = ({ photo, isNew = false, t }) => {
       )}
 
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-        <div className="bg-white bg-opacity-90 text-black px-3 sm:px-4 lg:px-4 py-1.5 sm:py-2 lg:py-2 rounded-lg font-bold text-[12px] sm:text-[13px] lg:text-sm">
+      <button
+        onClick={() => {
+          handleNavigate(photo.id);
+        }}
+        className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+      >
+        <p className="bg-white bg-opacity-90 text-black px-3 sm:px-4 lg:px-4 py-1.5 sm:py-2 lg:py-2 rounded-lg font-bold text-[12px] sm:text-[13px] lg:text-sm">
           {t("View Details")}
-        </div>
-      </div>
+        </p>
+      </button>
     </div>
   );
 };

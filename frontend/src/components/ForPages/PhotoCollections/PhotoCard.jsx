@@ -12,7 +12,7 @@ const PhotoCard = ({ photo, onClick }) => {
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
       />
-      
+
       {/* Overlay on hover */}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
         <div className="hidden group-hover:block bg-white/90 text-black px-3 py-1 rounded text-sm font-semibold">

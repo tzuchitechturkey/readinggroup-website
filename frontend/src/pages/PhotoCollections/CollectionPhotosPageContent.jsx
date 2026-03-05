@@ -45,7 +45,7 @@ const CollectionPhotosPageContent = () => {
       }
     };
 
-    fetchCollectionData();
+    // fetchCollectionData();
   }, [collectionId, t]);
 
   // Image Viewer Handlers

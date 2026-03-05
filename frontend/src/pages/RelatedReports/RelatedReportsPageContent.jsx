@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -8,10 +8,12 @@ import ReportLargeCard from "@/components/ForPages/RelatedReports/ReportLargeCar
 import ReportCard from "@/components/ForPages/RelatedReports/ReportCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
 
 const RelatedReportsPageContent = () => {
   const { t, i18n } = useTranslation();
   const [reportsList, setReportsList] = useState([]);
+  const [videoData, setVideoData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [paginationData, setPaginationData] = useState({
     page: 1,
@@ -45,23 +47,29 @@ const RelatedReportsPageContent = () => {
   };
 
   useEffect(() => {
-    fetchReports(1);
+    // fetchReports(1);
   }, []);
 
   const handlePageChange = (newPage) => {
     fetchReports(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // Separate first item and rest
-  const firstReport = reportsList[0];
-  const restReports = reportsList.slice(1);
-
+  const fetchVideoData = async () => {
+    try {
+      const res = await GetVideosByTypeVideo();
+      setVideoData(res.data);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
+  };
+  useEffect(() => {
+    fetchVideoData();
+  }, []);
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-10 md:mb-14">
           <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl lg:text-5xl text-[#081945] mb-3">
@@ -74,15 +82,12 @@ const RelatedReportsPageContent = () => {
           </p>
         </div>
 
-        {/* Featured Report Card */}
-        {firstReport && (
-          <div className="mb-10 md:mb-14">
-            <ReportLargeCard report={firstReport} />
-          </div>
-        )}
+        {/* Start Grid Cards */}
+        <NewClips clips={videoData?.clip_video || []} t={t} fromHomePage={false} />
+        {/* End Grid Cards */}
 
         {/* More Reports Section */}
-        {restReports.length > 0 ? (
+        {reportsList.length > 0 ? (
           <>
             <div className="mb-8">
               <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-2xl md:text-3xl text-[#081945] uppercase">
@@ -92,7 +97,7 @@ const RelatedReportsPageContent = () => {
 
             {/* Grid of Reports */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-10 md:mb-14">
-              {restReports.map((report) => (
+              {reportsList.map((report) => (
                 <ReportCard key={report.id} report={report} />
               ))}
             </div>

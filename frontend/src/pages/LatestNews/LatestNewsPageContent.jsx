@@ -9,6 +9,8 @@ import NewsCard from "@/components/ForPages/LatestNews/NewsCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
+import Image from "../../assets/latestnews.png";
+
 const LatestNewsPageContent = () => {
   const { t, i18n } = useTranslation();
   const [newsList, setNewsList] = useState([]);
@@ -45,7 +47,7 @@ const LatestNewsPageContent = () => {
   };
 
   useEffect(() => {
-    fetchNews(1);
+    // fetchNews(1);
   }, []);
 
   const handlePageChange = (newPage) => {
@@ -56,7 +58,17 @@ const LatestNewsPageContent = () => {
   // Separate first item and rest
   const firstNews = newsList[0];
   const restNews = newsList.slice(1);
-
+  const mockData = [
+    {
+      id: 1,
+      image: Image,
+      title: "Cute DIY Fundraising",
+      happened_at: "2024-09-01",
+      description:
+        "Short description of post or the first 1-2 sentences of the post. Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem...",
+      is_new: true,
+    },
+  ];
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
@@ -82,11 +94,11 @@ const LatestNewsPageContent = () => {
         )}
 
         {/* Rest of News List */}
-        {restNews.length > 0 ? (
+        {mockData.length > 0 ? (
           <>
             <div className="flex flex-col gap-3 md:gap-4 mb-10 md:mb-14">
-              {restNews.map((news) => (
-                <NewsCard key={news.id} news={news} />
+              {mockData.map((news) => (
+                <NewsCard key={news.id} news={news} t={t} />
               ))}
             </div>
 

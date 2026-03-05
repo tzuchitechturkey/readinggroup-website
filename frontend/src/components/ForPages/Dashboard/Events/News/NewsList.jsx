@@ -44,7 +44,8 @@ const NewsList = ({ onSectionChange }) => {
   const getNewsData = async (page = 0, searchVal = search) => {
     setIsLoading(true);
     const offset = page * limit;
-    const ordering = sortConfig.direction === "desc" ? `-${sortConfig.key}` : sortConfig.key;
+    const ordering =
+      sortConfig.direction === "desc" ? `-${sortConfig.key}` : sortConfig.key;
 
     try {
       const res = await GetLatestNews(limit, offset, searchVal, ordering);
@@ -59,7 +60,7 @@ const NewsList = ({ onSectionChange }) => {
 
   // Initial load and refetch on dependencies change
   useEffect(() => {
-    getNewsData(currentPage - 1, search);
+    // getNewsData(currentPage - 1, search);
   }, [update, sortConfig]);
 
   // Sorting functionality
@@ -125,7 +126,7 @@ const NewsList = ({ onSectionChange }) => {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      
+
       {/* Breadcrumb */}
       <CustomBreadcrumb
         backTitle={t("Back to Dashboard")}
@@ -135,7 +136,9 @@ const NewsList = ({ onSectionChange }) => {
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">{t("Latest News")}</h2>
+        <h2 className="text-lg font-medium text-[#1D2630]">
+          {t("Latest News")}
+        </h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
             {t("Total")}: {totalRecords} {t("news")}
@@ -244,7 +247,9 @@ const NewsList = ({ onSectionChange }) => {
                         />
                       ) : (
                         <div className="w-16 h-12 bg-gray-200 rounded flex items-center justify-center">
-                          <span className="text-xs text-gray-500">{t("No Image")}</span>
+                          <span className="text-xs text-gray-500">
+                            {t("No Image")}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -260,13 +265,12 @@ const NewsList = ({ onSectionChange }) => {
                   {/* Date */}
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <span className="font-medium">
-                      {news?.happened_at && 
+                      {news?.happened_at &&
                         new Date(news.happened_at).toLocaleDateString("en-GB", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",
-                        })
-                      }
+                        })}
                     </span>
                   </TableCell>
 
@@ -323,7 +327,10 @@ const NewsList = ({ onSectionChange }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-gray-500"
+                >
                   {search
                     ? t("No news found matching your search.")
                     : t("No news available.")}
@@ -385,7 +392,9 @@ const NewsList = ({ onSectionChange }) => {
       <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
         <DeleteConfirmation
           title={t("Delete News")}
-          message={t("Are you sure you want to delete this news? This action cannot be undone.")}
+          message={t(
+            "Are you sure you want to delete this news? This action cannot be undone.",
+          )}
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteModal(false)}
           confirmText={t("Delete")}

@@ -34,7 +34,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   const [errors, setErrors] = useState({});
   const [collections, setCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState(null);
-  
+
   // Load data for edit mode
   useEffect(() => {
     if (isEditMode) {
@@ -118,11 +118,6 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
     try {
       const submitData = new FormData();
 
-      // Add collection ID
-      if (selectedCollection?.id) {
-        submitData.append("collection_id", selectedCollection.id);
-      }
-
       // Add new files if any
       newImages.forEach((file) => {
         submitData.append("images", file);
@@ -137,7 +132,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
         });
       }
 
-      await AddPhotoToCollection(id, submitData);
+      await AddPhotoToCollection(selectedCollection.id, submitData);
 
       toast.success(
         t(
@@ -147,7 +142,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
         ),
       );
 
-      navigate("/admin/photo-collections");
+      onSectionChange("photoCollections");
     } catch (error) {
       console.error("Error saving photo collection:", error);
 
@@ -183,7 +178,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   useEffect(() => {
     handleGetCollections();
   }, []);
-  
+
   return (
     <div className="bg-white rounded-lg p-6 mx-4 min-h-screen pb-10 overflow-y-auto">
       {isLoading && <Loader />}
