@@ -855,6 +855,17 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
+class LatestNewsImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual images in latest news."""
+
+    queryset = LatestNewsImage.objects.all()
+    serializer_class = LatestNewsImageSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+
 class LatestNewsViewSet(viewsets.ModelViewSet):
     """ViewSet for managing latest news items."""
 
@@ -863,6 +874,7 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "description")
     ordering_fields = ("created_at",)
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @swagger_auto_schema(
@@ -916,8 +928,6 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
             created_images, many=True, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
 # ========================================== new viewset end============================================

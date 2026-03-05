@@ -315,10 +315,14 @@ class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at", "happened_at")
     images = LatestNewsImageSerializer(many=True, read_only=True)
+    image_count = serializers.SerializerMethodField()
 
     class Meta:
         model = LatestNews
         fields = "__all__"
+
+    def get_image_count(self, obj):
+        return obj.images.count()
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

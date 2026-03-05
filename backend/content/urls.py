@@ -7,6 +7,7 @@ from .views import (
     EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
+    LatestNewsImageViewSet,
     LatestNewsViewSet,
     PhotoViewSet,
     LearnViewSet,
@@ -42,5 +43,8 @@ router.register(
 )
 router.register(
     r"photo-collection", PhotoCollectionViewSet, basename="photo-collection"
+)
+router.register(
+    r"latest-news-images", LatestNewsImageViewSet, basename="latest-news-image"
 )
 urlpatterns = router.urls
