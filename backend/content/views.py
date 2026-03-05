@@ -827,23 +827,18 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    # get last 4 photos for home page
+    # get last 4 photo collections for home page
     @swagger_auto_schema(
-        operation_summary="Get last 4 photos",
-        operation_description="Return last 4 photos from the most recent photo collections ordered by created_at desc.",
+        operation_summary="Get last 4 photo collections",
+        operation_description="Return last 4 photo collections ordered by created_at desc.",
     )
     @action(detail=False, methods=["get"], url_path="last-4-photos")
     def last_four_photos(self, request):
         # Get the last 4 photo collections ordered by created_at descending
         collections = PhotoCollection.objects.order_by("-created_at")[:4]
-        # Collect all photos from these collections
-        photos = []
-        for collection in collections:
-            collection_photos = Photo.objects.filter(collection=collection).order_by(
-                "order"
-            )
-            photos.extend(collection_photos)
-        serializer = PhotoSerializer(photos, many=True, context={"request": request})
+        serializer = PhotoCollectionSerializer(
+            collections, many=True, context={"request": request}
+        )
         return Response(serializer.data)
 
 
