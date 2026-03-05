@@ -31,7 +31,6 @@ const RelatedReportsTable = ({
   onClearSearch,
 }) => {
   const { t } = useTranslation();
-
   if (reportsData.length === 0) {
     return (
       <Table>
@@ -72,36 +71,48 @@ const RelatedReportsTable = ({
 
   const truncateText = (text, maxLength = 50) => {
     if (!text) return "-";
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "..."
+      : text;
   };
 
   return (
     <Table>
       <TableHeader className="bg-[#FAFAFA] h-14">
         <TableRow className="border-b">
-          <TableHead className="w-[100px] text-center">
-            {t("Image")}
-          </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => sortData("title")}>
+          <TableHead className="w-[100px] text-center">{t("Image")}</TableHead>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => sortData("title")}
+          >
             <div className="flex items-center">
               {t("Title")}
               <SortIcon column="title" sortConfig={sortConfig} />
             </div>
           </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => sortData("category")}>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => sortData("category")}
+          >
             <div className="flex items-center">
               {t("Category")}
               <SortIcon column="category" sortConfig={sortConfig} />
             </div>
           </TableHead>
           <TableHead>{t("Description")}</TableHead>
-          <TableHead className="cursor-pointer" onClick={() => sortData("created_at")}>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => sortData("created_at")}
+          >
             <div className="flex items-center">
               {t("Created Date")}
               <SortIcon column="created_at" sortConfig={sortConfig} />
             </div>
           </TableHead>
-          <TableHead className="cursor-pointer" onClick={() => sortData("is_active")}>
+          <TableHead
+            className="cursor-pointer"
+            onClick={() => sortData("is_active")}
+          >
             <div className="flex items-center">
               {t("Status")}
               <SortIcon column="is_active" sortConfig={sortConfig} />
@@ -133,7 +144,7 @@ const RelatedReportsTable = ({
             </TableCell>
             <TableCell>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {report.category?.name || t("Uncategorized")}
+                {report.category?.title}
               </span>
             </TableCell>
             <TableCell className="text-gray-600">

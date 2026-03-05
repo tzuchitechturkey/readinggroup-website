@@ -15,10 +15,8 @@ const VideoCard = ({
           image:
             "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[490px] w-full sm:w-[95%] md:w-[90%] lg:w-full",
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
-          categoryText:
-            "text-[14px] sm:text-[15px] md:text-[16px] lg:text-[18px]",
-          durationText:
-            "text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]",
+          categoryText: "text-[14px] sm:text-[15px] md:text-base lg:text-xl",
+          durationText: "text-[13px] sm:text-[14px] md:text-[15px] lg:text-lg",
           gap: "gap-[8px] sm:gap-[10px] md:gap-[12px] lg:gap-[12px]",
         };
 
@@ -26,10 +24,8 @@ const VideoCard = ({
         return {
           image: "h-[215px] w-full sm:w-[48%] md:w-[45%] lg:w-[290px] ",
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
-          categoryText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[18px]",
-          durationText:
-            "text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]",
+          categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
+          durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",
           gap: "gap-[6px] sm:gap-[8px] md:gap-[10px] lg:gap-[12px]",
         };
     }
@@ -47,7 +43,13 @@ const VideoCard = ({
 
   return (
     <div
-      onClick={() => navigate(`/videos/${item?.id}`)}
+      onClick={() => {
+        if (fromHomePage && item?.external_link) {
+          window.open(item.external_link, "_blank");
+        } else {
+          navigate(`/videos/${item?.id}`);
+        }
+      }}
       className={`flex flex-col gap-[3px] sm:gap-[4px] md:gap-[4px] lg:gap-[4px] items-start w-full ${rounded ? "rounded-xl" : ""}`}
     >
       <div
@@ -78,7 +80,7 @@ const VideoCard = ({
         className={`flex ${gap} items-center w-full flex justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
       >
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal   ${categoryText} text-[#081945] uppercase`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945] uppercase`}
         >
           {item?.category?.name}
         </p>

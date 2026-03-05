@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
+
+import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
 const RevisitCard = ({ card, size = "medium", t }) => {
   const getSizeClasses = () => {
@@ -24,6 +26,7 @@ const RevisitCard = ({ card, size = "medium", t }) => {
   };
 
   const { image } = getSizeClasses();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   return (
     <div
@@ -31,7 +34,7 @@ const RevisitCard = ({ card, size = "medium", t }) => {
     >
       <div
         className={`${image} max-w-[580px] relative shadow-[0px_9px_17px_0px_rgba(0,0,0,0.25)] cursor-pointer group overflow-hidden  `}
-        onClick={() => {}}
+        onClick={() => setIsViewerOpen(true)}
       >
         <img
           alt={card?.title}
@@ -52,6 +55,13 @@ const RevisitCard = ({ card, size = "medium", t }) => {
       >
         {card?.title}
       </p>
+      {/* Image Viewer Modal - Single Image Display */}
+      <ImageViewerModal
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        images={[card]}
+        currentIndex={0}
+      />
     </div>
   );
 };

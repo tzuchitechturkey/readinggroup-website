@@ -69,7 +69,7 @@ const PosterCard = ({ poster, t }) => {
                 onClick={() => {
                   setIsViewerOpen(true);
                 }}
-                className="bg-[#fff] flex items-center gap-1 border-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
+                className="bg-[#fff] flex lg:hidden items-center gap-1 border-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
               >
                 <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-[#285688]">
                   {t("More Good Effects Posters")}

@@ -9,6 +9,7 @@ import ReportCard from "@/components/ForPages/RelatedReports/ReportCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
+import { GetVideosByTypeVideo } from "@/api/videos";
 
 const RelatedReportsPageContent = () => {
   const { t, i18n } = useTranslation();
@@ -83,7 +84,11 @@ const RelatedReportsPageContent = () => {
         </div>
 
         {/* Start Grid Cards */}
-        <NewClips clips={videoData?.clip_video || []} t={t} fromHomePage={false} />
+        <NewClips
+          clips={videoData?.clip_video || []}
+          t={t}
+          fromHomePage={false}
+        />
         {/* End Grid Cards */}
 
         {/* More Reports Section */}

@@ -19,7 +19,6 @@ const BasicDetailsSection = ({
   getCategories,
   t,
 }) => {
-  console.log(categoriesList);
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
       <h3 className="text-lg font-medium text-gray-900 mb-6">
