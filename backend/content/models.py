@@ -330,6 +330,7 @@ class LatestNews(TimestampedModel):
     image = models.ImageField(upload_to="latest-news/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
+    is_test = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_at",)
