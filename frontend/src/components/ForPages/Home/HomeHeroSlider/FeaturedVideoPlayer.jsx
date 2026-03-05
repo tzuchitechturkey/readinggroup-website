@@ -80,7 +80,12 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
             </div>
 
             {/* Start Watch Button */}
-            <button className="bg-white flex items-center gap-1   rounded-lg px-3 md:px-6 py-3 w-fit">
+            <button
+              onClick={() => {
+                navigate(`/videos/${item?.id}`);
+              }}
+              className="bg-white flex items-center gap-1   rounded-lg px-3 md:px-6 py-3 w-fit"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"

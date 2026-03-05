@@ -1,9 +1,12 @@
 import React from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import SectionHeader from "../shared/SectionHeader";
 import PosterCard from "../shared/PosterCard";
 
 const GoodEffectsPoster = ({ poster, t }) => {
+  const navigate = useNavigate();
   const handleSeeMoreClick = () => {
     navigate("/learn");
   };

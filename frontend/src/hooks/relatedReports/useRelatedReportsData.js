@@ -18,9 +18,8 @@ export const useRelatedReportsData = () => {
   const getReportsData = async (page = 0, searchVal = "", limit = 10) => {
     setIsLoading(true);
     const offset = page * limit;
-    const params = searchVal ? { search: searchVal } : {};
     try {
-      const res = await GetRelatedReports(limit, offset, params);
+      const res = await GetRelatedReports(limit, offset, searchVal);
       setReportsData(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
       return res?.data;

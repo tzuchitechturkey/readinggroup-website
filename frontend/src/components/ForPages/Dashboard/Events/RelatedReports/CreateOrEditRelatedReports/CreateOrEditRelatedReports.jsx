@@ -36,7 +36,6 @@ function CreateOrEditRelatedReports({ onSectionChange, report = null }) {
     getCategories,
     t,
   } = useCreateOrEditRelatedReports(report, onSectionChange);
-
   // Handler for category search clear
   const handleCategoryClearSearch = () => {
     setCategorySearchValue("");

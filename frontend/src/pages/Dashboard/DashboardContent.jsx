@@ -187,7 +187,6 @@ export default function Page() {
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
     setActiveSection(section);
-    
 
     // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
     if (section === "home" || section === "Home") {
@@ -223,6 +222,7 @@ export default function Page() {
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
     } else if (section === "createOrEditRelatedReports") {
+      console.log(data, "11111111111111");
       setSelectedrelatedReports(data);
     } else if (section === "createOrEditPhotoCollection") {
       setSelectedPhotoCollections(data);
@@ -366,7 +366,7 @@ export default function Page() {
       case "createOrEditRelatedReports":
         return (
           <CreateOrEditRelatedReports
-            relatedReport={selectedrelatedReports}
+            report={selectedrelatedReports}
             onSectionChange={handleSectionChange}
           />
         );

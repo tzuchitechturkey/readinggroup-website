@@ -170,7 +170,6 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
       setIsFetchingYoutube(false);
     }
   };
-  console.log(errors);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

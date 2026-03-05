@@ -59,6 +59,7 @@ function RelatedReportsList({ onSectionChange }) {
 
   const handleEdit = (report) => {
     setSelectedReport(report);
+    console.log(report);
     onSectionChange("createOrEditRelatedReports", report);
   };
 
