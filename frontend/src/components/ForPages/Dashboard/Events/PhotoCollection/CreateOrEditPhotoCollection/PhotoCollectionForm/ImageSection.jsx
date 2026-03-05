@@ -10,6 +10,7 @@ const ImageSection = ({
   onRemoveImage,
   errors,
 }) => {
+  console.log("Rendering ImageSection with images:", images);
   const { t } = useTranslation();
   const [previewImages, setPreviewImages] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
@@ -106,7 +107,7 @@ const ImageSection = ({
       </div>
 
       {/* URL Input Section */}
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           {t("Image URL")}
         </label>
@@ -127,7 +128,7 @@ const ImageSection = ({
             {t("Add")}
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* File Previews */}
       {previewImages.length > 0 && (

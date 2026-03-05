@@ -53,3 +53,8 @@ export async function EditPhotoInCollection(collection_id, photo_id, data) {
 export async function GetAllImages() {
   return await axios.get(`/photo-collection/images/`);
 }
+
+// /photo-collection/last-4-photos/
+export async function GetLast4Photos() {
+  return await axios.get(`/photo-collection/last-4-photos/`);
+}

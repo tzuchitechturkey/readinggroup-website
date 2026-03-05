@@ -6,41 +6,13 @@ import PhotoCard from "@/components/ForPages/Home/shared/PhotoCard";
 
 import SectionHeader from "../shared/SectionHeader";
 import Image from "../../../../assets/photocard.png";
-// Mock data for photo collections
-const mockPhotosData = [
-  {
-    id: 1,
-    date: "Jan. 21, 2026",
-    image: Image,
-    isNew: true,
-  },
-  {
-    id: 2,
-    date: "Dec. 31, 2025",
-    image: Image,
-    isNew: false,
-  },
-  {
-    id: 3,
-    date: "Dec. 24, 2025",
-    image: Image,
-    isNew: false,
-  },
-  {
-    id: 4,
-    date: "Dec. 17, 2025",
-    image: Image,
-    isNew: false,
-  },
-];
 
-const PhotoCollections = ({ t }) => {
+const PhotoCollections = ({ t, data }) => {
   const navigate = useNavigate();
 
   const handleMoreCollectionsClick = () => {
     navigate("/photo-collections");
   };
-
   return (
     <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-0 w-full lg:w-[1200px] mx-auto pb-12 sm:pb-16 md:pb-20 lg:pb-24">
       {/* Section Header */}
@@ -51,8 +23,8 @@ const PhotoCollections = ({ t }) => {
       />
 
       {/* Photo Grid */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 lg:gap-[24px] items-stretch flex-wrap w-full">
-        {mockPhotosData.map((photo) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-[24px] items-stretch w-full">
+        {data.map((photo) => (
           <PhotoCard key={photo.id} photo={photo} isNew={photo.isNew} t={t} />
         ))}
       </div>

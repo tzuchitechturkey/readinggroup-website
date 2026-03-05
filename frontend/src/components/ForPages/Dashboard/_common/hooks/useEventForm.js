@@ -58,7 +58,7 @@ export const useEventForm = (event = null, onSectionChange) => {
   const getLearnsList = useCallback(async (searchVal = "") => {
     try {
       const params = searchVal ? { search: searchVal } : {};
-      const res = await GetLearnsByType("event", params);
+      const res = await GetLearnsByType("posters", params);
       setLearnsList(res?.data?.results || []);
     } catch (error) {
       console.error("Error fetching learns:", error);
