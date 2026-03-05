@@ -313,7 +313,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
             <VideoCard
               key={video.id || index}
               item={video}
-              navigate={navigate}
+              navigate={() => navigate(`/videos/${video?.id}`)}
               size="small"
               showDate={true}
             />

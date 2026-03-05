@@ -7,6 +7,7 @@ const VideoCard = ({
   showDate = false,
   rounded = false,
   textClassName = "",
+  fromHomePage = false,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
