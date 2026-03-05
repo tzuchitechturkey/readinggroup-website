@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { X } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import * as Popover from "@radix-ui/react-popover";
+import "react-day-picker/dist/style.css";
+import "@/components/ForPages/Dashboard/CreateorEditCategoryModal/DatePickerStyles.css";
 
 import Loader from "@/components/Global/Loader/Loader";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
@@ -12,6 +17,7 @@ import { FormActionsSection } from "./LiveStreamForm";
 
 const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
   const { t } = useTranslation();
+  const [openDatePopover, setOpenDatePopover] = useState(false);
   const {
     formData,
     errors,
@@ -79,13 +85,57 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Date")} <span className="text-red-500">*</span>
           </label>
-          <input
-            type="date"
-            name="start_event_date"
-            value={formData.start_event_date}
-            onChange={handleInputChange}
-            className={`w-full px-3 py-2 border ${errors.start_event_date ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
+          <Popover.Root
+            open={openDatePopover}
+            onOpenChange={setOpenDatePopover}
+          >
+            <Popover.Trigger asChild>
+              <button
+                type="button"
+                className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.start_event_date ? "border-red-500" : "border-gray-300"
+                }`}
+              >
+                <span
+                  className={
+                    formData.start_event_date
+                      ? "text-gray-900"
+                      : "text-gray-500"
+                  }
+                >
+                  {formData.start_event_date
+                    ? format(
+                        new Date(formData.start_event_date),
+                        "MMMM d, yyyy",
+                      )
+                    : t("Select a date")}
+                </span>
+                <Calendar className="h-5 w-5 text-gray-400" />
+              </button>
+            </Popover.Trigger>
+            <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              <DayPicker
+                mode="single"
+                selected={
+                  formData.start_event_date
+                    ? new Date(formData.start_event_date)
+                    : undefined
+                }
+                onSelect={(date) => {
+                  if (date) {
+                    const formattedDate = format(date, "yyyy-MM-dd");
+                    handleInputChange({
+                      target: {
+                        name: "start_event_date",
+                        value: formattedDate,
+                      },
+                    });
+                    setOpenDatePopover(false);
+                  }
+                }}
+              />
+            </Popover.Content>
+          </Popover.Root>
           {errors.start_event_date && (
             <p className="text-red-600 text-sm">{errors.start_event_date}</p>
           )}

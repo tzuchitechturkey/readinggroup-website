@@ -1,10 +1,14 @@
 import React, { useMemo, useState, useEffect } from "react";
 
 import { toast } from "react-toastify";
-import { ToggleLeft, ToggleRight } from "lucide-react";
+import { ToggleLeft, ToggleRight, Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import * as Popover from "@radix-ui/react-popover";
+import "react-day-picker/dist/style.css";
+import "./DatePickerStyles.css";
 
 import Modal from "@/components/Global/Modal/Modal";
-import { languages } from "@/constants/constants";
 
 function CreateorEditCategoryModal({
   // Modal Control
@@ -66,7 +70,7 @@ function CreateorEditCategoryModal({
 
   const handleInputChange = (e) => {
     const { name, type, files, value } = e.target;
-    
+
     if (type === "file") {
       setForm((prev) => ({
         ...prev,
@@ -86,14 +90,14 @@ function CreateorEditCategoryModal({
     let url = "";
     // البحث عن حقل الملف (image) في الـ form
     const fileField = Object.entries(form).find(
-      ([key, value]) => value instanceof File
+      ([key, value]) => value instanceof File,
     );
-    
+
     if (fileField && fileField[1]) {
       url = URL.createObjectURL(fileField[1]);
       setPreviewUrl(url);
     }
-    
+
     // Cleanup: تحرير الـ object URL عند التغيير
     return () => {
       if (url) {
@@ -240,13 +244,17 @@ function CreateorEditCategoryModal({
                   onChange={handleInputChange}
                   accept={field.accept || ""}
                   className={`w-full p-2 border rounded ${
-                    errorState[field.name] ? "border-red-500" : "border-gray-300"
+                    errorState[field.name]
+                      ? "border-red-500"
+                      : "border-gray-300"
                   } `}
                 />
                 {/* معاينة الصورة المختارة أو الموجودة */}
                 {(previewUrl || form.image) && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium mb-2">{t("Image Preview")}:</p>
+                    <p className="text-sm font-medium mb-2">
+                      {t("Image Preview")}:
+                    </p>
                     <img
                       src={previewUrl || form.image}
                       alt="Preview"
@@ -261,15 +269,60 @@ function CreateorEditCategoryModal({
                 )}
               </div>
             ) : field.type === "date" ? (
-              <input
-                type="date"
-                name={field.name}
-                value={getDateFieldValue(field.name)}
-                onChange={handleInputChange}
-                className={`w-full p-2 border rounded ${
-                  errorState[field.name] ? "border-red-500" : "border-gray-300"
-                }`}
-              />
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <button
+                    type="button"
+                    className={`w-full p-2 border rounded flex items-center justify-between bg-white hover:bg-gray-50 transition-colors ${
+                      errorState[field.name]
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={
+                        getDateFieldValue(field.name)
+                          ? "text-gray-900"
+                          : "text-gray-500"
+                      }
+                    >
+                      {getDateFieldValue(field.name)
+                        ? format(
+                            new Date(getDateFieldValue(field.name)),
+                            "MMMM d, yyyy",
+                          )
+                        : t("Select a date")}
+                    </span>
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                  </button>
+                </Popover.Trigger>
+                <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <DayPicker
+                    mode="single"
+                    selected={
+                      getDateFieldValue(field.name)
+                        ? new Date(getDateFieldValue(field.name))
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      if (date) {
+                        const formattedDate = format(date, "yyyy-MM-dd");
+                        setForm((prev) => ({
+                          ...prev,
+                          [field.name]: formattedDate,
+                        }));
+                        if (errorState[field.name]) {
+                          setErrorState((prev) => ({
+                            ...prev,
+                            [field.name]: "",
+                          }));
+                        }
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                  />
+                </Popover.Content>
+              </Popover.Root>
             ) : field.type === "text" ? (
               <input
                 type={field.type || "text"}
