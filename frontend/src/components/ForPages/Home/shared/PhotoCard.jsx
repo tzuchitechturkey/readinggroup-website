@@ -1,6 +1,17 @@
 import React from "react";
 
 const PhotoCard = ({ photo, isNew = false, t, handleNavigate }) => {
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+
+    const formatted = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    return formatted.replace(",", ".");
+  };
   return (
     <div className="flex-1 h-[120px] sm:h-[140px] md:h-[160px] lg:h-[189px] min-h-px relative overflow-hidden cursor-pointer group rounded-lg sm:rounded-xl lg:rounded-lg">
       {/* Background Image */}
@@ -11,13 +22,13 @@ const PhotoCard = ({ photo, isNew = false, t, handleNavigate }) => {
             className="w-full duration-300 group-hover:scale-105"
             src={photo.image}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#081945]/20" />
         </div>
       </div>
 
       {/* Date Text */}
       <p className="absolute font-['Inter:Bold',sans-serif] font-semibold leading-normal bottom-[10px] sm:bottom-[12px] md:bottom-[14px] lg:bottom-[15px] left-1/2 transform -translate-x-1/2 text-[14px] sm:text-[16px] md:text-[20px] lg:text-[22px] text-white">
-        {photo.date}
+        {formatDate(photo.happened_at)}
       </p>
 
       {/* NEW Tag */}

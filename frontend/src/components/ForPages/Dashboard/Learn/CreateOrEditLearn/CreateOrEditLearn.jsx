@@ -101,14 +101,19 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  handleInputChange({
-                    target: {
-                      name: "is_event",
-                      type: "checkbox",
-                      checked: !formData.is_event,
-                    },
-                  })
+                disabled
+                onClick={
+                  () =>
+                    toast.info(
+                      t("It is Automaticaly changed when link with an Event"),
+                    )
+                  // handleInputChange({
+                  //   target: {
+                  //     name: "is_event",
+                  //     type: "checkbox",
+                  //     checked: !formData.is_event,
+                  //   },
+                  // })
                 }
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   formData.is_event ? "bg-blue-600" : "bg-gray-300"

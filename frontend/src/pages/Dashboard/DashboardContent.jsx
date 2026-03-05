@@ -222,7 +222,6 @@ export default function Page() {
     } else if (section === "createOrEditWriter") {
       setSelectedWriter(data);
     } else if (section === "createOrEditRelatedReports") {
-      console.log(data, "11111111111111");
       setSelectedrelatedReports(data);
     } else if (section === "createOrEditPhotoCollection") {
       setSelectedPhotoCollections(data);
@@ -233,9 +232,6 @@ export default function Page() {
     let autoParent = data;
     if (typeof data === "object" || !autoParent) {
       const parentMap = {
-        // Posts
-        cards: "Cards Or Photos",
-        // photos: "Cards Or Photos",
         learn: "Learn",
         createOrEditLearn: "Learn",
         learnCategories: "Learn",
@@ -243,12 +239,8 @@ export default function Page() {
         videos: "Videos",
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
-        // Contents
-        contents: "Contents",
-        createOrEditContent: "Contents",
-        ContentsCategories: "Contents",
         // Events
-        events: "Events",
+        // events: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
         news: "News",

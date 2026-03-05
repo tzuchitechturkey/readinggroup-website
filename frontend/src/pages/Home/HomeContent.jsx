@@ -13,6 +13,7 @@ import PhotoCollections from "@/components/ForPages/Home/PhotoCollections/PhotoC
 import { GetVideosByTypeVideo } from "@/api/videos";
 import { GetCarsdsForHome, GetTopOnePoster } from "@/api/learn";
 import { GetEvents } from "@/api/events";
+import { GetLast4Photos } from "@/api/photoCollections";
 
 export default function HomeContent() {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ export default function HomeContent() {
   const [cardsData, setCardsData] = useState(null);
   const [posterData, setPosterData] = useState({});
   const [upcomingLivestreamData, setUpcomingLivestreamData] = useState([]);
+  const [photoCollectionData, setPhotoCollectionData] = useState([]);
 
   const fetchVideoData = async () => {
     try {
@@ -54,11 +56,21 @@ export default function HomeContent() {
       setErrorFn(error, t);
     }
   };
+  const fetchPhotoCollectionData = async () => {
+    try {
+      const res = await GetLast4Photos();
+      console.log("Fetched Photo Collection Data:", res.data); // Debugging log
+      setPhotoCollectionData(res.data || []);
+    } catch (error) {
+      setErrorFn(error, t);
+    }
+  };
   useEffect(() => {
     fetchVideoData();
     fetchPosterData();
     fetchCardsData();
     fetchUpcomingLivestream();
+    fetchPhotoCollectionData();
   }, []);
   return (
     <div className="min-h-screen bg-[#C8DDF4]">
@@ -90,7 +102,7 @@ export default function HomeContent() {
 
       {/* Photo Collections Section */}
       <div className="py-16 pb-12  bg-[#91ADCB]">
-        <PhotoCollections t={t} />
+        <PhotoCollections t={t} data={photoCollectionData} />
       </div>
     </div>
   );

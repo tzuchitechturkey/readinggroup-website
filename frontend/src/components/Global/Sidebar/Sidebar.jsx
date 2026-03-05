@@ -124,10 +124,10 @@ export default function AppSidebar({
         onClick: "#",
         icon: TV,
         items: [
-          {
-            title: "All Photo Collections",
-            onClick: () => onSectionChange("photoCollections"),
-          },
+          // {
+          //   title: "All Photo Collections",
+          //   onClick: () => onSectionChange("photoCollections"),
+          // },
           {
             title: "Add/Edit Photo",
             onClick: () => onSectionChange("createOrEditPhotoCollection"),

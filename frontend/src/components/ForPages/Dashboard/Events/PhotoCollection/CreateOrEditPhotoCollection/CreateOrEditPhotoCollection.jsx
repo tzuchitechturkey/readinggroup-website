@@ -1,18 +1,11 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import {
-  GetCollectionById,
-  CreateCollection,
-  EditCollectionById,
-  GetCollections,
-  AddPhotoToCollection,
-} from "@/api/photoCollections";
+import { GetCollections, AddPhotoToCollection } from "@/api/photoCollections";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
-import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
@@ -21,12 +14,8 @@ import ImageSection from "./PhotoCollectionForm/ImageSection";
 
 const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   const { t } = useTranslation();
-  const { id } = useParams();
   const navigate = useNavigate();
-  const isEditMode = Boolean(id);
-
   // State
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [images, setImages] = useState([]);
@@ -35,50 +24,38 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   const [collections, setCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState(null);
 
-  // Load data for edit mode
-  useEffect(() => {
-    if (isEditMode) {
-      loadPhotoCollection();
-    }
-  }, [id, isEditMode]);
-
-  // Set selectedCollection from photoCollection prop
+  // Initialize data from photoCollection prop in edit mode
   useEffect(() => {
     if (photoCollection?.id && photoCollection?.title) {
       setSelectedCollection({
         id: photoCollection.id,
         title: photoCollection.title,
       });
+      // Load existing photos from photoCollection
+      if (photoCollection?.photos) {
+        setImages(photoCollection.photos);
+      }
     }
   }, [photoCollection]);
-
-  const loadPhotoCollection = async () => {
-    setIsLoading(true);
-    try {
-      const response = await GetCollectionById(id);
-      const collection = response.data;
-
-      setImages(collection.images || []);
-    } catch (error) {
-      console.error("Error loading photo collection:", error);
-      toast.error(t("Failed to load collection data"));
-      navigate("/admin/photo-collections");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Validation
   const validateForm = () => {
     const newErrors = {};
+    const MAX_IMAGES = 28;
+    const totalImages = images.length + newImages.length;
 
-    if (!isEditMode && newImages.length === 0 && images.length === 0) {
+    if (!photoCollection?.id && newImages.length === 0 && images.length === 0) {
       newErrors.images = t("At least one image is required");
+    }
+
+    // Check maximum images limit
+    if (totalImages > MAX_IMAGES) {
+      newErrors.images = t("Maximum 28 images allowed");
     }
 
     // في وضع التعديل، الـ collection يكون من photoCollection
     // في وضع الإنشاء، يجب أن يختار المستخدم
-    if (!isEditMode && !selectedCollection?.id) {
+    if (!photoCollection?.id && !selectedCollection?.id) {
       newErrors.collection = t("Collection category is required");
     }
 
@@ -87,6 +64,18 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   };
 
   const handleNewImagesChange = (files) => {
+    const MAX_IMAGES = 28;
+    const totalImages = images.length + files.length;
+
+    if (totalImages > MAX_IMAGES) {
+      toast.error(
+        t("Maximum 28 images allowed. You can only add {{count}} more images", {
+          count: MAX_IMAGES - images.length,
+        }),
+      );
+      return;
+    }
+
     setNewImages(files);
     if (errors.images) {
       setErrors((prev) => ({ ...prev, images: null }));
@@ -124,7 +113,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
       });
 
       // Add existing image URLs if any (for create mode with URL images)
-      if (!isEditMode && images.length > 0) {
+      if (!photoCollection?.id && images.length > 0) {
         images.forEach((url, index) => {
           if (typeof url === "string") {
             submitData.append(`image_urls[${index}]`, url);
@@ -136,13 +125,13 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
 
       toast.success(
         t(
-          isEditMode
+          photoCollection?.id
             ? "Collection updated successfully"
             : "Collection created successfully",
         ),
       );
 
-      onSectionChange("photoCollections");
+      onSectionChange("photoCollectionCategories");
     } catch (error) {
       console.error("Error saving photo collection:", error);
 
@@ -152,7 +141,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
 
       toast.error(
         t(
-          isEditMode
+          photoCollection?.id
             ? "Failed to update collection"
             : "Failed to create collection",
         ),
@@ -181,13 +170,14 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
 
   return (
     <div className="bg-white rounded-lg p-6 mx-4 min-h-screen pb-10 overflow-y-auto">
-      {isLoading && <Loader />}
       {/* Breadcrumb */}
       <CustomBreadcrumb
         backTitle={t("Back to Photo Collections List")}
         onBack={() => navigate(-1)}
         page={
-          isEditMode ? t("Edit Photo Collection") : t("Create Photo Collection")
+          photoCollection?.id
+            ? t("Edit Photo Collection")
+            : t("Create Photo Collection")
         }
       />
       <div className="">
@@ -199,6 +189,9 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
             onAddImageUrl={handleAddImageUrl}
             onRemoveImage={handleRemoveImage}
             errors={errors}
+            maxImages={28}
+            currentImageCount={images.length}
+            isEditMode={Boolean(photoCollection?.id)}
           />
           {/* Basic Details */}
 
@@ -214,7 +207,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
             searchApi={true}
             searchPlaceholder={t("Search collections...")}
             error={errors.collection}
-            required={!isEditMode}
+            required={!photoCollection?.id}
             renderItemLabel={(item) => item.title || item.name || ""}
           />
           {/* End Collections */}
@@ -222,7 +215,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
           <FormActionsSection
             onSubmit={handleSubmit}
             isLoading={isSubmitting}
-            isEditMode={isEditMode}
+            isEditMode={Boolean(photoCollection?.id)}
           />
         </form>
       </div>

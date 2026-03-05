@@ -30,17 +30,18 @@ function PhotoCollectionsCategoriesTable({
   const limit = 10;
 
   const openEditModal = (cat) => {
+    console.log("Opening edit modal for category:", cat);
     const formData = {
-      image: null,
-      title: cat.title || "",
-      happened_at: cat.happened_at || "",
-      is_active: cat.is_active !== undefined ? cat.is_active : false,
-      id: cat.id,
+      image: cat?.image,
+      title: cat?.title || "",
+      happened_at: cat?.happened_at || "",
+      // is_active: cat?.is_active !== undefined ? cat?.is_active : false,
+      id: cat?.id,
     };
     setForm(formData);
     setOriginalForm({
-      title: cat.title || "",
-      happened_at: cat.happened_at || "",
+      title: cat?.title || "",
+      happened_at: cat?.happened_at || "",
     });
     setIsAutoTranslated(false);
     setShowCreateEditModal(true);
@@ -87,40 +88,40 @@ function PhotoCollectionsCategoriesTable({
         );
       },
     },
-    {
-      title: t("Status"),
-      key: "is_active",
-      render: (item) => (
-        <button
-          onClick={async () => {
-            try {
-              await EditCollectionById(item.id, {
-                ...item,
-                is_active: !item.is_active,
-              });
-              toast.success(
-                item.is_active ? t("Category disabled") : t("Category enabled"),
-              );
-              getCategoriesData(currentPage - 1);
-            } catch (err) {
-              setErrorFn(err, t);
-            }
-          }}
-          className={`p-1 rounded-lg transition-all duration-200 ${
-            item.is_active
-              ? "bg-green-100 text-green-600 hover:bg-green-200"
-              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-          }`}
-          title={item.is_active ? t("Click to disable") : t("Click to enable")}
-        >
-          {item.is_active ? (
-            <ToggleRight className="h-8 w-12" />
-          ) : (
-            <ToggleLeft className="h-8 w-12" />
-          )}
-        </button>
-      ),
-    },
+    // {
+    //   title: t("Status"),
+    //   key: "is_active",
+    //   render: (item) => (
+    //     <button
+    //       onClick={async () => {
+    //         try {
+    //           await EditCollectionById(item.id, {
+    //             ...item,
+    //             is_active: !item.is_active,
+    //           });
+    //           toast.success(
+    //             item.is_active ? t("Category disabled") : t("Category enabled"),
+    //           );
+    //           getCategoriesData(currentPage - 1);
+    //         } catch (err) {
+    //           setErrorFn(err, t);
+    //         }
+    //       }}
+    //       className={`p-1 rounded-lg transition-all duration-200 ${
+    //         item.is_active
+    //           ? "bg-green-100 text-green-600 hover:bg-green-200"
+    //           : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+    //       }`}
+    //       title={item.is_active ? t("Click to disable") : t("Click to enable")}
+    //     >
+    //       {item.is_active ? (
+    //         <ToggleRight className="h-8 w-12" />
+    //       ) : (
+    //         <ToggleLeft className="h-8 w-12" />
+    //       )}
+    //     </button>
+    //   ),
+    // },
   ];
 
   // Define table actions
@@ -144,7 +145,7 @@ function PhotoCollectionsCategoriesTable({
       title: "Show",
       icon: <Eye className="h-4 w-4 text-blue-600" />,
       onClick: (item) => {
-         onSectionChange("createOrEditPhotoCollection", item);
+        onSectionChange("createOrEditPhotoCollection", item);
       },
       className: "p-1 rounded hover:bg-gray-100",
     },

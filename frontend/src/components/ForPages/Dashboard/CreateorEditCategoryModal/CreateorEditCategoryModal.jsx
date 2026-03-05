@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 import { toast } from "react-toastify";
 import { ToggleLeft, ToggleRight } from "lucide-react";
@@ -52,6 +52,7 @@ function CreateorEditCategoryModal({
   showAutoTranslate = false,
 }) {
   const [localErrors, setLocalErrors] = useState({});
+  const [previewUrl, setPreviewUrl] = useState("");
   const errorState = errors || localErrors;
   const setErrorState = setErrors || setLocalErrors;
 
@@ -78,6 +79,46 @@ function CreateorEditCategoryModal({
     if (errorState[name]) {
       setErrorState((prev) => ({ ...prev, [name]: "" }));
     }
+  };
+
+  // إنشاء object URL للصورة المختارة
+  useEffect(() => {
+    let url = "";
+    // البحث عن حقل الملف (image) في الـ form
+    const fileField = Object.entries(form).find(
+      ([key, value]) => value instanceof File
+    );
+    
+    if (fileField && fileField[1]) {
+      url = URL.createObjectURL(fileField[1]);
+      setPreviewUrl(url);
+    }
+    
+    // Cleanup: تحرير الـ object URL عند التغيير
+    return () => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [form]);
+
+  // دالة لتحويل التاريخ إلى صيغة input date
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    // معالجة صيغة "2026-03-10 00:00"
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    return date.toISOString().split("T")[0];
+  };
+
+  // دالة للحصول على قيمة حقل التاريخ (من form أو من happened_at)
+  const getDateFieldValue = (fieldName) => {
+    if (form[fieldName]) return form[fieldName];
+    // إذا كان اسم الحقل يحتوي على "happened" أو كان الحقل date
+    if (form.happened_at) {
+      return formatDateForInput(form.happened_at);
+    }
+    return "";
   };
 
   const handleToggleChange = (fieldName) => {
@@ -125,7 +166,7 @@ function CreateorEditCategoryModal({
     return colors[color] || colors.blue;
   };
   if (!isOpen) return null;
-
+  console.log("Rendering Create/Edit Modal with form data:", form);
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} width={width}>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -202,9 +243,20 @@ function CreateorEditCategoryModal({
                     errorState[field.name] ? "border-red-500" : "border-gray-300"
                   } `}
                 />
-                {form[field.name] && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    <p>{t("Selected file")}: {form[field.name].name}</p>
+                {/* معاينة الصورة المختارة أو الموجودة */}
+                {(previewUrl || form.image) && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">{t("Image Preview")}:</p>
+                    <img
+                      src={previewUrl || form.image}
+                      alt="Preview"
+                      className="max-w-full h-auto max-h-64 rounded border border-gray-300"
+                    />
+                    {previewUrl && form[field.name] && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        {t("Selected file")}: {form[field.name].name}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -212,7 +264,7 @@ function CreateorEditCategoryModal({
               <input
                 type="date"
                 name={field.name}
-                value={form[field.name] || ""}
+                value={getDateFieldValue(field.name)}
                 onChange={handleInputChange}
                 className={`w-full p-2 border rounded ${
                   errorState[field.name] ? "border-red-500" : "border-gray-300"
