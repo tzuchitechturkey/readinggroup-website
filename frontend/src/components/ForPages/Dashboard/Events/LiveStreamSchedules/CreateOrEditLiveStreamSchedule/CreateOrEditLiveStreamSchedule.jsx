@@ -15,7 +15,10 @@ import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useE
 
 import { FormActionsSection } from "./LiveStreamForm";
 
-const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
+const CreateOrEditLiveStreamSchedule = ({
+  onSectionChange,
+  liveStream = null,
+}) => {
   const { t } = useTranslation();
   const [openDatePopover, setOpenDatePopover] = useState(false);
   const {
@@ -34,12 +37,13 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
     handleLearnClear,
     getLearnsList,
     resetForm,
-  } = useEventForm(event, onSectionChange);
+  } = useEventForm(liveStream, onSectionChange);
 
   const handleCancel = () => {
     resetForm();
     onSectionChange("liveStreamSchedules");
   };
+  console.log("Form Data:", liveStream);
 
   return (
     <div className="bg-white rounded-lg p-3">
@@ -50,7 +54,7 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
         backTitle={t("Back to Live Stream Schedules List")}
         onBack={() => onSectionChange("liveStreamSchedules")}
         page={
-          event?.id
+          liveStream?.id
             ? t("Edit Live Stream Schedule")
             : t("Create New Live Stream Schedule")
         }
@@ -261,7 +265,7 @@ const CreateOrEditLiveStreamSchedule = ({ onSectionChange, event = null }) => {
       {/* Form Actions Section */}
       <FormActionsSection
         isLoading={isLoading}
-        isEditing={Boolean(event?.id)}
+        isEditing={Boolean(liveStream?.id)}
         onCancel={handleCancel}
         onSubmit={handleSubmit}
       />

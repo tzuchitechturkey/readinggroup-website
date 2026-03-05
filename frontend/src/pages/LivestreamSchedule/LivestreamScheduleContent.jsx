@@ -81,8 +81,10 @@ const LivestreamScheduleContent = () => {
     if (location?.state?.openPosterModal && location?.state?.selectedEvent) {
       setSelectedEvent(location.state.selectedEvent);
       setIsViewerOpen(true);
+      // Clear the state after opening to prevent reopening on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, [location]);
+  }, []);
   const fetchScheduleData = async (year, month) => {
     setIsLoading(true);
     try {

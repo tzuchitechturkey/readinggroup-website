@@ -20,7 +20,6 @@ import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departme
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
-import CreateOrEditEvent from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
 import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
 import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
@@ -225,6 +224,8 @@ export default function Page() {
       setSelectedrelatedReports(data);
     } else if (section === "createOrEditPhotoCollection") {
       setSelectedPhotoCollections(data);
+    } else if (section === "createOrEditLiveStreamSchedule") {
+      setSelectedLiveStream(data);
     } else if (section === "createOrEditBook") {
       setSelectedBook(data);
     }
