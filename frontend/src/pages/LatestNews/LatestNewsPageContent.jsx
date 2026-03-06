@@ -47,7 +47,7 @@ const LatestNewsPageContent = () => {
   };
 
   useEffect(() => {
-    // fetchNews(1);
+    fetchNews(1);
   }, []);
 
   const handlePageChange = (newPage) => {
@@ -56,8 +56,9 @@ const LatestNewsPageContent = () => {
   };
 
   // Separate first item and rest
-  const firstNews = newsList[0];
-  const restNews = newsList.slice(1);
+  // const firstNews = newsList[0];
+  // const restNews = newsList.slice(1);
+  console.log(newsList);
   const mockData = [
     {
       id: 1,
@@ -87,17 +88,12 @@ const LatestNewsPageContent = () => {
         </div>
 
         {/* Featured News Card */}
-        {firstNews && (
-          <div className="mb-10 md:mb-14">
-            <NewsLargeCard news={firstNews} />
-          </div>
-        )}
 
         {/* Rest of News List */}
-        {mockData.length > 0 ? (
+        {newsList.length > 0 ? (
           <>
             <div className="flex flex-col gap-3 md:gap-4 mb-10 md:mb-14">
-              {mockData.map((news) => (
+              {newsList.map((news) => (
                 <NewsCard key={news.id} news={news} t={t} />
               ))}
             </div>

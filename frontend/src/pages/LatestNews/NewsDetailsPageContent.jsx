@@ -50,16 +50,31 @@ const NewsDetailsPageContent = () => {
   // Update count when data changes and ensure buttons are enabled
   useEffect(() => {
     setCount(news?.images?.length || 0);
+  }, [news?.images]);
 
-    // Force update buttons when data changes
-    if (imageCarouselApi && news?.images?.length > 0) {
-      setTimeout(() => {
-        setCurrent(imageCarouselApi.selectedScrollSnap());
-        setCanPrev(imageCarouselApi.canScrollPrev());
-        setCanNext(imageCarouselApi.canScrollNext());
-      }, 100);
+  // Listen to carousel changes and update UI state
+  useEffect(() => {
+    if (!imageCarouselApi) {
+      return;
     }
-  }, [news?.images, imageCarouselApi]);
+
+    const updateCarouselState = () => {
+      setCurrent(imageCarouselApi.selectedScrollSnap());
+      setCanPrev(imageCarouselApi.canScrollPrev());
+      setCanNext(imageCarouselApi.canScrollNext());
+    };
+
+    // Set initial state
+    updateCarouselState();
+
+    // Add listener for when carousel selection changes
+    imageCarouselApi.on("select", updateCarouselState);
+
+    return () => {
+      // Cleanup: remove listener when component unmounts or API changes
+      imageCarouselApi.off("select", updateCarouselState);
+    };
+  }, [imageCarouselApi]);
 
   // Fetch news details and other news
   useEffect(() => {
@@ -71,18 +86,11 @@ const NewsDetailsPageContent = () => {
         setNews(newsRes.data);
 
         // Extract images for viewer
-        const newsImages = (newsRes.data.images || []).map((img) => ({
-          ...img,
-          image_url: img.image,
-        }));
-        setImages(newsImages);
-
-        // Fetch other news (exclude current)
-        const otherRes = await GetLatestNews(6, 0, "", "-happened_at");
-        const filtered = (otherRes.data.results || [])
-          .filter((n) => n.id !== newsId)
-          .slice(0, 5);
-        setOtherNews(filtered);
+        // const newsImages = (newsRes.data.images || []).map((img) => ({
+        //   ...img,
+        //   image_url: img.image,
+        // }));
+        setImages(newsRes?.data?.images || []);
       } catch (err) {
         setErrorFn(err, t);
       } finally {
@@ -90,9 +98,9 @@ const NewsDetailsPageContent = () => {
       }
     };
 
-    // fetchNewsData();
+    fetchNewsData();
   }, [newsId, t]);
-
+  console.log(images);
   // Image Viewer Handlers
   const openViewer = (index) => {
     setCurrentImageIndex(index);
@@ -174,17 +182,13 @@ const NewsDetailsPageContent = () => {
             <CarouselContent>
               {news?.images?.map((imageItem, index) => (
                 <CarouselItem key={index}>
-                  <div className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative">
+                  <div className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer relative">
                     <img
-                      src={imageItem}
+                      src={imageItem?.image}
                       alt={`${imageItem?.title} - ${index + 1}`}
-                      className="w-full h-full object-cover object-top"
+                      className="w-full h-full object-cover object-top  transition-transform duration-300"
                       loading="lazy"
                     />
-
-                    <div className="hidden lg:block bg-white bg-opacity-90 text-black px-4 py-2 rounded-lg font-bold text-sm">
-                      {t("View Details")}
-                    </div>
                   </div>
                 </CarouselItem>
               ))}

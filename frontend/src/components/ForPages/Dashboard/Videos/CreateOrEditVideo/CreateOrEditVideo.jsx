@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import { useCreateOrEditVideo } from "@/hooks/video/useVideoForm";
+import ImageUploadSection from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/ImageUploadSection";
 
 import { ThumbnailSection } from "./VideoForm/ThumbnailSection";
 import { BasicDetailsSection } from "./VideoForm/BasicDetailsSection";
@@ -66,45 +67,13 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Thumbnail Section */}
-        {/* <div>
-          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-            <p className="text-xs md:text-sm text-blue-800">
-              <strong>{t("Important")}:</strong>{" "}
-              {t(
-                "Please select an image with minimum dimensions of 300x200 pixels for best quality.",
-              )}
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
-            </p>
-          </div>
-          <div className="mt-4">
-            <ThumbnailSection
-              imagePreview={imagePreview}
-              onUpload={handleThumbnailUpload}
-              error={errors?.thumbnail}
-            />
-          </div>
-        </div> */}
-
-        {/* Start Thumbnail URL Alternative */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Thumbnail URL")} ({t("Alternative to file upload")})
-          </label>
-          <input
-            name="thumbnail_url"
-            value={formData?.thumbnail_url}
-            onChange={handleInputChange}
-            placeholder={t("Enter thumbnail URL as alternative to file upload")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            {t("You can either upload a file above or provide a URL here")}
-          </p>
-        </div>
-        {/* End Thumbnail URL Alternative */}
+        
+        {/* Thumbnail URL Section */}
+        <ImageUploadSection 
+          formData={formData}
+          t={t}
+        />
+        {/* End Thumbnail URL Section */}
         {/* Start Attachments Section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">

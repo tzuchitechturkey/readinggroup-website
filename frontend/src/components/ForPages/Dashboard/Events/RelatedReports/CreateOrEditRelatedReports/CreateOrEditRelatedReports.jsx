@@ -5,8 +5,8 @@ import { X } from "lucide-react";
 import Loader from "@/components/Global/Loader/Loader";
 import { useCreateOrEditRelatedReports } from "@/hooks/relatedReports/useRelatedReportsForm";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import ImageUploadSection from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/ImageUploadSection";
 
-import ImageUploadSection from "./ImageUploadSection";
 import BasicDetailsSection from "./BasicDetailsSection";
 import FormActionsSection from "./FormActionsSection";
 

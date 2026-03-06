@@ -41,6 +41,7 @@ import CreateOrEditRelatedReports from "@/components/ForPages/Dashboard/Events/R
 import NewsList from "@/components/ForPages/Dashboard/Events/News/NewsList";
 import CreateOrEditNews from "@/components/ForPages/Dashboard/Events/News/CreateOrEditNews/CreateOrEditNews";
 import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
+import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/UploadImagesToNews/UploadImagesToNews";
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
@@ -373,7 +374,7 @@ export default function Page() {
 
       case "createOrEditNews":
         return (
-          <CreateOrEditNews
+          <UploadImagesToNews
             news={selectedNews}
             onSectionChange={handleSectionChange}
           />

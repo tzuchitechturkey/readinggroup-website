@@ -25,3 +25,8 @@ export async function EditLatestNewsById(id, data) {
 export async function DeleteLatestNewsById(id) {
   return await axios.delete(`/latest-news/${id}/`);
 }
+
+// /latest-news/{id}/images/
+export async function AddImagesToLatestNews(newsId, data) {
+  return await axios.post(`/latest-news/${newsId}/images/`, data);
+}

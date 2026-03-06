@@ -101,9 +101,9 @@ export default function HomeContent() {
       </div>
 
       {/* Photo Collections Section */}
-      {/* <div className="py-16 pb-12  bg-[#91ADCB]"> */}
-        {/* <PhotoCollections t={t} data={photoCollectionData} /> */}
-      {/* </div> */}
+      <div className="py-16 pb-12  bg-[#91ADCB]">
+        <PhotoCollections t={t} data={photoCollectionData} />
+      </div>
     </div>
   );
 }

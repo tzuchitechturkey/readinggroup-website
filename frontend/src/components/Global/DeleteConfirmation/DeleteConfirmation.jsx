@@ -18,7 +18,7 @@ function DeleteConfirmation({
   if (!isOpen) return null;
 
   return (
-    <div className="bg-white rounded-lg p-6 pt-0 max-w-md w-full mx-4">
+    <div className="bg-white rounded-lg p-6  pt-0 max-w-md w-full mx-4">
       {/* Start Warning Icon */}
       <div className="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
         <AlertTriangle className="h-6 w-6 text-red-600" />

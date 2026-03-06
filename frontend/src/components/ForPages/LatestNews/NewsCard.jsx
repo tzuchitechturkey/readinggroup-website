@@ -18,7 +18,7 @@ const NewsCard = ({ news, t }) => {
       {/* Start Image */}
       <div className="relative w-[480px] h-[270px] flex-shrink-0 overflow-hidden  rounded">
         <img
-          src={news?.image || news?.image_url}
+          src={news?.images?.[0]?.image}
           alt={news.title}
           className="w-full h-full object-cover  "
           loading="lazy"

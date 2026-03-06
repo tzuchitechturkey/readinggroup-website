@@ -1,14 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 const ImageUploadSection = ({ formData, t }) => {
-  const [imagePreview, setImagePreview] = useState(null);
-  console.log("formData?.thumbnail_url", formData?.thumbnail_url);
-  // useEffect(() => {
-  //   if (formData?.thumbnail_url) {
-  //     const img = JSON.parse(formData?.thumbnail_url);
-  //     setImagePreview(img);
-  //   }
-  // }, [formData?.thumbnail_url]);
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
       <h3 className="text-lg font-medium text-gray-900 mb-4">

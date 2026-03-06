@@ -6,15 +6,16 @@ import { toast } from "react-toastify";
 import { CreateLatestNews, EditLatestNewsById } from "@/api/latestNews";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
-import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import {
-  BasicDetailsSection,
-  ImagesSection,
-  FormActionsSection,
-} from "./NewsForm";
+import BasicDetailsSection from "./NewsForm/BasicDetailsSection";
+import FormActionsSection from "./NewsForm/FormActionsSection";
 
-const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
+const CreateOrEditNews = ({
+  selectedNews,
+  onSectionChange,
+  setOpenCreateOrEditModal,
+  setUpdate,
+}) => {
   const { t, i18n } = useTranslation();
   const isEdit = Boolean(selectedNews);
 
@@ -24,11 +25,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
     description: "",
     happened_at: "",
   });
-
-  // Images state
-  const [imageFiles, setImageFiles] = useState([]);
-  const [imageUrls, setImageUrls] = useState([""]);
-  const [imageMode, setImageMode] = useState("files"); // "files" or "urls"
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
@@ -44,14 +40,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
           ? selectedNews.happened_at.split("T")[0]
           : "",
       });
-
-      // Set images
-      if (selectedNews.images && selectedNews.images.length > 0) {
-        // If editing, assume URLs mode with existing images
-        const existingUrls = selectedNews.images.map((img) => img.image);
-        setImageUrls(existingUrls);
-        setImageMode("urls");
-      }
     } else {
       // Reset for create mode
       setFormData({
@@ -59,9 +47,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
         description: "",
         happened_at: "",
       });
-      setImageFiles([]);
-      setImageUrls([""]);
-      setImageMode("files");
     }
   }, [selectedNews]);
 
@@ -80,18 +65,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
     if (!formData.happened_at) {
       newErrors.happened_at = t("Date is required");
     }
-
-    // Images validation
-    // if (imageMode === "files") {
-    //   if (imageFiles.length === 0) {
-    //     newErrors.images = t("At least one image is required");
-    //   }
-    // } else {
-    //   const validUrls = imageUrls.filter((url) => url.trim());
-    //   if (validUrls.length === 0) {
-    //     newErrors.images = t("At least one image URL is required");
-    //   }
-    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -115,18 +88,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
       submitData.append("description", formData.description);
       submitData.append("happened_at", formData.happened_at);
 
-      // if (imageMode === "files") {
-      //   // Append image files
-      //   imageFiles.forEach((file, index) => {
-      //     submitData.append("images", file);
-      //   });
-      // } else {
-
-      //   // Send as JSON for URLs
-      //   const jsonData = {
-      //     ...formData,
-      //     image_urls: imageUrls.filter((url) => url.trim()),
-      //   };
       const jsonData = {
         title: formData.title,
         description: formData.description,
@@ -144,23 +105,8 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
           ? t("News updated successfully")
           : t("News created successfully"),
       );
-      onSectionChange("newsList");
-
-      // }
-
-      // For file uploads
-      // if (isEdit) {
-      //   await EditLatestNewsById(selectedNews.id, submitData);
-      // } else {
-      //   await CreateLatestNews(submitData);
-      // }
-
-      // toast.success(
-      //   isEdit
-      //     ? t("News updated successfully")
-      //     : t("News created successfully"),
-      // );
-      // onSectionChange("newsList");
+      setUpdate((prev) => !prev);
+      setOpenCreateOrEditModal(false);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
@@ -172,46 +118,15 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
     onSectionChange("newsList");
   };
 
-  const handleImageModeChange = (mode) => {
-    setImageMode(mode);
-    // Clear the other mode's data
-    if (mode === "files") {
-      setImageUrls([""]);
-    } else {
-      setImageFiles([]);
-    }
-    // Clear errors
-    setErrors((prev) => ({ ...prev, images: "" }));
-  };
-
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
+      className="bg-white rounded-lg pt-3"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
 
-      {/* Breadcrumb */}
-      <CustomBreadcrumb
-        backTitle={t("Back to News List")}
-        onBack={() => onSectionChange("newsList")}
-        page={isEdit ? t("Edit News") : t("Create News")}
-      />
-
-      {/* Header */}
-      <div className="px-4 sm:px-6 py-4 border-b">
-        <h2 className="text-lg font-medium text-[#1D2630]">
-          {isEdit ? t("Edit News") : t("Create New News")}
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          {isEdit
-            ? t("Update the news information below")
-            : t("Fill in the information below to create a new news item")}
-        </p>
-      </div>
-
       {/* Form */}
-      <form onSubmit={handleSubmit} className="p-6 space-y-8">
+      <form onSubmit={handleSubmit}>
         {/* Basic Details */}
         <BasicDetailsSection
           title={formData.title}
@@ -228,17 +143,6 @@ const CreateOrEditNews = ({ selectedNews, onSectionChange }) => {
           }
           errors={errors}
         />
-
-        {/* Images */}
-        {/* <ImagesSection
-          imageFiles={imageFiles}
-          imageUrls={imageUrls}
-          onImageFilesChange={setImageFiles}
-          onImageUrlsChange={setImageUrls}
-          imageMode={imageMode}
-          onImageModeChange={handleImageModeChange}
-          errors={errors}
-        /> */}
 
         {/* Actions */}
         <FormActionsSection

@@ -27,18 +27,18 @@ const buildNavigationItems = (t, siteInfo) => {
           name: t("LIVESTREAM SCHEDULE"),
           href: "/livestream-schedule",
         },
-        // {
-        //   name: t("Photo Collections"),
-        //   href: "/photo-collections",
-        // },
-        // {
-        //   name: t("Latest News"),
-        //   href: "/latest-news",
-        // },
-        // {
-        //   name: t("Realted Reports"),
-        //   href: "/related-reports",
-        // },
+        {
+          name: t("Photo Collections"),
+          href: "/photo-collections",
+        },
+        {
+          name: t("Latest News"),
+          href: "/latest-news",
+        },
+        {
+          name: t("Realted Reports"),
+          href: "/related-reports",
+        },
       ],
     },
     // {
