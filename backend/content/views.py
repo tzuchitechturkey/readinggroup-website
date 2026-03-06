@@ -929,6 +929,22 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @swagger_auto_schema(
+        operation_summary="Get random other news",
+        operation_description="Get 3 random latest news IDs excluding the current news item.",
+    )
+    @action(detail=True, methods=["get"], url_path="random-others")
+    def random_others(self, request, pk=None):
+        """Get 3 random latest news IDs excluding the current one.
+        GET /latest-news/{id}/random-others/
+        Returns 3 random news IDs that are different from the specified ID.
+        """
+        current_news = self.get_object()
+        random_news = LatestNews.objects.exclude(pk=current_news.pk).order_by("?")[:3]
+        ids = [news.id for news in random_news]
+
+        return Response({"ids": ids}, status=status.HTTP_200_OK)
+
 
 # ========================================== new viewset end============================================
 class NavbarLogoViewSet(viewsets.ModelViewSet):
