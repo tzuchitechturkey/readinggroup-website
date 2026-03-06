@@ -136,59 +136,59 @@ export default function AppSidebar({
           },
         ],
       },
-      {
-        title: "Photo Collection",
-        onClick: "#",
-        icon: InstagramIcon,
-        items: [
-          // {
-          //   title: "All Photo Collections",
-          //   onClick: () => onSectionChange("photoCollections"),
-          // },
-          {
-            title: "Add/Edit Photo",
-            onClick: () => onSectionChange("createOrEditPhotoCollection"),
-          },
-          {
-            title: "Photo Collections",
-            onClick: () => onSectionChange("photoCollectionCategories"),
-          },
-        ],
-      },
-      {
-        title: "Latest News",
-        onClick: "#",
-        icon: LatestNews,
-        items: [
-          {
-            title: "All News",
-            onClick: () => onSectionChange("news"),
-          },
-          {
-            title: "Add/Edit News",
-            onClick: () => onSectionChange("createOrEditNews"),
-          },
-        ],
-      },
-      {
-        title: "Related Reports",
-        onClick: "#",
-        icon: VaadinHealth,
-        items: [
-          {
-            title: "All Related Reports",
-            onClick: () => onSectionChange("relatedReports"),
-          },
-          {
-            title: "Add/Edit Related Report",
-            onClick: () => onSectionChange("createOrEditRelatedReports"),
-          },
-          {
-            title: "Related Report Categories",
-            onClick: () => onSectionChange("relatedReportCategories"),
-          },
-        ],
-      },
+      // {
+      //   title: "Photo Collection",
+      //   onClick: "#",
+      //   icon: InstagramIcon,
+      //   items: [
+      //     // {
+      //     //   title: "All Photo Collections",
+      //     //   onClick: () => onSectionChange("photoCollections"),
+      //     // },
+      //     {
+      //       title: "Add/Edit Photo",
+      //       onClick: () => onSectionChange("createOrEditPhotoCollection"),
+      //     },
+      //     {
+      //       title: "Photo Collections",
+      //       onClick: () => onSectionChange("photoCollectionCategories"),
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "Latest News",
+      //   onClick: "#",
+      //   icon: LatestNews,
+      //   items: [
+      //     {
+      //       title: "All News",
+      //       onClick: () => onSectionChange("news"),
+      //     },
+      //     {
+      //       title: "Add/Edit News",
+      //       onClick: () => onSectionChange("createOrEditNews"),
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "Related Reports",
+      //   onClick: "#",
+      //   icon: VaadinHealth,
+      //   items: [
+      //     {
+      //       title: "All Related Reports",
+      //       onClick: () => onSectionChange("relatedReports"),
+      //     },
+      //     {
+      //       title: "Add/Edit Related Report",
+      //       onClick: () => onSectionChange("createOrEditRelatedReports"),
+      //     },
+      //     {
+      //       title: "Related Report Categories",
+      //       onClick: () => onSectionChange("relatedReportCategories"),
+      //     },
+      //   ],
+      // },
 
       // {
       //   title: "Writers",
