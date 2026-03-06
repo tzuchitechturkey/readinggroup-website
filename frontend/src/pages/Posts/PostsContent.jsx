@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import PostsTabs from "@/components/ForPages/Posts/PostsTabs/PostsTabs";
-import WeeklyList from "@/components/ForPages/Home/WeeklyListSection/WeeklyList";
 import heroImg from "@/assets/eventsHero.png";
 import ContentPostsFilterSction from "@/components/Global/ContentPostsFilterSction/ContentPostsFilterSction";
 import { GetPostCategories, TopViewedPosts } from "@/api/posts";

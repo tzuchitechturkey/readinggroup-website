@@ -7,14 +7,9 @@ const NewsDetailsPageContent = lazy(
   () => import("@/pages/LatestNews/NewsDetailsPageContent"),
 );
 
-const CategoryContentPage = lazy(
-  () => import("@/pages/CategoryContentPage/CategoryContentPage"),
-);
 // Lazy load all page components
 const BooksContent = lazy(() => import("@/pages/AboutUs/Books/BooksContent"));
-const ContentPage = lazy(
-  () => import("../pages/Contents/ContentPage/ContentPage"),
-);
+
 const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
 const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
 const Register = lazy(() => import("@/pages/Auth/Register/RegisterContent"));
@@ -30,29 +25,18 @@ const VideoPage = lazy(
   () => import("@/pages/Videos/VideoPage/VideoPageContent"),
 );
 const PostsContent = lazy(() => import("@/pages/Posts/PostsContent"));
-const ContentsContent = lazy(
-  () => import("@/pages/Contents/ContentsPageContent"),
-);
-const PostDetailsPageContent = lazy(
-  () =>
-    import("@/components/Global/PostDetailsPageContent/PostDetailsPageContent"),
-);
-const EventsContent = lazy(() => import("@/pages/Events/EventsPageContent"));
+
 const UserProfileContent = lazy(
   () => import("@/pages/UserProfile/UserProfileContent"),
 );
 const UserSettingContent = lazy(
   () => import("@/pages/Auth/UserSetting/UserSettingContent"),
 );
-const EventPageContent = lazy(() => import("@/pages/Events/EventPageContent"));
 const Pages404 = lazy(() => import("@/pages/NotFound/NotFound"));
-const EventsVideoPage = lazy(
-  () => import("@/components/ForPages/Events/EventsVideoPage/EventsVideoPage"),
-);
+
 const TOTPSetup = lazy(
   () => import("@/components/ForPages/Auth/TOTPSetup/TOTPSetup"),
 );
-const MyListContent = lazy(() => import("@/pages/MyList/MyListContent"));
 const LearnPageContent = lazy(() => import("@/pages/Learn/LearnPageContent"));
 const LivestreamScheduleContent = lazy(
   () => import("@/pages/LivestreamSchedule/LivestreamScheduleContent"),
@@ -74,7 +58,6 @@ export const userRoutes = [
   // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },
-  { path: "/my-list", element: <MyListContent /> },
   { path: "/learn", element: <LearnPageContent /> },
   { path: "/livestream-schedule", element: <LivestreamScheduleContent /> },
   { path: "/photo-collections", element: <PhotoCollectionsPageContent /> },
@@ -85,20 +68,9 @@ export const userRoutes = [
   { path: "/latest-news", element: <LatestNewsPageContent /> },
   { path: "/latest-news/:newsId", element: <NewsDetailsPageContent /> },
   { path: "/related-reports", element: <RelatedReportsPageContent /> },
-  // Contents Routes
-  { path: "/contents", element: <ContentsContent /> },
-  { path: "/contents/content/:id", element: <ContentPage /> },
   // Cards And Photos Routes
-  { path: "/cards-photos/card/:id", element: <PostDetailsPageContent /> },
   { path: "/cards-photos", element: <PostsContent /> },
   // { path: "/cards-photos/photos/:id", element: <PhotoDetailsContent /> },
-
-  { path: "/:type/category/:id", element: <CategoryContentPage /> },
-
-  // Events Routes
-  { path: "/events", element: <EventsContent /> },
-  { path: "/events/report/:id", element: <EventPageContent /> },
-  { path: "/events/video/:id", element: <EventsVideoPage /> },
 
   { path: "/profile/:id", element: <UserProfileContent /> },
   { path: "/settings", element: <UserSettingContent /> },

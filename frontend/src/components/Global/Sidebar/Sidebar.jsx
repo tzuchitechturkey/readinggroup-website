@@ -27,8 +27,10 @@ import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
 import LogOut from "@/assets/icons/Log-out.png";
 import Settings from "@/assets/icons/Settings.png";
-import WhoWeAre from "@/assets/icons/fluent_chat-32-regular.png";
 import TV from "@/assets/icons/cardsOrphoto-icon.png";
+import InstagramIcon from "@/assets/icons/instagramIcon.png";
+import LatestNews from "@/assets/icons/latestNews.png";
+import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
@@ -119,44 +121,6 @@ export default function AppSidebar({
           },
         ],
       },
-      // {
-      //   title: "Photo Collection",
-      //   onClick: "#",
-      //   icon: TV,
-      //   items: [
-      //     // {
-      //     //   title: "All Photo Collections",
-      //     //   onClick: () => onSectionChange("photoCollections"),
-      //     // },
-      //     {
-      //       title: "Add/Edit Photo",
-      //       onClick: () => onSectionChange("createOrEditPhotoCollection"),
-      //     },
-      //     {
-      //       title: "Photo Collections",
-      //       onClick: () => onSectionChange("photoCollectionCategories"),
-      //     },
-      //   ],
-      // },
-      // {
-      //   title: "Related Reports",
-      //   onClick: "#",
-      //   icon: TV,
-      //   items: [
-      //     {
-      //       title: "All Related Reports",
-      //       onClick: () => onSectionChange("relatedReports"),
-      //     },
-      //     {
-      //       title: "Add/Edit Related Report",
-      //       onClick: () => onSectionChange("createOrEditRelatedReports"),
-      //     },
-      //     {
-      //       title: "Related Report Categories",
-      //       onClick: () => onSectionChange("relatedReportCategories"),
-      //     },
-      //   ],
-      // },
       {
         title: "Live Stream Schedule",
         onClick: "#",
@@ -172,21 +136,60 @@ export default function AppSidebar({
           },
         ],
       },
-      // {
-      //   title: "Latest News",
-      //   onClick: "#",
-      //   icon: TV,
-      //   items: [
-      //     {
-      //       title: "All News",
-      //       onClick: () => onSectionChange("news"),
-      //     },
-      //     {
-      //       title: "Add/Edit News",
-      //       onClick: () => onSectionChange("createOrEditNews"),
-      //     },
-      //   ],
-      // },
+      {
+        title: "Photo Collection",
+        onClick: "#",
+        icon: InstagramIcon,
+        items: [
+          // {
+          //   title: "All Photo Collections",
+          //   onClick: () => onSectionChange("photoCollections"),
+          // },
+          {
+            title: "Add/Edit Photo",
+            onClick: () => onSectionChange("createOrEditPhotoCollection"),
+          },
+          {
+            title: "Photo Collections",
+            onClick: () => onSectionChange("photoCollectionCategories"),
+          },
+        ],
+      },
+      {
+        title: "Latest News",
+        onClick: "#",
+        icon: LatestNews,
+        items: [
+          {
+            title: "All News",
+            onClick: () => onSectionChange("news"),
+          },
+          {
+            title: "Add/Edit News",
+            onClick: () => onSectionChange("createOrEditNews"),
+          },
+        ],
+      },
+      {
+        title: "Related Reports",
+        onClick: "#",
+        icon: VaadinHealth,
+        items: [
+          {
+            title: "All Related Reports",
+            onClick: () => onSectionChange("relatedReports"),
+          },
+          {
+            title: "Add/Edit Related Report",
+            onClick: () => onSectionChange("createOrEditRelatedReports"),
+          },
+          {
+            title: "Related Report Categories",
+            onClick: () => onSectionChange("relatedReportCategories"),
+          },
+        ],
+      },
+
       // {
       //   title: "Writers",
       //   onClick: "#",
