@@ -4,7 +4,7 @@ services:
     container_name: readinggroup-db
     restart: always
     environment:
-      POSTGRES_DB: readinggroup2
+      POSTGRES_DB: readinggroup
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
@@ -29,7 +29,7 @@ services:
       DJANGO_TIME_ZONE: "UTC"
 
       DJANGO_DB_ENGINE: "django.db.backends.postgresql"
-      DJANGO_DB_NAME: "readinggroup2"
+      DJANGO_DB_NAME: "readinggroup"
       DJANGO_DB_USER: "postgres"
       DJANGO_DB_PASSWORD: "postgres"
       DJANGO_DB_HOST: "db"
