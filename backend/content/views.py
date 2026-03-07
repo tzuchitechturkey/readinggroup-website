@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.conf import settings
 from django.db.models import Count, F
 from rest_framework import viewsets, filters, status
@@ -645,7 +647,7 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
     def event_months(self, request):
         """
         GET /event-communities/event-months/
-        Returns unique months that contain events.
+        Returns months grouped by year.
         """
         months = (
             EventCommunity.objects.filter(start_event_date__isnull=False)
@@ -655,9 +657,14 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
             .order_by("month")
         )
 
-        results = [month.strftime("%Y-%m") for month in months]
+        result = defaultdict(list)
 
-        return Response({"months": results})
+        for month in months:
+            year = month.strftime("%Y")
+            month_num = month.strftime("%m")
+            result[year].append(month_num)
+
+        return Response(result)
 
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
