@@ -138,12 +138,11 @@ class LatestNewsAdmin(admin.ModelAdmin):
         "id",
         "title",
         "happened_at",
-        "is_test",
         "image_count",
         "created_at",
     )
     search_fields = ("title", "description")
-    list_filter = ("is_test", "happened_at", "created_at")
+    list_filter = ("happened_at", "created_at")
     inlines = [LatestNewsImageInline]
 
     def image_count(self, obj):

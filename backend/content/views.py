@@ -1,5 +1,3 @@
-from urllib import request
-
 from django.conf import settings
 from django.db.models import Count, F
 from rest_framework import viewsets, filters, status
@@ -8,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import TruncMonth
 from drf_yasg.utils import swagger_auto_schema
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -637,6 +636,28 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
                 pass
 
         return queryset.order_by("-start_event_date", "-start_event_time")
+
+    @swagger_auto_schema(
+        operation_summary="Get event months",
+        operation_description="Return all months that have EventCommunity posts.",
+    )
+    @action(detail=False, methods=["get"], url_path="event-months")
+    def event_months(self, request):
+        """
+        GET /event-communities/event-months/
+        Returns unique months that contain events.
+        """
+        months = (
+            EventCommunity.objects.filter(start_event_date__isnull=False)
+            .annotate(month=TruncMonth("start_event_date"))
+            .values_list("month", flat=True)
+            .distinct()
+            .order_by("month")
+        )
+
+        results = [month.strftime("%Y-%m") for month in months]
+
+        return Response({"months": results})
 
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
