@@ -104,7 +104,7 @@ const PhotoCollectionsPageContent = () => {
         {/* Grid of Collections */}
         {collections.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
               {collections.map((collection) => (
                 <div key={collection.id}>
                   <CollectionCard

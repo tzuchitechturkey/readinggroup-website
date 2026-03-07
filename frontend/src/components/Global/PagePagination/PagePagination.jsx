@@ -28,7 +28,7 @@ const Pagination = ({ currentPage = 1, totalPages = 1, onPageChange }) => {
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="mt-20 flex justify-center items-center gap-[24px]">
+    <div className="mt-10 flex justify-center items-center gap-[24px]">
       <div className="flex items-center gap-[24px]">
         {/* Page Numbers */}
         <div className="flex w-fit items-center justify-between max-w-[171px]">
