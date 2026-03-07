@@ -49,6 +49,11 @@ export async function EditPhotoInCollection(collection_id, photo_id, data) {
   );
 }
 
+// Delete Photo from collection /photos/{photo_id}/
+export async function DeletePhotoFromCollection(photo_id) {
+  return await axios.delete(`/photos/${photo_id}/`);
+}
+
 // get ALl Images
 export async function GetAllImages() {
   return await axios.get(`/photo-collection/images/`);

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { GetCollections, AddPhotoToCollection } from "@/api/photoCollections";
+import { GetCollections, AddPhotoToCollection, DeletePhotoFromCollection } from "@/api/photoCollections";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -20,6 +20,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
 
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
+  const [deletedPhotoIds, setDeletedPhotoIds] = useState([]);
   const [errors, setErrors] = useState({});
   const [collections, setCollections] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState(null);
@@ -90,6 +91,13 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   };
 
   const handleRemoveImage = (index) => {
+    const imageToRemove = images[index];
+    
+    // If it's an existing photo with an ID, track it for deletion
+    if (imageToRemove?.id) {
+      setDeletedPhotoIds((prev) => [...prev, imageToRemove.id]);
+    }
+    
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -105,23 +113,33 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
     setIsSubmitting(true);
 
     try {
-      const submitData = new FormData();
-
-      // Add new files if any
-      newImages.forEach((file) => {
-        submitData.append("images", file);
-      });
-
-      // Add existing image URLs if any (for create mode with URL images)
-      if (!photoCollection?.id && images.length > 0) {
-        images.forEach((url, index) => {
-          if (typeof url === "string") {
-            submitData.append(`image_urls[${index}]`, url);
-          }
-        });
+      // First, delete any removed photos (in edit mode)
+      if (photoCollection?.id && deletedPhotoIds.length > 0) {
+        await Promise.all(
+          deletedPhotoIds.map((photoId) => DeletePhotoFromCollection(photoId))
+        );
       }
 
-      await AddPhotoToCollection(selectedCollection.id, submitData);
+      // Then, add new photos if any
+      if (newImages.length > 0) {
+        const submitData = new FormData();
+
+        // Add new files
+        newImages.forEach((file) => {
+          submitData.append("images", file);
+        });
+
+        // Add existing image URLs if any (for create mode with URL images)
+        if (!photoCollection?.id && images.length > 0) {
+          images.forEach((url, index) => {
+            if (typeof url === "string") {
+              submitData.append(`image_urls[${index}]`, url);
+            }
+          });
+        }
+
+        await AddPhotoToCollection(selectedCollection.id, submitData);
+      }
 
       toast.success(
         t(
