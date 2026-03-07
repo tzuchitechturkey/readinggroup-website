@@ -638,6 +638,30 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by("-start_event_date", "-start_event_time")
 
+    @swagger_auto_schema(
+        operation_summary="Get event dates",
+        operation_description="Return all dates that have EventCommunity posts.",
+    )
+    @action(detail=False, methods=["get"], url_path="event-dates")
+    def event_dates(self, request):
+        """
+        GET /event-communities/event-dates/
+        Returns all dates that contain events.
+        """
+
+        dates = (
+            EventCommunity.objects.filter(start_event_date__isnull=False)
+            .values("start_event_date")
+            .annotate(count=Count("id"))
+            .order_by("start_event_date")
+        )
+
+        results = [
+            {"date": item["start_event_date"], "count": item["count"]} for item in dates
+        ]
+
+        return Response({"dates": results})
+
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
     queryset = RelatedReportsCategory.objects.all()
