@@ -19,44 +19,30 @@ const formatDate = (dateString) => {
   return `${month}. ${day}`;
 };
 
-// Helper function to convert 24-hour time to 12-hour format
-const convertTo12Hour = (time) => {
-  let [hours, minutes] = time.split(":").map(Number);
-  const ampm = hours >= 12 ? "PM" : "AM";
+ 
+// Helper function to format time range
+const formatTimeRange = (startTime, durationHours) => {
+  // تحويل البداية إلى ساعة ودقيقة
+  const [hourStr, minuteStr] = startTime.split(":");
+  const startHour = parseInt(hourStr, 10);
 
-  hours = hours % 12 || 12;
+  // حساب النهاية
+  let endHour = startHour + parseInt(durationHours, 10);
 
-  // إذا الدقائق = 0 لا نعرضها
-  if (minutes === 0) {
-    return `${hours} ${ampm}`;
+  // ضبط الساعة إذا تجاوزت 24
+  if (endHour >= 24) {
+    endHour = endHour - 24;
   }
 
-  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
-};
-// Helper function to add duration to start time
-const calculateEndTime = (startTime, duration) => {
-  const [hours, minutes] = startTime.split(":").map(Number);
+  // دالة تحويل 24 ساعة إلى 12 ساعة مع AM/PM
+  const formatHour = (h) => {
+    const ampm = h >= 12 ? "PM" : "AM";
+    let hour12 = h % 12;
+    if (hour12 === 0) hour12 = 12;
+    return `${hour12} ${ampm}`;
+  };
 
-  const startDate = new Date();
-  startDate.setHours(hours);
-  startDate.setMinutes(minutes);
-
-  // إضافة عدد الساعات
-  startDate.setHours(startDate.getHours() + duration);
-
-  const endHours = String(startDate.getHours()).padStart(2, "0");
-  const endMinutes = String(startDate.getMinutes()).padStart(2, "0");
-
-  return `${endHours}:${endMinutes}`;
-};
-// Helper function to format time range
-const formatTimeRange = (startTime, duration) => {
-  const endTime = calculateEndTime(startTime, duration);
-
-  const startFormatted = convertTo12Hour(startTime);
-  const endFormatted = convertTo12Hour(endTime);
-
-  return `${startFormatted} - ${endFormatted}`;
+  return `${formatHour(startHour)} - ${formatHour(endHour)}`;
 };
 
 const LivestreamScheduleContent = () => {
@@ -112,7 +98,7 @@ const LivestreamScheduleContent = () => {
     fetchScheduleData(filters.date.year, filters.date.month);
   }, [filters.date]);
   return (
-    <div className="min-h-screen bg-background pt-10 lg:pt-[50px] pb-32 px-4 select-none">
+    <div className="min-h-screen bg-background pt-10 lg:pt-[50px] pb-32 px-4 ">
       {isLoading && <Loader />}
       <div className="max-w-[1200px] mx-auto px-0 md:px-0">
         {/* Title Node 1:2309 */}

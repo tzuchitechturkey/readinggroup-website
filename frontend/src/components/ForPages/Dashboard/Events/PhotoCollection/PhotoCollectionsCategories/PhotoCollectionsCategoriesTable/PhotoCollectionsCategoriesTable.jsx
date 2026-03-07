@@ -83,9 +83,13 @@ function PhotoCollectionsCategoriesTable({
       key: "happened_at",
       render: (item) => {
         if (!item.happened_at) return "-";
-        return new Date(item.happened_at).toLocaleDateString(
-          i18n?.language === "ar" ? "ar-EG" : "en-US",
-        );
+
+        const date = new Date(item.happened_at);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
       },
     },
     // {

@@ -19,7 +19,7 @@ const PhotoCollectionsPageContent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paginationData, setPaginationData] = useState({
     page: 1,
-    limit: 12,
+    limit: 16,
     totalCount: 0,
   });
 
@@ -104,7 +104,7 @@ const PhotoCollectionsPageContent = () => {
         {/* Grid of Collections */}
         {collections.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-10 md:mb-14">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8 mb-8">
               {collections.map((collection) => (
                 <div key={collection.id}>
                   <CollectionCard

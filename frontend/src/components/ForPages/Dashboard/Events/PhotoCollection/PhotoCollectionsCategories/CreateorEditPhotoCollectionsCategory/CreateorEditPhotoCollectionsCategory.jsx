@@ -55,7 +55,7 @@ function CreateorEditPhotoCollectionsCategory({
     submitData.append("title", form.title.trim());
     submitData.append("happened_at", form.happened_at);
     submitData.append("is_active", form.is_active);
-    
+
     if (form.image instanceof File) {
       submitData.append("image", form.image);
     }
@@ -69,6 +69,7 @@ function CreateorEditPhotoCollectionsCategory({
         await CreateCollection(submitData);
         toast.success(t("Category created"));
       }
+      resetForm();
       setShowModal(false);
       setUpdate((prev) => !prev);
     } catch (err) {

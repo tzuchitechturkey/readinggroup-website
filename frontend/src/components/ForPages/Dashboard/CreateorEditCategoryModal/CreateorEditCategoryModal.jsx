@@ -10,6 +10,122 @@ import "./DatePickerStyles.css";
 
 import Modal from "@/components/Global/Modal/Modal";
 
+// مكون Date Picker محسّن مع قوائم الشهر والسنة
+function DatePickerWithMonthYear({ value, onChange, error, t }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(
+    value ? new Date(value) : new Date()
+  );
+
+  const months = [
+    { value: 0, label: t("January") },
+    { value: 1, label: t("February") },
+    { value: 2, label: t("March") },
+    { value: 3, label: t("April") },
+    { value: 4, label: t("May") },
+    { value: 5, label: t("June") },
+    { value: 6, label: t("July") },
+    { value: 7, label: t("August") },
+    { value: 8, label: t("September") },
+    { value: 9, label: t("October") },
+    { value: 10, label: t("November") },
+    { value: 11, label: t("December") },
+  ];
+
+  const years = Array.from({ length: 100 }, (_, i) => 
+    new Date().getFullYear() - 50 + i
+  );
+
+  const handleMonthChange = (e) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(parseInt(e.target.value));
+    setCurrentDate(newDate);
+  };
+
+  const handleYearChange = (e) => {
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(parseInt(e.target.value));
+    setCurrentDate(newDate);
+  };
+
+  const handleDateSelect = (date) => {
+    const formattedDate = format(date, "yyyy-MM-dd");
+    onChange(formattedDate);
+    setIsOpen(false);
+  };
+
+  return (
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className={`w-full p-2 border rounded flex items-center justify-between bg-white hover:bg-gray-50 transition-colors ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <span className={value ? "text-gray-900" : "text-gray-500"}>
+            {value ? format(new Date(value), "MMMM d, yyyy") : t("Select a date")}
+          </span>
+          <Calendar className="h-5 w-5 text-gray-400" />
+        </button>
+      </Popover.Trigger>
+      <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div className="space-y-4">
+          {/* قوائم الشهر والسنة */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                {t("Month")}
+              </label>
+              <select
+                value={currentDate.getMonth()}
+                onChange={handleMonthChange}
+                className="w-full p-2 border border-gray-300 rounded text-sm"
+              >
+                {months.map((month) => (
+                  <option key={month.value} value={month.value}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                {t("Year")}
+              </label>
+              <select
+                value={currentDate.getFullYear()}
+                onChange={handleYearChange}
+                className="w-full p-2 border border-gray-300 rounded text-sm"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* DayPicker */}
+          <DayPicker
+            mode="single"
+            month={currentDate}
+            onMonthChange={setCurrentDate}
+            selected={value ? new Date(value) : undefined}
+            onSelect={(date) => {
+              if (date) {
+                handleDateSelect(date);
+              }
+            }}
+            disabled={(date) => date > new Date()}
+          />
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
 function CreateorEditCategoryModal({
   // Modal Control
   isOpen,
@@ -269,60 +385,23 @@ function CreateorEditCategoryModal({
                 )}
               </div>
             ) : field.type === "date" ? (
-              <Popover.Root>
-                <Popover.Trigger asChild>
-                  <button
-                    type="button"
-                    className={`w-full p-2 border rounded flex items-center justify-between bg-white hover:bg-gray-50 transition-colors ${
-                      errorState[field.name]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={
-                        getDateFieldValue(field.name)
-                          ? "text-gray-900"
-                          : "text-gray-500"
-                      }
-                    >
-                      {getDateFieldValue(field.name)
-                        ? format(
-                            new Date(getDateFieldValue(field.name)),
-                            "MMMM d, yyyy",
-                          )
-                        : t("Select a date")}
-                    </span>
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                  </button>
-                </Popover.Trigger>
-                <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <DayPicker
-                    mode="single"
-                    selected={
-                      getDateFieldValue(field.name)
-                        ? new Date(getDateFieldValue(field.name))
-                        : undefined
-                    }
-                    onSelect={(date) => {
-                      if (date) {
-                        const formattedDate = format(date, "yyyy-MM-dd");
-                        setForm((prev) => ({
-                          ...prev,
-                          [field.name]: formattedDate,
-                        }));
-                        if (errorState[field.name]) {
-                          setErrorState((prev) => ({
-                            ...prev,
-                            [field.name]: "",
-                          }));
-                        }
-                      }
-                    }}
-                    disabled={(date) => date > new Date()}
-                  />
-                </Popover.Content>
-              </Popover.Root>
+              <DatePickerWithMonthYear 
+                value={getDateFieldValue(field.name)}
+                onChange={(formattedDate) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    [field.name]: formattedDate,
+                  }));
+                  if (errorState[field.name]) {
+                    setErrorState((prev) => ({
+                      ...prev,
+                      [field.name]: "",
+                    }));
+                  }
+                }}
+                error={errorState[field.name]}
+                t={t}
+              />
             ) : field.type === "text" ? (
               <input
                 type={field.type || "text"}

@@ -181,7 +181,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             <button
               onClick={() => {
                 setSelectedEvent(null);
-                onSectionChange("createOrEditEvent", null);
+                onSectionChange("createOrEditLiveStreamSchedule", null);
               }}
               className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
             >

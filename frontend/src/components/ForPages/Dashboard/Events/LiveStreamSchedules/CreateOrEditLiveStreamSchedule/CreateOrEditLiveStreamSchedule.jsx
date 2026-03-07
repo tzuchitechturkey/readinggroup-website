@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { X, Calendar } from "lucide-react";
+import { X, Calendar, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { DayPicker } from "react-day-picker";
@@ -14,6 +14,269 @@ import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
 
 import { FormActionsSection } from "./LiveStreamForm";
+
+// مكون Date Picker محسّن مع قوائم الشهر والسنة
+function DatePickerWithMonthYear({ 
+  value, 
+  onChange, 
+  error, 
+  t, 
+  isOpen, 
+  onOpenChange 
+}) {
+  const [currentDate, setCurrentDate] = useState(
+    value ? new Date(value) : new Date()
+  );
+
+  const months = [
+    { value: 0, label: t("January") },
+    { value: 1, label: t("February") },
+    { value: 2, label: t("March") },
+    { value: 3, label: t("April") },
+    { value: 4, label: t("May") },
+    { value: 5, label: t("June") },
+    { value: 6, label: t("July") },
+    { value: 7, label: t("August") },
+    { value: 8, label: t("September") },
+    { value: 9, label: t("October") },
+    { value: 10, label: t("November") },
+    { value: 11, label: t("December") },
+  ];
+
+  const years = Array.from({ length: 100 }, (_, i) => 
+    new Date().getFullYear() - 50 + i
+  );
+
+  const handleMonthChange = (e) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(parseInt(e.target.value));
+    setCurrentDate(newDate);
+  };
+
+  const handleYearChange = (e) => {
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(parseInt(e.target.value));
+    setCurrentDate(newDate);
+  };
+
+  const handleDateSelect = (date) => {
+    const formattedDate = format(date, "yyyy-MM-dd");
+    onChange(formattedDate);
+    onOpenChange(false);
+  };
+
+  return (
+    <Popover.Root open={isOpen} onOpenChange={onOpenChange}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <span className={value ? "text-gray-900" : "text-gray-500"}>
+            {value ? format(new Date(value), "MMMM d, yyyy") : t("Select a date")}
+          </span>
+          <Calendar className="h-5 w-5 text-gray-400" />
+        </button>
+      </Popover.Trigger>
+      <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div className="space-y-4">
+          {/* قوائم الشهر والسنة */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                {t("Month")}
+              </label>
+              <select
+                value={currentDate.getMonth()}
+                onChange={handleMonthChange}
+                className="w-full p-2 border border-gray-300 rounded text-sm"
+              >
+                {months.map((month) => (
+                  <option key={month.value} value={month.value}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">
+                {t("Year")}
+              </label>
+              <select
+                value={currentDate.getFullYear()}
+                onChange={handleYearChange}
+                className="w-full p-2 border border-gray-300 rounded text-sm"
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* DayPicker */}
+          <DayPicker
+            mode="single"
+            month={currentDate}
+            onMonthChange={setCurrentDate}
+            selected={value ? new Date(value) : undefined}
+            onSelect={(date) => {
+              if (date) {
+                handleDateSelect(date);
+              }
+            }}
+          />
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
+// مكون Time Picker محسّن مع Dropdowns للساعات والدقائق
+function TimePickerWithDropdowns({ 
+  value, 
+  onChange, 
+  error, 
+  t 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hours, setHours] = useState(
+    value ? parseInt(value.split(":")[0]) : 0
+  );
+  const [minutes, setMinutes] = useState(
+    value ? parseInt(value.split(":")[1]) : 0
+  );
+
+  // تحديث الساعات والدقائق عند تغيير القيمة (خاصة في وضع التعديل)
+  React.useEffect(() => {
+    if (value) {
+      const parts = value.split(":");
+      setHours(parseInt(parts[0]));
+      setMinutes(parseInt(parts[1]));
+    }
+  }, [value, isOpen]);
+
+  const hoursList = Array.from({ length: 24 }, (_, i) => 
+    String(i).padStart(2, "0")
+  );
+  const minutesList = Array.from({ length: 60 }, (_, i) => 
+    String(i).padStart(2, "0")
+  );
+
+  const handleHourChange = (e) => {
+    setHours(parseInt(e.target.value));
+  };
+
+  const handleMinuteChange = (e) => {
+    setMinutes(parseInt(e.target.value));
+  };
+
+  const handleConfirm = () => {
+    const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    onChange(formattedTime);
+    setIsOpen(false);
+  };
+
+  const handleSetNow = () => {
+    const now = new Date();
+    setHours(now.getHours());
+    setMinutes(now.getMinutes());
+  };
+
+  const displayTime = value || "00:00";
+
+  return (
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
+        >
+          <span className={value ? "text-gray-900 font-medium" : "text-gray-500"}>
+            {displayTime}
+          </span>
+          <Clock className="h-5 w-5 text-gray-400" />
+        </button>
+      </Popover.Trigger>
+      <Popover.Content className="w-auto p-6 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+        <div className="space-y-4 w-64">
+          {/* Dropdowns للساعات والدقائق */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-2 block">
+                {t("Hours")}
+              </label>
+              <select
+                value={hours}
+                onChange={handleHourChange}
+                className="w-full p-3 border border-gray-300 rounded-lg text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {hoursList.map((hour) => (
+                  <option key={hour} value={parseInt(hour)}>
+                    {hour}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="flex items-end">
+              <span className="text-2xl font-bold text-gray-400">:</span>
+            </div>
+
+            <div className="flex-1">
+              <label className="text-xs font-medium text-gray-600 mb-2 block">
+                {t("Minutes")}
+              </label>
+              <select
+                value={minutes}
+                onChange={handleMinuteChange}
+                className="w-full p-3 border border-gray-300 rounded-lg text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {minutesList.map((minute) => (
+                  <option key={minute} value={parseInt(minute)}>
+                    {minute}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* عرض الوقت المختار */}
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <p className="text-xs text-gray-600 mb-1">{t("Selected Time")}</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}
+            </p>
+          </div>
+
+          {/* الأزرار */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleSetNow}
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {t("Now")}
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              {t("Confirm")}
+            </button>
+          </div>
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
 
 const CreateOrEditLiveStreamSchedule = ({
   onSectionChange,
@@ -89,57 +352,21 @@ const CreateOrEditLiveStreamSchedule = ({
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Date")} <span className="text-red-500">*</span>
           </label>
-          <Popover.Root
-            open={openDatePopover}
+          <DatePickerWithMonthYear
+            value={formData.start_event_date}
+            onChange={(formattedDate) => {
+              handleInputChange({
+                target: {
+                  name: "start_event_date",
+                  value: formattedDate,
+                },
+              });
+            }}
+            error={errors.start_event_date}
+            t={t}
+            isOpen={openDatePopover}
             onOpenChange={setOpenDatePopover}
-          >
-            <Popover.Trigger asChild>
-              <button
-                type="button"
-                className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.start_event_date ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <span
-                  className={
-                    formData.start_event_date
-                      ? "text-gray-900"
-                      : "text-gray-500"
-                  }
-                >
-                  {formData.start_event_date
-                    ? format(
-                        new Date(formData.start_event_date),
-                        "MMMM d, yyyy",
-                      )
-                    : t("Select a date")}
-                </span>
-                <Calendar className="h-5 w-5 text-gray-400" />
-              </button>
-            </Popover.Trigger>
-            <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-              <DayPicker
-                mode="single"
-                selected={
-                  formData.start_event_date
-                    ? new Date(formData.start_event_date)
-                    : undefined
-                }
-                onSelect={(date) => {
-                  if (date) {
-                    const formattedDate = format(date, "yyyy-MM-dd");
-                    handleInputChange({
-                      target: {
-                        name: "start_event_date",
-                        value: formattedDate,
-                      },
-                    });
-                    setOpenDatePopover(false);
-                  }
-                }}
-              />
-            </Popover.Content>
-          </Popover.Root>
+          />
           {errors.start_event_date && (
             <p className="text-red-600 text-sm">{errors.start_event_date}</p>
           )}
@@ -151,19 +378,19 @@ const CreateOrEditLiveStreamSchedule = ({
             {t("Live Stream Start Time")}{" "}
             <span className="text-red-500">*</span>
           </label>
-
-          <div className="relative time-input-wrapper">
-            <input
-              type="time"
-              name="start_event_time"
-              value={formData.start_event_time}
-              onChange={handleInputChange}
-              className={`time-input w-full px-4 py-3 ${
-                errors.start_event_time ? "border-red-500" : "border-gray-300"
-              } border rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-          </div>
-
+          <TimePickerWithDropdowns
+            value={formData.start_event_time}
+            onChange={(time) => {
+              handleInputChange({
+                target: {
+                  name: "start_event_time",
+                  value: time,
+                },
+              });
+            }}
+            error={errors.start_event_time}
+            t={t}
+          />
           {errors.start_event_time && (
             <p className="text-red-600 text-sm">{errors.start_event_time}</p>
           )}

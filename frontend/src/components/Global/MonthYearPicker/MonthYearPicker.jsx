@@ -2,16 +2,28 @@ import React, { useState, useRef, useEffect } from "react";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
+import { GetEventMonths } from "@/api/events";
 
 const MonthYearPicker = ({ month, year, onChange, className }) => {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewYear, setViewYear] = useState(year);
   const containerRef = useRef(null);
-
+  const [activeMonths, setActiveMonths] = useState([]); // To store months with events
+  const getActive = async () => {
+    try {
+      const res = await GetEventMonths();
+      setActiveMonths(res.data);
+    } catch (err) {
+      console.error("Error fetching active months:", err);
+    }
+  };
+  useEffect(() => {
+    getActive();
+  }, []);
   const monthNames = [
     "January",
     "February",
@@ -48,6 +60,25 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
       setViewYear(year);
     }
   }, [year, isExpanded]);
+
+  // دالة للتحقق من وجود أحداث في سنة معينة
+  const hasEventsInYear = (checkYear) => {
+    return (
+      activeMonths &&
+      activeMonths[checkYear] &&
+      activeMonths[checkYear].length > 0
+    );
+  };
+
+  // دالة للتحقق من وجود أحداث في شهر معين بناءً على السنة
+  const hasEventsInMonth = (monthIndex, checkYear) => {
+    const monthStr = String(monthIndex + 1).padStart(2, "0");
+    return (
+      activeMonths &&
+      activeMonths[checkYear] &&
+      activeMonths[checkYear].includes(monthStr)
+    );
+  };
 
   // Close when clicking outside
   useEffect(() => {
@@ -131,8 +162,14 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
         </button>
 
         <div className="flex font-bold gap-[8px] items-center justify-center text-[#285688] text-[24px] uppercase w-[198px] truncate font-noto">
-          <span>{t(monthNames[month - 1])}</span>
-          <span>{year}</span>
+          <span className="flex items-center gap-2">
+            {t(monthNames[month - 1])}
+           
+          </span>
+          <span className="flex items-center gap-2">
+            {year}
+           
+          </span>
         </div>
 
         <button
@@ -171,8 +208,11 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
                   strokeWidth={2.5}
                 />
               </button>
-              <span className="font-bold text-[#081945] text-[24px] uppercase text-center font-noto">
+              <span className="font-bold text-[#081945] text-[24px] uppercase text-center font-noto flex items-center gap-2">
                 {viewYear}
+                {hasEventsInYear(viewYear) && (
+                  <span className="w-2 h-2 bg-green-500 rounded-full inline-block" />
+                )}
               </span>
               <button
                 onClick={handleNextYear}
@@ -189,6 +229,7 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
             <div className="grid grid-cols-3 gap-[8px] w-full">
               {monthShortNames.map((mShort, index) => {
                 const isSelected = month === index + 1 && year === viewYear;
+                const hasEvents = hasEventsInMonth(index, viewYear);
                 return (
                   <button
                     key={mShort}
@@ -197,7 +238,7 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
                       handleMonthSelect(index);
                     }}
                     className={cn(
-                      "flex items-center justify-center px-[10px] py-[4px] rounded-[42px] transition-all border w-full h-[32px]", // Fixed height/width approximation
+                      "flex items-center justify-center px-[10px] py-[4px] rounded-[42px] transition-all border w-full h-[32px] relative", // Fixed height/width approximation
                       isSelected
                         ? "border-[#285688] text-[#285688] font-semibold border-solid"
                         : "border-transparent text-[#081945] hover:bg-gray-100 hover:text-[#285688]",
@@ -206,6 +247,9 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
                     <span className="text-[16px] font-normal leading-[1.5] font-noto">
                       {t(mShort)}
                     </span>
+                    {hasEvents && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full" />
+                    )}
                   </button>
                 );
               })}
