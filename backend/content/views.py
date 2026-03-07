@@ -1,5 +1,3 @@
-from urllib import request
-
 from django.conf import settings
 from django.db.models import Count, F
 from rest_framework import viewsets, filters, status
@@ -8,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import TruncMonth
 from drf_yasg.utils import swagger_auto_schema
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -639,28 +638,26 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         return queryset.order_by("-start_event_date", "-start_event_time")
 
     @swagger_auto_schema(
-        operation_summary="Get event dates",
-        operation_description="Return all dates that have EventCommunity posts.",
+        operation_summary="Get event months",
+        operation_description="Return all months that have EventCommunity posts.",
     )
-    @action(detail=False, methods=["get"], url_path="event-dates")
-    def event_dates(self, request):
+    @action(detail=False, methods=["get"], url_path="event-months")
+    def event_months(self, request):
         """
-        GET /event-communities/event-dates/
-        Returns all dates that contain events.
+        GET /event-communities/event-months/
+        Returns unique months that contain events.
         """
-
-        dates = (
+        months = (
             EventCommunity.objects.filter(start_event_date__isnull=False)
-            .values("start_event_date")
-            .annotate(count=Count("id"))
-            .order_by("start_event_date")
+            .annotate(month=TruncMonth("start_event_date"))
+            .values_list("month", flat=True)
+            .distinct()
+            .order_by("month")
         )
 
-        results = [
-            {"date": item["start_event_date"], "count": item["count"]} for item in dates
-        ]
+        results = [month.strftime("%Y-%m") for month in months]
 
-        return Response({"dates": results})
+        return Response({"months": results})
 
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
