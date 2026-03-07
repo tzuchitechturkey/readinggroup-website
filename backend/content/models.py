@@ -281,6 +281,7 @@ class PhotoCollection(TimestampedModel):
         upload_to="photo-collections/covers/", blank=True, null=True
     )
     happened_at = models.DateTimeField(blank=True, null=True)
+    is_new = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-happened_at", "-created_at")

@@ -292,6 +292,15 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         """Return the number of photos in the collection."""
         return obj.photos.count()
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Ensure nested photos serializer gets the request context
+        if "photos" in data and instance.photos.exists():
+            data["photos"] = PhotoSerializer(
+                instance.photos.all(), many=True, context=self.context
+            ).data
+        return data
+
 
 class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for individual images in latest news."""
@@ -323,6 +332,15 @@ class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def get_image_count(self, obj):
         return obj.images.count()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Ensure nested images serializer gets the request context
+        if "images" in data and instance.images.exists():
+            data["images"] = LatestNewsImageSerializer(
+                instance.images.all(), many=True, context=self.context
+            ).data
+        return data
 
 
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):

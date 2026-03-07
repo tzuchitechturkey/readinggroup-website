@@ -798,6 +798,10 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
         queryset = PhotoCollection.objects.all().order_by("-happened_at", "-created_at")
         return queryset
 
+    def perform_create(self, serializer):
+        PhotoCollection.objects.update(is_new=False)
+        serializer.save(is_new=True)
+
     @swagger_auto_schema(
         operation_summary="Create photos in collection",
         operation_description="Create photos in this collection by uploading images. Supports multiple image upload with 'images' field or single image upload with 'image' field. Optional captions can be provided with 'caption_{index}' for multiple images or 'caption' for single image.",
@@ -976,7 +980,9 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         """
         current_news = self.get_object()
         random_news = LatestNews.objects.exclude(pk=current_news.pk).order_by("?")[:3]
-        serializer = LatestNewsSerializer(random_news, many=True)
+        serializer = LatestNewsSerializer(
+            random_news, many=True, context={"request": request}
+        )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
