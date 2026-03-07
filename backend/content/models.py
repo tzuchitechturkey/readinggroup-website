@@ -329,6 +329,7 @@ class LatestNews(TimestampedModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     happened_at = models.DateTimeField(blank=True, null=True)
+    is_new = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_at",)

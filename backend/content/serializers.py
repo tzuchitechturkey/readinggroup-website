@@ -32,15 +32,7 @@ class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
 
     class Meta:
         model = ContentAttachment
-        fields = (
-            "id",
-            "file",
-            "file_name",
-            "file_size",
-            "description",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
         file_fields = ("file",)
 
 
@@ -254,15 +246,7 @@ class PhotoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = Photo
-        fields = (
-            "id",
-            "collection",
-            "image",
-            "caption",
-            "order",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
         file_fields = ("image",)
 
 
@@ -276,18 +260,7 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = PhotoCollection
-        fields = (
-            "id",
-            "title",
-            "description",
-            "is_new",
-            "image",
-            "happened_at",
-            "photos",
-            "photo_count",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
         file_fields = ("image",)
 
     def get_photo_count(self, obj):
@@ -311,15 +284,7 @@ class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = LatestNewsImage
-        fields = (
-            "id",
-            "latest_news",
-            "image",
-            "caption",
-            "order",
-            "created_at",
-            "updated_at",
-        )
+        fields = "__all__"
         file_fields = ("image",)
 
 
@@ -327,6 +292,7 @@ class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at", "happened_at")
     images = LatestNewsImageSerializer(many=True, read_only=True)
     image_count = serializers.SerializerMethodField()
+    is_new = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = LatestNews

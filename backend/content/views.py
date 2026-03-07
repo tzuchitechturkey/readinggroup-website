@@ -953,6 +953,15 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         operation_summary="Create images for news item",
         operation_description="Add images to this news item by uploading. Supports multiple image upload with 'images' field or single image upload with 'image' field. Optional captions can be provided with 'caption_{index}' for multiple images or 'caption' for single image.",
     )
+    def perform_create(self, serializer):
+        LatestNews.objects.update(is_new=False)
+        serializer.save(is_new=True)
+
+    def perform_update(self, serializer):
+        # Preserve is_new status or update if needed
+        instance = serializer.instance
+        serializer.save()
+
     @action(detail=True, methods=["post"], url_path="images")
     def create_images(self, request, pk=None):
         """Create images for a specific latest news item.
