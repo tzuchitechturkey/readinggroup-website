@@ -4,13 +4,11 @@ const CollectionCard = ({ photo, isNew = false, t, handleNavigate }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
-    const formatted = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
 
-    return formatted.replace(",", ".");
+    return `${month}. ${day}, ${year}`;
   };
   return (
     <div className="flex-1 h-[116px] md:h-[150px] lg:h-[189px] min-h-px relative overflow-hidden cursor-pointer group ">
@@ -22,7 +20,7 @@ const CollectionCard = ({ photo, isNew = false, t, handleNavigate }) => {
             className="w-full duration-300 group-hover:scale-105"
             src={photo.image}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#081945]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#061437]" />
         </div>
       </div>
 

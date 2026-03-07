@@ -70,13 +70,11 @@ const CollectionPhotosPageContent = () => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
-    const formatted = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
 
-    return formatted.replace(",", ".");
+    return `${month}. ${day}, ${year}`;
   };
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
@@ -86,9 +84,9 @@ const CollectionPhotosPageContent = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-[#285688] hover:text-[#081945] transition-colors mb-6 md:mb-8 font-semibold"
+          className="flex items-center gap-2 text-[#285688] hover:text-[#081945] text-base lg:text-xl transition-colors mb-6 md:mb-8 font-semibold"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-6 h-6" />
           {t("Back to Photo Collections")}
         </button>
 
