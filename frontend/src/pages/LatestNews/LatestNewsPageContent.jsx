@@ -4,12 +4,9 @@ import { useTranslation } from "react-i18next";
 
 import { GetLatestNews } from "@/api/latestNews";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
-import NewsLargeCard from "@/components/ForPages/LatestNews/NewsLargeCard";
 import NewsCard from "@/components/ForPages/LatestNews/NewsCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-
-import Image from "../../assets/latestnews.png";
 
 const LatestNewsPageContent = () => {
   const { t, i18n } = useTranslation();
@@ -55,28 +52,13 @@ const LatestNewsPageContent = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Separate first item and rest
-  // const firstNews = newsList[0];
-  // const restNews = newsList.slice(1);
-  console.log(newsList);
-  const mockData = [
-    {
-      id: 1,
-      image: Image,
-      title: "Cute DIY Fundraising",
-      happened_at: "2024-09-01",
-      description:
-        "Short description of post or the first 1-2 sentences of the post. Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem...",
-      is_new: true,
-    },
-  ];
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
 
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="mb-10 md:mb-14">
+        <div className="mb-2 md:mb-14">
           <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl lg:text-5xl text-[#081945] mb-3">
             {t("Latest News")}
           </h1>
@@ -93,8 +75,13 @@ const LatestNewsPageContent = () => {
         {newsList.length > 0 ? (
           <>
             <div className="flex flex-col gap-3 md:gap-4 mb-10 md:mb-14">
-              {newsList.map((news) => (
-                <NewsCard key={news.id} news={news} t={t} />
+              {newsList.map((news, index) => (
+                <NewsCard
+                  key={news.id}
+                  news={news}
+                  t={t}
+                  latestItem={index === newsList.length - 1}
+                />
               ))}
             </div>
 

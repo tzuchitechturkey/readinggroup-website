@@ -30,3 +30,8 @@ export async function DeleteLatestNewsById(id) {
 export async function AddImagesToLatestNews(newsId, data) {
   return await axios.post(`/latest-news/${newsId}/images/`, data);
 }
+
+// /other-latest-news/ GET
+export async function GetOtherLatestNews(currentNewsId) {
+  return await axios.get(`/latest-news/${currentNewsId}/random-others/`);
+}
