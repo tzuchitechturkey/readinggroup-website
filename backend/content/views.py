@@ -818,17 +818,22 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
     serializer_class = PhotoCollectionSerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "description")
-    ordering_fields = ("happened_at", "created_at")
+    ordering_fields = ("-created_at", "-updated_at")
     parser_classes = (MultiPartParser, FormParser, JSONParser)
     filter_backends = [filters.SearchFilter]
 
     def get_queryset(self):
-        queryset = PhotoCollection.objects.all().order_by("-happened_at", "-created_at")
+        queryset = PhotoCollection.objects.all().order_by("-created_at", "-updated_at")
         return queryset
 
     def perform_create(self, serializer):
         PhotoCollection.objects.update(is_new=False)
         serializer.save(is_new=True)
+
+    def perform_update(self, serializer):
+        # Preserve is_new status or update if needed
+        instance = serializer.instance
+        serializer.save()
 
     @swagger_auto_schema(
         operation_summary="Create photos in collection",

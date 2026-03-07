@@ -272,6 +272,7 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     datetime_fields = ("created_at", "updated_at", "happened_at")
     photos = PhotoSerializer(many=True, read_only=True)
     photo_count = serializers.SerializerMethodField()
+    is_new = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = PhotoCollection
@@ -279,6 +280,7 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             "id",
             "title",
             "description",
+            "is_new",
             "image",
             "happened_at",
             "photos",
