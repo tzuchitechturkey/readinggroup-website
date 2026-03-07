@@ -11,6 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
+from .daai_tv import DaaiTVError, fetch_daai_tv_info
 from .swagger_parameters import (
     video_manual_parameters,
     learn_manual_parameters,
@@ -747,6 +748,40 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
 
         return Response(response_payload, status=status.HTTP_200_OK)
 
+    @action(
+        detail=False,
+        methods=("post",),
+        url_path="fetch-daai-tv-info",
+    )
+    def fetch_daai_tv_info(self, request):
+        """Fetch video information from Daai TV website.
+
+        POST /related-reports/fetch-daai-tv-info/
+        Body: { "video_url": "https://www.daai.tv/program/P1840/P18400170" }
+        """
+        video_url = request.data.get("video_url") or request.data.get("url")
+        if not video_url:
+            return Response(
+                {"detail": "video_url is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            info = fetch_daai_tv_info(video_url)
+        except DaaiTVError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        response_payload = {
+            "program_id": info.program_id,
+            "title": info.title,
+            "description": info.description,
+            "thumbnail_url": info.thumbnail_url,
+            "video_url": info.video_url,
+            "duration": info.duration,
+            "published_at": info.published_at,
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
 
 class PhotoCollectionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing photo collections."""
@@ -931,19 +966,19 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="Get random other news",
-        operation_description="Get 3 random latest news IDs excluding the current news item.",
+        operation_description="Get 3 random latest news excluding the current news item.",
     )
     @action(detail=True, methods=["get"], url_path="random-others")
     def random_others(self, request, pk=None):
-        """Get 3 random latest news IDs excluding the current one.
+        """
         GET /latest-news/{id}/random-others/
-        Returns 3 random news IDs that are different from the specified ID.
+        Returns 3 random news objects excluding the current one.
         """
         current_news = self.get_object()
         random_news = LatestNews.objects.exclude(pk=current_news.pk).order_by("?")[:3]
-        ids = [news.id for news in random_news]
+        serializer = LatestNewsSerializer(random_news, many=True)
 
-        return Response({"ids": ids}, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # ========================================== new viewset end============================================
