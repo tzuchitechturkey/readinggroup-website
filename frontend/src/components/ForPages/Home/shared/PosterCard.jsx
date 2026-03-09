@@ -7,16 +7,14 @@ import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerMo
 const PosterCard = ({ poster, t }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
-  const formatDate = (dateString) => {
+    const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    })
-      .format(date)
-      .replace(",", "")
-      .replace(/(\w{3})/, "$1.");
+
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}. ${day}, ${year}`;
   };
   return (
     <div className="flex flex-col items-start pb-[40px] sm:pb-[45px] md:pb-[55px] lg:pb-[65px] w-full">

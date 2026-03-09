@@ -109,9 +109,9 @@ const RelatedReportsTable = ({
         {reportsData.map((report) => (
           <TableRow key={report.id} className="hover:bg-gray-50">
             <TableCell className="text-center">
-              {report.thumbnail_url ? (
+              {report.image ? (
                 <img
-                  src={report.thumbnail_url?.default?.url}
+                  src={report?.image}
                   alt={report.title}
                   className="w-12 h-12 object-cover rounded-lg mx-auto"
                 />
@@ -126,7 +126,7 @@ const RelatedReportsTable = ({
             </TableCell>
             <TableCell>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {report.category?.title}
+                {report.category?.title || "-"}
               </span>
             </TableCell>
 

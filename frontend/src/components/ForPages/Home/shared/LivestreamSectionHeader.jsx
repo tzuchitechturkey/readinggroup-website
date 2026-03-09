@@ -10,7 +10,7 @@ const LivestreamSectionHeader = ({ title, actionText, onActionClick }) => {
         <div className="size-[20px] lg:size-[41px] flex items-center justify-center">
           <Calendar className="text-white" />
         </div>
-        <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-lg lg:text-[24px] text-white">
+        <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.5] text-lg lg:text-[24px] text-white">
           {title}
         </p>
       </div>

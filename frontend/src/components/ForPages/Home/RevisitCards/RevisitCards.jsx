@@ -29,7 +29,7 @@ const RevisitCards = ({ data, t }) => {
             {t("REVISIT CARDS FROM LIVESTREAMS")}
           </p>
 
-          <hr className="h-[1px] sm:h-[1.5px] md:h-[2px] lg:h-[2px] flex-1 bg-[#fff]" />
+          <hr className="h-[1px] sm:h-[1.5px] md:h-[2px] lg:h-[2px] flex-1 bg-[#FCFDFF] border-0" />
         </div>
         <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 w-full">
           <RevisitCard card={data?.vertical?.[0]} size="small" t={t} />

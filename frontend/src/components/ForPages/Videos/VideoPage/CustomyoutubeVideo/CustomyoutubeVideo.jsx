@@ -9,7 +9,7 @@ import { languages } from "@/constants/constants";
 
 import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
-function CustomyoutubeVideo({ t, i18n, videoData }) {
+function CustomyoutubeVideo({ t,  videoData }) {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState([]);
@@ -21,11 +21,12 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
   const limit = 5;
-   // Fetch related videos
+    // Fetch related videos
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
-      const res = await GetTopViewedVideos(limit, currentOffset);
+      const res = await GetTopViewedVideos(videoData?.id);
+      console.log("Related videos response:", res);
       const data = res?.data || {};
       const results = data.results || [];
       const count = data.count || 0;
@@ -50,8 +51,12 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
     }
   };
   useEffect(() => {
-    fetchRelated(0);
-  }, []);
+    if (videoData?.id){
+fetchRelated(0);
+    }
+
+    
+  }, [videoData?.id]);
   useEffect(() => {
     if (textRef.current) {
       const el = textRef.current;

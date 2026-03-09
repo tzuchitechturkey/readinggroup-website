@@ -109,8 +109,8 @@ export async function GetVideosByCategoryId(
 // }
 
 // // /top5-videos/
-export async function GetTopViewedVideos(limit = 5, offset = 0) {
-  return await axios.get(`/videos/top-views/?limit=${limit}&offset=${offset}`);
+export async function GetTopViewedVideos(videoId) {
+  return await axios.get(`/videos/${videoId}/top-views/`);
 }
 
 // // Top 5 videos by likes
