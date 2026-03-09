@@ -1011,6 +1011,47 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
+        operation_summary="Delete images from news item",
+        operation_description="Delete one or more images from this news item. Provide image IDs in 'image_ids' array or single 'image_id'.",
+    )
+    @action(detail=True, methods=["delete"], url_path="images/delete")
+    def delete_images(self, request, pk=None):
+        """Delete images from a specific latest news item.
+
+        DELETE /latest-news/{id}/images/delete/
+        Body: {"image_ids": [1, 2, 3]} or {"image_id": 1}
+        """
+        news = self.get_object()
+
+        # Get image IDs from request
+        image_ids = request.data.get("image_ids", [])
+        if not image_ids:
+            # Try single image_id
+            image_id = request.data.get("image_id")
+            if image_id:
+                image_ids = [image_id]
+            else:
+                return Response(
+                    {
+                        "error": "No image IDs provided. Use 'image_ids' array or single 'image_id'."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Delete images that belong to this news item
+        deleted_count, _ = LatestNewsImage.objects.filter(
+            latest_news=news, id__in=image_ids
+        ).delete()
+
+        return Response(
+            {
+                "message": f"Successfully deleted {deleted_count} image(s)",
+                "deleted_count": deleted_count,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @swagger_auto_schema(
         operation_summary="Get random other news",
         operation_description="Get 3 random latest news excluding the current news item.",
     )
