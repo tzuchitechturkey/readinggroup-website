@@ -107,7 +107,7 @@ const VideoCard = ({
         </p>
         {textClassName && <span className="mb-2">|</span>}
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal mb-1   ${durationText} text-[#081945]`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal   ${durationText} text-[#081945]`}
         >
           {reportCard
             ? heroReportCard
