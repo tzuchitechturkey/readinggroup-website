@@ -261,12 +261,21 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     # used for video page
     @swagger_auto_schema(
-        operation_summary="Top viewed videos",
-        operation_description="Return videos ordered by views desc with pagination support.",
+        operation_summary="Top viewed videos by category",
+        operation_description="Return top viewed videos in the same category as the specified video.",
     )
-    @action(detail=False, methods=["get"], url_path="top-views")
-    def top_views(self, request):
-        qs = self.get_queryset().filter(category__is_active=True).order_by("-views")
+    @action(detail=True, methods=["get"], url_path="top-views")
+    def top_views(self, request, pk=None):
+        # Get the current video instance
+        video = self.get_object()
+
+        # Get all videos with the same category_id, excluding the current video
+        qs = (
+            self.get_queryset()
+            .filter(category_id=video.category_id, category__is_active=True)
+            .exclude(id=video.id)
+            .order_by("-views")
+        )
 
         page = self.paginate_queryset(qs)
         if page is not None:
