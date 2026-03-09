@@ -70,7 +70,11 @@ const VideoCard = ({
         <img
           className={` w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105`}
           alt={item?.title}
-          src={getThumbnailUrl(item?.thumbnail_url, size)}
+          src={
+            reportCard
+              ? item?.image
+              : getThumbnailUrl(item?.thumbnail_url, size)
+          }
         />
 
         {/* Play Button Overlay */}

@@ -119,7 +119,6 @@ const RelatedReportsPageContent = () => {
   useEffect(() => {
     fetchVideoData();
   }, []);
-  console.log(videoData);
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
