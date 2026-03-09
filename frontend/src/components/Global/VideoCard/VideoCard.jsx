@@ -8,6 +8,7 @@ const VideoCard = ({
   rounded = false,
   textClassName = "",
   fromHomePage = false,
+  reportCard = false,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
@@ -23,7 +24,7 @@ const VideoCard = ({
 
       case "small":
         return {
-          image: `${fromHomePage ? "h-[215px] " : "h-[164px] " } w-full sm:w-[48%] md:w-[45%] lg:w-[290px] `,
+          image: `${fromHomePage ? "h-[215px] " : "h-[164px] "} w-full sm:w-[48%] md:w-[45%] lg:w-[290px] `,
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
           durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",
@@ -41,12 +42,22 @@ const VideoCard = ({
     };
     return thumbnails?.[sizeMap[size]]?.url;
   };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}. ${day}, ${year}`;
+  };
 
   return (
     <div
       onClick={() => {
-        if (fromHomePage && item?.external_link) {
-          window.open(item.external_link, "_blank");
+        if (reportCard) {
+          window.open(item?.external_link, "_blank");
+          return;
         } else {
           navigate(`/videos/${item?.id}`);
         }
@@ -84,7 +95,10 @@ const VideoCard = ({
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945]  `}
         >
-          {item?.category?.name?.charAt(0).toUpperCase() + item?.category?.name?.slice(1)}
+          {reportCard
+            ? item?.title?.charAt(0).toUpperCase() + item?.title?.slice(1)
+            : item?.category?.name?.charAt(0).toUpperCase() +
+              item?.category?.name?.slice(1)}
         </p>
         {textClassName && <span className="mb-2">|</span>}
         <p
@@ -97,12 +111,7 @@ const VideoCard = ({
       {showDate && (
         <div className="mx-1 -mt-1 px-4 lg:px-0">
           <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] text-[#285688]">
-            {item?.happened_at &&
-              new Date(item.happened_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+            {formatDate(item?.happened_at)}
           </p>
         </div>
       )}

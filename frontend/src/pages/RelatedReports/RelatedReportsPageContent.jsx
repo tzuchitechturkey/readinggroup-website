@@ -5,13 +5,13 @@ import { useTranslation } from "react-i18next";
 import {
   GetRelatedReports,
   GetRelatedReportsByCategoryId,
+  GetTopViewedRelatedReports,
 } from "@/api/relatedReports";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
-import ReportCard from "@/components/ForPages/RelatedReports/ReportCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
-import { GetVideosByTypeVideo } from "@/api/videos";
+import VideoCard from "@/components/Global/VideoCard/VideoCard";
 
 const RelatedReportsPageContent = () => {
   const { t, i18n } = useTranslation();
@@ -22,21 +22,17 @@ const RelatedReportsPageContent = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [paginationData, setPaginationData] = useState({
     page: 1,
-    limit: 24,
+    limit: 16,
     totalCount: 0,
   });
+  console.log(reportsList);
 
   // Fetch reports on mount or when pagination changes
   const fetchReports = async (page = 1) => {
     setIsLoading(true);
     try {
       const offset = (page - 1) * paginationData.limit;
-      const res = await GetRelatedReports(
-        paginationData.limit,
-        offset,
-        "",
-        "-happened_at",
-      );
+      const res = await GetRelatedReports(paginationData.limit, offset);
 
       setReportsList(res.data.results || []);
       setPaginationData((prev) => ({
@@ -60,7 +56,6 @@ const RelatedReportsPageContent = () => {
         categoryId,
         paginationData.limit,
         offset,
-        "-happened_at",
       );
 
       setReportsList(res.data.results || []);
@@ -78,7 +73,7 @@ const RelatedReportsPageContent = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await GetRelatedReports(24, 0, "", "-happened_at");
+      const res = await GetRelatedReports(16, 0);
 
       setCategories(res?.data?.results || []);
     } catch (err) {
@@ -115,7 +110,7 @@ const RelatedReportsPageContent = () => {
   };
   const fetchVideoData = async () => {
     try {
-      const res = await GetVideosByTypeVideo();
+      const res = await GetTopViewedRelatedReports();
       setVideoData(res.data);
     } catch (error) {
       setErrorFn(error, t);
@@ -124,6 +119,7 @@ const RelatedReportsPageContent = () => {
   useEffect(() => {
     fetchVideoData();
   }, []);
+  console.log(videoData);
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
@@ -142,11 +138,7 @@ const RelatedReportsPageContent = () => {
         </div>
 
         {/* Start Grid Cards */}
-        <NewClips
-          clips={videoData?.clip_video || []}
-          t={t}
-          fromHomePage={false}
-        />
+        <NewClips clips={videoData || []} t={t} fromHomePage={false} />
         {/* End Grid Cards */}
 
         <hr className="h-[1px] border-none bg-[#9FB3E1] max-w-7xl mx-auto my-12 " />
@@ -154,6 +146,11 @@ const RelatedReportsPageContent = () => {
         {/* Categories Filter Section */}
         {categories.length > 0 && (
           <div className="mb-10">
+            <div className="mb-4">
+              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold  lg:text-xl text-[#081945] uppercase">
+                {t("More Reports")}
+              </h2>
+            </div>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => handleCategorySelect(null)}
@@ -185,16 +182,22 @@ const RelatedReportsPageContent = () => {
         {/* More Reports Section */}
         {reportsList.length > 0 ? (
           <>
-            <div className="mb-8">
-              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold  lg:text-xl text-[#081945] uppercase">
-                {t("More Reports")}
-              </h2>
-            </div>
-
             {/* Grid of Reports */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-10 md:mb-14">
-              {reportsList.map((report) => (
-                <ReportCard key={report.id} report={report} />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4  gap-3 md:gap-4 lg:gap-6 mb-10 md:mb-14">
+              {reportsList?.map((report) => (
+                <>
+                  <VideoCard
+                    item={report}
+                    navigate={() => {
+                      console.log("sasd");
+                    }}
+                    size="small"
+                    fromHomePage={false}
+                    rounded={true}
+                    reportCard={true}
+                    showDate={true}
+                  />
+                </>
               ))}
             </div>
 

@@ -34,6 +34,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
           navigate={navigate}
           rounded={true}
           textClassName="!justify-start gap-[4px] "
+          reportCard={fromHomePage ? false : true}
         />
 
         {/* Side Videos Column */}

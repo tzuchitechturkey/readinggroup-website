@@ -1,10 +1,25 @@
 import axios from "./axios";
 
 // /related-reports/?limit=10&offset=0&search=
-export async function GetRelatedReports(limit, offset, search = "") {
+export async function GetRelatedReportsByCategoryId(
+  categoryId,
+  limit,
+  offset,
+  search = "",
+) {
   return await axios.get(
-    `/related-reports/?limit=${limit}&offset=${offset}&search=${search}`,
+    `/related-reports-categories/${categoryId}/related-reports/?limit=${limit}&offset=${offset}&search=${search}`,
   );
+}
+
+// /related-reports/?limit=10&offset=0
+export async function GetRelatedReports(limit, offset) {
+  return await axios.get(`/related-reports/?limit=${limit}&offset=${offset}`);
+}
+
+// /related-reports/top-views/
+export async function GetTopViewedRelatedReports() {
+  return await axios.get(`/related-reports/top-views/`);
 }
 
 // /related-reports/ data = {title, description, video_url, duration, etc}
@@ -57,19 +72,6 @@ export async function EditRelatedReportCategoryById(id, data) {
 // /related-reports-categories/{id}/
 export async function DeleteRelatedReportCategoryById(id) {
   return await axios.delete(`/related-reports-categories/${id}/`);
-}
-
-// /related-reports-categories/{id}/reports/
-export async function GetRelatedReportsByCategoryId(
-  categoryId,
-  limit,
-  offset,
-  search = "",
-  ordering = "",
-) {
-  return await axios.get(
-    `/related-reports-categories/${categoryId}/reports/?limit=${limit}&offset=${offset}&search=${search}&ordering=${ordering}`,
-  );
 }
 
 // /related-reports/fetch-youtube-info/
