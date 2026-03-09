@@ -23,11 +23,11 @@ function OtherNewsSection({ t, newsId }) {
       {otherNews.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-6 ">
-            <span className="h-8 w-1 rounded-full bg-[#081945] " />
-            <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-lg md:text-xl lg:text-3xl text-[#081945] uppercase">
+            <span className="h-8 w-2  bg-[#5E82AB] " />
+            <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold text-lg lg:text-2xl text-[#081945] uppercase">
               {t("OTHER NEWS")}
             </h2>
-            <hr className="flex-1 h-[1px] border-none bg-[#5E82AB] " />
+            <hr className="flex-1 h-[1px] border-none bg-[#081945] " />
           </div>
           <div className="flex flex-col gap-3 md:gap-4">
             {otherNews.map((n, index) => (

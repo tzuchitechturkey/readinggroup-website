@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 import { GetLatestNews, AddImagesToLatestNews } from "@/api/latestNews";
+import { DeletePhotoFromCollection } from "@/api/photoCollections";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
@@ -17,6 +18,7 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
   // Images state
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
+  const [deletedPhotoIds, setDeletedPhotoIds] = useState([]);
   const [errors, setErrors] = useState({});
 
   // News selection state
@@ -40,10 +42,9 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
         title: news.title,
       });
 
-      // Set existing images
+      // Set existing images - احتفظ بالكائن الكامل مع id
       if (news.images && news.images.length > 0) {
-        const existingImages = news.images.map((img) => img.image);
-        setImages(existingImages);
+        setImages(news.images);
       }
     }
   }, [news]);
@@ -77,6 +78,13 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
   };
 
   const handleRemoveImage = (index) => {
+    const imageToRemove = images[index];
+    
+    // If it's an existing photo with an ID, track it for deletion
+    if (imageToRemove?.id) {
+      setDeletedPhotoIds((prev) => [...prev, imageToRemove.id]);
+    }
+    
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -122,7 +130,14 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
     setIsLoading(true);
 
     try {
-      // Add images
+      // First, delete any removed photos
+      if (deletedPhotoIds.length > 0) {
+        await Promise.all(
+          deletedPhotoIds.map((photoId) => DeletePhotoFromCollection(photoId))
+        );
+      }
+
+      // Then, add images
       if (newImages.length > 0 || images.length > 0) {
         const imageFormData = new FormData();
 
@@ -131,10 +146,11 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
           imageFormData.append("images", file);
         });
 
-        // Add image URLs if any
-        images.forEach((url, index) => {
-          if (typeof url === "string") {
-            imageFormData.append(`image_urls[${index}]`, url);
+        // Add image URLs from new images added via URL input (string type)
+        images.forEach((img, index) => {
+          // Only add if it's a string URL (not an existing photo object)
+          if (typeof img === "string") {
+            imageFormData.append(`image_urls[${index}]`, img);
           }
         });
 
@@ -142,6 +158,7 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
       }
 
       toast.success(t("Images added successfully"));
+      setDeletedPhotoIds([]);
       onSectionChange("news");
     } catch (error) {
       console.error("Error adding images to news:", error);

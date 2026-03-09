@@ -93,7 +93,7 @@ const CollectionPhotosPageContent = () => {
         {/* Collection Header */}
         {collection && (
           <div className="mb-10 md:mb-14">
-            <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl  text-[#081945] mb-3">
+            <h1 className="font-black text-3xl md:text-4xl  text-[#081945] mb-3">
               {formatDate(collection.happened_at)}
             </h1>
           </div>

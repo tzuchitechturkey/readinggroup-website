@@ -25,7 +25,7 @@ const CollectionCard = ({ photo,  t, handleNavigate }) => {
       </div>
 
       {/* Date Text */}
-      <p className="absolute font-['Inter:Bold',sans-serif] font-semibold leading-normal bottom-[10px] sm:bottom-[12px] md:bottom-[14px] lg:bottom-[15px] left-1/2 transform -translate-x-1/2 text-[14px] sm:text-[16px] md:text-[20px]  text-white/90  ">
+      <p className="absolute  font-semibold leading-normal bottom-[10px] sm:bottom-[12px] md:bottom-[14px] lg:bottom-[15px] left-1/2 transform -translate-x-1/2 text-[14px] sm:text-[16px] md:text-[20px]  text-white/90  ">
         {formatDate(photo.happened_at)}
       </p>
 

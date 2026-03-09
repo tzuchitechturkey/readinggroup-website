@@ -106,13 +106,15 @@ const NewsDetailsPageContent = () => {
         {/* News Details Card */}
         <div className="rounded-lg px-1 md:px-0 md:py-8 mb-10 md:mb-14 flex flex-col gap-2.5 md:gap-3">
           {/* Start Is New */}
-          <div className="px-4 py-[3px] w-fit rounded-full border-[1px] border-[#081945]">
-            <p className="text-[#081945]">{t("NEW")}</p>
-          </div>
+          {news?.is_new && (
+            <div className="px-4 py-[3px] w-fit rounded-full border-[1px] border-[#081945]">
+              <p className="text-[#081945]">{t("NEW")}</p>
+            </div>
+          )}
           {/* End Is New */}
           {/* Date Tag */}
           {news.happened_at && (
-            <span className="inline-block  text-[#081945] font-bold  rounded-full">
+            <span className="inline-block  text-[#081945] font-bold rounded-full">
               {formatDate(news.happened_at)}
             </span>
           )}
