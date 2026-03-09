@@ -21,8 +21,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
   const limit = 5;
-console.log(relatedVideos)
-  // Fetch related videos
+   // Fetch related videos
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
@@ -298,7 +297,7 @@ console.log(relatedVideos)
           showArrows={true}
           showCount={false}
           cardName={VideoCard}
-          cardProps={{ navigate, size: "small", showDate: true }}
+          cardProps={{ navigate, size: "small", showDate: true, rounded: true }}
           t={t}
         />
       </div>
@@ -316,6 +315,7 @@ console.log(relatedVideos)
               navigate={() => navigate(`/videos/${video?.id}`)}
               size="small"
               showDate={true}
+              rounded={true}
             />
           ))}
         </div>

@@ -27,7 +27,7 @@ const SectionHeader = ({
       </div>
 
       {/* Title */}
-      <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px] text-[#1b2d58] shrink-0">
+      <p className="font-['Noto_Sans_TC:Bold',sans-serif] font-bold leading-[1.5] text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px] text-[#081945] shrink-0">
         {title}
       </p>
       <hr className="h-[1px] border-0 flex-1 bg-[#1B2D58]" />
@@ -38,10 +38,10 @@ const SectionHeader = ({
           className="hidden lg:flex  gap-[2px] sm:gap-[3px] md:gap-[4px] items-center cursor-pointer group shrink-0"
           onClick={onActionClick}
         >
-          <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] text-[#285688] group-hover:text-[#2563eb] transition-colors">
+          <p className="font-['Noto_Sans_TC:Bold',sans-serif]  leading-[1.2] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px] text-[#285688]  transition-colors">
             {actionText}
           </p>
-          <div className="flex items-center justify-center size-[18px] sm:size-[20px] md:size-[22px]  group-hover:translate-x-1 transition-transform">
+          <div className="flex items-center justify-center size-[18px] sm:size-[20px] md:size-[22px]   transition-transform">
             <ChevronRight className="size-5 text-[#285688]" />
           </div>
         </div>

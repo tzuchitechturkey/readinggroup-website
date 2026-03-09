@@ -35,3 +35,8 @@ export async function AddImagesToLatestNews(newsId, data) {
 export async function GetOtherLatestNews(currentNewsId) {
   return await axios.get(`/latest-news/${currentNewsId}/random-others/`);
 }
+
+// Delete Photo from collection /photos/{photo_id}/
+export async function DeletePhotoFromNews(photo_id) {
+  return await axios.delete(`/photos/${photo_id}/`);
+}

@@ -37,7 +37,7 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
   const hasChanges = useMemo(() => {
     return JSON.stringify(formData) !== JSON.stringify(originalFormData);
   }, [formData, originalFormData]);
-  
+    console.log(report,  );
   // Initialize form data when report changes
   useEffect(() => {
     if (report) {
@@ -167,8 +167,8 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
       if (formData.category) {
         submitData.append("category", formData.category.id);
       }
-
-      if (formData.image) {
+      console.log(formData);
+        if (formData.image) {
         submitData.append("image", formData.image);
       }
 

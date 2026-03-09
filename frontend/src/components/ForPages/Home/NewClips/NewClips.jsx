@@ -20,7 +20,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
       {fromHomePage && (
         <SectionHeader
           title={t("NEW CLIPS")}
-          actionText={t("More Clips")}
+          actionText={t("More clips")}
           onActionClick={handleMoreClipsClick}
         />
       )}
@@ -46,6 +46,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
               navigate={navigate}
               rounded={true}
               textClassName="!justify-start gap-[4px] "
+              fromHomePage={fromHomePage}
             />
           ))}
         </div>

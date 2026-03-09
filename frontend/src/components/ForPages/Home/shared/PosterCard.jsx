@@ -35,7 +35,7 @@ const PosterCard = ({ poster, t }) => {
               />
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent from-[21.96%] via-[rgba(172,196,223,0.9)] via-[65%] to-[#acc4df]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent from-[15%] via-[rgba(200,221,244,0.7)] via-[55%] to-[#C8DDF4]" />
           </div>
         </div>
 
@@ -59,9 +59,9 @@ const PosterCard = ({ poster, t }) => {
                 onClick={() => {
                   setIsViewerOpen(true);
                 }}
-                className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[4px] hover:bg-[#404040] transition-colors"
+                className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[4px]  "
               >
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-white/80">
+                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-white/90">
                   {t("Learn more")}
                 </p>
               </button>

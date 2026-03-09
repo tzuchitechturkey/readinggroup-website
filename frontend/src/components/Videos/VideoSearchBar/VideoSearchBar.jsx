@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 
-const VideoSearchBar = ({ searchTerm, onSearch }) => {
+const VideoSearchBar = ({ searchTerm, activeSearchTerm, onSearch }) => {
   const { t } = useTranslation();
 
   const handleKeyPress = (e) => {
@@ -32,7 +32,7 @@ const VideoSearchBar = ({ searchTerm, onSearch }) => {
           className="flex-1 bg-transparent border-none outline-none text-base text-gray-800 placeholder-gray-500"
         />
         {/* Clear Search Button */}
-        {searchTerm && (
+        {activeSearchTerm && (
           <button
             onClick={() => onSearch("", true)} // Clear and search
             className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2"

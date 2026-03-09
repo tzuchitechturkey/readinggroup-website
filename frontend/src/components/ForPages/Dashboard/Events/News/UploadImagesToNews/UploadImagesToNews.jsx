@@ -3,9 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { GetLatestNews, AddImagesToLatestNews } from "@/api/latestNews";
-import { DeletePhotoFromCollection } from "@/api/photoCollections";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { GetLatestNews, AddImagesToLatestNews ,DeletePhotoFromNews} from "@/api/latestNews";
+ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import ImageSection from "@/components/ForPages/Dashboard/Events/PhotoCollection/CreateOrEditPhotoCollection/PhotoCollectionForm/ImageSection";
@@ -133,7 +132,7 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
       // First, delete any removed photos
       if (deletedPhotoIds.length > 0) {
         await Promise.all(
-          deletedPhotoIds.map((photoId) => DeletePhotoFromCollection(photoId))
+          deletedPhotoIds.map((photoId) => DeletePhotoFromNews(photoId))
         );
       }
 

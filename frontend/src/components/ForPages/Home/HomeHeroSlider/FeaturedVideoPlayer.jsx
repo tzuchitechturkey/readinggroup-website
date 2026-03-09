@@ -1,6 +1,15 @@
 import React from "react";
 
 export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
+    const formatDate = (dateString) => {
+    const date = new Date(dateString);
+
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}. ${day}, ${year}`;
+  };
   return (
     <div className="w-full relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[92vh]">
       <div className="relative w-full h-full overflow-hidden shadow-2xl group">
@@ -65,16 +74,11 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
               <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-5 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[50px]">
                 {item?.title}
               </h2>
-              <div className="mb-5 uppercase flex items-center  gap-1 text-[#FCFDFF] opacity-80">
+              <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF] opacity-80">
                 <p className=""> {t("Full Livestream")} </p>|
                 <span>
-                  {item?.happened_at
-                    ? new Date(item.happened_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "2-digit",
-                        year: "numeric",
-                      })
-                    : ""}
+                  
+                 {item?.happened_at ? formatDate(item.happened_at) : ""}
                 </span>
               </div>
             </div>

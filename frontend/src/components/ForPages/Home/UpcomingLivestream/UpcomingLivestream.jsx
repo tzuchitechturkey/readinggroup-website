@@ -16,7 +16,7 @@ const UpcomingLivestream = ({ t, data }) => {
           {/* Section Header */}
           <LivestreamSectionHeader
             title={t("UPCOMING LIVESTREAM")}
-            actionText={t("SEE SCHEDULE")}
+            actionText={t("See schedule")}
             onActionClick={handleViewScheduleClick}
           />
 

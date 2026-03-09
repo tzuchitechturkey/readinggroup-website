@@ -15,7 +15,7 @@ const GoodEffectsPoster = ({ poster, t }) => {
       {/* Section Header */}
       <SectionHeader
         title={t("GOOD EFFECTS POSTER")}
-        actionText={t("SEE MORE")}
+        actionText={t("See more")}
         onActionClick={handleSeeMoreClick}
       />
       {/* Poster Content */}

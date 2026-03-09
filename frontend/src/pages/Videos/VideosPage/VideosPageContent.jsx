@@ -34,6 +34,7 @@ function VideosPageContent() {
     sortBy: "newest",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [appliedDateFilter, setAppliedDateFilter] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -286,6 +287,7 @@ function VideosPageContent() {
     console.log("Search term updated:", term,  );
     // Only search when Enter is pressed or search is explicitly triggered
     if (shouldSearch) {
+      setActiveSearchTerm(term); // Update active search term
       // Ensure URL updates are allowed for user interactions
       allowUrlUpdateRef.current = true;
       fetchFilteredVideosWithParams(
@@ -380,12 +382,7 @@ function VideosPageContent() {
     // Mark as initial load complete
     initialLoadRef.current = true;
 
-    console.log(
-      "Fetching with initial filters:",
-      newFilters,
-      appliedDate,
-      cats,
-    );
+    
     // Fetch videos directly with the new filters
     fetchFilteredVideosWithParams(1, newFilters, appliedDate, cats);
     getActiveVideoCategories();
@@ -553,6 +550,7 @@ function VideosPageContent() {
               <div className="mb-8 w-full lg:max-w-[340px] md:mb-0 px-4 md:px-0">
                 <VideoSearchBar
                   searchTerm={searchTerm}
+                  activeSearchTerm={activeSearchTerm}
                   onSearch={handleSearch}
                 />
               </div>
@@ -621,7 +619,7 @@ function VideosPageContent() {
                 <p className="text-[#9FB3E1] text-3xl font-bold">
                   {t("No results found.")}
                 </p>
-                {(searchTerm ||
+                {(activeSearchTerm ||
                   selectedCategories.length > 0 ||
                   !filters.videoType.includes("all")) && (
                   <button
