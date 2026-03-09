@@ -9,13 +9,13 @@ const VideoCard = ({
   textClassName = "",
   fromHomePage = false,
   reportCard = false,
+  heroReportCard = false,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
       case "large":
         return {
-          image:
-            "h-[200px] sm:h-[200px] md:h-[300px] lg:h-[490px] w-full sm:w-[95%] md:w-[90%] lg:w-full",
+          image: `h-[200px] sm:h-[200px] md:h-[300px] ${reportCard ? "lg:h-[410px]" : "lg:h-[490px]"}  w-full sm:w-[95%] md:w-[90%] lg:w-full`,
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
           categoryText: "text-[14px] sm:text-[15px] md:text-base lg:text-xl",
           durationText: "text-[13px] sm:text-[14px] md:text-[15px] lg:text-lg",
@@ -100,7 +100,8 @@ const VideoCard = ({
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945]  `}
         >
           {reportCard
-            ? item?.title?.charAt(0).toUpperCase() + item?.title?.slice(1)
+            ? item?.category?.title?.charAt(0).toUpperCase() +
+              item?.category?.title?.slice(1)
             : item?.category?.name?.charAt(0).toUpperCase() +
               item?.category?.name?.slice(1)}
         </p>
@@ -108,7 +109,11 @@ const VideoCard = ({
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal mb-1   ${durationText} text-[#081945]`}
         >
-          {item?.duration}
+          {reportCard
+            ? heroReportCard
+              ? formatDate(item?.happened_at)
+              : item?.duration
+            : item?.duration}
         </p>
       </div>
       {/* End Category Name && Duration */}

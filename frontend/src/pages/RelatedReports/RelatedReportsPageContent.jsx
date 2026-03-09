@@ -98,7 +98,7 @@ const RelatedReportsPageContent = () => {
     } else {
       fetchReports(1);
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePageChange = (newPage) => {
@@ -147,7 +147,7 @@ const RelatedReportsPageContent = () => {
         {categories.length > 0 && (
           <div className="mb-10">
             <div className="mb-4">
-              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold  lg:text-xl text-[#081945] uppercase">
+              <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-bold  lg:text-xl text-[#081945]  ">
                 {t("More Reports")}
               </h2>
             </div>

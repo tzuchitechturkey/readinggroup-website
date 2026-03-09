@@ -49,6 +49,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
               textClassName="!justify-start gap-[4px] "
               fromHomePage={fromHomePage}
               reportCard={fromHomePage ? false : true}
+              heroReportCard={fromHomePage ? false : true}
             />
           ))}
         </div>
