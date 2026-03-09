@@ -15,7 +15,7 @@ const VideoCard = ({
     switch (size) {
       case "large":
         return {
-          image: `h-[200px] sm:h-[200px] md:h-[300px] ${reportCard ? "lg:h-[410px]" : "lg:h-[490px]"}  w-full sm:w-[95%] md:w-[90%] lg:w-full`,
+          image: `h-[200px] sm:h-[200px] md:h-[300px] ${reportCard ? "lg:h-[410px]" : "lg:h-[490px]"}  w-full sm:w-[90%] md:w-[90%]  lg:w-full`,
           titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
           categoryText: "text-[14px] sm:text-[15px] md:text-base lg:text-xl",
           durationText: "text-[13px] sm:text-[14px] md:text-[15px] lg:text-lg",
@@ -24,7 +24,7 @@ const VideoCard = ({
 
       case "small":
         return {
-          image: `${fromHomePage ? "h-[215px] " : "h-[164px] "} w-full sm:w-[48%] md:w-[45%] lg:w-[290px] `,
+          image: `${fromHomePage ? "h-[215px] " : "h-[174px] "} w-full sm:w-[48%] md:w-[45%] lg:w-[290px] `,
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
           durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",

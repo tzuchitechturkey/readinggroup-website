@@ -132,7 +132,7 @@ const RelatedReportsPageContent = () => {
           </h1>
           <p className="text-[#285688] text-base md:text-lg font-normal max-w-2xl">
             {t(
-              "Watch the latest reports and find out how we can be a part of our community.",
+              "Watch Tzu Chi Study Group mentioned in Da Ai TV and by Master Cheng Yen!",
             )}
           </p>
         </div>
