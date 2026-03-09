@@ -48,6 +48,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
               rounded={true}
               textClassName="!justify-start gap-[4px] "
               fromHomePage={fromHomePage}
+              reportCard={fromHomePage ? false : true}
             />
           ))}
         </div>

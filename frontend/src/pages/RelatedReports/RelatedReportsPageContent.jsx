@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
+  GetRelatedReportCategories,
   GetRelatedReports,
   GetRelatedReportsByCategoryId,
   GetTopViewedRelatedReports,
@@ -73,7 +74,7 @@ const RelatedReportsPageContent = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await GetRelatedReports(16, 0);
+      const res = await GetRelatedReportCategories(30, 0);
 
       setCategories(res?.data?.results || []);
     } catch (err) {
