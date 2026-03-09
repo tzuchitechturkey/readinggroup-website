@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
-import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
+// import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
 function EventCard({ className = "", item }) {
   const { t, i18n } = useTranslation();
@@ -74,7 +74,7 @@ function EventCard({ className = "", item }) {
           {/* End Title */}
         </div>
       </div>
-      {openDetailsVideoModal &&
+      {/* {openDetailsVideoModal &&
         createPortal(
           <VideoDetailsContent
             isOpen={openDetailsVideoModal}
@@ -82,7 +82,7 @@ function EventCard({ className = "", item }) {
             videoData={item}
           />,
           document.body
-        )}
+        )} */}
     </div>
   );
 }

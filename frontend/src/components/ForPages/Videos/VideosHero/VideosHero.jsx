@@ -9,7 +9,7 @@ import { GetTop5ViewedVideos } from "@/api/videos";
 import { Button } from "@/components/ui/button";
 import BrokenCarousel from "@/components/Global/BrokenCarousel/BrokenCarousel";
 import VideoCard from "@/components/Global/VideoCard/VideoCard";
-import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
+// import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 function VideosHero({ top1Video }) {
@@ -111,7 +111,7 @@ function VideosHero({ top1Video }) {
       </div>
       {/* End Content */}
       {/* Video Details Modal - Using Portal to render outside normal DOM hierarchy */}
-      {isModalOpen &&
+      {/* {isModalOpen &&
         createPortal(
           <VideoDetailsContent
             isOpen={isModalOpen}
@@ -121,7 +121,7 @@ function VideosHero({ top1Video }) {
             videoData={firstVideo}
           />,
           document.body
-        )}
+        )} */}
     </div>
   );
 }

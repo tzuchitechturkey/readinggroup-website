@@ -1,6 +1,6 @@
 import React from "react";
 
-const CollectionCard = ({ photo, isNew = false, t, handleNavigate }) => {
+const CollectionCard = ({ photo,  t, handleNavigate }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
@@ -30,7 +30,7 @@ const CollectionCard = ({ photo, isNew = false, t, handleNavigate }) => {
       </p>
 
       {/* NEW Tag */}
-      {isNew && (
+      {photo?.is_new && (
         <div className="absolute border-[1px] border-white p-[6px] sm:p-[7px] md:p-[7px] lg:p-[8px] rounded-full top-2 sm:top-3 md:top-3 lg:top-4 left-2 sm:left-3 md:left-3 lg:left-4">
           <p className="font-inter font-normal leading-none text-[#f5f5f5] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]">
             {t("NEW")}

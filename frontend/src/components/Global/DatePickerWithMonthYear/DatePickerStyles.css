@@ -1,0 +1,100 @@
+/* React Day Picker Custom Styling */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #2E5C8A;
+  --rdp-background-color: #e0edff;
+  font-size: 14px;
+}
+
+.rdp-months {
+  margin: 0;
+}
+
+.rdp-month {
+  width: 100%;
+}
+
+.rdp-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #081945;
+}
+
+.rdp-head_cell {
+  color: #285688;
+  font-weight: 600;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rdp-cell {
+  padding: 0;
+}
+
+.rdp-day {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #081945;
+  transition: all 0.3s ease;
+}
+
+.rdp-day:hover:not(.rdp-day_disabled) {
+  background-color: #D7EAFF;
+  color: #2E5C8A;
+}
+
+.rdp-day_selected {
+  background-color: #2E5C8A;
+  color: white;
+  font-weight: 600;
+}
+
+.rdp-day_today {
+  font-weight: 700;
+  color: #2E5C8A;
+  border: 2px solid #2E5C8A;
+}
+
+.rdp-day_disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.rdp-button {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  opacity: 0.7;
+}
+
+.rdp-caption_label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #081945;
+}
+
+.rdp-nav_button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #D7EAFF;
+  background-color: white;
+  color: #2E5C8A;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

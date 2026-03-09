@@ -81,7 +81,15 @@ const NewsDetailsPageContent = () => {
       </div>
     );
   }
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
 
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}. ${day}, ${year}`;
+  };
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>
       {isLoading && <Loader />}
@@ -105,22 +113,18 @@ const NewsDetailsPageContent = () => {
           {/* Date Tag */}
           {news.happened_at && (
             <span className="inline-block  text-[#081945] font-bold  rounded-full">
-              {new Date(news.happened_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {formatDate(news.happened_at)}
             </span>
           )}
-
+ 
           {/* Title */}
-          <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-2xl md:text-3xl lg:text-5xl text-[#081945] md:mb-6">
+          <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-2xl md:text-3xl lg:text-4xl text-[#081945] md:mb-6">
             {news.title}
           </h1>
 
           {/* Description */}
-          <div className="prose prose-sm md:prose max-w-none mb-4 md:my-6">
-            <p className="text-[#285688] text-base md:text-lg leading-relaxed whitespace-pre-line">
+          <div className="prose prose-sm md:prose max-w-none mb-4 md:mb-6 md:mt-2">
+            <p className="text-[#081945] text-base md:text-lg leading-relaxed whitespace-pre-line">
               {news.description}
             </p>
           </div>

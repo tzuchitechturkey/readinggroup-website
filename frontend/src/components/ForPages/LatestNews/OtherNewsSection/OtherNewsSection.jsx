@@ -18,12 +18,12 @@ function OtherNewsSection({ t, newsId }) {
   }, []);
 
   return (
-    <div>
+    <div className="mb-14">
       {/* Other News Section */}
       {otherNews.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-6 ">
-            <span className="h-8 w-1 rounded-full bg-[#5E82AB] " />
+            <span className="h-8 w-1 rounded-full bg-[#081945] " />
             <h2 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-lg md:text-xl lg:text-3xl text-[#081945] uppercase">
               {t("OTHER NEWS")}
             </h2>

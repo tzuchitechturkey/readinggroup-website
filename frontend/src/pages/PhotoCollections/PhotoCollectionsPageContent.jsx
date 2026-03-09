@@ -5,12 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 import { GetCollections } from "@/api/photoCollections";
 import Pagination from "@/components/Global/PagePagination/PagePagination";
-// import CollectionCard from "@/components/ForPages/PhotoCollections/CollectionCard";
 import Loader from "@/components/Global/Loader/Loader";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import CollectionCard from "@/components/ForPages/Home/shared/CollectionCard";
 
-import Image from "../../assets/photocard.png";
 
 const PhotoCollectionsPageContent = () => {
   const { t, i18n } = useTranslation();
@@ -56,33 +54,7 @@ const PhotoCollectionsPageContent = () => {
     fetchCollections(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  // Mock data for photo collections
-  // const mockPhotosData = [
-  //   {
-  //     id: 1,
-  //     date: "Jan. 21, 2026",
-  //     image: Image,
-  //     isNew: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     date: "Dec. 31, 2025",
-  //     image: Image,
-  //     isNew: false,
-  //   },
-  //   {
-  //     id: 3,
-  //     date: "Dec. 24, 2025",
-  //     image: Image,
-  //     isNew: false,
-  //   },
-  //   {
-  //     id: 4,
-  //     date: "Dec. 17, 2025",
-  //     image: Image,
-  //     isNew: false,
-  //   },
-  // ];
+   
 
   return (
     <div className="min-h-screen bg-[#D7EAFF] py-8 md:py-12" dir={i18n.dir()}>

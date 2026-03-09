@@ -14,7 +14,7 @@ const LatestNewsPageContent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paginationData, setPaginationData] = useState({
     page: 1,
-    limit: 6,
+    limit: 4,
     totalCount: 0,
   });
 

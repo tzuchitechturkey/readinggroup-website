@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 import { useIsMobile } from "@/hooks/global/use-mobile";
-import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
+// import VideoDetailsContent from "@/pages/Videos/VideoDetails/VideoDetailsContent";
 
 import Modal from "../Modal/Modal";
 
@@ -114,7 +114,7 @@ function TopFiveSectionCard({ item, index }) {
           <div className="absolute inset-0 shadow-inner" />
         </div>
       </div>
-      {openDetailsVideoModal &&
+      {/* {openDetailsVideoModal &&
         createPortal(
           <VideoDetailsContent
             isOpen={openDetailsVideoModal}
@@ -122,7 +122,7 @@ function TopFiveSectionCard({ item, index }) {
             videoData={item}
           />,
           document.body
-        )}
+        )} */}
     </div>
   );
 }

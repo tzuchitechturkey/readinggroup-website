@@ -9,6 +9,15 @@ const NewsCard = ({ news, t, latestItem }) => {
   const handleNavigate = () => {
     navigate(`/latest-news/${news.id}`);
   };
+    const formatDate = (dateString) => {
+    const date = new Date(dateString);
+
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    return `${month}. ${day}, ${year}`;
+  };
   return (
     <div
       onClick={handleNavigate}
@@ -25,27 +34,28 @@ const NewsCard = ({ news, t, latestItem }) => {
       </div>
       {/* End Image */}
       {/* Start Content */}
-      <div className="flex-1 py-3 md:py-4 pr-3 md:pr-4 flex flex-col gap-4">
+      <div className="flex-1 py-3 md:py-4 pr-3 md:pr-4 flex flex-col justify-center gap-4">
         {/* Start Is New */}
-        <div className="px-3 py-1 w-fit rounded-full text-sm md:text-base border-[1px] border-[#081945]">
+        {
+          news.is_new && (
+             <div className="px-3 py-1 w-fit rounded-full text-sm md:text-base border-[1px] border-[#081945]">
           <p className="text-[#081945]">{t("NEW")}</p>
         </div>
+          )
+        }
+      
         {/* End Is New */}
         <div>
           {news.happened_at && (
-            <span className="inline-block  text-[#081945] text-sm md:text-lg font-bold rounded mb-1">
-              {new Date(news.happened_at).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <span className="inline-block  text-[#081945] text-sm md:text-base font-bold rounded mb-1">
+              {formatDate(news.happened_at)}
             </span>
           )}
           <h3 className="font-bold text-[#081945] text-xl md:text-2xl line-clamp-2">
             {news.title}
           </h3>
         </div>
-        <p className="text-sm md:text-base text-[#285688] line-clamp-2">
+        <p className="text-sm md:text-base text-[#081945] line-clamp-2">
           {news.description}
         </p>
         {/* Start Button */}

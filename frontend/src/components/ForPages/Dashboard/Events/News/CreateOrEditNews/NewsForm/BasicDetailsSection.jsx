@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import DatePickerWithMonthYear from "@/components/Global/DatePickerWithMonthYear/DatePickerWithMonthYear";
 
 const BasicDetailsSection = ({
   title,
@@ -56,13 +57,11 @@ const BasicDetailsSection = ({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           {t("News Date")}*
         </label>
-        <input
-          type="date"
+        <DatePickerWithMonthYear
           value={happenedAt}
           onChange={onHappenedAtChange}
-          className={`w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.happened_at ? "border-red-500" : "border-gray-300"
-          }`}
+          error={errors.happened_at}
+          t={t}
         />
         {errors.happened_at && (
           <p className="text-red-500 text-xs mt-1">{errors.happened_at}</p>
