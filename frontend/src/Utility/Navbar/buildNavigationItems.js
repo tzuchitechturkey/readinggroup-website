@@ -1,30 +1,30 @@
 const buildNavigationItems = (t, siteInfo) => {
   const items = [
     {
-      name: t("HOME"),
+      name: t("Home"),
       href: "/",
       hasDropdown: false,
     },
     {
-      name: t("WATCH"),
+      name: t("Watch"),
       href: "/videos",
       hasDropdown: false,
       categoryType: "video",
     },
     {
-      name: t("LEARN"),
+      name: t("Learn"),
       href: "/learn",
       hasDropdown: false,
       categoryType: "learn",
     },
     {
-      name: t("COMMUNITY & EVENTS"),
+      name: t("Community & Events"),
       // href: "/events",
       hasDropdown: true,
       categoryType: "event",
       subItems: [
         {
-          name: t("LIVESTREAM SCHEDULE"),
+          name: t("Livestream Schedule"),
           href: "/livestream-schedule",
         },
         {
@@ -36,7 +36,7 @@ const buildNavigationItems = (t, siteInfo) => {
           href: "/latest-news",
         },
         {
-          name: t("Realted Reports"),
+          name: t("Related Reports"),
           href: "/related-reports",
         },
       ],

@@ -59,6 +59,7 @@ function VideosPageContent() {
     passedFilters = {},
     dateFilter = null,
     categoriesOverride = null,
+    saearchTermOverride = searchTerm,
   ) => {
     try {
       setIsLoading(true);
@@ -68,8 +69,8 @@ function VideosPageContent() {
       const filterParams = {};
 
       // Only add search if it's not empty
-      if (searchTerm && searchTerm.trim() !== "") {
-        filterParams.search = searchTerm.trim();
+      if (saearchTermOverride && saearchTermOverride.trim() !== "") {
+        filterParams.search = saearchTermOverride.trim();
       }
 
       // Video type filter
@@ -282,6 +283,7 @@ function VideosPageContent() {
   // Handle search (triggered on Enter press)
   const handleSearch = (term, shouldSearch = false) => {
     setSearchTerm(term);
+    console.log("Search term updated:", term,  );
     // Only search when Enter is pressed or search is explicitly triggered
     if (shouldSearch) {
       // Ensure URL updates are allowed for user interactions
@@ -291,6 +293,7 @@ function VideosPageContent() {
         filters,
         appliedDateFilter,
         selectedCategories,
+        term,
       );
     }
   };

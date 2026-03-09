@@ -6,7 +6,7 @@ const SectionHeader = ({
   title,
   actionText,
   onActionClick,
-  iconColor = "#1b2d58",
+  iconColor = "#5E82AB",
 }) => {
   return (
     <div className="flex gap-[8px] sm:gap-[12px] md:gap-[16px] items-center w-full">
@@ -42,7 +42,7 @@ const SectionHeader = ({
             {actionText}
           </p>
           <div className="flex items-center justify-center size-[18px] sm:size-[20px] md:size-[22px]  group-hover:translate-x-1 transition-transform">
-            <ChevronRight size={"80%"} />
+            <ChevronRight className="size-5 text-[#285688]" />
           </div>
         </div>
       )}

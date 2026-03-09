@@ -8,7 +8,6 @@ import {
   CreateRelatedReport,
   EditRelatedReportById,
   GetRelatedReportCategories,
-  FetchYouTubeInfoByUrl,
 } from "@/api/relatedReports";
 
 export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
@@ -19,24 +18,26 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
     title: "",
     external_link: "",
     duration: "",
-    thumbnail_url: "",
+    happened_at: "",
+    image: null,
     category: null,
   });
 
   const [originalFormData, setOriginalFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
 
   //   Category dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categoriesList, setCategoriesList] = useState([]);
   const [categorySearchValue, setCategorySearchValue] = useState("");
   const categoryDropdownRef = useRef(null);
+  
   // Check if form has changes
   const hasChanges = useMemo(() => {
     return JSON.stringify(formData) !== JSON.stringify(originalFormData);
   }, [formData, originalFormData]);
+  
   // Initialize form data when report changes
   useEffect(() => {
     if (report) {
@@ -44,7 +45,8 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
         title: report.title || "",
         external_link: report.external_link || "",
         duration: report.duration || "",
-        thumbnail_url: report.thumbnail_url || "",
+        happened_at: report.happened_at || "",
+        image: null,
         category: report.category || null,
       };
       setFormData(initialData);
@@ -54,7 +56,8 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
         title: "",
         external_link: "",
         duration: "",
-        thumbnail_url: "",
+        happened_at: "",
+        image: null,
         category: null,
       };
       setFormData(initialData);
@@ -90,12 +93,20 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
     };
   }, []);
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    if (type === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files?.[0] || null,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
+    
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -110,71 +121,11 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
     }
   };
 
-  // Helper function to validate YouTube URL
-  const isValidYouTubeUrl = (url) => {
-    const youtubeRegex =
-      /^(https?:\/\/)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)\//;
-    return youtubeRegex.test(url);
-  };
-
-  const handleFetchYouTubeInfo = async () => {
-    const url = formData?.external_link?.trim();
-
-    if (!url) {
-      setErrors((prev) => ({
-        ...prev,
-        external_link: t("Video URL is required"),
-      }));
-      toast.error(t("Please enter a YouTube URL"));
-      return;
-    }
-
-    if (!isValidYouTubeUrl(url)) {
-      setErrors((prev) => ({
-        ...prev,
-        external_link: t("Please enter a valid YouTube URL"),
-      }));
-      toast.error(t("Please enter a valid YouTube URL"));
-      return;
-    }
-
-    setIsFetchingYoutube(true);
-
-    try {
-      const response = await FetchYouTubeInfoByUrl(url);
-      const data = response?.data || {};
-      setFormData((prev) => {
-        const next = {
-          ...prev,
-          title: prev.title || data?.title || "",
-          description: prev.description || data?.description || "",
-          duration: data?.duration_formatted || "", // Always update from YouTube
-          thumbnail_url: JSON.stringify(data?.thumbnails) || "",
-        };
-
-        return next;
-      });
-
-      setErrors((prev) => ({
-        ...prev,
-        external_link: "",
-        title: "",
-        description: "",
-        duration: "",
-        thumbnail_url: "",
-      }));
-      toast.success(t("YouTube details fetched successfully"));
-    } catch (err) {
-      setErrorFn(err, t);
-    } finally {
-      setIsFetchingYoutube(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+    
     // Validation
     const newErrors = {};
     if (!formData.title?.trim()) {
@@ -183,38 +134,42 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
     if (!formData.duration?.trim()) {
       newErrors.duration = t("Duration is required");
     }
+    if (!formData.happened_at?.trim()) {
+      newErrors.happened_at = t("Event date is required");
+    } else if (!isValidDate(formData.happened_at)) {
+      newErrors.happened_at = t("Please enter date in YYYY-MM-DD format");
+    }
     if (formData.external_link && !isValidUrl(formData.external_link)) {
       newErrors.external_link = t("Please enter a valid URL");
     }
-    if (!formData.thumbnail_url) {
-      console.log("Validating thumbnail URL:", formData.thumbnail_url);
-      newErrors.thumbnail_url = t(
-        "Please enter the thumbnail URL using the YouTube fetch function",
-      );
+    if (!formData.image && !report) {
+      newErrors.image = t("Report image is required");
     }
     if (!formData.category) {
-      console.log("Validating category:", formData.category);
-      newErrors.category = t("Please select a category");
+      newErrors.category = t("Category is required");
     }
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsLoading(false);
       toast.error(t("Please fix the errors in the form"));
       return;
     }
+    
     try {
       const submitData = new FormData();
 
       submitData.append("title", formData.title.trim());
       submitData.append("external_link", formData.external_link || "");
       submitData.append("duration", formData.duration || "");
+      submitData.append("happened_at", formData.happened_at || "");
 
       if (formData.category) {
         submitData.append("category", formData.category.id);
       }
 
-      if (formData.thumbnail_url) {
-        submitData.append("thumbnail_url", formData.thumbnail_url);
+      if (formData.image) {
+        submitData.append("image", formData.image);
       }
 
       if (report) {
@@ -233,6 +188,7 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
       setIsLoading(false);
     }
   };
+
   // Helper function to validate URL
   const isValidUrl = (string) => {
     try {
@@ -242,13 +198,22 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
       return false;
     }
   };
+
+  // Helper function to validate date format (YYYY-MM-DD)
+  const isValidDate = (dateString) => {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) return false;
+    
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date);
+  };
+
   return {
     // Form state
     formData,
     hasChanges,
     errors,
     isLoading,
-    isFetchingYoutube,
 
     // Category dropdown state
     showCategoryDropdown,
@@ -261,7 +226,6 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
     // Handlers
     handleInputChange,
     handleCategorySelect,
-    handleFetchYouTubeInfo,
     handleSubmit,
 
     // API functions

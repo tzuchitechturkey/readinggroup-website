@@ -26,7 +26,7 @@ const VideoTypeFilter = ({
             : filters.videoType.length === 1
               ? t(
                   filters.videoType[0] === "full_video"
-                    ? "Live Stream"
+                    ? "Livestreams"
                     : filters.videoType[0] === "clips"
                       ? "Clips"
                       : "Guided Reading",
@@ -59,7 +59,7 @@ const VideoTypeFilter = ({
               <div className="w-6 h-6">
                 {filters.videoType.includes("full_video") && <Check />}
               </div>
-              <p className="font-normal text-base ">{t("Live Stream")}</p>
+              <p className="font-normal text-base ">{t("Livestreams")}</p>
             </div>
             {/* Clips Option */}
             <div

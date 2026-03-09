@@ -39,7 +39,7 @@ function DesktopNavigation({
                     }
                   }}
                   className={({ isActive }) =>
-                    `transition-all duration-200 text-[18px] uppercase font-['Noto_Sans'] font-regular h-full flex gap-[8px] items-center justify-center border-b-[3px] border-b-transparent ${
+                    `transition-all duration-200 text-[18px] font-['Noto_Sans'] font-medium h-full flex gap-[8px] items-center justify-center border-b-[3px] border-b-transparent ${
                       isActive
                         ? "border-b-[#fcfdff] text-[#fcfdff]"
                         : "text-[#fcfdff] hover:text-white/90"
@@ -97,7 +97,7 @@ function DesktopNavigation({
                           <Link
                             to={subItem?.href}
                             onClick={(e) => handleNavClick(e, subItem)}
-                            className="block w-full px-6 py-4 text-[16px] uppercase font-['Noto_Sans'] text-white hover:bg-white/10 transition-colors duration-200 group/item relative flex items-center justify-between"
+                            className="block w-full px-6 py-4 text-[16px] font-medium  font-['Noto_Sans'] text-white hover:bg-white/10 transition-colors duration-200 group/item relative flex items-center justify-between"
                           >
                             <span className="flex items-center text-left w-full">
                               {subItem?.name}
@@ -299,7 +299,7 @@ function DesktopNavigation({
               <NavLink
                 to={item?.href}
                 className={({ isActive }) =>
-                  `transition-all duration-200 text-[18px] uppercase font-['Noto_Sans'] px-[8px] h-full flex items-center justify-center border-b-4 ${
+                  `transition-all duration-200 text-[18px]  font-medium font-['Noto_Sans'] px-[8px] h-full flex items-center justify-center border-b-4 ${
                     isActive
                       ? "border-[#fcfdff] text-[#fcfdff]"
                       : "border-transparent text-[#fcfdff] hover:text-white/90"

@@ -72,7 +72,7 @@ const LivestreamCard = ({ data = [], t }) => {
         <div className="flex flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] h-full items-start py-[8px] sm:py-[10px] md:py-[12px] lg:py-[12px] w-full md:w-[384px]">
           {/* Date Tag */}
           <div className="border-[1px] border-white flex gap-[6px] sm:gap-[7px] md:gap-[8px] lg:gap-[8px] items-center justify-center py-[6px] sm:py-[7px] md:py-[8px] lg:py-[8px] px-[8px] sm:px-[9px] md:px-3 rounded-full">
-            <p className="font-inter font-normal leading-none text-[#f5f5f5] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]">
+            <p className="font-inter font-bold leading-none text-[#fff] text-[12px] sm:text-[13px] md:text-[14px] lg:text-[16px]">
               {activeItem && formatDate(activeItem.start_event_date)}
             </p>
           </div>
@@ -90,9 +90,9 @@ const LivestreamCard = ({ data = [], t }) => {
             {activeItem?.guest_speakers?.map((speaker, index) => (
               <ul
                 key={index}
-                className="flex gap-[3px] sm:gap-[3px] md:gap-[4px] lg:gap-[4px] list-none px-2 lg:px-3 items-start w-full"
+                className="flex font-normal gap-[3px] sm:gap-[3px] md:gap-[4px] lg:gap-[4px] list-none px-2 lg:px-3 items-start w-full"
               >
-                <li className="flex-1 flex items-center gap-2 sm:gap-3 md:gap-3 lg:gap-4 font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[11px] sm:text-[12px] md:text-[13px] lg:text-sm text-[#FCFDFF] whitespace-pre-wrap">
+                <li className="flex-1 flex items-center gap-2 sm:gap-3 md:gap-3 lg:gap-4  font-light  text-[11px] sm:text-[12px] md:text-[13px] lg:text-sm text-[#FCFDFF] whitespace-pre-wrap">
                   <div
                     key={index}
                     className={`w-1 lg:w-1.5 h-1 lg:h-1.5 rounded-full bg-[#FCFDFF]`}

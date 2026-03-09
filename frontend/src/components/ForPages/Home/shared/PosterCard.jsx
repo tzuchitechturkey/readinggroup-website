@@ -35,7 +35,7 @@ const PosterCard = ({ poster, t }) => {
               />
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent from-[21.96%] via-[rgba(172,196,223,0.5)] via-[87.844%] to-[#acc4df]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent from-[21.96%] via-[rgba(172,196,223,0.9)] via-[65%] to-[#acc4df]" />
           </div>
         </div>
 
@@ -44,7 +44,7 @@ const PosterCard = ({ poster, t }) => {
           <div className="flex flex-1 flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] h-full items-start min-h-px min-w-px py-[8px] sm:py-[10px] md:py-[12px] lg:py-[12px] w-full">
             {/* Date Tag */}
             <div className="flex gap-[6px] sm:gap-[7px] md:gap-[8px] lg:gap-[8px] border-[1px] border-[#285688] items-center justify-center p-[6px] sm:p-[7px] md:p-[8px] lg:p-[8px] rounded-full">
-              <p className="font-inter font-normal leading-none text-[#285688] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]">
+              <p className="font-inter font-medium leading-none text-[#285688] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]">
                 {formatDate(poster?.created_at)}
               </p>
             </div>
@@ -59,9 +59,9 @@ const PosterCard = ({ poster, t }) => {
                 onClick={() => {
                   setIsViewerOpen(true);
                 }}
-                className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"
+                className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[4px] hover:bg-[#404040] transition-colors"
               >
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-[#f5f5f5]">
+                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-white/80">
                   {t("Learn more")}
                 </p>
               </button>

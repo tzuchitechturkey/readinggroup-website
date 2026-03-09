@@ -19,7 +19,7 @@ const LearnSidebar = ({ categories, activeCategory, onCategoryClick }) => {
         <nav className="space-y-[16px]">
           {Object.entries(categories).map(([section, items]) => (
             <div key={section} className="flex flex-col gap-[4px]">
-              <h2 className="text-[18px] font-normal text-[#285688] uppercase tracking-normal h-[40px] flex items-center">
+              <h2 className="text-[18px] font-bold text-[#285688] uppercase tracking-normal h-[40px] flex items-center">
                 {t(section)}
               </h2>
               <ul className="space-y-[4px]">

@@ -1,6 +1,7 @@
 import React from "react";
 
-import { ChevronDown, Search, X, Loader } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
+import DatePickerWithMonthYear from "@/components/Global/DatePickerWithMonthYear/DatePickerWithMonthYear";
 
 const BasicDetailsSection = ({
   formData,
@@ -14,8 +15,6 @@ const BasicDetailsSection = ({
   categoryDropdownRef,
   onCategorySelect,
   onCategoryClearSearch,
-  onFetchYouTube,
-  isFetchingYoutube,
   getCategories,
   t,
 }) => {
@@ -25,9 +24,9 @@ const BasicDetailsSection = ({
         {t("Basic Information")}
       </h3>
 
-      <div className=" grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Start Title */}
-        <div className=" ">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("Report Title")} *
           </label>
@@ -46,57 +45,70 @@ const BasicDetailsSection = ({
           )}
         </div>
         {/* End Title */}
-        {/* Start YouTube URL */}
-        <div className="">
+
+        {/* Start Duration */}
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("YouTube URL")}
+            {t("Duration")} *
           </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              name="external_link"
-              value={formData?.external_link || ""}
-              onChange={onInputChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  if (!isFetchingYoutube && formData?.external_link) {
-                    onFetchYouTube();
-                  }
-                }
-              }}
-              placeholder={t("Enter YouTube URL")}
-              className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors?.external_link ? "border-red-500" : "border-gray-300"
-              }`}
-            />
-            <button
-              type="button"
-              onClick={onFetchYouTube}
-              disabled={isFetchingYoutube || !formData?.external_link}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap transition-colors"
-            >
-              {isFetchingYoutube && (
-                <Loader size={16} className="animate-spin" />
-              )}
-              {t("Fetch Info")}
-            </button>
-          </div>
+          <input
+            type="text"
+            name="duration"
+            value={formData.duration || ""}
+            onChange={onInputChange}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.duration ? "border-red-500" : "border-gray-300"
+            }`}
+            placeholder={t("e.g., 45 minutes")}
+          />
+          {errors.duration && (
+            <p className="text-sm text-red-600 mt-1">{errors.duration}</p>
+          )}
+        </div>
+        {/* End Duration */}
+
+        {/* Start Event Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Event Date")} *
+          </label>
+          <DatePickerWithMonthYear
+            value={formData.happened_at || ""}
+            onChange={onInputChange}
+            error={!!errors.happened_at}
+            t={t}
+          />
+          {errors.happened_at && (
+            <p className="text-sm text-red-600 mt-1">{errors.happened_at}</p>
+          )}
+        </div>
+        {/* End Event Date */}
+
+        {/* Start External Link */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("External Link")}
+          </label>
+          <input
+            type="text"
+            name="external_link"
+            value={formData?.external_link || ""}
+            onChange={onInputChange}
+            placeholder={t("e.g., https://example.com")}
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors?.external_link ? "border-red-500" : "border-gray-300"
+            }`}
+          />
           {errors.external_link && (
             <p className="text-sm text-red-600 mt-1">{errors.external_link}</p>
           )}
-          <p className="text-xs text-gray-500 mt-1">
-            {t(
-              "Paste a YouTube URL and click 'Fetch Info' to automatically fill title, description, and duration",
-            )}
-          </p>
         </div>
-        {/* End YouTube URL */}
+        {/* End External Link */}
 
         {/* Start Category Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Category")}
+            {t("Category")} *
           </label>
           <div className="relative" ref={categoryDropdownRef}>
             <button
@@ -172,26 +184,6 @@ const BasicDetailsSection = ({
           )}
         </div>
         {/* End Category */}
-
-        {/* Start Duration (Read-only) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Duration")}
-          </label>
-          <input
-            type="text"
-            value={formData.duration || ""}
-            disabled
-            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 focus:outline-none cursor-not-allowed"
-            placeholder={t("Duration will be filled automatically")}
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            {t(
-              "This field is automatically filled when fetching YouTube information",
-            )}
-          </p>
-        </div>
-        {/* End Duration */}
       </div>
     </div>
   );

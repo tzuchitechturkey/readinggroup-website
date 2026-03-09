@@ -80,10 +80,11 @@ const VideoCard = ({
       <div
         className={`flex ${gap} items-center w-full flex justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
       >
+        {/* make first letter uppercase */}
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945] uppercase`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945]  `}
         >
-          {item?.category?.name}
+          {item?.category?.name?.charAt(0).toUpperCase() + item?.category?.name?.slice(1)}
         </p>
         {textClassName && <span className="mb-2">|</span>}
         <p

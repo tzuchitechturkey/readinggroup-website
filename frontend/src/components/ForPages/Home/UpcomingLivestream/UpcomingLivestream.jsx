@@ -4,33 +4,7 @@ import LivestreamSectionHeader from "../shared/LivestreamSectionHeader";
 import LivestreamCard from "../shared/LivestreamCard";
 
 // Mock data for upcoming livestream
-const mockLivestreamData = {
-  id: 1,
-  title: "Neuroscience Education",
-  date: "Jan. 28, 2026",
-  thumbnail: "/api/placeholder/692/452",
-  speakers: [
-    {
-      name: "Wu Chengyao",
-      avatar: "/api/placeholder/30/30",
-    },
-    {
-      name: "Huang Yongcun",
-      avatar: "/api/placeholder/30/30",
-    },
-    {
-      name: "Liu Yijun",
-      avatar: "/api/placeholder/30/30",
-    },
-    {
-      name: "Group with Boai Long-term Care Center in Kaohsiung",
-      avatar: "/api/placeholder/30/30",
-    },
-  ],
-  description:
-    "Join our upcoming neuroscience education session with leading experts in the field.",
-};
-
+ 
 const UpcomingLivestream = ({ t, data }) => {
   const handleViewScheduleClick = () => {
     // Navigate to full schedule page - implement navigation logic here
@@ -41,8 +15,8 @@ const UpcomingLivestream = ({ t, data }) => {
         <div className=" ">
           {/* Section Header */}
           <LivestreamSectionHeader
-            title="UPCOMING LIVESTREAM"
-            actionText="View Schedule"
+            title={t("UPCOMING LIVESTREAM")}
+            actionText={t("SEE SCHEDULE")}
             onActionClick={handleViewScheduleClick}
           />
 

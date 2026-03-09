@@ -21,7 +21,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
   const [hasMore, setHasMore] = useState(false);
   const textRef = useRef(null);
   const limit = 5;
-
+console.log(relatedVideos)
   // Fetch related videos
   const fetchRelated = async (currentOffset = 0) => {
     try {

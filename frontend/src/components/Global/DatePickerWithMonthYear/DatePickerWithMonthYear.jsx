@@ -92,25 +92,13 @@ function DatePickerWithMonthYear({ value, onChange, error, t }) {
       
       const formattedDate = format(dateObj, "yyyy-MM-dd");
       
-      // اكتشف نوع onChange
-      // إذا كانت تتوقع event object (handleInputChange pattern)
-      // أو string مباشر (simple callback)
-      try {
-        // جرب الاتصال مع event object أولاً
-        onChange({
-          target: {
-            value: formattedDate,
-            name: 'happenedAt'
-          }
-        });
-      } catch (eventError) {
-        // إذا فشل، جرب مع string مباشر
-        try {
-          onChange(formattedDate);
-        } catch (stringError) {
-          console.error("Both onChange patterns failed:", eventError, stringError);
+      // استدعاء onChange مع event object بنفس شكل handleInputChange
+      onChange({
+        target: {
+          value: formattedDate,
+          name: 'happened_at'
         }
-      }
+      });
       
       setIsOpen(false);
     } catch (error) {

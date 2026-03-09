@@ -62,7 +62,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
 
             {/* Title and Description */}
             <div className="text-white w-full lg:w-2/5">
-              <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-4 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[50px]">
+              <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2 md:mb-5 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[50px]">
                 {item?.title}
               </h2>
               <div className="mb-5 uppercase flex items-center  gap-1 text-[#FCFDFF] opacity-80">
@@ -84,7 +84,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
               onClick={() => {
                 navigate(`/videos/${item?.id}`);
               }}
-              className="bg-white flex items-center gap-1   rounded-lg px-3 md:px-6 py-3 w-fit"
+              className="bg-white flex items-center gap-1   rounded-lg px-3 md:px-6 py-4 w-fit"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
