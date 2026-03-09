@@ -226,6 +226,7 @@ class RelatedReportsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     class Meta:
         model = RelatedReports
         fields = "__all__"
+        file_fields = ("image",)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

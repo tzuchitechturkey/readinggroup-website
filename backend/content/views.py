@@ -731,6 +731,7 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def get_queryset(self):
         """Optimize queryset with select_related for category."""
