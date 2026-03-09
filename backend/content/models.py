@@ -225,6 +225,7 @@ class RelatedReports(TimestampedModel):
     external_link = models.URLField(blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     duration = models.CharField(max_length=64, blank=True, null=True)
+    views = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ("-created_at",)

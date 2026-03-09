@@ -746,6 +746,14 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         """Optimize queryset with select_related for category."""
         return RelatedReports.objects.select_related("category").all()
 
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve a single RelatedReports instance and increment its view count."""
+        instance = self.get_object()
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     @action(
         detail=False,
         methods=("post",),
@@ -819,6 +827,22 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         }
 
         return Response(response_payload, status=status.HTTP_200_OK)
+
+    # new endpoint to get 3 top views related reports for home page
+    @swagger_auto_schema(
+        operation_summary="Top viewed related reports",
+        operation_description="Return top 3 related reports ordered by views.",
+    )
+    @action(detail=False, methods=["get"], url_path="top-views")
+    def top_views(self, request):
+        top_reports = RelatedReports.objects.filter(category__is_active=True).order_by(
+            "-views"
+        )[:3]
+
+        serializer = self.get_serializer(
+            top_reports, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PhotoCollectionViewSet(viewsets.ModelViewSet):
