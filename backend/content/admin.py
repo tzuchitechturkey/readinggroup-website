@@ -7,7 +7,6 @@ from .models import (
     VideoCategory,
     Learn,
     LearnCategory,
-    MyListEntry,
     SocialMedia,
     NavbarLogo,
     Authors,
@@ -159,14 +158,6 @@ class LatestNewsImageAdmin(admin.ModelAdmin):
 
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------
-
-
-@admin.register(MyListEntry)
-class MyListEntryAdmin(admin.ModelAdmin):
-    # ensure fields listed exist on MyListEntry model
-    list_display = ("id", "user", "video", "created_at")
-    search_fields = ("user__username", "video__title")
-
 
 @admin.register(SocialMedia)
 class SocialMediaAdmin(admin.ModelAdmin):
