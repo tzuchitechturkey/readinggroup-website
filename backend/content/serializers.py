@@ -9,19 +9,20 @@ from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    LatestNewsImage,
     PhotoCollection,
     RelatedReports,
     EventCommunity,
     LearnCategory,
     VideoCategory,
+    OurTeamImage,
+    SocialMedia,
+    NavbarLogo,
     LatestNews,
-    LatestNewsImage,
+    OurTeam,
     Video,
     Photo,
     Learn,
-    SocialMedia,
-    NavbarLogo,
-    Authors,
 )
 
 
@@ -37,6 +38,8 @@ class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
 
 
 class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for VideoCategory model with absolute URL handling for file fields."""
+
     datetime_fields = ("created_at", "updated_at")
     video_count = serializers.IntegerField(read_only=True)
 
@@ -46,16 +49,62 @@ class VideoCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
 
 class LearnCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for LearnCategory model with absolute URL handling for file fields."""
+
+    learn_count = serializers.IntegerField(read_only=True)
     datetime_fields = (
         "created_at",
         "updated_at",
         "happened_at",
     )
-    learn_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = LearnCategory
         fields = "__all__"
+
+
+class RelatedReportsCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for RelatedReportsCategory model with absolute URL handling for file fields."""
+
+    datetime_fields = ("created_at", "updated_at")
+    related_reports_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = RelatedReportsCategory
+        fields = "__all__"
+
+
+class PhotoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual photos in a collection."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = Photo
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual images in latest news."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = LatestNewsImage
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+class OurTeamImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for OurTeamImage model with absolute URL handling for file fields."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = OurTeamImage
+        fields = "__all__"
+        file_fields = ("image",)
 
 
 class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -186,38 +235,9 @@ class LearnSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
-class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
-    learn = serializers.PrimaryKeyRelatedField(
-        queryset=Learn.objects.filter(category__learn_type=LearnType.POSTERS),
-        write_only=True,
-        required=False,
-    )
-
-    class Meta:
-        model = EventCommunity
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["learn"] = (
-            LearnSerializer(instance.learn, context=self.context).data
-            if instance.learn
-            else None
-        )
-        return data
-
-
-class RelatedReportsCategorySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    related_reports_count = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = RelatedReportsCategory
-        fields = "__all__"
-
-
 class RelatedReportsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for RelatedReports model with absolute URL handling for file fields."""
+
     datetime_fields = ("created_at", "updated_at")
     category = serializers.PrimaryKeyRelatedField(
         queryset=RelatedReportsCategory.objects.all(), write_only=True, required=False
@@ -240,19 +260,8 @@ class RelatedReportsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
-class PhotoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for individual photos in a collection."""
-
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = Photo
-        fields = "__all__"
-        file_fields = ("image",)
-
-
 class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for photo collections."""
+    """Serializer for PhotoCollection model with absolute URL handling for file fields."""
 
     datetime_fields = ("created_at", "updated_at", "happened_at")
     photos = PhotoSerializer(many=True, read_only=True)
@@ -278,18 +287,9 @@ class PhotoCollectionSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
-class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    """Serializer for individual images in latest news."""
-
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = LatestNewsImage
-        fields = "__all__"
-        file_fields = ("image",)
-
-
 class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for LatestNews model with absolute URL handling for file fields."""
+
     datetime_fields = ("created_at", "updated_at", "happened_at")
     images = LatestNewsImageSerializer(many=True, read_only=True)
     image_count = serializers.SerializerMethodField()
@@ -312,6 +312,42 @@ class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         return data
 
 
+class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for EventCommunity model with absolute URL handling for file fields."""
+
+    datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
+    learn = serializers.PrimaryKeyRelatedField(
+        queryset=Learn.objects.filter(category__learn_type=LearnType.POSTERS),
+        write_only=True,
+        required=False,
+    )
+
+    class Meta:
+        model = EventCommunity
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["learn"] = (
+            LearnSerializer(instance.learn, context=self.context).data
+            if instance.learn
+            else None
+        )
+        return data
+
+
+class OurTeamSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for OurTeam model with absolute URL handling for file fields."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = OurTeam
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+# ------------------------------------------------------------------new models serializers end----------------------------------------------------------------
 class SocialMediaSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("created_at", "updated_at")
 
@@ -325,12 +361,4 @@ class NavbarLogoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = NavbarLogo
-        fields = "__all__"
-
-
-class AuthorsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-
-    class Meta:
-        model = Authors
         fields = "__all__"

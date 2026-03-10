@@ -2,25 +2,22 @@ from django.contrib import admin
 
 from .enums import LearnType
 from .models import (
+    RelatedReportsCategory,
+    ContentAttachment,
+    PhotoCollection,
+    LatestNewsImage,
     EventCommunity,
-    Video,
+    RelatedReports,
     VideoCategory,
-    Learn,
     LearnCategory,
     SocialMedia,
     NavbarLogo,
-    Authors,
-    ContentAttachment,
-    PhotoCollection,
-    Photo,
-    RelatedReports,
-    RelatedReportsCategory,
     LatestNews,
-    LatestNewsImage,
+    OurTeam,
+    Video,
+    Learn,
+    Photo,
 )
-
-
-# ----------------------------------------------------------------new models admin start----------------------------------------------------------------
 
 
 @admin.register(Video)
@@ -157,7 +154,15 @@ class LatestNewsImageAdmin(admin.ModelAdmin):
     list_filter = ("latest_news", "created_at")
 
 
+@admin.register(OurTeam)
+class OurTeamAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "description", "created_at")
+    search_fields = ("title", "description")
+    list_filter = ("created_at",)
+
+
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------
+
 
 @admin.register(SocialMedia)
 class SocialMediaAdmin(admin.ModelAdmin):
@@ -169,9 +174,3 @@ class SocialMediaAdmin(admin.ModelAdmin):
 class NavbarLogoAdmin(admin.ModelAdmin):
     list_display = ("logo",)
     search_fields = ("logo",)
-
-
-@admin.register(Authors)
-class AuthorsAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
-    search_fields = ("name", "description")

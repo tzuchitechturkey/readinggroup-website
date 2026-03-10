@@ -3,19 +3,20 @@ from .views import (
     RelatedReportsCategoryViewSet,
     ContentAttachmentViewSet,
     PhotoCollectionViewSet,
+    LatestNewsImageViewSet,
     RelatedReportsViewSet,
     EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
-    LatestNewsImageViewSet,
+    OurTeamImageViewSet,
+    SocialMediaViewSet,
     LatestNewsViewSet,
+    NavbarLogoViewSet,
+    SiteInfoViewSet,
+    OurTeamViewSet,
     PhotoViewSet,
     LearnViewSet,
     VideoViewSet,
-    SocialMediaViewSet,
-    NavbarLogoViewSet,
-    SiteInfoViewSet,
-    AuthorsViewSet,
 )
 
 app_name = "content"
@@ -24,11 +25,12 @@ router = DefaultRouter()
 router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"photos", PhotoViewSet, basename="photo")
-router.register(r"authors", AuthorsViewSet, basename="authors")
+router.register(r"our-team", OurTeamViewSet, basename="our-team")
 router.register(r"site-info", SiteInfoViewSet, basename="site-info")
 router.register(r"latest-news", LatestNewsViewSet, basename="latest-news")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"social-media", SocialMediaViewSet, basename="social-media")
+router.register(r"our-team-images", OurTeamImageViewSet, basename="our-team-image")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
 router.register(r"event-communities", EventCommunityViewSet, basename="event-community")

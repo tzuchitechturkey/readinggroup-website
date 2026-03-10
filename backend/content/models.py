@@ -367,25 +367,45 @@ class EventCommunity(TimestampedModel):
         return self.title
 
 
-# ======================================================= New Models end =======================================================
-
-
-class Authors(TimestampedModel):
-    """Authors for videos and posts."""
-
-    name = models.CharField(max_length=255)
+class OurTeam(TimestampedModel):
+    title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    position = models.CharField(max_length=255, blank=True)
-    avatar = models.ImageField(upload_to="authors/avatars/", blank=True, null=True)
-    avatar_url = models.URLField(blank=True)
+    image = models.ImageField(upload_to="our-team/images/", blank=True, null=True)
+    image_url = models.JSONField(default=list, blank=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("title",)
 
     def __str__(self) -> str:
-        return self.name
+        return self.title
 
 
+class OurTeamImage(TimestampedModel):
+    """Individual image for an our team member."""
+
+    our_team = models.ForeignKey(
+        "OurTeam", on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="our-team/images/")
+    caption = models.CharField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of image for the team member"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["our_team", "order"],
+                name="unique_image_order_per_team_member",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Image {self.order} for {self.our_team.title}"
+
+
+# ======================================================= New Models end =======================================================
 class NavbarLogo(TimestampedModel):
     logo = models.ImageField(upload_to="infowebsite/logos/", blank=True, null=True)
 

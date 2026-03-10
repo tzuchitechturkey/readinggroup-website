@@ -14,47 +14,49 @@ from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
 from .daai_tv import DaaiTVError, fetch_daai_tv_info
 from .swagger_parameters import (
+    event_community_manual_parameters,
+    learn_category_manual_parameters,
+    video_category_manual_parameters,
+    by_type_video_manual_parameters,
     video_manual_parameters,
     learn_manual_parameters,
-    video_category_manual_parameters,
-    learn_category_manual_parameters,
-    by_type_video_manual_parameters,
-    event_community_manual_parameters,
 )
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    LatestNewsImage,
     PhotoCollection,
+    RelatedReports,
     EventCommunity,
     VideoCategory,
     LearnCategory,
-    RelatedReports,
+    OurTeamImage,
+    SocialMedia,
+    NavbarLogo,
     LatestNews,
-    LatestNewsImage,
+    OurTeam,
     Learn,
     Video,
     Photo,
-    SocialMedia,
-    NavbarLogo,
-    Authors,
 )
 
 from .serializers import (
     RelatedReportsCategorySerializer,
     ContentAttachmentSerializer,
     PhotoCollectionSerializer,
+    LatestNewsImageSerializer,
     RelatedReportsSerializer,
     EventCommunitySerializer,
     VideoCategorySerializer,
     LearnCategorySerializer,
+    OurTeamImageSerializer,
+    SocialMediaSerializer,
     LatestNewsSerializer,
-    LatestNewsImageSerializer,
+    NavbarLogoSerializer,
+    OurTeamSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
-    SocialMediaSerializer,
-    NavbarLogoSerializer,
-    AuthorsSerializer,
 )
 
 
@@ -87,6 +89,8 @@ class ContentAttachmentViewSet(viewsets.ModelViewSet):
 
 
 class VideoViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing Video content with multi-language support."""
+
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     search_fields = (
@@ -357,6 +361,8 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
 
 
 class LearnViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing Learn content with multi-language support."""
+
     queryset = Learn.objects.all()
     serializer_class = LearnSerializer
     pagination_class = LimitOffsetPagination
@@ -611,6 +617,8 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
 
 
 class EventCommunityViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing EventCommunity content with multi-language support."""
+
     queryset = EventCommunity.objects.all()
     serializer_class = EventCommunitySerializer
     pagination_class = LimitOffsetPagination
@@ -677,6 +685,8 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing RelatedReportsCategory content with multi-language support."""
+
     queryset = RelatedReportsCategory.objects.all()
     serializer_class = RelatedReportsCategorySerializer
     pagination_class = LimitOffsetPagination
@@ -729,6 +739,8 @@ class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
 
 
 class RelatedReportsViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing RelatedReports content with multi-language support."""
+
     queryset = RelatedReports.objects.all()
     serializer_class = RelatedReportsSerializer
     pagination_class = LimitOffsetPagination
@@ -1104,6 +1116,29 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class OurTeamViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing OurTeam content."""
+
+    queryset = OurTeam.objects.all()
+    serializer_class = OurTeamSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title",)
+    ordering_fields = ("created_at", "title")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    queryset = OurTeam.objects.all().order_by("-created_at")
+
+
+class OurTeamImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual images in OurTeam."""
+
+    queryset = OurTeamImage.objects.all()
+    serializer_class = OurTeamImageSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+
 # ========================================== new viewset end============================================
 class NavbarLogoViewSet(viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
@@ -1214,14 +1249,3 @@ class SiteInfoViewSet(viewsets.ViewSet):
             {"logo": created_logo, "socialmedia": result_socials},
             status=status.HTTP_201_CREATED,
         )
-
-
-class AuthorsViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing Authors content."""
-
-    queryset = Authors.objects.all()
-    serializer_class = AuthorsSerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ("name", "description")
-    ordering_fields = ("created_at", "name")
-    queryset = Authors.objects.all().order_by("-created_at")
