@@ -23,7 +23,7 @@ const formatDate = (dateString) => {
 // Helper function to format time range
 const formatTimeRange = (startTime, durationHours) => {
   // تحويل البداية إلى ساعة ودقيقة
-  const [hourStr, minuteStr] = startTime.split(":");
+  const [hourStr] = startTime.split(":");
   const startHour = parseInt(hourStr, 10);
 
   // حساب النهاية
@@ -43,6 +43,12 @@ const formatTimeRange = (startTime, durationHours) => {
   };
 
   return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+};
+
+const getSpeakerDisplayName = (speaker) => {
+  if (typeof speaker === "string") return speaker;
+  if (speaker && typeof speaker === "object") return speaker.name || "";
+  return "";
 };
 
 const LivestreamScheduleContent = () => {
@@ -170,9 +176,9 @@ const LivestreamScheduleContent = () => {
                         {t("Guest Speaker(s)")}
                       </div>
                       <div className="livestream-schedule-speakers-list">
-                        {item.guest_speakers.map((speaker, idx) => (
+                        {(item.guest_speakers || []).map((speaker, idx) => (
                           <div key={idx} className="truncate lg:w-[128px]">
-                            {speaker}
+                            {getSpeakerDisplayName(speaker)}
                           </div>
                         ))}
                       </div>
