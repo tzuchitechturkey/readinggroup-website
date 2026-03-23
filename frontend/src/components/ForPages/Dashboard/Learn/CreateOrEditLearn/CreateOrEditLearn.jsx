@@ -5,7 +5,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import { useCreateOrEditLearn } from "@/hooks/learn/useLearnForm";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
-import ImageUploadSection from "@/components/ForPages/dashboard/Learn/CreateOrEditLearn//ImageUploadSection";
+import ImageUploadSection from "./ImageUploadSection";
 import BasicDetailsSection from "./BasicDetailsSection";
 import FormActionsSection from "./FormActionsSection";
 
