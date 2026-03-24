@@ -32,12 +32,14 @@ from .models import (
     LearnCategory,
     OurTeamImage,
     SocialMedia,
+    BookReview,
     NavbarLogo,
     LatestNews,
     OurTeam,
     Learn,
     Video,
     Photo,
+    Book,
 )
 
 from .serializers import (
@@ -52,11 +54,13 @@ from .serializers import (
     OurTeamImageSerializer,
     SocialMediaSerializer,
     LatestNewsSerializer,
+    BookReviewSerializer,
     NavbarLogoSerializer,
     OurTeamSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
+    BookSerializer,
 )
 
 
@@ -1137,6 +1141,67 @@ class OurTeamImageViewSet(viewsets.ModelViewSet):
     search_fields = ("caption",)
     ordering_fields = ("created_at", "order")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+
+class BookViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing books and their review files."""
+
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("title", "description")
+    ordering_fields = ("created_at", "updated_at")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    @action(detail=True, methods=["post"], url_path="reviews")
+    def create_reviews(self, request, pk=None):
+        """Create review files for a specific book.
+
+        POST /book/{id}/reviews/
+        Accepts multiple files under 'reviews' or single file under 'image'.
+        """
+        book = self.get_object()
+
+        review_files = request.FILES.getlist("reviews")
+        if not review_files:
+            single_file = request.FILES.get("image")
+            if single_file:
+                review_files = [single_file]
+            else:
+                return Response(
+                    {
+                        "error": "No review files provided. Use 'reviews' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        current_count = book.reviews.count()
+        created_reviews = []
+        for idx, review_file in enumerate(review_files):
+            review = BookReview.objects.create(
+                book=book,
+                image=review_file,
+                order=current_count + idx,
+            )
+            created_reviews.append(review)
+
+        serializer = BookReviewSerializer(
+            created_reviews, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class BookReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual review files in books."""
+
+    queryset = BookReview.objects.all()
+    serializer_class = BookReviewSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("book__title",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
 # ========================================== new viewset end============================================

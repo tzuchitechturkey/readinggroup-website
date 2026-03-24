@@ -405,6 +405,38 @@ class OurTeamImage(TimestampedModel):
         return f"Image {self.order} for {self.our_team.title}"
 
 
+class Book(TimestampedModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to="books/images/", blank=True, null=True)
+    cover_image = models.FileField(upload_to="books/covers/", blank=True, null=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class BookReview(TimestampedModel):
+    book = models.ForeignKey("Book", on_delete=models.CASCADE, related_name="reviews")
+    image = models.FileField(upload_to="books/reviews/")
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of review image in the book"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["book", "order"], name="unique_review_order_per_book"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Review {self.order} for {self.book.title}"
+
+
 # ======================================================= New Models end =======================================================
 class NavbarLogo(TimestampedModel):
     logo = models.ImageField(upload_to="infowebsite/logos/", blank=True, null=True)

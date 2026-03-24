@@ -17,12 +17,14 @@ from .models import (
     VideoCategory,
     OurTeamImage,
     SocialMedia,
+    BookReview,
     NavbarLogo,
     LatestNews,
     OurTeam,
     Video,
     Photo,
     Learn,
+    Book,
 )
 
 
@@ -103,6 +105,17 @@ class OurTeamImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = OurTeamImage
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+class BookReviewSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual review files in a book."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = BookReview
         fields = "__all__"
         file_fields = ("image",)
 
@@ -345,6 +358,26 @@ class OurTeamSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = OurTeam
         fields = "__all__"
         file_fields = ("image",)
+
+
+class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for Book model with nested review files."""
+
+    datetime_fields = ("created_at", "updated_at")
+    reviews = BookReviewSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Book
+        fields = "__all__"
+        file_fields = ("image", "cover_image")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if "reviews" in data and instance.reviews.exists():
+            data["reviews"] = BookReviewSerializer(
+                instance.reviews.all(), many=True, context=self.context
+            ).data
+        return data
 
 
 # ------------------------------------------------------------------new models serializers end----------------------------------------------------------------

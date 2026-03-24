@@ -11,12 +11,14 @@ from .models import (
     VideoCategory,
     LearnCategory,
     SocialMedia,
+    BookReview,
     NavbarLogo,
     LatestNews,
     OurTeam,
     Video,
     Learn,
     Photo,
+    Book,
 )
 
 
@@ -159,6 +161,29 @@ class OurTeamAdmin(admin.ModelAdmin):
     list_display = ("id", "title", "description", "created_at")
     search_fields = ("title", "description")
     list_filter = ("created_at",)
+
+
+class BookReviewInline(admin.TabularInline):
+    """Inline admin for review files in a book."""
+
+    model = BookReview
+    extra = 1
+    fields = ("image", "order")
+
+
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "created_at")
+    search_fields = ("title", "description")
+    list_filter = ("created_at",)
+    inlines = [BookReviewInline]
+
+
+@admin.register(BookReview)
+class BookReviewAdmin(admin.ModelAdmin):
+    list_display = ("id", "book", "order", "created_at")
+    search_fields = ("book__title",)
+    list_filter = ("book", "created_at")
 
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------
