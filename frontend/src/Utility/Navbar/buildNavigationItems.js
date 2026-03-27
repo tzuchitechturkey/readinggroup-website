@@ -47,17 +47,17 @@ const buildNavigationItems = (t, siteInfo) => {
       subItems: [
         {
           name: t("OUR HISTORY"),
-          href: "/about",
+          href: "/about/history",
           tab: "history",
         },
         {
           name: t("TEAM FUNCTIONS"),
-          href: "/about",
+          href: "/about/team",
           tab: "our_team",
         },
         {
           name: t("BOOK"),
-          href: "/about",
+          href: "/about/book",
           tab: "book",
         },
       ],

@@ -53,8 +53,10 @@ export const userRoutes = [
   { path: "/dashboard", element: <Dashboard /> },
   // About Us Routes
   { path: "/about", element: <AboutUs /> },
+  { path: "/about/history", element: <AboutUs activeTab="history" /> },
   { path: "/about/team", element: <AboutUs activeTab="our_team" /> },
   { path: "/about/functions", element: <AboutUs activeTab="functions" /> },
+  { path: "/about/book", element: <AboutUs activeTab="book" /> },
   { path: "/about/team/:id", element: <AboutMemberContent /> },
   { path: "/about/books", element: <BooksContent /> },
   // Videos Routes
