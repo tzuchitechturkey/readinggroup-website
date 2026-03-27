@@ -1,50 +1,90 @@
 import React, { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
-
-import TabsSection from "@/components/ForPages/AboutUs/Team/TabsSection/TabsSection";
-import { filterPositions, GetTeam } from "@/api/aboutUs";
+import { GetTeam } from "@/api/aboutUs";
 import Loader from "@/components/Global/Loader/Loader";
-import MemberCard from "@/components/ForPages/AboutUs/Team/MemberCard/MemberCard";
+import TeamFunctionsSection from "@/components/ForPages/AboutUs/Team/TeamFunctionsSection/TeamFunctionsSection";
+
+const heartMaskStyle = {
+  WebkitMaskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E")`,
+  WebkitMaskSize: "contain",
+  WebkitMaskRepeat: "no-repeat",
+  WebkitMaskPosition: "center",
+  maskImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E")`,
+  maskSize: "contain",
+  maskRepeat: "no-repeat",
+  maskPosition: "center",
+};
+
+const SISTER_SECTION_METADATA = {
+  mainTitle: "Our Team",
+  sectionTitle: "Meet the Sister that runs all the livestreams!",
+  sisterName: "美雲老師",
+  sisterAvatar: "https://placehold.co/400x400/ffe4e6/e11d48?text=Sister",
+  description: "美雲老師 serves as the principal teacher And host of our weekly livestream gatherings. With [X] years of dedication to Tzu Chi's mission, she brings profound understanding and compassionate insight to every session. Her leadership has shaped our study group into a thriving community where students from around the world gather to explore Buddhist teachings and cultivate wisdom together. Her commitment to sharing the Dharma continues to inspire all who join us."
+};
+
+const TEAM_FUNCTIONS_METADATA = [
+  {
+    title: "Guest Hosting Team",
+    images: [
+      "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+1",
+      "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+2",
+      "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+3"
+    ],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Broadcasting Team",
+    images: ["https://placehold.co/800x400/e0f2fe/0369a1?text=Broadcasting+Banner"],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Video Creation Team",
+    images: ["https://placehold.co/800x400/f0f9ff/075985?text=Video+Creation+Banner"],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Steering Team",
+    images: ["https://placehold.co/800x400/ecfdf5/065f46?text=Steering+Banner"],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Documentation Design Team",
+    images: ["https://placehold.co/800x400/fff7ed/9a3412?text=Design+Banner"],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Steering Team ",
+    images: ["https://placehold.co/800x400/f8fafc/334155?text=Steering+Banner+2"],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  },
+  {
+    title: "Video Creation Team ",
+    images: [
+      "https://placehold.co/800x400/f1f5f9/475569?text=Video+Banner+2",
+      "https://placehold.co/800x400/f1f5f9/475569?text=Video+Banner+3"
+    ],
+    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+  }
+];
 
 function AboutTeamContent() {
-  const [activeTab, setActiveTab] = useState(() => {
-    // استرجاع التاب المحفوظ من localStorage
-    return localStorage.getItem("teamActiveTab") || "All";
-  });
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
   const [groupedData, setGroupedData] = useState({});
 
-  const groupByPosition = (data) => {
-    return data.reduce((acc, item) => {
-      const key = item.position?.name || "غير محدد";
-
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-
-      acc[key].push(item);
-      return acc;
-    }, {});
-  };
-
   const getTeamData = async () => {
     setIsLoading(true);
     try {
-      if (activeTab === "All") {
-        const res = await GetTeam(100, 0);
-        const results = res.data.results || [];
-
-        setGroupedData(groupByPosition(results));
-        setIsLoading(false);
-        return;
-      }
-
-      const res = await filterPositions(activeTab);
-      const results = res.data || [];
-
-      setGroupedData(groupByPosition(results));
+      const res = await GetTeam(100, 0);
+      const results = res.data.results || [];
+      const grouped = {};
+      results.forEach((item) => {
+        const key = item.position?.name || "Unassigned";
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(item);
+      });
+      setGroupedData(grouped);
     } catch (err) {
       console.error(err);
     } finally {
@@ -53,32 +93,59 @@ function AboutTeamContent() {
   };
 
   useEffect(() => {
-    // حفظ التاب النشط في localStorage عند التغيير
-    localStorage.setItem("teamActiveTab", activeTab);
     getTeamData();
-  }, [activeTab]);
+  }, []);
 
   return (
-    <div className="max-w-7xl mx-auto lg:p-6 pt-0">
+    <div className="w-full bg-[#e6effb] min-h-screen py-12 px-4 sm:px-8 lg:px-12 overflow-hidden">
       {isLoading && <Loader />}
 
-      <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 md:mb-8 tracking-tight text-center">
-        {t("About Us Team Function")}
-      </div>
+      <div className="max-w-6xl mx-auto">
+        {/* Top Header */}
+        <div className="mb-12">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-[#112344]">
+            {t(SISTER_SECTION_METADATA.mainTitle)}
+          </h1>
+        </div>
 
-      <TabsSection activeTab={activeTab} setActiveTab={setActiveTab} />
-
-      {Object.keys(groupedData).map((posName) => (
-        <div key={posName} className="mb-10 w-full">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">{posName}</h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 justify-items-center">
-            {groupedData[posName].map((member) => (
-              <MemberCard key={member.id} member={member} />
-            ))}
+        {/* Sister Section */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center mb-24">
+          <div className="lg:w-1/3 flex justify-center lg:justify-start">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 bg-gradient-to-tr from-[#ffe4e6] to-[#ffedd5] p-2" style={heartMaskStyle}>
+              <img
+                src={SISTER_SECTION_METADATA.sisterAvatar}
+                alt={SISTER_SECTION_METADATA.sisterName}
+                className="w-full h-full object-cover"
+                style={heartMaskStyle}
+              />
+            </div>
+          </div>
+          <div className="lg:w-2/3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#112344] mb-2 leading-tight">
+              {t(SISTER_SECTION_METADATA.sectionTitle)}
+            </h2>
+            <h3 className="text-xl sm:text-2xl font-bold text-[#112344] mb-4">
+              {SISTER_SECTION_METADATA.sisterName}
+            </h3>
+            <p className="text-[#4a6288] leading-relaxed text-sm sm:text-base mb-4 font-medium">
+              {t(SISTER_SECTION_METADATA.description)}
+            </p>
           </div>
         </div>
-      ))}
+
+        {/* Team Functions Header */}
+        <div className="mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#112344]">
+            {t("All our Team Functions")}
+          </h2>
+        </div>
+
+        {/* Reusable Section Component */}
+        <TeamFunctionsSection
+          groupedData={groupedData}
+          metadata={TEAM_FUNCTIONS_METADATA}
+        />
+      </div>
     </div>
   );
 }

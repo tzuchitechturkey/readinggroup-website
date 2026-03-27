@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CarouselControls from "@/components/Global/CarouselControls/CarouselControls";
 
 import {
   Carousel,
@@ -146,47 +146,17 @@ const LivestreamCard = ({ data = [], t }) => {
           </CarouselContent>
         </Carousel>
 
-        <div className="flex items-center   justify-center gap-3 sm:gap-3 md:gap-4 lg:gap-4 mt-3 sm:mt-3 md:mt-4 lg:mt-4">
-          {/* السابق */}
-          <button
-            onClick={() => imageCarouselApi?.scrollPrev()}
-            disabled={!canPrev}
-            className={`p-0.5 sm:p-0.5 md:p-1 lg:p-1 rounded-full ${
-              canPrev ? "hover:scale-110" : "opacity-40 cursor-not-allowed"
-            }`}
-          >
-            <ChevronLeft className="text-white w-4 md:w-5 lg:w-5 h-4 md:h-5 lg:h-5" />
-          </button>
+        <CarouselControls
+          canPrev={canPrev}
+          canNext={canNext}
+          onPrev={() => imageCarouselApi?.scrollPrev()}
+          onNext={() => imageCarouselApi?.scrollNext()}
+          count={count}
+          current={current}
+          onDotClick={(index) => imageCarouselApi?.scrollTo(index)}
+        />
 
-          {/* dots */}
-          {count > 0 && (
-            <div className="flex gap-2 sm:gap-2 md:gap-2.5 lg:gap-3 items-center min-h-[12px] px-2">
-              {Array.from({ length: count }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => imageCarouselApi?.scrollTo(index)}
-                  className={`transition-all duration-300 rounded-full flex-shrink-0 ${
-                    current === index
-                      ? "bg-white w-8 h-2.5 sm:w-3 sm:h-3 md:w-3 md:h-3 lg:w-3 lg:h-3"
-                      : "w-2 h-2 sm:w-2 sm:h-2 md:w-2 md:h-2 lg:w-2 lg:h-2 bg-[#92A9C3] hover:bg-white/70"
-                  }`}
-                  aria-label={`Go to item ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* التالي */}
-          <button
-            onClick={() => imageCarouselApi?.scrollNext()}
-            disabled={!canNext}
-            className={`p-0.5 sm:p-0.5 md:p-1 lg:p-1 rounded-full ${
-              canNext ? "hover:scale-110" : "opacity-40 cursor-not-allowed"
-            }`}
-          >
-            <ChevronRight className="text-white w-4 sm:w-4 md:w-5 lg:w-5 h-4 sm:h-4 md:h-5 lg:h-5" />
-          </button>
-        </div>
+        {/* See schedule button - visible on mobile only */}
         <button className=" mt-10 bg-white flex items-center justify-center gap-1.5 lg:hidden rounded-md text-xs text-[#285688] py-2 w-full mx-auto ">
           {t("See schedule")}
           <ArrowRight className="size-4" />

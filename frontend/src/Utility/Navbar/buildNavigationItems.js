@@ -41,28 +41,27 @@ const buildNavigationItems = (t, siteInfo) => {
         },
       ],
     },
-    // {
-    //   name: t("ABOUT US"),
-    //   href: "/about",
-    //   hasDropdown: true,
-    //   subItems: [
-    //     {
-    //       name: t("OUR HISTORY"),
-    //       href: "/about",
-    //       tab: "history",
-    //     },
-    //     {
-    //       name: t("TEAM FUNCTIONS"),
-    //       href: "/about",
-    //       tab: "our_team",
-    //     },
-    //     {
-    //       name: t("SPECIAL BOOK OF 10 YEARS"),
-    //       href: "/about/books",
-    //       tab: "book_of_study",
-    //     },
-    //   ],
-    // },
+    {
+      name: t("ABOUT US"),
+      hasDropdown: true,
+      subItems: [
+        {
+          name: t("OUR HISTORY"),
+          href: "/about",
+          tab: "history",
+        },
+        {
+          name: t("TEAM FUNCTIONS"),
+          href: "/about",
+          tab: "our_team",
+        },
+        {
+          name: t("BOOK"),
+          href: "/about",
+          tab: "book",
+        },
+      ],
+    },
   ];
 
   return items;
