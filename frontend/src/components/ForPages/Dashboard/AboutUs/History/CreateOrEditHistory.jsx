@@ -7,7 +7,12 @@ import { CreateHistory, EditHistoryById } from "@/api/history";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
-const CreateOrEditHistory = ({ setUpdate, onClose, historyItem = null }) => {
+const CreateOrEditHistory = ({
+  setUpdate,
+  isOpen,
+  onClose,
+  historyItem = null,
+}) => {
   const { t } = useTranslation();
   const [isLaoding, setIsLaoding] = useState(false);
   const [errors, setErrors] = useState({});
