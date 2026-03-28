@@ -370,8 +370,17 @@ class EventCommunity(TimestampedModel):
 class OurTeam(TimestampedModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    is_heart = models.BooleanField(default=False)
     image = models.ImageField(upload_to="our-team/images/", blank=True, null=True)
     image_url = models.JSONField(default=list, blank=True)
+
+    def save(self, *args, **kwargs):
+        """Ensure only one OurTeam item has is_heart=True at any time."""
+        super().save(*args, **kwargs)
+        if self.is_heart:
+            OurTeam.objects.filter(is_heart=True).exclude(pk=self.pk).update(
+                is_heart=False
+            )
 
     class Meta:
         ordering = ("title",)
