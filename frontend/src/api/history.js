@@ -28,7 +28,7 @@ export async function GetHistoryImages(historyId) {
 }
 
 export async function AddHistoryImage(historyId, data) {
-  return await axios.post(`/history-event/${historyId}/images/`, data);
+  return await axios.post(`/history-events/${historyId}/images/`, data);
 }
 
 export async function DeleteHistoryImageById(id) {
