@@ -64,7 +64,7 @@ function HistoryList({ onSectionChange }) {
       await DeleteHistoryById(selectedHistoryItem.id);
       toast.success(t("Event deleted successfully"));
       setHistoryData((prev) =>
-        prev.filter((item) => item.id !== selectedHistoryItem.id)
+        prev.filter((item) => item.id !== selectedHistoryItem.id),
       );
       setShowDeleteModal(false);
     } catch (error) {
@@ -219,10 +219,13 @@ function HistoryList({ onSectionChange }) {
                     {t("Image")}
                   </TableHead>
                   <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
+                    {t("Year")}
+                  </TableHead>
+                  <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
                     {t("Title")}
                   </TableHead>
                   <TableHead className="text-[#5B6B79] font-medium text-xs text-center ">
-                    {t("Time Period")}
+                    {t("Sub Title")}
                   </TableHead>
                   <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                     {t("Description")}
@@ -255,6 +258,11 @@ function HistoryList({ onSectionChange }) {
                         />
                       </div>
                     </TableCell>
+                    <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="font-medium">{item.year}</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="py-4">
                       <div className="flex items-center justify-center gap-3">
                         <div className="flex flex-col">
@@ -264,17 +272,10 @@ function HistoryList({ onSectionChange }) {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#1E1E1E] text-[11px] py-4   ">
-                      <div className="flex flex-col items-center ">
-                        <span className="font-medium">
-                          {new Date(item.story_date).toLocaleDateString(
-                            "en-GB",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                            }
-                          )}
+                    <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="text-sm line-clamp-1">
+                          {item.sub_title}
                         </span>
                       </div>
                     </TableCell>
@@ -364,7 +365,7 @@ function HistoryList({ onSectionChange }) {
             onConfirm={handleConfirmDelete}
             title={t("Delete Member")}
             message={t(
-              "Are you sure you want to delete this member? This action cannot be undone."
+              "Are you sure you want to delete this member? This action cannot be undone.",
             )}
             itemName={selectedHistoryItem?.title}
           />

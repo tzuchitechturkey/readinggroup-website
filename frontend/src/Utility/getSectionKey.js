@@ -36,16 +36,15 @@ export const getSectionKey = (title) => {
     // Profile && Setting
     "Profile Settings": "profileSettings",
     profile: "profile",
-    // About Us
-    History: "history",
-    Departments: "departments",
     // Team
     "Our Team": "team",
     "Add/Edit Team Member": "createOrEditTeam",
     // Books
-    "The Books": "books",
-    "Add/Edit Book": "createOrEditBook",
-    "The Books Groups": "booksGroups",
+    "The Book": "book",
+    "The Reviews": "createOrEditReviews",
+    // History
+    "All History": "history",
+    "Add/Edit History": "createOrEditHistory",
     // Web site info
     "Website Info": "websiteInfo",
     "Sort Section": "sortSection",

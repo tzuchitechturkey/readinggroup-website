@@ -200,22 +200,37 @@ export default function AppSidebar({
           },
         ],
       },
+      {
+        title: "Book",
+        onClick: "#",
+        icon: VaadinHealth,
+        items: [
+          {
+            title: "The Book",
+            onClick: () => onSectionChange("book"),
+          },
+          {
+            title: "The Reviews",
+            onClick: () => onSectionChange("createOrEditReviews"),
+          },
+        ],
+      },
+      {
+        title: "All History",
+        onClick: "#",
+        icon: VaadinHealth,
+        items: [
+          {
+            title: "History",
+            onClick: () => onSectionChange("history"),
+          },
+          {
+            title: "Add/Edit History",
+            onClick: () => onSectionChange("createOrEditHistory"),
+          },
+        ],
+      },
 
-      // {
-      //   title: "Writers",
-      //   onClick: "#",
-      //   icon: FakeUser,
-      //   items: [
-      //     {
-      //       title: "All Writers",
-      //       onClick: () => onSectionChange("writers"),
-      //     },
-      //     {
-      //       title: "Add/Edit Writer",
-      //       onClick: () => onSectionChange("createOrEditWriter"),
-      //     },
-      //   ],
-      // },
       // {
       //   title: "About Us",
       //   onClick: () => onSectionChange("about"),

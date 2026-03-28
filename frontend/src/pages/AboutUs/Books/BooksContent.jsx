@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import Loader from "@/components/Global/Loader/Loader";
 import Modal from "@/components/Global/Modal/Modal";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetBooksGroups, GetBooksByGroupId } from "@/api/books";
 
 function BooksContent() {
   const { t, i18n } = useTranslation();
@@ -36,24 +35,6 @@ function BooksContent() {
     if (!text) return "";
     return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   }
-  // جلب الفئات
-  const getCategories = async () => {
-    setIsLoading(true);
-    try {
-      const res = await GetBooksGroups(100, 0);
-      const categoryList = res?.data?.results || [];
-      setCategories(categoryList);
-
-      if (categoryList.length > 0) {
-        setSelectedCategory(categoryList[0]);
-        await getBooksByCategory(categoryList[0].id);
-      }
-    } catch (error) {
-      setErrorFn(error, t);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // جلب الكتب حسب الفئة
   const getBooksByCategory = async (categoryId, page = 0) => {
@@ -124,7 +105,7 @@ function BooksContent() {
   // الفئات المرئية في الـ Carousel
   const visibleCategories = categories.slice(
     carouselPosition,
-    carouselPosition + VISIBLE_TABS
+    carouselPosition + VISIBLE_TABS,
   );
 
   useEffect(() => {

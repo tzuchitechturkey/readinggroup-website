@@ -25,10 +25,9 @@ import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/Create
 import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
 import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
 import BooksList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksList";
-import BooksGroupsList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksGroupsList";
 import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/CreateorEditWriter/CreateorEditWriter";
 import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
-import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/CreateorEditBook";
+import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
 import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
 import PhotoCollectionsList from "@/components/ForPages/Dashboard/Events/PhotoCollection/PhotoCollectionsList";
@@ -45,6 +44,8 @@ import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/Uplo
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
+import UploadImagesToReviews from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
+import CreateOrEditHistory from "@/components/ForPages/Dashboard/AboutUs/History/CreateOrEditHistory";
 
 export default function Page() {
   const { i18n } = useTranslation();
@@ -100,6 +101,11 @@ export default function Page() {
   const [selectedBook, setSelectedBook] = useState(() => {
     // استرجاع الأحداث المحفوظة إن وجدت
     const saved = localStorage.getItem("dashboardSelectedBook");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [selectedHistory, setSelectedHistory] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedHistory");
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -208,6 +214,7 @@ export default function Page() {
       setSelectedPhotoCollections(null);
       setSelectedWriter(null);
       setSelectedBook(null);
+      setSelectedHistory(null);
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
@@ -229,6 +236,8 @@ export default function Page() {
       setSelectedLiveStream(data);
     } else if (section === "createOrEditBook") {
       setSelectedBook(data);
+    } else if (section === "createOrEditHistory") {
+      setSelectedHistory(data);
     }
 
     let autoParent = data;
@@ -258,7 +267,8 @@ export default function Page() {
         createOrEditLiveStreamSchedule: "Live Stream Schedules",
 
         // About Us
-        history: "About Us",
+        history: "All History",
+        createOrEditHistory: "All History",
         team: "About Us",
         positions: "About Us",
         books: "About Us",
@@ -379,34 +389,26 @@ export default function Page() {
             onSectionChange={handleSectionChange}
           />
         );
-      // Writers
-      case "writers":
-        return <WritersList onSectionChange={handleSectionChange} />;
-      case "createOrEditWriter":
-        return (
-          <CreateorEditWriter
-            onSectionChange={handleSectionChange}
-            selectedWriter={selectedWriter}
-          />
-        );
+
       // About Us
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
+      case "createOrEditHistory":
+        return (
+          <CreateOrEditHistory
+            historyItem={selectedHistory}
+            onSectionChange={handleSectionChange}
+          />
+        );
       case "team":
         return <OurTeamList onSectionChange={handleSectionChange} />;
       case "createOrEditTeam":
         return <UploadImagesToTeam onSectionChange={handleSectionChange} />;
-      case "books":
+      case "book":
         return <BooksList onSectionChange={handleSectionChange} />;
-      case "createOrEditBook":
-        return (
-          <CreateOrEditBook
-            selectedBook={selectedBook}
-            onSectionChange={handleSectionChange}
-          />
-        );
-      case "booksGroups":
-        return <BooksGroupsList onSectionChange={handleSectionChange} />;
+      case "createOrEditReviews":
+        return <UploadImagesToReviews onSectionChange={handleSectionChange} />;
+
       default:
         return <DashboardSections />;
       // Profile && Settings
