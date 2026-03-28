@@ -2,9 +2,9 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.db.models import Count, F, Max
-from jsonschema import ValidationError
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -1201,6 +1201,8 @@ class BookViewSet(viewsets.ModelViewSet):
 
         if Book.objects.exists():
             raise ValidationError({"error": "A book has already been created."})
+
+        return super().create(request, *args, **kwargs)
 
     @action(detail=True, methods=["post"], url_path="reviews")
     def create_reviews(self, request, pk=None):
