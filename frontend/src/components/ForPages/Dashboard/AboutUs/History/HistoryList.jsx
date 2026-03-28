@@ -4,7 +4,7 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { DeleteHistoryById, GetHistory } from "@/api/aboutUs";
+import { DeleteHistoryById, GetHistory } from "@/api/history";
 import {
   Table,
   TableBody,
@@ -121,7 +121,7 @@ function HistoryList({ onSectionChange }) {
           {/* Start Button && Total */}
           <div className="flex items-center justify-end gap-2 mt-4">
             <span className="text-sm text-gray-500">
-              {t("Total")}: {historyData.length} {t("events")}
+              {t("Total")}: {historyData?.length} {t("events")}
             </span>
             <button
               onClick={() => {
@@ -181,7 +181,7 @@ function HistoryList({ onSectionChange }) {
         {/* End Search */}
 
         {/* Start Table */}
-        {historyData.length === 0 ? (
+        {historyData?.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center shadow-sm">
             <div className="text-6xl mb-4">📅</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -191,7 +191,7 @@ function HistoryList({ onSectionChange }) {
               {t("Start by adding your first event in the company's history")}
             </p>
           </div>
-        ) : historyData.length === 0 ? (
+        ) : historyData?.length === 0 ? (
           <div className="bg-white rounded-lg p-12 text-center shadow-sm">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -236,7 +236,7 @@ function HistoryList({ onSectionChange }) {
                 </TableRow>
               </TableHeader>
               <TableBody className="text-[11px]">
-                {historyData.map((item) => (
+                {historyData?.map((item) => (
                   <TableRow
                     key={item.id}
                     className="hover:bg-gray-50/60 border-b"

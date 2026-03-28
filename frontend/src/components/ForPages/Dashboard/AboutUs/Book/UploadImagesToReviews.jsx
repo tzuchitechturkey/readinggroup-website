@@ -16,30 +16,34 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
   const [newImages, setNewImages] = useState([]);
   const [deletedPhotoIds, setDeletedPhotoIds] = useState([]);
   const [errors, setErrors] = useState({});
-  const [selectedNewsItem, setSelectedNewsItem] = useState(null);
+  const [book, setBook] = useState();
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize edit mode with news data
   useEffect(() => {
-    if (news && news.id) {
-      // Set selected news item
-      setSelectedNewsItem({
-        id: news.id,
-        title: news.title,
-      });
-
-      // Set existing images - احتفظ بالكائن الكامل مع id
-      if (news.images && news.images.length > 0) {
-        setImages(news.images);
+    const fetchBook = async () => {
+      setIsLoading(true);
+      try {
+        const res = await GetBook();
+        setBook(res.data[0]);
+        // Set existing images - احتفظ بالكائن الكامل مع id
+        if (res.data[0].reviews && res.data[0].reviews.length > 0) {
+          setImages(res.data[0].reviews);
+        }
+      } catch (error) {
+        setErrorFn(error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [news]);
+    };
+    fetchBook();
+  }, []);
 
   // Handler functions
   const handleNewImagesChange = (files) => {
-    const MAX_IMAGES = news?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
+    const MAX_IMAGES = book?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
     const totalImages = images.length + files.length;
 
     if (totalImages > MAX_IMAGES) {
@@ -71,7 +75,7 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
   const handleRemoveImage = (index) => {
     const imageToRemove = images[index];
 
-    // If it's an existing photo with an ID, track it for deletion
+    // If it's an existing review with an ID, track it for deletion
     if (imageToRemove?.id) {
       setDeletedPhotoIds((prev) => [...prev, imageToRemove.id]);
     }
@@ -103,7 +107,7 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
     setIsLoading(true);
 
     try {
-      // First, delete any removed photos
+      // First, delete any removed reviews
       if (deletedPhotoIds.length > 0) {
         await Promise.all(
           deletedPhotoIds.map((photoId) => DeleteBookReviewById(photoId)),
@@ -127,14 +131,14 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
           }
         });
 
-        await AddBookReview(selectedNewsItem.id, imageFormData);
+        await AddBookReview(book.id, imageFormData);
       }
 
       toast.success(t("Images added successfully"));
       setDeletedPhotoIds([]);
-      onSectionChange("news");
+      onSectionChange("book");
     } catch (error) {
-      console.error("Error adding images to news:", error);
+      console.error("Error adding images to book:", error);
 
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -148,7 +152,7 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
   };
 
   const handleCancel = () => {
-    onSectionChange("news");
+    onSectionChange("book");
   };
 
   const MAX_IMAGES = news?.id ? 28 : 6;

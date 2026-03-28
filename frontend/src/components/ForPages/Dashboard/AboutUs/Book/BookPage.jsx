@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { LuPencil, LuUpload } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
@@ -9,8 +8,9 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { GetBook, CreateBook, EditBookById } from "@/api/books";
 
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import ImageSection from "./ImageSection";
 
-const BooksList = ({ onSectionChange }) => {
+const BookPage = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -26,24 +26,24 @@ const BooksList = ({ onSectionChange }) => {
     cover_image: null,
   });
 
+  const [errors, setErrors] = useState({});
+
   // Fetch the single book
   const fetchBook = async () => {
     setIsLoading(true);
     try {
       const res = await GetBook();
-      if (res?.data) {
-        setBook(res.data);
-        setFormData({
-          title: res.data.title || "",
-          description: res.data.description || "",
-          image: null,
-          cover_image: null,
-        });
-        setPreviewImages({
-          image: res.data.image || null,
-          cover_image: res.data.cover_image || null,
-        });
-      }
+      setBook(res.data[0]);
+      setFormData({
+        title: res.data[0].title || "",
+        description: res.data[0].description || "",
+        image: null,
+        cover_image: null,
+      });
+      setPreviewImages({
+        image: res.data[0].image || null,
+        cover_image: res.data[0].cover_image || null,
+      });
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -64,23 +64,29 @@ const BooksList = ({ onSectionChange }) => {
     }));
   };
 
-  // Handle file input changes
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    if (files && files[0]) {
+  // Handle file input changes for specific image
+  const handleFileChange = (imageKey) => (file) => {
+    if (file) {
       setFormData((prev) => ({
         ...prev,
-        [name]: files[0],
+        [imageKey]: file,
       }));
       // Create preview
       const reader = new FileReader();
       reader.onload = (event) => {
         setPreviewImages((prev) => ({
           ...prev,
-          [name]: event.target.result,
+          [imageKey]: event.target.result,
         }));
       };
-      reader.readAsDataURL(files[0]);
+      reader.readAsDataURL(file);
+      // Clear error if exists
+      if (errors[imageKey]) {
+        setErrors((prev) => ({
+          ...prev,
+          [imageKey]: "",
+        }));
+      }
     }
   };
 
@@ -118,6 +124,7 @@ const BooksList = ({ onSectionChange }) => {
         image: res.data.image || null,
         cover_image: res.data.cover_image || null,
       });
+
       toast.success(
         book?.id
           ? t("Book updated successfully")
@@ -132,7 +139,7 @@ const BooksList = ({ onSectionChange }) => {
 
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 pt-3 px-3"
+      className="bg-white rounded-lg p-3 lg:p-6 w-full mx-4 overflow-y-auto"
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
@@ -149,6 +156,24 @@ const BooksList = ({ onSectionChange }) => {
 
       <div className="py-6">
         <form onSubmit={handleCreateBook} className="space-y-6">
+          {/* Image Upload */}
+          <ImageSection
+            imagePreview={previewImages.image}
+            onFileChange={handleFileChange("image")}
+            errors={errors}
+          />
+
+          {/* Cover Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("Cover Image")}
+            </label>
+            <ImageSection
+              imagePreview={previewImages.cover_image}
+              onFileChange={handleFileChange("cover_image")}
+              errors={errors}
+            />
+          </div>
           {/* Title Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -178,61 +203,6 @@ const BooksList = ({ onSectionChange }) => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Image")}
-            </label>
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100">
-                <LuUpload />
-                <span>{t("Upload Image")}</span>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-              {previewImages.image && (
-                <img
-                  src={previewImages.image}
-                  alt="Preview"
-                  className="h-20 w-20 object-cover rounded"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Cover Image Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Cover Image")}
-            </label>
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100">
-                <LuUpload />
-                <span>{t("Upload Cover Image")}</span>
-                <input
-                  type="file"
-                  name="cover_image"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-              {previewImages.cover_image && (
-                <img
-                  src={previewImages.cover_image}
-                  alt="Preview"
-                  className="h-20 w-20 object-cover rounded"
-                />
-              )}
-            </div>
-          </div>
-
           {/* Submit Button */}
           <div className="flex gap-3">
             <button
@@ -256,4 +226,4 @@ const BooksList = ({ onSectionChange }) => {
   );
 };
 
-export default BooksList;
+export default BookPage;

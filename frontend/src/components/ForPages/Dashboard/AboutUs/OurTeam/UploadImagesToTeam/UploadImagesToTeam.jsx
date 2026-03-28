@@ -159,7 +159,7 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
 
       toast.success(t("Images added successfully"));
       setDeletedPhotoIds([]);
-      onSectionChange("news");
+      onSectionChange("team");
     } catch (error) {
       console.error("Error adding images to news:", error);
 

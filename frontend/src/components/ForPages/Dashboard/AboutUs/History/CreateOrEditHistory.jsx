@@ -238,65 +238,7 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
         </div>
         {/* End Description */}
 
-        {/* Start Image URL */}
-        {/* <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Image URL")}
-          </label>
-          <input
-            type="url"
-            name="image_url"
-            value={formData.image_url || ""}
-            onChange={handleInputChange}
-            placeholder={t("Enter image URL")}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div> */}
-        {/* End Image URL */}
-
-        {/* Start Image Upload */}
-        <div>
-          <div className="px-4 py-3 bg-blue-50 border-b border-blue-100">
-            <p className="text-sm text-blue-800">
-              <strong>{t("Important")}:</strong>{" "}
-              {t(
-                "Please select an image with minimum dimensions of 1920x1080 pixels for best quality.",
-              )}
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
-            </p>
-          </div>
-          <label className="block text-sm font-medium text-gray-700 mb-2 mt-3">
-            {t("Event Image")} {!historyItem?.id && "*"}
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className={`w-full p-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm ${
-              errors.image ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.image && (
-            <p className="text-red-500 text-xs mt-1">{errors.image}</p>
-          )}
-
-          {formData.image && (
-            <div className="mt-3">
-              <img
-                src={
-                  typeof formData.image === "string"
-                    ? formData.image
-                    : URL.createObjectURL(formData.image)
-                }
-                alt="preview"
-                className="w-32 h-32 object-cover rounded-lg border"
-              />
-            </div>
-          )}
-        </div>
-        {/* End Image Upload */}
+      
 
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">

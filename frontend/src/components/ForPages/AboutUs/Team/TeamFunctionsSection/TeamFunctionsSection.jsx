@@ -24,18 +24,21 @@ const TeamFunctionCarousel = ({ bannerImages = [] }) => {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
-  const slides = bannerImages.length > 0 ? bannerImages : ["https://placehold.co/800x450/cbd5e1/475569?text=No+Banner+Available"];
+  const slides =
+    bannerImages?.length > 0
+      ? bannerImages
+      : ["https://placehold.co/800x450/cbd5e1/475569?text=No+Banner+Available"];
 
   return (
     <div className="relative w-full">
       <div className="overflow-hidden rounded-md shadow-md" ref={emblaRef}>
         <div className="flex h-[250px] sm:h-[300px] lg:h-[385px]">
-          {slides.map((image, index) => (
+          {slides?.map((image, index) => (
             <div className="flex-[0_0_100%] min-w-0 relative" key={index}>
-              <img 
-                src={image} 
-                alt={`Team Slide ${index + 1}`} 
-                className="w-full h-full object-cover transition-opacity duration-700" 
+              <img
+                src={image?.image}
+                alt={`Team Slide ${index + 1}`}
+                className="w-full h-full object-cover transition-opacity duration-700"
               />
             </div>
           ))}
@@ -58,25 +61,26 @@ const TeamFunctionCarousel = ({ bannerImages = [] }) => {
   );
 };
 
-const TeamFunctionsSection = ({ metadata }) => {
+const TeamFunctionsSection = ({ data }) => {
   return (
     <div className="space-y-16 lg:space-y-24 max-w-[1200px] mx-auto px-4">
-      {metadata.map((team, index) => (
-        <div key={index} className={`flex flex-col ${index % 2 !== 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-6 items-center lg:min-h-[435px]`}>
-
+      {data?.map((team, index) => (
+        <div
+          key={index}
+          className={`flex flex-col ${index % 2 !== 0 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-6 items-center lg:min-h-[435px]`}
+        >
           <div className="w-full lg:w-[60%] shrink-0">
-            <TeamFunctionCarousel bannerImages={team.images} />
+            <TeamFunctionCarousel bannerImages={team?.images} />
           </div>
 
           <div className="w-full lg:w-[40%] flex flex-col justify-center px-2 lg:px-6">
             <h3 className="text-2xl sm:text-3xl lg:text-[36px] font-extrabold text-[#112344] mb-4 leading-tight">
-              {team.title}
+              {team?.title}
             </h3>
             <p className="text-[#4a6288] leading-relaxed text-sm lg:text-base font-medium">
-              {team.description}
+              {team?.description}
             </p>
           </div>
-
         </div>
       ))}
     </div>

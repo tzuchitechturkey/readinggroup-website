@@ -24,10 +24,7 @@ import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/C
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
 import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
 import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
-import BooksList from "@/components/ForPages/Dashboard/AboutUs/Book/BooksList";
-import CreateorEditWriter from "@/components/ForPages/Dashboard/Writers/CreateorEditWriter/CreateorEditWriter";
-import WritersList from "@/components/ForPages/Dashboard/Writers/WritersList";
-import CreateOrEditBook from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
+import BookPage from "@/components/ForPages/Dashboard/AboutUs/Book/BookPage";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
 import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
 import PhotoCollectionsList from "@/components/ForPages/Dashboard/Events/PhotoCollection/PhotoCollectionsList";
@@ -37,7 +34,6 @@ import RelatedReportsList from "@/components/ForPages/Dashboard/Events/RelatedRe
 import RelatedReportsCategoriesContent from "@/components/ForPages/Dashboard/Events/RelatedReports/RelatedReportsCategories/RelatedReportsCategoriesContent";
 import CreateOrEditRelatedReports from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/CreateOrEditRelatedReports";
 import NewsList from "@/components/ForPages/Dashboard/Events/News/NewsList";
-import CreateOrEditNews from "@/components/ForPages/Dashboard/Events/News/CreateOrEditNews/CreateOrEditNews";
 import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
 import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/UploadImagesToNews/UploadImagesToNews";
 
@@ -234,7 +230,7 @@ export default function Page() {
       setSelectedPhotoCollections(data);
     } else if (section === "createOrEditLiveStreamSchedule") {
       setSelectedLiveStream(data);
-    } else if (section === "createOrEditBook") {
+    } else if (section === "createOrEditReviews") {
       setSelectedBook(data);
     } else if (section === "createOrEditHistory") {
       setSelectedHistory(data);
@@ -269,10 +265,11 @@ export default function Page() {
         // About Us
         history: "All History",
         createOrEditHistory: "All History",
-        team: "About Us",
+        team: "Team Members",
+        createOrEditTeam: "Team Members",
         positions: "About Us",
-        books: "About Us",
-        createOrEditBook: "About Us",
+        book: "Book",
+        createOrEditReviews: "Book",
         booksGroups: "About Us",
         // Settings && Profile
         profileSettings: "Settings",
@@ -405,7 +402,7 @@ export default function Page() {
       case "createOrEditTeam":
         return <UploadImagesToTeam onSectionChange={handleSectionChange} />;
       case "book":
-        return <BooksList onSectionChange={handleSectionChange} />;
+        return <BookPage onSectionChange={handleSectionChange} />;
       case "createOrEditReviews":
         return <UploadImagesToReviews onSectionChange={handleSectionChange} />;
 

@@ -230,38 +230,6 @@ export default function AppSidebar({
           },
         ],
       },
-
-      // {
-      //   title: "About Us",
-      //   onClick: () => onSectionChange("about"),
-      //   icon: VaadinHealth,
-      //   items: [
-      //     {
-      //       title: "History",
-      //       onClick: () => onSectionChange("history"),
-      //     },
-      //     {
-      //       title: "Our Team",
-      //       onClick: () => onSectionChange("team"),
-      //     },
-      //     {
-      //       title: "Departments",
-      //       onClick: () => onSectionChange("departments"),
-      //     },
-      //     {
-      //       title: "The Books Groups",
-      //       onClick: () => onSectionChange("booksGroups"),
-      //     },
-      //     {
-      //       title: "The Books",
-      //       onClick: () => onSectionChange("books"),
-      //     },
-      //     {
-      //       title: "Add/Edit Book",
-      //       onClick: () => onSectionChange("createOrEditBook"),
-      //     },
-      //   ],
-      // },
     ],
 
     settings: [

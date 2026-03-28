@@ -63,3 +63,4 @@ export async function EditTeamImage(photoId, data) {
 export async function DeletePhotoFromTeam(photo_id) {
   return await axios.delete(`/our-team-images/${photo_id}/`);
 }
+

@@ -237,7 +237,7 @@ function OurTeamList({ onSectionChange }) {
                       <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                         <div className="flex items-center justify-center gap-2">
                           <img
-                            src={member.image}
+                            src={member.images[0]?.image}
                             alt={member.title}
                             className="w-10 h-10 rounded-full object-cover border-2 border-blue-100 "
                             onError={(e) => {

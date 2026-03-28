@@ -20,7 +20,8 @@ const SISTER_SECTION_METADATA = {
   sectionTitle: "Meet the Sister that runs all the livestreams!",
   sisterName: "美雲老師",
   sisterAvatar: "https://placehold.co/400x400/ffe4e6/e11d48?text=Sister",
-  description: "美雲老師 serves as the principal teacher And host of our weekly livestream gatherings. With [X] years of dedication to Tzu Chi's mission, she brings profound understanding and compassionate insight to every session. Her leadership has shaped our study group into a thriving community where students from around the world gather to explore Buddhist teachings and cultivate wisdom together. Her commitment to sharing the Dharma continues to inspire all who join us."
+  description:
+    "美雲老師 serves as the principal teacher And host of our weekly livestream gatherings. With [X] years of dedication to Tzu Chi's mission, she brings profound understanding and compassionate insight to every session. Her leadership has shaped our study group into a thriving community where students from around the world gather to explore Buddhist teachings and cultivate wisdom together. Her commitment to sharing the Dharma continues to inspire all who join us.",
 };
 
 const TEAM_FUNCTIONS_METADATA = [
@@ -29,43 +30,56 @@ const TEAM_FUNCTIONS_METADATA = [
     images: [
       "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+1",
       "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+2",
-      "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+3"
+      "https://placehold.co/800x400/f1f5f9/475569?text=Guest+Hosting+Banner+3",
     ],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Broadcasting Team",
-    images: ["https://placehold.co/800x400/e0f2fe/0369a1?text=Broadcasting+Banner"],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    images: [
+      "https://placehold.co/800x400/e0f2fe/0369a1?text=Broadcasting+Banner",
+    ],
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Video Creation Team",
-    images: ["https://placehold.co/800x400/f0f9ff/075985?text=Video+Creation+Banner"],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    images: [
+      "https://placehold.co/800x400/f0f9ff/075985?text=Video+Creation+Banner",
+    ],
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Steering Team",
     images: ["https://placehold.co/800x400/ecfdf5/065f46?text=Steering+Banner"],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Documentation Design Team",
     images: ["https://placehold.co/800x400/fff7ed/9a3412?text=Design+Banner"],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Steering Team ",
-    images: ["https://placehold.co/800x400/f8fafc/334155?text=Steering+Banner+2"],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
+    images: [
+      "https://placehold.co/800x400/f8fafc/334155?text=Steering+Banner+2",
+    ],
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
   },
   {
     title: "Video Creation Team ",
     images: [
       "https://placehold.co/800x400/f1f5f9/475569?text=Video+Banner+2",
-      "https://placehold.co/800x400/f1f5f9/475569?text=Video+Banner+3"
+      "https://placehold.co/800x400/f1f5f9/475569?text=Video+Banner+3",
     ],
-    description: "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos."
-  }
+    description:
+      "Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.",
+  },
 ];
 
 function AboutTeamContent() {
@@ -78,13 +92,8 @@ function AboutTeamContent() {
     try {
       const res = await GetTeam(100, 0);
       const results = res.data.results || [];
-      const grouped = {};
-      results.forEach((item) => {
-        const key = item.position?.name || "Unassigned";
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(item);
-      });
-      setGroupedData(grouped);
+
+      setGroupedData(results);
     } catch (err) {
       console.error(err);
     } finally {
@@ -104,17 +113,20 @@ function AboutTeamContent() {
         {/* Top Header */}
         <div className="mb-12">
           <h1 className="text-3xl md:text-5xl font-extrabold text-[#112344]">
-            {t(SISTER_SECTION_METADATA.mainTitle)}
+            {t("Our Team")}
           </h1>
         </div>
 
         {/* Sister Section */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center mb-24">
           <div className="lg:w-1/3 flex justify-center lg:justify-start">
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80 bg-gradient-to-tr from-[#ffe4e6] to-[#ffedd5] p-2" style={heartMaskStyle}>
+            <div
+              className="relative w-64 h-64 sm:w-80 sm:h-80 bg-gradient-to-tr from-[#ffe4e6] to-[#ffedd5] p-2"
+              style={heartMaskStyle}
+            >
               <img
-                src={SISTER_SECTION_METADATA.sisterAvatar}
-                alt={SISTER_SECTION_METADATA.sisterName}
+                src={groupedData[0]?.images[0]?.image}
+                alt={groupedData[0]?.name}
                 className="w-full h-full object-cover"
                 style={heartMaskStyle}
               />
@@ -122,13 +134,11 @@ function AboutTeamContent() {
           </div>
           <div className="lg:w-2/3">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#112344] mb-2 leading-tight">
-              {t(SISTER_SECTION_METADATA.sectionTitle)}
+              {t(groupedData[0]?.title)}
             </h2>
-            <h3 className="text-xl sm:text-2xl font-bold text-[#112344] mb-4">
-              {SISTER_SECTION_METADATA.sisterName}
-            </h3>
+
             <p className="text-[#4a6288] leading-relaxed text-sm sm:text-base mb-4 font-medium">
-              {t(SISTER_SECTION_METADATA.description)}
+              {t(groupedData[0]?.description)}
             </p>
           </div>
         </div>
@@ -141,10 +151,7 @@ function AboutTeamContent() {
         </div>
 
         {/* Reusable Section Component */}
-        <TeamFunctionsSection
-          groupedData={groupedData}
-          metadata={TEAM_FUNCTIONS_METADATA}
-        />
+        {groupedData?.length > 0 && <TeamFunctionsSection data={groupedData} />}
       </div>
     </div>
   );
