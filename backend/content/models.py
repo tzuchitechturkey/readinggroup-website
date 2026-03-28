@@ -455,7 +455,7 @@ class HistoryEventImage(TimestampedModel):
         HistoryEvent, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="our-history/images/")
-    caption = models.CharField(max_length=500, blank=True)
+    caption = models.CharField(max_length=1000, blank=False, null=False)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
