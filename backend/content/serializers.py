@@ -18,7 +18,6 @@ from .models import (
     VideoCategory,
     OurTeamImage,
     HistoryEvent,
-    HistoryYear,
     SocialMedia,
     BookReview,
     NavbarLogo,
@@ -409,14 +408,13 @@ class HistoryEventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         model = HistoryEvent
         fields = "__all__"
 
-
-class HistoryYearSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
-    datetime_fields = ("created_at", "updated_at")
-    events = HistoryEventSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = HistoryYear
-        fields = "__all__"
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if "images" in data and instance.images.exists():
+            data["images"] = HistoryEventImageSerializer(
+                instance.images.all(), many=True, context=self.context
+            ).data
+        return data
 
 
 # ------------------------------------------------------------------new models serializers end----------------------------------------------------------------

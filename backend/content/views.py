@@ -35,7 +35,6 @@ from .models import (
     HistoryEvent,
     OurTeamImage,
     SocialMedia,
-    HistoryYear,
     BookReview,
     NavbarLogo,
     LatestNews,
@@ -58,7 +57,6 @@ from .serializers import (
     LearnCategorySerializer,
     OurTeamImageSerializer,
     HistoryEventSerializer,
-    HistoryYearSerializer,
     SocialMediaSerializer,
     LatestNewsSerializer,
     BookReviewSerializer,
@@ -1254,45 +1252,34 @@ class BookReviewViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
-class HistoryYearViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing history years."""
-
-    queryset = HistoryYear.objects.all().order_by("year")
-    serializer_class = HistoryYearSerializer
+class HistoryEventViewSet(viewsets.ModelViewSet):
+    queryset = HistoryEvent.objects.all().order_by("year")
+    serializer_class = HistoryEventSerializer
     pagination_class = None
 
-    search_fields = ("year",)
+    search_fields = ("title", "sub_title")
     ordering_fields = ("year", "created_at")
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-
-
-class HistoryEventViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing history events."""
-
-    queryset = HistoryEvent.objects.all().order_by("-created_at")
-    serializer_class = HistoryEventSerializer
-    pagination_class = LimitOffsetPagination
-
-    search_fields = ("title",)
-    ordering_fields = ("created_at",)
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
     @action(detail=True, methods=["post"], url_path="images")
     def upload_images(self, request, pk=None):
-        """Upload multiple images for an event (same as OurTeam)."""
-
         event = self.get_object()
+
         files = request.FILES.getlist("images")
 
         if not files:
             return Response(
                 {"error": "No images provided"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=400,
             )
+
+        # 🔥 نحسب آخر order
+        last_order = event.images.aggregate(max_order=Max("order"))["max_order"]
+        last_order = last_order if last_order is not None else -1
 
         created_images = []
 
-        for index, file in enumerate(files):
+        for index, file in enumerate(files, start=last_order + 1):
             obj = HistoryEventImage.objects.create(
                 event=event,
                 image=file,
@@ -1304,12 +1291,10 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
             created_images, many=True, context={"request": request}
         )
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=201)
 
 
 class HistoryEventImageViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing individual event images."""
-
     queryset = HistoryEventImage.objects.all()
     serializer_class = HistoryEventImageSerializer
     pagination_class = LimitOffsetPagination

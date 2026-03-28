@@ -9,9 +9,8 @@ from .views import (
     EventCommunityViewSet,
     VideoCategoryViewSet,
     LearnCategoryViewSet,
-    OurTeamImageViewSet,
     HistoryEventViewSet,
-    HistoryYearViewSet,
+    OurTeamImageViewSet,
     SocialMediaViewSet,
     BookReviewViewSet,
     LatestNewsViewSet,
@@ -37,6 +36,7 @@ router.register(r"latest-news", LatestNewsViewSet, basename="latest-news")
 router.register(r"book-reviews", BookReviewViewSet, basename="book-review")
 router.register(r"navbar-logos", NavbarLogoViewSet, basename="navbar-logo")
 router.register(r"social-media", SocialMediaViewSet, basename="social-media")
+router.register(r"history-events", HistoryEventViewSet, basename="history-event")
 router.register(r"our-team-images", OurTeamImageViewSet, basename="our-team-image")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
@@ -59,7 +59,5 @@ router.register(
 router.register(
     r"history-event-images", HistoryEventImageViewSet, basename="history-event-image"
 )
-router.register(r"history-events", HistoryEventViewSet, basename="history-event")
-router.register(r"history-years", HistoryYearViewSet, basename="history-year")
 
 urlpatterns = router.urls

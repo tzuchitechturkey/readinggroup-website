@@ -13,7 +13,6 @@ from .models import (
     LearnCategory,
     HistoryEvent,
     SocialMedia,
-    HistoryYear,
     BookReview,
     NavbarLogo,
     LatestNews,
@@ -187,12 +186,6 @@ class BookReviewAdmin(admin.ModelAdmin):
     list_display = ("id", "book", "order", "created_at")
     search_fields = ("book__title",)
     list_filter = ("book", "created_at")
-
-
-@admin.register(HistoryYear)
-class HistoryYearAdmin(admin.ModelAdmin):
-    list_display = ("year",)
-    search_fields = ("year",)
 
 
 @admin.register(HistoryEvent)

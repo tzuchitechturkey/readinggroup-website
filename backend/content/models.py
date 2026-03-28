@@ -437,29 +437,17 @@ class BookReview(TimestampedModel):
         return f"Review {self.order} for {self.book.title}"
 
 
-class HistoryYear(TimestampedModel):
-    year = models.PositiveIntegerField(unique=True)
-
-    class Meta:
-        ordering = ("-year",)
-
-    def __str__(self):
-        return str(self.year)
-
-
 class HistoryEvent(TimestampedModel):
-    year = models.ForeignKey(
-        HistoryYear, on_delete=models.CASCADE, related_name="events"
-    )
+    year = models.PositiveIntegerField()
     title = models.CharField(max_length=255)
     sub_title = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
 
     class Meta:
-        ordering = ("created_at",)
+        ordering = ("year",)
 
     def __str__(self):
-        return f"{self.year.year} - {self.title}"
+        return f"{self.year} - {self.title}"
 
 
 class HistoryEventImage(TimestampedModel):
