@@ -1,65 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-import { Trash2, X, Tag, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { CreateTeam, EditTeamById, GetDepartments } from "@/api/aboutUs";
+import { CreateTeam, EditTeamById } from "@/api/aboutUs";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
-import { socialPlatforms } from "@/constants/constants";
-import { processImageFile } from "@/Utility/imageConverter";
 
 const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    department: "",
+    title: "",
     description: "",
-    job_title: "",
-    avatar: "",
-    avatar_url: "",
-    social_links: [{ name: "", url: "" }],
   });
-  const [DepartmentsList, setDepartmentsList] = useState([]);
-  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
-  const departmentDropdownRef = useRef(null);
-  const [departmentSearchValue, setDepartmentSearchValue] = useState("");
   const [errors, setErrors] = useState({});
-  // Reset form when modal opens/closes or member changes
-
-  const getDepartments = async (searchVal) => {
-    try {
-      const res = await GetDepartments(10, 0, searchVal);
-      setDepartmentsList(res?.data?.results || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   useEffect(() => {
     if (isOpen) {
       if (member?.id) {
         setFormData({
-          name: member.name,
-          department: member.position,
+          title: member.title,
           description: member.description,
-          job_title: member.job_title,
-          avatar: member.avatar,
-          avatar_url: member.avatar,
-          social_links: member.social_links || [],
         });
       } else {
         setFormData({
-          name: "",
-          department: "",
+          title: "",
           description: "",
-          job_title: "",
-          avatar: "",
-          avatar_url: "",
-          social_links: [{ name: "", url: "" }],
         });
       }
     }
@@ -81,95 +49,16 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        // معالجة الصورة (تحويل HEIC إذا لزم الأمر)
-        const { file: processedFile } = await processImageFile(file);
-
-        // Store the file object for upload
-        setFormData((prev) => ({
-          ...prev,
-          avatar: processedFile,
-          avatar_url: "", // Clear URL when file is selected
-        }));
-
-        // Clear avatar error if exists
-        if (errors.avatar) {
-          setErrors((prev) => ({
-            ...prev,
-            avatar: "",
-          }));
-        }
-      } catch (error) {
-        console.error("Error processing image:", error);
-        toast.error(t("Failed to process image"));
-      }
-    }
-  };
-
-  // Handle  selection
-  const handleDepartmentSelect = (department) => {
-    setFormData((prev) => ({
-      ...prev,
-      department: department.id,
-    }));
-    setShowDepartmentDropdown(false);
-    setDepartmentSearchValue("");
-
-    // Clear department error if exists
-    if (errors.department) {
-      setErrors((prev) => ({
-        ...prev,
-        department: "",
-      }));
-    }
-  };
-
-  const handleSocialChange = (index, field, value) => {
-    const newSocial = [...formData.social_links];
-    newSocial[index] = { ...newSocial[index], [field]: value };
-    setFormData((prev) => ({
-      ...prev,
-      social_links: newSocial,
-    }));
-  };
-
-  const addSocialField = () => {
-    setFormData((prev) => ({
-      ...prev,
-      social_links: [...prev.social_links, { name: "", url: "" }],
-    }));
-  };
-
-  const removeSocialField = (index) => {
-    if (formData.social_links.length > 1) {
-      const newSocial = formData.social_links.filter((_, i) => i !== index);
-      setFormData((prev) => ({
-        ...prev,
-        social_links: newSocial,
-      }));
-    }
-  };
-
   // Validate form
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = t("Name is required");
+    if (!formData.title.trim()) {
+      newErrors.title = t("Title is required");
     }
 
-    if (!formData.department) {
-      newErrors.department = t("Department is required");
-    }
-    if (!formData.job_title.trim()) {
-      newErrors.job_title = t("Job title is required");
-    }
-
-    if (!formData.avatar && !member?.id) {
-      newErrors.avatar = t("Avatar is required");
+    if (!formData.description.trim()) {
+      newErrors.description = t("Description is required");
     }
 
     setErrors(newErrors);
@@ -187,21 +76,10 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
 
     // Prepare data for submission
     const submitData = new FormData();
-    submitData.append("name", formData.name);
-    submitData.append(
-      "position",
-      formData.department?.id || formData.department
-    );
+    submitData.append("title", formData.title);
+
     submitData.append("description", formData.description);
-    submitData.append("job_title", formData.job_title);
 
-    if (formData.avatar instanceof File) {
-      submitData.append("avatar", formData.avatar);
-    }
-
-    // Add social media data
-    const cleanedSocial = formData.social_links.filter((s) => s.name && s.url);
-    submitData.append("social_links", JSON.stringify(cleanedSocial));
     try {
       member?.id
         ? await EditTeamById(member.id, submitData)
@@ -210,7 +88,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
       toast.success(
         member?.id
           ? t("Member updated successfully")
-          : t("Member created successfully")
+          : t("Member created successfully"),
       );
       setUpdate((prev) => !prev);
       onClose();
@@ -221,31 +99,6 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     }
   };
 
-  useEffect(() => {
-    getDepartments();
-  }, []);
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Close writer dropdown if clicked outside
-
-      // Close department dropdown if clicked outside
-      if (
-        departmentDropdownRef.current &&
-        !departmentDropdownRef.current.contains(event.target)
-      ) {
-        setShowDepartmentDropdown(false);
-      }
-    };
-
-    // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
   if (!isOpen) return null;
   return (
     <div className="bg-white rounded-lg p-6 px-1 w-full   overflow-y-auto">
@@ -258,159 +111,19 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           </label>
           <input
             type="text"
-            name="name"
+            name="title"
             placeholder={t("Enter full name")}
-            value={formData.name}
+            value={formData.title}
             onChange={handleInputChange}
             className={`w-full p-3 border rounded-lg outline-none ${
-              errors.name ? "border-red-500" : "border-gray-300"
+              errors.title ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
           )}
         </div>
 
-        {/* Start Department */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t("Department")} *
-          </label>
-          <div className="relative" ref={departmentDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setShowDepartmentDropdown(!showDepartmentDropdown)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex items-center gap-3 ${
-                errors.department ? "border-red-500" : "border-gray-300"
-              }`}
-            >
-              {formData?.department ? (
-                <>
-                  <Tag className="w-5 h-5 text-blue-600" />
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">
-                      {DepartmentsList.find(
-                        (pos) =>
-                          pos.id ===
-                          (formData.department?.id || formData.department)
-                      )?.name || t("Select Department")}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Tag className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-500">
-                    {t("Select Department")}
-                  </span>
-                </>
-              )}
-            </button>
-
-            {showDepartmentDropdown && (
-              <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-hidden">
-                {/* Search Box */}
-                <div className="p-3 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        value={departmentSearchValue}
-                        onChange={(e) =>
-                          setDepartmentSearchValue(e.target.value)
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            getCategories(departmentSearchValue);
-                          }
-                        }}
-                        placeholder={t("Search departments...")}
-                        className="w-full px-3 py-1.5 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      />
-                      {departmentSearchValue && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDepartmentSearchValue("");
-                            getDepartments("");
-                          }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        getDepartments(departmentSearchValue);
-                      }}
-                      className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                      title={t("Search")}
-                    >
-                      <Search className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Categories List */}
-                <div className="max-h-60 overflow-y-auto">
-                  {DepartmentsList.length > 0 ? (
-                    DepartmentsList.map((department) => (
-                      <button
-                        key={department.id}
-                        type="button"
-                        onClick={() => handleDepartmentSelect(department)}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 flex items-center gap-3"
-                      >
-                        <Tag className="w-5 h-5 text-blue-600" />
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">
-                            {department.name}
-                          </div>
-                          {department.description && (
-                            <div className="text-xs text-gray-500">
-                              {department.description}
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-3 py-4 text-center text-gray-500 text-sm">
-                      {t("No categories found")}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          {errors.department && (
-            <p className="text-red-500 text-xs mt-1">{errors.department}</p>
-          )}
-        </div>
-        {/* End Department */}
-        {/* Start Job Title */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Job Title")} *
-          </label>
-          <input
-            type="text"
-            name="job_title"
-            value={formData.job_title}
-            onChange={handleInputChange}
-            placeholder={t("Developer, Manager, etc")}
-            className={`w-full p-3 border border-gray-300 rounded-lg  outline-none ${
-              errors.job_title ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.job_title && (
-            <p className="text-red-500 text-xs mt-1">{errors.job_title}</p>
-          )}
-        </div>
-        {/* End Job Title */}
         {/* Start Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -426,106 +139,6 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
           />
         </div>
         {/* End Description */}
-        {/* Start Avatar Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Avatar")} *
-          </label>
-          <input
-            type="file"
-            name="avatar"
-            accept="image/*,.heic,.heif"
-            onChange={handleFileChange}
-            className={`w-full p-3 border rounded-lg outline-none ${
-              errors.avatar ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {errors.avatar && (
-            <p className="text-red-500 text-xs mt-1">{errors.avatar}</p>
-          )}
-          {formData.avatar && typeof formData.avatar === "string" && (
-            <div className="mt-2">
-              <img
-                src={formData.avatar}
-                alt="Avatar preview"
-                className="w-16 h-16 rounded-full object-cover"
-              />
-            </div>
-          )}
-        </div>
-        {/* End Avatar Upload */}
-
-        {/* Start Avatar URL (Alternative) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Avatar URL")}
-          </label>
-          <input
-            type="url"
-            name="avatar_url"
-            value={formData.avatar_url}
-            onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
-            placeholder={t("Enter image URL as alternative to file upload")}
-          />
-        </div>
-        {/* End Avatar URL */}
-        {/* Start Social Media */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Social Media")}
-          </label>
-
-          {formData.social_links.map((social, index) => (
-            <div key={index} className="flex flex-col gap-2 mb-2 sm:flex-row">
-              <select
-                value={social.name || ""}
-                onChange={(e) =>
-                  handleSocialChange(index, "name", e.target.value)
-                }
-                className="w-1/2 p-2 border border-gray-300 rounded-lg outline-none placeholder:text-sm"
-              >
-                <option disabled hidden value="">
-                  {t("platform")}
-                </option>
-                {socialPlatforms.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="url"
-                placeholder={t("Social Network URL")}
-                value={social.url}
-                onChange={(e) =>
-                  handleSocialChange(index, "url", e.target.value)
-                }
-                className="w-full p-2 border border-gray-300 rounded-lg  outline-none"
-              />
-
-              {formData.social_links.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeSocialField(index)}
-                  className="w-full sm:w-auto px-2 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addSocialField}
-            className="mt-2 w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-          >
-            {t("Add Social Media Link")}
-          </button>
-        </div>
-
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button

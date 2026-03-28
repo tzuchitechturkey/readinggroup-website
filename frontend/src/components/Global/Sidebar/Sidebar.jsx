@@ -141,10 +141,6 @@ export default function AppSidebar({
         onClick: "#",
         icon: InstagramIcon,
         items: [
-          // {
-          //   title: "All Photo Collections",
-          //   onClick: () => onSectionChange("photoCollections"),
-          // },
           {
             title: "Add/Edit Photo",
             onClick: () => onSectionChange("createOrEditPhotoCollection"),
@@ -189,6 +185,21 @@ export default function AppSidebar({
           },
         ],
       },
+      {
+        title: "Team Members",
+        onClick: "#",
+        icon: VaadinHealth,
+        items: [
+          {
+            title: "Add/Edit Team Member",
+            onClick: () => onSectionChange("createOrEditTeam"),
+          },
+          {
+            title: "Our Team",
+            onClick: () => onSectionChange("team"),
+          },
+        ],
+      },
 
       // {
       //   title: "Writers",
@@ -208,7 +219,7 @@ export default function AppSidebar({
       // {
       //   title: "About Us",
       //   onClick: () => onSectionChange("about"),
-      //   icon: WhoWeAre,
+      //   icon: VaadinHealth,
       //   items: [
       //     {
       //       title: "History",

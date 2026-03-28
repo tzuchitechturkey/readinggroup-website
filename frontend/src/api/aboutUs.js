@@ -2,7 +2,7 @@ import axios from "./axios";
 
 export async function GetHistory(limit, offset, search = "") {
   return await axios.get(
-    `/history/?limit=${limit}&offset=${offset}&search=${search}`
+    `/history/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 
@@ -24,51 +24,42 @@ export async function DeleteHistoryById(id) {
 
 export async function GetTeam(limit, offset, search = "") {
   return await axios.get(
-    `/team/?limit=${limit}&offset=${offset}&search=${search}`
+    `/our-team/?limit=${limit}&offset=${offset}&search=${search}`,
   );
 }
 
 export async function CreateTeam(data) {
-  return await axios.post(`/team/`, data);
+  return await axios.post(`/our-team/`, data);
 }
 
 export async function GetTeamById(id) {
-  return await axios.get(`/team/${id}/`);
+  return await axios.get(`/our-team/${id}/`);
 }
 
 export async function EditTeamById(id, data) {
-  return await axios.put(`/team/${id}/`, data);
+  return await axios.put(`/our-team/${id}/`, data);
 }
 
 export async function DeleteTeamById(id) {
-  return await axios.delete(`/team/${id}/`);
+  return await axios.delete(`/our-team/${id}/`);
 }
 
-export async function GetDepartments(limit, offset, search = "") {
-  return await axios.get(
-    `/position-team-members/?limit=${limit}&offset=${offset}&search=${search}`
-  );
-}
-export async function GetAllDepartments() {
-  return await axios.get(`/position-team-members/`);
+// /our-team-images/
+export async function GetTeamImages(teamId) {
+  return await axios.get(`/our-team/${teamId}/images/`);
 }
 
-export async function filterPositions(positionName) {
-  return await axios.get(`/team/?search=${positionName}`);
+// /our-team-images/
+export async function AddImagesToTeam(teamId, data) {
+  return await axios.post(`/our-team/${teamId}/images/`, data);
 }
 
-export async function CreateDepartment(data) {
-  return await axios.post(`/position-team-members/`, data);
+// /our-team-images/{id}/
+export async function EditTeamImage(photoId, data) {
+  return await axios.put(`/our-team-images/${photoId}/`, data);
 }
 
-export async function GetDepartmentById(id) {
-  return await axios.get(`/position-team-members/${id}/`);
-}
-
-export async function EditDepartmentById(id, data) {
-  return await axios.put(`/position-team-members/${id}/`, data);
-}
-
-export async function DeleteDepartmentById(id) {
-  return await axios.delete(`/position-team-members/${id}/`);
+// Delete Photo from collection /our-team-images/{id}/
+export async function DeletePhotoFromTeam(photo_id) {
+  return await axios.delete(`/our-team-images/${photo_id}/`);
 }

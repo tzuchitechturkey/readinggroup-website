@@ -1,11 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-import RevisitCard from "../shared/RevisitCard";
+import { GetLearnCategories, GetLearnsByCategoryId } from "@/api/learn";
+import ScrollCards from "./ScrollCards";
 
-const RevisitCards = ({ data, t }) => {
+const RevisitCards = ({ t }) => {
+  const [categories, setCategories] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch categories on component mount
+  const getCategories = async () => {
+    setIsLoading(true);
+    try {
+      const res = await GetLearnCategories();
+      setCategories(res.data.results || []);
+      if (res.data.results && res.data.results.length > 0) {
+        setActiveCategory(res.data.results[0]);
+        await handleGetItemsByCategory(res.data.results[0].id);
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch items by category
+  const handleGetItemsByCategory = async (categoryId) => {
+    setIsLoading(true);
+    try {
+      const res = await GetLearnsByCategoryId(categoryId, 8, 0);
+      console.log("Fetched items for category:", categoryId, res.data.results);
+      setItems(res.data.results || []);
+    } catch (err) {
+      console.error("Error fetching items:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle category click
+  const handleCategoryClick = (category) => {
+    setActiveCategory(category);
+    handleGetItemsByCategory(category.id);
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
+
   return (
-    <div className="bg-[#285688] h-auto md:h-[654px] relative">
-      <div className=" flex-col  gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start w-full max-w-7xl px-4 sm:px-8 md:px-12 lg:px-16 py-6 md:py-12 lg:py-16 mx-auto">
+    <div className="bg-[#285688] h-auto md:h-[700px] relative">
+      <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start w-full max-w-7xl px-4 sm:px-8 md:px-12 lg:px-16 py-6 md:py-12 lg:py-16 mx-auto">
         {/* Section Header - White Style */}
         <div className="flex gap-[12px] sm:gap-[14px] md:gap-[16px] lg:gap-[16px] items-center w-full mb-6">
           {/* Icon Line */}
@@ -31,14 +78,33 @@ const RevisitCards = ({ data, t }) => {
 
           <hr className="h-[1px] sm:h-[1.5px] md:h-[2px] lg:h-[2px] flex-1 bg-[#FCFDFF] border-0" />
         </div>
-        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 w-full">
-          <RevisitCard card={data?.vertical?.[0]} size="small" t={t} />
-          <RevisitCard card={data?.vertical?.[1]} size="small" t={t} />
 
-          <div className="col-span-2 lg:col-span-2  ">
-            <RevisitCard card={data?.horizontal} size="large" t={t} />
-          </div>
+        {/* Category Tabs */}
+        <div className="flex gap-3 sm:gap-4 md:gap-5 scrollbar-hide overflow-auto scroll-0 w-full mb-8">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategoryClick(category)}
+              className={`px-4 py-2 sm:py-2.5 rounded-full shrink-0 w-fit font-['Noto_Sans_TC:Regular',sans-serif] text-[13px] md:text-[16px] transition-all ${
+                activeCategory?.id === category.id
+                  ? "bg-white text-[#285688]"
+                  : "bg-[#4a7ba7] text-white hover:bg-[#5a8bb7]"
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
+
+        {/* Cards Carousel */}
+        {!isLoading && items.length > 0 && <ScrollCards items={items} t={t} />}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="w-full h-48 flex items-center justify-center">
+            <p className="text-white text-center">{t("Loading...")}</p>
+          </div>
+        )}
       </div>
     </div>
   );

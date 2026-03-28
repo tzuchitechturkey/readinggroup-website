@@ -16,7 +16,6 @@ import VideosList from "@/components/ForPages/Dashboard/Videos/VideosList/Videos
 import CreateOrEditVideo from "@/components/ForPages/Dashboard/Videos/CreateOrEditVideo/CreateOrEditVideo";
 import HistoryList from "@/components/ForPages/Dashboard/AboutUs/History/HistoryList";
 import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeamList";
-import DepartmentsContent from "@/components/ForPages/Dashboard/AboutUs/Departments/DepartmentsContent";
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
@@ -45,6 +44,7 @@ import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/Uplo
 
 import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
+import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
 
 export default function Page() {
   const { i18n } = useTranslation();
@@ -394,8 +394,8 @@ export default function Page() {
         return <HistoryList onSectionChange={handleSectionChange} />;
       case "team":
         return <OurTeamList onSectionChange={handleSectionChange} />;
-      case "departments":
-        return <DepartmentsContent onSectionChange={handleSectionChange} />;
+      case "createOrEditTeam":
+        return <UploadImagesToTeam onSectionChange={handleSectionChange} />;
       case "books":
         return <BooksList onSectionChange={handleSectionChange} />;
       case "createOrEditBook":

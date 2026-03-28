@@ -205,23 +205,16 @@ function OurTeamList({ onSectionChange }) {
                 <TableHeader className="bg-[#FAFAFA] h-14">
                   <TableRow className="border-b">
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
-                      {t("Name")}
+                      {t("Title")}
                     </TableHead>
-                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
-                      {t("Member")}
-                    </TableHead>
+
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                      {t("Department")}
-                    </TableHead>
-                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                      {t("job")}
+                      {t("Image")}
                     </TableHead>
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("Description")}
                     </TableHead>
-                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                      {t("Social Media")}
-                    </TableHead>
+
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("Actions")}
                     </TableHead>
@@ -233,38 +226,30 @@ function OurTeamList({ onSectionChange }) {
                       key={member.id}
                       className="hover:bg-gray-50/60 border-b"
                     >
+                      {/* Start Title */}
                       <TableCell className="py-4">
                         <span className="block w-fit  px-2 py-1 text-xs  mx-auto text-center font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {member?.name}
+                          {member?.title}
                         </span>
                       </TableCell>
+                      {/* End Title */}
+                      {/* Start Image */}
                       <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
                         <div className="flex items-center justify-center gap-2">
                           <img
-                            src={member.avatar}
-                            alt={member.userName}
+                            src={member.image}
+                            alt={member.title}
                             className="w-10 h-10 rounded-full object-cover border-2 border-blue-100 "
                             onError={(e) => {
                               e.target.src =
                                 "https://via.placeholder.com/100/4F46E5/FFFFFF?text=" +
-                                member.userName.charAt(0);
+                                member.title.charAt(0);
                             }}
                           />
-                          <div>
-                            <div className="text-sm mb-2 font-medium text-gray-900">
-                              {member.userName}
-                            </div>
-                          </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-4">
-                        <span className="block w-fit m-auto text-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {member.position?.name}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                        {member.job_title}
-                      </TableCell>
+                      {/* End Image */}
+                      {/* Start Description */}
                       <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-xs">
                         <p
                           className="text-sm text-center text-gray-900 truncate"
@@ -275,35 +260,8 @@ function OurTeamList({ onSectionChange }) {
                             : member.description}
                         </p>
                       </TableCell>
-                      <TableCell className="py-4">
-                        <div className="flex flex-wrap justify-center gap-1">
-                          {member?.social_links.length > 0 ? (
-                            member?.social_links
-                              .slice(0, 2)
-                              .map((social, index) => (
-                                <a
-                                  key={index}
-                                  href={social.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
-                                  title={social.url}
-                                >
-                                  {social.name}
-                                </a>
-                              ))
-                          ) : (
-                            <span className="text-xs text-gray-400">
-                              {t("No content")}
-                            </span>
-                          )}
-                          {member.social && member?.social_links.length > 2 && (
-                            <span className="text-xs text-gray-500">
-                              +{member?.social_links.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
+                      {/* End Description */}
+                      {/* Start Actions */}
                       <TableCell className="py-4">
                         <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                           <button
@@ -337,104 +295,6 @@ function OurTeamList({ onSectionChange }) {
                 t={t}
               />
             </div>
-
-            {/* Start Mobile View */}
-            <div className="lg:hidden">
-              <div className="divide-y divide-gray-200">
-                {members?.map((member) => (
-                  <div
-                    key={member.id}
-                    className="p-6 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-start gap-4">
-                      <img
-                        src={member.avatar}
-                        alt={member.userName}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-blue-100"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/100/4F46E5/FFFFFF?text=" +
-                            member.userName.charAt(0);
-                        }}
-                      />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {member.userName}
-                            </h3>
-                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                              {member.position?.name || member.position}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 mb-4">
-                          <div>
-                            <span className="text-sm font-medium text-gray-600">
-                              {t("Job")}:{" "}
-                            </span>
-                            <span className="text-sm text-gray-900">
-                              {member.job}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium text-gray-600">
-                              {t("Description")}:{" "}
-                            </span>
-                            <p className="text-sm text-gray-900">
-                              {member.description.length > 100
-                                ? `${member.description.substring(0, 100)}...`
-                                : member.description}
-                            </p>
-                          </div>
-
-                          {member.social_links.length > 0 && (
-                            <div>
-                              <span className="text-sm font-medium text-gray-600 block mb-1">
-                                {t("Social Media")}:{" "}
-                              </span>
-                              <div className="flex flex-wrap gap-1">
-                                {member.social_links.map((social, index) => (
-                                  <a
-                                    key={index}
-                                    href={social.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-colors"
-                                  >
-                                    {social.name}
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedMember(member);
-                              setShowCreateOrEditModal(true);
-                            }}
-                            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg text-sm transition-colors"
-                          >
-                            {t("Edit")}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteMember(member.id)}
-                            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg text-sm transition-colors"
-                          >
-                            {t("Delete")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* End Mobile View */}
           </div>
         )}
         {/* End Table */}
@@ -472,7 +332,7 @@ function OurTeamList({ onSectionChange }) {
             onConfirm={handleConfirmDelete}
             title={t("Delete Member")}
             message={t(
-              "Are you sure you want to delete this member? This action cannot be undone."
+              "Are you sure you want to delete this member? This action cannot be undone.",
             )}
             itemName={selectedMember?.userName}
           />

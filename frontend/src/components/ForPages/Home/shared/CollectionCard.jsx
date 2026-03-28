@@ -1,6 +1,6 @@
 import React from "react";
 
-const CollectionCard = ({ photo,  t, handleNavigate }) => {
+const CollectionCard = ({ photo, t, handleNavigate, fromHomePage }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
@@ -11,10 +11,12 @@ const CollectionCard = ({ photo,  t, handleNavigate }) => {
     return `${month}. ${day}, ${year}`;
   };
   return (
-    <div className="flex-1 h-[116px] md:h-[150px] lg:h-[189px] min-h-px relative overflow-hidden cursor-pointer group ">
+    <div
+      className={`flex-1 h-[116px] md:h-[150px] ${fromHomePage ? "lg:h-[330px]" : "lg:h-[189px]"} relative overflow-hidden cursor-pointer group `}
+    >
       {/* Background Image */}
       <div className="">
-        <div aria-hidden="true" className=" ">
+        <div aria-hidden="true">
           <img
             alt={photo.date}
             className="w-full duration-300 group-hover:scale-105"

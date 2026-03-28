@@ -39,7 +39,10 @@ export const getSectionKey = (title) => {
     // About Us
     History: "history",
     Departments: "departments",
+    // Team
     "Our Team": "team",
+    "Add/Edit Team Member": "createOrEditTeam",
+    // Books
     "The Books": "books",
     "Add/Edit Book": "createOrEditBook",
     "The Books Groups": "booksGroups",
