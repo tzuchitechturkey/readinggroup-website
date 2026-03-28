@@ -1247,7 +1247,7 @@ class HistoryYearViewSet(viewsets.ModelViewSet):
 
     queryset = HistoryYear.objects.all().order_by("-year")
     serializer_class = HistoryYearSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = None
 
     search_fields = ("year",)
     ordering_fields = ("year", "created_at")
