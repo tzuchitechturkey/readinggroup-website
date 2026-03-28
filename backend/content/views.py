@@ -1121,15 +1121,40 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
 
 
 class OurTeamViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing OurTeam content."""
-
-    queryset = OurTeam.objects.all()
+    queryset = OurTeam.objects.all().order_by("-created_at")
     serializer_class = OurTeamSerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("title",)
     ordering_fields = ("created_at", "title")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    queryset = OurTeam.objects.all().order_by("-created_at")
+
+    @action(detail=True, methods=["post"], url_path="images")
+    def upload_images(self, request, pk=None):
+        team = self.get_object()
+
+        files = request.FILES.getlist("images")
+
+        if not files:
+            return Response(
+                {"error": "No images provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        created_images = []
+
+        for index, file in enumerate(files):
+            obj = OurTeamImage.objects.create(
+                our_team=team,
+                image=file,
+                order=index,
+            )
+            created_images.append(obj)
+
+        serializer = OurTeamImageSerializer(
+            created_images, many=True, context={"request": request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OurTeamImageViewSet(viewsets.ModelViewSet):
