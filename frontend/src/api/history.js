@@ -1,9 +1,7 @@
 import axios from "./axios";
 
-export async function GetHistory(limit, offset, search = "") {
-  return await axios.get(
-    `/history-events/?limit=${limit}&offset=${offset}&search=${search}`,
-  );
+export async function GetHistory() {
+  return await axios.get(`/history-events/`);
 }
 
 export async function CreateHistory(data) {
@@ -33,4 +31,9 @@ export async function AddHistoryImage(historyId, data) {
 
 export async function DeleteHistoryImageById(id) {
   return await axios.delete(`/history-event-images/${id}/`);
+}
+
+// history-events/by-year/?year=2020
+export async function GetHistoryByYear(year) {
+  return await axios.get(`/history-events/by-year/?year=${year}`);
 }

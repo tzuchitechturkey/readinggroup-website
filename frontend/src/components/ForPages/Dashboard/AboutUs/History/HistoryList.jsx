@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -21,6 +21,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 
 import CreateOrEditHistory from "./CreateOrEditHistory";
+import { LuEye } from "react-icons/lu";
 
 function HistoryList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -33,7 +34,8 @@ function HistoryList({ onSectionChange }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [update, setUpdate] = useState(false);
   const [historyData, setHistoryData] = useState([]);
-
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   // Get Data
   const getData = async (page, searchValue = searchTerm) => {
     setIsLaoding(true);
@@ -65,14 +67,9 @@ function HistoryList({ onSectionChange }) {
       setIsLaoding(false);
     }
   };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const handleView = (report) => {
+    setSelectedReport(report);
+    setShowDetailsModal(true);
   };
 
   useEffect(() => {
@@ -217,47 +214,45 @@ function HistoryList({ onSectionChange }) {
                   <TableHead className="text-[#5B6B79] font-medium text-xs text-center ">
                     {t("Sub Title")}
                   </TableHead>
-                  <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
-                    {t("Description")}
-                  </TableHead>
+
                   <TableHead className="text-[#5B6B79] font-medium text-xs text-center">
                     {t("Actions")}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="text-[11px]">
-                {historyData?.map((item) => (
+                {historyData?.map((history) => (
                   <TableRow
-                    key={item.id}
+                    key={history.id}
                     className="hover:bg-gray-50/60 border-b"
                   >
                     <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                      {item.id}
+                      {history.id}
                     </TableCell>
                     <TableCell className="py-4">
                       <div className="flex items-center justify-center gap-3">
                         <img
-                          src={item.image}
-                          alt={item.title}
+                          src={history.images[0]?.image}
+                          alt={history.title}
                           className="w-24 h-24 rounded object-cover border"
                           onError={(e) => {
                             e.target.src =
                               "https://via.placeholder.com/100/4F46E5/FFFFFF?text=" +
-                              item.title.charAt(0);
+                              history.title.charAt(0);
                           }}
                         />
                       </div>
                     </TableCell>
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
                       <div className="flex flex-col items-center">
-                        <span className="font-medium">{item.year}</span>
+                        <span className="font-medium">{history.year}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
                       <div className="flex items-center justify-center gap-3">
                         <div className="flex flex-col">
                           <span className="text-[#1E1E1E] font-medium text-sm line-clamp-1">
-                            {item.title}
+                            {history.title}
                           </span>
                         </div>
                       </div>
@@ -265,26 +260,27 @@ function HistoryList({ onSectionChange }) {
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
                       <div className="flex flex-col items-center">
                         <span className="text-sm line-clamp-1">
-                          {item.sub_title}
+                          {history.sub_title}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-sm">
-                      <p
-                        className="text-sm text-gray-900 line-clamp-2 text-center"
-                        title={item.description}
-                      >
-                        {item.description.length > 80
-                          ? `${item.description.substring(0, 80)}...`
-                          : item.description}
-                      </p>
-                    </TableCell>
+
                     <TableCell className="py-4">
                       <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                         <button
+                          onClick={() => {
+                            console.log(history);
+                            onSectionChange("createOrEditHistory", history);
+                          }}
+                          className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded"
+                          title={t("View Images")}
+                        >
+                          <LuEye className="h-4 w-4" />
+                        </button>
+                        <button
                           title={t("Edit")}
                           onClick={() => {
-                            setSelectedHistoryItem(item);
+                            setSelectedHistoryItem(history);
                             setShowCreateOrEditModal(true);
                           }}
                           className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
@@ -294,9 +290,9 @@ function HistoryList({ onSectionChange }) {
                         <button
                           title={t("Delete")}
                           onClick={() => {
-                            setSelectedHistoryItem(item);
+                            setSelectedHistoryItem(history);
                             setShowDeleteModal(true);
-                            item;
+                            history;
                           }}
                           className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
                         >
@@ -354,6 +350,21 @@ function HistoryList({ onSectionChange }) {
           />
         </Modal>
         {/* End Delete Member Modal */}
+        {/* Report Details Modal */}
+        <Modal
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          title={t("Report Details")}
+          width="800px"
+        >
+          {/* <RelatedReportsDetails
+            report={selectedReport}
+            onClose={() => setShowDetailsModal(false)}
+            onEdit={() => {
+              onSectionChange("createOrEditRelatedReports", selectedReport);
+            }}
+          /> */}
+        </Modal>
       </div>
     </div>
   );

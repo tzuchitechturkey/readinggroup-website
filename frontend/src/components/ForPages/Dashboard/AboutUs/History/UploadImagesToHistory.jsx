@@ -16,7 +16,7 @@ import FormActionsSection from "../../Events/News/CreateOrEditNews/NewsForm/Form
 
 const UploadImagesToHistory = ({ onSectionChange, history }) => {
   const { t } = useTranslation();
-
+  console.log(history);
   // Images state
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);

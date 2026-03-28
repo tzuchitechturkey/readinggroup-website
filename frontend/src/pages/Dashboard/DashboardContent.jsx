@@ -391,7 +391,12 @@ export default function Page() {
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
       case "createOrEditHistory":
-        return <UploadImagesToHistory onSectionChange={handleSectionChange} />;
+        return (
+          <UploadImagesToHistory
+            history={selectedHistory}
+            onSectionChange={handleSectionChange}
+          />
+        );
       case "team":
         return <OurTeamList onSectionChange={handleSectionChange} />;
       case "createOrEditTeam":
