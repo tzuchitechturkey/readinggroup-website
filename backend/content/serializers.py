@@ -356,11 +356,20 @@ class OurTeamSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for OurTeam model with absolute URL handling for file fields."""
 
     datetime_fields = ("created_at", "updated_at")
+    images = OurTeamImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = OurTeam
         fields = "__all__"
         file_fields = ("image",)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if "images" in data and instance.images.exists():
+            data["images"] = OurTeamImageSerializer(
+                instance.images.all(), many=True, context=self.context
+            ).data
+        return data
 
 
 class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, F
+from django.db.models import Count, F, Max
 from jsonschema import ValidationError
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
@@ -1135,9 +1135,15 @@ class OurTeamViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at", "title")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
-    @action(detail=True, methods=["post"], url_path="images")
+    @action(detail=True, methods=["get", "post"], url_path="images")
     def upload_images(self, request, pk=None):
         team = self.get_object()
+
+        if request.method.lower() == "get":
+            serializer = OurTeamImageSerializer(
+                team.images.all(), many=True, context={"request": request}
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         files = request.FILES.getlist("images")
 
@@ -1147,9 +1153,13 @@ class OurTeamViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # 🔥 نحسب آخر order موجود
+        last_order = team.images.aggregate(max_order=Max("order"))["max_order"]
+        last_order = last_order if last_order is not None else -1
+
         created_images = []
 
-        for index, file in enumerate(files):
+        for index, file in enumerate(files, start=last_order + 1):
             obj = OurTeamImage.objects.create(
                 our_team=team,
                 image=file,
@@ -1245,7 +1255,7 @@ class BookReviewViewSet(viewsets.ModelViewSet):
 class HistoryYearViewSet(viewsets.ModelViewSet):
     """ViewSet for managing history years."""
 
-    queryset = HistoryYear.objects.all().order_by("-year")
+    queryset = HistoryYear.objects.all().order_by("year")
     serializer_class = HistoryYearSerializer
     pagination_class = None
 
