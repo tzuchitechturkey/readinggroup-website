@@ -29,8 +29,8 @@ export async function GetBookReviews() {
   return await axios.get(`/book-reviews/`);
 }
 
-export async function AddBookReview(data) {
-  return await axios.post(`/book-reviews/`, data);
+export async function AddBookReview(bookId, data) {
+  return await axios.post(`/book/${bookId}/reviews/`, data);
 }
 
 export async function GetBookReviewById(id) {

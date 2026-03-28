@@ -120,7 +120,7 @@ const UploadImagesToReviews = ({ onSectionChange, news }) => {
 
         // Add new image files
         newImages.forEach((file) => {
-          imageFormData.append("images", file);
+          imageFormData.append("reviews", file);
         });
 
         // Add image URLs from new images added via URL input (string type)
