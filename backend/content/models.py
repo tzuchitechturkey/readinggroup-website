@@ -437,6 +437,52 @@ class BookReview(TimestampedModel):
         return f"Review {self.order} for {self.book.title}"
 
 
+class HistoryYear(TimestampedModel):
+    year = models.PositiveIntegerField(unique=True)
+
+    class Meta:
+        ordering = ("-year",)
+
+    def __str__(self):
+        return str(self.year)
+
+
+class HistoryEvent(TimestampedModel):
+    year = models.ForeignKey(
+        HistoryYear, on_delete=models.CASCADE, related_name="events"
+    )
+    title = models.CharField(max_length=255)
+    sub_title = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ("created_at",)
+
+    def __str__(self):
+        return f"{self.year.year} - {self.title}"
+
+
+class HistoryEventImage(TimestampedModel):
+    event = models.ForeignKey(
+        HistoryEvent, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="our-history/images/")
+    caption = models.CharField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("order", "created_at")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "order"],
+                name="unique_image_order_per_event",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.event.title} - Image {self.order}"
+
+
 # ======================================================= New Models end =======================================================
 class NavbarLogo(TimestampedModel):
     logo = models.ImageField(upload_to="infowebsite/logos/", blank=True, null=True)

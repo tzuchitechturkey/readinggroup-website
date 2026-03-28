@@ -3,6 +3,7 @@ from django.contrib import admin
 from .enums import LearnType
 from .models import (
     RelatedReportsCategory,
+    HistoryEventImage,
     ContentAttachment,
     PhotoCollection,
     LatestNewsImage,
@@ -10,7 +11,9 @@ from .models import (
     RelatedReports,
     VideoCategory,
     LearnCategory,
+    HistoryEvent,
     SocialMedia,
+    HistoryYear,
     BookReview,
     NavbarLogo,
     LatestNews,
@@ -184,6 +187,26 @@ class BookReviewAdmin(admin.ModelAdmin):
     list_display = ("id", "book", "order", "created_at")
     search_fields = ("book__title",)
     list_filter = ("book", "created_at")
+
+
+@admin.register(HistoryYear)
+class HistoryYearAdmin(admin.ModelAdmin):
+    list_display = ("year",)
+    search_fields = ("year",)
+
+
+@admin.register(HistoryEvent)
+class HistoryEventAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "sub_title", "year")
+    search_fields = ("id", "title", "sub_title", "description")
+    list_filter = ("year",)
+
+
+@admin.register(HistoryEventImage)
+class HistoryEventImageAdmin(admin.ModelAdmin):
+    list_display = ("id", "event", "caption", "order", "created_at")
+    search_fields = ("id", "caption", "event__title")
+    list_filter = ("event", "created_at")
 
 
 # ----------------------------------------------------------------new models admin end----------------------------------------------------------------

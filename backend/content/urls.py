@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RelatedReportsCategoryViewSet,
     ContentAttachmentViewSet,
+    HistoryEventImageViewSet,
     PhotoCollectionViewSet,
     LatestNewsImageViewSet,
     RelatedReportsViewSet,
@@ -9,6 +10,8 @@ from .views import (
     VideoCategoryViewSet,
     LearnCategoryViewSet,
     OurTeamImageViewSet,
+    HistoryEventViewSet,
+    HistoryYearViewSet,
     SocialMediaViewSet,
     BookReviewViewSet,
     LatestNewsViewSet,
@@ -53,4 +56,10 @@ router.register(
 router.register(
     r"latest-news-images", LatestNewsImageViewSet, basename="latest-news-image"
 )
+router.register(
+    r"history-event-images", HistoryEventImageViewSet, basename="history-event-image"
+)
+router.register(r"history-events", HistoryEventViewSet, basename="history-event")
+router.register(r"history-years", HistoryYearViewSet, basename="history-year")
+
 urlpatterns = router.urls

@@ -9,6 +9,7 @@ from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    HistoryEventImage,
     LatestNewsImage,
     PhotoCollection,
     RelatedReports,
@@ -16,6 +17,8 @@ from .models import (
     LearnCategory,
     VideoCategory,
     OurTeamImage,
+    HistoryEvent,
+    HistoryYear,
     SocialMedia,
     BookReview,
     NavbarLogo,
@@ -378,6 +381,33 @@ class BookSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
                 instance.reviews.all(), many=True, context=self.context
             ).data
         return data
+
+
+class HistoryEventImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = HistoryEventImage
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+class HistoryEventSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    images = HistoryEventImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = HistoryEvent
+        fields = "__all__"
+
+
+class HistoryYearSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    datetime_fields = ("created_at", "updated_at")
+    events = HistoryEventSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = HistoryYear
+        fields = "__all__"
 
 
 # ------------------------------------------------------------------new models serializers end----------------------------------------------------------------

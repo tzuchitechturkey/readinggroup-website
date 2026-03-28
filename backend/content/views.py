@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.db.models import Count, F
+from jsonschema import ValidationError
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -24,14 +25,17 @@ from .swagger_parameters import (
 from .models import (
     RelatedReportsCategory,
     ContentAttachment,
+    HistoryEventImage,
     LatestNewsImage,
     PhotoCollection,
     RelatedReports,
     EventCommunity,
     VideoCategory,
     LearnCategory,
+    HistoryEvent,
     OurTeamImage,
     SocialMedia,
+    HistoryYear,
     BookReview,
     NavbarLogo,
     LatestNews,
@@ -45,6 +49,7 @@ from .models import (
 from .serializers import (
     RelatedReportsCategorySerializer,
     ContentAttachmentSerializer,
+    HistoryEventImageSerializer,
     PhotoCollectionSerializer,
     LatestNewsImageSerializer,
     RelatedReportsSerializer,
@@ -52,6 +57,8 @@ from .serializers import (
     VideoCategorySerializer,
     LearnCategorySerializer,
     OurTeamImageSerializer,
+    HistoryEventSerializer,
+    HistoryYearSerializer,
     SocialMediaSerializer,
     LatestNewsSerializer,
     BookReviewSerializer,
@@ -1173,11 +1180,17 @@ class BookViewSet(viewsets.ModelViewSet):
 
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = None
     search_fields = ("title", "description")
     ordering_fields = ("created_at", "updated_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    def create(self, request, *args, **kwargs):
+        """Allow only one Book instance."""
+
+        if Book.objects.exists():
+            raise ValidationError({"error": "A book has already been created."})
 
     @action(detail=True, methods=["post"], url_path="reviews")
     def create_reviews(self, request, pk=None):
@@ -1227,6 +1240,71 @@ class BookReviewViewSet(viewsets.ModelViewSet):
     ordering_fields = ("created_at", "order")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+
+class HistoryYearViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing history years."""
+
+    queryset = HistoryYear.objects.all().order_by("-year")
+    serializer_class = HistoryYearSerializer
+    pagination_class = LimitOffsetPagination
+
+    search_fields = ("year",)
+    ordering_fields = ("year", "created_at")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+
+class HistoryEventViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing history events."""
+
+    queryset = HistoryEvent.objects.all().order_by("-created_at")
+    serializer_class = HistoryEventSerializer
+    pagination_class = LimitOffsetPagination
+
+    search_fields = ("title",)
+    ordering_fields = ("created_at",)
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    @action(detail=True, methods=["post"], url_path="images")
+    def upload_images(self, request, pk=None):
+        """Upload multiple images for an event (same as OurTeam)."""
+
+        event = self.get_object()
+        files = request.FILES.getlist("images")
+
+        if not files:
+            return Response(
+                {"error": "No images provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        created_images = []
+
+        for index, file in enumerate(files):
+            obj = HistoryEventImage.objects.create(
+                event=event,
+                image=file,
+                order=index,
+            )
+            created_images.append(obj)
+
+        serializer = HistoryEventImageSerializer(
+            created_images, many=True, context={"request": request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class HistoryEventImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual event images."""
+
+    queryset = HistoryEventImage.objects.all()
+    serializer_class = HistoryEventImageSerializer
+    pagination_class = LimitOffsetPagination
+
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
 # ========================================== new viewset end============================================
