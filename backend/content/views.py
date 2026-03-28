@@ -15,6 +15,7 @@ from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
 from .daai_tv import DaaiTVError, fetch_daai_tv_info
 from .swagger_parameters import (
+    history_by_year_manual_parameters,
     event_community_manual_parameters,
     learn_category_manual_parameters,
     video_category_manual_parameters,
@@ -1292,6 +1293,25 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
         )
 
         return Response(serializer.data, status=201)
+
+    @swagger_auto_schema(
+        operation_summary="Get events by year",
+        operation_description="Return all history events for a specific year without pagination. Provide the year as a query parameter, e.g., /history-events/by-year/?year=2020.",
+        manual_parameters=history_by_year_manual_parameters,
+    )
+    @action(detail=False, methods=["get"], url_path="by-year")
+    def get_by_year(self, request):
+        """Get all events for a specific year (no pagination)."""
+
+        year = request.query_params.get("year")
+
+        if not year:
+            return Response({"error": "Year is required"}, status=400)
+
+        queryset = HistoryEvent.objects.filter(year=year).order_by("created_at")
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class HistoryEventImageViewSet(viewsets.ModelViewSet):

@@ -180,3 +180,13 @@ event_community_manual_parameters = [
 ]
 
 # ==================================== team event community swagger parameters end =======================================
+# ==================================== our history events swagger parameters start =======================================
+history_by_year_manual_parameters = [
+    openapi.Parameter(
+        "year",
+        openapi.IN_QUERY,
+        description="Year to filter events by (e.g., 2020)",
+        type=openapi.TYPE_STRING,
+        required=True,
+    )
+]
