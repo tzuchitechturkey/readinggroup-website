@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
-import { CreateHistory, EditHistoryById } from "@/api/aboutUs";
+import { CreateHistory, EditHistoryById } from "@/api/history";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 
-const CreateOrEditHistory = ({ historyItem = null }) => {
+const CreateOrEditHistory = ({ setUpdate, onClose, historyItem = null }) => {
   const { t } = useTranslation();
   const [isLaoding, setIsLaoding] = useState(false);
   const [errors, setErrors] = useState({});
@@ -16,8 +16,6 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
     title: "",
     sub_title: "",
     description: "",
-    image: "",
-    image_url: "",
   });
 
   // Reset form when modal opens/closes or historyItem changes
@@ -32,8 +30,6 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
         title: "",
         sub_title: "",
         description: "",
-        image: "",
-        image_url: "",
       });
     }
   }, [historyItem]);
@@ -54,26 +50,13 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, image: file }));
-
-      // Clear image error if exists
-      if (errors.image) {
-        setErrors((prev) => ({
-          ...prev,
-          image: "",
-        }));
-      }
-    }
-  };
-
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.year.toString().trim()) {
       newErrors.year = t("Year is required");
+    } else if (formData.year < 1960 || formData.year > 2040) {
+      newErrors.year = t("Year must be between 1960 and 2040");
     }
 
     if (!formData.title.trim()) {
@@ -86,10 +69,6 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
 
     if (!formData.description.trim()) {
       newErrors.description = t("Description is required");
-    }
-
-    if (!formData.image && !formData.image_url && !historyItem?.id) {
-      newErrors.image = t("Image is required");
     }
 
     setErrors(newErrors);
@@ -113,24 +92,6 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
       formDataToSend.append("sub_title", formData.sub_title || "");
       formDataToSend.append("description", formData.description || "");
 
-      // إضافة رابط الصورة إذا كان موجود
-      if (formData.image_url && formData.image_url.trim()) {
-        formDataToSend.append("image_url", formData.image_url.trim());
-      }
-
-      // إضافة الصورة المرفوعة إذا كانت موجودة
-      if (formData.image && typeof formData.image !== "string") {
-        formDataToSend.append("image", formData.image);
-      }
-
-      // طباعة البيانات للتصحيح
-      if (process.env.NODE_ENV === "development") {
-        console.warn("FormData being sent:");
-        for (const pair of formDataToSend.entries()) {
-          console.warn(pair[0] + ": " + pair[1]);
-        }
-      }
-
       if (historyItem?.id) {
         await EditHistoryById(historyItem.id, formDataToSend);
         toast.success(t("Event saved successfully"));
@@ -139,6 +100,7 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
         toast.success(t("Event created successfully"));
       }
       setUpdate((prev) => !prev);
+      onClose();
     } catch (error) {
       console.error("Submit error:", error);
       setErrorFn(error, t);
@@ -146,6 +108,7 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
       setIsLaoding(false);
     }
   };
+  if (!isOpen) return null;
 
   return (
     <div className="bg-white rounded-lg p-6 overflow-y-auto">
@@ -237,8 +200,6 @@ const CreateOrEditHistory = ({ historyItem = null }) => {
           )}
         </div>
         {/* End Description */}
-
-      
 
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">

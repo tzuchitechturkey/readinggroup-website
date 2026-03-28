@@ -3,13 +3,18 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { GetTeam, AddImagesToTeam, DeletePhotoFromTeam } from "@/api/team";
+import {
+  GetHistory,
+  AddHistoryImage,
+  DeleteHistoryImageById,
+} from "@/api/history";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import ImageSection from "@/components/ForPages/Dashboard/Events/PhotoCollection/CreateOrEditPhotoCollection/PhotoCollectionForm/ImageSection";
+import FormActionsSection from "../../Events/News/CreateOrEditNews/NewsForm/FormActionsSection";
 
-const UploadImagesToTeam = ({ onSectionChange, news }) => {
+const UploadImagesToHistory = ({ onSectionChange, history }) => {
   const { t } = useTranslation();
 
   // Images state
@@ -17,38 +22,37 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   const [newImages, setNewImages] = useState([]);
   const [deletedPhotoIds, setDeletedPhotoIds] = useState([]);
   const [errors, setErrors] = useState({});
-
-  // News selection state
-  const [newsList, setNewsList] = useState([]);
-  const [selectedNewsItem, setSelectedNewsItem] = useState(null);
+  const [historyList, setHistoryList] = useState([]);
+  // History selection state
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch news list
+  // Fetch history list
   useEffect(() => {
-    handleGetNewsList();
+    handleGetHistoryList();
   }, []);
 
-  // Initialize edit mode with news data
+  // Initialize edit mode with history data
   useEffect(() => {
-    if (news && news.id) {
-      // Set selected news item
-      setSelectedNewsItem({
-        id: news.id,
-        title: news.title,
+    if (history && history.id) {
+      // Set selected history item
+      setSelectedHistoryItem({
+        id: history.id,
+        title: history.title,
       });
 
       // Set existing images - احتفظ بالكائن الكامل مع id
-      if (news.images && news.images.length > 0) {
-        setImages(news.images);
+      if (history.images && history.images.length > 0) {
+        setImages(history.images);
       }
     }
-  }, [news]);
+  }, [history]);
 
   // Handler functions
   const handleNewImagesChange = (files) => {
-    const MAX_IMAGES = news?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
+    const MAX_IMAGES = history?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
     const totalImages = images.length + files.length;
 
     if (totalImages > MAX_IMAGES) {
@@ -88,16 +92,16 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleGetNewsList = async (search = "") => {
+  const handleGetHistoryList = async (search = "") => {
     try {
-      const res = await GetTeam(10, 0, search);
-      const newsData = res.data.results.map((news) => ({
-        id: news.id,
-        title: news.title,
+      const res = await GetHistory(10, 0, search);
+      const historyData = res?.data?.map((history) => ({
+        id: history.id,
+        title: history.title,
       }));
-      setNewsList(newsData);
+      setHistoryList(historyData);
     } catch (err) {
-      console.error("Error fetching news:", err);
+      console.error("Error fetching history:", err);
       setErrorFn(err, t);
     }
   };
@@ -106,8 +110,8 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!selectedNewsItem?.id) {
-      newErrors.news = t("News is required");
+    if (!selectedHistoryItem?.id) {
+      newErrors.history = t("History event is required");
     }
 
     if (images.length === 0 && newImages.length === 0) {
@@ -133,7 +137,7 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
       // First, delete any removed photos
       if (deletedPhotoIds.length > 0) {
         await Promise.all(
-          deletedPhotoIds.map((photoId) => DeletePhotoFromTeam(photoId)),
+          deletedPhotoIds.map((photoId) => DeleteHistoryImageById(photoId)),
         );
       }
 
@@ -154,14 +158,14 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
           }
         });
 
-        await AddImagesToTeam(selectedNewsItem.id, imageFormData);
+        await AddHistoryImage(selectedHistoryItem.id, imageFormData);
       }
 
       toast.success(t("Images added successfully"));
       setDeletedPhotoIds([]);
-      onSectionChange("team");
+      onSectionChange("history");
     } catch (error) {
-      console.error("Error adding images to news:", error);
+      console.error("Error adding images to history:", error);
 
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -175,11 +179,11 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   };
 
   const handleCancel = () => {
-    onSectionChange("news");
+    onSectionChange("history");
   };
 
-  const MAX_IMAGES = news?.id ? 28 : 6;
-  const isEditMode = Boolean(news?.id);
+  const MAX_IMAGES = history?.id ? 28 : 6;
+  const isEditMode = Boolean(history?.id);
 
   return (
     <div className="bg-white rounded-lg pt-3">
@@ -201,22 +205,22 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
           />
         </div>
 
-        {/* News Selection */}
+        {/* History Event Selection */}
         <div className="px-4 py-3">
           <AutoComplete
-            label={t("News")}
-            placeholder={t("Select a news item")}
-            selectedItem={selectedNewsItem}
+            label={t("History Event")}
+            placeholder={t("Select a history event")}
+            selectedItem={selectedHistoryItem}
             onSelect={(item) => {
-              setSelectedNewsItem(item);
-              setErrors((prev) => ({ ...prev, news: null }));
+              setSelectedHistoryItem(item);
+              setErrors((prev) => ({ ...prev, history: null }));
             }}
-            onClear={() => !isEditMode && setSelectedNewsItem(null)}
-            list={newsList}
-            searchMethod={handleGetNewsList}
+            onClear={() => !isEditMode && setSelectedHistoryItem(null)}
+            list={historyList}
+            searchMethod={handleGetHistoryList}
             searchApi={!isEditMode}
-            searchPlaceholder={t("Search news...")}
-            error={errors.news}
+            searchPlaceholder={t("Search history events...")}
+            error={errors.history}
             required={true}
             renderItemLabel={(item) => item.title || item.name || ""}
             disabled={isEditMode}
@@ -224,37 +228,15 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
         </div>
 
         {/* Actions */}
-        {/* <FormActionsSection
+        <FormActionsSection
           onSave={handleSubmit}
           onCancel={handleCancel}
           isLoading={isLoading}
           isEdit={isEditMode}
-        /> */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isLoading}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {t("Cancel")}
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading
-              ? t("Saving...")
-              : isEditMode
-                ? t("Update Team")
-                : t("Create Team")}
-          </button>
-        </div>
+        />
       </form>
     </div>
   );
 };
 
-export default UploadImagesToTeam;
+export default UploadImagesToHistory;

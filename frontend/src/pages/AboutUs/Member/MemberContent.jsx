@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { socialMediaIcons, socialColors } from "@/constants/constants";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetTeamById } from "@/api/aboutUs";
+import { GetTeamById } from "@/api/team";
 
 function MemberContent() {
   const { i18n, t } = useTranslation();

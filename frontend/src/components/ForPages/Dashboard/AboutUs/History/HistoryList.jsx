@@ -25,7 +25,6 @@ import CreateOrEditHistory from "./CreateOrEditHistory";
 function HistoryList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [totalRecords, setTotalRecords] = useState(0);
   const [isLaoding, setIsLaoding] = useState(false);
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
@@ -43,19 +42,12 @@ function HistoryList({ onSectionChange }) {
       const res = searchValue
         ? await GetHistory(limit, offset, searchValue)
         : await GetHistory(limit, offset);
-      setTotalRecords(res.data?.count || 0);
-      setHistoryData(res.data?.results);
+      setHistoryData(res.data);
     } catch (error) {
       setErrorFn(error, t);
     } finally {
       setIsLaoding(false);
     }
-  };
-
-  // Handle Pagination
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    getData(newPage - 1);
   };
 
   const handleConfirmDelete = async () => {
@@ -82,8 +74,6 @@ function HistoryList({ onSectionChange }) {
       day: "numeric",
     });
   };
-
-  const totalPages = Math.ceil(totalRecords / limit);
 
   useEffect(() => {
     getData(0);
@@ -318,13 +308,6 @@ function HistoryList({ onSectionChange }) {
                 ))}
               </TableBody>
             </Table>
-
-            <TableButtons
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onPageChange={handlePageChange}
-              t={t}
-            />
           </div>
         )}
 

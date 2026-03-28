@@ -41,7 +41,7 @@ import ProfileContent from "../Profile/ProfileContent";
 import SettingsContent from "../Settings/SettingsContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
 import UploadImagesToReviews from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
-import CreateOrEditHistory from "@/components/ForPages/Dashboard/AboutUs/History/CreateOrEditHistory";
+import UploadImagesToHistory from "@/components/ForPages/Dashboard/AboutUs/History/UploadImagesToHistory";
 
 export default function Page() {
   const { i18n } = useTranslation();
@@ -391,12 +391,7 @@ export default function Page() {
       case "history":
         return <HistoryList onSectionChange={handleSectionChange} />;
       case "createOrEditHistory":
-        return (
-          <CreateOrEditHistory
-            historyItem={selectedHistory}
-            onSectionChange={handleSectionChange}
-          />
-        );
+        return <UploadImagesToHistory onSectionChange={handleSectionChange} />;
       case "team":
         return <OurTeamList onSectionChange={handleSectionChange} />;
       case "createOrEditTeam":

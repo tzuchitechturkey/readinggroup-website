@@ -1,27 +1,5 @@
 import axios from "./axios";
 
-export async function GetHistory(limit, offset, search = "") {
-  return await axios.get(
-    `/history/?limit=${limit}&offset=${offset}&search=${search}`,
-  );
-}
-
-export async function CreateHistory(data) {
-  return await axios.post(`/history/`, data);
-}
-
-export async function GetHistoryById(id) {
-  return await axios.get(`/history/${id}/`);
-}
-
-export async function EditHistoryById(id, data) {
-  return await axios.put(`/history/${id}/`, data);
-}
-
-export async function DeleteHistoryById(id) {
-  return await axios.delete(`/history/${id}/`);
-}
-
 export async function GetTeam(limit, offset, search = "") {
   return await axios.get(
     `/our-team/?limit=${limit}&offset=${offset}&search=${search}`,
@@ -63,4 +41,3 @@ export async function EditTeamImage(photoId, data) {
 export async function DeletePhotoFromTeam(photo_id) {
   return await axios.delete(`/our-team-images/${photo_id}/`);
 }
-

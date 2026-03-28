@@ -15,7 +15,7 @@ import {
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
-import { GetTeam, DeleteTeamById } from "@/api/aboutUs";
+import { GetTeam, DeleteTeamById } from "@/api/team";
 import Loader from "@/components/Global/Loader/Loader";
 import TableButtons from "@/components/Global/TableButtons/TableButtons";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GetTeam } from "@/api/aboutUs";
+import { GetTeam } from "@/api/team";
 import Loader from "@/components/Global/Loader/Loader";
 import TeamFunctionsSection from "@/components/ForPages/AboutUs/Team/TeamFunctionsSection/TeamFunctionsSection";
 
