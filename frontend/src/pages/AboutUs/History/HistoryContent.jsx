@@ -71,7 +71,7 @@ const AboutHistoryContent = () => {
           <h1 className="text-[32px] md:text-[42px] font-[800] text-[#081945] mb-6 tracking-tight leading-tight">
             {t("Our History")}
           </h1>
-          <p className="text-[#3B5B80] text-[15px] md:text-[16.5px] leading-[1.75] font-medium opacity-90">
+          <p className="text-[#081945] text-[15px] md:text-[16.5px] leading-[1.75] font-medium opacity-90">
             {t(
               "Our study group's history is marked by meaningful milestones and transformative moments that have shaped who we are today. Explore this timeline to discover the key events, achievements, and turning points in our journey from a local gathering to an international community.",
             )}
@@ -87,17 +87,17 @@ const AboutHistoryContent = () => {
               <div key={yearData.year} className="relative group">
                 {/* Year Header */}
                 <div
-                  className="flex items-center gap-[24px] py-4 cursor-pointer bg-[#E5F0FA] sticky top-0 z-20"
+                  className="flex items-center gap-[24px] py-4 cursor-pointer  sticky top-0 z-20"
                   onClick={() => toggleYear(yearData.year)}
                 >
                   <div className="w-[24px] h-[24px] shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold text-[18px] leading-none rounded-[4px] shadow-sm">
                     {isExpanded ? "-" : "+"}
                   </div>
-                  <div className="flex items-baseline gap-4">
+                  <div className="flex items-center gap-4">
                     <span className="text-[28px] md:text-[34px] font-[800] text-[#081945] leading-none tracking-tight">
                       {yearData.year}
                     </span>
-                    <span className="text-[13px] font-semibold text-[#6285a8] leading-none">
+                    <span className="text-[13px] text-[#6285a8] leading-none">
                       {yearData.eventsCount} {t("event(s)")}
                     </span>
                   </div>
@@ -121,7 +121,7 @@ const AboutHistoryContent = () => {
                         </div>
 
                         {/* Event Details */}
-                        <div className="flex-1">
+                        <div className="flex-1 mt-[2px]">
                           <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
                             {event?.title}
                           </p>
