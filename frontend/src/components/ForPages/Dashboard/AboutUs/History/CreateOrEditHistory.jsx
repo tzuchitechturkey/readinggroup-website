@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { CreateHistory, EditHistoryById } from "@/api/history";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
+import DatePickerMonthYear from "@/components/Global/DatePickerMonthYear/DatePickerMonthYear";
 
 const CreateOrEditHistory = ({
   setUpdate,
@@ -17,7 +18,7 @@ const CreateOrEditHistory = ({
   const [isLaoding, setIsLaoding] = useState(false);
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
-    year: "",
+    date: null,
     title: "",
     sub_title: "",
     description: "",
@@ -26,12 +27,20 @@ const CreateOrEditHistory = ({
   // Reset form when modal opens/closes or historyItem changes
   useEffect(() => {
     if (historyItem && historyItem.id) {
+      // Convert year and month to a date object
+      const date =
+        historyItem.year && historyItem.month
+          ? new Date(historyItem.year, historyItem.month - 1, 1)
+          : null;
       setFormData({
-        ...historyItem,
+        date,
+        title: historyItem.title || "",
+        sub_title: historyItem.sub_title || "",
+        description: historyItem.description || "",
       });
     } else {
       setFormData({
-        year: "",
+        date: null,
         title: "",
         sub_title: "",
         description: "",
@@ -58,10 +67,8 @@ const CreateOrEditHistory = ({
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.year.toString().trim()) {
-      newErrors.year = t("Year is required");
-    } else if (formData.year < 1960 || formData.year > 2040) {
-      newErrors.year = t("Year must be between 1960 and 2040");
+    if (!formData.date) {
+      newErrors.date = t("Date is required");
     }
 
     if (!formData.title.trim()) {
@@ -92,7 +99,12 @@ const CreateOrEditHistory = ({
       // إنشاء FormData لإرسال الصورة بشكل صحيح
       const formDataToSend = new FormData();
 
-      formDataToSend.append("year", formData.year);
+      // Extract year and month from the date
+      const year = formData.date.getFullYear();
+      const month = formData.date.getMonth() + 1; // getMonth() returns 0-11, so add 1
+
+      formDataToSend.append("year", year);
+      formDataToSend.append("month", month); // Send as number
       formDataToSend.append("title", formData.title || "");
       formDataToSend.append("sub_title", formData.sub_title || "");
       formDataToSend.append("description", formData.description || "");
@@ -116,32 +128,28 @@ const CreateOrEditHistory = ({
   if (!isOpen) return null;
 
   return (
-    <div className="bg-white rounded-lg p-6 overflow-y-auto">
+    <div className="bg-white relative rounded-lg p-6 ">
       {isLaoding && <Loader />}
 
       <form onSubmit={handleSubmit} className="relative z-50 space-y-4">
-        {/* Start Year */}
+        {/* Date Picker for Month and Year Only */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Year")} *
+            {t("Month & Year")} *
           </label>
-          <input
-            type="number"
-            name="year"
-            value={formData.year}
-            onChange={handleInputChange}
-            placeholder={t("Enter year")}
-            min="1900"
-            max={new Date().getFullYear()}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.year ? "border-red-500" : "border-gray-300"
-            }`}
+          <DatePickerMonthYear
+            value={formData.date}
+            onChange={(date) => {
+              setFormData((prev) => ({ ...prev, date }));
+              // Clear error when user selects a date
+              if (errors.date) {
+                setErrors((prev) => ({ ...prev, date: "" }));
+              }
+            }}
+            error={Boolean(errors.date)}
+            disabled={false}
           />
-          {errors.year && (
-            <p className="text-red-500 text-xs mt-1">{errors.year}</p>
-          )}
         </div>
-        {/* End Year */}
 
         {/* Start Title */}
         <div>

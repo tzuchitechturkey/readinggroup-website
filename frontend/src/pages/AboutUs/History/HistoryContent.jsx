@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import HistoryModal from "./HistoryModal";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetHistory } from "@/api/history";
+import { Minus, Plus } from "lucide-react";
 
 const AboutHistoryContent = () => {
   const { t } = useTranslation();
@@ -90,8 +91,12 @@ const AboutHistoryContent = () => {
                   className="flex items-center gap-[24px] py-4 cursor-pointer  sticky top-0 z-20"
                   onClick={() => toggleYear(yearData.year)}
                 >
-                  <div className="w-[24px] h-[24px] shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold text-[18px] leading-none rounded-[4px] shadow-sm">
-                    {isExpanded ? "-" : "+"}
+                  <div className="w-7 h-7 shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold  leading-none rounded-[4px] shadow-sm">
+                    {isExpanded ? (
+                      <Minus className="text-white size-4 " />
+                    ) : (
+                      <Plus className="text-white size-4 " />
+                    )}
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-[28px] md:text-[34px] font-[800] text-[#081945] leading-none tracking-tight">
@@ -122,6 +127,9 @@ const AboutHistoryContent = () => {
 
                         {/* Event Details */}
                         <div className="flex-1 mt-[2px]">
+                          <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
+                            {event?.month}
+                          </p>
                           <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
                             {event?.title}
                           </p>

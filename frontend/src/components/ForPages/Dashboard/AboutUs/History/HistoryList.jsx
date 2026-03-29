@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { Edit, Trash2, Plus, Eye } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/table";
 import Modal from "@/components/Global/Modal/Modal";
 import DeleteConfirmation from "@/components/Global/DeleteConfirmation/DeleteConfirmation";
-import TableButtons from "@/components/Global/TableButtons/TableButtons";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
@@ -29,12 +28,10 @@ function HistoryList({ onSectionChange }) {
   const [isLaoding, setIsLaoding] = useState(false);
   const [showCreateOrEditModal, setShowCreateOrEditModal] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const [searchTerm, setSearchTerm] = useState("");
   const [update, setUpdate] = useState(false);
   const [historyData, setHistoryData] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   // Get Data
   const getData = async (page, searchValue = searchTerm) => {
@@ -67,14 +64,16 @@ function HistoryList({ onSectionChange }) {
       setIsLaoding(false);
     }
   };
-  const handleView = (report) => {
-    setSelectedReport(report);
-    setShowDetailsModal(true);
-  };
 
   useEffect(() => {
     getData(0);
   }, [update]);
+  // Add a helper function to map month numbers to names
+  const getMonthName = (monthNumber) => {
+    const date = new Date();
+    date.setMonth(monthNumber - 1); // JavaScript months are 0-indexed
+    return date.toLocaleString("en-US", { month: "long" });
+  };
 
   return (
     <div
@@ -246,6 +245,9 @@ function HistoryList({ onSectionChange }) {
                     <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
                       <div className="flex flex-col items-center">
                         <span className="font-medium">{history.year}</span>
+                        <span className="font-medium">
+                          {getMonthName(history.month)}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
@@ -316,6 +318,7 @@ function HistoryList({ onSectionChange }) {
               ? t("Edit Historical Event")
               : t("Add New Historical Event")
           }
+          zIndex={1}
         >
           <CreateOrEditHistory
             isOpen={showCreateOrEditModal}

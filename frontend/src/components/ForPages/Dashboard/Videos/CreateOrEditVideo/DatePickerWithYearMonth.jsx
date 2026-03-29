@@ -23,7 +23,7 @@ function DatePickerWithYearMonth({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(
-    value ? new Date(value) : new Date()
+    value ? new Date(value) : new Date(),
   );
 
   const handleDateSelect = (date) => {
@@ -39,7 +39,11 @@ function DatePickerWithYearMonth({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen} className="!z-[999999999999999]">
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+      className="!z-[999999999999999]"
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -47,7 +51,7 @@ function DatePickerWithYearMonth({
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",
-            error && "border-red-500"
+            error && "border-red-500",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />

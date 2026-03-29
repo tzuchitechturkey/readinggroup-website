@@ -13,7 +13,7 @@ const modalVariants = {
   exit: { opacity: 0, y: 50 },
 };
 
-const Modal = ({ isOpen, onClose, title, children, width }) => {
+const Modal = ({ isOpen, onClose, title, children, width, zIndex }) => {
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
@@ -42,7 +42,7 @@ const Modal = ({ isOpen, onClose, title, children, width }) => {
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.2)",
-            zIndex: 145,
+            zIndex: zIndex || 145,
           }}
         >
           <motion.div
