@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import HistoryModal from "./HistoryModal";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetHistory } from "@/api/history";
+import { GetHistoryGroupedByYear } from "@/api/history";
 import { Minus, Plus } from "lucide-react";
 
 const AboutHistoryContent = () => {
@@ -22,25 +22,15 @@ const AboutHistoryContent = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const res = await GetHistory();
+      const res = await GetHistoryGroupedByYear();
 
-      // Group events by year
-      const groupedByYear = {};
-      res.data.forEach((event) => {
-        const year = event?.year.toString();
-        if (!groupedByYear[year]) {
-          groupedByYear[year] = [];
-        }
-        groupedByYear[year].push(event);
-      });
-
-      // Convert to array format
-      const formattedData = Object.keys(groupedByYear)
+      // Convert grouped data from object to array format
+      const formattedData = Object.keys(res.data)
         .sort((a, b) => b - a) // Sort years in descending order
         .map((year) => ({
           year: year,
-          events: groupedByYear[year],
-          eventsCount: groupedByYear[year].length,
+          events: res.data[year].events,
+          eventsCount: res.data[year].count,
         }));
 
       setHistoryMetadata(formattedData);
@@ -94,9 +84,7 @@ const AboutHistoryContent = () => {
                 {/* Vertical line for this year */}
                 <div
                   className={`absolute left-[13.5px] w-1 transition-all duration-300 bg-[#8FABCA] ${
-                    isExpanded
-                      ? "top-[58px] bottom-0"
-                      : "top-[58px] h-8"
+                    isExpanded ? "top-[58px] bottom-0" : "top-[58px] h-8"
                   }`}
                 ></div>
 
