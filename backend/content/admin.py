@@ -190,8 +190,8 @@ class BookReviewAdmin(admin.ModelAdmin):
 
 @admin.register(HistoryEvent)
 class HistoryEventAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "sub_title", "year")
-    search_fields = ("id", "title", "sub_title", "description")
+    list_display = ("id", "title", "sub_title_one", "sub_title_two", "year")
+    search_fields = ("id", "title", "sub_title_one", "sub_title_two", "description")
     list_filter = ("year",)
 
 

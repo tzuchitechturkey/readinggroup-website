@@ -450,7 +450,8 @@ class HistoryEvent(TimestampedModel):
     year = models.PositiveIntegerField()
     month = models.PositiveSmallIntegerField(default=1)
     title = models.CharField(max_length=255)
-    sub_title = models.CharField(max_length=255, blank=True)
+    sub_title_one = models.CharField(max_length=255, blank=True)
+    sub_title_two = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
 
     class Meta:
