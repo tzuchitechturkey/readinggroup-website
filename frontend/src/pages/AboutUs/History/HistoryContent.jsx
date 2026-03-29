@@ -63,7 +63,7 @@ const AboutHistoryContent = () => {
   }, []);
 
   return (
-    <div className="w-full bg-[#E5F0FA] min-h-screen pt-[60px] pb-32 font-['Noto_Sans',sans-serif] relative">
+    <div className="w-full bg-[#D7EAFF] min-h-screen pt-[60px] pb-32 font-['Noto_Sans',sans-serif] relative">
       {isLoading && <Loader />}
       <div className="max-w-[1199px] mx-auto px-4 md:px-0 relative">
         {/* Header Section */}
