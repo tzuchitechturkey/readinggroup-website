@@ -448,12 +448,13 @@ class BookReview(TimestampedModel):
 
 class HistoryEvent(TimestampedModel):
     year = models.PositiveIntegerField()
+    month = models.PositiveSmallIntegerField(default=1)
     title = models.CharField(max_length=255)
     sub_title = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
 
     class Meta:
-        ordering = ("year",)
+        ordering = ("year", "month")
 
     def __str__(self):
         return f"{self.year} - {self.title}"

@@ -1254,11 +1254,11 @@ class BookReviewViewSet(viewsets.ModelViewSet):
 
 
 class HistoryEventViewSet(viewsets.ModelViewSet):
-    queryset = HistoryEvent.objects.all().order_by("year")
+    queryset = HistoryEvent.objects.all().order_by("year", "month")
     serializer_class = HistoryEventSerializer
     pagination_class = None
     search_fields = ("title", "sub_title")
-    ordering_fields = ("year", "created_at")
+    ordering_fields = ("year", "month", "created_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
     @action(detail=True, methods=["post"], url_path="images")
@@ -1315,7 +1315,7 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"], url_path="grouped-by-year")
     def grouped_by_year(self, request):
         """Return events grouped by year"""
-        queryset = HistoryEvent.objects.all().order_by("year", "created_at")
+        queryset = HistoryEvent.objects.all().order_by("year", "month", "created_at")
         serializer = self.get_serializer(queryset, many=True)
         data = serializer.data
 
