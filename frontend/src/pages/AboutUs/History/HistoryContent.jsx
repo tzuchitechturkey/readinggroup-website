@@ -25,13 +25,11 @@ const AboutHistoryContent = () => {
       const res = await GetHistoryGroupedByYear();
 
       // Convert grouped data from object to array format
-      const formattedData = Object.keys(res.data)
-        .sort((a, b) => b - a) // Sort years in descending order
-        .map((year) => ({
-          year: year,
-          events: res.data[year].events,
-          eventsCount: res.data[year].count,
-        }));
+      const formattedData = Object.keys(res.data).map((year) => ({
+        year: year,
+        events: res.data[year].events,
+        eventsCount: res.data[year].count,
+      }));
 
       setHistoryMetadata(formattedData);
 
@@ -64,7 +62,7 @@ const AboutHistoryContent = () => {
       <div className="max-w-[1199px] mx-auto px-4 md:px-0 relative">
         {/* Header Section */}
         <div className="mb-14 max-w-[850px]">
-          <h1 className="text-[32px] md:text-[42px] font-[900] text-[#081945] mb-6 tracking-tight leading-tight">
+          <h1 className="text-[32px] md:text-[44px] font-black text-[#081945] mb-6 tracking-tight leading-tight">
             {t("Our History")}
           </h1>
           <p className="text-[#081945] text-[15px] md:text-[16.5px] leading-[1.75] font-medium opacity-90">
