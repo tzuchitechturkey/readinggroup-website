@@ -40,16 +40,8 @@ router.register(r"history-events", HistoryEventViewSet, basename="history-event"
 router.register(r"our-team-images", OurTeamImageViewSet, basename="our-team-image")
 router.register(r"video-categories", VideoCategoryViewSet, basename="video-category")
 router.register(r"learn-categories", LearnCategoryViewSet, basename="learn-category")
-router.register(r"event-communities", EventCommunityViewSet, basename="event-community")
-router.register(
-    r"related-reports-categories",
-    RelatedReportsCategoryViewSet,
-    basename="related-reports-category",
-)
 router.register(r"related-reports", RelatedReportsViewSet, basename="related-reports")
-router.register(
-    r"content-attachments", ContentAttachmentViewSet, basename="content-attachment"
-)
+router.register(r"event-communities", EventCommunityViewSet, basename="event-community")
 router.register(
     r"photo-collection", PhotoCollectionViewSet, basename="photo-collection"
 )
@@ -57,7 +49,15 @@ router.register(
     r"latest-news-images", LatestNewsImageViewSet, basename="latest-news-image"
 )
 router.register(
+    r"content-attachments", ContentAttachmentViewSet, basename="content-attachment"
+)
+router.register(
     r"history-event-images", HistoryEventImageViewSet, basename="history-event-image"
+)
+router.register(
+    r"related-reports-categories",
+    RelatedReportsCategoryViewSet,
+    basename="related-reports-category",
 )
 
 urlpatterns = router.urls
