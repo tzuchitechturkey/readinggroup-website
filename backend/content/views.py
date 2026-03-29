@@ -1127,7 +1127,7 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
 
 
 class OurTeamViewSet(viewsets.ModelViewSet):
-    queryset = OurTeam.objects.all().order_by("-created_at")
+    queryset = OurTeam.objects.all().order_by("-is_heart", "-created_at")
     serializer_class = OurTeamSerializer
     pagination_class = LimitOffsetPagination
     search_fields = ("title",)
