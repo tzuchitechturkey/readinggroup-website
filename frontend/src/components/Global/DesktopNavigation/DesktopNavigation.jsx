@@ -72,7 +72,7 @@ function DesktopNavigation({
                 <div
                   className={`absolute top-full left-1/2 -translate-x-1/2 pt-0 opacity-0 invisible ${item?.subItems?.length && "group-hover:opacity-100 "} group-hover:visible transition-all duration-200 z-50`}
                 >
-                  <div className="min-w-[240px] bg-[var(--color-primary)] shadow-xl py-0 px-0 animate-in fade-in-0 zoom-in-95">
+                  <div className="min-w-[220px] bg-[var(--color-primary)] shadow-xl py-0 px-0 animate-in fade-in-0 zoom-in-95">
                     <ul className="flex flex-col">
                       {item?.subItems?.map((subItem, subIdx) => (
                         <li

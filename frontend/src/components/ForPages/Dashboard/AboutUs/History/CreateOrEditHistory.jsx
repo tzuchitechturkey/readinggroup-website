@@ -63,6 +63,7 @@ const CreateOrEditHistory = ({
       }));
     }
   };
+  console.log("Form data:", formData);
 
   const validateForm = () => {
     const newErrors = {};

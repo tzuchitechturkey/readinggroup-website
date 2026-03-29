@@ -46,17 +46,17 @@ const buildNavigationItems = (t, siteInfo) => {
       hasDropdown: true,
       subItems: [
         {
-          name: t("OUR HISTORY"),
+          name: t("Our History"),
           href: "/about/history",
           tab: "history",
         },
         {
-          name: t("TEAM FUNCTIONS"),
+          name: t("Team Functions"),
           href: "/about/team",
           tab: "our_team",
         },
         {
-          name: t("BOOK"),
+          name: t("Book"),
           href: "/about/book",
           tab: "book",
         },

@@ -181,7 +181,7 @@ const BookPage = ({ onSectionChange }) => {
             imagePreview={previewImages.image}
             onFileChange={handleFileChange("image")}
             errors={errors}
-            title={t("Image")}
+            title={t("Book Image")}
             fieldName="image"
           />
 

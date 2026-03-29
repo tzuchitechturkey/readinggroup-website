@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertCircle } from "lucide-react";
 
@@ -15,6 +15,14 @@ function DatePickerMonthYear({
   const [selectedMonth, setSelectedMonth] = useState(
     value ? new Date(value).getMonth() : new Date().getMonth()
   );
+
+  // Update selected month and year when value prop changes
+  useEffect(() => {
+    if (value) {
+      setSelectedYear(new Date(value).getFullYear());
+      setSelectedMonth(new Date(value).getMonth());
+    }
+  }, [value]);
 
   const handleYearChange = (e) => {
     const year = parseInt(e.target.value);

@@ -23,7 +23,7 @@ const HistoryModal = ({ isOpen, onClose, event }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[50] bg-[#081945]/95 overflow-y-auto">
+    <div className="fixed inset-0 z-[50] bg-[#16213AF7]/97 overflow-y-auto">
       <div className="min-h-screen px-4 md:px-8 py-16 md:py-24 flex items-start justify-center">
         <div className="w-full max-w-[1000px] relative mt-10 md:mt-0">
           {/* Header */}

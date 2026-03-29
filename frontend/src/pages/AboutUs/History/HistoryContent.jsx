@@ -62,14 +62,19 @@ const AboutHistoryContent = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
+  // Add a helper function to map month numbers to names
+  const getMonthName = (monthNumber) => {
+    const date = new Date();
+    date.setMonth(monthNumber - 1); // JavaScript months are 0-indexed
+    return date.toLocaleString("en-US", { month: "long" });
+  };
   return (
     <div className="w-full bg-[#D7EAFF] min-h-screen pt-[60px] pb-32 font-['Noto_Sans',sans-serif] relative">
       {isLoading && <Loader />}
       <div className="max-w-[1199px] mx-auto px-4 md:px-0 relative">
         {/* Header Section */}
         <div className="mb-14 max-w-[850px]">
-          <h1 className="text-[32px] md:text-[42px] font-[800] text-[#081945] mb-6 tracking-tight leading-tight">
+          <h1 className="text-[32px] md:text-[42px] font-[900] text-[#081945] mb-6 tracking-tight leading-tight">
             {t("Our History")}
           </h1>
           <p className="text-[#081945] text-[15px] md:text-[16.5px] leading-[1.75] font-medium opacity-90">
@@ -81,28 +86,37 @@ const AboutHistoryContent = () => {
 
         {/* Timeline Section */}
         <div className="relative">
-          {historyMetadata.map((yearData) => {
+          {historyMetadata.map((yearData, index) => {
             const isExpanded = expandedYears[yearData.year];
 
             return (
               <div key={yearData.year} className="relative group">
+                {/* Vertical line for this year */}
+                <div
+                  className={`absolute left-[13.5px] w-1 transition-all duration-300 bg-[#8FABCA] ${
+                    isExpanded
+                      ? "top-[58px] bottom-0"
+                      : "top-[58px] h-8"
+                  }`}
+                ></div>
+
                 {/* Year Header */}
                 <div
-                  className="flex items-center gap-[24px] py-4 cursor-pointer  sticky top-0 z-20"
+                  className="flex items-center gap-[24px] py-4 cursor-pointer sticky top-0 z-20"
                   onClick={() => toggleYear(yearData.year)}
                 >
-                  <div className="w-7 h-7 shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold  leading-none rounded-[4px] shadow-sm">
+                  <div className="w-7 h-7 shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold leading-none rounded-[4px] shadow-sm relative z-10">
                     {isExpanded ? (
-                      <Minus className="text-white size-4 " />
+                      <Minus className="text-white size-4" />
                     ) : (
-                      <Plus className="text-white size-4 " />
+                      <Plus className="text-white size-4" />
                     )}
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-[28px] md:text-[34px] font-[800] text-[#081945] leading-none tracking-tight">
                       {yearData.year}
                     </span>
-                    <span className="text-[13px] text-[#6285a8] leading-none">
+                    <span className="text-lg text-[#285688] leading-none">
                       {yearData.eventsCount} {t("event(s)")}
                     </span>
                   </div>
@@ -127,8 +141,8 @@ const AboutHistoryContent = () => {
 
                         {/* Event Details */}
                         <div className="flex-1 mt-[2px]">
-                          <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
-                            {event?.month}
+                          <p className="text-[#081945] uppercase font-bold text-base md:text-[20px] mb-4">
+                            {getMonthName(event?.month)}
                           </p>
                           <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
                             {event?.title}
