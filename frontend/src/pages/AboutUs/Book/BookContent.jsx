@@ -42,8 +42,10 @@ function BookContent() {
     fetchData();
   }, []);
 
+  console.log(book?.reviews);
+
   return (
-    <div className="w-full bg-[#e6effb] min-h-screen py-16 lg:py-[120px] px-4 sm:px-8 xl:px-0 flex justify-center">
+    <div className="w-full bg-[#D7EAFF] min-h-screen py-16 lg:py-[120px] px-4 sm:px-8 xl:px-0 flex justify-center">
       {isLoading && <Loader />}
       <div className="w-full max-w-[1200px] flex flex-col gap-16 lg:gap-[64px]">
         {/* Hero Section */}
@@ -57,22 +59,22 @@ function BookContent() {
               className="text-[#4a6288] leading-relaxed text-sm sm:text-base mb-8 font-medium"
               dangerouslySetInnerHTML={{ __html: book?.description }}
             />
+          </div>
 
-            <div className="flex-1 flex justify-center lg:justify-end">
-              <div className="relative w-full">
-                <img
-                  src={book?.image}
-                  alt={book?.title}
-                  className="w-full h-auto object-cover"
-                />
-              </div>
+          <div className="flex-1 flex justify-center lg:justify-end">
+            <div className="relative max-h-[800px] max-w-[590px]">
+              <img
+                src={book?.image}
+                alt={book?.title}
+                className="w-full h-auto object-cover"
+              />
             </div>
           </div>
         </div>
 
         {/* Testimonials Carousel Section */}
         <div className="w-full flex flex-col gap-[12px]">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#112344]">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#081945]">
             {t("See what people are saying about our book!")}
           </h2>
           <div className="relative bg-[#5a6a7e] overflow-hidden w-full aspect-[16/9] xl:aspect-[1200/700]">
@@ -83,7 +85,7 @@ function BookContent() {
               {book?.reviews?.map((slide) => (
                 <div key={slide.id} className="min-w-full h-full relative">
                   <img
-                    src={slide.contentImage}
+                    src={slide?.image}
                     alt={`Slide ${slide.id}`}
                     className="w-full h-full object-cover"
                   />

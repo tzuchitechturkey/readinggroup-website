@@ -4,6 +4,11 @@ export async function GetHistory() {
   return await axios.get(`/history-events/`);
 }
 
+// history-events/grouped-by-year/
+export async function GetHistoryGroupedByYear() {
+  return await axios.get(`/history-events/grouped-by-year/`);
+}
+
 export async function CreateHistory(data) {
   return await axios.post(`/history-events/`, data);
 }

@@ -39,7 +39,7 @@ function DesktopNavigation({
                     }
                   }}
                   className={({ isActive }) =>
-                    `transition-all duration-200 text-[18px] font-['Noto_Sans'] font-medium h-full flex gap-[8px] items-center justify-center border-b-[3px] border-b-transparent ${
+                    `transition-all duration-200 font-semibold text-[18px] font-['Noto_Sans']  h-full flex gap-[8px] items-center justify-center border-b-[3px] border-b-transparent ${
                       isActive
                         ? "border-b-[#fcfdff] text-[#fcfdff]"
                         : "text-[#fcfdff] hover:text-white/90"
@@ -299,7 +299,7 @@ function DesktopNavigation({
               <NavLink
                 to={item?.href}
                 className={({ isActive }) =>
-                  `transition-all duration-200 text-[18px]  font-medium font-['Noto_Sans'] px-[8px] h-full flex items-center justify-center border-b-4 ${
+                  `transition-all duration-200 text-[18px]  font-semibold font-['Noto_Sans'] px-[8px] h-full flex items-center justify-center border-b-4 ${
                     isActive
                       ? "border-[#fcfdff] text-[#fcfdff]"
                       : "border-transparent text-[#fcfdff] hover:text-white/90"

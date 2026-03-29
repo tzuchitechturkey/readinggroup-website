@@ -24,15 +24,6 @@ function Usernavbar({ isHome = false }) {
   const [categoryContents, setCategoryContents] = useState({});
   const [loadingContents, setLoadingContents] = useState({});
 
-  const fetchWebSiteInfo = async () => {
-    try {
-      const response = await GetWebSiteInfo();
-      setSiteInfo(response.data);
-    } catch (error) {
-      setErrorFn(error, t);
-    }
-  };
-
   // Check if item should open in new tab (for external links)
   const shouldOpenInNewTab = (item, categoryType) => {
     return categoryType === "event" && item.external_link;

@@ -63,17 +63,17 @@ const TeamFunctionCarousel = ({ bannerImages = [] }) => {
 
 const TeamFunctionsSection = ({ data }) => {
   return (
-    <div className="space-y-16 lg:space-y-24 max-w-[1200px] mx-auto px-4">
+    <div className="space-y-16 lg:space-y-20 max-w-[1200px] mx-auto ">
       {data?.map((team, index) => (
         <div
           key={index}
-          className={`flex flex-col ${index % 2 !== 0 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-6 items-center lg:min-h-[435px]`}
+          className={`flex flex-col ${index % 2 !== 0 ? "lg:flex-row-reverse" : "lg:flex-row"} gap-10 items-center lg:min-h-[435px]`}
         >
           <div className="w-full lg:w-[60%] shrink-0">
             <TeamFunctionCarousel bannerImages={team?.images} />
           </div>
 
-          <div className="w-full lg:w-[40%] flex flex-col justify-center px-2 lg:px-6">
+          <div className="w-full lg:w-[40%] flex flex-col justify-center px-2 ">
             <h3 className="text-2xl sm:text-3xl lg:text-[36px] font-extrabold text-[#112344] mb-4 leading-tight">
               {team?.title}
             </h3>

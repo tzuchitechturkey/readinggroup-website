@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
+import { DescriptionSection } from "./DescriptionSection";
 
 import { CreateTeam, EditTeamById } from "@/api/team";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
@@ -14,6 +14,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    is_heart: false,
   });
   const [errors, setErrors] = useState({});
 
@@ -23,11 +24,13 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         setFormData({
           title: member.title,
           description: member.description,
+          is_heart: member.is_heart,
         });
       } else {
         setFormData({
           title: "",
           description: "",
+          is_heart: false,
         });
       }
     }
@@ -47,6 +50,27 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         [name]: "",
       }));
     }
+  };
+
+  // Handle description changes
+  const handleDescriptionChange = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: data,
+    }));
+
+    // Clear error if exists
+    if (errors.description) {
+      setErrors((prev) => ({
+        ...prev,
+        description: "",
+      }));
+    }
+  };
+
+  // Handle description blur
+  const handleDescriptionBlur = () => {
+    // Add validation logic if needed
   };
 
   // Validate form
@@ -77,7 +101,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     // Prepare data for submission
     const submitData = new FormData();
     submitData.append("title", formData.title);
-
+    submitData.append("is_heart", formData.is_heart);
     submitData.append("description", formData.description);
 
     try {
@@ -125,20 +149,28 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         </div>
 
         {/* Start Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Description")}
-          </label>
-          <textarea
-            name="description"
-            placeholder={t("Enter a brief description or bio")}
-            value={formData.description}
-            onChange={handleInputChange}
-            rows={3}
-            className="w-full p-3 border border-gray-300 rounded-lg  outline-none"
-          />
-        </div>
+        <DescriptionSection
+          formData={formData}
+          onBodyChange={handleDescriptionChange}
+          onBodyBlur={handleDescriptionBlur}
+          error={errors.description}
+        />
         {/* End Description */}
+
+        {/* Start Is Heart */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="is_heart"
+            checked={formData.is_heart}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, is_heart: e.target.checked }))
+            }
+            className="h-4 w-4 text-primary border-gray-300 rounded"
+          />
+          <label className="text-sm text-gray-700">{t("Is Heart")}</label>
+        </div>
+        {/* End Is Heart */}
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">
           <button

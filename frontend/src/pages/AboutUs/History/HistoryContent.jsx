@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import HistoryModal from "./HistoryModal";
 import Loader from "@/components/Global/Loader/Loader";
-import { GetHistory, GetHistoryByYear } from "@/api/history";
+import { GetHistory } from "@/api/history";
 
 const AboutHistoryContent = () => {
   const { t } = useTranslation();
@@ -10,44 +10,23 @@ const AboutHistoryContent = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [historyMetadata, setHistoryMetadata] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const toggleYear = async (year) => {
+
+  const toggleYear = (year) => {
     setExpandedYears((prev) => ({
       ...prev,
       [year]: !prev[year],
     }));
-
-    if (!expandedYears[year]) {
-      setIsLoading(true);
-      try {
-        const response = await GetHistoryByYear(year);
-        setHistoryMetadata((prev) => {
-          const updatedMetadata = prev.map((item) =>
-            item.year === year
-              ? {
-                  ...item,
-                  events: response.data,
-                  eventsCount: response.data.length,
-                }
-              : item,
-          );
-          return updatedMetadata;
-        });
-      } catch (error) {
-        console.error("Error fetching history by year:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
   };
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const res = await GetHistory();
-      
+
       // Group events by year
       const groupedByYear = {};
       res.data.forEach((event) => {
-        const year = event.year.toString();
+        const year = event?.year.toString();
         if (!groupedByYear[year]) {
           groupedByYear[year] = [];
         }
@@ -101,90 +80,62 @@ const AboutHistoryContent = () => {
 
         {/* Timeline Section */}
         <div className="relative">
-          {historyMetadata.map((yearData, index) => {
+          {historyMetadata.map((yearData) => {
             const isExpanded = expandedYears[yearData.year];
 
             return (
               <div key={yearData.year} className="relative group">
-                {/* Timeline Line Context */}
-                {index < historyMetadata.length - 1 && (
-                  <div className="absolute left-[11px] top-[36px] bottom-[-15px] w-[2px] bg-[#8ba4c3] z-0 pointer-events-none group-last:hidden"></div>
-                )}
-
-                {/* Main Year Row Sticky Header */}
-                <div className="bg-[#E5F0FA] sticky top-0 md:top-[70px] z-20">
-                  <div
-                    className="flex items-center gap-[24px] py-4 cursor-pointer"
-                    onClick={() => toggleYear(yearData.year)}
-                  >
-                    <div className="w-[24px] h-[24px] shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold text-[18px] leading-none rounded-[4px] shadow-sm z-30 transform transition-transform duration-200">
-                      {isExpanded && yearData.events?.length > 0 ? "-" : "+"}
-                    </div>
-                    <div className="flex items-baseline gap-4">
-                      <span className="text-[28px] md:text-[34px] font-[800] text-[#081945] leading-none tracking-tight">
-                        {yearData.year}
-                      </span>
-                      <span className="text-[13px] font-semibold text-[#6285a8] leading-none">
-                        {yearData.eventsCount} {t("event(s)")}
-                      </span>
-                    </div>
+                {/* Year Header */}
+                <div
+                  className="flex items-center gap-[24px] py-4 cursor-pointer bg-[#E5F0FA] sticky top-0 z-20"
+                  onClick={() => toggleYear(yearData.year)}
+                >
+                  <div className="w-[24px] h-[24px] shrink-0 bg-[#35577D] text-white flex items-center justify-center font-bold text-[18px] leading-none rounded-[4px] shadow-sm">
+                    {isExpanded ? "-" : "+"}
+                  </div>
+                  <div className="flex items-baseline gap-4">
+                    <span className="text-[28px] md:text-[34px] font-[800] text-[#081945] leading-none tracking-tight">
+                      {yearData.year}
+                    </span>
+                    <span className="text-[13px] font-semibold text-[#6285a8] leading-none">
+                      {yearData.eventsCount} {t("event(s)")}
+                    </span>
                   </div>
                 </div>
 
-                {/* Expanded Content */}
-                {isExpanded && yearData.events?.length > 0 && (
-                  <div className="pl-[54px] pt-4 pb-12 pr-0 relative">
-                    {yearData.events.map((ev, i) => (
+                {/* Events */}
+                {isExpanded && (
+                  <div className="pl-[54px] pt-4 pb-12">
+                    {yearData.events.map((event) => (
                       <div
-                        key={ev.id}
-                        className="flex flex-col md:flex-row gap-[24px] mb-14 last:mb-0 w-full max-w-[1145px]"
+                        key={event?.id}
+                        className="flex flex-col md:flex-row gap-[24px] mb-14 last:mb-0"
                       >
-                        <div className="w-full md:w-[329px] shrink-0">
+                        {/* Event Images */}
+                        <div className="w-full md:w-[329px] h-[247px]">
                           <img
-                            src={ev.images[0]?.image}
-                            alt={ev.title}
-                            className="w-full h-auto object-cover rounded-none"
+                            src={event?.images[0]?.image}
+                            alt={event?.title}
+                            className="w-full h-full object-cover "
                           />
                         </div>
-                        <div className="flex-1 max-w-[792px] pt-0 flex flex-col items-start gap-0">
-                          {ev.date && (
-                            <h4 className="text-[#081945] font-black text-[15px] uppercase tracking-[0.15em] mb-3">
-                              {ev.date}
-                            </h4>
-                          )}
-                          <p className="text-[#081945] font-[700] text-[20px] md:text-[22px] leading-[1.55] tracking-tight">
-                            {ev.title}
+
+                        {/* Event Details */}
+                        <div className="flex-1">
+                          <p className="text-[#081945] font-bold text-base md:text-[20px] mb-4">
+                            {event?.title}
                           </p>
-                          <div className="mt-[36px]">
-                            <button
-                              onClick={() =>
-                                setSelectedEvent({
-                                  event: ev,
-                                  year: yearData.year,
-                                })
-                              }
-                              className="bg-[#FCFDFF] border border-[#D1E0EF] rounded-[4px] w-[140px] h-[40px] px-0 py-0 text-[#2C5282] font-semibold text-[14px] inline-flex items-center justify-center gap-[6px] shadow-sm hover:shadow-md hover:bg-gray-50 transition-all"
-                            >
-                              <span className="pl-0">{t("Read more")}</span>
-                              <span
-                                className="text-[16px] font-normal leading-none pt-[1px]"
-                                aria-hidden="true"
-                              >
-                                &rarr;
-                              </span>
-                            </button>
-                          </div>
+
+                          <button
+                            onClick={() => setSelectedEvent(event)}
+                            className="mt-3 bg-[#FCFDFF] border border-[#D1E0EF] rounded-[4px] px-4 py-2 text-[#285688]  text-[14px] hover:bg-gray-50 transition-all"
+                          >
+                            {t("Read more")} &rarr;
+                          </button>
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-
-                {/* Space out closed items */}
-                {(!isExpanded ||
-                  !yearData.events ||
-                  yearData.events.length === 0) && (
-                  <div className="h-[12px]"></div>
                 )}
               </div>
             );
@@ -192,12 +143,14 @@ const AboutHistoryContent = () => {
         </div>
       </div>
 
-      <HistoryModal
-        isOpen={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        event={selectedEvent?.event}
-        year={selectedEvent?.year}
-      />
+      {/* Modal for Selected Event */}
+      {selectedEvent && (
+        <HistoryModal
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          event={selectedEvent}
+        />
+      )}
     </div>
   );
 };

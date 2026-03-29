@@ -214,6 +214,9 @@ function OurTeamList({ onSectionChange }) {
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("Description")}
                     </TableHead>
+                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                      {t("Is Heart")}
+                    </TableHead>
 
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("Actions")}
@@ -261,6 +264,11 @@ function OurTeamList({ onSectionChange }) {
                         </p>
                       </TableCell>
                       {/* End Description */}
+                      {/* Start Is Heart */}
+                      <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
+                        {member.is_heart ? t("Active") : t("Inactive")}
+                      </TableCell>
+                      {/* End Is Heart */}
                       {/* Start Actions */}
                       <TableCell className="py-4">
                         <div className="flex items-center justify-center gap-2 text-[#5B6B79]">

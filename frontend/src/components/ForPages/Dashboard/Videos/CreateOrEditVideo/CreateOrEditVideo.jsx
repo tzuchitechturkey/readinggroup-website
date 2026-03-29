@@ -6,7 +6,6 @@ import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/C
 import { useCreateOrEditVideo } from "@/hooks/video/useVideoForm";
 import ImageUploadSection from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/ImageUploadSection";
 
-import { ThumbnailSection } from "./VideoForm/ThumbnailSection";
 import { BasicDetailsSection } from "./VideoForm/BasicDetailsSection";
 import { VideoUrlAndDateSection } from "./VideoForm/VideoUrlAndDateSection";
 import { CastSection } from "./VideoForm/CastSection";
@@ -67,12 +66,8 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        
         {/* Thumbnail URL Section */}
-        <ImageUploadSection 
-          formData={formData}
-          t={t}
-        />
+        <ImageUploadSection formData={formData} t={t} />
         {/* End Thumbnail URL Section */}
         {/* Start Attachments Section */}
         <div className="mb-8">

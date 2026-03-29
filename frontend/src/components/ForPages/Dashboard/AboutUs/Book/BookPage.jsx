@@ -9,6 +9,7 @@ import { GetBook, CreateBook, EditBookById } from "@/api/books";
 
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import ImageSection from "./ImageSection";
+import { DescriptionSection } from "./DescriptionSection";
 
 const BookPage = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
@@ -27,6 +28,7 @@ const BookPage = ({ onSectionChange }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [descriptionError, setDescriptionError] = useState("");
 
   // Fetch the single book
   const fetchBook = async () => {
@@ -62,6 +64,23 @@ const BookPage = ({ onSectionChange }) => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  // Handle description changes
+  const handleDescriptionChange = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      description: data,
+    }));
+    // Clear error if exists
+    if (descriptionError) {
+      setDescriptionError("");
+    }
+  };
+
+  // Handle description blur
+  const handleDescriptionBlur = () => {
+    // Add validation logic if needed
   };
 
   // Handle file input changes for specific image
@@ -130,6 +149,7 @@ const BookPage = ({ onSectionChange }) => {
           ? t("Book updated successfully")
           : t("Book created successfully"),
       );
+      onSectionChange("dashboard");
     } catch (error) {
       setErrorFn(error);
     } finally {
@@ -161,17 +181,18 @@ const BookPage = ({ onSectionChange }) => {
             imagePreview={previewImages.image}
             onFileChange={handleFileChange("image")}
             errors={errors}
+            title={t("Image")}
+            fieldName="image"
           />
 
           {/* Cover Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Cover Image")}
-            </label>
             <ImageSection
               imagePreview={previewImages.cover_image}
               onFileChange={handleFileChange("cover_image")}
               errors={errors}
+              title={t("Cover Image")}
+              fieldName="cover_image"
             />
           </div>
           {/* Title Input */}
@@ -190,19 +211,12 @@ const BookPage = ({ onSectionChange }) => {
           </div>
 
           {/* Description Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("Description")}
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder={t("Enter book description")}
-              rows="4"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <DescriptionSection
+            formData={formData}
+            onBodyChange={handleDescriptionChange}
+            onBodyBlur={handleDescriptionBlur}
+            error={descriptionError}
+          />
           {/* Submit Button */}
           <div className="flex gap-3">
             <button
