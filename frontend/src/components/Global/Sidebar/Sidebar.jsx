@@ -31,6 +31,8 @@ import TV from "@/assets/icons/cardsOrphoto-icon.png";
 import InstagramIcon from "@/assets/icons/instagramIcon.png";
 import LatestNews from "@/assets/icons/latestNews.png";
 import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
+import Message from "@/assets/Message.png";
+import Security from "@/assets/icons/security-safe.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
@@ -188,7 +190,7 @@ export default function AppSidebar({
       {
         title: "Team Members",
         onClick: "#",
-        icon: VaadinHealth,
+        icon: Security,
         items: [
           {
             title: "Add/Edit Team Member",
@@ -203,7 +205,7 @@ export default function AppSidebar({
       {
         title: "Book",
         onClick: "#",
-        icon: VaadinHealth,
+        icon: Message,
         items: [
           {
             title: "The Book",
@@ -218,7 +220,7 @@ export default function AppSidebar({
       {
         title: "All History",
         onClick: "#",
-        icon: VaadinHealth,
+        icon: Posts,
         items: [
           {
             title: "History",

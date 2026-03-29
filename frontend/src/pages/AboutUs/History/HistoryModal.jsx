@@ -68,7 +68,7 @@ const HistoryModal = ({ isOpen, onClose, event }) => {
             />
 
             <div className="text-[#FCFDFF] text-[14px] md:text-lg leading-[1.75]">
-              {event.title}
+              {event.sub_title_one}
             </div>
 
             {/* Support for additional modal-specific images if they exist in the metadata */}
@@ -81,9 +81,9 @@ const HistoryModal = ({ isOpen, onClose, event }) => {
               />
             )}
             {/* Support for additional paragraphs if they exist in the metadata */}
-            {event.sub_title && (
+            {event.sub_title_two && (
               <div className="text-[#FCFDFF] text-[14px] md:text-lg leading-[1.75] ">
-                {event.sub_title}
+                {event.sub_title_two}
               </div>
             )}
           </div>

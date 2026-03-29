@@ -20,7 +20,8 @@ const CreateOrEditHistory = ({
   const [formData, setFormData] = useState({
     date: null,
     title: "",
-    sub_title: "",
+    sub_title_one: "",
+    sub_title_two: "",
     description: "",
   });
 
@@ -35,14 +36,16 @@ const CreateOrEditHistory = ({
       setFormData({
         date,
         title: historyItem.title || "",
-        sub_title: historyItem.sub_title || "",
+        sub_title_one: historyItem.sub_title_one || "",
+        sub_title_two: historyItem.sub_title_two || "",
         description: historyItem.description || "",
       });
     } else {
       setFormData({
         date: null,
         title: "",
-        sub_title: "",
+        sub_title_one: "",
+        sub_title_two: "",
         description: "",
       });
     }
@@ -76,12 +79,8 @@ const CreateOrEditHistory = ({
       newErrors.title = t("Title is required");
     }
 
-    if (!formData.sub_title.trim()) {
-      newErrors.sub_title = t("Sub Title is required");
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = t("Description is required");
+    if (!formData.sub_title_one.trim()) {
+      newErrors.sub_title_one = t("Sub Title One is required");
     }
 
     setErrors(newErrors);
@@ -107,8 +106,8 @@ const CreateOrEditHistory = ({
       formDataToSend.append("year", year);
       formDataToSend.append("month", month); // Send as number
       formDataToSend.append("title", formData.title || "");
-      formDataToSend.append("sub_title", formData.sub_title || "");
-      formDataToSend.append("description", formData.description || "");
+      formDataToSend.append("sub_title_one", formData.sub_title_one || "");
+      formDataToSend.append("sub_title_two", formData.sub_title_two || "");
 
       if (historyItem?.id) {
         await EditHistoryById(historyItem.id, formDataToSend);
@@ -176,44 +175,40 @@ const CreateOrEditHistory = ({
         {/* Start Sub Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Sub Title")} *
+            {t("Sub Title One")} *
           </label>
           <input
             type="text"
-            name="sub_title"
-            value={formData.sub_title}
+            name="sub_title_one"
+            value={formData.sub_title_one}
             onChange={handleInputChange}
-            placeholder={t("Enter sub title")}
+            placeholder={t("Enter sub title one")}
             className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.sub_title ? "border-red-500" : "border-gray-300"
+              errors.sub_title_one ? "border-red-500" : "border-gray-300"
             }`}
           />
-          {errors.sub_title && (
-            <p className="text-red-500 text-xs mt-1">{errors.sub_title}</p>
+          {errors.sub_title_one && (
+            <p className="text-red-500 text-xs mt-1">{errors.sub_title_one}</p>
           )}
         </div>
-        {/* End Sub Title */}
+        {/* End Sub Title One */}
 
-        {/* Start Description */}
+        {/* Start Sub Title Two */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t("Description")} *
+            {t("Sub Title Two")} *
           </label>
           <textarea
-            name="description"
-            value={formData.description}
+            name="sub_title_two"
+            value={formData.sub_title_two}
             onChange={handleInputChange}
-            placeholder={t("Enter description")}
+            placeholder={t("Enter sub title two")}
             rows={4}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errors.description ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent  border-gray-300
+            `}
           />
-          {errors.description && (
-            <p className="text-red-500 text-xs mt-1">{errors.description}</p>
-          )}
         </div>
-        {/* End Description */}
+        {/* End Sub Title Two */}
 
         {/* Start Actions */}
         <div className="flex justify-end gap-3 mt-6">
