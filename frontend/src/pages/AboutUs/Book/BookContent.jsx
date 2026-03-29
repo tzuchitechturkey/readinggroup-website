@@ -49,7 +49,7 @@ function BookContent() {
       {isLoading && <Loader />}
       <div className="w-full max-w-[1200px] flex flex-col gap-16 lg:gap-[64px]">
         {/* Hero Section */}
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-[84px] items-start">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-[64px] items-start">
           <div className="flex-1 flex flex-col justify-start">
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#112344] mb-2 leading-tight">
               {t(book?.title)}
@@ -62,7 +62,7 @@ function BookContent() {
           </div>
 
           <div className="flex-1 flex justify-center lg:justify-end">
-            <div className="relative max-h-[800px] max-w-[590px]">
+            <div className="relative max-h-[800px] lg:min-w-[600px]">
               <img
                 src={book?.image}
                 alt={book?.title}
@@ -73,17 +73,20 @@ function BookContent() {
         </div>
 
         {/* Testimonials Carousel Section */}
-        <div className="w-full flex flex-col gap-[12px]">
+        <div className="w-full flex flex-col gap-[12px] mt-16">
           <h2 className="text-2xl md:text-3xl font-bold text-[#081945]">
             {t("See what people are saying about our book!")}
           </h2>
-          <div className="relative bg-[#5a6a7e] overflow-hidden w-full aspect-[16/9] xl:aspect-[1200/700]">
+          <div className="relative bg-[#5a6a7e] overflow-hidden w-full aspect-[16/9] xl:aspect-[1200/675]">
             <div
-              className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
+              className="flex transition-transform duration-700 ease-in-out w-full h-full"
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               {book?.reviews?.map((slide) => (
-                <div key={slide.id} className="min-w-full h-full relative">
+                <div
+                  key={slide.id}
+                  className="w-full h-full flex-shrink-0 relative"
+                >
                   <img
                     src={slide?.image}
                     alt={`Slide ${slide.id}`}
