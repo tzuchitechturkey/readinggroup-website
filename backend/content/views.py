@@ -1257,7 +1257,6 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
     queryset = HistoryEvent.objects.all().order_by("year")
     serializer_class = HistoryEventSerializer
     pagination_class = None
-
     search_fields = ("title", "sub_title")
     ordering_fields = ("year", "created_at")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -1312,6 +1311,27 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="grouped-by-year")
+    def grouped_by_year(self, request):
+        """Return events grouped by year"""
+        queryset = HistoryEvent.objects.all().order_by("year", "created_at")
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        grouped = defaultdict(list)
+
+        # 🔥 grouping
+        for item in data:
+            grouped[str(item["year"])].append(item)
+
+        # 🔥 الشكل النهائي
+        response = {}
+
+        for year, items in grouped.items():
+            response[year] = {"count": len(items), "events": items}
+
+        return Response(response)
 
 
 class HistoryEventImageViewSet(viewsets.ModelViewSet):
