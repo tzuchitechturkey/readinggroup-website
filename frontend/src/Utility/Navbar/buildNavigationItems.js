@@ -42,7 +42,7 @@ const buildNavigationItems = (t, siteInfo) => {
       ],
     },
     {
-      name: t("ABOUT US"),
+      name: t("About Us"),
       hasDropdown: true,
       subItems: [
         {
