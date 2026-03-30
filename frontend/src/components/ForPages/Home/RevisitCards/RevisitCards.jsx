@@ -88,7 +88,7 @@ const RevisitCards = ({ t }) => {
               className={`px-4 py-2 sm:py-2.5 rounded-full shrink-0 w-fit font-['Noto_Sans_TC:Regular',sans-serif] text-[13px] md:text-[16px] transition-all ${
                 activeCategory?.id === category.id
                   ? "bg-white text-[#285688]"
-                  : "bg-[#4a7ba7] text-white hover:bg-[#5a8bb7]"
+                  : "bg-[#4a7ba7] text-[#FCFDFF]/80 hover:bg-[#5a8bb7]"
               }`}
             >
               {category.name}
