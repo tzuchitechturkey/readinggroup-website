@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
-    const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
 
     const month = date.toLocaleDateString("en-US", { month: "short" });
@@ -39,7 +39,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
 
           {/* Play Button - Responsive Positioning */}
           <button
-            onClick={() => navigate(`/videos/details/${item.id}`)}
+            onClick={() => navigate(`/videos/${item.id}`)}
             className="absolute bottom-20 lg:top-1/2 right-1/2 lg:right-1/4 sm:right-1/3 md:right-1/3 transform -translate-y-1/2 flex items-center justify-center hover:opacity-100 transition-opacity z-10"
             aria-label="Play video"
           >
@@ -77,8 +77,7 @@ export default function FeaturedVideoPlayer({ item = {}, t, navigate }) {
               <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF] opacity-80">
                 <p className=""> {t("Full Livestream")} </p>|
                 <span>
-                  
-                 {item?.happened_at ? formatDate(item.happened_at) : ""}
+                  {item?.happened_at ? formatDate(item.happened_at) : ""}
                 </span>
               </div>
             </div>
