@@ -7,7 +7,7 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import GroupProfile, User
+from .models import User
 
 try:
     from content.models import Post
@@ -457,11 +457,6 @@ class AdminCreateUserSerializer(serializers.Serializer):
             user.last_password_change = timezone.now()
             user.save()
             user.groups.add(group_obj)
-
-            if section_name:
-                GroupProfile.objects.update_or_create(
-                    group=group_obj, defaults={"section_name": section_name}
-                )
         return user
 
 
@@ -470,7 +465,7 @@ class AdminUpdateUserSerializer(serializers.Serializer):
 
     All fields are optional to support PATCH.
     - `group` is plain text; if provided and doesn't exist, it will be created.
-    - If `section_name` is provided, it updates the GroupProfile for the user's
+    - `section_name` can be provided with or without `group`. If provided with `group`, it will update the
       target group (the provided `group`, else the user's current primary group).
     """
 
@@ -588,10 +583,5 @@ class AdminUpdateUserSerializer(serializers.Serializer):
                 user.groups.set([target_group])
             else:
                 target_group = user.groups.first()
-
-            if section_name and target_group:
-                GroupProfile.objects.update_or_create(
-                    group=target_group, defaults={"section_name": section_name}
-                )
 
         return user

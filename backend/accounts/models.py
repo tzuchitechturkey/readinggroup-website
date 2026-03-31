@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
@@ -15,7 +14,7 @@ class User(AbstractUser):
     display_name = models.CharField(max_length=255, blank=True)
     about_me = models.TextField(blank=True)
 
-    # Contect information
+    # Contact information
     country = models.CharField(max_length=100, blank=True)
     mobile_number = models.CharField(max_length=20, blank=True)
     address_details = models.TextField(blank=True)
@@ -40,18 +39,3 @@ class User(AbstractUser):
         self.last_password_change = timezone.now()
         self.is_first_login = False
         self.save(update_fields=["last_password_change", "is_first_login"])
-
-
-class GroupProfile(models.Model):
-    """Extra metadata for a Django auth Group.
-
-    We keep this in a separate model to avoid replacing the built-in Group model.
-    """
-
-    group = models.OneToOneField(
-        Group, on_delete=models.CASCADE, related_name="profile"
-    )
-    section_name = models.CharField(max_length=255, blank=True, default="")
-
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return f"GroupProfile<{self.group_id}:{self.section_name}>"
