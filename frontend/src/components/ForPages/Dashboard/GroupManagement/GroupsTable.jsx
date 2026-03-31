@@ -81,6 +81,11 @@ const GroupsTable = ({
           </TableHead>
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
             <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+              {t("Content Type")}
+            </div>
+          </TableHead>
+          <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
+            <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
               {t("Actions")}
             </div>
           </TableHead>
@@ -95,6 +100,11 @@ const GroupsTable = ({
             </TableCell>
             <TableCell className="text-center text-sm text-gray-600">
               {group.name}
+            </TableCell>
+            <TableCell className="text-center text-sm">
+              <span className="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-full text-xs font-medium">
+                {group.section_name}
+              </span>
             </TableCell>
             <TableCell className="text-center">
               <div className="flex items-center justify-center gap-2">

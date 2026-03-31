@@ -14,12 +14,12 @@ export const useCreateOrEditUser = (user, onClose) => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    group_id: "",
+    group: "",
+    section_name: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
-  const [groupsList, setGroupsList] = useState([]);
 
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +42,7 @@ export const useCreateOrEditUser = (user, onClose) => {
       }));
     }
   };
-
+  console.log(errors);
   const validateForm = () => {
     const newErrors = {};
 
@@ -56,8 +56,8 @@ export const useCreateOrEditUser = (user, onClose) => {
       newErrors.email = t("Email is invalid");
     }
 
-    if (!formData.group_id) {
-      newErrors.group_id = t("Group is required");
+    if (!formData.group) {
+      newErrors.group = t("Group is required");
     }
 
     setErrors(newErrors);
@@ -68,7 +68,8 @@ export const useCreateOrEditUser = (user, onClose) => {
     setFormData({
       username: "",
       email: "",
-      group_id: "",
+      group: "",
+      section_name: "",
     });
     setErrors({});
     setHasChanges(false);
@@ -101,19 +102,6 @@ export const useCreateOrEditUser = (user, onClose) => {
     }
   };
 
-  // Load groups
-  useEffect(() => {
-    const loadGroups = async () => {
-      try {
-        const res = await GetGroups();
-        setGroupsList(res?.data?.results || []);
-      } catch (error) {
-        console.error("Error loading groups:", error);
-      }
-    };
-    loadGroups();
-  }, []);
-
   // Load user data if editing
   useEffect(() => {
     if (user?.id) {
@@ -124,12 +112,14 @@ export const useCreateOrEditUser = (user, onClose) => {
           setFormData({
             username: loadedUser?.username || "",
             email: loadedUser?.email || "",
-            group_id: loadedUser?.groups?.[0] || "",
+            group: loadedUser?.groups?.[0] || "",
+            section_name: loadedUser?.section_name || "",
           });
           setInitialFormData({
             username: loadedUser?.username || "",
             email: loadedUser?.email || "",
-            group_id: loadedUser?.groups?.[0] || "",
+            group: loadedUser?.groups?.[0] || "",
+            section_name: loadedUser?.section_name || "",
           });
         } catch (error) {
           setErrorFn(error, t);
@@ -145,7 +135,8 @@ export const useCreateOrEditUser = (user, onClose) => {
   // Track changes
   useEffect(() => {
     if (initialFormData) {
-      const changed = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      const changed =
+        JSON.stringify(formData) !== JSON.stringify(initialFormData);
       setHasChanges(changed);
     }
   }, [formData, initialFormData]);
@@ -155,7 +146,6 @@ export const useCreateOrEditUser = (user, onClose) => {
     errors,
     isLoading,
     hasChanges,
-    groupsList,
     handleInputChange,
     handleSubmit,
     resetForm,

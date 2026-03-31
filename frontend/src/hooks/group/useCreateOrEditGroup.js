@@ -12,6 +12,7 @@ export const useCreateOrEditGroup = (group, onClose) => {
   // Form state
   const [formData, setFormData] = useState({
     name: "",
+    section_name: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -46,6 +47,10 @@ export const useCreateOrEditGroup = (group, onClose) => {
       newErrors.name = t("Group name is required");
     }
 
+    if (!formData.section_name) {
+      newErrors.section_name = t("Content type is required");
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -53,6 +58,7 @@ export const useCreateOrEditGroup = (group, onClose) => {
   const resetForm = () => {
     setFormData({
       name: "",
+      section_name: "",
     });
     setErrors({});
     setHasChanges(false);
@@ -94,9 +100,11 @@ export const useCreateOrEditGroup = (group, onClose) => {
           const loadedGroup = res?.data;
           setFormData({
             name: loadedGroup?.name || "",
+            section_name: loadedGroup?.section_name || "",
           });
           setInitialFormData({
             name: loadedGroup?.name || "",
+            section_name: loadedGroup?.section_name || "",
           });
         } catch (error) {
           setErrorFn(error, t);
@@ -112,7 +120,8 @@ export const useCreateOrEditGroup = (group, onClose) => {
   // Track changes
   useEffect(() => {
     if (initialFormData) {
-      const changed = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      const changed =
+        JSON.stringify(formData) !== JSON.stringify(initialFormData);
       setHasChanges(changed);
     }
   }, [formData, initialFormData]);

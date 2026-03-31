@@ -245,10 +245,10 @@ export default function AppSidebar({
             title: "Manage Users",
             onClick: () => onSectionChange("manageUsers"),
           },
-          {
-            title: "Manage Group",
-            onClick: () => onSectionChange("manageGroup"),
-          },
+          // {
+          //   title: "Manage Group",
+          //   onClick: () => onSectionChange("manageGroup"),
+          // },
         ],
       },
       {
