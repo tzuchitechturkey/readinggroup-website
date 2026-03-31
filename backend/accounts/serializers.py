@@ -557,13 +557,9 @@ class AdminCreateUserSerializer(serializers.Serializer):
                 {"email": "A user with this email already exists."}
             )
 
+        # NOTE: `group` is accepted as plain text. If the group doesn't exist yet,
+        # it will be created when saving.
         group_obj = Group.objects.filter(name__iexact=group_name).first()
-        if not group_obj:
-            raise serializers.ValidationError(
-                {
-                    "group": "Group not found for this name. Create it first, then assign the user."
-                }
-            )
 
         requested_section_name = (attrs.get("section_name") or "").strip()
         existing_section_name = ""
@@ -580,7 +576,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
         attrs["username"] = username
         attrs["email"] = email
-        attrs["group_obj"] = group_obj
+        attrs["group"] = group_name
         if requested_section_name:
             attrs["section_name"] = requested_section_name
         return attrs
@@ -589,11 +585,14 @@ class AdminCreateUserSerializer(serializers.Serializer):
         """Create the user and attach group inside a DB transaction."""
 
         validated = dict(self.validated_data)
-        group_obj = validated.pop("group_obj")
-        validated.pop("group", None)
+        group_name = (validated.pop("group", None) or "").strip()
         section_name = (validated.pop("section_name", None) or "").strip()
 
         with transaction.atomic():
+            group_obj = Group.objects.filter(name__iexact=group_name).first()
+            if not group_obj:
+                group_obj = Group.objects.create(name=group_name)
+
             user = User(**validated)
             user.set_password(password)
             # Ensure it can log in; keep same flags as registration flow.

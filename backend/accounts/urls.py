@@ -1,7 +1,6 @@
 from django.urls import path
 from .views import (
     AdminCreateUserView,
-    GroupCreateView,
     LoginView,
     ProfileView,
     PublicProfileView,
@@ -24,7 +23,6 @@ app_name = "accounts"
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
-    path("groups/", GroupCreateView.as_view(), name="groups-create"),
     path("admin/users/", AdminCreateUserView.as_view(), name="admin-users-create"),
     path("profile/", ProfileView.as_view(), name="profile"),
     path("profile/<int:pk>/", PublicProfileView.as_view(), name="profile-detail"),
