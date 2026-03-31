@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from readinggroup_backend.helpers import DateTimeFormattingMixin
@@ -446,4 +447,93 @@ class PasswordChangeSerializer(serializers.Serializer):
         user.save(update_fields=["password"])
         # mark as changed and clear first-login requirement
         user.mark_password_changed()
+        return user
+
+
+class GroupCreateSerializer(serializers.Serializer):
+    """Create a Django auth Group.
+
+    This endpoint is intended for admins to manage available user groups.
+    """
+
+    name = serializers.CharField(max_length=150)
+
+    def validate_name(self, value: str) -> str:
+        name = (value or "").strip()
+        if not name:
+            raise serializers.ValidationError("Group name is required.")
+        if Group.objects.filter(name__iexact=name).exists():
+            raise serializers.ValidationError("A group with this name already exists.")
+        return name
+
+    def create(self, validated_data):
+        return Group.objects.create(name=validated_data["name"])
+
+
+class AdminCreateUserSerializer(serializers.Serializer):
+    """Create a new user (admin-only) and assign them to a group.
+
+    The password is generated server-side and sent to the provided email.
+    """
+
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    # Group id returned from GroupCreateView
+    group_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        username = (attrs.get("username") or "").strip()
+        email = (attrs.get("email") or "").strip()
+        group_id = attrs.get("group_id")
+
+        if not username:
+            raise serializers.ValidationError({"username": "Username is required."})
+        if not email:
+            raise serializers.ValidationError({"email": "Email is required."})
+        if group_id in (None, ""):
+            raise serializers.ValidationError({"group_id": "group_id is required."})
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError(
+                {"username": "A user with this username already exists."}
+            )
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError(
+                {"email": "A user with this email already exists."}
+            )
+
+        try:
+            group_obj = Group.objects.filter(id=int(group_id)).first()
+        except Exception:
+            group_obj = None
+
+        if not group_obj:
+            raise serializers.ValidationError(
+                {
+                    "group_id": "Group not found for this id. Create it first, then assign the user."
+                }
+            )
+
+        attrs["username"] = username
+        attrs["email"] = email
+        attrs["group_obj"] = group_obj
+        return attrs
+
+    def create_user_and_assign_group(self, *, password: str) -> User:
+        """Create the user and attach group inside a DB transaction."""
+
+        validated = dict(self.validated_data)
+        group_obj = validated.pop("group_obj")
+        validated.pop("group_id", None)
+
+        with transaction.atomic():
+            user = User(**validated)
+            user.set_password(password)
+            # Ensure it can log in; keep same flags as registration flow.
+            user.is_first_login = True
+            user.last_password_change = timezone.now()
+            user.save()
+            user.groups.add(group_obj)
         return user

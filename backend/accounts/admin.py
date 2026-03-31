@@ -17,8 +17,22 @@ class UserAdmin(DjangoUserAdmin):
     add_fieldsets = DjangoUserAdmin.add_fieldsets + (
         (None, {"classes": ("wide",), "fields": ("display_name",)}),
     )
-    list_display = ("username", "email", "display_name", "is_staff", "is_active")
+    list_display = (
+        "username",
+        "email",
+        "display_name",
+        "get_groups",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("is_staff", "is_active", "groups")
     search_fields = ("username", "email", "display_name")
+
+    @admin.display(description="Groups")
+    def get_groups(self, obj: User) -> str:
+        """Render user's groups as a comma-separated string."""
+
+        return ", ".join(obj.groups.values_list("name", flat=True))
 
 
 @admin.register(FriendRequest)

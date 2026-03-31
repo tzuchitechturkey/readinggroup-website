@@ -10,15 +10,23 @@ from django.utils.crypto import get_random_string
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, permissions, serializers, status
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .utils import generate_qr_code_base64, generate_totp_secret, get_totp_uri
+from .utils import (
+    generate_password,
+    generate_qr_code_base64,
+    generate_totp_secret,
+    get_totp_uri,
+)
 from .models import FriendRequest
 from .serializers import (
+    AdminCreateUserSerializer,
     FriendRequestSerializer,
+    GroupCreateSerializer,
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
@@ -529,15 +537,192 @@ class LoginView(APIView):
             user.save()
 
         refresh = RefreshToken.for_user(user)
+
+        # Convenience field for the frontend: a single group "type".
+        # Keep the full list inside UserSerializer as well.
+        group_name = None
+        try:
+            group_name = user.groups.values_list("name", flat=True).first()
+        except Exception:
+            group_name = None
+
         return Response(
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "qr": qr,
                 "secret": user.totp_secret,
+                "group": group_name,
                 "user": UserSerializer(user).data,
                 "force_password_change": getattr(user, "force_password_change", False),
             }
+        )
+
+
+class GroupCreateView(APIView):
+    """Create a Django auth Group (admin-only).
+
+    POST body: { "name": "editors" }
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="List all auth groups (admin-only).",
+        responses={
+            200: openapi.Response(
+                description="Groups list",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "next": openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        "previous": openapi.Schema(
+                            type=openapi.TYPE_STRING, nullable=True
+                        ),
+                        "results": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                },
+                            ),
+                        ),
+                    },
+                ),
+            ),
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def get(self, request):
+        """Return a paginated list of groups."""
+
+        from django.contrib.auth.models import Group
+
+        qs = Group.objects.all().order_by("name")
+        paginator = LimitOffsetPagination()
+        page = paginator.paginate_queryset(qs, request)
+        results = [{"id": g.id, "name": g.name} for g in (page or [])]
+        return paginator.get_paginated_response(results)
+
+    @swagger_auto_schema(
+        operation_description="Create a new auth group (admin-only).",
+        request_body=GroupCreateSerializer,
+        responses={
+            201: openapi.Response(
+                description="Group created",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "name": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def post(self, request):
+        serializer = GroupCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        group = serializer.save()
+        return Response(
+            {"id": group.id, "name": group.name}, status=status.HTTP_201_CREATED
+        )
+
+
+class AdminCreateUserView(APIView):
+    """Create a new user after admin login (admin-only).
+
+    Required fields:
+    - username
+    - email
+    - group_id (id returned from /accounts/groups/)
+
+    The server generates a password and sends it to the user's email.
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="List all users (admin-only).",
+        responses={
+            200: openapi.Response(description="Users list"),
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def get(self, request):
+        """Return a paginated list of users."""
+
+        qs = User.objects.all().order_by("-date_joined", "-id")
+        paginator = LimitOffsetPagination()
+        page = paginator.paginate_queryset(qs, request)
+        data = UserSerializer(page or [], many=True, context={"request": request}).data
+        return paginator.get_paginated_response(data)
+
+    @swagger_auto_schema(
+        operation_description="Create a user and email them a generated password (admin-only).",
+        request_body=AdminCreateUserSerializer,
+        responses={
+            201: openapi.Response(description="User created"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            500: "Email sending failed",
+        },
+    )
+    def post(self, request):
+        serializer = AdminCreateUserSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        password = generate_password()
+
+        # Create user + assign group
+        user = serializer.create_user_and_assign_group(password=password)
+
+        # Send credentials via email
+        subject = "Your account password"
+        message = (
+            f"Hello {user.username},\n\n"
+            "An admin created an account for you.\n"
+            f"Username: {user.username}\n"
+            f"Password: {password}\n\n"
+            "Please log in and change your password after the first login."
+        )
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
+        try:
+            send_mail(
+                subject,
+                message,
+                from_email,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception:
+            # Roll back: delete user so we don't create an unreachable account.
+            try:
+                user.delete()
+            except Exception:
+                pass
+            return Response(
+                {"detail": "Failed to send password email. User was not created."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {
+                "detail": "User created and password sent by email.",
+                "user": UserSerializer(user, context={"request": request}).data,
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 
