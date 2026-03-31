@@ -171,7 +171,7 @@ EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", 587))
 
 # Set the email sender directly
 EMAIL_HOST_USER = "anasdaas210@gmail.com"
-EMAIL_HOST_PASSWORD = "utko uazs achz rdvx"
+EMAIL_HOST_PASSWORD = "jrxg fqsb vlbx veeg"
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
 
