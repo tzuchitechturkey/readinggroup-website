@@ -38,6 +38,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
+            "is_team_lead",
             "is_first_login",
             "last_password_change",
             "date_joined",
@@ -478,8 +479,8 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    # Group id returned from GroupCreateView
     group_id = serializers.IntegerField()
+    is_team_lead = serializers.BooleanField(required=False, default=False)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -519,6 +520,35 @@ class AdminCreateUserSerializer(serializers.Serializer):
         attrs["username"] = username
         attrs["email"] = email
         attrs["group_obj"] = group_obj
+
+        # Enforce: each auth Group must have exactly one team lead.
+        # - If the group has no lead yet, the first created user MUST be team lead.
+        # - If the group is in an inconsistent state (multiple leads), require selecting
+        #   a single lead by creating a user with is_team_lead=true (this will demote others).
+        requested_is_team_lead = bool(attrs.get("is_team_lead", False))
+        existing_leads = User.objects.filter(groups=group_obj, is_team_lead=True)
+        existing_leads_count = existing_leads.count()
+
+        if existing_leads_count == 0 and not requested_is_team_lead:
+            raise serializers.ValidationError(
+                {
+                    "is_team_lead": (
+                        "This group has no team lead yet. "
+                        "Create the first user with is_team_lead=true."
+                    )
+                }
+            )
+
+        if existing_leads_count > 1 and not requested_is_team_lead:
+            raise serializers.ValidationError(
+                {
+                    "is_team_lead": (
+                        "This group currently has multiple team leads. "
+                        "Create a user with is_team_lead=true to select the single team lead "
+                        "(others will be set to false automatically)."
+                    )
+                }
+            )
         return attrs
 
     def create_user_and_assign_group(self, *, password: str) -> User:
@@ -536,4 +566,13 @@ class AdminCreateUserSerializer(serializers.Serializer):
             user.last_password_change = timezone.now()
             user.save()
             user.groups.add(group_obj)
+
+            # Enforce: only one team lead per group.
+            # If this user is marked as team lead, disable any previously-enabled lead.
+            if getattr(user, "is_team_lead", False):
+                (
+                    User.objects.filter(groups=group_obj, is_team_lead=True)
+                    .exclude(pk=user.pk)
+                    .update(is_team_lead=False)
+                )
         return user
