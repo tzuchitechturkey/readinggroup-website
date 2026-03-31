@@ -528,7 +528,8 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    group_id = serializers.IntegerField()
+    # Send group name as a string.
+    group = serializers.CharField(max_length=150)
     section_name = serializers.CharField(max_length=255, required=False)
 
     def validate(self, attrs):
@@ -536,14 +537,16 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
         username = (attrs.get("username") or "").strip()
         email = (attrs.get("email") or "").strip()
-        group_id = attrs.get("group_id")
+        group_name = (attrs.get("group") or "").strip()
 
         if not username:
             raise serializers.ValidationError({"username": "Username is required."})
         if not email:
             raise serializers.ValidationError({"email": "Email is required."})
-        if group_id in (None, ""):
-            raise serializers.ValidationError({"group_id": "group_id is required."})
+        if not group_name:
+            raise serializers.ValidationError(
+                {"group": "group (group name) is required."}
+            )
 
         if User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError(
@@ -554,15 +557,11 @@ class AdminCreateUserSerializer(serializers.Serializer):
                 {"email": "A user with this email already exists."}
             )
 
-        try:
-            group_obj = Group.objects.filter(id=int(group_id)).first()
-        except Exception:
-            group_obj = None
-
+        group_obj = Group.objects.filter(name__iexact=group_name).first()
         if not group_obj:
             raise serializers.ValidationError(
                 {
-                    "group_id": "Group not found for this id. Create it first, then assign the user."
+                    "group": "Group not found for this name. Create it first, then assign the user."
                 }
             )
 
@@ -591,7 +590,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
         validated = dict(self.validated_data)
         group_obj = validated.pop("group_obj")
-        validated.pop("group_id", None)
+        validated.pop("group", None)
         section_name = (validated.pop("section_name", None) or "").strip()
 
         with transaction.atomic():

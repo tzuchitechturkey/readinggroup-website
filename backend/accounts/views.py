@@ -663,7 +663,7 @@ class AdminCreateUserView(APIView):
     Required fields:
     - username
     - email
-    - group_id (id returned from /accounts/groups/)
+    - group (group name, e.g. "editors")
     - section_name (required only when the group does not have one yet)
 
     The server generates a password and sends it to the user's email.
