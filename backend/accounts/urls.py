@@ -13,11 +13,6 @@ from .views import (
     ResetTOTPAPIView,
     TOTPSetupAPIView,
     UserListView,
-    FriendRequestListCreateView,
-    FriendRequestActionView,
-    UnfriendView,
-    FriendRequestsForUserView,
-    PendingFriendRequestsView,
 )
 
 app_name = "accounts"
@@ -47,36 +42,4 @@ urlpatterns = [
     path("reset-totp/", ResetTOTPAPIView.as_view(), name="reset-totp"),
     path("setup-totp/", TOTPSetupAPIView.as_view(), name="setup-totp"),
     path("users/", UserListView.as_view(), name="users-list"),
-    path(
-        "friend-requests/",
-        FriendRequestListCreateView.as_view(),
-        name="friend-requests-list-create",
-    ),
-    path(
-        "friend-requests/<int:pk>/action/",
-        FriendRequestActionView.as_view(),
-        name="friend-requests-action",
-    ),
-    path(
-        "friend-requests/unfriend/<int:user_id>/",
-        UnfriendView.as_view(),
-        name="friend-requests-unfriend",
-    ),
-    path(
-        "friend-requests/user/<int:user_id>/",
-        FriendRequestsForUserView.as_view(),
-        name="friend-requests-for-user",
-    ),
-    path(
-        "friend-requests/pending/",
-        PendingFriendRequestsView.as_view(),
-        name="friend-requests-pending",
-    ),
-    # Allow fetching pending requests for a specific user via path param (shows as path param in Swagger)
-    path(
-        "friend-requests/pending/<int:user_id>/",
-        PendingFriendRequestsView.as_view(),
-        name="friend-requests-pending-user",
-    ),
-    # path("confirm-email/<str:token>/", ConfirmEmailView.as_view(), name="confirm-email"),
 ]

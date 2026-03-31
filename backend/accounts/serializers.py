@@ -7,11 +7,11 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import FriendRequest, GroupProfile, User
+from .models import GroupProfile, User
 
 try:
     from content.models import Post
-except Exception:  # pragma: no cover - defensive import
+except Exception:
     Post = None
 
 
@@ -420,61 +420,6 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             ).count()
         except Exception:
             return 0
-
-
-class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
-    """Serializer for FriendRequest model."""
-
-    datetime_fields = ("created_at", "updated_at")
-    from_user = UserSerializer(read_only=True)
-    to_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    class Meta:
-        model = FriendRequest
-        fields = (
-            "id",
-            "from_user",
-            "to_user",
-            "status",
-            "message",
-            "created_at",
-            "updated_at",
-        )
-        read_only_fields = ("id", "from_user", "status", "created_at", "updated_at")
-
-    def validate(self, attrs):
-        request = self.context.get("request")
-        from_user = getattr(request, "user", None)
-        to_user = attrs.get("to_user")
-        if not from_user or not from_user.is_authenticated:
-            raise serializers.ValidationError("Authentication required.")
-        if from_user == to_user:
-            raise serializers.ValidationError("Cannot send friend request to yourself.")
-
-        # Prevent sending if blocked or already existing
-        existing = FriendRequest.objects.filter(
-            from_user=from_user, to_user=to_user
-        ).first()
-        if existing:
-            raise serializers.ValidationError(
-                "A friend request already exists between these users."
-            )
-
-        # Also check if 'to_user' previously blocked 'from_user'
-        blocked = FriendRequest.objects.filter(
-            from_user=to_user, to_user=from_user, status=FriendRequest.STATUS_BLOCKED
-        ).exists()
-        if blocked:
-            raise serializers.ValidationError("You are blocked by this user.")
-
-        return attrs
-
-    def create(self, validated_data):
-        request = self.context.get("request")
-        from_user = getattr(request, "user", None)
-        validated_data["from_user"] = from_user
-        # default message may be empty
-        return super().create(validated_data)
 
 
 class PasswordChangeSerializer(serializers.Serializer):

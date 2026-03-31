@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import User, FriendRequest
+from .models import User
 
 
 @admin.register(User)
@@ -33,12 +33,3 @@ class UserAdmin(DjangoUserAdmin):
         """Render user's groups as a comma-separated string."""
 
         return ", ".join(obj.groups.values_list("name", flat=True))
-
-
-@admin.register(FriendRequest)
-class FriendRequestAdmin(admin.ModelAdmin):
-    """Admin interface for FriendRequest model."""
-
-    list_display = ("from_user", "to_user", "status", "created_at", "updated_at")
-    list_filter = ("status", "created_at", "updated_at")
-    search_fields = ("from_user__username", "to_user__username", "message")

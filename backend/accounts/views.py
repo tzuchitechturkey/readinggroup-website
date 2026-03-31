@@ -1,11 +1,7 @@
 import pyotp
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core import signing
 from django.core.mail import send_mail
-from django.core.signing import BadSignature, SignatureExpired
-from django.db.models import Q
-from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -22,11 +18,9 @@ from .utils import (
     generate_totp_secret,
     get_totp_uri,
 )
-from .models import FriendRequest
 from .serializers import (
     AdminCreateUserSerializer,
     AdminUpdateUserSerializer,
-    FriendRequestSerializer,
     GroupCreateSerializer,
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
@@ -35,233 +29,6 @@ from .serializers import (
 )
 
 User = get_user_model()
-
-
-class FriendRequestListCreateView(generics.ListCreateAPIView):
-    """List incoming/outgoing friend requests or create a new friend request.
-
-    Query params:
-    - direction=incoming|outgoing (default incoming)
-    """
-
-    serializer_class = FriendRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        direction = self.request.query_params.get("direction", "incoming").lower()
-        if direction == "outgoing":
-            return FriendRequest.objects.filter(from_user=user).order_by("-created_at")
-        # incoming
-        return FriendRequest.objects.filter(to_user=user).order_by("-created_at")
-
-    def perform_create(self, serializer):
-        serializer.save(from_user=self.request.user)
-
-
-class FriendRequestActionView(APIView):
-    """Accept / reject / block a friend request by id.
-
-    POST body: { "action": "accept" | "reject" | "block" }
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk):
-        action = request.data.get("action")
-        if action not in ("accept", "reject", "block"):
-            return Response(
-                {"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            fr = FriendRequest.objects.get(pk=pk)
-        except FriendRequest.DoesNotExist:
-            return Response(
-                {"detail": "Friend request not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # only the recipient may accept/reject; block may be performed by recipient or requestor
-        user = request.user
-        if action == "accept":
-            if fr.to_user != user:
-                return Response(
-                    {"detail": "Only recipient can accept."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            fr.accept()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-        if action == "reject":
-            if fr.to_user != user:
-                return Response(
-                    {"detail": "Only recipient can reject."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            fr.reject()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-        # block
-        if action == "block":
-            # allow both sides to block; create or update inverse request as BLOCKED too
-            fr.block()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-
-class UnfriendView(APIView):
-    """Remove an existing friendship (accepted FriendRequest) between the
-    authenticated user and the target user (by id).
-
-    DELETE /api/v1/friend-requests/unfriend/{user_id}/
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, user_id):
-        try:
-            target = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if target == request.user:
-            return Response(
-                {"detail": "Cannot unfriend yourself."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # find any accepted friend requests in either direction
-        qs = FriendRequest.objects.filter(
-            (
-                Q(from_user=request.user, to_user=target)
-                | Q(from_user=target, to_user=request.user)
-            ),
-            status=FriendRequest.STATUS_ACCEPTED,
-        )
-
-        # if none found, inform caller
-        if not qs.exists():
-            return Response(
-                {"detail": "Friendship not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # delete the accepted friendship records
-        try:
-            qs.delete()
-        except Exception:
-            return Response(
-                {"detail": "Failed to remove friendship."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(
-            {
-                "detail": "Friendship removed.",
-                "user": UserSerializer(target, context={"request": request}).data,
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
-class FriendRequestsForUserView(APIView):
-    """Return incoming and outgoing friend requests for a given user id.
-
-    Access control: only staff users or the user themself may view this.
-    Response format:
-    {
-      "incoming": [<FriendRequestSerializer>],
-      "outgoing": [<FriendRequestSerializer>]
-    }
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, user_id):
-        # Only staff or the target user may access
-        if not (request.user.is_staff or request.user.id == int(user_id)):
-            return Response(
-                {"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN
-            )
-
-        try:
-            target = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        incoming_qs = FriendRequest.objects.filter(to_user=target).order_by(
-            "-created_at"
-        )
-        outgoing_qs = FriendRequest.objects.filter(from_user=target).order_by(
-            "-created_at"
-        )
-
-        incoming = FriendRequestSerializer(
-            incoming_qs, many=True, context={"request": request}
-        ).data
-        outgoing = FriendRequestSerializer(
-            outgoing_qs, many=True, context={"request": request}
-        ).data
-
-        return Response(
-            {"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK
-        )
-
-
-class PendingFriendRequestsView(generics.ListAPIView):
-    """List pending friend requests for the authenticated user.
-
-    Query params:
-    - direction=incoming|outgoing (default incoming)
-
-    Returns FriendRequestSerializer list filtered by status=STATUS_PENDING.
-    """
-
-    serializer_class = FriendRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        request_user = self.request.user
-        # allow an optional user_id query param so admins (or the user themself) can fetch pending for another user
-        # allow user_id either as query param or as URL kwarg (path param)
-        user_id = self.request.query_params.get("user_id") or self.kwargs.get("user_id")
-        direction = self.request.query_params.get("direction", "incoming").lower()
-
-        target_user = None
-        if user_id:
-            try:
-                uid = int(user_id)
-                # only allow if the requester is staff or requesting their own data
-                if not (request_user.is_staff or request_user.id == uid):
-                    # don't leak data
-                    return FriendRequest.objects.none()
-                from django.contrib.auth import get_user_model
-
-                UserModel = get_user_model()
-                target_user = UserModel.objects.filter(pk=uid).first()
-                if not target_user:
-                    return FriendRequest.objects.none()
-            except Exception:
-                return FriendRequest.objects.none()
-        else:
-            target_user = request_user
-
-        if direction == "outgoing":
-            return FriendRequest.objects.filter(
-                from_user=target_user, status=FriendRequest.STATUS_PENDING
-            ).order_by("-created_at")
-        return FriendRequest.objects.filter(
-            to_user=target_user, status=FriendRequest.STATUS_PENDING
-        ).order_by("-created_at")
 
 
 class UserListView(generics.ListAPIView):
@@ -353,55 +120,6 @@ class RegisterView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
-
-# class ConfirmEmailView(APIView):
-#     """Activate a user account given a signed token sent by email.
-
-#     GET /api/v1/accounts/confirm-email/{token}/
-#     """
-#     permission_classes = [permissions.AllowAny]
-
-#     def get(self, request, token=None):
-#         try:
-#             data = signing.loads(token, salt="email-confirm", max_age=getattr(settings, 'EMAIL_CONFIRMATION_MAX_AGE', 60 * 60 * 24))
-#         except SignatureExpired:
-#             return Response({"detail": "Confirmation link expired."}, status=status.HTTP_400_BAD_REQUEST)
-#         except BadSignature:
-#             return Response({"detail": "Invalid confirmation token."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user_id = data.get("user_id")
-#         try:
-#             user = User.objects.get(pk=user_id)
-#         except User.DoesNotExist:
-#             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-#         # Activate the user
-#         if hasattr(user, 'is_active'):
-#             user.is_active = True
-#             user.save(update_fields=['is_active'])
-
-#         # If the client expects HTML (clicked in a browser), return a small HTML page with Arabic confirmation
-#         accepts = request.META.get('HTTP_ACCEPT', '')
-#         if 'text/html' in accepts:
-#             html = """
-#             <!doctype html>
-#             <html lang="ar">
-#             <head>
-#               <meta charset="utf-8" />
-#               <meta name="viewport" content="width=device-width, initial-scale=1" />
-#               <title>Confirm account</title>
-#               <style>body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;direction: rtl; text-align: right; padding: 2rem;}</style>
-#             </head>
-#             <body>
-#               <h1>Confirm account</h1>
-#               <p>Your account has been confirmed. You can now log in.</p>
-#             </body>
-#             </html>
-#             """
-#             return HttpResponse(html, content_type='text/html; charset=utf-8')
-
-#         # Fallback: return a JSON response for API clients
-#         return Response({"detail": "Email confirmed. You can now log in."}, status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):
@@ -871,7 +589,6 @@ class AdminUserDeleteView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# Optional: endpoint to verify TOTP code (for setup/enable)
 class TOTPVerifyAPIView(APIView):
     """Verify a TOTP code for the authenticated user."""
 
