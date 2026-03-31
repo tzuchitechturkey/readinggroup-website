@@ -42,7 +42,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "is_active",
             "group_id",
             "section_name",
-            "is_team_lead",
             "is_first_login",
             "last_password_change",
             "date_joined",
@@ -508,7 +507,6 @@ class GroupCreateSerializer(serializers.Serializer):
     """
 
     name = serializers.CharField(max_length=150)
-    section_name = serializers.CharField(max_length=255)
 
     def validate_name(self, value: str) -> str:
         name = (value or "").strip()
@@ -518,18 +516,8 @@ class GroupCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("A group with this name already exists.")
         return name
 
-    def validate_section_name(self, value: str) -> str:
-        section_name = (value or "").strip()
-        if not section_name:
-            raise serializers.ValidationError("section_name is required.")
-        return section_name
-
     def create(self, validated_data):
-        group = Group.objects.create(name=validated_data["name"])
-        GroupProfile.objects.create(
-            group=group, section_name=validated_data.get("section_name", "")
-        )
-        return group
+        return Group.objects.create(name=validated_data["name"])
 
 
 class AdminCreateUserSerializer(serializers.Serializer):
@@ -541,7 +529,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     group_id = serializers.IntegerField()
-    is_team_lead = serializers.BooleanField(required=False, default=False)
+    section_name = serializers.CharField(max_length=255, required=False)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -578,38 +566,24 @@ class AdminCreateUserSerializer(serializers.Serializer):
                 }
             )
 
+        requested_section_name = (attrs.get("section_name") or "").strip()
+        existing_section_name = ""
+        try:
+            existing_section_name = (group_obj.profile.section_name or "").strip()
+        except Exception:
+            existing_section_name = ""
+
+        # Require section_name only when the group doesn't have one yet.
+        if not existing_section_name and not requested_section_name:
+            raise serializers.ValidationError(
+                {"section_name": "section_name is required for this group."}
+            )
+
         attrs["username"] = username
         attrs["email"] = email
         attrs["group_obj"] = group_obj
-
-        # Enforce: each auth Group must have exactly one team lead.
-        # - If the group has no lead yet, the first created user MUST be team lead.
-        # - If the group is in an inconsistent state (multiple leads), require selecting
-        #   a single lead by creating a user with is_team_lead=true (this will demote others).
-        requested_is_team_lead = bool(attrs.get("is_team_lead", False))
-        existing_leads = User.objects.filter(groups=group_obj, is_team_lead=True)
-        existing_leads_count = existing_leads.count()
-
-        if existing_leads_count == 0 and not requested_is_team_lead:
-            raise serializers.ValidationError(
-                {
-                    "is_team_lead": (
-                        "This group has no team lead yet. "
-                        "Create the first user with is_team_lead=true."
-                    )
-                }
-            )
-
-        if existing_leads_count > 1 and not requested_is_team_lead:
-            raise serializers.ValidationError(
-                {
-                    "is_team_lead": (
-                        "This group currently has multiple team leads. "
-                        "Create a user with is_team_lead=true to select the single team lead "
-                        "(others will be set to false automatically)."
-                    )
-                }
-            )
+        if requested_section_name:
+            attrs["section_name"] = requested_section_name
         return attrs
 
     def create_user_and_assign_group(self, *, password: str) -> User:
@@ -618,6 +592,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         validated = dict(self.validated_data)
         group_obj = validated.pop("group_obj")
         validated.pop("group_id", None)
+        section_name = (validated.pop("section_name", None) or "").strip()
 
         with transaction.atomic():
             user = User(**validated)
@@ -628,12 +603,8 @@ class AdminCreateUserSerializer(serializers.Serializer):
             user.save()
             user.groups.add(group_obj)
 
-            # Enforce: only one team lead per group.
-            # If this user is marked as team lead, disable any previously-enabled lead.
-            if getattr(user, "is_team_lead", False):
-                (
-                    User.objects.filter(groups=group_obj, is_team_lead=True)
-                    .exclude(pk=user.pk)
-                    .update(is_team_lead=False)
+            if section_name:
+                GroupProfile.objects.update_or_create(
+                    group=group_obj, defaults={"section_name": section_name}
                 )
         return user

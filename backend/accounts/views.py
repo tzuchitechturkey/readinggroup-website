@@ -562,7 +562,7 @@ class LoginView(APIView):
 class GroupCreateView(APIView):
     """Create a Django auth Group (admin-only).
 
-    POST body: { "name": "editors", "section_name": "Section A" }
+    POST body: { "name": "editors" }
     """
 
     permission_classes = [permissions.IsAdminUser]
@@ -588,7 +588,7 @@ class GroupCreateView(APIView):
                                     "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                                     "name": openapi.Schema(type=openapi.TYPE_STRING),
                                     "section_name": openapi.Schema(
-                                        type=openapi.TYPE_STRING
+                                        type=openapi.TYPE_STRING, nullable=True
                                     ),
                                 },
                             ),
@@ -608,15 +608,14 @@ class GroupCreateView(APIView):
         qs = Group.objects.select_related("profile").all().order_by("name")
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(qs, request)
-        results = [
-            {
-                "id": g.id,
-                "name": g.name,
-                "section_name": getattr(getattr(g, "profile", None), "section_name", "")
-                or None,
-            }
-            for g in (page or [])
-        ]
+        results = []
+        for g in page or []:
+            section_name = None
+            try:
+                section_name = (g.profile.section_name or "").strip() or None
+            except Exception:
+                section_name = None
+            results.append({"id": g.id, "name": g.name, "section_name": section_name})
         return paginator.get_paginated_response(results)
 
     @swagger_auto_schema(
@@ -630,7 +629,9 @@ class GroupCreateView(APIView):
                     properties={
                         "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                         "name": openapi.Schema(type=openapi.TYPE_STRING),
-                        "section_name": openapi.Schema(type=openapi.TYPE_STRING),
+                        "section_name": openapi.Schema(
+                            type=openapi.TYPE_STRING, nullable=True
+                        ),
                     },
                 ),
             ),
@@ -663,6 +664,7 @@ class AdminCreateUserView(APIView):
     - username
     - email
     - group_id (id returned from /accounts/groups/)
+    - section_name (required only when the group does not have one yet)
 
     The server generates a password and sends it to the user's email.
     """

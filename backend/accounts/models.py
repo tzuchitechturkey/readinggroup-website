@@ -27,9 +27,6 @@ class User(AbstractUser):
     last_password_change = models.DateTimeField(null=True, blank=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
 
-    # Group role information
-    is_team_lead = models.BooleanField(default=False)
-
     def __str__(self) -> str:  # pragma: no cover - trivial
         full_name = self.get_full_name()
         if full_name:
