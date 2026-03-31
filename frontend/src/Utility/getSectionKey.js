@@ -48,6 +48,10 @@ export const getSectionKey = (title) => {
     // Web site info
     "Website Info": "websiteInfo",
     "Sort Section": "sortSection",
+
+    // User Management
+    "Manage Users": "manageUsers",
+    "Manage Group": "manageGroup",
   };
   return titleMap[title] || title.toLowerCase();
 };

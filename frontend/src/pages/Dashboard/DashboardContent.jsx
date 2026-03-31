@@ -42,6 +42,8 @@ import SettingsContent from "../Settings/SettingsContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
 import UploadImagesToReviews from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
 import UploadImagesToHistory from "@/components/ForPages/Dashboard/AboutUs/History/UploadImagesToHistory";
+import UsersManagementContent from "@/components/ForPages/Dashboard/UsersManagement/UsersManagementContent";
+import GroupssManagementContent from "@/components/ForPages/Dashboard/GroupManagement/GroupssManagementContent";
 
 export default function Page() {
   const { i18n } = useTranslation();
@@ -277,6 +279,9 @@ export default function Page() {
         // Website Info
         websiteInfo: "Settings",
         sortSection: "Settings",
+        // Group Management
+        manageUsers: "Roles",
+        manageGroup: "Roles",
       };
       autoParent = parentMap[section] || null;
     }
@@ -418,6 +423,15 @@ export default function Page() {
         return <WebSiteInfoContent onSectionChange={handleSectionChange} />;
       case "sortSection":
         return <SortSectionContent onSectionChange={handleSectionChange} />;
+
+      // User Management
+      case "manageUsers":
+        return <UsersManagementContent onSectionChange={handleSectionChange} />;
+      case "manageGroup":
+      case "groupsList":
+        return (
+          <GroupssManagementContent onSectionChange={handleSectionChange} />
+        );
     }
   };
 

@@ -9,31 +9,16 @@ import UserIcons from "../UserIcons/UserIcons";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 
 function MobileSidebar({
-  siteInfo,
   isMenuOpen,
   closeMenu,
   navigationItems,
   t,
   expandedMenus,
   toggleMobileSubmenu,
-  categoryContents,
   handleNavClick,
-  shouldOpenInNewTab,
-  loadingContents,
-  setLoadingContents,
-  setCategoryContents,
-  isHome = false,
 }) {
   const { i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
-  const [expandedSubItems, setExpandedSubItems] = React.useState({});
-
-  const toggleSubItemExpand = (subItemKey) => {
-    setExpandedSubItems((prev) => ({
-      ...prev,
-      [subItemKey]: !prev[subItemKey],
-    }));
-  };
 
   return (
     <div
@@ -64,7 +49,7 @@ function MobileSidebar({
         <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-white/20">
           <Link to="/" onClick={closeMenu} className="flex items-center">
             <img
-              src={siteInfo?.logo?.logo || defaultLogo}
+              src={defaultLogo}
               alt="logo"
               className="w-24 h-8 object-contain"
               onError={(e) => {

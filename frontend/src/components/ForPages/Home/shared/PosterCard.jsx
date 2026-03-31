@@ -7,7 +7,7 @@ import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerMo
 const PosterCard = ({ poster, t }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
 
-    const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
 
     const month = date.toLocaleDateString("en-US", { month: "short" });
@@ -41,8 +41,8 @@ const PosterCard = ({ poster, t }) => {
         <div className="flex flex-1  flex-col  md:flex-row items-start md:items-center  w-full">
           <div className="flex flex-1 flex-col gap-[16px] sm:gap-[18px] md:gap-[20px] lg:gap-[24px] h-full items-start min-h-px min-w-px py-[8px] sm:py-[10px] md:py-[12px] lg:py-[12px] w-full">
             {/* Date Tag */}
-            <div className="flex gap-[6px] sm:gap-[7px] md:gap-[8px] lg:gap-[8px] border-[1px] border-[#285688] items-center justify-center p-[6px] sm:p-[7px] md:p-[8px] lg:p-[8px] rounded-full">
-              <p className="font-inter font-medium leading-none text-[#285688] text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px]">
+            <div className="flex  border-[1px] border-[#285688] items-center justify-center p-[6px] md:p-[8px] lg:p-[8px] rounded-full">
+              <p className="font-inter font-bold leading-none text-[#285688] text-[13px]  md:text-[15px] lg:text-[16px]">
                 {formatDate(poster?.created_at)}
               </p>
             </div>
@@ -59,7 +59,7 @@ const PosterCard = ({ poster, t }) => {
                 }}
                 className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[4px]  "
               >
-                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-[16px] text-white/90">
+                <p className="font-['Noto_Sans_TC:Regular',sans-serif] font-normal leading-[1.5] text-[12px] md:text-[15px] lg:text-xl text-white/90">
                   {t("Learn more")}
                 </p>
               </button>

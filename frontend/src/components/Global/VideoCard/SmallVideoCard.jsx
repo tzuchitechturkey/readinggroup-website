@@ -1,6 +1,6 @@
 import React from "react";
 
-const VideoCard = ({
+const SmallVideoCard = ({
   item,
   size = "default",
   navigate,
@@ -11,37 +11,8 @@ const VideoCard = ({
   reportCard = false,
   heroReportCard = false,
 }) => {
-  const getSizeClasses = () => {
-    switch (size) {
-      case "large":
-        return {
-          image: `h-[200px]  md:h-[300px]  lg:h-[450px]   w-full  md:w-[90%]  lg:w-full`,
-          titleHeight: "h-[30px] md:h-[34px] lg:h-[35px]",
-          categoryText: "text-[14px]  md:text-base lg:text-xl",
-          durationText: "text-[13px] md:text-[15px] lg:text-lg",
-          gap: "gap-[8px] md:gap-[12px] lg:gap-[12px]",
-        };
-
-      case "small":
-        return {
-          image: `h-[199px] w-[354px] `,
-          titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
-          categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
-          durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",
-          gap: "gap-[6px] sm:gap-[8px] md:gap-[10px] lg:gap-[12px]",
-        };
-    }
-  };
-
   const { image, categoryText, durationText, gap } = getSizeClasses();
 
-  const getThumbnailUrl = (thumbnails, size) => {
-    const sizeMap = {
-      small: "medium",
-      large: "maxres", // 1280×720 أو 'standard' للـ 640×480
-    };
-    return thumbnails?.[sizeMap[size]]?.url;
-  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
 
@@ -128,4 +99,4 @@ const VideoCard = ({
   );
 };
 
-export default VideoCard;
+export default SmallVideoCard;

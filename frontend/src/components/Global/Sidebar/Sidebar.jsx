@@ -33,6 +33,7 @@ import LatestNews from "@/assets/icons/latestNews.png";
 import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
 import Message from "@/assets/Message.png";
 import Security from "@/assets/icons/security-safe.png";
+import Roles from "@/assets/icons/security-safe.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
@@ -235,6 +236,21 @@ export default function AppSidebar({
     ],
 
     settings: [
+      {
+        title: "Roles",
+        onClick: "#",
+        icon: Roles,
+        items: [
+          {
+            title: "Manage Users",
+            onClick: () => onSectionChange("manageUsers"),
+          },
+          {
+            title: "Manage Group",
+            onClick: () => onSectionChange("manageGroup"),
+          },
+        ],
+      },
       {
         title: "Settings",
         onClick: "#",
