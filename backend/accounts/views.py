@@ -562,7 +562,7 @@ class LoginView(APIView):
 class GroupCreateView(APIView):
     """Create a Django auth Group (admin-only).
 
-    POST body: { "name": "editors" }
+    POST body: { "name": "editors", "section_name": "Section A" }
     """
 
     permission_classes = [permissions.IsAdminUser]
@@ -587,6 +587,9 @@ class GroupCreateView(APIView):
                                 properties={
                                     "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                                     "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                    "section_name": openapi.Schema(
+                                        type=openapi.TYPE_STRING
+                                    ),
                                 },
                             ),
                         ),
@@ -602,10 +605,18 @@ class GroupCreateView(APIView):
 
         from django.contrib.auth.models import Group
 
-        qs = Group.objects.all().order_by("name")
+        qs = Group.objects.select_related("profile").all().order_by("name")
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(qs, request)
-        results = [{"id": g.id, "name": g.name} for g in (page or [])]
+        results = [
+            {
+                "id": g.id,
+                "name": g.name,
+                "section_name": getattr(getattr(g, "profile", None), "section_name", "")
+                or None,
+            }
+            for g in (page or [])
+        ]
         return paginator.get_paginated_response(results)
 
     @swagger_auto_schema(
@@ -619,6 +630,7 @@ class GroupCreateView(APIView):
                     properties={
                         "id": openapi.Schema(type=openapi.TYPE_INTEGER),
                         "name": openapi.Schema(type=openapi.TYPE_STRING),
+                        "section_name": openapi.Schema(type=openapi.TYPE_STRING),
                     },
                 ),
             ),
@@ -631,8 +643,16 @@ class GroupCreateView(APIView):
         serializer = GroupCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         group = serializer.save()
+        section_name = None
+        try:
+            section_name = getattr(
+                getattr(group, "profile", None), "section_name", None
+            )
+        except Exception:
+            section_name = None
         return Response(
-            {"id": group.id, "name": group.name}, status=status.HTTP_201_CREATED
+            {"id": group.id, "name": group.name, "section_name": section_name},
+            status=status.HTTP_201_CREATED,
         )
 
 

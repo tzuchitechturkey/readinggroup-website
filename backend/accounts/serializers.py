@@ -7,7 +7,7 @@ from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import FriendRequest, User
+from .models import FriendRequest, GroupProfile, User
 
 try:
     from content.models import Post
@@ -26,6 +26,8 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     posts_count = serializers.SerializerMethodField()
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+    group_id = serializers.SerializerMethodField()
+    section_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -38,6 +40,8 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
+            "group_id",
+            "section_name",
             "is_team_lead",
             "is_first_login",
             "last_password_change",
@@ -58,6 +62,27 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "status",
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
+
+    def _get_primary_group(self, obj):
+        try:
+            return obj.groups.order_by("id").first()
+        except Exception:
+            return None
+
+    def get_group_id(self, obj):
+        g = self._get_primary_group(obj)
+        return g.id if g else None
+
+    def get_section_name(self, obj):
+        g = self._get_primary_group(obj)
+        if not g:
+            return None
+        try:
+            profile = getattr(g, "profile", None)
+            value = getattr(profile, "section_name", "")
+            return value or None
+        except Exception:
+            return None
 
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
@@ -276,6 +301,8 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    group_id = serializers.SerializerMethodField()
+    section_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -288,6 +315,8 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "last_name",
             "is_staff",
             "is_active",
+            "group_id",
+            "section_name",
             "is_first_login",
             "last_password_change",
             "date_joined",
@@ -306,6 +335,27 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "status",
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
+
+    def _get_primary_group(self, obj):
+        try:
+            return obj.groups.order_by("id").first()
+        except Exception:
+            return None
+
+    def get_group_id(self, obj):
+        g = self._get_primary_group(obj)
+        return g.id if g else None
+
+    def get_section_name(self, obj):
+        g = self._get_primary_group(obj)
+        if not g:
+            return None
+        try:
+            profile = getattr(g, "profile", None)
+            value = getattr(profile, "section_name", "")
+            return value or None
+        except Exception:
+            return None
 
     def get_profile_image_url(self, obj):
         request = self.context.get("request")
@@ -458,6 +508,7 @@ class GroupCreateSerializer(serializers.Serializer):
     """
 
     name = serializers.CharField(max_length=150)
+    section_name = serializers.CharField(max_length=255)
 
     def validate_name(self, value: str) -> str:
         name = (value or "").strip()
@@ -467,8 +518,18 @@ class GroupCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("A group with this name already exists.")
         return name
 
+    def validate_section_name(self, value: str) -> str:
+        section_name = (value or "").strip()
+        if not section_name:
+            raise serializers.ValidationError("section_name is required.")
+        return section_name
+
     def create(self, validated_data):
-        return Group.objects.create(name=validated_data["name"])
+        group = Group.objects.create(name=validated_data["name"])
+        GroupProfile.objects.create(
+            group=group, section_name=validated_data.get("section_name", "")
+        )
+        return group
 
 
 class AdminCreateUserSerializer(serializers.Serializer):
