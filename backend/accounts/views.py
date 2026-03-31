@@ -25,6 +25,7 @@ from .utils import (
 from .models import FriendRequest
 from .serializers import (
     AdminCreateUserSerializer,
+    AdminUpdateUserSerializer,
     FriendRequestSerializer,
     GroupCreateSerializer,
     PasswordChangeSerializer,
@@ -719,7 +720,22 @@ class AdminCreateUserView(APIView):
             f"Password: {password}\n\n"
             "Please log in and change your password after the first login."
         )
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
+        # Be tolerant to missing DEFAULT_FROM_EMAIL in some deployments/branches.
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
+            settings, "EMAIL_HOST_USER", None
+        )
+        if not from_email:
+            # Roll back: delete user so we don't create an unreachable account.
+            try:
+                user.delete()
+            except Exception:
+                pass
+            return Response(
+                {
+                    "detail": "Email settings are not configured (missing DEFAULT_FROM_EMAIL/EMAIL_HOST_USER). User was not created.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         try:
             send_mail(
                 subject,
@@ -728,14 +744,22 @@ class AdminCreateUserView(APIView):
                 [user.email],
                 fail_silently=False,
             )
-        except Exception:
+        except Exception as exc:
             # Roll back: delete user so we don't create an unreachable account.
             try:
                 user.delete()
             except Exception:
                 pass
+
+            payload = {
+                "detail": "Failed to send password email. User was not created.",
+                "error_type": type(exc).__name__,
+            }
+            # Provide more diagnostics in debug to help identify SMTP/auth/config issues.
+            if getattr(settings, "DEBUG", False):
+                payload["error"] = str(exc)
             return Response(
-                {"detail": "Failed to send password email. User was not created."},
+                payload,
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -746,6 +770,105 @@ class AdminCreateUserView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class AdminUserUpdateView(APIView):
+    """Update an existing user (admin-only).
+
+    PATCH/PUT /api/v1/accounts/admin/users/{user_id}/
+    Body: any subset of AdminUpdateUserSerializer fields.
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Update a user (admin-only).",
+        request_body=AdminUpdateUserSerializer,
+        responses={
+            200: openapi.Response(description="User updated"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def patch(self, request, user_id: int):
+        return self._update(request, user_id=user_id, partial=True)
+
+    @swagger_auto_schema(
+        operation_description="Update a user (admin-only).",
+        request_body=AdminUpdateUserSerializer,
+        responses={
+            200: openapi.Response(description="User updated"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def put(self, request, user_id: int):
+        return self._update(request, user_id=user_id, partial=False)
+
+    def _update(self, request, *, user_id: int, partial: bool):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AdminUpdateUserSerializer(
+            instance=user,
+            data=request.data,
+            partial=partial,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        return Response(
+            {
+                "detail": "User updated.",
+                "user": UserSerializer(user, context={"request": request}).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class AdminUserDeleteView(APIView):
+    """Delete a user (admin-only).
+
+    DELETE /api/v1/accounts/admin/users/{user_id}/delete/
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Delete a user (admin-only).",
+        responses={
+            204: openapi.Response(description="User deleted"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def delete(self, request, user_id: int):
+        if int(user_id) == int(getattr(request.user, "id", 0)):
+            return Response(
+                {"detail": "You cannot delete your own account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Optional: endpoint to verify TOTP code (for setup/enable)

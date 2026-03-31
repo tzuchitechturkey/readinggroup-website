@@ -606,3 +606,135 @@ class AdminCreateUserSerializer(serializers.Serializer):
                     group=group_obj, defaults={"section_name": section_name}
                 )
         return user
+
+
+class AdminUpdateUserSerializer(serializers.Serializer):
+    """Update an existing user (admin-only).
+
+    All fields are optional to support PATCH.
+    - `group` is plain text; if provided and doesn't exist, it will be created.
+    - If `section_name` is provided, it updates the GroupProfile for the user's
+      target group (the provided `group`, else the user's current primary group).
+    """
+
+    username = serializers.CharField(max_length=150, required=False)
+    email = serializers.EmailField(required=False)
+    display_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    is_staff = serializers.BooleanField(required=False)
+    is_active = serializers.BooleanField(required=False)
+
+    profession_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
+    about_me = serializers.CharField(required=False, allow_blank=True)
+    country = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    mobile_number = serializers.CharField(
+        max_length=20, required=False, allow_blank=True
+    )
+    address_details = serializers.CharField(required=False, allow_blank=True)
+    website_address = serializers.URLField(required=False, allow_blank=True)
+
+    group = serializers.CharField(max_length=150, required=False)
+    section_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        user: User = self.instance
+
+        if "username" in attrs:
+            username = (attrs.get("username") or "").strip()
+            if not username:
+                raise serializers.ValidationError(
+                    {"username": "Username cannot be empty."}
+                )
+            if (
+                User.objects.filter(username__iexact=username)
+                .exclude(pk=user.pk)
+                .exists()
+            ):
+                raise serializers.ValidationError(
+                    {"username": "A user with this username already exists."}
+                )
+            attrs["username"] = username
+
+        if "email" in attrs:
+            email = (attrs.get("email") or "").strip()
+            if not email:
+                raise serializers.ValidationError({"email": "Email cannot be empty."})
+            if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+                raise serializers.ValidationError(
+                    {"email": "A user with this email already exists."}
+                )
+            attrs["email"] = email
+
+        if "group" in attrs:
+            group_name = (attrs.get("group") or "").strip()
+            if not group_name:
+                raise serializers.ValidationError({"group": "group cannot be empty."})
+            attrs["group"] = group_name
+
+            # If the group exists and has no section_name yet, require section_name when assigning.
+            group_obj = Group.objects.filter(name__iexact=group_name).first()
+            existing_section_name = ""
+            try:
+                existing_section_name = (group_obj.profile.section_name or "").strip()
+            except Exception:
+                existing_section_name = ""
+
+            requested_section_name = (attrs.get("section_name") or "").strip()
+            if group_obj and not existing_section_name and not requested_section_name:
+                raise serializers.ValidationError(
+                    {"section_name": "section_name is required for this group."}
+                )
+
+        # If section_name is provided without group, we'll update the user's current primary group.
+        if "section_name" in attrs and "group" not in attrs:
+            section_name = (attrs.get("section_name") or "").strip()
+            if section_name:
+                primary_group = user.groups.first()
+                if not primary_group:
+                    raise serializers.ValidationError(
+                        {
+                            "group": "User has no group; provide group to set section_name."
+                        }
+                    )
+            attrs["section_name"] = section_name
+
+        return attrs
+
+    def save(self, **kwargs) -> User:
+        user: User = self.instance
+        validated = dict(self.validated_data)
+
+        group_name = (validated.pop("group", None) or "").strip()
+        section_name = (validated.pop("section_name", None) or "").strip()
+
+        with transaction.atomic():
+            # Update basic user fields
+            for field, value in validated.items():
+                setattr(user, field, value)
+            user.save()
+
+            target_group = None
+            if group_name:
+                target_group = Group.objects.filter(name__iexact=group_name).first()
+                if not target_group:
+                    target_group = Group.objects.create(name=group_name)
+                # Replace groups with the requested one to match current API semantics.
+                user.groups.set([target_group])
+            else:
+                target_group = user.groups.first()
+
+            if section_name and target_group:
+                GroupProfile.objects.update_or_create(
+                    group=target_group, defaults={"section_name": section_name}
+                )
+
+        return user
