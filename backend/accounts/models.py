@@ -55,4 +55,3 @@ class GroupProfile(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return f"GroupProfile<{self.group_id}:{self.section_name}>"
-

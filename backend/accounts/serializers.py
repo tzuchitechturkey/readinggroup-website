@@ -20,7 +20,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
 
     datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
-    friend_request_status = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
@@ -48,7 +47,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "groups",
             "profile_image_url",
             "status",
-            "friend_request_status",
             "posts_count",
             "followers_count",
             "following_count",
@@ -86,49 +84,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     def get_groups(self, obj):
         return list(obj.groups.values_list("name", flat=True))
 
-    def get_status(self, obj):
-        try:
-            pending_requests = FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_PENDING
-            ).count()
-            if pending_requests > 0:
-                return f"You have {pending_requests} pending friend request(s)."
-            return "No pending friend requests."
-        except Exception:
-            return "Status unavailable."
-
-    def get_friend_request_status(self, obj):
-        """Return the FriendRequest.status string between the requesting user and `obj`, or None.
-
-        This mirrors the behavior of `FriendRequestStatusMixin.get_friend_request_status` used
-        in `content` serializers: it returns the exact status string (e.g. "PENDING", "ACCEPTED")
-        when a FriendRequest exists in either direction, otherwise None. If the request user
-        is not authenticated or is the same as `obj`, return None.
-        """
-        request = self.context.get("request")
-        if (
-            not request
-            or not getattr(request, "user", None)
-            or not request.user.is_authenticated
-        ):
-            return None
-
-        requester = request.user
-        # don't expose relationship to self
-        if requester == obj:
-            return None
-
-        try:
-            fr = FriendRequest.objects.filter(from_user=requester, to_user=obj).first()
-            if fr:
-                return fr.status
-            fr = FriendRequest.objects.filter(from_user=obj, to_user=requester).first()
-            if fr:
-                return fr.status
-        except Exception:
-            return None
-        return None
-
     def get_profile_image_url(self, obj):
         request = self.context.get("request")
         if obj.profile_image and hasattr(obj.profile_image, "url"):
@@ -160,22 +115,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
                 return 0
 
             return Post.objects.filter(queries).count()
-        except Exception:
-            return 0
-
-    def get_followers_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
-        except Exception:
-            return 0
-
-    def get_following_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
         except Exception:
             return 0
 
@@ -368,17 +307,6 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             return obj.profile_image.url
         return None
 
-    def get_status(self, obj):
-        try:
-            pending_requests = FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_PENDING
-            ).count()
-            if pending_requests > 0:
-                return f"You have {pending_requests} pending friend request(s)."
-            return "No pending friend requests."
-        except Exception:
-            return "Status unavailable."
-
     def get_posts_count(self, obj):
         # reuse same logic as UserSerializer
         if Post is None:
@@ -402,22 +330,6 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
                 return 0
 
             return Post.objects.filter(queries).count()
-        except Exception:
-            return 0
-
-    def get_followers_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
-        except Exception:
-            return 0
-
-    def get_following_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
         except Exception:
             return 0
 
