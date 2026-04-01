@@ -162,25 +162,13 @@ CORS_ALLOW_CREDENTIALS = True
 # Authentication
 AUTH_USER_MODEL = "accounts.User"
 
-# Email settings (for password reset)
-# In development without DJANGO_EMAIL_HOST_USER set, fall back to console backend
-# so user-creation flows work locally without real SMTP credentials.
-_email_host_user = os.getenv("DJANGO_EMAIL_HOST_USER", "")
-_default_email_backend = (
-    "django.core.mail.backends.smtp.EmailBackend"
-    if _email_host_user
-    else "django.core.mail.backends.console.EmailBackend"
-)
-EMAIL_BACKEND = os.getenv("DJANGO_EMAIL_BACKEND", _default_email_backend)
-EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", 587))
-EMAIL_HOST_USER = _email_host_user
-EMAIL_HOST_PASSWORD = os.getenv("DJANGO_EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.getenv("DJANGO_EMAIL_USE_TLS", "true").lower() == "true"
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DJANGO_DEFAULT_FROM_EMAIL", _email_host_user or "noreply@localhost"
-)
-
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "anasdaas210@gmail.com"
+EMAIL_HOST_PASSWORD = "jrxgfqsbvlbxveeg"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

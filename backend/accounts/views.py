@@ -424,19 +424,37 @@ class AdminCreateUserView(APIView):
         )
         serializer.is_valid(raise_exception=True)
 
+        # Do not allow "console" email backend for this flow.
+        # If console backend is enabled, emails won't be delivered to real inboxes.
+        email_backend = (getattr(settings, "EMAIL_BACKEND", "") or "").lower()
+        if "console" in email_backend:
+            return Response(
+                {
+                    "detail": "Email is not configured to send real messages (console backend is active). Configure SMTP via DJANGO_EMAIL_HOST_USER/DJANGO_EMAIL_HOST_PASSWORD (and optionally DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend).",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         password = generate_password()
+
+        # Always use the email provided in the request as the recipient.
+        recipient_email = (serializer.validated_data.get("email") or "").strip()
 
         # Create user + assign group
         user = serializer.create_user_and_assign_group(password=password)
 
         # Send credentials via email
-        subject = "Your account password"
+        subject = "Your login credentials"
+        api_login_url = f"{request.scheme}://{request.get_host()}/api/v1/user/login/"
         message = (
             f"Hello {user.username},\n\n"
-            "An admin created an account for you.\n"
-            f"Username: {user.username}\n"
-            f"Password: {password}\n\n"
-            "Please log in and change your password after the first login."
+            "An admin created an account for you.\n\n"
+            "Login details:\n"
+            f"- Username: {user.username}\n"
+            f"- Email: {recipient_email or getattr(user, 'email', '')}\n"
+            f"- Password: {password}\n\n"
+            f"API login endpoint: {api_login_url}\n\n"
+            "Please log in and change your password after the first login.\n"
         )
         # Be tolerant to missing DEFAULT_FROM_EMAIL in some deployments/branches.
         from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
@@ -454,12 +472,32 @@ class AdminCreateUserView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+        # If using SMTP backend, ensure credentials exist; otherwise sending may fail silently in some setups.
+        if "smtp" in email_backend:
+            smtp_user = getattr(settings, "EMAIL_HOST_USER", "") or ""
+            smtp_pass = getattr(settings, "EMAIL_HOST_PASSWORD", "") or ""
+            if not smtp_user or not smtp_pass:
+                try:
+                    user.delete()
+                except Exception:
+                    pass
+                return Response(
+                    {
+                        "detail": "SMTP email settings are incomplete (missing EMAIL_HOST_USER/EMAIL_HOST_PASSWORD). User was not created.",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        # Fallback to the user's email if, for some reason, validated data is missing.
+        if not recipient_email:
+            recipient_email = (getattr(user, "email", "") or "").strip()
+
         try:
             send_mail(
                 subject,
                 message,
                 from_email,
-                [user.email],
+                [recipient_email],
                 fail_silently=False,
             )
         except Exception as exc:
@@ -484,6 +522,7 @@ class AdminCreateUserView(APIView):
         return Response(
             {
                 "detail": "User created and password sent by email.",
+                "sent_to": recipient_email,
                 "user": UserSerializer(user, context={"request": request}).data,
             },
             status=status.HTTP_201_CREATED,

@@ -380,7 +380,9 @@ class AdminCreateUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     # Send group name as a string.
     group = serializers.CharField(max_length=150)
-    section_name = serializers.CharField(max_length=255, required=False)
+    section_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -418,11 +420,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         except Exception:
             existing_section_name = ""
 
-        # Require section_name only when the group doesn't have one yet.
-        if not existing_section_name and not requested_section_name:
-            raise serializers.ValidationError(
-                {"section_name": "section_name is required for this group."}
-            )
+        # section_name is optional (can be omitted/blank).
 
         attrs["username"] = username
         attrs["email"] = email
@@ -525,19 +523,7 @@ class AdminUpdateUserSerializer(serializers.Serializer):
                 raise serializers.ValidationError({"group": "group cannot be empty."})
             attrs["group"] = group_name
 
-            # If the group exists and has no section_name yet, require section_name when assigning.
-            group_obj = Group.objects.filter(name__iexact=group_name).first()
-            existing_section_name = ""
-            try:
-                existing_section_name = (group_obj.profile.section_name or "").strip()
-            except Exception:
-                existing_section_name = ""
-
-            requested_section_name = (attrs.get("section_name") or "").strip()
-            if group_obj and not existing_section_name and not requested_section_name:
-                raise serializers.ValidationError(
-                    {"section_name": "section_name is required for this group."}
-                )
+            # section_name is optional (can be omitted/blank).
 
         # If section_name is provided without group, we'll update the user's current primary group.
         if "section_name" in attrs and "group" not in attrs:
