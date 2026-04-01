@@ -72,6 +72,7 @@ function LoginForm() {
         localStorage.setItem("userId", data.user.id);
         localStorage.setItem("userImage", data.user.profile_image_url);
         localStorage.setItem("username", data.user.display_name);
+        localStorage.setItem("sectionName", data.user.section_name || "");
 
         if (data.user.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");
@@ -107,7 +108,7 @@ function LoginForm() {
     } catch (error) {
       if (error.response && error.response.status === 403) {
         toast.error(
-          t("Your account is not confirmed, please check your email")
+          t("Your account is not confirmed, please check your email"),
         );
       }
       setErrorFn(error, t);
@@ -138,16 +139,17 @@ function LoginForm() {
         localStorage.setItem("userId", res?.data.user?.id);
         localStorage.setItem("userImage", res?.data.user?.profile_image_url);
         localStorage.setItem("username", res?.data.user?.display_name);
+        localStorage.setItem("sectionName", res?.data.user?.section_name || "");
 
         setShowTOTPModal(false);
-        if (res?.data.user?.groups.includes("admin")) {
+        if (res?.data.group === "admin") {
           localStorage.setItem("userType", "admin");
         } else {
           localStorage.setItem("userType", res?.data.user?.groups[0]);
         }
 
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
-        if (redirectAfterLogin && res?.data.user?.groups.includes("admin")) {
+        if (redirectAfterLogin && res?.data.group === "admin") {
           navigate("/dashboard");
         } else if (redirectAfterLogin && redirectAfterLogin !== "/") {
           navigate(redirectAfterLogin);
@@ -341,7 +343,7 @@ function LoginForm() {
         )}
 
         {/* Start Don't have an account? */}
-        <div className="flex items-center justify-center mt-3">
+        {/* <div className="flex items-center justify-center mt-3">
           <span className="text-xs text-gray-400 mr-1">
             {t("Don't have an account?")}
           </span>
@@ -351,7 +353,7 @@ function LoginForm() {
           >
             {t("Sign Up")}
           </Link>
-        </div>
+        </div> */}
         {/* End Don't have an account? */}
         {/* Start Recaptch */}
         <div>
@@ -371,7 +373,7 @@ function LoginForm() {
           ) : (
             <p className="text-center text-[10px] mt-2">
               {t(
-                "This page is protected by Google reCAPTCHA to ensure you're not a bot."
+                "This page is protected by Google reCAPTCHA to ensure you're not a bot.",
               )}
             </p>
           )}

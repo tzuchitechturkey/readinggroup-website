@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { CreateUser, EditUserById, GetUserById } from "@/api/user";
+import { CreateUser, EditUserById } from "@/api/user";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 export const useCreateOrEditUser = (user, onClose) => {
@@ -106,19 +106,17 @@ export const useCreateOrEditUser = (user, onClose) => {
     if (user?.id) {
       const loadUserData = async () => {
         try {
-          const res = await GetUserById(user.id);
-          const loadedUser = res?.data;
           setFormData({
-            username: loadedUser?.username || "",
-            email: loadedUser?.email || "",
-            group: loadedUser?.groups?.[0] || "",
-            section_name: loadedUser?.section_name || "",
+            username: user?.username || "",
+            email: user?.email || "",
+            group: user?.groups?.[0] || "",
+            section_name: user?.section_name || "",
           });
           setInitialFormData({
-            username: loadedUser?.username || "",
-            email: loadedUser?.email || "",
-            group: loadedUser?.groups?.[0] || "",
-            section_name: loadedUser?.section_name || "",
+            username: user?.username || "",
+            email: user?.email || "",
+            group: user?.groups?.[0] || "",
+            section_name: user?.section_name || "",
           });
         } catch (error) {
           setErrorFn(error, t);

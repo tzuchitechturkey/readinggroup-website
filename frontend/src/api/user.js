@@ -21,5 +21,5 @@ export async function PatchUserById(id, data) {
 }
 
 export async function DeleteUserById(id) {
-  return await axios.delete(`/accounts/admin/users/${id}/`);
+  return await axios.delete(`/accounts/admin/users/${id}/delete/`);
 }

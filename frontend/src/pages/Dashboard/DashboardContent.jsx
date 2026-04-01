@@ -45,14 +45,56 @@ import UploadImagesToHistory from "@/components/ForPages/Dashboard/AboutUs/Histo
 import UsersManagementContent from "@/components/ForPages/Dashboard/UsersManagement/UsersManagementContent";
 import GroupssManagementContent from "@/components/ForPages/Dashboard/GroupManagement/GroupssManagementContent";
 
+const SECTION_NAME_TO_DEFAULT = {
+  learn: "learn",
+  video: "videos",
+  liveStream: "liveStreamSchedules",
+  photoCollection: "photoCollections",
+  latestNews: "news",
+  relatedReport: "relatedReports",
+  teamMembers: "team",
+  book: "book",
+  history: "history",
+};
+
+const SECTION_NAME_TO_ALLOWED = {
+  learn: ["learn", "createOrEditLearn", "learnCategories"],
+  video: ["videos", "createOrEditVideo", "videosCategories"],
+  liveStream: ["liveStreamSchedules", "createOrEditLiveStreamSchedule"],
+  photoCollection: [
+    "photoCollections",
+    "createOrEditPhotoCollection",
+    "photoCollectionCategories",
+  ],
+  latestNews: ["news", "createOrEditNews"],
+  relatedReport: [
+    "relatedReports",
+    "createOrEditRelatedReports",
+    "relatedReportCategories",
+  ],
+  teamMembers: ["team", "createOrEditTeam"],
+  book: ["book", "createOrEditReviews"],
+  history: ["history", "createOrEditHistory"],
+};
+
 export default function Page() {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
   const direction = isRtl ? "rtl" : "ltr";
 
   const [activeSection, setActiveSection] = useState(() => {
-    // استرجاع الصفحة المحفوظة من localStorage عند التحميل
-    return localStorage.getItem("dashboardActiveSection") || "home";
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+    const saved = localStorage.getItem("dashboardActiveSection");
+
+    if (userType !== "admin" && sectionName && SECTION_NAME_TO_DEFAULT[sectionName]) {
+      const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
+      return saved && allowed.includes(saved)
+        ? saved
+        : SECTION_NAME_TO_DEFAULT[sectionName];
+    }
+
+    return saved || "home";
   });
   const [activeParent, setActiveParent] = useState(() => {
     // استرجاع العنصر الأساسي المحفوظ من localStorage
@@ -190,6 +232,21 @@ export default function Page() {
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+
+    // حماية: المستخدم غير الأدمن لا يمكنه التنقل خارج قسمه
+    if (userType !== "admin" && sectionName && SECTION_NAME_TO_DEFAULT[sectionName]) {
+      const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
+      const defaultSection = SECTION_NAME_TO_DEFAULT[sectionName];
+
+      if (section === "home" || section === "Home") {
+        section = defaultSection;
+      } else if (!allowed.includes(section)) {
+        return;
+      }
+    }
+
     setActiveSection(section);
 
     // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
@@ -437,7 +494,10 @@ export default function Page() {
 
   useEffect(() => {
     const user = localStorage.getItem("userType");
-    if (!user || user !== "admin") {
+    if (
+      !user ||
+      (user !== "admin" && user !== "editor" && user !== "team_leader")
+    ) {
       localStorage.setItem("redirectAfterLogin", "/dashboard");
       window.location.href = "/auth/login";
     }
