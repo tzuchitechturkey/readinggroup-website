@@ -11,7 +11,15 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = DjangoUserAdmin.fieldsets + (
         (
             "Profile",
-            {"fields": ("display_name", "is_first_login", "last_password_change")},
+            {
+                "fields": (
+                    "display_name",
+                    "is_first_login",
+                    "last_password_change",
+                    "section_name",
+                    "group_name",
+                )
+            },
         ),
     )
     add_fieldsets = DjangoUserAdmin.add_fieldsets + (
@@ -21,6 +29,8 @@ class UserAdmin(DjangoUserAdmin):
         "username",
         "email",
         "display_name",
+        "group_name",
+        "section_name",
         "get_groups",
         "is_staff",
         "is_active",

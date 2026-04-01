@@ -21,7 +21,6 @@ from .utils import (
 from .serializers import (
     AdminCreateUserSerializer,
     AdminUpdateUserSerializer,
-    GroupCreateSerializer,
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
@@ -336,44 +335,6 @@ class GroupCreateView(APIView):
                 section_name = None
             results.append({"id": g.id, "name": g.name, "section_name": section_name})
         return paginator.get_paginated_response(results)
-
-    @swagger_auto_schema(
-        operation_description="Create a new auth group (admin-only).",
-        request_body=GroupCreateSerializer,
-        responses={
-            201: openapi.Response(
-                description="Group created",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "id": openapi.Schema(type=openapi.TYPE_INTEGER),
-                        "name": openapi.Schema(type=openapi.TYPE_STRING),
-                        "section_name": openapi.Schema(
-                            type=openapi.TYPE_STRING, nullable=True
-                        ),
-                    },
-                ),
-            ),
-            400: "Validation Error",
-            401: "Unauthorized",
-            403: "Forbidden",
-        },
-    )
-    def post(self, request):
-        serializer = GroupCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        group = serializer.save()
-        section_name = None
-        try:
-            section_name = getattr(
-                getattr(group, "profile", None), "section_name", None
-            )
-        except Exception:
-            section_name = None
-        return Response(
-            {"id": group.id, "name": group.name, "section_name": section_name},
-            status=status.HTTP_201_CREATED,
-        )
 
 
 class AdminCreateUserView(APIView):
