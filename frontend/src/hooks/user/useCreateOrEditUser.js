@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { CreateUser, EditUserById, GetUserById, GetUsers } from "@/api/user";
-import { GetGroups } from "@/api/group";
+import { CreateUser, EditUserById, GetUserById } from "@/api/user";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 
 export const useCreateOrEditUser = (user, onClose) => {

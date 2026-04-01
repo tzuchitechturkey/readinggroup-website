@@ -92,39 +92,38 @@ export default function CreateOrEditUsers({ user, onClose }) {
       </div>
 
       {/* Section Name Selection - Only show if group is not admin */}
-      {formData.group === "editor" ||
-        (formData?.group === "team_leader" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("Section Name")}
-            </label>
-            <select
-              name="section_name"
-              value={formData.section_name}
-              onChange={handleInputChange}
-              disabled={isLoading}
-              className={`w-full px-4 py-2.5 border rounded-lg outline-none ${
-                errors.section_name ? "border-red-500" : "border-gray-300"
-              } focus:ring-2 focus:ring-blue-500`}
-            >
-              <option value="" hidden>
-                {t("Select Section Name")}
-              </option>
-              <option value="learn">{t("Learn")}</option>
-              <option value="video">{t("Video")}</option>
-              <option value="liveStream">{t("Live Stream")}</option>
-              <option value="photoCollection">{t("Photo Collection")}</option>
-              <option value="latestNews">{t("Latest News")}</option>
-              <option value="relatedReport">{t("Related Report")}</option>
-              <option value="teamMembers">{t("Team Members")}</option>
-              <option value="book">{t("Book")}</option>
-              <option value="history">{t("History")}</option>
-            </select>
-            {errors.section_name && (
-              <p className="text-red-500 text-xs mt-1">{errors.section_name}</p>
-            )}
-          </div>
-        ))}
+      {(formData.group === "editor" || formData?.group === "team_leader") && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Section Name")}
+          </label>
+          <select
+            name="section_name"
+            value={formData.section_name}
+            onChange={handleInputChange}
+            disabled={isLoading}
+            className={`w-full px-4 py-2.5 border rounded-lg outline-none ${
+              errors.section_name ? "border-red-500" : "border-gray-300"
+            } focus:ring-2 focus:ring-blue-500`}
+          >
+            <option value="" hidden>
+              {t("Select Section Name")}
+            </option>
+            <option value="learn">{t("Learn")}</option>
+            <option value="video">{t("Video")}</option>
+            <option value="liveStream">{t("Live Stream")}</option>
+            <option value="photoCollection">{t("Photo Collection")}</option>
+            <option value="latestNews">{t("Latest News")}</option>
+            <option value="relatedReport">{t("Related Report")}</option>
+            <option value="teamMembers">{t("Team Members")}</option>
+            <option value="book">{t("Book")}</option>
+            <option value="history">{t("History")}</option>
+          </select>
+          {errors.section_name && (
+            <p className="text-red-500 text-xs mt-1">{errors.section_name}</p>
+          )}
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="flex gap-3 pt-4 border-t">
