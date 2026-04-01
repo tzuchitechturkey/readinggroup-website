@@ -21,10 +21,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined", "last_password_change")
     groups = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
     group_id = serializers.SerializerMethodField()
     section_name = serializers.SerializerMethodField()
 
@@ -46,17 +43,13 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "date_joined",
             "groups",
             "profile_image_url",
-            "status",
             "posts_count",
-            "followers_count",
-            "following_count",
             "profession_name",
             "about_me",
             "country",
             "mobile_number",
             "address_details",
             "website_address",
-            "status",
         )
         read_only_fields = ("id", "is_staff", "is_active", "date_joined")
 
