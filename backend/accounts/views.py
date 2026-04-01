@@ -116,6 +116,7 @@ class RegisterView(generics.CreateAPIView):
         return Response(
             {
                 "detail": "User registered successfully.",
+                "group": user.groups.values_list("name", flat=True).first(),
             },
             status=status.HTTP_201_CREATED,
         )

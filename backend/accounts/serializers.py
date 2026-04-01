@@ -1,4 +1,6 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
@@ -6,7 +8,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from readinggroup_backend.helpers import DateTimeFormattingMixin
 from .models import User
-from .enums import GroupName
 
 try:
     from content.models import Post
@@ -33,7 +34,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
-            "group_name",
             "section_name",
             "is_first_login",
             "last_password_change",
@@ -181,8 +181,6 @@ class LoginSerializer(serializers.Serializer):
 # =========================
 class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined",)
-
-    group_name = serializers.ChoiceField(choices=GroupName.choices, required=False)
     section_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -194,7 +192,6 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "display_name",
             "first_name",
             "last_name",
-            "group_name",
             "section_name",
             "profile_image",
             "profession_name",
@@ -235,34 +232,56 @@ class PasswordChangeSerializer(serializers.Serializer):
 class AdminCreateUserSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    group_name = serializers.ChoiceField(choices=GroupName.choices)
+    group = serializers.CharField(max_length=150)
     section_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
-        if User.objects.filter(username=attrs["username"]).exists():
+        attrs = super().validate(attrs)
+
+        username = (attrs.get("username") or "").strip()
+        email = (attrs.get("email") or "").strip()
+        group_name = (attrs.get("group") or "").strip()
+        section_name = (attrs.get("section_name") or "").strip()
+
+        if not username:
+            raise serializers.ValidationError({"username": "Username is required."})
+        if not email:
+            raise serializers.ValidationError({"email": "Email is required."})
+        if not group_name:
+            raise serializers.ValidationError({"group": "Group is required."})
+
+        if User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError({"username": "Username already exists"})
-        if User.objects.filter(email=attrs["email"]).exists():
+        if User.objects.filter(email__iexact=email).exists():
             raise serializers.ValidationError({"email": "Email already exists"})
+
+        attrs["username"] = username
+        attrs["email"] = email
+        attrs["group"] = group_name
+        attrs["section_name"] = section_name
         return attrs
 
-    def create(self, validated_data):
-        from .utils import generate_password
+    def create_user_and_assign_group(self, *, password: str) -> User:
+        """Create user + assign group (admin flow).
 
-        password = generate_password()
+        `views.py` generates the password and emails it, so we accept the password as an argument.
+        """
 
-        user = User(
-            username=validated_data["username"],
-            email=validated_data["email"],
-            group_name=validated_data.get("group_name"),
-            section_name=validated_data.get("section_name"),
-        )
+        validated = dict(self.validated_data)
+        group_name = (validated.pop("group", "") or "").strip()
+        section_name = (validated.pop("section_name", "") or "").strip()
 
-        user.set_password(password)
-        user.is_first_login = True
-        user.last_password_change = timezone.now()
-        user.save()
+        with transaction.atomic():
+            group_obj, _created = Group.objects.get_or_create(name=group_name)
 
-        return user, password
+            user = User(**validated)
+            user.section_name = section_name or None
+            user.set_password(password)
+            user.is_first_login = True
+            user.last_password_change = timezone.now()
+            user.save()
+            user.groups.add(group_obj)
+        return user
 
 
 # =========================
@@ -275,16 +294,23 @@ class AdminUpdateUserSerializer(serializers.Serializer):
     display_name = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
-
-    group_name = serializers.ChoiceField(choices=GroupName.choices, required=False)
+    group = serializers.CharField(max_length=150, required=False)
     section_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
-        user = self.instance
+        attrs = super().validate(attrs)
+        user: User = self.instance
+
+        if "username" in attrs:
+            attrs["username"] = (attrs.get("username") or "").strip()
+            if not attrs["username"]:
+                raise serializers.ValidationError(
+                    {"username": "Username cannot be empty."}
+                )
 
         if "username" in attrs:
             if (
-                User.objects.filter(username=attrs["username"])
+                User.objects.filter(username__iexact=attrs["username"])
                 .exclude(pk=user.pk)
                 .exists()
             ):
@@ -293,16 +319,45 @@ class AdminUpdateUserSerializer(serializers.Serializer):
                 )
 
         if "email" in attrs:
-            if User.objects.filter(email=attrs["email"]).exclude(pk=user.pk).exists():
+            attrs["email"] = (attrs.get("email") or "").strip()
+            if not attrs["email"]:
+                raise serializers.ValidationError({"email": "Email cannot be empty."})
+            if (
+                User.objects.filter(email__iexact=attrs["email"])
+                .exclude(pk=user.pk)
+                .exists()
+            ):
                 raise serializers.ValidationError({"email": "Email already exists"})
+
+        if "group" in attrs:
+            group_name = (attrs.get("group") or "").strip()
+            if not group_name:
+                raise serializers.ValidationError({"group": "Group cannot be empty."})
+            attrs["group"] = group_name
+
+        if "section_name" in attrs:
+            attrs["section_name"] = (attrs.get("section_name") or "").strip()
 
         return attrs
 
-    def save(self):
-        user = self.instance
+    def save(self, **kwargs) -> User:
+        user: User = self.instance
+        validated = dict(self.validated_data)
 
-        for field, value in self.validated_data.items():
-            setattr(user, field, value)
+        group_name = (validated.pop("group", "") or "").strip()
+        section_name = validated.pop("section_name", None)
 
-        user.save()
+        with transaction.atomic():
+            for field, value in validated.items():
+                setattr(user, field, value)
+
+            if section_name is not None:
+                user.section_name = section_name or None
+
+            user.save()
+
+            if group_name:
+                group_obj, _created = Group.objects.get_or_create(name=group_name)
+                user.groups.set([group_obj])
+
         return user

@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from .enums import GroupName
 
 
 class User(AbstractUser):
@@ -27,9 +26,6 @@ class User(AbstractUser):
     last_password_change = models.DateTimeField(null=True, blank=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
     section_name = models.CharField(max_length=255, blank=True, null=True)
-    group_name = models.CharField(
-        max_length=255, blank=True, null=True, choices=GroupName.choices
-    )
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         full_name = self.get_full_name()

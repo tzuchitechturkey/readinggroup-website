@@ -17,7 +17,6 @@ class UserAdmin(DjangoUserAdmin):
                     "is_first_login",
                     "last_password_change",
                     "section_name",
-                    "group_name",
                 )
             },
         ),
@@ -29,7 +28,6 @@ class UserAdmin(DjangoUserAdmin):
         "username",
         "email",
         "display_name",
-        "group_name",
         "section_name",
         "get_groups",
         "is_staff",
