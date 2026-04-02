@@ -19,9 +19,6 @@ import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
-import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
-import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
-import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
 import BookPage from "@/components/ForPages/Dashboard/AboutUs/Book/BookPage";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
 import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
@@ -378,20 +375,7 @@ export default function Page() {
             video={selectedVideo}
           />
         );
-      // contents
-      case "contents":
-        return <ContentsList onSectionChange={handleSectionChange} />;
-      case "contentsCategories":
-        return (
-          <ContentsCategoriesContent onSectionChange={handleSectionChange} />
-        );
-      case "createOrEditContent":
-        return (
-          <CreateOrEditContent
-            content={selectedContent}
-            onSectionChange={handleSectionChange}
-          />
-        );
+
       // Live Stream Schedules
       case "liveStreamSchedules":
         return (

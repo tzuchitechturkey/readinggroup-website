@@ -81,25 +81,7 @@ export default function AppSidebar({
         onClick: () => onSectionChange("Home"),
         icon: DashboardIcon,
       },
-      // {
-      //   title: "Contents",
-      //   onClick: () => onSectionChange("contents"),
-      //   icon: Content,
-      //   items: [
-      //     {
-      //       title: "All Contents",
-      //       onClick: () => onSectionChange("contents"),
-      //     },
-      //     {
-      //       title: "Add/Edit Content",
-      //       onClick: () => onSectionChange("createOrEditContent"),
-      //     },
-      //     {
-      //       title: "Contents Categories",
-      //       onClick: () => onSectionChange("contentsCategories"),
-      //     },
-      //   ],
-      // },
+
       {
         title: "Learn",
         onClick: "#",
