@@ -24,13 +24,13 @@ function Footer() {
     youtube: "https://www.youtube.com/@慈濟高雄線上讀書-v7c",
     facebook:
       "https://www.facebook.com/profile.php?id=100090837282933&rdid=e0KJ25Nt1QDBOoqR&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CC79NYUCs%2F ",
-    daAiTv: "https://www.daai.tv",
+    daAiTv: "https://www.daai.tv/",
   });
 
   const { t, i18n } = useTranslation();
 
   const communityEventsLinks = [
-    { name: t("Livestream Schedule"), href: "/events?type=livestream" },
+    { name: t("Livestream Schedule"), href: "/livestream-schedule" },
     { name: t("Photo Collection"), href: "/photo-collections" },
     { name: t("Latest News"), href: "/latest-news" },
     { name: t("Related Reports"), href: "/related-reports" },
@@ -41,10 +41,6 @@ function Footer() {
     { name: t("Team Functions"), href: "/about/team" },
     { name: t("閱上雲端 Book"), href: "/about/book" },
   ];
-
-  useEffect(() => {
-    // fetchSocialLinks();
-  }, [t]);
 
   return (
     <div
@@ -91,14 +87,14 @@ function Footer() {
           </div>
 
           {/* Third Column - Brands Logos and Social Media */}
-          <div
-            // href="https://www.jingsi.com"
-            // target="_blank"
-            // rel="noopener noreferrer"
-            className="flex flex-col gap-[24px] items-start w-full md:w-auto"
-          >
+          <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* Jing Si Logo Section */}
-            <div className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]">
+            <a
+              href="https://www.jingsi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]"
+            >
               <div className="flex flex-col items-start gap-[4px] w-20">
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("JING SI")}
@@ -117,7 +113,7 @@ function Footer() {
                   src={logoImages.jingSi}
                 />
               </div>
-            </div>
+            </a>
 
             {/* DA AI TV Logo Section */}
             <a

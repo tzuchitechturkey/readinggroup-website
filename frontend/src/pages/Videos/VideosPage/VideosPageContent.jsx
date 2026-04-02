@@ -132,7 +132,7 @@ function VideosPageContent() {
               ? videos.sort((a, b) => (b.views || 0) - (a.views || 0))
               : videos;
 
-      setFilteredVideos(sortedVideos);
+      setFilteredVideos([...sortedVideos, ...sortedVideos]);
 
       // Update pagination state
       setPagination((prev) => ({

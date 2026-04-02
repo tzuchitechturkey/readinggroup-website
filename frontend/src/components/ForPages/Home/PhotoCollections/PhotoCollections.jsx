@@ -19,8 +19,8 @@ const PhotoCollections = ({ t, data }) => {
   const [scrollSnaps, setScrollSnaps] = useState([]);
   const autoplayRef = useRef(null);
 
-  const handleMoreCollectionsClick = (collectionId) => {
-    navigate(`/photo-collections/${collectionId}`);
+  const handleMoreCollectionsClick = () => {
+    navigate(`/photo-collections`);
   };
 
   // Track current slide and set up auto-scroll

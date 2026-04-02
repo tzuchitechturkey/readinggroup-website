@@ -74,8 +74,8 @@ export default function ScrollCards({ items, t }) {
           </CarouselContent>
 
           {/* Navigation Buttons - Hidden by default, shown on hover */}
-          <CarouselPrevious className=" hidden md:block w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
-          <CarouselNext className=" hidden md:block w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
+          <CarouselPrevious className=" hidden md:flex w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
+          <CarouselNext className=" hidden md:flex w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
         </Carousel>
       </div>
 
