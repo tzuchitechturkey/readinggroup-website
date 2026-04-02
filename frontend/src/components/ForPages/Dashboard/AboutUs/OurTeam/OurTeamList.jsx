@@ -281,15 +281,17 @@ function OurTeamList({ onSectionChange }) {
                           >
                             <Edit className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => {
-                              setSelectedMember(member);
-                              setShowDeleteMemberModal(true);
-                            }}
-                            className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {localStorage.getItem("userType") !== "editor" && (
+                            <button
+                              onClick={() => {
+                                setSelectedMember(member);
+                                setShowDeleteMemberModal(true);
+                              }}
+                              className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

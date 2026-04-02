@@ -135,6 +135,7 @@ function LoginForm() {
       setIsLoading(true);
       try {
         const res = await Login({ username, password, totp });
+        console.log("TOTP verification response:", res);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
         localStorage.setItem("userId", res?.data.user?.id);
         localStorage.setItem("userImage", res?.data.user?.profile_image_url);
@@ -142,14 +143,19 @@ function LoginForm() {
         localStorage.setItem("sectionName", res?.data.user?.section_name || "");
 
         setShowTOTPModal(false);
-        if (res?.data.group === "admin") {
-          localStorage.setItem("userType", "admin");
-        } else {
-          localStorage.setItem("userType", res?.data.user?.groups[0]);
-        }
-
+        localStorage.setItem("userType", res?.data?.group);
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
-        if (redirectAfterLogin && res?.data.group === "admin") {
+        if (
+          redirectAfterLogin ||
+          res?.data.group === "admin" ||
+          res?.data.group === "editor" ||
+          res?.data.group === "team_leader" ||
+          redirectAfterLogin === "/dashboard"
+        ) {
+          localStorage.setItem(
+            "section_name",
+            res?.data?.user?.section_name || "",
+          );
           navigate("/dashboard");
         } else if (redirectAfterLogin && redirectAfterLogin !== "/") {
           navigate(redirectAfterLogin);

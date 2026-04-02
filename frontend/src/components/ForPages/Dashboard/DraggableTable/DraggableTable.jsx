@@ -165,17 +165,25 @@ function DraggableTable({
                 {actions && actions.length > 0 && (
                   <td className="py-3 px-3">
                     <div className="flex gap-2">
-                      {actions.map((action, index) => (
-                        <button
-                          key={index}
-                          onClick={() => action.onClick(item)}
-                          className={action.className || "p-1 rounded hover:bg-gray-100"}
-                          title={t(action.title)}
-                          disabled={action.disabled ? action.disabled(item) : false}
-                        >
-                          {action.icon}
-                        </button>
-                      ))}
+                      {actions
+                        .filter(
+                          (action) =>
+                            !(
+                              action.title === "Delete" &&
+                              localStorage.getItem("userType") === "editor"
+                            ),
+                        )
+                        .map((action, index) => (
+                          <button
+                            key={index}
+                            onClick={() => action.onClick(item)}
+                            className={action.className || "p-1 rounded hover:bg-gray-100"}
+                            title={t(action.title)}
+                            disabled={action.disabled ? action.disabled(item) : false}
+                          >
+                            {action.icon}
+                          </button>
+                        ))}
                     </div>
                   </td>
                 )}
