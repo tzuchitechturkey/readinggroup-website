@@ -14,12 +14,19 @@ const ImageViewerModal = ({
   onPrev,
 }) => {
   const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const imageRef = useRef(null);
   const [mounted, setMounted] = useState(false);
+
+  // Drag (pan) refs
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const panAtDragStart = useRef({ x: 0, y: 0 });
 
   // Touch tracking states
   const [touchStartX, setTouchStartX] = useState(null);
   const [lastTouchDistance, setLastTouchDistance] = useState(null);
+  const lastSingleTouch = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     setMounted(true);
@@ -47,10 +54,18 @@ const ImageViewerModal = ({
     };
   }, [isOpen]);
 
-  // Reset zoom when image changes
+  // Reset zoom and pan when image changes
   useEffect(() => {
     setZoom(1);
+    setPan({ x: 0, y: 0 });
   }, [currentIndex]);
+
+  // Reset pan when zoom returns to 1
+  useEffect(() => {
+    if (zoom === 1) {
+      setPan({ x: 0, y: 0 });
+    }
+  }, [zoom]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -72,12 +87,38 @@ const ImageViewerModal = ({
     setZoom(newZoom);
   };
 
+  // Mouse drag handlers
+  const handleMouseDown = (e) => {
+    if (zoom <= 1) return;
+    isDragging.current = true;
+    dragStart.current = { x: e.clientX, y: e.clientY };
+    panAtDragStart.current = { ...pan };
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    setPan({
+      x: panAtDragStart.current.x + dx,
+      y: panAtDragStart.current.y + dy,
+    });
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
   // Mobile Touch Logic
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
+      lastSingleTouch.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
       setTouchStartX(e.touches[0].clientX);
     } else if (e.touches.length === 2) {
-      // Two fingers for pinch to zoom
       const distance = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY,
@@ -98,6 +139,15 @@ const ImageViewerModal = ({
       const newZoom = Math.min(Math.max(1, zoom + scaleAmount), 3);
       setZoom(newZoom);
       setLastTouchDistance(distance);
+    } else if (e.touches.length === 1 && zoom > 1) {
+      // Single finger pan when zoomed in
+      const dx = e.touches[0].clientX - lastSingleTouch.current.x;
+      const dy = e.touches[0].clientY - lastSingleTouch.current.y;
+      lastSingleTouch.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+      setPan((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
     }
   };
 
@@ -153,8 +203,13 @@ const ImageViewerModal = ({
 
         {/* Image Container */}
         <div
-          className="relative flex items-center justify-center h-full p-0  select-none overflow-hidden touch-none"
+          className="relative flex items-center justify-center h-full p-0 select-none overflow-hidden touch-none"
+          style={{ cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default" }}
           onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -163,12 +218,13 @@ const ImageViewerModal = ({
             ref={imageRef}
             src={imgSrc}
             alt={imgAlt}
-            className={`max-h-full object-contain transition-transform duration-100 ease-out select-none ${
+            className={`max-h-full object-contain select-none ${
               isVertical ? "max-w-[420px] md:max-w-[500px]" : "max-w-full"
             }`}
             style={{
-              transform: `scale(${zoom})`,
+              transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
               WebkitTouchCallout: "none",
+              transition: isDragging.current ? "none" : "transform 0.1s ease-out",
             }}
             draggable={false}
           />

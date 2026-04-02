@@ -64,15 +64,18 @@ export default function ScrollCards({ items, t }) {
         >
           <CarouselContent className="-ml-4 md:-ml-5">
             {items.map((item) => (
-              <CarouselItem key={item.id} className="pl-4 md:pl-5 basis-1/4">
+              <CarouselItem
+                key={item.id}
+                className="pl-4 md:pl-5 basis-1/2 md:basis-1/2 lg:basis-1/4"
+              >
                 <RevisitCard item={item} t={t} />
               </CarouselItem>
             ))}
           </CarouselContent>
 
           {/* Navigation Buttons - Hidden by default, shown on hover */}
-          <CarouselPrevious className="w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
-          <CarouselNext className="w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
+          <CarouselPrevious className=" hidden md:block w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
+          <CarouselNext className=" hidden md:block w-10 h-10 opacity-0 group-hover:opacity-100 transition-opacity bg-transparent border-[1px] border-white   text-white rounded-full" />
         </Carousel>
       </div>
 

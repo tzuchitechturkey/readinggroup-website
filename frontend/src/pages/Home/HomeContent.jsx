@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import HomeHeroSlider from "@/components/ForPages/Home/HomeHeroSlider/HomeHeroSlider";
-// import { HomeData } from "@/api/home";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import NewClips from "@/components/ForPages/Home/NewClips/NewClips";
 import RevisitCards from "@/components/ForPages/Home/RevisitCards/RevisitCards";

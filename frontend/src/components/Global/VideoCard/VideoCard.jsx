@@ -24,7 +24,7 @@ const VideoCard = ({
 
       case "small":
         return {
-          image: `${fromHomePage ? " h-[199px] w-[354px]" : " h-[164px] w-[291px]"} `,
+          image: `w-full ${fromHomePage ? " h-[199px] md:w-[354px]" : " h-[164px] md:w-[291px]"} `,
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
           durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",

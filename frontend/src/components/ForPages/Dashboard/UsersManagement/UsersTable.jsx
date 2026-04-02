@@ -1,10 +1,6 @@
 import React from "react";
 
-import {
-  Edit,
-  Trash2,
-  Search,
-} from "lucide-react";
+import { Edit, Trash2, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -119,13 +115,9 @@ const UsersTable = ({
               {user.email}
             </TableCell>
             <TableCell className="text-center text-sm text-gray-600">
-              {user.groups && user.groups.length > 0 ? (
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                  {user.groups.join(", ")}
-                </span>
-              ) : (
-                <span className="text-gray-400">-</span>
-              )}
+              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                {user.group}
+              </span>
             </TableCell>
             <TableCell className="text-center text-sm">
               <span
