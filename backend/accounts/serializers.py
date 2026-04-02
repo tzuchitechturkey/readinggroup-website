@@ -22,6 +22,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined", "last_password_change")
     profile_image_url = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
+    group = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -34,6 +35,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
+            "group",
             "section_name",
             "is_first_login",
             "last_password_change",
@@ -77,6 +79,24 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             return Post.objects.filter(queries).count() if queries else 0
         except Exception:
             return 0
+
+    def get_group(self, obj):
+        """Return the user's primary group name.
+
+        For safety, expose this only to staff users (e.g. admin panel).
+        """
+
+        request = self.context.get("request")
+        if not request or not getattr(request, "user", None):
+            return None
+        if not getattr(request.user, "is_staff", False):
+            return None
+
+        try:
+            groups = list(obj.groups.all())
+            return groups[0].name if groups else None
+        except Exception:
+            return None
 
 
 # =========================

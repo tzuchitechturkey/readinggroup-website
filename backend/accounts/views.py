@@ -363,7 +363,9 @@ class AdminCreateUserView(APIView):
     def get(self, request):
         """Return a paginated list of users."""
 
-        qs = User.objects.all().order_by("-date_joined", "-id")
+        qs = User.objects.prefetch_related("groups").all().order_by(
+            "-date_joined", "-id"
+        )
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(qs, request)
         data = UserSerializer(page or [], many=True, context={"request": request}).data
