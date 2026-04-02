@@ -40,3 +40,8 @@ export async function GetOtherLatestNews(currentNewsId) {
 export async function DeletePhotoFromNews(photo_id) {
   return await axios.delete(`/photos/${photo_id}/`);
 }
+
+// Delete Photo from collection /latest-news-images/{photo_id}/
+// export async function DeletePhotoFromNews(photo_id) {
+//   return await axios.delete(`/latest-news-images/${photo_id}/`);
+// }

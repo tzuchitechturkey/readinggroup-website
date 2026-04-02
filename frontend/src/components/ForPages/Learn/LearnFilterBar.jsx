@@ -18,11 +18,15 @@ const LearnFilterBar = ({
   onApplyDateFilter,
   onSortChange,
   onOpenFilter,
+  onResetFilters,
   totalrecord = 0,
 }) => {
   const { t } = useTranslation();
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState(false);
-  const [isMobileFiltersVisible, setIsMobileFiltersVisible] = useState(false);
+
+  const isFilterActive =
+    filters?.date?.month !== null ||
+    filters?.date?.year !== new Date().getFullYear();
 
   // Handle sort by filter changes - local sorting
   const handleSortByChange = (sortValue) => {
@@ -130,6 +134,14 @@ const LearnFilterBar = ({
 
         {/* Filters (Desktop Always Visible, Mobile Toggleable) */}
         <div className="hidden md:flex w-full md:w-auto flex-col md:flex-row gap-[12px] relative z-40">
+          {isFilterActive && (
+            <button
+              onClick={onResetFilters}
+              className="px-3 py-1 mt-3  underline  text-base transition-colors"
+            >
+              {t("Reset Filter")}
+            </button>
+          )}
           <DateFilter
             filters={filters}
             openDropdowns={openDropdowns}

@@ -20,7 +20,6 @@ function UserIcons() {
     const storedUserType = localStorage.getItem("userType");
     setUserType(storedUserType);
   }, []);
-  console.log("User Type in UserIcons:", userType, isLoggedIn);
   return (
     <div className="flex items-center ">
       <div

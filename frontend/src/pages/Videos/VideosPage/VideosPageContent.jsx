@@ -284,7 +284,7 @@ function VideosPageContent() {
   // Handle search (triggered on Enter press)
   const handleSearch = (term, shouldSearch = false) => {
     setSearchTerm(term);
-    console.log("Search term updated:", term,  );
+    console.log("Search term updated:", term);
     // Only search when Enter is pressed or search is explicitly triggered
     if (shouldSearch) {
       setActiveSearchTerm(term); // Update active search term
@@ -338,13 +338,6 @@ function VideosPageContent() {
     const categoriesParam = searchParams.get("categories");
     const sortParam = searchParams.get("sort");
 
-    console.log("Initial load from URL:", {
-      typeParam,
-      dateParam,
-      categoriesParam,
-      sortParam,
-    });
-
     // Map type from URL format to internal format
     const typeMapping = {
       clip_video: "clips",
@@ -382,7 +375,6 @@ function VideosPageContent() {
     // Mark as initial load complete
     initialLoadRef.current = true;
 
-    
     // Fetch videos directly with the new filters
     fetchFilteredVideosWithParams(1, newFilters, appliedDate, cats);
     getActiveVideoCategories();
@@ -431,7 +423,6 @@ function VideosPageContent() {
     // Navigate to new URL
     const queryString = params.toString();
     const newPath = `/videos${queryString ? "?" + queryString : ""}`;
-    console.log("Navigating to:", newPath);
     navigate(newPath, { replace: true });
   }, [
     filters.videoType,
@@ -447,12 +438,6 @@ function VideosPageContent() {
       return; // Don't fetch during initial load
     }
 
-    console.log(
-      "Filter changed, fetching with:",
-      filters,
-      appliedDateFilter,
-      selectedCategories,
-    );
     // Pass filters explicitly to avoid closure issues
     fetchFilteredVideosWithParams(
       1,
@@ -489,7 +474,7 @@ function VideosPageContent() {
       />
       <div className="max-w-7xl mx-auto md:px-6 lg:px-8 py-6">
         {/* Title Section */}
-        <div className="flex items-end gap-3 mb-8 px-4 md:px-0">
+        <div className="flex items-end gap-3 mb-8 px-4 md:px-0 mt-6">
           <h1 className="text-4xl font-extrabold text-[#081945]">
             {t("Watch")}
           </h1>

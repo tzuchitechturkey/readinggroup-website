@@ -69,6 +69,10 @@ const LearnPageContent = () => {
 
   const handleCategoryClick = (category) => {
     setActiveCategory(category);
+    setFilters({
+      date: { month: null, year: new Date().getFullYear() },
+      sortBy: "newest",
+    });
     setItems([]);
     setPaginationData({
       page: 0,
@@ -338,6 +342,7 @@ const LearnPageContent = () => {
               onApplyDateFilter={handleApplyDateFilter}
               onSortChange={handleSortChange}
               onOpenFilter={() => setIsFilterModalOpen(true)}
+              onResetFilters={handleResetFilters}
               totalrecord={items.length}
             />
 
@@ -345,7 +350,7 @@ const LearnPageContent = () => {
             <div
               className={`grid ${
                 sortedAndFilteredItems[0]?.category?.direction === "vertical"
-                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                   : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
               }`}
               style={{ columnGap: "12px", rowGap: "16px" }}

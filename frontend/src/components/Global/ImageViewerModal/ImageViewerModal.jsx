@@ -14,9 +14,6 @@ const ImageViewerModal = ({
   onPrev,
 }) => {
   const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const imageRef = useRef(null);
   const [mounted, setMounted] = useState(false);
 
@@ -50,10 +47,9 @@ const ImageViewerModal = ({
     };
   }, [isOpen]);
 
-  // Reset zoom and position when image changes
+  // Reset zoom when image changes
   useEffect(() => {
     setZoom(1);
-    setPosition({ x: 0, y: 0 });
   }, [currentIndex]);
 
   // Handle keyboard events
@@ -76,40 +72,10 @@ const ImageViewerModal = ({
     setZoom(newZoom);
   };
 
-  // Dragging and Panning logic
-  const handleMouseDown = (e) => {
-    if (zoom > 1) {
-      setIsDragging(true);
-      setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging && zoom > 1) {
-      e.preventDefault();
-      setPosition({
-        x: e.clientX - startPos.x,
-        y: e.clientY - startPos.y,
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   // Mobile Touch Logic
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
-      // Single touch for swiping or panning
       setTouchStartX(e.touches[0].clientX);
-      if (zoom > 1) {
-        setIsDragging(true);
-        setStartPos({
-          x: e.touches[0].clientX - position.x,
-          y: e.touches[0].clientY - position.y,
-        });
-      }
     } else if (e.touches.length === 2) {
       // Two fingers for pinch to zoom
       const distance = Math.hypot(
@@ -121,13 +87,7 @@ const ImageViewerModal = ({
   };
 
   const handleTouchMove = (e) => {
-    if (e.touches.length === 1 && isDragging && zoom > 1) {
-      // Panning while zoomed in
-      setPosition({
-        x: e.touches[0].clientX - startPos.x,
-        y: e.touches[0].clientY - startPos.y,
-      });
-    } else if (e.touches.length === 2 && lastTouchDistance) {
+    if (e.touches.length === 2 && lastTouchDistance) {
       // Pinch to zoom
       const distance = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -142,7 +102,6 @@ const ImageViewerModal = ({
   };
 
   const handleTouchEnd = (e) => {
-    setIsDragging(false);
     setLastTouchDistance(null);
 
     // Only handle swipe if at 1x zoom
@@ -172,11 +131,12 @@ const ImageViewerModal = ({
       : currentImage?.image || currentImage?.image_url;
   const imgAlt =
     typeof currentImage === "string" ? "Tzu Chi Content" : currentImage?.title;
+  const isVertical = currentImage?.category?.direction === "vertical";
 
   const modalContent = (
     <div className="fixed inset-0 z-[100000] bg-[rgba(22,33,58,0.95)] backdrop-blur-[3px] flex items-center justify-center">
       {/* Container for Arrows and Image */}
-      <div className="relative max-w-[1200px] w-full h-full flex items-center justify-between px-4 md:px-10">
+      <div className="relative max-w-[1200px] w-full h-full flex items-center justify-center gap-16 px-4 md:px-10">
         {/* Previous Button - hidden on small mobile screen when not zoomed to allow swiping */}
         {onPrev && (
           <button
@@ -193,12 +153,8 @@ const ImageViewerModal = ({
 
         {/* Image Container */}
         <div
-          className="relative flex-1 flex items-center justify-center h-full p-0 md:p-10 select-none overflow-hidden touch-none"
+          className="relative flex items-center justify-center h-full p-0  select-none overflow-hidden touch-none"
           onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -207,11 +163,11 @@ const ImageViewerModal = ({
             ref={imageRef}
             src={imgSrc}
             alt={imgAlt}
-            className={`max-w-full max-h-full object-contain transition-transform duration-100 ease-out select-none ${
-              isDragging ? "cursor-grabbing" : "cursor-grab"
+            className={`max-h-full object-contain transition-transform duration-100 ease-out select-none ${
+              isVertical ? "max-w-[420px] md:max-w-[500px]" : "max-w-full"
             }`}
             style={{
-              transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+              transform: `scale(${zoom})`,
               WebkitTouchCallout: "none",
             }}
             draggable={false}

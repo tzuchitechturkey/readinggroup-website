@@ -91,10 +91,10 @@ function Footer() {
           </div>
 
           {/* Third Column - Brands Logos and Social Media */}
-          <a
-            href="https://www.jingsi.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <div
+            // href="https://www.jingsi.com"
+            // target="_blank"
+            // rel="noopener noreferrer"
             className="flex flex-col gap-[24px] items-start w-full md:w-auto"
           >
             {/* Jing Si Logo Section */}
@@ -142,7 +142,7 @@ function Footer() {
                 />
               </div>
             </a>
-          </a>
+          </div>
 
           {/* Right Column - Social Media */}
           <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">

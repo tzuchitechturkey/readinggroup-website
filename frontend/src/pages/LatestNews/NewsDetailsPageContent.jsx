@@ -96,7 +96,7 @@ const NewsDetailsPageContent = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Back Button */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/latest-news")}
           className="flex items-center gap-2 text-[#285688] hover:text-[#081945] transition-colors mb-6 md:mb-8 font-semibold"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -118,7 +118,7 @@ const NewsDetailsPageContent = () => {
               {formatDate(news.happened_at)}
             </span>
           )}
- 
+
           {/* Title */}
           <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-2xl md:text-3xl lg:text-4xl text-[#081945] md:mb-6">
             {news.title}
