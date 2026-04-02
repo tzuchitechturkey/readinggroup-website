@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
-import { BASE_URL } from "@/configs";
+// import { BASE_URL } from "@/configs";
 
 export function UserSwitcher({ onSectionChange }) {
   const [data, setData] = useState();
@@ -15,6 +15,7 @@ export function UserSwitcher({ onSectionChange }) {
   useEffect(() => {
     const username = localStorage.getItem("username");
     const userImage = localStorage.getItem("userImage");
+    const sectionName = localStorage.getItem("section_name");
 
     const newData = {};
 
@@ -26,10 +27,19 @@ export function UserSwitcher({ onSectionChange }) {
       }
     }
     if (userImage) {
+      console.log("userImage from localStorage:", userImage);
       try {
         newData.profile_image_url = JSON.parse(userImage);
       } catch {
         newData.profile_image_url = userImage;
+      }
+    }
+
+    if (sectionName) {
+      try {
+        newData.section_name = JSON.parse(sectionName);
+      } catch {
+        newData.section_name = sectionName;
       }
     }
 
@@ -44,7 +54,7 @@ export function UserSwitcher({ onSectionChange }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              onClick={() => onSectionChange("profile")}
+              // onClick={() => onSectionChange("profile")}
               size="lg"
             >
               {/* Start Avatar */}
@@ -70,6 +80,13 @@ export function UserSwitcher({ onSectionChange }) {
                   {data?.display_name || data?.username}
                 </span>
                 {/* End Name */}
+                {/* Start Section Name */}
+                {data?.section_name && (
+                  <span className="truncate text-sm text-gray-500">
+                    {data?.section_name}
+                  </span>
+                )}
+                {/* End Section Name */}
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>

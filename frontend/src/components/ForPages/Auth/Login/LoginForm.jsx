@@ -66,18 +66,18 @@ function LoginForm() {
     try {
       const { data } = await Login({ username: userName, password });
       setTokens({ access: data?.access, refresh: data?.refresh });
-
+      console.log("Login response data:", data);
       // حفظ بيانات المستخدم
       if (data?.user) {
-        localStorage.setItem("userId", data.user.id);
-        localStorage.setItem("userImage", data.user.profile_image_url);
-        localStorage.setItem("username", data.user.display_name);
-        localStorage.setItem("sectionName", data.user.section_name || "");
+        localStorage.setItem("userId", data?.user?.id);
+        localStorage.setItem("userImage", data?.user?.profile_image_url);
+        localStorage.setItem("username", data?.user?.username);
+        localStorage.setItem("sectionName", data?.user?.section_name || "");
 
-        if (data.user.groups.includes("admin")) {
+        if (data?.user?.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");
         } else {
-          localStorage.setItem("userType", data.user.groups[0]);
+          localStorage.setItem("userType", data?.user?.groups[0]);
         }
       }
 
@@ -137,19 +137,22 @@ function LoginForm() {
         const res = await Login({ username, password, totp });
         console.log("TOTP verification response:", res);
         setTokens({ access: res.data?.access, refresh: res.data?.refresh });
-        localStorage.setItem("userId", res?.data.user?.id);
-        localStorage.setItem("userImage", res?.data.user?.profile_image_url);
-        localStorage.setItem("username", res?.data.user?.display_name);
-        localStorage.setItem("sectionName", res?.data.user?.section_name || "");
+        localStorage.setItem("userId", res?.data?.user?.id);
+        localStorage.setItem("userImage", res?.data?.user?.profile_image_url);
+        localStorage.setItem("username", res?.data?.user?.username);
+        localStorage.setItem(
+          "sectionName",
+          res?.data?.user?.section_name || "",
+        );
 
         setShowTOTPModal(false);
         localStorage.setItem("userType", res?.data?.group);
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
         if (
           redirectAfterLogin ||
-          res?.data.group === "admin" ||
-          res?.data.group === "editor" ||
-          res?.data.group === "team_leader" ||
+          res?.data?.group === "admin" ||
+          res?.data?.group === "editor" ||
+          res?.data?.group === "team_leader" ||
           redirectAfterLogin === "/dashboard"
         ) {
           localStorage.setItem(

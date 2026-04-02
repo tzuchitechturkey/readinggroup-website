@@ -19,10 +19,8 @@ import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
-import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
 import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
 import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
-import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
 import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
 import BookPage from "@/components/ForPages/Dashboard/AboutUs/Book/BookPage";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
@@ -38,12 +36,10 @@ import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Even
 import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/UploadImagesToNews/UploadImagesToNews";
 
 import ProfileContent from "../Profile/ProfileContent";
-import SettingsContent from "../Settings/SettingsContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
 import UploadImagesToReviews from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
 import UploadImagesToHistory from "@/components/ForPages/Dashboard/AboutUs/History/UploadImagesToHistory";
 import UsersManagementContent from "@/components/ForPages/Dashboard/UsersManagement/UsersManagementContent";
-import GroupssManagementContent from "@/components/ForPages/Dashboard/GroupManagement/GroupssManagementContent";
 
 const SECTION_NAME_TO_DEFAULT = {
   learn: "learn",
@@ -87,7 +83,11 @@ export default function Page() {
     const sectionName = localStorage.getItem("sectionName");
     const saved = localStorage.getItem("dashboardActiveSection");
 
-    if (userType !== "admin" && sectionName && SECTION_NAME_TO_DEFAULT[sectionName]) {
+    if (
+      userType !== "admin" &&
+      sectionName &&
+      SECTION_NAME_TO_DEFAULT[sectionName]
+    ) {
       const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
       return saved && allowed.includes(saved)
         ? saved
@@ -236,7 +236,11 @@ export default function Page() {
     const sectionName = localStorage.getItem("sectionName");
 
     // حماية: المستخدم غير الأدمن لا يمكنه التنقل خارج قسمه
-    if (userType !== "admin" && sectionName && SECTION_NAME_TO_DEFAULT[sectionName]) {
+    if (
+      userType !== "admin" &&
+      sectionName &&
+      SECTION_NAME_TO_DEFAULT[sectionName]
+    ) {
       const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
       const defaultSection = SECTION_NAME_TO_DEFAULT[sectionName];
 
@@ -329,16 +333,11 @@ export default function Page() {
         positions: "About Us",
         book: "Book",
         createOrEditReviews: "Book",
-        booksGroups: "About Us",
         // Settings && Profile
         profileSettings: "Settings",
         profile: "Settings",
         // Website Info
-        websiteInfo: "Settings",
-        sortSection: "Settings",
-        // Group Management
         manageUsers: "Roles",
-        manageGroup: "Roles",
       };
       autoParent = parentMap[section] || null;
     }
@@ -470,25 +469,12 @@ export default function Page() {
 
       default:
         return <DashboardSections />;
-      // Profile && Settings
-      case "profileSettings":
-        return <SettingsContent onSectionChange={handleSectionChange} />;
       case "profile":
         return <ProfileContent onSectionChange={handleSectionChange} />;
-      // Website Info
-      case "websiteInfo":
-        return <WebSiteInfoContent onSectionChange={handleSectionChange} />;
-      case "sortSection":
-        return <SortSectionContent onSectionChange={handleSectionChange} />;
 
       // User Management
       case "manageUsers":
         return <UsersManagementContent onSectionChange={handleSectionChange} />;
-      case "manageGroup":
-      case "groupsList":
-        return (
-          <GroupssManagementContent onSectionChange={handleSectionChange} />
-        );
     }
   };
 

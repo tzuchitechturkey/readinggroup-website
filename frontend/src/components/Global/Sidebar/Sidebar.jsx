@@ -260,29 +260,6 @@ export default function AppSidebar({
             title: "Manage Users",
             onClick: () => onSectionChange("manageUsers"),
           },
-          // {
-          //   title: "Manage Group",
-          //   onClick: () => onSectionChange("manageGroup"),
-          // },
-        ],
-      },
-      {
-        title: "Settings",
-        onClick: "#",
-        icon: Settings,
-        items: [
-          {
-            title: "Sort Section",
-            onClick: () => onSectionChange("sortSection"),
-          },
-          {
-            title: "Website Info",
-            onClick: () => onSectionChange("websiteInfo"),
-          },
-          {
-            title: "Profile Settings",
-            onClick: () => onSectionChange("settings"),
-          },
         ],
       },
     ],
@@ -302,9 +279,12 @@ export default function AppSidebar({
         <hr className="h-[2px] bg-[#2D2F39] w-5/6 mx-auto rounded-lg mt-3" />
         <DynamicNav
           data={
-            userType !== "admin" && sectionName && SECTION_NAME_TO_NAV_TITLE[sectionName]
+            userType !== "admin" &&
+            sectionName &&
+            SECTION_NAME_TO_NAV_TITLE[sectionName]
               ? data.navMain.filter(
-                  (item) => item.title === SECTION_NAME_TO_NAV_TITLE[sectionName],
+                  (item) =>
+                    item.title === SECTION_NAME_TO_NAV_TITLE[sectionName],
                 )
               : data.navMain
           }
