@@ -86,7 +86,12 @@ const UsersTable = ({
           </TableHead>
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
             <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
-              {t("Groups")}
+              {t("Group")}
+            </div>
+          </TableHead>
+          <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
+            <div className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]">
+              {t("Section Name")}
             </div>
           </TableHead>
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
@@ -118,6 +123,9 @@ const UsersTable = ({
               <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
                 {user.group}
               </span>
+            </TableCell>
+            <TableCell className="text-center text-sm text-gray-600">
+              {user.section_name}
             </TableCell>
             <TableCell className="text-center text-sm">
               <span
