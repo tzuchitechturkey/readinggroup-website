@@ -7,12 +7,40 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from readinggroup_backend.helpers import DateTimeFormattingMixin
+from .enums import GroupName
 from .models import User
 
 try:
     from content.models import Post
 except Exception:
     Post = None
+
+
+def _demote_existing_team_leaders(
+    *, section_name: str, exclude_user_id: int | None = None
+):
+    """Ensure there is at most one team leader per section.
+
+    Business rule:
+    - If a new user becomes `team_leader` for a given `section_name`, any existing
+      `team_leader` user(s) in that same section are demoted to `editor`.
+    """
+
+    section_name = (section_name or "").strip()
+    if not section_name:
+        return
+
+    editor_group, _created = Group.objects.get_or_create(name=GroupName.EDITOR)
+
+    qs = User.objects.filter(
+        section_name=section_name,
+        groups__name=GroupName.TEAM_LEADER,
+    )
+    if exclude_user_id is not None:
+        qs = qs.exclude(pk=exclude_user_id)
+
+    for user in qs:
+        user.groups.set([editor_group])
 
 
 # =========================
@@ -119,7 +147,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         username = (attrs.get("username") or attrs.get("email")).strip()
-        email = (attrs.get("email") or "").strip()
+        email = (attrs.get("email") or "").strip().lower()
 
         if not email:
             raise serializers.ValidationError({"email": "Email is required."})
@@ -135,6 +163,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
 
         attrs["username"] = username
+        attrs["email"] = email
         return attrs
 
     def create(self, validated_data):
@@ -222,6 +251,26 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "website_address",
         )
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        instance: User = self.instance
+
+        if "email" in attrs:
+            email = (attrs.get("email") or "").strip().lower()
+            if not email:
+                raise serializers.ValidationError({"email": "Email cannot be empty."})
+
+            if (
+                User.objects.filter(email__iexact=email)
+                .exclude(pk=getattr(instance, "pk", None))
+                .exists()
+            ):
+                raise serializers.ValidationError({"email": "Email already exists"})
+
+            attrs["email"] = email
+
+        return attrs
+
 
 # =========================
 # Password Change
@@ -259,7 +308,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         attrs = super().validate(attrs)
 
         username = (attrs.get("username") or "").strip()
-        email = (attrs.get("email") or "").strip()
+        email = (attrs.get("email") or "").strip().lower()
         group_name = (attrs.get("group") or "").strip()
         section_name = (attrs.get("section_name") or "").strip()
 
@@ -279,6 +328,11 @@ class AdminCreateUserSerializer(serializers.Serializer):
         attrs["email"] = email
         attrs["group"] = group_name
         attrs["section_name"] = section_name
+
+        if attrs["group"] == GroupName.TEAM_LEADER and not attrs["section_name"]:
+            raise serializers.ValidationError(
+                {"section_name": "section_name is required for team_leader."}
+            )
         return attrs
 
     def create_user_and_assign_group(self, *, password: str) -> User:
@@ -294,13 +348,16 @@ class AdminCreateUserSerializer(serializers.Serializer):
         with transaction.atomic():
             group_obj, _created = Group.objects.get_or_create(name=group_name)
 
+            if group_name == GroupName.TEAM_LEADER:
+                _demote_existing_team_leaders(section_name=section_name)
+
             user = User(**validated)
             user.section_name = section_name or None
             user.set_password(password)
             user.is_first_login = True
             user.last_password_change = timezone.now()
             user.save()
-            user.groups.add(group_obj)
+            user.groups.set([group_obj])
         return user
 
 
@@ -339,7 +396,7 @@ class AdminUpdateUserSerializer(serializers.Serializer):
                 )
 
         if "email" in attrs:
-            attrs["email"] = (attrs.get("email") or "").strip()
+            attrs["email"] = (attrs.get("email") or "").strip().lower()
             if not attrs["email"]:
                 raise serializers.ValidationError({"email": "Email cannot be empty."})
             if (
@@ -358,6 +415,24 @@ class AdminUpdateUserSerializer(serializers.Serializer):
         if "section_name" in attrs:
             attrs["section_name"] = (attrs.get("section_name") or "").strip()
 
+        # If the target group is team_leader, section_name must be present (either existing or provided).
+        target_group = attrs.get("group")
+        current_is_team_leader = user.groups.filter(name=GroupName.TEAM_LEADER).exists()
+        target_is_team_leader = target_group == GroupName.TEAM_LEADER or (
+            target_group is None and current_is_team_leader
+        )
+
+        if target_is_team_leader:
+            target_section = (
+                attrs.get("section_name")
+                if "section_name" in attrs
+                else (user.section_name or "")
+            )
+            if not (target_section or "").strip():
+                raise serializers.ValidationError(
+                    {"section_name": "section_name is required for team_leader."}
+                )
+
         return attrs
 
     def save(self, **kwargs) -> User:
@@ -375,6 +450,23 @@ class AdminUpdateUserSerializer(serializers.Serializer):
                 user.section_name = section_name or None
 
             user.save()
+
+            current_is_team_leader = user.groups.filter(
+                name=GroupName.TEAM_LEADER
+            ).exists()
+            target_is_team_leader = bool(
+                group_name == GroupName.TEAM_LEADER
+                or (not group_name and current_is_team_leader)
+            )
+            target_section = (
+                (user.section_name or "").strip() if target_is_team_leader else ""
+            )
+
+            if target_is_team_leader:
+                _demote_existing_team_leaders(
+                    section_name=target_section,
+                    exclude_user_id=user.pk,
+                )
 
             if group_name:
                 group_obj, _created = Group.objects.get_or_create(name=group_name)
