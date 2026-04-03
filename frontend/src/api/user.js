@@ -1,7 +1,14 @@
 import axios from "./axios";
 
-export async function GetUsers() {
-  return await axios.get(`/accounts/admin/users/`);
+export async function GetUsers(params = {}) {
+  const { limit, offset, search } = params || {};
+  return await axios.get(`/accounts/admin/users/`, {
+    params: {
+      ...(typeof limit === "number" ? { limit } : {}),
+      ...(typeof offset === "number" ? { offset } : {}),
+      ...(search ? { search } : {}),
+    },
+  });
 }
 
 export async function CreateUser(data) {

@@ -18,18 +18,15 @@ export const useUserData = () => {
     const offset = page * limit;
 
     try {
-      const res = await GetUsers();
-      // Filter data based on search if needed
-      let results = res?.data?.results || [];
-      if (searchVal) {
-        results = results.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchVal.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchVal.toLowerCase())
-        );
-      }
+      const res = await GetUsers({
+        limit,
+        offset,
+        search: (searchVal || "").trim() || undefined,
+      });
+
+      const results = res?.data?.results || [];
       setUserData(results);
-      setTotalRecords(res?.data?.count || results.length);
+      setTotalRecords(typeof res?.data?.count === "number" ? res.data.count : 0);
       return res?.data;
     } catch (error) {
       setErrorFn(error, t);

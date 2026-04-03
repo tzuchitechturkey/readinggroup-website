@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from django.db.models import Q
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, permissions, serializers, status
@@ -363,9 +364,28 @@ class AdminCreateUserView(APIView):
     def get(self, request):
         """Return a paginated list of users."""
 
-        qs = User.objects.prefetch_related("groups").all().order_by(
-            "-date_joined", "-id"
+        qs = (
+            User.objects.prefetch_related("groups")
+            .all()
+            .order_by("-date_joined", "-id")
         )
+
+        search = (
+            request.query_params.get("search") or request.query_params.get("q") or ""
+        ).strip()
+        if search:
+            search_q = (
+                Q(username__icontains=search)
+                | Q(email__icontains=search)
+                | Q(display_name__icontains=search)
+            )
+            if search.isdigit():
+                try:
+                    search_q = search_q | Q(id=int(search))
+                except Exception:
+                    pass
+            qs = qs.filter(search_q)
+
         paginator = LimitOffsetPagination()
         page = paginator.paginate_queryset(qs, request)
         data = UserSerializer(page or [], many=True, context={"request": request}).data

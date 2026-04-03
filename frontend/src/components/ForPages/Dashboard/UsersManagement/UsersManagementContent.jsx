@@ -28,7 +28,7 @@ function UsersManagementContent({ onSectionChange }) {
   } = useUserData();
 
   const { sortData, getSortedData, sortConfig } = useSorting(userData);
-  const { currentPage, handlePageChange, resetPage, getPaginationInfo } =
+  const { currentPage, limit, handlePageChange, resetPage, getPaginationInfo } =
     usePagination(10);
 
   // Local state
@@ -39,13 +39,13 @@ function UsersManagementContent({ onSectionChange }) {
 
   // Functions
   const fetchData = (page = 0) => {
-    getUserData(page, search);
+    getUserData(page, search, limit);
   };
 
   const clearSearch = () => {
     setSearch("");
     resetPage();
-    getUserData(0, "");
+    getUserData(0, "", limit);
   };
 
   const handlePageChangeWithFetch = (newPage) => {
