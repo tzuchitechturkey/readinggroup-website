@@ -70,9 +70,12 @@ function AboutTeamContent() {
               {t(groupedData[0]?.title)}
             </h2>
 
-            <p className="text-[#4a6288] leading-relaxed text-sm sm:text-base mb-4 font-medium">
-              {t(groupedData[0]?.description)}
-            </p>
+            <p
+              className="text-[#4a6288] leading-relaxed text-sm sm:text-base mb-4 font-medium"
+              dangerouslySetInnerHTML={{
+                __html: groupedData[0]?.description,
+              }}
+            />
           </div>
         </div>
 

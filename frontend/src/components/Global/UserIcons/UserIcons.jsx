@@ -20,7 +20,6 @@ function UserIcons() {
     const storedUserType = localStorage.getItem("userType");
     setUserType(storedUserType);
   }, []);
-
   return (
     <div className="flex items-center ">
       <div
@@ -52,25 +51,28 @@ function UserIcons() {
               {t("Login")}
             </button>
           )}
-          {isLoggedIn && userType === "admin" && (
-            <div
-              onClick={() => {
-                localStorage.removeItem("dashboardSelectedLearn");
-                localStorage.removeItem("dashboardSelectedVideo");
-                localStorage.removeItem("dashboardSelectedNews");
-                localStorage.removeItem("dashboardSelectedEvent");
-                localStorage.removeItem("dashboardActiveParent");
-                localStorage.removeItem("dashboardActiveSection");
-              }}
-            >
-              <Link
-                className=" rounded-[38px] px-[16px] py-[8px]  border-[1px] border-gray-300  bg-white transition-colors duration-200  text-[#285688] text-lg font-medium leading-[1.5] font-['Noto_Sans']"
-                to="/dashboard"
+          {isLoggedIn &&
+            (userType === "admin" ||
+              userType === "team_leader" ||
+              userType === "editor") && (
+              <div
+                onClick={() => {
+                  localStorage.removeItem("dashboardSelectedLearn");
+                  localStorage.removeItem("dashboardSelectedVideo");
+                  localStorage.removeItem("dashboardSelectedNews");
+                  localStorage.removeItem("dashboardSelectedEvent");
+                  localStorage.removeItem("dashboardActiveParent");
+                  localStorage.removeItem("dashboardActiveSection");
+                }}
               >
-                {t("Dashboard")}
-              </Link>
-            </div>
-          )}
+                <Link
+                  className=" rounded-[38px] px-[16px] py-[8px]  border-[1px] border-gray-300  bg-white transition-colors duration-200  text-[#285688] text-lg font-medium leading-[1.5] font-['Noto_Sans']"
+                  to="/dashboard"
+                >
+                  {t("Dashboard")}
+                </Link>
+              </div>
+            )}
         </>
       )}
 
@@ -90,25 +92,28 @@ function UserIcons() {
               {t("Login")}
             </button>
           )}
-          {isLoggedIn && userType === "admin" && (
-            <div
-              onClick={() => {
-                localStorage.removeItem("dashboardSelectedLearn");
-                localStorage.removeItem("dashboardSelectedVideo");
-                localStorage.removeItem("dashboardSelectedNews");
-                localStorage.removeItem("dashboardSelectedEvent");
-                localStorage.removeItem("dashboardActiveParent");
-                localStorage.removeItem("dashboardActiveSection");
-              }}
-            >
-              <Link
-                className="text-sm p-1 text-white px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
-                to="/dashboard"
+          {isLoggedIn &&
+            (userType === "admin" ||
+              userType === "team_leader" ||
+              userType === "editor") && (
+              <div
+                onClick={() => {
+                  localStorage.removeItem("dashboardSelectedLearn");
+                  localStorage.removeItem("dashboardSelectedVideo");
+                  localStorage.removeItem("dashboardSelectedNews");
+                  localStorage.removeItem("dashboardSelectedEvent");
+                  localStorage.removeItem("dashboardActiveParent");
+                  localStorage.removeItem("dashboardActiveSection");
+                }}
               >
-                {t("Dashboard")}
-              </Link>
-            </div>
-          )}
+                <Link
+                  className="text-sm p-1 text-white px-2 border-[1px] border-gray-300 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
+                  to="/dashboard"
+                >
+                  {t("Dashboard")}
+                </Link>
+              </div>
+            )}
         </>
       )}
     </div>

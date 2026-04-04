@@ -1,30 +1,56 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Group
+from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from readinggroup_backend.helpers import DateTimeFormattingMixin
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import FriendRequest, User
+from readinggroup_backend.helpers import DateTimeFormattingMixin
+from .enums import GroupName
+from .models import User
 
 try:
     from content.models import Post
-except Exception:  # pragma: no cover - defensive import
+except Exception:
     Post = None
 
 
-class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
-    """Serialize the public profile of a user."""
+def _demote_existing_team_leaders(
+    *, section_name: str, exclude_user_id: int | None = None
+):
+    """Ensure there is at most one team leader per section.
 
+    Business rule:
+    - If a new user becomes `team_leader` for a given `section_name`, any existing
+      `team_leader` user(s) in that same section are demoted to `editor`.
+    """
+
+    section_name = (section_name or "").strip()
+    if not section_name:
+        return
+
+    editor_group, _created = Group.objects.get_or_create(name=GroupName.EDITOR)
+
+    qs = User.objects.filter(
+        section_name=section_name,
+        groups__name=GroupName.TEAM_LEADER,
+    )
+    if exclude_user_id is not None:
+        qs = qs.exclude(pk=exclude_user_id)
+
+    for user in qs:
+        user.groups.set([editor_group])
+
+
+# =========================
+# User Serializer
+# =========================
+class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined", "last_password_change")
-    groups = serializers.SerializerMethodField()
-    friend_request_status = serializers.SerializerMethodField()
     profile_image_url = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
     posts_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
+    group = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -37,71 +63,20 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "last_name",
             "is_staff",
             "is_active",
+            "group",
+            "section_name",
             "is_first_login",
             "last_password_change",
             "date_joined",
-            "groups",
             "profile_image_url",
-            "status",
-            "friend_request_status",
             "posts_count",
-            "followers_count",
-            "following_count",
             "profession_name",
             "about_me",
             "country",
             "mobile_number",
             "address_details",
             "website_address",
-            "status",
         )
-        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
-
-    def get_groups(self, obj):
-        return list(obj.groups.values_list("name", flat=True))
-
-    def get_status(self, obj):
-        try:
-            pending_requests = FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_PENDING
-            ).count()
-            if pending_requests > 0:
-                return f"You have {pending_requests} pending friend request(s)."
-            return "No pending friend requests."
-        except Exception:
-            return "Status unavailable."
-
-    def get_friend_request_status(self, obj):
-        """Return the FriendRequest.status string between the requesting user and `obj`, or None.
-
-        This mirrors the behavior of `FriendRequestStatusMixin.get_friend_request_status` used
-        in `content` serializers: it returns the exact status string (e.g. "PENDING", "ACCEPTED")
-        when a FriendRequest exists in either direction, otherwise None. If the request user
-        is not authenticated or is the same as `obj`, return None.
-        """
-        request = self.context.get("request")
-        if (
-            not request
-            or not getattr(request, "user", None)
-            or not request.user.is_authenticated
-        ):
-            return None
-
-        requester = request.user
-        # don't expose relationship to self
-        if requester == obj:
-            return None
-
-        try:
-            fr = FriendRequest.objects.filter(from_user=requester, to_user=obj).first()
-            if fr:
-                return fr.status
-            fr = FriendRequest.objects.filter(from_user=obj, to_user=requester).first()
-            if fr:
-                return fr.status
-        except Exception:
-            return None
-        return None
 
     def get_profile_image_url(self, obj):
         request = self.context.get("request")
@@ -112,7 +87,6 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
         return None
 
     def get_posts_count(self, obj):
-        # reuse same logic as UserSerializer
         if Post is None:
             return 0
         try:
@@ -130,33 +104,33 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
                 if n:
                     queries |= Q(writer__iexact=n)
 
-            if not queries:
-                return 0
-
-            return Post.objects.filter(queries).count()
+            return Post.objects.filter(queries).count() if queries else 0
         except Exception:
             return 0
 
-    def get_followers_count(self, obj):
+    def get_group(self, obj):
+        """Return the user's primary group name.
+
+        For safety, expose this only to staff users (e.g. admin panel).
+        """
+
+        request = self.context.get("request")
+        if not request or not getattr(request, "user", None):
+            return None
+        if not getattr(request.user, "is_staff", False):
+            return None
+
         try:
-            return FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
+            groups = list(obj.groups.all())
+            return groups[0].name if groups else None
         except Exception:
-            return 0
-
-    def get_following_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
-        except Exception:
-            return 0
+            return None
 
 
+# =========================
+# Register
+# =========================
 class RegisterSerializer(serializers.ModelSerializer):
-    """Handle registration of a new user."""
-
     password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
@@ -169,49 +143,37 @@ class RegisterSerializer(serializers.ModelSerializer):
             "display_name",
             "first_name",
             "last_name",
-            "totp_secret",
         )
-        extra_kwargs = {"username": {"required": False}}
 
     def validate(self, attrs):
-        """Normalize username and validate uniqueness of email and username.
+        username = (attrs.get("username") or attrs.get("email")).strip()
+        email = (attrs.get("email") or "").strip().lower()
 
-        Behavior:
-        - If `username` is not provided, use the email as username.
-        - Reject registration when the email OR username is already taken (case-insensitive).
-        """
-        attrs = super().validate(attrs)
-        username = (attrs.get("username") or attrs.get("email") or "").strip()
-        email = (attrs.get("email") or "").strip()
-
-        # Validate email presence (Model will also enforce, but provide clearer message)
         if not email:
             raise serializers.ValidationError({"email": "Email is required."})
 
-        # Check email uniqueness (case-insensitive)
         if User.objects.filter(email__iexact=email).exists():
             raise serializers.ValidationError(
                 {"email": "A user with this email already exists."}
             )
 
-        # Check username uniqueness (case-insensitive)
-        if username and User.objects.filter(username__iexact=username).exists():
+        if User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError(
                 {"username": "A user with this username already exists."}
             )
 
         attrs["username"] = username
+        attrs["email"] = email
         return attrs
 
     def create(self, validated_data):
         password = validated_data.pop("password")
+
         user = User(**validated_data)
         user.set_password(password)
         user.is_first_login = True
         user.last_password_change = timezone.now()
         user.save()
-        group, _created = Group.objects.get_or_create(name="user")
-        user.groups.add(group)
 
         return user
 
@@ -219,9 +181,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return UserSerializer(instance).data
 
 
+# =========================
+# Login
+# =========================
 class LoginSerializer(serializers.Serializer):
-    """Authenticate a user and return JWT tokens."""
-
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
@@ -230,50 +193,44 @@ class LoginSerializer(serializers.Serializer):
         password = attrs.get("password")
         request = self.context.get("request")
 
-        if not identifier or not password:
-            raise serializers.ValidationError(("Username and password are required."))
-
         user = authenticate(request=request, username=identifier, password=password)
+
         if user is None:
             try:
                 user_obj = User.objects.get(email__iexact=identifier)
-            except User.DoesNotExist as exc:
-                raise serializers.ValidationError(("Invalid credentials.")) from exc
+                user = authenticate(
+                    request=request,
+                    username=user_obj.username,
+                    password=password,
+                )
+            except User.DoesNotExist:
+                raise serializers.ValidationError("Invalid credentials.")
 
-            user = authenticate(
-                request=request, username=user_obj.username, password=password
-            )
-
-        if user is None:
-            raise serializers.ValidationError(("Invalid credentials."))
-
-        if not user.is_active:
-            raise serializers.ValidationError(("This account is disabled."))
+        if not user:
+            raise serializers.ValidationError("Invalid credentials.")
 
         refresh = RefreshToken.for_user(user)
-        attrs["access"] = str(refresh.access_token)
-        attrs["refresh"] = str(refresh)
-        attrs["user"] = user
-        return attrs
+
+        return {
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": user,
+        }
 
     def to_representation(self, instance):
-        user: User = instance["user"]
         return {
             "access": instance["access"],
             "refresh": instance["refresh"],
-            "user": UserSerializer(user).data,
+            "user": UserSerializer(instance["user"]).data,
         }
 
 
+# =========================
+# Profile Update
+# =========================
 class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
-    """Update limited user profile fields."""
-
-    datetime_fields = "date_joined"
-    profile_image_url = serializers.SerializerMethodField()
-    posts_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
+    datetime_fields = ("date_joined",)
+    section_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
@@ -284,16 +241,7 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "display_name",
             "first_name",
             "last_name",
-            "is_staff",
-            "is_active",
-            "is_first_login",
-            "last_password_change",
-            "date_joined",
-            "groups",
-            "profile_image_url",
-            "posts_count",
-            "followers_count",
-            "following_count",
+            "section_name",
             "profile_image",
             "profession_name",
             "about_me",
@@ -301,149 +249,227 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "mobile_number",
             "address_details",
             "website_address",
-            "status",
         )
-        read_only_fields = ("id", "is_staff", "is_active", "date_joined")
-
-    def get_profile_image_url(self, obj):
-        request = self.context.get("request")
-        if (
-            hasattr(obj, "profile_image")
-            and obj.profile_image
-            and hasattr(obj.profile_image, "url")
-        ):
-            if request:
-                return request.build_absolute_uri(obj.profile_image.url)
-            return obj.profile_image.url
-        return None
-
-    def get_status(self, obj):
-        try:
-            pending_requests = FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_PENDING
-            ).count()
-            if pending_requests > 0:
-                return f"You have {pending_requests} pending friend request(s)."
-            return "No pending friend requests."
-        except Exception:
-            return "Status unavailable."
-
-    def get_posts_count(self, obj):
-        # reuse same logic as UserSerializer
-        if Post is None:
-            return 0
-        try:
-            names = set()
-            if obj.username:
-                names.add(obj.username.strip())
-            if obj.display_name:
-                names.add(obj.display_name.strip())
-            full = obj.get_full_name()
-            if full:
-                names.add(full.strip())
-
-            queries = Q()
-            for n in names:
-                if n:
-                    queries |= Q(writer__iexact=n)
-
-            if not queries:
-                return 0
-
-            return Post.objects.filter(queries).count()
-        except Exception:
-            return 0
-
-    def get_followers_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                to_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
-        except Exception:
-            return 0
-
-    def get_following_count(self, obj):
-        try:
-            return FriendRequest.objects.filter(
-                from_user=obj, status=FriendRequest.STATUS_ACCEPTED
-            ).count()
-        except Exception:
-            return 0
-
-
-class FriendRequestSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
-    """Serializer for FriendRequest model."""
-
-    datetime_fields = ("created_at", "updated_at")
-    from_user = UserSerializer(read_only=True)
-    to_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    class Meta:
-        model = FriendRequest
-        fields = (
-            "id",
-            "from_user",
-            "to_user",
-            "status",
-            "message",
-            "created_at",
-            "updated_at",
-        )
-        read_only_fields = ("id", "from_user", "status", "created_at", "updated_at")
 
     def validate(self, attrs):
-        request = self.context.get("request")
-        from_user = getattr(request, "user", None)
-        to_user = attrs.get("to_user")
-        if not from_user or not from_user.is_authenticated:
-            raise serializers.ValidationError("Authentication required.")
-        if from_user == to_user:
-            raise serializers.ValidationError("Cannot send friend request to yourself.")
+        attrs = super().validate(attrs)
+        instance: User = self.instance
 
-        # Prevent sending if blocked or already existing
-        existing = FriendRequest.objects.filter(
-            from_user=from_user, to_user=to_user
-        ).first()
-        if existing:
-            raise serializers.ValidationError(
-                "A friend request already exists between these users."
-            )
+        if "email" in attrs:
+            email = (attrs.get("email") or "").strip().lower()
+            if not email:
+                raise serializers.ValidationError({"email": "Email cannot be empty."})
 
-        # Also check if 'to_user' previously blocked 'from_user'
-        blocked = FriendRequest.objects.filter(
-            from_user=to_user, to_user=from_user, status=FriendRequest.STATUS_BLOCKED
-        ).exists()
-        if blocked:
-            raise serializers.ValidationError("You are blocked by this user.")
+            if (
+                User.objects.filter(email__iexact=email)
+                .exclude(pk=getattr(instance, "pk", None))
+                .exists()
+            ):
+                raise serializers.ValidationError({"email": "Email already exists"})
+
+            attrs["email"] = email
 
         return attrs
 
-    def create(self, validated_data):
-        request = self.context.get("request")
-        from_user = getattr(request, "user", None)
-        validated_data["from_user"] = from_user
-        # default message may be empty
-        return super().create(validated_data)
 
-
+# =========================
+# Password Change
+# =========================
 class PasswordChangeSerializer(serializers.Serializer):
-    """Simple serializer for password updates."""
-
     current_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True, min_length=8)
 
     def validate(self, attrs):
-        user: User = self.context["request"].user
+        user = self.context["request"].user
         if not user.check_password(attrs["current_password"]):
             raise serializers.ValidationError(
-                {"current_password": ("Incorrect password.")}
+                {"current_password": "Incorrect password."}
             )
         return attrs
 
-    def save(self, **kwargs):
-        user: User = self.context["request"].user
+    def save(self):
+        user = self.context["request"].user
         user.set_password(self.validated_data["new_password"])
         user.save(update_fields=["password"])
-        # mark as changed and clear first-login requirement
         user.mark_password_changed()
+        return user
+
+
+# =========================
+# Admin Create User
+# =========================
+class AdminCreateUserSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    group = serializers.CharField(max_length=150)
+    section_name = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        username = (attrs.get("username") or "").strip()
+        email = (attrs.get("email") or "").strip().lower()
+        group_name = (attrs.get("group") or "").strip()
+        section_name = (attrs.get("section_name") or "").strip()
+
+        if not username:
+            raise serializers.ValidationError({"username": "Username is required."})
+        if not email:
+            raise serializers.ValidationError({"email": "Email is required."})
+        if not group_name:
+            raise serializers.ValidationError({"group": "Group is required."})
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise serializers.ValidationError({"username": "Username already exists"})
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError({"email": "Email already exists"})
+
+        attrs["username"] = username
+        attrs["email"] = email
+        attrs["group"] = group_name
+        attrs["section_name"] = section_name
+
+        if attrs["group"] == GroupName.TEAM_LEADER and not attrs["section_name"]:
+            raise serializers.ValidationError(
+                {"section_name": "section_name is required for team_leader."}
+            )
+        return attrs
+
+    def create_user_and_assign_group(self, *, password: str) -> User:
+        """Create user + assign group (admin flow).
+
+        `views.py` generates the password and emails it, so we accept the password as an argument.
+        """
+
+        validated = dict(self.validated_data)
+        group_name = (validated.pop("group", "") or "").strip()
+        section_name = (validated.pop("section_name", "") or "").strip()
+
+        with transaction.atomic():
+            group_obj, _created = Group.objects.get_or_create(name=group_name)
+
+            if group_name == GroupName.TEAM_LEADER:
+                _demote_existing_team_leaders(section_name=section_name)
+
+            user = User(**validated)
+            user.section_name = section_name or None
+            user.set_password(password)
+            user.is_first_login = True
+            user.last_password_change = timezone.now()
+            user.save()
+            user.groups.set([group_obj])
+        return user
+
+
+# =========================
+# Admin Update User
+# =========================
+class AdminUpdateUserSerializer(serializers.Serializer):
+
+    username = serializers.CharField(max_length=150, required=False)
+    email = serializers.EmailField(required=False)
+    display_name = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    group = serializers.CharField(max_length=150, required=False)
+    section_name = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user: User = self.instance
+
+        if "username" in attrs:
+            attrs["username"] = (attrs.get("username") or "").strip()
+            if not attrs["username"]:
+                raise serializers.ValidationError(
+                    {"username": "Username cannot be empty."}
+                )
+
+        if "username" in attrs:
+            if (
+                User.objects.filter(username__iexact=attrs["username"])
+                .exclude(pk=user.pk)
+                .exists()
+            ):
+                raise serializers.ValidationError(
+                    {"username": "Username already exists"}
+                )
+
+        if "email" in attrs:
+            attrs["email"] = (attrs.get("email") or "").strip().lower()
+            if not attrs["email"]:
+                raise serializers.ValidationError({"email": "Email cannot be empty."})
+            if (
+                User.objects.filter(email__iexact=attrs["email"])
+                .exclude(pk=user.pk)
+                .exists()
+            ):
+                raise serializers.ValidationError({"email": "Email already exists"})
+
+        if "group" in attrs:
+            group_name = (attrs.get("group") or "").strip()
+            if not group_name:
+                raise serializers.ValidationError({"group": "Group cannot be empty."})
+            attrs["group"] = group_name
+
+        if "section_name" in attrs:
+            attrs["section_name"] = (attrs.get("section_name") or "").strip()
+
+        # If the target group is team_leader, section_name must be present (either existing or provided).
+        target_group = attrs.get("group")
+        current_is_team_leader = user.groups.filter(name=GroupName.TEAM_LEADER).exists()
+        target_is_team_leader = target_group == GroupName.TEAM_LEADER or (
+            target_group is None and current_is_team_leader
+        )
+
+        if target_is_team_leader:
+            target_section = (
+                attrs.get("section_name")
+                if "section_name" in attrs
+                else (user.section_name or "")
+            )
+            if not (target_section or "").strip():
+                raise serializers.ValidationError(
+                    {"section_name": "section_name is required for team_leader."}
+                )
+
+        return attrs
+
+    def save(self, **kwargs) -> User:
+        user: User = self.instance
+        validated = dict(self.validated_data)
+
+        group_name = (validated.pop("group", "") or "").strip()
+        section_name = validated.pop("section_name", None)
+
+        with transaction.atomic():
+            for field, value in validated.items():
+                setattr(user, field, value)
+
+            if section_name is not None:
+                user.section_name = section_name or None
+
+            user.save()
+
+            current_is_team_leader = user.groups.filter(
+                name=GroupName.TEAM_LEADER
+            ).exists()
+            target_is_team_leader = bool(
+                group_name == GroupName.TEAM_LEADER
+                or (not group_name and current_is_team_leader)
+            )
+            target_section = (
+                (user.section_name or "").strip() if target_is_team_leader else ""
+            )
+
+            if target_is_team_leader:
+                _demote_existing_team_leaders(
+                    section_name=target_section,
+                    exclude_user_id=user.pk,
+                )
+
+            if group_name:
+                group_obj, _created = Group.objects.get_or_create(name=group_name)
+                user.groups.set([group_obj])
+
         return user

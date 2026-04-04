@@ -23,6 +23,7 @@ import Labeled from "./Labeled/Labeled";
 import Stat from "./Stat/Stat";
 
 function Profile({ userId, myUserId }) {
+ 
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +100,7 @@ function Profile({ userId, myUserId }) {
       {
         autoClose: 2000,
         position: "bottom-right",
-      }
+      },
     );
   };
 
@@ -348,7 +349,7 @@ function Profile({ userId, myUserId }) {
             <div className="mx-5 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
                 {t(
-                  "You have unsaved changes. Click 'Update Profile' to save them."
+                  "You have unsaved changes. Click 'Update Profile' to save them.",
                 )}
               </p>
             </div>
@@ -380,86 +381,91 @@ function Profile({ userId, myUserId }) {
                   {friendRequests?.incoming?.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                        {t("Incoming Requests")} ({friendRequests.incoming.length})
+                        {t("Incoming Requests")} (
+                        {friendRequests.incoming.length})
                       </h4>
                       <div className="space-y-3">
                         {friendRequests.incoming.map((request) => (
-                            <div
-                              key={request.id}
-                              className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10">
-                                  <AvatarImage
-                                    src={
-                                      request.from_user?.profile_image
-                                        ? `${BASE_URL}/${request.from_user.profile_image}`
-                                        : request.from_user
-                                            ?.profile_image_url ||
-                                          "/fake-user.png"
-                                    }
-                                    alt={
-                                      request.from_user?.display_name ||
-                                      request.from_user?.username
-                                    }
-                                  />
-                                  <AvatarFallback>
-                                    {(
-                                      request.from_user?.display_name ||
-                                      request.from_user?.username
-                                    )
-                                      ?.slice(0, 2)
-                                      ?.toUpperCase() || "NA"}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="text-sm font-semibold text-gray-900">
-                                    {request.from_user?.display_name ||
-                                      request.from_user?.first_name ||
-                                      request.from_user?.username}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    @{request.from_user?.username}
-                                  </p>
-                                  <p className="text-xs text-gray-400 mt-1">
-                                    {t("Status")}: <span className={`font-medium ${
-                                      request.status === "ACCEPTED" ? "text-green-600" :
-                                      request.status === "REJECTED" ? "text-red-600" :
-                                      "text-yellow-600"
-                                    }`}>
-                                      {request.status}
-                                    </span>
-                                  </p>
-                                </div>
+                          <div
+                            key={request.id}
+                            className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage
+                                  src={
+                                    request.from_user?.profile_image
+                                      ? `${BASE_URL}/${request.from_user.profile_image}`
+                                      : request.from_user?.profile_image_url ||
+                                        "/fake-user.png"
+                                  }
+                                  alt={
+                                    request.from_user?.display_name ||
+                                    request.from_user?.username
+                                  }
+                                />
+                                <AvatarFallback>
+                                  {(
+                                    request.from_user?.display_name ||
+                                    request.from_user?.username
+                                  )
+                                    ?.slice(0, 2)
+                                    ?.toUpperCase() || "NA"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">
+                                  {request.from_user?.display_name ||
+                                    request.from_user?.first_name ||
+                                    request.from_user?.username}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  @{request.from_user?.username}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {t("Status")}:{" "}
+                                  <span
+                                    className={`font-medium ${
+                                      request.status === "ACCEPTED"
+                                        ? "text-green-600"
+                                        : request.status === "REJECTED"
+                                          ? "text-red-600"
+                                          : "text-yellow-600"
+                                    }`}
+                                  >
+                                    {request.status}
+                                  </span>
+                                </p>
                               </div>
-                              {request.status === "PENDING" && (
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() =>
-                                      handleFriendRequestAction(
-                                        request.id,
-                                        "accept"
-                                      )
-                                    }
-                                    className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
-                                  >
-                                    {t("Accept")}
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleFriendRequestAction(
-                                        request.id,
-                                        "reject"
-                                      )
-                                    }
-                                    className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
-                                  >
-                                    {t("Reject")}
-                                  </button>
-                                </div>
-                              )}
                             </div>
-                          ))}
+                            {request.status === "PENDING" && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleFriendRequestAction(
+                                      request.id,
+                                      "accept",
+                                    )
+                                  }
+                                  className="px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                                >
+                                  {t("Accept")}
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleFriendRequestAction(
+                                      request.id,
+                                      "reject",
+                                    )
+                                  }
+                                  className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                  {t("Reject")}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

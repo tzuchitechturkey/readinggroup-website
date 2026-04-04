@@ -146,13 +146,15 @@ const RelatedReportsTable = ({
                 >
                   <Edit className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => onDelete(report)}
-                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                  title={t("Delete")}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {localStorage.getItem("userType") !== "editor" && (
+                  <button
+                    onClick={() => onDelete(report)}
+                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title={t("Delete")}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </TableCell>
           </TableRow>

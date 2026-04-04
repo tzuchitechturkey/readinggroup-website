@@ -9,7 +9,7 @@ const NewsCard = ({ news, t, latestItem }) => {
   const handleNavigate = () => {
     navigate(`/latest-news/${news.id}`);
   };
-    const formatDate = (dateString) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
 
     const month = date.toLocaleString("en-US", { month: "short" });
@@ -21,7 +21,7 @@ const NewsCard = ({ news, t, latestItem }) => {
   return (
     <div
       onClick={handleNavigate}
-      className={` cursor-pointer ${latestItem ? "py-6" : "border-b-[1px] border-[#9FB3E1] py-6"} overflow-hidden  transition-shadow md:flex gap-3 md:gap-6`}
+      className={` cursor-pointer ${latestItem ? "pb-6 pt-3" : "border-b-[1px] border-[#9FB3E1] pb-6 pt-3"} overflow-hidden  transition-shadow md:flex gap-3 md:gap-6`}
     >
       {/* Start Image */}
       <div className="relative lg:w-[480px] h-[200px] lg:h-[270px] flex-shrink-0 overflow-hidden ">
@@ -36,14 +36,12 @@ const NewsCard = ({ news, t, latestItem }) => {
       {/* Start Content */}
       <div className="flex-1 py-3 md:py-4 pr-3 md:pr-4 flex flex-col justify-center gap-4">
         {/* Start Is New */}
-        {
-          news.is_new && (
-             <div className="px-3 py-1 w-fit rounded-full text-sm md:text-base border-[1px] border-[#081945]">
-          <p className="text-[#081945]">{t("NEW")}</p>
-        </div>
-          )
-        }
-      
+        {news.is_new && (
+          <div className="px-3 py-1 w-fit rounded-full text-sm md:text-base border-[1px] border-[#081945]">
+            <p className="text-[#081945]">{t("NEW")}</p>
+          </div>
+        )}
+
         {/* End Is New */}
         <div>
           {news.happened_at && (

@@ -109,19 +109,7 @@ function CreateorEditPhotoCollectionsCategory({
       required: true,
     },
   ];
-  // const toggleFields = [
-  //   {
-  //     name: "is_active",
-  //     label: t("Status"),
-  //     color: "green",
-  //     activeLabel: t("Active"),
-  //     inactiveLabel: t("Inactive"),
-  //     validation: (form) => ({
-  //       isValid: form.is_active || form.photo_count > 0,
-  //       message: t("Cannot activate category with no Items."),
-  //     }),
-  //   },
-  // ];
+
   return (
     <CreateorEditCategoryModal
       isOpen={showModal}

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import User, FriendRequest
+from .models import User
 
 
 @admin.register(User)
@@ -11,20 +11,33 @@ class UserAdmin(DjangoUserAdmin):
     fieldsets = DjangoUserAdmin.fieldsets + (
         (
             "Profile",
-            {"fields": ("display_name", "is_first_login", "last_password_change")},
+            {
+                "fields": (
+                    "display_name",
+                    "is_first_login",
+                    "last_password_change",
+                    "section_name",
+                )
+            },
         ),
     )
     add_fieldsets = DjangoUserAdmin.add_fieldsets + (
         (None, {"classes": ("wide",), "fields": ("display_name",)}),
     )
-    list_display = ("username", "email", "display_name", "is_staff", "is_active")
+    list_display = (
+        "username",
+        "email",
+        "display_name",
+        "section_name",
+        "get_groups",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("is_staff", "is_active", "groups")
     search_fields = ("username", "email", "display_name")
 
+    @admin.display(description="Groups")
+    def get_groups(self, obj: User) -> str:
+        """Render user's groups as a comma-separated string."""
 
-@admin.register(FriendRequest)
-class FriendRequestAdmin(admin.ModelAdmin):
-    """Admin interface for FriendRequest model."""
-
-    list_display = ("from_user", "to_user", "status", "created_at", "updated_at")
-    list_filter = ("status", "created_at", "updated_at")
-    search_fields = ("from_user__username", "to_user__username", "message")
+        return ", ".join(obj.groups.values_list("name", flat=True))

@@ -15,16 +15,16 @@ const VideoCard = ({
     switch (size) {
       case "large":
         return {
-          image: `h-[200px] sm:h-[200px] md:h-[300px]  lg:h-[456px]   w-full sm:w-[90%] md:w-[90%]  lg:w-full`,
-          titleHeight: "h-[30px] sm:h-[32px] md:h-[34px] lg:h-[35px]",
-          categoryText: "text-[14px] sm:text-[15px] md:text-base lg:text-xl",
-          durationText: "text-[13px] sm:text-[14px] md:text-[15px] lg:text-lg",
-          gap: "gap-[8px] sm:gap-[10px] md:gap-[12px] lg:gap-[12px]",
+          image: `h-[200px]  md:h-[300px]  lg:h-[450px]   w-full  md:w-[90%]  lg:w-full`,
+          titleHeight: "h-[30px] md:h-[34px] lg:h-[35px]",
+          categoryText: "text-[14px]  md:text-base lg:text-xl",
+          durationText: "text-[13px] md:text-[15px] lg:text-lg",
+          gap: "gap-[8px] md:gap-[12px] lg:gap-[12px]",
         };
 
       case "small":
         return {
-          image: `${fromHomePage ? "h-[200px] " : heroReportCard ? "h-[199px] " : "h-[174px] "} w-full sm:w-[48%] md:w-[45%] lg:w-[290px] `,
+          image: `w-full ${fromHomePage ? " h-[199px] md:w-[354px]" : " h-[164px] md:w-[291px]"} `,
           titleHeight: "h-[25px] sm:h-[26px] md:h-[28px] lg:h-[30px]",
           categoryText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-xl",
           durationText: "text-[12px] sm:text-[13px] md:text-[14px] lg:text-lg",
@@ -93,7 +93,7 @@ const VideoCard = ({
 
       {/* Start Category Name && Duration */}
       <div
-        className={`flex ${gap} items-center w-full flex justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
+        className={`flex ${gap} w-full  items-center justify-between mt-0.5 mx-0.5 sm:mx-1 px-4 lg:px-0 ${textClassName}`}
       >
         {/* make first letter uppercase */}
         <p
@@ -105,9 +105,9 @@ const VideoCard = ({
             : item?.category?.name?.charAt(0).toUpperCase() +
               item?.category?.name?.slice(1)}
         </p>
-        {textClassName && <span className="mb-2">|</span>}
+        {textClassName && <span className="">|</span>}
         <p
-          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal mb-[2px]   ${durationText} text-[#081945]`}
+          className={`font-['Noto_Sans_TC:Regular',sans-serif] font-normal mt-[2px] ${durationText} text-[#081945]`}
         >
           {reportCard
             ? heroReportCard

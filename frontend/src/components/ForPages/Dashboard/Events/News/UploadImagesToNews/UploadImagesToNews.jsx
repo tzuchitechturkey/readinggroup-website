@@ -3,8 +3,12 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { GetLatestNews, AddImagesToLatestNews ,DeletePhotoFromNews} from "@/api/latestNews";
- import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import {
+  GetLatestNews,
+  AddImagesToLatestNews,
+  DeleteImagesFromLatestNews,
+} from "@/api/latestNews";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import ImageSection from "@/components/ForPages/Dashboard/Events/PhotoCollection/CreateOrEditPhotoCollection/PhotoCollectionForm/ImageSection";
@@ -129,15 +133,29 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
     setIsLoading(true);
 
     try {
+      const didDelete = deletedPhotoIds.length > 0;
+      const didAdd = newImages.length > 0;
+
       // First, delete any removed photos
-      if (deletedPhotoIds.length > 0) {
-        await Promise.all(
-          deletedPhotoIds.map((photoId) => DeletePhotoFromNews(photoId))
+      if (didDelete) {
+        const res = await DeleteImagesFromLatestNews(
+          selectedNewsItem.id,
+          deletedPhotoIds,
         );
+
+        const deletedCount = res?.data?.deleted_count;
+        if (
+          typeof deletedCount === "number" &&
+          deletedCount !== deletedPhotoIds.length
+        ) {
+          toast.warn(
+            t("Some images could not be deleted. Please refresh and try again."),
+          );
+        }
       }
 
       // Then, add images
-      if (newImages.length > 0 || images.length > 0) {
+      if (didAdd) {
         const imageFormData = new FormData();
 
         // Add new image files
@@ -145,18 +163,10 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
           imageFormData.append("images", file);
         });
 
-        // Add image URLs from new images added via URL input (string type)
-        images.forEach((img, index) => {
-          // Only add if it's a string URL (not an existing photo object)
-          if (typeof img === "string") {
-            imageFormData.append(`image_urls[${index}]`, img);
-          }
-        });
-
         await AddImagesToLatestNews(selectedNewsItem.id, imageFormData);
       }
 
-      toast.success(t("Images added successfully"));
+      toast.success(t("Images updated successfully"));
       setDeletedPhotoIds([]);
       onSectionChange("news");
     } catch (error) {

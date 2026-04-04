@@ -1042,8 +1042,11 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Get current count for ordering
-        current_count = news.images.count()
+        # Get next order index safely.
+        # Using count() breaks when there are gaps after deletions and can violate
+        # the unique constraint (latest_news, order).
+        max_order = news.images.aggregate(max_order=Max("order")).get("max_order")
+        next_order = (max_order if max_order is not None else -1) + 1
 
         # Create images
         created_images = []
@@ -1051,7 +1054,7 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
             caption = request.data.get(f"caption_{idx}", "") or request.data.get(
                 "caption", ""
             )
-            order = current_count + idx
+            order = next_order + idx
 
             news_image = LatestNewsImage.objects.create(
                 latest_news=news,

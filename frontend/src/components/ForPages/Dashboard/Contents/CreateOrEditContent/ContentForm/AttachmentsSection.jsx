@@ -13,7 +13,7 @@ export const AttachmentsSection = ({
     if (mimeType.includes("powerpoint")) return "🎯";
     return "📎";
   };
-console.log("AttachmentsSection render", formData.attachments);
+
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -42,15 +42,15 @@ console.log("AttachmentsSection render", formData.attachments);
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-2xl flex-shrink-0">
-                  {getFileIcon(attachment.type || "")}
+                  {getFileIcon(attachment.file?.type || "")}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-700 truncate">
-                    {attachment.name || attachment?.file_name}
+                    {attachment.name || attachment.file?.name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {attachment?.file_size
-                      ? `${(attachment.file_size / 1024 / 1024).toFixed(2)} MB`
+                    {attachment.file?.size
+                      ? `${(attachment.file.size / 1024 / 1024).toFixed(2)} MB`
                       : ""}
                   </p>
                 </div>
@@ -59,7 +59,7 @@ console.log("AttachmentsSection render", formData.attachments);
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   type="button"
-                  onClick={() => handlePreviewFile(attachment)}
+                  onClick={() => handlePreviewFile(attachment.file)}
                   className="p-1 text-blue-600 hover:bg-blue-50 rounded"
                   title={t("Preview")}
                 >

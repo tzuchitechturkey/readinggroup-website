@@ -1,4 +1,4 @@
-const buildNavigationItems = (t, siteInfo) => {
+const buildNavigationItems = (t, i18n, siteInfo) => {
   const items = [
     {
       name: t("Home"),
@@ -22,6 +22,7 @@ const buildNavigationItems = (t, siteInfo) => {
       // href: "/events",
       hasDropdown: true,
       categoryType: "event",
+      disabled: i18n?.language === "ch",
       subItems: [
         {
           name: t("Livestream Schedule"),

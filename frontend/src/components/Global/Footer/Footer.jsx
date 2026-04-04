@@ -20,15 +20,20 @@ const logoImages = {
 };
 
 function Footer() {
-  const [socialLinks, setSocialLinks] = useState([]);
+  const [socialLinks, setSocialLinks] = useState({
+    youtube: "https://www.youtube.com/@慈濟高雄線上讀書-v7c",
+    facebook:
+      "https://www.facebook.com/profile.php?id=100090837282933&rdid=e0KJ25Nt1QDBOoqR&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1CC79NYUCs%2F ",
+    daAiTv: "https://www.daai.tv/",
+  });
 
   const { t, i18n } = useTranslation();
 
   const communityEventsLinks = [
-    { name: t("Livestream Schedule"), href: "/events?type=livestream" },
+    { name: t("Livestream Schedule"), href: "/livestream-schedule" },
     { name: t("Photo Collection"), href: "/photo-collections" },
-    { name: t("Latest News"), href: "/news" },
-    { name: t("Related Reports"), href: "/reports" },
+    { name: t("Latest News"), href: "/latest-news" },
+    { name: t("Related Reports"), href: "/related-reports" },
   ];
 
   const aboutUsLinks = [
@@ -36,10 +41,6 @@ function Footer() {
     { name: t("Team Functions"), href: "/about/team" },
     { name: t("閱上雲端 Book"), href: "/about/book" },
   ];
-
-  useEffect(() => {
-    // fetchSocialLinks();
-  }, [t]);
 
   return (
     <div
@@ -88,19 +89,22 @@ function Footer() {
           {/* Third Column - Brands Logos and Social Media */}
           <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* Jing Si Logo Section */}
-            <div className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]">
+            <a
+              href="https://www.jingsi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]"
+            >
               <div className="flex flex-col items-start gap-[4px] w-20">
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("JING SI")}
                 </p>
-                <a
-                  href="https://www.jingsi.com"
-                  target="_blank"
+                <p
                   rel="noopener noreferrer"
                   className="text-[16px] font-normal text-[#285688] hover:text-[#285688]/80 transition-colors"
                 >
                   {t("靜思淨斯")}
-                </a>
+                </p>
               </div>
               <div className="w-[128px] flex justify-center py-[4px]">
                 <img
@@ -109,10 +113,15 @@ function Footer() {
                   src={logoImages.jingSi}
                 />
               </div>
-            </div>
+            </a>
 
             {/* DA AI TV Logo Section */}
-            <div className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]">
+            <a
+              href={socialLinks.daAiTv}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex gap-[20px] items-center lg:justify-between w-full md:w-[225px]"
+            >
               <div className="flex flex-col items-start gap-[4px] w-20">
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("DA AI TV")}
@@ -128,13 +137,17 @@ function Footer() {
                   src={logoImages.daAiTv}
                 />
               </div>
-            </div>
+            </a>
           </div>
 
           {/* Right Column - Social Media */}
           <div className="flex flex-col gap-[24px] items-start w-full md:w-auto">
             {/* YouTube Section */}
-            <div className="flex gap-[20px] items-center">
+            <a
+              href={socialLinks.youtube}
+              target="_blank"
+              className="flex gap-[20px] items-center"
+            >
               <div className="border border-solid border-[#285688] rounded-full w-[57px] h-[57px] overflow-hidden flex-shrink-0">
                 <img
                   alt="YouTube"
@@ -146,23 +159,21 @@ function Footer() {
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("YOUTUBE")}
                 </p>
-                <a
-                  href={
-                    socialLinks.find(
-                      (l) => l.platform.toLowerCase() === "youtube",
-                    )?.url || "#"
-                  }
-                  target="_blank"
+                <p
                   rel="noopener noreferrer"
                   className="text-[16px] font-normal text-[#285688] underline underline-offset-4 hover:text-[#285688]/80 transition-colors"
                 >
                   {t("@慈濟高雄線上讀書會")}
-                </a>
+                </p>
               </div>
-            </div>
+            </a>
 
             {/* Facebook Section */}
-            <div className="flex gap-[20px] items-center">
+            <a
+              href={socialLinks.facebook}
+              target="_blank"
+              className="flex gap-[20px] items-center"
+            >
               <div className="border border-solid border-[#285688] rounded-full w-[57px] h-[57px] overflow-hidden flex-shrink-0">
                 <img
                   alt="Facebook"
@@ -174,20 +185,14 @@ function Footer() {
                 <p className="text-[16px] font-normal text-[#081945] tracking-wide">
                   {t("FACEBOOK")}
                 </p>
-                <a
-                  href={
-                    socialLinks.find(
-                      (l) => l.platform.toLowerCase() === "facebook",
-                    )?.url || "#"
-                  }
-                  target="_blank"
+                <p
                   rel="noopener noreferrer"
                   className="text-[16px] font-normal text-[#285688] underline underline-offset-4 hover:text-[#285688]/80 transition-colors"
                 >
                   {t("@閱上雲端 - 慈濟高雄線上讀書會")}
-                </a>
+                </p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
 

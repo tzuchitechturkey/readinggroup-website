@@ -3,14 +3,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
-import { UserIcon } from "lucide-react";
 
-import { GetWebSiteInfo } from "@/api/info";
-import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import defaultLogo from "@/assets/icons/newlogo.png";
 import buildNavigationItems from "@/Utility/Navbar/buildNavigationItems";
 
-import LanguageDropdown from "../LanguageDropdown/LanguageDropdown";
 import DesktopNavigation from "../DesktopNavigation/DesktopNavigation";
 import MobileSidebar from "../MobileSidebar/MobileSidebar";
 import UserIcons from "../UserIcons/UserIcons";
@@ -123,8 +119,8 @@ function Usernavbar({ isHome = false }) {
   }, [isMenuOpen]);
 
   const navigationItems = useMemo(
-    () => buildNavigationItems(t, siteInfo),
-    [t, siteInfo],
+    () => buildNavigationItems(t, i18n),
+    [t, i18n.language],
   );
 
   return (
@@ -178,7 +174,7 @@ function Usernavbar({ isHome = false }) {
           <div className="flex-1 flex items-center justify-end">
             <Link to="/" className="flex items-center h-full">
               <img
-                src={siteInfo?.logo?.logo || defaultLogo}
+                src={defaultLogo}
                 alt="logo"
                 className="h-[32px] w-auto object-contain"
                 onError={(e) => {
@@ -193,7 +189,7 @@ function Usernavbar({ isHome = false }) {
           <div className="flex-1 flex items-center justify-start">
             <Link to="/" className="flex items-center h-full">
               <img
-                src={siteInfo?.logo?.logo || defaultLogo}
+                src={defaultLogo}
                 alt="logo"
                 className="h-[32px] w-auto object-contain"
                 onError={(e) => {
@@ -240,7 +236,6 @@ function Usernavbar({ isHome = false }) {
       </div>
       {/* Mobile Sidebar Menu */}
       <MobileSidebar
-        siteInfo={siteInfo}
         isMenuOpen={isMenuOpen}
         closeMenu={closeMenu}
         navigationItems={navigationItems}

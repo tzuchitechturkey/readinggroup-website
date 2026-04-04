@@ -354,16 +354,18 @@ const PhotoCollectionsList = ({ onSectionChange }) => {
                       >
                         <LuPencil className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => {
-                          setSelectedCollection(collection);
-                          setShowDeleteModal(true);
-                        }}
-                        className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
-                        title={t("Delete")}
-                      >
-                        <LuTrash2 className="h-4 w-4" />
-                      </button>
+                      {localStorage.getItem("userType") !== "editor" && (
+                        <button
+                          onClick={() => {
+                            setSelectedCollection(collection);
+                            setShowDeleteModal(true);
+                          }}
+                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
+                          title={t("Delete")}
+                        >
+                          <LuTrash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

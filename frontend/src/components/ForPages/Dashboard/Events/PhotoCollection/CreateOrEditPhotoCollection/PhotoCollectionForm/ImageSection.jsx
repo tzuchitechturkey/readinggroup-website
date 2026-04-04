@@ -9,6 +9,8 @@ const ImageSection = ({
   onAddImageUrl,
   onRemoveImage,
   errors,
+  maxImages = 28,
+  isLoading = false,
 }) => {
   console.log("Rendering ImageSection with images:", images);
   const { t } = useTranslation();
@@ -74,7 +76,29 @@ const ImageSection = ({
           {t("Supported formats")}: PNG, WEBP, JPG, JPEG, HEIC
         </p>
       </div>
-      <h3 className="text-lg font-medium text-gray-900">{t("Images")}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium text-gray-900">{t("Images")}</h3>
+        <div className="flex items-center gap-3 text-sm">
+          <span className="text-gray-600">
+            {t("Added")}:{" "}
+            <span className={`font-semibold ${images.length + previewImages.length >= maxImages ? "text-red-600" : "text-blue-600"}`}>
+              {images.length + previewImages.length}
+            </span>
+          </span>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-600">
+            {t("Max")}:{" "}
+            <span className="font-semibold text-gray-800">{maxImages}</span>
+          </span>
+          <span className="text-gray-400">|</span>
+          <span className="text-gray-600">
+            {t("Remaining")}:{" "}
+            <span className={`font-semibold ${maxImages - (images.length + previewImages.length) === 0 ? "text-red-600" : "text-green-600"}`}>
+              {Math.max(0, maxImages - (images.length + previewImages.length))}
+            </span>
+          </span>
+        </div>
+      </div>
 
       {/* File Upload Section */}
       <div>
@@ -171,7 +195,15 @@ const ImageSection = ({
       )}
 
       {/* Existing Images + URL Images */}
-      {images && images.length > 0 && (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-10 gap-3 text-gray-500">
+          <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <span className="text-sm">{t("Loading collection photos...")}</span>
+        </div>
+      ) : images && images.length > 0 ? (
         <div>
           <h4 className="text-md font-medium text-gray-700 mb-3">
             {t("Current Images")} ({images.length})
@@ -189,7 +221,7 @@ const ImageSection = ({
                 <button
                   type="button"
                   onClick={() => onRemoveImage(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100"
                 >
                   ×
                 </button>
@@ -197,7 +229,7 @@ const ImageSection = ({
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

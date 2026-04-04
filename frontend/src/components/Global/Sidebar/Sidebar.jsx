@@ -33,6 +33,7 @@ import LatestNews from "@/assets/icons/latestNews.png";
 import VaadinHealth from "@/assets/icons/vaadin_health-card.png";
 import Message from "@/assets/Message.png";
 import Security from "@/assets/icons/security-safe.png";
+import Roles from "@/assets/icons/security-safe.png";
 import { languages } from "@/constants/constants";
 
 export default function AppSidebar({
@@ -44,6 +45,21 @@ export default function AppSidebar({
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === "ar";
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
+
+  const userType = localStorage.getItem("userType");
+  const sectionName = localStorage.getItem("sectionName");
+
+  const SECTION_NAME_TO_NAV_TITLE = {
+    learn: "Learn",
+    video: "Videos",
+    liveStream: "Live Stream Schedule",
+    photoCollection: "Photo Collection",
+    latestNews: "Latest News",
+    relatedReport: "Related Reports",
+    teamMembers: "Team Members",
+    book: "Book",
+    history: "All History",
+  };
 
   const handleLogout = () => {
     setOpenLogoutModal(true);
@@ -65,25 +81,7 @@ export default function AppSidebar({
         onClick: () => onSectionChange("Home"),
         icon: DashboardIcon,
       },
-      // {
-      //   title: "Contents",
-      //   onClick: () => onSectionChange("contents"),
-      //   icon: Content,
-      //   items: [
-      //     {
-      //       title: "All Contents",
-      //       onClick: () => onSectionChange("contents"),
-      //     },
-      //     {
-      //       title: "Add/Edit Content",
-      //       onClick: () => onSectionChange("createOrEditContent"),
-      //     },
-      //     {
-      //       title: "Contents Categories",
-      //       onClick: () => onSectionChange("contentsCategories"),
-      //     },
-      //   ],
-      // },
+
       {
         title: "Learn",
         onClick: "#",
@@ -236,21 +234,13 @@ export default function AppSidebar({
 
     settings: [
       {
-        title: "Settings",
+        title: "Roles",
         onClick: "#",
-        icon: Settings,
+        icon: Roles,
         items: [
           {
-            title: "Sort Section",
-            onClick: () => onSectionChange("sortSection"),
-          },
-          {
-            title: "Website Info",
-            onClick: () => onSectionChange("websiteInfo"),
-          },
-          {
-            title: "Profile Settings",
-            onClick: () => onSectionChange("settings"),
+            title: "Manage Users",
+            onClick: () => onSectionChange("manageUsers"),
           },
         ],
       },
@@ -270,20 +260,33 @@ export default function AppSidebar({
       <SidebarContent>
         <hr className="h-[2px] bg-[#2D2F39] w-5/6 mx-auto rounded-lg mt-3" />
         <DynamicNav
-          data={data.navMain}
+          data={
+            userType !== "admin" &&
+            sectionName &&
+            SECTION_NAME_TO_NAV_TITLE[sectionName]
+              ? data.navMain.filter(
+                  (item) =>
+                    item.title === SECTION_NAME_TO_NAV_TITLE[sectionName],
+                )
+              : data.navMain
+          }
           onSectionChange={onSectionChange}
           activeSection={activeSection}
           activeParent={activeParent}
           title={t("MAIN")}
         />
-        <hr className="h-[3px] bg-[#2D2F39] w-5/6 mx-auto rounded-lg mt-3" />
-        <DynamicNav
-          data={data.settings}
-          onSectionChange={onSectionChange}
-          activeSection={activeSection}
-          activeParent={activeParent}
-          title={t("SETTINGS")}
-        />
+        {userType === "admin" && (
+          <>
+            <hr className="h-[3px] bg-[#2D2F39] w-5/6 mx-auto rounded-lg mt-3" />
+            <DynamicNav
+              data={data.settings}
+              onSectionChange={onSectionChange}
+              activeSection={activeSection}
+              activeParent={activeParent}
+              title={t("SETTINGS")}
+            />
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter>

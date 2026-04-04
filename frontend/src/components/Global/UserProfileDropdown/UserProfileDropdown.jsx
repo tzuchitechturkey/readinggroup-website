@@ -34,7 +34,7 @@ export default function UserProfileDropdown({ iconColor }) {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-[160px] rounded-xl shadow-lg border border-gray-100 bg-white/95 py-2 px-1">
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={() => {
             navigate(`/profile/${userId}`);
           }}
@@ -48,8 +48,8 @@ export default function UserProfileDropdown({ iconColor }) {
             style={{ color: iconColor || undefined }}
           />
           <span className="flex-1">{t("Profile")}</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
+        </DropdownMenuItem> */}
+        {/* <DropdownMenuItem
           onClick={() => {
             navigate("/settings");
           }}
@@ -63,7 +63,7 @@ export default function UserProfileDropdown({ iconColor }) {
             style={{ color: iconColor || undefined }}
           />
           <span className="flex-1">{t("Settings")}</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           onClick={() => {
             setOpenLogoutModal(true);

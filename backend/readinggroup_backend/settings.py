@@ -162,19 +162,13 @@ CORS_ALLOW_CREDENTIALS = True
 # Authentication
 AUTH_USER_MODEL = "accounts.User"
 
-# Email settings (for password reset)
-EMAIL_BACKEND = os.getenv(
-    "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
-)
-EMAIL_HOST = os.getenv("DJANGO_EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("DJANGO_EMAIL_PORT", 587))
-
-# Set the email sender directly
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
 EMAIL_HOST_USER = "anasdaas210@gmail.com"
-EMAIL_HOST_PASSWORD = "utko uazs achz rdvx"
+EMAIL_HOST_PASSWORD = "jrxgfqsbvlbxveeg"
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "anasdaas210@gmail.com"
-
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

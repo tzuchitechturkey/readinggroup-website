@@ -17,7 +17,6 @@ import CreateOrEditNews from "./CreateOrEditNews/CreateOrEditNews";
 
 const NewsList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
-  // State management
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({
     key: "happened_at",

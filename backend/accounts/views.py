@@ -1,24 +1,27 @@
 import pyotp
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core import signing
 from django.core.mail import send_mail
-from django.core.signing import BadSignature, SignatureExpired
-from django.db.models import Q
-from django.http import HttpResponse
 from django.utils.crypto import get_random_string
+from django.db.models import Q
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, permissions, serializers, status
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .utils import generate_qr_code_base64, generate_totp_secret, get_totp_uri
-from .models import FriendRequest
+from .utils import (
+    generate_password,
+    generate_qr_code_base64,
+    generate_totp_secret,
+    get_totp_uri,
+)
 from .serializers import (
-    FriendRequestSerializer,
+    AdminCreateUserSerializer,
+    AdminUpdateUserSerializer,
     PasswordChangeSerializer,
     ProfileUpdateSerializer,
     RegisterSerializer,
@@ -26,233 +29,6 @@ from .serializers import (
 )
 
 User = get_user_model()
-
-
-class FriendRequestListCreateView(generics.ListCreateAPIView):
-    """List incoming/outgoing friend requests or create a new friend request.
-
-    Query params:
-    - direction=incoming|outgoing (default incoming)
-    """
-
-    serializer_class = FriendRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        direction = self.request.query_params.get("direction", "incoming").lower()
-        if direction == "outgoing":
-            return FriendRequest.objects.filter(from_user=user).order_by("-created_at")
-        # incoming
-        return FriendRequest.objects.filter(to_user=user).order_by("-created_at")
-
-    def perform_create(self, serializer):
-        serializer.save(from_user=self.request.user)
-
-
-class FriendRequestActionView(APIView):
-    """Accept / reject / block a friend request by id.
-
-    POST body: { "action": "accept" | "reject" | "block" }
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, pk):
-        action = request.data.get("action")
-        if action not in ("accept", "reject", "block"):
-            return Response(
-                {"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            fr = FriendRequest.objects.get(pk=pk)
-        except FriendRequest.DoesNotExist:
-            return Response(
-                {"detail": "Friend request not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # only the recipient may accept/reject; block may be performed by recipient or requestor
-        user = request.user
-        if action == "accept":
-            if fr.to_user != user:
-                return Response(
-                    {"detail": "Only recipient can accept."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            fr.accept()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-        if action == "reject":
-            if fr.to_user != user:
-                return Response(
-                    {"detail": "Only recipient can reject."},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
-            fr.reject()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-        # block
-        if action == "block":
-            # allow both sides to block; create or update inverse request as BLOCKED too
-            fr.block()
-            return Response(
-                FriendRequestSerializer(fr, context={"request": request}).data
-            )
-
-
-class UnfriendView(APIView):
-    """Remove an existing friendship (accepted FriendRequest) between the
-    authenticated user and the target user (by id).
-
-    DELETE /api/v1/friend-requests/unfriend/{user_id}/
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, user_id):
-        try:
-            target = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        if target == request.user:
-            return Response(
-                {"detail": "Cannot unfriend yourself."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # find any accepted friend requests in either direction
-        qs = FriendRequest.objects.filter(
-            (
-                Q(from_user=request.user, to_user=target)
-                | Q(from_user=target, to_user=request.user)
-            ),
-            status=FriendRequest.STATUS_ACCEPTED,
-        )
-
-        # if none found, inform caller
-        if not qs.exists():
-            return Response(
-                {"detail": "Friendship not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        # delete the accepted friendship records
-        try:
-            qs.delete()
-        except Exception:
-            return Response(
-                {"detail": "Failed to remove friendship."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(
-            {
-                "detail": "Friendship removed.",
-                "user": UserSerializer(target, context={"request": request}).data,
-            },
-            status=status.HTTP_200_OK,
-        )
-
-
-class FriendRequestsForUserView(APIView):
-    """Return incoming and outgoing friend requests for a given user id.
-
-    Access control: only staff users or the user themself may view this.
-    Response format:
-    {
-      "incoming": [<FriendRequestSerializer>],
-      "outgoing": [<FriendRequestSerializer>]
-    }
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, user_id):
-        # Only staff or the target user may access
-        if not (request.user.is_staff or request.user.id == int(user_id)):
-            return Response(
-                {"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN
-            )
-
-        try:
-            target = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        incoming_qs = FriendRequest.objects.filter(to_user=target).order_by(
-            "-created_at"
-        )
-        outgoing_qs = FriendRequest.objects.filter(from_user=target).order_by(
-            "-created_at"
-        )
-
-        incoming = FriendRequestSerializer(
-            incoming_qs, many=True, context={"request": request}
-        ).data
-        outgoing = FriendRequestSerializer(
-            outgoing_qs, many=True, context={"request": request}
-        ).data
-
-        return Response(
-            {"incoming": incoming, "outgoing": outgoing}, status=status.HTTP_200_OK
-        )
-
-
-class PendingFriendRequestsView(generics.ListAPIView):
-    """List pending friend requests for the authenticated user.
-
-    Query params:
-    - direction=incoming|outgoing (default incoming)
-
-    Returns FriendRequestSerializer list filtered by status=STATUS_PENDING.
-    """
-
-    serializer_class = FriendRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        request_user = self.request.user
-        # allow an optional user_id query param so admins (or the user themself) can fetch pending for another user
-        # allow user_id either as query param or as URL kwarg (path param)
-        user_id = self.request.query_params.get("user_id") or self.kwargs.get("user_id")
-        direction = self.request.query_params.get("direction", "incoming").lower()
-
-        target_user = None
-        if user_id:
-            try:
-                uid = int(user_id)
-                # only allow if the requester is staff or requesting their own data
-                if not (request_user.is_staff or request_user.id == uid):
-                    # don't leak data
-                    return FriendRequest.objects.none()
-                from django.contrib.auth import get_user_model
-
-                UserModel = get_user_model()
-                target_user = UserModel.objects.filter(pk=uid).first()
-                if not target_user:
-                    return FriendRequest.objects.none()
-            except Exception:
-                return FriendRequest.objects.none()
-        else:
-            target_user = request_user
-
-        if direction == "outgoing":
-            return FriendRequest.objects.filter(
-                from_user=target_user, status=FriendRequest.STATUS_PENDING
-            ).order_by("-created_at")
-        return FriendRequest.objects.filter(
-            to_user=target_user, status=FriendRequest.STATUS_PENDING
-        ).order_by("-created_at")
 
 
 class UserListView(generics.ListAPIView):
@@ -341,58 +117,10 @@ class RegisterView(generics.CreateAPIView):
         return Response(
             {
                 "detail": "User registered successfully.",
+                "group": user.groups.values_list("name", flat=True).first(),
             },
             status=status.HTTP_201_CREATED,
         )
-
-
-# class ConfirmEmailView(APIView):
-#     """Activate a user account given a signed token sent by email.
-
-#     GET /api/v1/accounts/confirm-email/{token}/
-#     """
-#     permission_classes = [permissions.AllowAny]
-
-#     def get(self, request, token=None):
-#         try:
-#             data = signing.loads(token, salt="email-confirm", max_age=getattr(settings, 'EMAIL_CONFIRMATION_MAX_AGE', 60 * 60 * 24))
-#         except SignatureExpired:
-#             return Response({"detail": "Confirmation link expired."}, status=status.HTTP_400_BAD_REQUEST)
-#         except BadSignature:
-#             return Response({"detail": "Invalid confirmation token."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user_id = data.get("user_id")
-#         try:
-#             user = User.objects.get(pk=user_id)
-#         except User.DoesNotExist:
-#             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-#         # Activate the user
-#         if hasattr(user, 'is_active'):
-#             user.is_active = True
-#             user.save(update_fields=['is_active'])
-
-#         # If the client expects HTML (clicked in a browser), return a small HTML page with Arabic confirmation
-#         accepts = request.META.get('HTTP_ACCEPT', '')
-#         if 'text/html' in accepts:
-#             html = """
-#             <!doctype html>
-#             <html lang="ar">
-#             <head>
-#               <meta charset="utf-8" />
-#               <meta name="viewport" content="width=device-width, initial-scale=1" />
-#               <title>Confirm account</title>
-#               <style>body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;direction: rtl; text-align: right; padding: 2rem;}</style>
-#             </head>
-#             <body>
-#               <h1>Confirm account</h1>
-#               <p>Your account has been confirmed. You can now log in.</p>
-#             </body>
-#             </html>
-#             """
-#             return HttpResponse(html, content_type='text/html; charset=utf-8')
-
-#         # Fallback: return a JSON response for API clients
-#         return Response({"detail": "Email confirmed. You can now log in."}, status=status.HTTP_200_OK)
 
 
 class LoginView(APIView):
@@ -529,19 +257,361 @@ class LoginView(APIView):
             user.save()
 
         refresh = RefreshToken.for_user(user)
+
+        # Convenience field for the frontend: a single group "type".
+        # Keep the full list inside UserSerializer as well.
+        group_name = None
+        try:
+            group_name = user.groups.values_list("name", flat=True).first()
+        except Exception:
+            group_name = None
+
         return Response(
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "qr": qr,
                 "secret": user.totp_secret,
+                "group": group_name,
                 "user": UserSerializer(user).data,
                 "force_password_change": getattr(user, "force_password_change", False),
             }
         )
 
 
-# Optional: endpoint to verify TOTP code (for setup/enable)
+class GroupCreateView(APIView):
+    """Create a Django auth Group (admin-only).
+
+    POST body: { "name": "editors" }
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="List all auth groups (admin-only).",
+        responses={
+            200: openapi.Response(
+                description="Groups list",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "count": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "next": openapi.Schema(type=openapi.TYPE_STRING, nullable=True),
+                        "previous": openapi.Schema(
+                            type=openapi.TYPE_STRING, nullable=True
+                        ),
+                        "results": openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING),
+                                    "section_name": openapi.Schema(
+                                        type=openapi.TYPE_STRING, nullable=True
+                                    ),
+                                },
+                            ),
+                        ),
+                    },
+                ),
+            ),
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def get(self, request):
+        """Return a paginated list of groups."""
+
+        from django.contrib.auth.models import Group
+
+        qs = Group.objects.select_related("profile").all().order_by("name")
+        paginator = LimitOffsetPagination()
+        page = paginator.paginate_queryset(qs, request)
+        results = []
+        for g in page or []:
+            section_name = None
+            try:
+                section_name = (g.profile.section_name or "").strip() or None
+            except Exception:
+                section_name = None
+            results.append({"id": g.id, "name": g.name, "section_name": section_name})
+        return paginator.get_paginated_response(results)
+
+
+class AdminCreateUserView(APIView):
+    """Create a new user after admin login (admin-only).
+
+    Required fields:
+    - username
+    - email
+    - group (group name, e.g. "editors")
+    - section_name (required only when the group does not have one yet)
+
+    The server generates a password and sends it to the user's email.
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="List all users (admin-only).",
+        responses={
+            200: openapi.Response(description="Users list"),
+            401: "Unauthorized",
+            403: "Forbidden",
+        },
+    )
+    def get(self, request):
+        """Return a paginated list of users."""
+
+        qs = (
+            User.objects.prefetch_related("groups")
+            .all()
+            .order_by("-date_joined", "-id")
+        )
+
+        search = (
+            request.query_params.get("search") or request.query_params.get("q") or ""
+        ).strip()
+        if search:
+            search_q = (
+                Q(username__icontains=search)
+                | Q(email__icontains=search)
+                | Q(display_name__icontains=search)
+            )
+            if search.isdigit():
+                try:
+                    search_q = search_q | Q(id=int(search))
+                except Exception:
+                    pass
+            qs = qs.filter(search_q)
+
+        paginator = LimitOffsetPagination()
+        page = paginator.paginate_queryset(qs, request)
+        data = UserSerializer(page or [], many=True, context={"request": request}).data
+        return paginator.get_paginated_response(data)
+
+    @swagger_auto_schema(
+        operation_description="Create a user and email them a generated password (admin-only).",
+        request_body=AdminCreateUserSerializer,
+        responses={
+            201: openapi.Response(description="User created"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            500: "Email sending failed",
+        },
+    )
+    def post(self, request):
+        serializer = AdminCreateUserSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # Do not allow "console" email backend for this flow.
+        # If console backend is enabled, emails won't be delivered to real inboxes.
+        email_backend = (getattr(settings, "EMAIL_BACKEND", "") or "").lower()
+        if "console" in email_backend:
+            return Response(
+                {
+                    "detail": "Email is not configured to send real messages (console backend is active). Configure SMTP via DJANGO_EMAIL_HOST_USER/DJANGO_EMAIL_HOST_PASSWORD (and optionally DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend).",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        password = generate_password()
+
+        # Always use the email provided in the request as the recipient.
+        recipient_email = (serializer.validated_data.get("email") or "").strip()
+
+        # Create user + assign group
+        user = serializer.create_user_and_assign_group(password=password)
+
+        # Send credentials via email
+        subject = "Your login credentials"
+        api_login_url = f"{request.scheme}://{request.get_host()}/api/v1/user/login/"
+        message = (
+            f"Hello {user.username},\n\n"
+            "An admin created an account for you.\n\n"
+            "Login details:\n"
+            f"- Username: {user.username}\n"
+            f"- Email: {recipient_email or getattr(user, 'email', '')}\n"
+            f"- Password: {password}\n\n"
+            f"API login endpoint: {api_login_url}\n\n"
+            "Please log in and change your password after the first login.\n"
+        )
+        # Be tolerant to missing DEFAULT_FROM_EMAIL in some deployments/branches.
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or getattr(
+            settings, "EMAIL_HOST_USER", None
+        )
+        if not from_email:
+            # Roll back: delete user so we don't create an unreachable account.
+            try:
+                user.delete()
+            except Exception:
+                pass
+            return Response(
+                {
+                    "detail": "Email settings are not configured (missing DEFAULT_FROM_EMAIL/EMAIL_HOST_USER). User was not created.",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # If using SMTP backend, ensure credentials exist; otherwise sending may fail silently in some setups.
+        if "smtp" in email_backend:
+            smtp_user = getattr(settings, "EMAIL_HOST_USER", "") or ""
+            smtp_pass = getattr(settings, "EMAIL_HOST_PASSWORD", "") or ""
+            if not smtp_user or not smtp_pass:
+                try:
+                    user.delete()
+                except Exception:
+                    pass
+                return Response(
+                    {
+                        "detail": "SMTP email settings are incomplete (missing EMAIL_HOST_USER/EMAIL_HOST_PASSWORD). User was not created.",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        # Fallback to the user's email if, for some reason, validated data is missing.
+        if not recipient_email:
+            recipient_email = (getattr(user, "email", "") or "").strip()
+
+        try:
+            send_mail(
+                subject,
+                message,
+                from_email,
+                [recipient_email],
+                fail_silently=False,
+            )
+        except Exception as exc:
+            # Roll back: delete user so we don't create an unreachable account.
+            try:
+                user.delete()
+            except Exception:
+                pass
+
+            payload = {
+                "detail": "Failed to send password email. User was not created.",
+                "error_type": type(exc).__name__,
+            }
+            # Provide more diagnostics in debug to help identify SMTP/auth/config issues.
+            if getattr(settings, "DEBUG", False):
+                payload["error"] = str(exc)
+            return Response(
+                payload,
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {
+                "detail": "User created and password sent by email.",
+                "sent_to": recipient_email,
+                "user": UserSerializer(user, context={"request": request}).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AdminUserUpdateView(APIView):
+    """Update an existing user (admin-only).
+
+    PATCH/PUT /api/v1/accounts/admin/users/{user_id}/
+    Body: any subset of AdminUpdateUserSerializer fields.
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Update a user (admin-only).",
+        request_body=AdminUpdateUserSerializer,
+        responses={
+            200: openapi.Response(description="User updated"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def patch(self, request, user_id: int):
+        return self._update(request, user_id=user_id, partial=True)
+
+    @swagger_auto_schema(
+        operation_description="Update a user (admin-only).",
+        request_body=AdminUpdateUserSerializer,
+        responses={
+            200: openapi.Response(description="User updated"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def put(self, request, user_id: int):
+        return self._update(request, user_id=user_id, partial=False)
+
+    def _update(self, request, *, user_id: int, partial: bool):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AdminUpdateUserSerializer(
+            instance=user,
+            data=request.data,
+            partial=partial,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        return Response(
+            {
+                "detail": "User updated.",
+                "user": UserSerializer(user, context={"request": request}).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class AdminUserDeleteView(APIView):
+    """Delete a user (admin-only).
+
+    DELETE /api/v1/accounts/admin/users/{user_id}/delete/
+    """
+
+    permission_classes = [permissions.IsAdminUser]
+
+    @swagger_auto_schema(
+        operation_description="Delete a user (admin-only).",
+        responses={
+            204: openapi.Response(description="User deleted"),
+            400: "Validation Error",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "User not found",
+        },
+    )
+    def delete(self, request, user_id: int):
+        if int(user_id) == int(getattr(request.user, "id", 0)):
+            return Response(
+                {"detail": "You cannot delete your own account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class TOTPVerifyAPIView(APIView):
     """Verify a TOTP code for the authenticated user."""
 

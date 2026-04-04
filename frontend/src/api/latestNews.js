@@ -36,7 +36,14 @@ export async function GetOtherLatestNews(currentNewsId) {
   return await axios.get(`/latest-news/${currentNewsId}/random-others/`);
 }
 
-// Delete Photo from collection /photos/{photo_id}/
+// Delete Photo from collection /latest-news-images/{photo_id}/
 export async function DeletePhotoFromNews(photo_id) {
-  return await axios.delete(`/photos/${photo_id}/`);
+  return await axios.delete(`/latest-news-images/${photo_id}/`);
+}
+
+// DELETE /latest-news/{id}/images/delete/  body: { image_ids: [1,2,3] }
+export async function DeleteImagesFromLatestNews(newsId, imageIds = []) {
+  return await axios.delete(`/latest-news/${newsId}/images/delete/`, {
+    data: { image_ids: imageIds },
+  });
 }

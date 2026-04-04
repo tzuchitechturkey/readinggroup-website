@@ -9,7 +9,7 @@ const CardOverlay = ({ card, onViewDetails }) => {
   const handleDownload = async (e) => {
     e.stopPropagation();
     try {
-      const response = await fetch(card.image);
+      const response = await fetch(card.image || card.image_url);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -25,6 +25,7 @@ const CardOverlay = ({ card, onViewDetails }) => {
       console.error("Download failed", error);
     }
   };
+  console.log("CardOverlay rendered for card:", card);
 
   return (
     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out flex flex-col items-center justify-center gap-3">

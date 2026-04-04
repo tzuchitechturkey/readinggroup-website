@@ -19,11 +19,6 @@ import OurTeamList from "@/components/ForPages/Dashboard/AboutUs/OurTeam/OurTeam
 import LearnCategoriesContent from "@/components/ForPages/Dashboard/Learn/LearnCategories/LearnCategoriesContent";
 import VideosCategoriesContent from "@/components/ForPages/Dashboard/Videos/VideosCategories/VideosCategoriesContent";
 import LiveStreamSchedulesList from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/LiveStreamSchedulesList/LiveStreamSchedulesList";
-import SortSectionContent from "@/components/ForPages/Dashboard/SortSection/SortSectionContent";
-import ContentsList from "@/components/ForPages/Dashboard/Contents/ContentList/ContentsList";
-import CreateOrEditContent from "@/components/ForPages/Dashboard/Contents/CreateOrEditContent/CreateOrEditContent";
-import WebSiteInfoContent from "@/components/ForPages/Dashboard/WebsiteInfo/WebSiteInfoContent";
-import ContentsCategoriesContent from "@/components/ForPages/Dashboard/Contents/ContentsCategories/ContentsCategoriesContent";
 import BookPage from "@/components/ForPages/Dashboard/AboutUs/Book/BookPage";
 import CreateOrEditLearn from "@/components/ForPages/Dashboard/Learn/CreateOrEditLearn/CreateOrEditLearn";
 import LearnList from "@/components/ForPages/Dashboard/Learn/LearnList/LearnList";
@@ -38,10 +33,42 @@ import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Even
 import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/UploadImagesToNews/UploadImagesToNews";
 
 import ProfileContent from "../Profile/ProfileContent";
-import SettingsContent from "../Settings/SettingsContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
 import UploadImagesToReviews from "@/components/ForPages/Dashboard/AboutUs/Book/UploadImagesToReviews";
 import UploadImagesToHistory from "@/components/ForPages/Dashboard/AboutUs/History/UploadImagesToHistory";
+import UsersManagementContent from "@/components/ForPages/Dashboard/UsersManagement/UsersManagementContent";
+
+const SECTION_NAME_TO_DEFAULT = {
+  learn: "learn",
+  video: "videos",
+  liveStream: "liveStreamSchedules",
+  photoCollection: "photoCollections",
+  latestNews: "news",
+  relatedReport: "relatedReports",
+  teamMembers: "team",
+  book: "book",
+  history: "history",
+};
+
+const SECTION_NAME_TO_ALLOWED = {
+  learn: ["learn", "createOrEditLearn", "learnCategories"],
+  video: ["videos", "createOrEditVideo", "videosCategories"],
+  liveStream: ["liveStreamSchedules", "createOrEditLiveStreamSchedule"],
+  photoCollection: [
+    "photoCollections",
+    "createOrEditPhotoCollection",
+    "photoCollectionCategories",
+  ],
+  latestNews: ["news", "createOrEditNews"],
+  relatedReport: [
+    "relatedReports",
+    "createOrEditRelatedReports",
+    "relatedReportCategories",
+  ],
+  teamMembers: ["team", "createOrEditTeam"],
+  book: ["book", "createOrEditReviews"],
+  history: ["history", "createOrEditHistory"],
+};
 
 export default function Page() {
   const { i18n } = useTranslation();
@@ -49,8 +76,22 @@ export default function Page() {
   const direction = isRtl ? "rtl" : "ltr";
 
   const [activeSection, setActiveSection] = useState(() => {
-    // استرجاع الصفحة المحفوظة من localStorage عند التحميل
-    return localStorage.getItem("dashboardActiveSection") || "home";
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+    const saved = localStorage.getItem("dashboardActiveSection");
+
+    if (
+      userType !== "admin" &&
+      sectionName &&
+      SECTION_NAME_TO_DEFAULT[sectionName]
+    ) {
+      const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
+      return saved && allowed.includes(saved)
+        ? saved
+        : SECTION_NAME_TO_DEFAULT[sectionName];
+    }
+
+    return saved || "home";
   });
   const [activeParent, setActiveParent] = useState(() => {
     // استرجاع العنصر الأساسي المحفوظ من localStorage
@@ -188,6 +229,25 @@ export default function Page() {
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+
+    // حماية: المستخدم غير الأدمن لا يمكنه التنقل خارج قسمه
+    if (
+      userType !== "admin" &&
+      sectionName &&
+      SECTION_NAME_TO_DEFAULT[sectionName]
+    ) {
+      const allowed = SECTION_NAME_TO_ALLOWED[sectionName] || [];
+      const defaultSection = SECTION_NAME_TO_DEFAULT[sectionName];
+
+      if (section === "home" || section === "Home") {
+        section = defaultSection;
+      } else if (!allowed.includes(section)) {
+        return;
+      }
+    }
+
     setActiveSection(section);
 
     // مسح البيانات المحفوظة عند الرجوع للصفحة الرئيسية
@@ -270,13 +330,11 @@ export default function Page() {
         positions: "About Us",
         book: "Book",
         createOrEditReviews: "Book",
-        booksGroups: "About Us",
         // Settings && Profile
         profileSettings: "Settings",
         profile: "Settings",
         // Website Info
-        websiteInfo: "Settings",
-        sortSection: "Settings",
+        manageUsers: "Roles",
       };
       autoParent = parentMap[section] || null;
     }
@@ -317,20 +375,7 @@ export default function Page() {
             video={selectedVideo}
           />
         );
-      // contents
-      case "contents":
-        return <ContentsList onSectionChange={handleSectionChange} />;
-      case "contentsCategories":
-        return (
-          <ContentsCategoriesContent onSectionChange={handleSectionChange} />
-        );
-      case "createOrEditContent":
-        return (
-          <CreateOrEditContent
-            content={selectedContent}
-            onSectionChange={handleSectionChange}
-          />
-        );
+
       // Live Stream Schedules
       case "liveStreamSchedules":
         return (
@@ -408,22 +453,21 @@ export default function Page() {
 
       default:
         return <DashboardSections />;
-      // Profile && Settings
-      case "profileSettings":
-        return <SettingsContent onSectionChange={handleSectionChange} />;
       case "profile":
         return <ProfileContent onSectionChange={handleSectionChange} />;
-      // Website Info
-      case "websiteInfo":
-        return <WebSiteInfoContent onSectionChange={handleSectionChange} />;
-      case "sortSection":
-        return <SortSectionContent onSectionChange={handleSectionChange} />;
+
+      // User Management
+      case "manageUsers":
+        return <UsersManagementContent onSectionChange={handleSectionChange} />;
     }
   };
 
   useEffect(() => {
     const user = localStorage.getItem("userType");
-    if (!user || user !== "admin") {
+    if (
+      !user ||
+      (user !== "admin" && user !== "editor" && user !== "team_leader")
+    ) {
       localStorage.setItem("redirectAfterLogin", "/dashboard");
       window.location.href = "/auth/login";
     }

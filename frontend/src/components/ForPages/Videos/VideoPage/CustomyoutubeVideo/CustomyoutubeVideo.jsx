@@ -9,19 +9,19 @@ import { languages } from "@/constants/constants";
 
 import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
-function CustomyoutubeVideo({ t,  videoData }) {
+function CustomyoutubeVideo({ t, videoData }) {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [showMoreVideos, setShowMoreVideos] = useState(false);
   const textRef = useRef(null);
   const limit = 5;
-    // Fetch related videos
+  // Fetch related videos
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
@@ -38,7 +38,6 @@ function CustomyoutubeVideo({ t,  videoData }) {
         setRelatedVideos((prev) => [...prev, ...results]);
       }
 
-      setTotalCount(count);
       setOffset(currentOffset + limit);
 
       // Check if there are more videos to load
@@ -51,18 +50,18 @@ function CustomyoutubeVideo({ t,  videoData }) {
     }
   };
   useEffect(() => {
-    if (videoData?.id){
-fetchRelated(0);
+    if (videoData?.id) {
+      fetchRelated(0);
     }
-
-    
   }, [videoData?.id]);
+
   useEffect(() => {
     if (textRef.current) {
       const el = textRef.current;
       setHasMore(el.scrollHeight > el.clientHeight);
     }
   }, [videoData?.description]);
+
   const isYouTubeUrl = (url) =>
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))/i.test(
       url || "",
@@ -103,8 +102,6 @@ fetchRelated(0);
 
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
-    // setCurrentTime(videoRef.current.currentTime || 0);
-    // setDuration(videoRef.current.duration || 0);
   };
 
   const youTube = isYouTubeUrl(videoData?.video_url);
@@ -115,6 +112,7 @@ fetchRelated(0);
   const isLong = plainText.length > MAX_LENGTH;
 
   const displayedText = expanded ? plainText : plainText.slice(0, MAX_LENGTH);
+
   return (
     <div className=" max-w-[1200px] mx-auto ">
       {/* Back Button */}
@@ -133,15 +131,86 @@ fetchRelated(0);
         <div className="relative bg-black md:rounded-xl overflow-hidden h-[220px] lg:h-[675px]">
           {videoData?.video_url ? (
             youTube ? (
-              <iframe
-                className="w-full h-full"
-                src={getYouTubeEmbedUrl(videoData?.video_url)}
-                title={videoData?.title || "YouTube video"}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
+              <>
+                <iframe
+                  className="w-full h-full"
+                  src={getYouTubeEmbedUrl(videoData?.video_url)}
+                  title={videoData?.title || "YouTube video"}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+                {/* More Videos Button */}
+                {relatedVideos.length > 0 && (
+                  <button
+                    onClick={() => setShowMoreVideos(true)}
+                    className="absolute bottom-3 right-3 bg-black/70 hover:bg-black/90 text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+                    </svg>
+                    {t("More Videos")}
+                  </button>
+                )}
+                {/* More Videos Overlay Panel */}
+                {showMoreVideos && (
+                  <div className="absolute inset-0 bg-black/90 flex flex-col p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-white font-bold text-sm lg:text-xl">
+                        {t("Other Guided Reading Videos")}
+                      </h3>
+                      <button
+                        onClick={() => setShowMoreVideos(false)}
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 flex-1">
+                      {relatedVideos.map((video, index) => (
+                        <div
+                          key={video.id || index}
+                          onClick={() => navigate(`/videos/${video?.id}`)}
+                          className="cursor-pointer group flex flex-col gap-1.5"
+                        >
+                          <div className="relative rounded-lg overflow-hidden aspect-video bg-gray-800">
+                            <img
+                              src={video?.thumbnail_url?.medium?.url}
+                              alt={video?.title}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
+                                <svg
+                                  className="w-3 h-3 text-black ml-0.5"
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-white text-xs font-medium line-clamp-2 leading-tight">
+                            {video?.title}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <video
                 ref={videoRef}
@@ -184,7 +253,7 @@ fetchRelated(0);
         {/* Content Layout - Description + Info Sidebar */}
         <div className="lg:flex gap-3 mb-14">
           {/* Description Section */}
-          <div className="flex-1 bg-[#C4DBF5] rounded-[10px] p-4 mb-2">
+          <div className="flex-1 bg-[#C4DBF5] rounded-[10px]  p-4 ">
             <div className="mb-4">
               <p className="text-base font-bold text-[#081945] mb-0">
                 {videoData?.created_at

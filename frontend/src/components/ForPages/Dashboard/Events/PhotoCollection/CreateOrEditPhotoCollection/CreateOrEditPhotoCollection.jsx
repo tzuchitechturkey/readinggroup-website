@@ -31,10 +31,17 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
       setSelectedCollection({
         id: photoCollection.id,
         title: photoCollection.title,
+        photo_count: photoCollection.photos?.length ?? 0,
       });
       // Load existing photos from photoCollection
       if (photoCollection?.photos) {
         setImages(photoCollection.photos);
+        if (photoCollection.photos.length >= 28) {
+          setErrors((prev) => ({
+            ...prev,
+            collection: t("This collection has reached the maximum limit of 28 photos"),
+          }));
+        }
       }
     }
   }, [photoCollection]);
@@ -105,6 +112,13 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const MAX_IMAGES = 28;
+    const totalImages = images.length + newImages.length;
+    if (totalImages > MAX_IMAGES) {
+      toast.error(t("You cannot add more than 28 photos to a collection"));
+      return;
+    }
+
     if (!validateForm()) {
       toast.error(t("Please fix the errors in the form"));
       return;
@@ -113,8 +127,8 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
     setIsSubmitting(true);
 
     try {
-      // First, delete any removed photos (in edit mode)
-      if (photoCollection?.id && deletedPhotoIds.length > 0) {
+      // First, delete any removed photos (in edit mode or when selecting existing collection)
+      if (deletedPhotoIds.length > 0) {
         await Promise.all(
           deletedPhotoIds.map((photoId) => DeletePhotoFromCollection(photoId))
         );
@@ -175,12 +189,38 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
       const collectionsData = res.data.results.map((collection) => ({
         id: collection.id,
         title: collection.title,
+        photo_count: collection.photo_count ?? 0,
+        photos: collection.photos ?? [],
       }));
       setCollections(collectionsData);
     } catch (err) {
       console.error("Error fetching collections:", err);
       setErrorFn(err, t);
     }
+  };
+
+  const handleCollectionSelect = async (collection) => {
+    if (collection?.photo_count >= 28) {
+      setErrors((prev) => ({
+        ...prev,
+        collection: t("This collection has reached the maximum limit of 28 photos"),
+      }));
+      setSelectedCollection(null);
+      return;
+    }
+    setSelectedCollection(collection);
+    setImages(collection?.photos ?? []);
+    setDeletedPhotoIds([]);
+    if (errors.collection) {
+      setErrors((prev) => ({ ...prev, collection: null }));
+    }
+  };
+
+  const handleClearCollection = () => {
+    setSelectedCollection(null);
+    setImages([]);
+    setNewImages([]);
+    setDeletedPhotoIds([]);
   };
   useEffect(() => {
     handleGetCollections();
@@ -210,6 +250,7 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
             maxImages={28}
             currentImageCount={images.length}
             isEditMode={Boolean(photoCollection?.id)}
+            isLoading={false}
           />
           {/* Basic Details */}
 
@@ -218,15 +259,15 @@ const CreateOrEditPhotoCollection = ({ onSectionChange, photoCollection }) => {
             label={t("Collection Category")}
             placeholder={t("Select a collection category")}
             selectedItem={selectedCollection}
-            onSelect={setSelectedCollection}
-            onClear={() => setSelectedCollection(null)}
+            onSelect={handleCollectionSelect}
+            onClear={handleClearCollection}
             list={collections}
             searchMethod={handleGetCollections}
             searchApi={true}
             searchPlaceholder={t("Search collections...")}
             error={errors.collection}
             required={!photoCollection?.id}
-            renderItemLabel={(item) => item.title || item.name || ""}
+            renderItemLabel={(item) => `${item.title || item.name || ""} (${item.photo_count ?? 0}/28)`}
           />
           {/* End Collections */}
           {/* Form Actions */}

@@ -2,16 +2,18 @@ import React from "react";
 
 import LivestreamSectionHeader from "../shared/LivestreamSectionHeader";
 import LivestreamCard from "../shared/LivestreamCard";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for upcoming livestream
- 
+
 const UpcomingLivestream = ({ t, data }) => {
+  const navigate = useNavigate();
   const handleViewScheduleClick = () => {
-    // Navigate to full schedule page - implement navigation logic here
+    navigate("/livestream-schedule");
   };
   return (
     <div className="md:px-12 lg:px-[120px] w-full lg:w-[1440px] mx-auto">
-      <div className="bg-[#285688] w-full overflow-hidden px-4 md:px-8 lg:px-8 py-8 md:py-[28px] lg:py-[32px]">
+      <div className="bg-[#285688] w-full rounded-[8px] overflow-hidden px-4 md:px-8 lg:px-8 py-8 md:py-[28px] lg:py-[32px]">
         <div className=" ">
           {/* Section Header */}
           <LivestreamSectionHeader

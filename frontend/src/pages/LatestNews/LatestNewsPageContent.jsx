@@ -59,7 +59,7 @@ const LatestNewsPageContent = () => {
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-2 md:mb-6">
-          <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-3xl md:text-4xl lg:text-5xl text-[#081945] mb-3">
+          <h1 className="font-['Noto_Sans_TC:Black',sans-serif] font-black text-lg md:text-xl lg:text-3xl text-[#081945] mb-3">
             {t("Latest News")}
           </h1>
           <p className="text-[#285688] text-base md:text-lg font-normal max-w-2xl">
@@ -74,7 +74,7 @@ const LatestNewsPageContent = () => {
         {/* Rest of News List */}
         {newsList.length > 0 ? (
           <>
-            <div className="flex flex-col gap-3 md:gap-4 mb-10 md:mb-14">
+            <div className="flex flex-col gap-3 md:gap-4 mb-10 md:mb-6">
               {newsList.map((news, index) => (
                 <NewsCard
                   key={news.id}
