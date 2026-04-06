@@ -140,8 +140,8 @@ class ContentAttachment(TimestampedModel):
 
 
 class Learn(TimestampedModel):
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    subtitle = models.CharField(max_length=255, blank=True, null=True)
     category = models.ForeignKey(
         "LearnCategory",
         on_delete=models.SET_NULL,
