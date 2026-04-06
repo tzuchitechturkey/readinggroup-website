@@ -23,12 +23,14 @@ function BasicDetailsSection({
   categoryDropdownRef,
 }) {
   const { t } = useTranslation();
+  const learnType = formData.learn_type || formData?.category?.learn_type;
+  const isPosters = learnType === "posters";
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Title")} *
+          {t("Title")} {isPosters && "*"}
         </label>
         <Input
           name="title"
@@ -45,7 +47,7 @@ function BasicDetailsSection({
       {/* Subtitle */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Subtitle")} *
+          {t("Subtitle")} {isPosters && "*"}
         </label>
         <Input
           name="subtitle"
@@ -100,7 +102,8 @@ function BasicDetailsSection({
           <CategorySelectionDropdown
             showDropdown={showCategoryDropdown}
             onToggleDropdown={setShowCategoryDropdown}
-            selectedCategoryId={formData.category||formData.category?.id}
+            selectedCategoryId={formData.category?.id ?? formData.category}
+            selectedCategoryName={formData.category?.name}
             categoriesList={categoriesList}
             categorySearchValue={categorySearchValue}
             onSearchChange={setCategorySearchValue}

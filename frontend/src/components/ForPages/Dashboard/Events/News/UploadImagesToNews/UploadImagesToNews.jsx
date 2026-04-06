@@ -59,10 +59,13 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
 
     if (totalImages > MAX_IMAGES) {
       toast.error(
-        t("Maximum {{max}} images allowed. You can only add {{count}} more images", {
-          max: MAX_IMAGES,
-          count: MAX_IMAGES - images.length,
-        }),
+        t(
+          "Maximum {{max}} images allowed. You can only add {{count}} more images",
+          {
+            max: MAX_IMAGES,
+            count: MAX_IMAGES - images.length,
+          },
+        ),
       );
       return;
     }
@@ -82,12 +85,12 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
 
   const handleRemoveImage = (index) => {
     const imageToRemove = images[index];
-    
+
     // If it's an existing photo with an ID, track it for deletion
     if (imageToRemove?.id) {
       setDeletedPhotoIds((prev) => [...prev, imageToRemove.id]);
     }
-    
+
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -110,7 +113,7 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
     const newErrors = {};
 
     if (!selectedNewsItem?.id) {
-      newErrors.news = t("News is required");
+      newErrors.news = t("Latest News is required");
     }
 
     if (images.length === 0 && newImages.length === 0) {
@@ -149,7 +152,9 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
           deletedCount !== deletedPhotoIds.length
         ) {
           toast.warn(
-            t("Some images could not be deleted. Please refresh and try again."),
+            t(
+              "Some images could not be deleted. Please refresh and try again.",
+            ),
           );
         }
       }
@@ -213,8 +218,8 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
         {/* News Selection */}
         <div className="px-4 py-3">
           <AutoComplete
-            label={t("News")}
-            placeholder={t("Select a news item")}
+            label={t("Latest News")}
+            placeholder={t("Select a latest news item")}
             selectedItem={selectedNewsItem}
             onSelect={(item) => {
               setSelectedNewsItem(item);
@@ -224,7 +229,7 @@ const UploadImagesToNews = ({ onSectionChange, news }) => {
             list={newsList}
             searchMethod={handleGetNewsList}
             searchApi={!isEditMode}
-            searchPlaceholder={t("Search news...")}
+            searchPlaceholder={t("Search latest news...")}
             error={errors.news}
             required={true}
             renderItemLabel={(item) => item.title || item.name || ""}

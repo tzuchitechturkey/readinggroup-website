@@ -175,16 +175,18 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
       attachments: prev.attachments.filter((att) => att.id !== attachmentId),
     }));
   };
-  const handlePreviewFile = (file) => {
-    console.log("111111:", file);
-    setPreviewFile(file);
-    // Handle both File objects and attachment objects from server
+  const handlePreviewFile = (attachment) => {
+    setPreviewFile(attachment);
     let url;
-    if (file instanceof File) {
-      url = URL.createObjectURL(file);
-    } else if (file?.file) {
-      // attachment object from server with file URL
-      url = file.file;
+    if (attachment instanceof File) {
+      url = URL.createObjectURL(attachment);
+    } else if (typeof attachment?.file === "string") {
+      // attachment object from server — file is a URL string
+      url = attachment.file;
+    } else if (attachment?.file instanceof File) {
+      url = URL.createObjectURL(attachment.file);
+    } else if (typeof attachment === "string") {
+      url = attachment;
     } else {
       return;
     }
@@ -386,7 +388,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
         duration: video?.duration || "",
         guest_speakers: video?.guest_speakers || [],
         video_type: video?.video_type || "",
-        attachments: video?.attachments || [],
+        attachments: video?.attachments_data || video?.attachments || [],
       };
       console.log(video);
       setFormData(initialData);

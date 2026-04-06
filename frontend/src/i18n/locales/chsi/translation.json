@@ -1157,5 +1157,20 @@
   "Add/Edit History": "添加/编辑历史",
   "Roles": "角色",
   "Manage Users": "管理用户",
-  "": ""
+  "posters": "海报",
+  "Team is required": "团队是必填项",
+  "Team": "团队",
+  "Select a team item": "选择一个团队项",
+  "Search team...": "搜索团队...",
+  "Latest News updated successfully": "最新新闻更新成功",
+  "Latest News created successfully": "最新新闻创建成功",
+  "Latest News Title": "最新新闻标题",
+  "Latest News Date": "最新新闻日期",
+  "Latest News deleted successfully": "最新新闻删除成功",
+  "Latest News is required": "最新新闻为必填项",
+  "Some images could not be deleted. Please refresh and try again.": "某些图片无法删除。请刷新并重试。",
+  "Images updated successfully": "图片更新成功",
+  "Select a latest news item": "选择最新新闻项",
+  "Search latest news...": "搜索最新新闻...",
+  "Latest News not found": "未找到最新新闻"
 }

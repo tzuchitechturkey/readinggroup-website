@@ -136,7 +136,7 @@ const LearnTable = ({
             <TableCell className="text-center py-4">
               <div className="flex flex-col">
                 <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-1">
-                  {learn?.title}
+                  {learn?.title || "-"}
                 </span>
                 <span className="text-[#9FA2AA] text-[10px]">
                   {learn?.subtitle}

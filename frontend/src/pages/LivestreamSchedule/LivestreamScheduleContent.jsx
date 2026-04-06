@@ -19,7 +19,6 @@ const formatDate = (dateString) => {
   return `${month}. ${day}`;
 };
 
- 
 // Helper function to format time range
 const formatTimeRange = (startTime, durationHours) => {
   // تحويل البداية إلى ساعة ودقيقة
@@ -103,6 +102,7 @@ const LivestreamScheduleContent = () => {
   useEffect(() => {
     fetchScheduleData(filters.date.year, filters.date.month);
   }, [filters.date]);
+
   return (
     <div className="min-h-screen bg-background pt-10 lg:pt-[50px] pb-32 px-4 ">
       {isLoading && <Loader />}
@@ -121,7 +121,7 @@ const LivestreamScheduleContent = () => {
           />
         </div>
 
-        {/* Content  */}
+        {/* Start Content  */}
 
         {scheduleData?.length > 0 ? (
           <div className="flex flex-col gap-[16px] w-full items-start">

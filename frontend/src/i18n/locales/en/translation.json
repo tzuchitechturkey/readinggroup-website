@@ -1902,5 +1902,19 @@
   "Add/Edit History": "Add/Edit History",
   "Roles": "Roles",
   "Manage Users": "Manage Users",
-  "": ""
+  "": "",
+  "Team is required": "Team is required",
+  "Select a team item": "Select a team item",
+  "Search team...": "Search team...",
+  "Latest News updated successfully": "Latest News updated successfully",
+  "Latest News created successfully": "Latest News created successfully",
+  "Latest News Title": "Latest News Title",
+  "Latest News Date": "Latest News Date",
+  "Latest News deleted successfully": "Latest News deleted successfully",
+  "Latest News is required": "Latest News is required",
+  "Some images could not be deleted. Please refresh and try again.": "Some images could not be deleted. Please refresh and try again.",
+  "Images updated successfully": "Images updated successfully",
+  "Select a latest news item": "Select a latest news item",
+  "Search latest news...": "Search latest news...",
+  "Latest News not found": "Latest News not found"
 }
