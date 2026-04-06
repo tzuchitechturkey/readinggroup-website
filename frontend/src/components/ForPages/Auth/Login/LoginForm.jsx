@@ -83,7 +83,7 @@ function LoginForm() {
 
       toast.success(t("Login successful"));
 
-      if (data?.user?.is_first_login) {
+      if (data?.is_first_login) {
         setShowFirstLoginModal(true);
       } else if (data?.requires_totp) {
         setShowTOTPModal(true);
