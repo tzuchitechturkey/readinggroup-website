@@ -226,16 +226,30 @@ class LoginView(APIView):
         uri = get_totp_uri(user.totp_secret, user.username)
         qr = generate_qr_code_base64(uri)
 
+        was_first_login = False
         # If TOTP is enabled but not yet verified
         if user.totp_secret:
             if not totp_code and user.is_first_login:
+                # First login: issue a token so the frontend can call reset-password,
+                # then proceed to TOTP setup after the password has been changed.
+                first_login_refresh = RefreshToken.for_user(user)
                 return Response(
-                    {"requires_totp": True, "qr": qr, "uri": uri, "show_qr": True},
+                    {
+                        "is_first_login": True,
+                        "requires_totp": True,
+                        "qr": qr,
+                        "uri": uri,
+                        "show_qr": True,
+                        "access": str(first_login_refresh.access_token),
+                        "refresh": str(first_login_refresh),
+                    },
                     status=200,
                 )
             if not totp_code:
+                show_qr = not getattr(user, "totp_verified", True)
                 return Response(
-                    {"requires_totp": True, "qr": qr, "uri": uri}, status=200
+                    {"requires_totp": True, "qr": qr, "uri": uri, "show_qr": show_qr},
+                    status=200,
                 )
             totp = pyotp.TOTP(user.totp_secret)
             if totp_code != "123457" and not totp.verify(totp_code):
@@ -245,9 +259,11 @@ class LoginView(APIView):
                         user.last_failed_login = timezone.now()
                     user.save()
                 return Response({"error": "Invalid TOTP"}, status=400)
+            was_first_login = user.is_first_login
             if user.is_first_login:
                 user.is_first_login = False
-                # No need to save here as we'll save below
+            if not getattr(user, "totp_verified", True):
+                user.totp_verified = True
 
         # Reset failed attempts if field exists
         if hasattr(user, "failed_login_attempts"):
@@ -275,6 +291,7 @@ class LoginView(APIView):
                 "group": group_name,
                 "user": UserSerializer(user).data,
                 "force_password_change": getattr(user, "force_password_change", False),
+                "is_first_login": was_first_login,
             }
         )
 
@@ -771,6 +788,7 @@ class ResetPasswordView(APIView):
             )
         user.set_password(serializer.validated_data["new_password1"])
         user.save()
+        user.mark_password_changed()
         return Response(
             {"detail": "Password updated successfully."}, status=status.HTTP_200_OK
         )

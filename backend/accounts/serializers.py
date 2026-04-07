@@ -173,6 +173,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.is_first_login = True
+        user.totp_verified = False
         user.last_password_change = timezone.now()
         user.save()
 
@@ -363,6 +364,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
             user.category_name = category_name or None
             user.set_password(password)
             user.is_first_login = True
+            user.totp_verified = False
             user.last_password_change = timezone.now()
             user.save()
             user.groups.set([group_obj])

@@ -25,6 +25,7 @@ class User(AbstractUser):
     is_first_login = models.BooleanField(default=True)
     last_password_change = models.DateTimeField(null=True, blank=True)
     totp_secret = models.CharField(max_length=32, blank=True, null=True)
+    totp_verified = models.BooleanField(default=True)
     section_name = models.CharField(max_length=255, blank=True, null=True)
     category_name = models.CharField(max_length=255, blank=True, null=True)
 

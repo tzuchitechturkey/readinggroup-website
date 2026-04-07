@@ -11,7 +11,7 @@ import {
   requirements,
 } from "@/Utility/Profile/getPasswordStrength";
 
-function FirstLoginResetPasswordModal({ open, onClose }) {
+function FirstLoginResetPasswordModal({ open, onClose, onSuccess }) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showRetypePassword, setShowRetypePassword] = useState(false);
@@ -71,7 +71,11 @@ function FirstLoginResetPasswordModal({ open, onClose }) {
         new_password2: retypePassword,
       });
       toast.success(t("Password changed successfully!"));
-      onClose();
+      if (onSuccess) {
+        onSuccess(newPassword);
+      } else {
+        onClose();
+      }
     } catch (error) {
       setErrorFn(error, t);
     } finally {

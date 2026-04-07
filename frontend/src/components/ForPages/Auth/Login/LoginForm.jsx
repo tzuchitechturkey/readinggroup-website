@@ -84,6 +84,7 @@ function LoginForm() {
       toast.success(t("Login successful"));
 
       if (data?.is_first_login) {
+        if (data?.qr) setQr(data.qr);
         setShowFirstLoginModal(true);
       } else if (data?.requires_totp) {
         setShowTOTPModal(true);
@@ -399,6 +400,11 @@ function LoginForm() {
         <FirstLoginResetPasswordModal
           open={true}
           onClose={() => setShowFirstLoginModal(false)}
+          onSuccess={(newPw) => {
+            setPassword(newPw);
+            setShowFirstLoginModal(false);
+            setShowTOTPModal(true);
+          }}
         />
       </Modal>
       {/* End First Login Reset Password Modal */}
