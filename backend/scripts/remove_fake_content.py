@@ -63,8 +63,12 @@ def main() -> int:
 
     rx = {k: re.compile(v) for k, v in patterns.items()}
 
-    qs_video_categories = VideoCategory.objects.filter(name__regex=patterns["video_categories"])
-    qs_learn_categories = LearnCategory.objects.filter(name__regex=patterns["learn_categories"])
+    qs_video_categories = VideoCategory.objects.filter(
+        name__regex=patterns["video_categories"]
+    )
+    qs_learn_categories = LearnCategory.objects.filter(
+        name__regex=patterns["learn_categories"]
+    )
     qs_learns = Learn.objects.filter(title__regex=patterns["learns"])
     qs_events = EventCommunity.objects.filter(title__regex=patterns["events"])
     qs_reports_categories = RelatedReportsCategory.objects.filter(

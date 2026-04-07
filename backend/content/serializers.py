@@ -135,6 +135,9 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     category = serializers.PrimaryKeyRelatedField(
         queryset=VideoCategory.objects.all(), write_only=True, required=False
     )
+    base_video = serializers.PrimaryKeyRelatedField(
+        queryset=Video.objects.all(), write_only=True, required=False, allow_null=True
+    )
     user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -226,6 +229,37 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
+
+
+class VideoMultiLangSerializer(serializers.Serializer):
+    """Returns a video grouped by language keys.
+
+    Output shape:
+    {
+        "id": 5,
+        "ar": { ...all video fields... },   ← base language
+        "en": { ...all video fields... }    ← added translation (omitted if not yet created)
+    }
+    The first language the video is created in is the base (base_video=null).
+    Additional translations link back to the base via base_video FK.
+    """
+
+    def _serialize_lang(self, instance):
+        data = VideoSerializer(instance, context=self.context).data
+        data.pop("base_video", None)
+        return data
+
+    def to_representation(self, instance):
+        base = instance if not instance.base_video_id else instance.base_video
+        result = {"id": base.id}
+        result[base.language] = self._serialize_lang(base)
+        for tr in (
+            base.translations.select_related("category")
+            .prefetch_related("attachments")
+            .all()
+        ):
+            result[tr.language] = self._serialize_lang(tr)
+        return result
 
 
 class LearnSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

@@ -63,6 +63,7 @@ from .serializers import (
     BookReviewSerializer,
     NavbarLogoSerializer,
     OurTeamSerializer,
+    VideoMultiLangSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
@@ -119,17 +120,43 @@ class VideoViewSet(viewsets.ModelViewSet):
     )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
+        # Increment views on the resolved record (base or translation)
         instance.views = instance.views + 1
         instance.save(update_fields=["views"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response(
+            VideoMultiLangSerializer(instance, context={"request": request}).data
+        )
 
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            data = VideoMultiLangSerializer(
+                page, many=True, context={"request": request}
+            ).data
+            return self.get_paginated_response(data)
+        data = VideoMultiLangSerializer(
+            queryset, many=True, context={"request": request}
+        ).data
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = VideoSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        return Response(
+            VideoMultiLangSerializer(instance, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(category__is_active=True)
+
+        # List endpoint only returns base videos; translations are nested inside them
+        if self.action == "list":
+            queryset = queryset.filter(base_video__isnull=True)
+
         params = self.request.query_params
 
         # Allow search filter to work before custom filtering

@@ -14,6 +14,7 @@ Options
     --skip-images  Skip downloading images (for ImageField-only columns)
     --reset      Delete all existing content before importing (⚠ destructive)
 """
+
 from __future__ import annotations
 
 import io
@@ -153,12 +154,15 @@ def _download_image(url: str, filename: str) -> Optional[ContentFile]:
 def _rows(ws):
     """Iterate data rows (row 4 onwards), skip completely empty rows."""
     for row_idx in range(DATA_START_ROW, ws.max_row + 1):
-        row_vals = [ws.cell(row=row_idx, column=c).value for c in range(1, ws.max_column + 1)]
+        row_vals = [
+            ws.cell(row=row_idx, column=c).value for c in range(1, ws.max_column + 1)
+        ]
         if any(v is not None and str(v).strip() for v in row_vals):
             yield row_idx
 
 
 # ── Importers ─────────────────────────────────────────────────────────────────
+
 
 class Importer:
     def __init__(self, wb, stdout, dry_run: bool, skip_images: bool):
@@ -177,8 +181,12 @@ class Importer:
             raise CommandError(f"Sheet '{name}' not found in the Excel file.")
         return self.wb[name]
 
-    def _record(self, sheet: str, created: int, updated: int, skipped: int, errors: int):
-        self.summary[sheet] = dict(created=created, updated=updated, skipped=skipped, errors=errors)
+    def _record(
+        self, sheet: str, created: int, updated: int, skipped: int, errors: int
+    ):
+        self.summary[sheet] = dict(
+            created=created, updated=updated, skipped=skipped, errors=errors
+        )
 
     # ── Video Categories ──────────────────────────────────────────────────────
     def import_video_categories(self):
@@ -209,21 +217,27 @@ class Importer:
                 self.errors.append(f"VideoCategories row {row}: {e}")
                 errors += 1
         self._record("VideoCategories", created, updated, skipped, errors)
-        self._log(f"  VideoCategories   → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  VideoCategories   → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Videos ───────────────────────────────────────────────────────────────
     def import_videos(self):
         ws = self._sheet("Videos")
         created = updated = skipped = errors = 0
         for row in _rows(ws):
-            title     = _val(ws, row, 1)
+            title = _val(ws, row, 1)
             video_url = _val(ws, row, 2)
             if not title or not video_url:
                 skipped += 1
                 continue
             try:
-                cat_name   = _val(ws, row, 5)
-                category   = VideoCategory.objects.filter(name=cat_name).first() if cat_name else None
+                cat_name = _val(ws, row, 5)
+                category = (
+                    VideoCategory.objects.filter(name=cat_name).first()
+                    if cat_name
+                    else None
+                )
                 video_type = _val(ws, row, 3)
                 if video_type and video_type not in VideoType.values:
                     video_type = None
@@ -264,20 +278,24 @@ class Importer:
                 self.errors.append(f"Videos row {row} ('{title}'): {e}")
                 errors += 1
         self._record("Videos", created, updated, skipped, errors)
-        self._log(f"  Videos            → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  Videos            → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Learn Categories ──────────────────────────────────────────────────────
     def import_learn_categories(self):
         ws = self._sheet("LearnCategories")
         created = updated = skipped = errors = 0
         for row in _rows(ws):
-            name       = _val(ws, row, 1)
+            name = _val(ws, row, 1)
             learn_type = _val(ws, row, 2)
             if not name or not learn_type:
                 skipped += 1
                 continue
             if learn_type not in LearnType.values:
-                self.errors.append(f"LearnCategories row {row}: invalid learn_type '{learn_type}' – must be 'cards' or 'posters'")
+                self.errors.append(
+                    f"LearnCategories row {row}: invalid learn_type '{learn_type}' – must be 'cards' or 'posters'"
+                )
                 errors += 1
                 continue
             try:
@@ -305,22 +323,26 @@ class Importer:
                 self.errors.append(f"LearnCategories row {row} ('{name}'): {e}")
                 errors += 1
         self._record("LearnCategories", created, updated, skipped, errors)
-        self._log(f"  LearnCategories   → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  LearnCategories   → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Learn ─────────────────────────────────────────────────────────────────
     def import_learn(self):
         ws = self._sheet("Learn")
         created = updated = skipped = errors = 0
         for row in _rows(ws):
-            title     = _val(ws, row, 1)
-            cat_name  = _val(ws, row, 2)
+            title = _val(ws, row, 1)
+            cat_name = _val(ws, row, 2)
             if not title or not cat_name:
                 skipped += 1
                 continue
             try:
                 category = LearnCategory.objects.filter(name=cat_name).first()
                 if not category:
-                    self.errors.append(f"Learn row {row}: category '{cat_name}' not found – create it in LearnCategories first")
+                    self.errors.append(
+                        f"Learn row {row}: category '{cat_name}' not found – create it in LearnCategories first"
+                    )
                     errors += 1
                     continue
                 data = dict(
@@ -343,7 +365,9 @@ class Importer:
                 self.errors.append(f"Learn row {row} ('{title}'): {e}")
                 errors += 1
         self._record("Learn", created, updated, skipped, errors)
-        self._log(f"  Learn             → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  Learn             → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Related Reports Categories ────────────────────────────────────────────
     def import_related_reports_categories(self):
@@ -373,7 +397,9 @@ class Importer:
                 self.errors.append(f"RelatedReportsCategories row {row}: {e}")
                 errors += 1
         self._record("RelatedReportsCategories", created, updated, skipped, errors)
-        self._log(f"  RelatedReportsCats→ created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  RelatedReportsCats→ created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Related Reports ───────────────────────────────────────────────────────
     def import_related_reports(self):
@@ -386,7 +412,11 @@ class Importer:
                 continue
             try:
                 cat_title = _val(ws, row, 2)
-                category  = RelatedReportsCategory.objects.filter(title=cat_title).first() if cat_title else None
+                category = (
+                    RelatedReportsCategory.objects.filter(title=cat_title).first()
+                    if cat_title
+                    else None
+                )
                 thumb_urls = _json_list(_val(ws, row, 7), _val(ws, row, 8))
                 data = dict(
                     category=category,
@@ -410,7 +440,9 @@ class Importer:
                 self.errors.append(f"RelatedReports row {row} ('{title}'): {e}")
                 errors += 1
         self._record("RelatedReports", created, updated, skipped, errors)
-        self._log(f"  RelatedReports    → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  RelatedReports    → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Photo Collections ─────────────────────────────────────────────────────
     def import_photo_collections(self):
@@ -422,9 +454,9 @@ class Importer:
                 skipped += 1
                 continue
             try:
-                cover_url    = _val(ws, row, 3)
-                happened_at  = _datetime(_val(ws, row, 4))
-                description  = _val(ws, row, 2) or ""
+                cover_url = _val(ws, row, 3)
+                happened_at = _datetime(_val(ws, row, 4))
+                description = _val(ws, row, 2) or ""
                 if not self.dry_run:
                     obj, was_created = PhotoCollection.objects.update_or_create(
                         title=title,
@@ -438,7 +470,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"PhotoCollections row {row}: could not download cover image from {cover_url}")
+                            self.errors.append(
+                                f"PhotoCollections row {row}: could not download cover image from {cover_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -449,7 +483,9 @@ class Importer:
                 self.errors.append(f"PhotoCollections row {row} ('{title}'): {e}")
                 errors += 1
         self._record("PhotoCollections", created, updated, skipped, errors)
-        self._log(f"  PhotoCollections  → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  PhotoCollections  → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Photos ────────────────────────────────────────────────────────────────
     def import_photos(self):
@@ -465,14 +501,17 @@ class Importer:
             try:
                 collection = PhotoCollection.objects.filter(title=col_title).first()
                 if not collection:
-                    self.errors.append(f"Photos row {row}: collection '{col_title}' not found")
+                    self.errors.append(
+                        f"Photos row {row}: collection '{col_title}' not found"
+                    )
                     errors += 1
                     continue
                 order = _int(order_raw, default=1)
                 caption = _val(ws, row, 3) or ""
                 if not self.dry_run:
                     obj, was_created = Photo.objects.update_or_create(
-                        collection=collection, order=order,
+                        collection=collection,
+                        order=order,
                         defaults=dict(caption=caption),
                     )
                     if not self.skip_images:
@@ -482,7 +521,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"Photos row {row}: could not download image from {image_url}")
+                            self.errors.append(
+                                f"Photos row {row}: could not download image from {image_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -493,7 +534,9 @@ class Importer:
                 self.errors.append(f"Photos row {row}: {e}")
                 errors += 1
         self._record("Photos", created, updated, skipped, errors)
-        self._log(f"  Photos            → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  Photos            → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Latest News ───────────────────────────────────────────────────────────
     def import_latest_news(self):
@@ -524,7 +567,9 @@ class Importer:
                 self.errors.append(f"LatestNews row {row} ('{title}'): {e}")
                 errors += 1
         self._record("LatestNews", created, updated, skipped, errors)
-        self._log(f"  LatestNews        → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  LatestNews        → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Latest News Images ────────────────────────────────────────────────────
     def import_latest_news_images(self):
@@ -532,22 +577,25 @@ class Importer:
         created = updated = skipped = errors = 0
         for row in _rows(ws):
             news_title = _val(ws, row, 1)
-            image_url  = _val(ws, row, 2)
-            order_raw  = _val(ws, row, 4)
+            image_url = _val(ws, row, 2)
+            order_raw = _val(ws, row, 4)
             if not news_title or not image_url:
                 skipped += 1
                 continue
             try:
                 news = LatestNews.objects.filter(title=news_title).first()
                 if not news:
-                    self.errors.append(f"LatestNewsImages row {row}: news '{news_title}' not found")
+                    self.errors.append(
+                        f"LatestNewsImages row {row}: news '{news_title}' not found"
+                    )
                     errors += 1
                     continue
                 order = _int(order_raw, default=1)
                 caption = _val(ws, row, 3) or ""
                 if not self.dry_run:
                     obj, was_created = LatestNewsImage.objects.update_or_create(
-                        latest_news=news, order=order,
+                        latest_news=news,
+                        order=order,
                         defaults=dict(caption=caption),
                     )
                     if not self.skip_images:
@@ -557,7 +605,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"LatestNewsImages row {row}: could not download image from {image_url}")
+                            self.errors.append(
+                                f"LatestNewsImages row {row}: could not download image from {image_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -568,7 +618,9 @@ class Importer:
                 self.errors.append(f"LatestNewsImages row {row}: {e}")
                 errors += 1
         self._record("LatestNewsImages", created, updated, skipped, errors)
-        self._log(f"  LatestNewsImages  → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  LatestNewsImages  → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Event Community ───────────────────────────────────────────────────────
     def import_event_community(self):
@@ -581,9 +633,13 @@ class Importer:
                 continue
             try:
                 learn_title = _val(ws, row, 6)
-                learn = Learn.objects.filter(
-                    title=learn_title, category__learn_type=LearnType.POSTERS
-                ).first() if learn_title else None
+                learn = (
+                    Learn.objects.filter(
+                        title=learn_title, category__learn_type=LearnType.POSTERS
+                    ).first()
+                    if learn_title
+                    else None
+                )
                 guest_speakers = _json_list(
                     _val(ws, row, 7),
                     _val(ws, row, 8),
@@ -611,7 +667,9 @@ class Importer:
                 self.errors.append(f"EventCommunity row {row} ('{title}'): {e}")
                 errors += 1
         self._record("EventCommunity", created, updated, skipped, errors)
-        self._log(f"  EventCommunity    → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  EventCommunity    → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Our Team ──────────────────────────────────────────────────────────────
     def import_our_team(self):
@@ -643,7 +701,9 @@ class Importer:
                 self.errors.append(f"OurTeam row {row} ('{title}'): {e}")
                 errors += 1
         self._record("OurTeam", created, updated, skipped, errors)
-        self._log(f"  OurTeam           → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  OurTeam           → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Our Team Images ───────────────────────────────────────────────────────
     def import_our_team_images(self):
@@ -651,22 +711,25 @@ class Importer:
         created = updated = skipped = errors = 0
         for row in _rows(ws):
             member_title = _val(ws, row, 1)
-            image_url    = _val(ws, row, 2)
-            order_raw    = _val(ws, row, 4)
+            image_url = _val(ws, row, 2)
+            order_raw = _val(ws, row, 4)
             if not member_title or not image_url:
                 skipped += 1
                 continue
             try:
                 member = OurTeam.objects.filter(title=member_title).first()
                 if not member:
-                    self.errors.append(f"OurTeamImages row {row}: team member '{member_title}' not found")
+                    self.errors.append(
+                        f"OurTeamImages row {row}: team member '{member_title}' not found"
+                    )
                     errors += 1
                     continue
                 order = _int(order_raw, default=1)
                 caption = _val(ws, row, 3) or ""
                 if not self.dry_run:
                     obj, was_created = OurTeamImage.objects.update_or_create(
-                        our_team=member, order=order,
+                        our_team=member,
+                        order=order,
                         defaults=dict(caption=caption),
                     )
                     if not self.skip_images:
@@ -676,7 +739,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"OurTeamImages row {row}: could not download image from {image_url}")
+                            self.errors.append(
+                                f"OurTeamImages row {row}: could not download image from {image_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -687,7 +752,9 @@ class Importer:
                 self.errors.append(f"OurTeamImages row {row}: {e}")
                 errors += 1
         self._record("OurTeamImages", created, updated, skipped, errors)
-        self._log(f"  OurTeamImages     → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  OurTeamImages     → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Books ─────────────────────────────────────────────────────────────────
     def import_books(self):
@@ -699,7 +766,7 @@ class Importer:
                 skipped += 1
                 continue
             try:
-                image_url       = _val(ws, row, 3)
+                image_url = _val(ws, row, 3)
                 cover_image_url = _val(ws, row, 4)
                 if not self.dry_run:
                     obj, was_created = Book.objects.update_or_create(
@@ -714,15 +781,22 @@ class Importer:
                             if cf:
                                 obj.image.save(fname, cf, save=True)
                             else:
-                                self.errors.append(f"Books row {row}: could not download image from {image_url}")
+                                self.errors.append(
+                                    f"Books row {row}: could not download image from {image_url}"
+                                )
                         if cover_image_url:
-                            ext = os.path.splitext(cover_image_url.split("?")[0])[1] or ".jpg"
+                            ext = (
+                                os.path.splitext(cover_image_url.split("?")[0])[1]
+                                or ".jpg"
+                            )
                             fname = f"book_cover_{slugify(title)}{ext}"
                             cf = _download_image(cover_image_url, fname)
                             if cf:
                                 obj.cover_image.save(fname, cf, save=True)
                             else:
-                                self.errors.append(f"Books row {row}: could not download cover from {cover_image_url}")
+                                self.errors.append(
+                                    f"Books row {row}: could not download cover from {cover_image_url}"
+                                )
                     if was_created:
                         created += 1
                     else:
@@ -733,7 +807,9 @@ class Importer:
                 self.errors.append(f"Books row {row} ('{title}'): {e}")
                 errors += 1
         self._record("Books", created, updated, skipped, errors)
-        self._log(f"  Books             → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  Books             → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Book Reviews ──────────────────────────────────────────────────────────
     def import_book_reviews(self):
@@ -741,15 +817,17 @@ class Importer:
         created = updated = skipped = errors = 0
         for row in _rows(ws):
             book_title = _val(ws, row, 1)
-            image_url  = _val(ws, row, 2)
-            order_raw  = _val(ws, row, 3)
+            image_url = _val(ws, row, 2)
+            order_raw = _val(ws, row, 3)
             if not book_title or not image_url:
                 skipped += 1
                 continue
             try:
                 book = Book.objects.filter(title=book_title).first()
                 if not book:
-                    self.errors.append(f"BookReviews row {row}: book '{book_title}' not found")
+                    self.errors.append(
+                        f"BookReviews row {row}: book '{book_title}' not found"
+                    )
                     errors += 1
                     continue
                 order = _int(order_raw, default=1)
@@ -764,7 +842,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"BookReviews row {row}: could not download image from {image_url}")
+                            self.errors.append(
+                                f"BookReviews row {row}: could not download image from {image_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -775,7 +855,9 @@ class Importer:
                 self.errors.append(f"BookReviews row {row}: {e}")
                 errors += 1
         self._record("BookReviews", created, updated, skipped, errors)
-        self._log(f"  BookReviews       → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  BookReviews       → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── History Events ────────────────────────────────────────────────────────
     def import_history_events(self):
@@ -783,14 +865,14 @@ class Importer:
         created = updated = skipped = errors = 0
         for row in _rows(ws):
             year_raw = _val(ws, row, 1)
-            title    = _val(ws, row, 3)
+            title = _val(ws, row, 3)
             if not year_raw or not title:
                 skipped += 1
                 continue
             try:
-                year  = _int(year_raw)
+                year = _int(year_raw)
                 month = _int(_val(ws, row, 2), default=1)
-                data  = dict(
+                data = dict(
                     month=month,
                     sub_title_one=_val(ws, row, 4) or "",
                     sub_title_two=_val(ws, row, 5) or "",
@@ -810,18 +892,20 @@ class Importer:
                 self.errors.append(f"HistoryEvents row {row} ('{title}'): {e}")
                 errors += 1
         self._record("HistoryEvents", created, updated, skipped, errors)
-        self._log(f"  HistoryEvents     → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  HistoryEvents     → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── History Event Images ──────────────────────────────────────────────────
     def import_history_event_images(self):
         ws = self._sheet("HistoryEventImages")
         created = updated = skipped = errors = 0
         for row in _rows(ws):
-            event_year  = _val(ws, row, 1)
+            event_year = _val(ws, row, 1)
             event_title = _val(ws, row, 2)
-            image_url   = _val(ws, row, 3)
-            caption     = _val(ws, row, 4)
-            order_raw   = _val(ws, row, 5)
+            image_url = _val(ws, row, 3)
+            caption = _val(ws, row, 4)
+            order_raw = _val(ws, row, 5)
             if not event_year or not event_title or not image_url:
                 skipped += 1
                 continue
@@ -830,13 +914,16 @@ class Importer:
                     year=_int(event_year), title=event_title
                 ).first()
                 if not event:
-                    self.errors.append(f"HistoryEventImages row {row}: event '{event_title}' ({event_year}) not found")
+                    self.errors.append(
+                        f"HistoryEventImages row {row}: event '{event_title}' ({event_year}) not found"
+                    )
                     errors += 1
                     continue
                 order = _int(order_raw, default=1)
                 if not self.dry_run:
                     obj, was_created = HistoryEventImage.objects.update_or_create(
-                        event=event, order=order,
+                        event=event,
+                        order=order,
                         defaults=dict(caption=caption or ""),
                     )
                     if not self.skip_images:
@@ -846,7 +933,9 @@ class Importer:
                         if cf:
                             obj.image.save(fname, cf, save=True)
                         else:
-                            self.errors.append(f"HistoryEventImages row {row}: could not download image from {image_url}")
+                            self.errors.append(
+                                f"HistoryEventImages row {row}: could not download image from {image_url}"
+                            )
                     if was_created:
                         created += 1
                     else:
@@ -857,7 +946,9 @@ class Importer:
                 self.errors.append(f"HistoryEventImages row {row}: {e}")
                 errors += 1
         self._record("HistoryEventImages", created, updated, skipped, errors)
-        self._log(f"  HistoryEventImages→ created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  HistoryEventImages→ created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Social Media ──────────────────────────────────────────────────────────
     def import_social_media(self):
@@ -865,7 +956,7 @@ class Importer:
         created = updated = skipped = errors = 0
         for row in _rows(ws):
             platform = _val(ws, row, 1)
-            url      = _val(ws, row, 2)
+            url = _val(ws, row, 2)
             if not platform or not url:
                 skipped += 1
                 continue
@@ -884,7 +975,9 @@ class Importer:
                 self.errors.append(f"SocialMedia row {row} ('{platform}'): {e}")
                 errors += 1
         self._record("SocialMedia", created, updated, skipped, errors)
-        self._log(f"  SocialMedia       → created={created} updated={updated} skipped={skipped} errors={errors}")
+        self._log(
+            f"  SocialMedia       → created={created} updated={updated} skipped={skipped} errors={errors}"
+        )
 
     # ── Run all ───────────────────────────────────────────────────────────────
     def run(self):
@@ -917,12 +1010,14 @@ class Importer:
 
 # ── Management command ────────────────────────────────────────────────────────
 
+
 class Command(BaseCommand):
     help = "Import content from the Excel entry template into the database."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--file", "-f",
+            "--file",
+            "-f",
             required=True,
             help="Path to the Excel template file (Content_Entry_Template.xlsx)",
         )
@@ -946,35 +1041,53 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        file_path  = options["file"]
-        dry_run    = options["dry_run"]
+        file_path = options["file"]
+        dry_run = options["dry_run"]
         skip_images = options["skip_images"]
-        reset      = options["reset"]
+        reset = options["reset"]
 
         if not os.path.exists(file_path):
             raise CommandError(f"File not found: {file_path}")
 
-        self.stdout.write(self.style.MIGRATE_HEADING("\n═══════════════════════════════════════"))
+        self.stdout.write(
+            self.style.MIGRATE_HEADING("\n═══════════════════════════════════════")
+        )
         self.stdout.write(self.style.MIGRATE_HEADING(" Content Excel Importer"))
-        self.stdout.write(self.style.MIGRATE_HEADING("═══════════════════════════════════════"))
+        self.stdout.write(
+            self.style.MIGRATE_HEADING("═══════════════════════════════════════")
+        )
         self.stdout.write(f" File       : {file_path}")
-        self.stdout.write(f" Dry run    : {'YES – nothing will be saved' if dry_run else 'NO – data will be saved'}")
+        self.stdout.write(
+            f" Dry run    : {'YES – nothing will be saved' if dry_run else 'NO – data will be saved'}"
+        )
         self.stdout.write(f" Skip images: {skip_images}")
         self.stdout.write(f" Reset      : {reset}")
         self.stdout.write("")
 
         if reset and not dry_run:
-            self.stdout.write(self.style.WARNING("⚠  --reset flag detected: deleting all existing content…"))
+            self.stdout.write(
+                self.style.WARNING(
+                    "⚠  --reset flag detected: deleting all existing content…"
+                )
+            )
             models_to_clear = [
-                HistoryEventImage, HistoryEvent,
-                BookReview, Book,
-                OurTeamImage, OurTeam,
+                HistoryEventImage,
+                HistoryEvent,
+                BookReview,
+                Book,
+                OurTeamImage,
+                OurTeam,
                 EventCommunity,
-                LatestNewsImage, LatestNews,
-                Photo, PhotoCollection,
-                RelatedReports, RelatedReportsCategory,
-                Learn, LearnCategory,
-                Video, VideoCategory,
+                LatestNewsImage,
+                LatestNews,
+                Photo,
+                PhotoCollection,
+                RelatedReports,
+                RelatedReportsCategory,
+                Learn,
+                LearnCategory,
+                Video,
+                VideoCategory,
                 SocialMedia,
             ]
             for model in models_to_clear:
@@ -1000,13 +1113,15 @@ class Command(BaseCommand):
 
         # ── Summary ───────────────────────────────────────────────────────────
         self.stdout.write("")
-        self.stdout.write(self.style.MIGRATE_HEADING("═══ Summary ════════════════════════════"))
+        self.stdout.write(
+            self.style.MIGRATE_HEADING("═══ Summary ════════════════════════════")
+        )
         total_created = total_updated = total_skipped = total_errors = 0
         for sheet, counts in importer.summary.items():
             total_created += counts["created"]
             total_updated += counts["updated"]
             total_skipped += counts["skipped"]
-            total_errors  += counts["errors"]
+            total_errors += counts["errors"]
         self.stdout.write(f" Total created : {total_created}")
         self.stdout.write(f" Total updated : {total_updated}")
         self.stdout.write(f" Total skipped : {total_skipped}")
@@ -1014,17 +1129,27 @@ class Command(BaseCommand):
         self.stdout.write("")
 
         if importer.errors:
-            self.stdout.write(self.style.WARNING(f"⚠  {len(importer.errors)} issue(s) encountered:"))
+            self.stdout.write(
+                self.style.WARNING(f"⚠  {len(importer.errors)} issue(s) encountered:")
+            )
             for err in importer.errors:
                 self.stdout.write(self.style.ERROR(f"   • {err}"))
             self.stdout.write("")
 
         if dry_run:
-            self.stdout.write(self.style.WARNING("DRY RUN complete – no data was saved."))
+            self.stdout.write(
+                self.style.WARNING("DRY RUN complete – no data was saved.")
+            )
             self.stdout.write("Re-run without --dry-run to commit the import.")
         else:
             if total_errors == 0:
-                self.stdout.write(self.style.SUCCESS("✓ Import complete with no errors."))
+                self.stdout.write(
+                    self.style.SUCCESS("✓ Import complete with no errors.")
+                )
             else:
-                self.stdout.write(self.style.WARNING(f"Import complete with {total_errors} error(s). Check the list above."))
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Import complete with {total_errors} error(s). Check the list above."
+                    )
+                )
         self.stdout.write("")

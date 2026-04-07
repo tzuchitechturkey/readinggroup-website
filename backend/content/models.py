@@ -44,6 +44,13 @@ class Video(TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     guest_speakers = models.JSONField(default=list, blank=True)
+    base_video = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
 
     @property
     def is_new_computed(self) -> bool:
