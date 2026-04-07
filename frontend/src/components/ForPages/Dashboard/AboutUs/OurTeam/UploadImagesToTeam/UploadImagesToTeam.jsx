@@ -9,7 +9,7 @@ import Loader from "@/components/Global/Loader/Loader";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import ImageSection from "@/components/ForPages/Dashboard/Events/PhotoCollection/CreateOrEditPhotoCollection/PhotoCollectionForm/ImageSection";
 
-const UploadImagesToTeam = ({ onSectionChange, news }) => {
+const UploadImagesToTeam = ({ onSectionChange, team }) => {
   const { t } = useTranslation();
 
   // Images state
@@ -18,37 +18,37 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   const [deletedPhotoIds, setDeletedPhotoIds] = useState([]);
   const [errors, setErrors] = useState({});
 
-  // News selection state
-  const [newsList, setNewsList] = useState([]);
-  const [selectedNewsItem, setSelectedNewsItem] = useState(null);
+  // Team selection state
+  const [teamList, setTeamList] = useState([]);
+  const [selectedTeamItem, setSelectedTeamItem] = useState(null);
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch news list
+  // Fetch team list
   useEffect(() => {
-    handleGetNewsList();
+    handleGetTeamList();
   }, []);
 
-  // Initialize edit mode with news data
+  // Initialize edit mode with team data
   useEffect(() => {
-    if (news && news.id) {
-      // Set selected news item
-      setSelectedNewsItem({
-        id: news.id,
-        title: news.title,
+    if (team && team.id) {
+      // Set selected team item
+      setSelectedTeamItem({
+        id: team.id,
+        title: team.title,
       });
 
       // Set existing images - احتفظ بالكائن الكامل مع id
-      if (news.images && news.images.length > 0) {
-        setImages(news.images);
+      if (team.images && team.images.length > 0) {
+        setImages(team.images);
       }
     }
-  }, [news]);
+  }, [team]);
 
   // Handler functions
   const handleNewImagesChange = (files) => {
-    const MAX_IMAGES = news?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
+    const MAX_IMAGES = team?.id ? 28 : 6; // 28 for edit mode, 6 for create mode
     const totalImages = images.length + files.length;
 
     if (totalImages > MAX_IMAGES) {
@@ -88,16 +88,16 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleGetNewsList = async (search = "") => {
+  const handleGetTeamList = async (search = "") => {
     try {
       const res = await GetTeam(10, 0, search);
-      const newsData = res.data.results.map((news) => ({
-        id: news.id,
-        title: news.title,
+      const teamData = res.data.results.map((team) => ({
+        id: team.id,
+        title: team.title,
       }));
-      setNewsList(newsData);
+      setTeamList(teamData);
     } catch (err) {
-      console.error("Error fetching news:", err);
+      console.error("Error fetching team:", err);
       setErrorFn(err, t);
     }
   };
@@ -106,8 +106,8 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!selectedNewsItem?.id) {
-      newErrors.news = t("News is required");
+    if (!selectedTeamItem?.id) {
+      newErrors.team = t("Team is required");
     }
 
     if (images.length === 0 && newImages.length === 0) {
@@ -154,14 +154,14 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
           }
         });
 
-        await AddImagesToTeam(selectedNewsItem.id, imageFormData);
+        await AddImagesToTeam(selectedTeamItem.id, imageFormData);
       }
 
       toast.success(t("Images added successfully"));
       setDeletedPhotoIds([]);
       onSectionChange("team");
     } catch (error) {
-      console.error("Error adding images to news:", error);
+      console.error("Error adding images to team:", error);
 
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -175,11 +175,11 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
   };
 
   const handleCancel = () => {
-    onSectionChange("news");
+    onSectionChange("team");
   };
 
-  const MAX_IMAGES = news?.id ? 28 : 6;
-  const isEditMode = Boolean(news?.id);
+  const MAX_IMAGES = team?.id ? 28 : 6;
+  const isEditMode = Boolean(team?.id);
 
   return (
     <div className="bg-white rounded-lg pt-3">
@@ -201,22 +201,22 @@ const UploadImagesToTeam = ({ onSectionChange, news }) => {
           />
         </div>
 
-        {/* News Selection */}
+        {/* Team Selection */}
         <div className="px-4 py-3">
           <AutoComplete
-            label={t("News")}
-            placeholder={t("Select a news item")}
-            selectedItem={selectedNewsItem}
+            label={t("Team")}
+            placeholder={t("Select a team item")}
+            selectedItem={selectedTeamItem}
             onSelect={(item) => {
-              setSelectedNewsItem(item);
-              setErrors((prev) => ({ ...prev, news: null }));
+              setSelectedTeamItem(item);
+              setErrors((prev) => ({ ...prev, team: null }));
             }}
-            onClear={() => !isEditMode && setSelectedNewsItem(null)}
-            list={newsList}
-            searchMethod={handleGetNewsList}
+            onClear={() => !isEditMode && setSelectedTeamItem(null)}
+            list={teamList}
+            searchMethod={handleGetTeamList}
             searchApi={!isEditMode}
-            searchPlaceholder={t("Search news...")}
-            error={errors.news}
+            searchPlaceholder={t("Search team...")}
+            error={errors.team}
             required={true}
             renderItemLabel={(item) => item.title || item.name || ""}
             disabled={isEditMode}

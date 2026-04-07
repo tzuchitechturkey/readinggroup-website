@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import RevisitCard from "../shared/RevisitCard";
 
-export default function ScrollCards({ items, t }) {
+export default function ScrollCards({ items, t, direction }) {
   const [api, setApi] = useState(null);
   const [current, setCurrent] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState([]);
@@ -49,7 +49,7 @@ export default function ScrollCards({ items, t }) {
       api.off("select", updateCurrent);
     };
   }, [api]);
-
+  console.log(items, "Items passed to ScrollCards");
   return (
     <div className="w-full">
       <div className="group relative px-5">
@@ -63,14 +63,16 @@ export default function ScrollCards({ items, t }) {
           className="w-full"
         >
           <CarouselContent className="-ml-4 md:-ml-5">
-            {items.map((item) => (
-              <CarouselItem
-                key={item.id}
-                className="pl-4 md:pl-5 basis-1/2 md:basis-1/2 lg:basis-1/4"
-              >
-                <RevisitCard item={item} t={t} />
-              </CarouselItem>
-            ))}
+            {items.map((item) => {
+              return (
+                <CarouselItem
+                  key={item.id}
+                  className={`pl-4 md:pl-5 ${direction === "horizontal" ? "basis-1/2 md:basis-1/2" : "basis-1/2 md:basis-1/2 lg:basis-1/4"}`}
+                >
+                  <RevisitCard item={item} t={t} />
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
 
           {/* Navigation Buttons - Hidden by default, shown on hover */}

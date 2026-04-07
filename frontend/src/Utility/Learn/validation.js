@@ -1,12 +1,16 @@
 export const validateForm = (formData, t, post) => {
   const newErrors = {};
 
-  if (!formData.title.trim()) {
-    newErrors.title = t("Title is required");
-  }
+  const learnType = formData.learn_type || formData?.category?.learn_type;
 
-  if (!formData.subtitle.trim()) {
-    newErrors.subtitle = t("Subtitle is required");
+  if (learnType === "posters") {
+    if (!formData.title.trim()) {
+      newErrors.title = t("Title is required");
+    }
+
+    if (!formData.subtitle.trim()) {
+      newErrors.subtitle = t("Subtitle is required");
+    }
   }
 
   if (!formData.category) {

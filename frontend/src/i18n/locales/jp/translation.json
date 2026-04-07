@@ -1907,5 +1907,19 @@
   "Add/Edit History": "歴史の追加/編集",
   "Roles": "役割",
   "Manage Users": "ユーザー管理",
-  "": ""
+  "posters": "ポスター",
+  "Team is required": "チームは必須です",
+  "Select a team item": "チーム項目を選択してください",
+  "Search team...": "チームを検索...",
+  "Latest News updated successfully": "最新ニュースが正常に更新されました",
+  "Latest News created successfully": "最新ニュースが正常に作成されました",
+  "Latest News Title": "最新ニュースのタイトル",
+  "Latest News Date": "最新ニュースの日付",
+  "Latest News deleted successfully": "最新ニュースが正常に削除されました",
+  "Latest News is required": "最新ニュースは必須です",
+  "Some images could not be deleted. Please refresh and try again.": "一部の画像を削除できませんでした。リフレッシュして再試行してください。",
+  "Images updated successfully": "画像が正常に更新されました",
+  "Select a latest news item": "最新ニュース項目を選択してください",
+  "Search latest news...": "最新ニュースを検索...",
+  "Latest News not found": "最新ニュースが見つかりません"
 }

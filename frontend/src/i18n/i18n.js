@@ -32,7 +32,7 @@ const resources = {
 
 const language = localStorage?.getItem("I18N_LANGUAGE");
 if (!language) {
-  localStorage.setItem("I18N_LANGUAGE", "en");
+  localStorage.setItem("I18N_LANGUAGE", "chsi");
 }
 
 i18n
@@ -40,8 +40,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("I18N_LANGUAGE") || "en",
-    fallbackLng: "en",
+    lng: localStorage.getItem("I18N_LANGUAGE") || "chsi",
+    fallbackLng: "chsi",
 
     keySeparator: false,
 

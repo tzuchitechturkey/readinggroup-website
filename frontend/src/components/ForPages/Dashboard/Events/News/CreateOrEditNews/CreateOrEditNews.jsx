@@ -102,8 +102,8 @@ const CreateOrEditNews = ({
 
       toast.success(
         isEdit
-          ? t("News updated successfully")
-          : t("News created successfully"),
+          ? t("Latest News updated successfully")
+          : t("Latest News created successfully"),
       );
       setUpdate((prev) => !prev);
       setOpenCreateOrEditModal(false);

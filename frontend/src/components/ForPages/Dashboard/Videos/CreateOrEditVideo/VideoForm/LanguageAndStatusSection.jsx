@@ -11,7 +11,7 @@ export const LanguageAndStatusSection = ({
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-2 gap-4  pt-4 ">
+    <div className="grid grid-cols-1 gap-4  pt-1 ">
       {/* Language */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">

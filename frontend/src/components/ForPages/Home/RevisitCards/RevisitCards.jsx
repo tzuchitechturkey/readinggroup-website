@@ -97,7 +97,7 @@ const RevisitCards = ({ t }) => {
         </div>
 
         {/* Cards Carousel */}
-        {!isLoading && items.length > 0 && <ScrollCards items={items} t={t} />}
+        {!isLoading && items.length > 0 && <ScrollCards items={items} t={t} direction={activeCategory?.direction} />}
 
         {/* Loading State */}
         {isLoading && (

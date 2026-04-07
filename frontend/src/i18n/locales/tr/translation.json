@@ -1899,5 +1899,19 @@
   "Add/Edit History": "Tarihi Ekle/Düzenle",
   "Roles": "Roller",
   "Manage Users": "Kullanıcıları Yönet",
-  "": ""
+  "posters": "Afişler",
+  "Team is required": "Takım gereklidir",
+  "Select a team item": "Bir takım öğesi seçin",
+  "Search team...": "Takımı ara...",
+  "Latest News updated successfully": "Son Haberler başarıyla güncellendi",
+  "Latest News created successfully": "Son Haberler başarıyla oluşturuldu",
+  "Latest News Title": "Son Haberler Başlığı",
+  "Latest News Date": "Son Haberler Tarihi",
+  "Latest News deleted successfully": "Son Haberler başarıyla silindi",
+  "Latest News is required": "Son Haberler gereklidir",
+  "Some images could not be deleted. Please refresh and try again.": "Bazı resimler silinemedi. Lütfen sayfayı yenileyin ve tekrar deneyin.",
+  "Images updated successfully": "Resimler başarıyla güncellendi",
+  "Select a latest news item": "Son haber öğesini seçin",
+  "Search latest news...": "Son haberleri ara...",
+  "Latest News not found": "Son haber bulunamadı"
 }

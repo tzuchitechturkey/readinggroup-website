@@ -77,7 +77,7 @@ const NewsDetailsPageContent = () => {
   if (!news) {
     return (
       <div className="min-h-screen bg-[#D7EAFF] flex items-center justify-center">
-        <p className="text-[#285688] text-lg">{t("News not found")}</p>
+        <p className="text-[#285688] text-lg">{t("Latest News not found")}</p>
       </div>
     );
   }

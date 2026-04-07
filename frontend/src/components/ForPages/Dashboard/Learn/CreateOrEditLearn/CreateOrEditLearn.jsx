@@ -1,6 +1,5 @@
 import React from "react";
 
-
 import Loader from "@/components/Global/Loader/Loader";
 import { useCreateOrEditLearn } from "@/hooks/learn/useLearnForm";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
@@ -10,6 +9,7 @@ import BasicDetailsSection from "./BasicDetailsSection";
 import FormActionsSection from "./FormActionsSection";
 
 function CreateOrEditLearn({ onSectionChange, learn = null }) {
+  console.log("Learn data in form:", learn);
   const {
     // Form state
     formData,

@@ -255,13 +255,14 @@ function OurTeamList({ onSectionChange }) {
                       {/* Start Description */}
                       <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-xs">
                         <p
-                          className="text-sm text-center text-gray-900 truncate"
-                          title={member.description}
-                        >
-                          {member.description.length > 60
-                            ? `${member.description.substring(0, 60)}...`
-                            : member.description}
-                        </p>
+                          className="text-sm text-center text-gray-900 line-clamp-2"
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              member.description.length > 120
+                                ? member.description.substring(0, 120) + "..."
+                                : member.description,
+                          }}
+                        />
                       </TableCell>
                       {/* End Description */}
                       {/* Start Is Heart */}

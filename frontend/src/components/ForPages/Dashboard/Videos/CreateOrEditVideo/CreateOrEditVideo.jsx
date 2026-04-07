@@ -21,7 +21,7 @@ import {
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();
-
+  console.log("Video prop:", video); // Debugging line to check the video prop
   const {
     formData,
     hasChanges,
@@ -52,7 +52,7 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
     handlePreviewFile,
     handleClosePreview,
   } = useCreateOrEditVideo(video, onSectionChange);
-  // console.log("Form Data:", formData); // Debugging line to check form data
+  console.log("Form Data:", formData); // Debugging line to check form data
   return (
     <div
       className="bg-white rounded-lg p-3 lg:p-6 w-full mx-4 overflow-y-auto"
@@ -66,22 +66,17 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <VideoUrlAndDateSection
+          formData={formData}
+          onInputChange={handleInputChange}
+          onFetchYouTube={handleFetchYouTubeInfo}
+          isFetchingYoutube={isFetchingYoutube}
+          errors={errors}
+        />
         {/* Thumbnail URL Section */}
         <ImageUploadSection formData={formData} t={t} />
         {/* End Thumbnail URL Section */}
-        {/* Start Attachments Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            {t("Attachments")}
-          </h2>
-          <AttachmentsSection
-            t={t}
-            formData={formData}
-            setShowAttachmentsModal={setShowAttachmentsModal}
-            handleRemoveAttachment={handleRemoveAttachment}
-            handlePreviewFile={handlePreviewFile}
-          />
-        </div>
+
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -102,28 +97,11 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
               onCategoryDropdownToggle={setShowCategoryDropdown}
               errors={errors}
             />
-            {/* Start Guest Speakers */}
-            <CastSection
-              guestSpeakers={formData?.guest_speakers}
-              guestSpeakersInput={guestSpeakersInput}
-              onGuestSpeakersInputChange={setGuestSpeakersInput}
-              onGuestSpeakersInputKeyPress={handleGuestSpeakersInput}
-              onGuestSpeakersRemove={removeGuestSpeaker}
-              error={errors?.guest_speakers}
-            />
-            {/* End Guest Speakers */}
           </div>
 
           {/* Right Column */}
           <div className="space-y-4 ">
             {/* Video URL and Date */}
-            <VideoUrlAndDateSection
-              formData={formData}
-              onInputChange={handleInputChange}
-              onFetchYouTube={handleFetchYouTubeInfo}
-              isFetchingYoutube={isFetchingYoutube}
-              errors={errors}
-            />
 
             {/* Language and Status */}
             <div className="">
@@ -161,6 +139,29 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
           />
         )}
 
+        {/* Start Attachments Section */}
+        <div className="mb-8">
+          {/* Start Guest Speakers */}
+          <CastSection
+            guestSpeakers={formData?.guest_speakers}
+            guestSpeakersInput={guestSpeakersInput}
+            onGuestSpeakersInputChange={setGuestSpeakersInput}
+            onGuestSpeakersInputKeyPress={handleGuestSpeakersInput}
+            onGuestSpeakersRemove={removeGuestSpeaker}
+            error={errors?.guest_speakers}
+          />
+          {/* End Guest Speakers */}
+          <h2 className="text-xl font-semibold text-gray-800 my-4">
+            {t("Attachments")}
+          </h2>
+          <AttachmentsSection
+            t={t}
+            formData={formData}
+            setShowAttachmentsModal={setShowAttachmentsModal}
+            handleRemoveAttachment={handleRemoveAttachment}
+            handlePreviewFile={handlePreviewFile}
+          />
+        </div>
         {/* Form Actions */}
         <FormActionsSection
           isLoading={isLoading}

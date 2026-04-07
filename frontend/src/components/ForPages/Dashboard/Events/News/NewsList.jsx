@@ -100,7 +100,7 @@ const NewsList = ({ onSectionChange }) => {
     setIsLoading(true);
     try {
       await DeleteLatestNewsById(selectedNews.id);
-      toast.success(t("News deleted successfully"));
+      toast.success(t("Latest News deleted successfully"));
       setShowDeleteModal(false);
       setSelectedNews(null);
       setUpdate((prev) => !prev);
@@ -135,7 +135,7 @@ const NewsList = ({ onSectionChange }) => {
         </h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
-            {t("Total")}: {totalRecords} {t("news")}
+            {t("Total")}: {totalRecords} {t("Latest News")}
           </span>
           <button
             onClick={() => {

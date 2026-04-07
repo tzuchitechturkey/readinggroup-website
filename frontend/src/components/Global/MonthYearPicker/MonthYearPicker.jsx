@@ -223,15 +223,16 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
                     key={mShort}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMonthSelect(index);
+                      if (hasEvents) handleMonthSelect(index);
                     }}
+                    disabled={!hasEvents}
                     className={cn(
                       "flex items-center justify-center px-[10px] py-[4px] rounded-[42px] transition-all border w-full h-[32px] relative",
                       isSelected
                         ? "border-[#285688] text-[#285688] font-semibold border-solid"
                         : hasEvents
                           ? "border-transparent text-[#081945] hover:bg-gray-100 hover:text-[#285688]"
-                          : "border-transparent text-[#92A5B8] hover:bg-gray-100 hover:text-[#285688]",
+                          : "border-transparent text-[#92A5B8] cursor-not-allowed opacity-50",
                     )}
                   >
                     <span className="text-[16px] font-normal leading-[1.5] font-noto">

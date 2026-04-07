@@ -8,6 +8,7 @@ function CategorySelectionDropdown({
   showDropdown,
   onToggleDropdown,
   selectedCategoryId,
+  selectedCategoryName,
   categoriesList,
   categorySearchValue,
   onSearchChange,
@@ -43,7 +44,7 @@ function CategorySelectionDropdown({
             <Tag className="w-5 h-5 text-blue-600" />
             <div className="flex-1">
               <div className="font-medium text-sm">
-                {selectedCategory?.name || t("Select Category")}
+                {selectedCategory?.name || selectedCategoryName || t("Select Category")}
               </div>
             </div>
           </>

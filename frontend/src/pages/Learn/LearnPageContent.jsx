@@ -30,7 +30,7 @@ const LearnPageContent = () => {
   // Pagination State
   const [paginationData, setPaginationData] = useState({
     page: 0,
-    limit: 24,
+    limit: 12,
     totalCount: 0,
     hasMoreItems: false,
   });
@@ -76,7 +76,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -96,10 +96,10 @@ const LearnPageContent = () => {
     }
     try {
       const params = { created_at: happenedAt };
-      const res = await GetLearnsByCategoryId(categoryId, 24, offset, params);
+      const res = await GetLearnsByCategoryId(categoryId, 12, offset, params);
       const newItems = res.data.results || [];
       const totalCount = res.data.count || 0;
-      const hasMoreItems = offset + 24 < totalCount;
+      const hasMoreItems = offset + 12 < totalCount;
 
       if (appendMode) {
         // Append new items when loading more
@@ -110,8 +110,8 @@ const LearnPageContent = () => {
       }
 
       setPaginationData({
-        page: Math.floor(offset / 24),
-        limit: 24,
+        page: Math.floor(offset / 12),
+        limit: 12,
         totalCount,
         hasMoreItems,
       });
@@ -158,7 +158,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -207,7 +207,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -223,7 +223,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -376,9 +376,9 @@ const LearnPageContent = () => {
             {sortedAndFilteredItems.length > 0 && (
               <Pagination
                 currentPage={paginationData.page + 1}
-                totalPages={Math.ceil(paginationData.totalCount / 24) || 1}
+                totalPages={Math.ceil(paginationData.totalCount / 12) || 1}
                 onPageChange={(newPage) => {
-                  const newOffset = (newPage - 1) * 24;
+                  const newOffset = (newPage - 1) * 12;
                   let happenedAt = null;
                   if (filters.date.month && filters.date.year) {
                     const month = String(filters.date.month).padStart(2, "0");
