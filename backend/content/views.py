@@ -376,27 +376,6 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
         )
         return context
 
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder VideoCategories based on provided order.
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    VideoCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LearnViewSet(viewsets.ModelViewSet):
     """ViewSet for managing Learn content with multi-language support."""
