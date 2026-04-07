@@ -7,7 +7,7 @@ import Pagination from "@/components/Global/PagePagination/PagePagination";
 import VerticalCard from "@/components/ForPages/Learn/VerticalCard";
 import HorizontalCard from "@/components/ForPages/Learn/HorizontalCard";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
-import { GetLearnCategories, GetLearnsByCategoryId } from "@/api/learn";
+import { GetLearnCategories, GetLearnsByCategoryId, IncrementLearnViews } from "@/api/learn";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import LearnFilterBar from "@/components/ForPages/Learn/LearnFilterBar";
@@ -234,6 +234,10 @@ const LearnPageContent = () => {
   const openViewer = (index) => {
     setCurrentImageIndex(index);
     setIsViewerOpen(true);
+    const item = sortedAndFilteredItems[index];
+    if (item?.id) {
+      IncrementLearnViews(item.id).catch(() => {});
+    }
   };
 
   const closeViewer = () => {

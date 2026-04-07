@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
+import { IncrementLearnViews } from "@/api/learn";
 
 const PosterCard = ({ poster, t }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -55,6 +56,7 @@ const PosterCard = ({ poster, t }) => {
               {/* Learn More Button */}
               <button
                 onClick={() => {
+                  if (poster?.id) IncrementLearnViews(poster.id).catch(() => {});
                   setIsViewerOpen(true);
                 }}
                 className="bg-[#285688] border-none outline-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[4px]  "
@@ -65,6 +67,7 @@ const PosterCard = ({ poster, t }) => {
               </button>
               <button
                 onClick={() => {
+                  if (poster?.id) IncrementLearnViews(poster.id).catch(() => {});
                   setIsViewerOpen(true);
                 }}
                 className="bg-[#fff] flex lg:hidden items-center gap-1 border-none p-[8px] px-3 md:p-[11px] lg:p-[12px] rounded-[6px] sm:rounded-[7px] md:rounded-[8px] lg:rounded-[8px] hover:bg-[#404040] transition-colors"

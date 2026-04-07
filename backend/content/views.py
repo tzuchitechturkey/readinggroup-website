@@ -3,6 +3,7 @@ from collections import defaultdict
 from django.conf import settings
 from django.db.models import Count, F, Max
 from rest_framework import viewsets, filters, status
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -420,13 +421,6 @@ class LearnViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        Learn.objects.filter(pk=instance.pk).update(views=F("views") + 1)
-        instance.refresh_from_db()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
     def get_queryset(self):
         queryset = super().get_queryset().select_related("category")
         params = self.request.query_params
@@ -558,6 +552,20 @@ class LearnViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(poster_learn, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_summary="Increment learn views",
+        operation_description="Increment the view count of a learn item by 1. Called when user clicks View Details or Learn More.",
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="increment-views",
+        permission_classes=[AllowAny],
+    )
+    def increment_views(self, request, pk=None):
+        Learn.objects.filter(pk=pk).update(views=F("views") + 1)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LearnCategoryViewSet(viewsets.ModelViewSet):

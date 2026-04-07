@@ -107,3 +107,7 @@ export async function GetLearnsByType(type, params) {
     params,
   });
 }
+
+export async function IncrementLearnViews(id) {
+  return await axios.post(`/learn/${id}/increment-views/`);
+}
