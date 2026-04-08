@@ -350,21 +350,49 @@ class VideoViewSet(viewsets.ModelViewSet):
         # Get the current video instance
         video = self.get_object()
 
+        requested_languages = self._parse_requested_languages(request)
+        base_video_id = video.base_video_id or video.id
+
         # Get all videos with the same category_id, excluding the current video
+        qs = Video.objects.filter(
+            category_id=video.category_id,
+            category__is_active=True,
+            base_video__isnull=True,
+        ).exclude(id=base_video_id)
+
+        if requested_languages:
+            qs = qs.filter(
+                Q(language__in=requested_languages)
+                | Q(translations__language__in=requested_languages)
+            ).distinct()
+
         qs = (
-            self.get_queryset()
-            .filter(category_id=video.category_id, category__is_active=True)
-            .exclude(id=video.id)
+            qs.select_related("category")
+            .prefetch_related("attachments")
             .order_by("-views")
         )
 
         page = self.paginate_queryset(qs)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            data = VideoMultiLangSerializer(
+                page,
+                many=True,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
+            ).data
+            return self.get_paginated_response(data)
 
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = VideoMultiLangSerializer(
+            qs,
+            many=True,
+            context={
+                "request": request,
+                "requested_languages": requested_languages,
+            },
+        ).data
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class VideoCategoryViewSet(viewsets.ModelViewSet):
