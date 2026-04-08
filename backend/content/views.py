@@ -170,11 +170,7 @@ class VideoViewSet(viewsets.ModelViewSet):
             for item in language:
                 values.extend([v.strip() for v in item.split(",") if v.strip()])
             if values:
-                # List returns only base videos, but we want filtering to match
-                # either the base language OR any translation language.
-                queryset = queryset.filter(
-                    Q(language__in=values) | Q(translations__language__in=values)
-                ).distinct()
+                queryset = queryset.filter(language__in=values)
 
         category = params.get("category")
         if category:
