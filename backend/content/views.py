@@ -424,6 +424,10 @@ class LearnViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset().select_related("category")
         params = self.request.query_params
 
+        # Exclude learns that belong to inactive categories from list/search/filter.
+        if getattr(self, "action", None) == "list":
+            queryset = queryset.filter(category__is_active=True)
+
         if params.get("search"):
             return queryset.order_by("happened_at")
 
