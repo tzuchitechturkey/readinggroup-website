@@ -358,11 +358,10 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
 
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <a
-                      disabled={!event?.live_stream_link}
-                      className={`flex items-center w-fit gap-1 mx-auto cursor-pointer rounded-md p-3 text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]"}`}
-                      href={event.live_stream_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      className={`flex items-center w-fit gap-1 mx-auto rounded-md p-3 text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF] cursor-pointer" : "bg-[#C2DCF7] text-[#92A5B8] cursor-not-allowed pointer-events-none"}`}
+                      href={event?.live_stream_link || undefined}
+                      target={event?.live_stream_link ? "_blank" : undefined}
+                      rel={event?.live_stream_link ? "noopener noreferrer" : undefined}
                     >
                       <Radio className="w-4 h-4" />
                       <span>{t("Livestream Link")}</span>
