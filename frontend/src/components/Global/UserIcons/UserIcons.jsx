@@ -7,8 +7,6 @@ import { useIsMobile } from "@/hooks/global/use-mobile";
 import LanguageDropdown from "@/components/Global/LanguageDropdown/LanguageDropdown";
 import UserProfileDropdown from "@/components/Global/UserProfileDropdown/UserProfileDropdown";
 
-import SearchItem from "../SearchItem/SearchItem";
-
 function UserIcons() {
   const { t, i18n } = useTranslation();
   const isLoggedIn = Boolean(localStorage.getItem("accessToken"));

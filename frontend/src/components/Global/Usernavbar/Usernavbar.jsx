@@ -15,7 +15,6 @@ function Usernavbar({ isHome = false }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [siteInfo, setSiteInfo] = useState({});
   const [expandedMenus, setExpandedMenus] = useState({});
   const [categoryContents, setCategoryContents] = useState({});
   const [loadingContents, setLoadingContents] = useState({});

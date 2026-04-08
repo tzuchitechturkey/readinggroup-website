@@ -39,14 +39,16 @@ export async function DeleteLearnById(id) {
 }
 
 // Categories
-export async function GetLearnCategories(limit = 20, offset = 0, search = "") {
+export async function GetLearnCategories(
+  limit = 20,
+  offset = 0,
+  search = "",
+  isActive,
+) {
   return await axios.get(
-    `/learn-categories/?limit=${limit}&offset=${offset}&search=${search}`,
+    // Add is_active filter if provided
+    `/learn-categories/?limit=${limit}&offset=${offset}&search=${search}${isActive !== undefined ? `&is_active=${isActive}` : ""}`,
   );
-}
-
-export async function SortLearnCategories(data) {
-  return await axios.post(`/learn-categories/reorder/`, data);
 }
 
 export async function AddLearnCategory(data) {
@@ -80,7 +82,7 @@ export async function GetLearnsByCategoryId(
 
 export async function GetLearnCategoriesByType(type, search = "") {
   return await axios.get(
-    `/learn-categories/?learn_type=${type}&search=${search}`,
+    `/learn-categories/?learn_type=${type}&search=${search}&is_active=True`,
   );
 }
 

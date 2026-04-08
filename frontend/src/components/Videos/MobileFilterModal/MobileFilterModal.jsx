@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { X, ChevronDown } from "lucide-react";
+import { languages } from "@/constants/constants";
 
 function MobileFilterModal({
   isOpen,
@@ -18,6 +19,7 @@ function MobileFilterModal({
   appliedDateFilter,
   onResetFilters,
   onApplyFilters, // Add this optional unified callback
+  onLanguageChange,
 }) {
   const { t, i18n } = useTranslation();
   const [localFilters, setLocalFilters] = useState(filters);
@@ -51,6 +53,7 @@ function MobileFilterModal({
     // Call individual handlers if they exist
     onVideoTypeChange?.(localFilters.videoType[0]);
     onSortByChange?.(localFilters.sortBy);
+    onLanguageChange?.(localFilters.language);
 
     if (localFilters.date.month !== null) {
       onDateMonthSelect?.(localFilters.date.month);
@@ -327,6 +330,41 @@ function MobileFilterModal({
                     </div>
                     <span className="text-[14px] font-noto-sans text-[#285688]">
                       {t(option.label)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Language Filter */}
+            <div className="space-y-[16px]">
+              <h3 className="text-[16px] font-bold text-[#081945] font-noto-sans uppercase">
+                {t("Language")}
+              </h3>
+              <div className="space-y-[12px]">
+                {Object.keys(languages).map((lang) => (
+                  <label
+                    key={lang.code}
+                    className="flex items-center gap-[12px] cursor-pointer group"
+                  >
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="radio"
+                        name="language"
+                        value={lang.code}
+                        checked={localFilters.language === lang.code}
+                        onChange={() =>
+                          setLocalFilters((prev) => ({
+                            ...prev,
+                            language: lang.code,
+                          }))
+                        }
+                        className="peer appearance-none w-[20px] h-[20px] rounded-full border border-[#285688] bg-transparent cursor-pointer"
+                      />
+                      <div className="hidden peer-checked:block absolute w-[12px] h-[12px] rounded-full bg-[#285688]" />
+                    </div>
+                    <span className="text-[14px] font-noto-sans text-[#285688]">
+                      {lang.label}
                     </span>
                   </label>
                 ))}

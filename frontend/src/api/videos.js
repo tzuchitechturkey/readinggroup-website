@@ -22,7 +22,7 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
 
   if (params.search) queryParams.append("search", params.search);
   if (params.video_type) queryParams.append("video_type", params.video_type);
-  // if (params.language) queryParams.append("language", params.language);
+  if (params.language) queryParams.append("language", params.language);
   if (params.category) {
     // Handle categories as array or single value
     // if (Array.isArray(params.category)) {
@@ -66,9 +66,14 @@ export async function DeleteVideoById(id) {
 }
 
 // /video-categories/
-export async function GetVideoCategories(limit = 10, offset = 0, search = "") {
+export async function GetVideoCategories(
+  limit = 10,
+  offset = 0,
+  search = "",
+  isActive,
+) {
   return await axios.get(
-    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`,
+    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}${isActive !== undefined ? `&is_active=${isActive}` : ""}`,
   );
 }
 

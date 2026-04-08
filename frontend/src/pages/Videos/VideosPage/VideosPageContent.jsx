@@ -14,6 +14,33 @@ import VideoSearchBar from "@/components/Videos/VideoSearchBar/VideoSearchBar";
 import CategoryCarousel from "@/components/Videos/CategoryCarousel/CategoryCarousel";
 import MobileFilterModal from "@/components/Videos/MobileFilterModal/MobileFilterModal";
 import { GetVideoCategories, GetVideosByFilter } from "@/api/videos";
+import LanguageFilter from "@/components/Videos/LanguageFilter/LanguageFilter";
+
+// Map i18n language code → video API language code
+const I18N_TO_VIDEO_LANG = {
+  en: "en",
+  tr: "tr",
+  ch: "zh-hant",
+  chsi: "zh-hans",
+  jp: "jp",
+};
+
+/**
+ * Extract the flat video object for the requested language from the multi-lang
+ * API response shape: { id, [lang]: { ...videoFields } }
+ */
+function normalizeVideoByLang(item, lang) {
+  if (!item || typeof item !== "object") return null;
+  // Already flat (pre-migration format)
+  if (item.title !== undefined) return item;
+  const langData = item[lang];
+  if (langData && typeof langData === "object") return langData;
+  // Fallback: first non-id key that is an object
+  const fallbackKey = Object.keys(item).find(
+    (k) => k !== "id" && item[k] && typeof item[k] === "object",
+  );
+  return fallbackKey ? item[fallbackKey] : null;
+}
 
 function VideosPageContent() {
   const { i18n, t } = useTranslation();
@@ -22,6 +49,13 @@ function VideosPageContent() {
   const isMobile = useIsMobile(991);
   const initialLoadRef = useRef(false);
   const allowUrlUpdateRef = useRef(false);
+
+  // Resolve default language from i18n
+  const defaultLanguage =
+    I18N_TO_VIDEO_LANG[i18n.language] ||
+    (Object.keys(languages).some((l) => l === i18n.language)
+      ? i18n.language
+      : "en");
 
   // State management
   const [filteredVideos, setFilteredVideos] = useState([]);
@@ -32,6 +66,7 @@ function VideosPageContent() {
     videoType: ["all"],
     date: { year: 2026, month: null },
     sortBy: "newest",
+    language: defaultLanguage,
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSearchTerm, setActiveSearchTerm] = useState("");
@@ -52,6 +87,7 @@ function VideosPageContent() {
     videoType: false,
     date: false,
     sortBy: false,
+    language: false,
   });
 
   // Helper function to fetch with explicit parameters
@@ -108,6 +144,11 @@ function VideosPageContent() {
         filterParams.category = categoriesToUse;
       }
 
+      // Language filter — always send (has a default value)
+      const langToUse =
+        passedFilters.language || filters.language || defaultLanguage;
+      filterParams.language = langToUse;
+
       const res = await GetVideosByFilter(
         pagination.limit,
         offset,
@@ -116,23 +157,28 @@ function VideosPageContent() {
 
       // Handle API response structure
       const responseData = res.data || {};
-      const videos = responseData.results || [];
+      const rawResults = responseData.results || [];
+
+      // Normalize multi-lang format: { id, [lang]: {...} } → flat video object
+      const videos = rawResults
+        .map((item) => normalizeVideoByLang(item, langToUse))
+        .filter(Boolean);
 
       // Apply local sorting
       const sortedVideos =
         passedFilters.sortBy === "newest"
-          ? videos.sort(
+          ? [...videos].sort(
               (a, b) => new Date(b.happened_at) - new Date(a.happened_at),
             )
           : passedFilters.sortBy === "oldest"
-            ? videos.sort(
+            ? [...videos].sort(
                 (a, b) => new Date(a.happened_at) - new Date(b.happened_at),
               )
             : passedFilters.sortBy === "most_popular"
-              ? videos.sort((a, b) => (b.views || 0) - (a.views || 0))
+              ? [...videos].sort((a, b) => (b.views || 0) - (a.views || 0))
               : videos;
 
-      setFilteredVideos([...sortedVideos, ...sortedVideos]);
+      setFilteredVideos(sortedVideos);
 
       // Update pagination state
       setPagination((prev) => ({
@@ -153,7 +199,7 @@ function VideosPageContent() {
   // Fetch active categories
   const getActiveVideoCategories = async () => {
     try {
-      const res = await GetVideoCategories(200, 0);
+      const res = await GetVideoCategories(200, 0, "", "True");
       const allCategories = res.data?.results || res.data || [];
       const active = allCategories.filter((cat) => cat.is_active === true);
       setActiveCategories(active);
@@ -203,7 +249,22 @@ function VideosPageContent() {
       videoType: false,
       date: false,
       sortBy: false,
+      language: false,
     });
+  };
+
+  // Handle language filter change
+  const handleLanguageChange = (langCode) => {
+    allowUrlUpdateRef.current = true;
+    const newFilters = { ...filters, language: langCode };
+    setFilters(newFilters);
+    fetchFilteredVideosWithParams(
+      1,
+      newFilters,
+      appliedDateFilter,
+      selectedCategories,
+    );
+    closeAllDropdowns();
   };
 
   // Handle video type filter changes (only one type allowed)
@@ -300,7 +361,7 @@ function VideosPageContent() {
     }
   };
 
-  // Reset all filters
+  // Reset all filters (language is intentionally excluded from reset)
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedCategories([]);
@@ -309,6 +370,7 @@ function VideosPageContent() {
       videoType: ["all"],
       date: { year: 2026, month: null },
       sortBy: "newest",
+      language: filters.language, // preserve current language
     };
     setFilters(defaultFilters);
     // reset searchParams by navigating without query parameters
@@ -471,6 +533,7 @@ function VideosPageContent() {
         onCategorySelect={handleCategorySelect}
         appliedDateFilter={appliedDateFilter}
         onResetFilters={resetFilters}
+        onLanguageChange={handleLanguageChange}
       />
       <div className="max-w-7xl mx-auto md:px-6 lg:px-8 py-6">
         {/* Title Section */}
@@ -513,6 +576,13 @@ function VideosPageContent() {
                   openDropdowns={openDropdowns}
                   onToggleDropdown={toggleDropdown}
                   onSortByChange={handleSortByChange}
+                />
+
+                <LanguageFilter
+                  filters={filters}
+                  openDropdowns={openDropdowns}
+                  onToggleDropdown={toggleDropdown}
+                  onLanguageChange={handleLanguageChange}
                 />
 
                 {/* Active Filters Display */}

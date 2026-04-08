@@ -200,7 +200,6 @@ function MultiLangManager({ multiLangData }) {
 
 function CreateOrEditVideo({ onSectionChange, video = null }) {
   const { t, i18n } = useTranslation();
-  console.log(video);
   // Detect if the passed `video` is already in multi-lang format and normalize it
   const [multiLangData, setMultiLangData] = useState(() =>
     normalizeToMultiLang(video),

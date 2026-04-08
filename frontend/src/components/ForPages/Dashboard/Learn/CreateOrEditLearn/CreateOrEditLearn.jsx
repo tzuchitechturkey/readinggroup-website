@@ -9,7 +9,6 @@ import BasicDetailsSection from "./BasicDetailsSection";
 import FormActionsSection from "./FormActionsSection";
 
 function CreateOrEditLearn({ onSectionChange, learn = null }) {
-  console.log("Learn data in form:", learn);
   const {
     // Form state
     formData,
@@ -33,6 +32,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     // API Functions
     getCategories,
     t,
+    
     // Restriction
     isRestrictedCategory,
   } = useCreateOrEditLearn(learn, onSectionChange);

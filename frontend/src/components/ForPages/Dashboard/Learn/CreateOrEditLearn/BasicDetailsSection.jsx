@@ -31,7 +31,7 @@ function BasicDetailsSection({
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Title")} {isPosters && "*"}
+          {t("Title")}
         </label>
         <Input
           name="title"
@@ -48,7 +48,7 @@ function BasicDetailsSection({
       {/* Subtitle */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Subtitle")} {isPosters && "*"}
+          {t("Subtitle")}
         </label>
         <Input
           name="subtitle"
@@ -93,6 +93,32 @@ function BasicDetailsSection({
         )}
       </div>
       {/* End Learn Type */}
+      {/* Name */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("Author/Speaker Name")}
+        </label>
+        <Input
+          name="name"
+          value={formData.name || ""}
+          onChange={onInputChange}
+          placeholder={t("Enter author/speaker name")}
+        />
+      </div>
+
+      {/* Country */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("Author/Speaker Country")}
+        </label>
+        <Input
+          name="country"
+          value={formData.country || ""}
+          onChange={onInputChange}
+          placeholder={t("Enter author/speaker country")}
+        />
+      </div>
+
       {/* Category and Writer Selection */}
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         {/* Category Selection */}
@@ -115,7 +141,10 @@ function BasicDetailsSection({
             onSelect={handleCategorySelect}
             errors={errors}
             dropdownRef={categoryDropdownRef}
-            disabled={disableCategory || (!formData.learn_type && !formData?.category?.learn_type)}
+            disabled={
+              disableCategory ||
+              (!formData.learn_type && !formData?.category?.learn_type)
+            }
             disabledMessage={
               disableCategory
                 ? t("Category is fixed for your account")

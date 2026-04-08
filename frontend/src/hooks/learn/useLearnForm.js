@@ -37,6 +37,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     event_title: "",
     guest_speakers: [],
     live_stream_link: "",
+    name: "",
+    country: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -240,6 +242,14 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
       learnData.append("live_stream_link", formData.live_stream_link);
     }
 
+    // Add optional fields
+    if (formData.name) {
+      learnData.append("name", formData.name);
+    }
+    if (formData.country) {
+      learnData.append("country", formData.country);
+    }
+
     learnData.append("updated_at", new Date().toISOString());
 
     setIsLoading(true);
@@ -284,6 +294,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         event_title: learn.event_title || "",
         guest_speakers: learn.guest_speakers || [],
         live_stream_link: learn.live_stream_link || "",
+        name: learn.name || "",
+        country: learn.country || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
