@@ -315,20 +315,36 @@ class VideoViewSet(viewsets.ModelViewSet):
         - last 3 CLIP_VIDEO
         """
 
+        requested_languages = self._parse_requested_languages(request)
+
         def base_queryset(video_type_value):
-            return Video.objects.filter(
+            qs = Video.objects.filter(
                 video_type=video_type_value,
                 category__is_active=True,
+                base_video__isnull=True,
             ).order_by("-created_at")
+
+            if requested_languages:
+                qs = qs.filter(
+                    Q(language__in=requested_languages)
+                    | Q(translations__language__in=requested_languages)
+                ).distinct()
+
+            return qs.select_related("category").prefetch_related("attachments")
 
         full_video_qs = base_queryset(VideoType.FULL_VIDEO)[:1]
         clip_video_qs = base_queryset(VideoType.CLIP_VIDEO)[:3]
+
+        serializer_context = {
+            "request": request,
+            "requested_languages": requested_languages,
+        }
         payload = {
-            "full_video": VideoSerializer(
-                full_video_qs, many=True, context={"request": request}
+            "full_video": VideoMultiLangSerializer(
+                full_video_qs, many=True, context=serializer_context
             ).data,
-            "clip_video": VideoSerializer(
-                clip_video_qs, many=True, context={"request": request}
+            "clip_video": VideoMultiLangSerializer(
+                clip_video_qs, many=True, context=serializer_context
             ).data,
         }
 
