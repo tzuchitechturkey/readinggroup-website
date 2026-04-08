@@ -358,6 +358,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
 
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <a
+                      disabled={!event?.live_stream_link}
                       className={`flex items-center w-fit gap-1 mx-auto cursor-pointer rounded-md p-3 text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]"}`}
                       href={event.live_stream_link}
                       target="_blank"
