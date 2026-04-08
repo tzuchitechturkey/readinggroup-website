@@ -347,13 +347,6 @@ class VideoViewSet(viewsets.ModelViewSet):
                 clip_video_qs, many=True, context=serializer_context
             ).data,
         }
-
-        if not payload["full_video"] and not payload["clip_video"]:
-            return Response(
-                {"detail": "No videos found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
         return Response(payload, status=status.HTTP_200_OK)
 
     # used for video page
@@ -740,11 +733,10 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
-    filterset_fields = ("learn__category__learn_type",)
 
     @swagger_auto_schema(
         operation_summary="List all event communities",
-        operation_description="Retrieve a list of event communities with optional filtering by start_event_date and learn category type.",
+        operation_description="Retrieve a list of event communities with optional filtering by start_event_date.",
         manual_parameters=event_community_manual_parameters,
     )
     def list(self, request, *args, **kwargs):

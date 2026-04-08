@@ -398,11 +398,6 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for EventCommunity model with absolute URL handling for file fields."""
 
     datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
-    learn = serializers.PrimaryKeyRelatedField(
-        queryset=Learn.objects.filter(category__learn_type=LearnType.POSTERS),
-        write_only=True,
-        required=False,
-    )
     images = EventCommunityImageSerializer(many=True, read_only=True)
 
     class Meta:
@@ -411,11 +406,6 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["learn"] = (
-            LearnSerializer(instance.learn, context=self.context).data
-            if instance.learn
-            else None
-        )
         data["images"] = EventCommunityImageSerializer(
             instance.images.all(), many=True, context=self.context
         ).data

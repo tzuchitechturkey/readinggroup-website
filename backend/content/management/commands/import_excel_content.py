@@ -632,14 +632,6 @@ class Importer:
                 skipped += 1
                 continue
             try:
-                learn_title = _val(ws, row, 6)
-                learn = (
-                    Learn.objects.filter(
-                        title=learn_title, category__learn_type=LearnType.POSTERS
-                    ).first()
-                    if learn_title
-                    else None
-                )
                 guest_speakers = _json_list(
                     _val(ws, row, 7),
                     _val(ws, row, 8),
@@ -650,7 +642,6 @@ class Importer:
                     start_event_time=_time_val(_val(ws, row, 3)),
                     duration=_val(ws, row, 4),
                     live_stream_link=_val(ws, row, 5),
-                    learn=learn,
                     guest_speakers=guest_speakers,
                 )
                 if not self.dry_run:

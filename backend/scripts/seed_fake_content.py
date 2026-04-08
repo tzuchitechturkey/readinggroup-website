@@ -207,29 +207,7 @@ def main() -> int:
             )
             learns.append(learn)
 
-        # Events (must attach to Learn in POSTERS category due to limit_choices_to + clean())
-        poster_learns = [
-            l
-            for l in learns
-            if l.category and l.category.learn_type == LearnType.POSTERS
-        ]
-        if not poster_learns:
-            for i in range(3):
-                poster_learns.append(
-                    Learn.objects.create(
-                        title=f"Poster Learn {i + 1}: {_random_words(3).title()}",
-                        subtitle=_random_sentence(4, 9),
-                        category=random.choice(poster_categories),
-                        image=None,
-                        image_url=IMAGE_URL,
-                        happened_at=now - timedelta(days=random.randint(0, 180)),
-                        views=random.randint(0, 5000),
-                        is_event=False,
-                    )
-                )
-
         for i in range(args.events):
-            learn = random.choice(poster_learns)
             start_date = (now - timedelta(days=random.randint(0, 90))).date()
             start_time = (
                 (now - timedelta(minutes=random.randint(0, 1200)))
@@ -240,7 +218,6 @@ def main() -> int:
                 title=f"Community Event {i + 1}",
                 guest_speakers=[{"name": _random_words(2).title()}],
                 live_stream_link="https://example.com/live",
-                learn=learn,
                 start_event_date=start_date,
                 start_event_time=start_time,
                 duration=str(random.choice(["30m", "45m", "60m", "90m"])),

@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .enums import LearnType
 from .models import (
     RelatedReportsCategory,
     EventCommunityImage,
@@ -76,13 +75,6 @@ class EventCommunityImageInline(admin.TabularInline):
 @admin.register(EventCommunity)
 class EventCommunityAdmin(admin.ModelAdmin):
     inlines = [EventCommunityImageInline]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "learn":
-            kwargs["queryset"] = Learn.objects.filter(
-                category__learn_type=LearnType.POSTERS
-            )
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 @admin.register(EventCommunityImage)
