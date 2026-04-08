@@ -26,11 +26,11 @@ const LanguageFilter = ({
         <p className="text-lg font-bold text-[#081945] leading-tight">
           {t("Language")}
         </p>
-        <p className="text-base font-normal text-[#285688] leading-tight">
+        <p className="text-base font-normal text-[#081945]/80 leading-tight">
           {selectedLangObj?.label}
         </p>
       </div>
-      <ChevronDown className="text-[#081945] font-bold" />
+      <ChevronDown className="font-bold" />
 
       {openDropdowns?.language && (
         <div className="absolute top-full left-0 -mt-2 w-full bg-white rounded-b-[17px] z-50 p-4">

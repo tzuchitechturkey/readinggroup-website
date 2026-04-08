@@ -9,23 +9,22 @@ import "react-day-picker/dist/style.css";
 import "@/components/ForPages/Dashboard/CreateorEditCategoryModal/DatePickerStyles.css";
 
 import Loader from "@/components/Global/Loader/Loader";
-import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
 
 import { FormActionsSection } from "./LiveStreamForm";
 
 // مكون Date Picker محسّن مع قوائم الشهر والسنة
-function DatePickerWithMonthYear({ 
-  value, 
-  onChange, 
-  error, 
-  t, 
-  isOpen, 
-  onOpenChange 
+function DatePickerWithMonthYear({
+  value,
+  onChange,
+  error,
+  t,
+  isOpen,
+  onOpenChange,
 }) {
   const [currentDate, setCurrentDate] = useState(
-    value ? new Date(value) : new Date()
+    value ? new Date(value) : new Date(),
   );
 
   const months = [
@@ -43,8 +42,9 @@ function DatePickerWithMonthYear({
     { value: 11, label: t("December") },
   ];
 
-  const years = Array.from({ length: 100 }, (_, i) => 
-    new Date().getFullYear() - 50 + i
+  const years = Array.from(
+    { length: 100 },
+    (_, i) => new Date().getFullYear() - 50 + i,
   );
 
   const handleMonthChange = (e) => {
@@ -75,14 +75,15 @@ function DatePickerWithMonthYear({
           }`}
         >
           <span className={value ? "text-gray-900" : "text-gray-500"}>
-            {value ? format(new Date(value), "MMMM d, yyyy") : t("Select a date")}
+            {value
+              ? format(new Date(value), "MMMM d, yyyy")
+              : t("Select a date")}
           </span>
           <Calendar className="h-5 w-5 text-gray-400" />
         </button>
       </Popover.Trigger>
       <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
         <div className="space-y-4">
-          {/* قوائم الشهر والسنة */}
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="text-xs font-medium text-gray-600 mb-1 block">
@@ -118,7 +119,6 @@ function DatePickerWithMonthYear({
             </div>
           </div>
 
-          {/* DayPicker */}
           <DayPicker
             mode="single"
             month={currentDate}
@@ -137,21 +137,13 @@ function DatePickerWithMonthYear({
 }
 
 // مكون Time Picker محسّن مع Dropdowns للساعات والدقائق
-function TimePickerWithDropdowns({ 
-  value, 
-  onChange, 
-  error, 
-  t 
-}) {
+function TimePickerWithDropdowns({ value, onChange, error, t }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [hours, setHours] = useState(
-    value ? parseInt(value.split(":")[0]) : 0
-  );
+  const [hours, setHours] = useState(value ? parseInt(value.split(":")[0]) : 0);
   const [minutes, setMinutes] = useState(
-    value ? parseInt(value.split(":")[1]) : 0
+    value ? parseInt(value.split(":")[1]) : 0,
   );
 
-  // تحديث الساعات والدقائق عند تغيير القيمة (خاصة في وضع التعديل)
   React.useEffect(() => {
     if (value) {
       const parts = value.split(":");
@@ -160,11 +152,11 @@ function TimePickerWithDropdowns({
     }
   }, [value, isOpen]);
 
-  const hoursList = Array.from({ length: 24 }, (_, i) => 
-    String(i).padStart(2, "0")
+  const hoursList = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0"),
   );
-  const minutesList = Array.from({ length: 60 }, (_, i) => 
-    String(i).padStart(2, "0")
+  const minutesList = Array.from({ length: 60 }, (_, i) =>
+    String(i).padStart(2, "0"),
   );
 
   const handleHourChange = (e) => {
@@ -198,7 +190,9 @@ function TimePickerWithDropdowns({
             error ? "border-red-500" : "border-gray-300"
           }`}
         >
-          <span className={value ? "text-gray-900 font-medium" : "text-gray-500"}>
+          <span
+            className={value ? "text-gray-900 font-medium" : "text-gray-500"}
+          >
             {displayTime}
           </span>
           <Clock className="h-5 w-5 text-gray-400" />
@@ -206,7 +200,6 @@ function TimePickerWithDropdowns({
       </Popover.Trigger>
       <Popover.Content className="w-auto p-6 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
         <div className="space-y-4 w-64">
-          {/* Dropdowns للساعات والدقائق */}
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="text-xs font-medium text-gray-600 mb-2 block">
@@ -224,7 +217,7 @@ function TimePickerWithDropdowns({
                 ))}
               </select>
             </div>
-            
+
             <div className="flex items-end">
               <span className="text-2xl font-bold text-gray-400">:</span>
             </div>
@@ -247,15 +240,14 @@ function TimePickerWithDropdowns({
             </div>
           </div>
 
-          {/* عرض الوقت المختار */}
           <div className="bg-blue-50 rounded-lg p-3 text-center">
             <p className="text-xs text-gray-600 mb-1">{t("Selected Time")}</p>
             <p className="text-3xl font-bold text-blue-600">
-              {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}
+              {String(hours).padStart(2, "0")}:
+              {String(minutes).padStart(2, "0")}
             </p>
           </div>
 
-          {/* الأزرار */}
           <div className="flex gap-2">
             <button
               type="button"
@@ -279,11 +271,18 @@ function TimePickerWithDropdowns({
 }
 
 const CreateOrEditLiveStreamSchedule = ({
-  onSectionChange,
   liveStream = null,
+  onClose,
+  setUpdate,
 }) => {
   const { t } = useTranslation();
   const [openDatePopover, setOpenDatePopover] = useState(false);
+
+  const handleSuccess = () => {
+    if (setUpdate) setUpdate((prev) => !prev);
+    if (onClose) onClose();
+  };
+
   const {
     formData,
     errors,
@@ -300,34 +299,22 @@ const CreateOrEditLiveStreamSchedule = ({
     handleLearnClear,
     getLearnsList,
     resetForm,
-  } = useEventForm(liveStream, onSectionChange);
+  } = useEventForm(liveStream, handleSuccess);
 
   const handleCancel = () => {
     resetForm();
-    onSectionChange("liveStreamSchedules");
+    if (onClose) onClose();
   };
-  console.log("Form Data:", liveStream);
 
   return (
     <div className="bg-white rounded-lg p-3">
       {isLoading && <Loader />}
 
-      {/* Breadcrumb */}
-      <CustomBreadcrumb
-        backTitle={t("Back to Live Stream Schedules List")}
-        onBack={() => onSectionChange("liveStreamSchedules")}
-        page={
-          liveStream?.id
-            ? t("Edit Live Stream Schedule")
-            : t("Create New Live Stream Schedule")
-        }
-      />
-
       <form
         onSubmit={handleSubmit}
-        className=" mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4"
       >
-        {/* Start Event Title */}
+        {/* Live Stream Title */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Title")} <span className="text-red-500">*</span>
@@ -344,10 +331,8 @@ const CreateOrEditLiveStreamSchedule = ({
             <p className="text-red-600 text-sm">{errors.title}</p>
           )}
         </div>
-        {/* End Event Title */}
 
-        {/* Date & Link & Guest Speakers Section */}
-        {/* Start Event Date */}
+        {/* Live Stream Date */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Date")} <span className="text-red-500">*</span>
@@ -372,7 +357,7 @@ const CreateOrEditLiveStreamSchedule = ({
           )}
         </div>
 
-        {/* Start Live Stream Time */}
+        {/* Live Stream Start Time */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Start Time")}{" "}
@@ -395,6 +380,7 @@ const CreateOrEditLiveStreamSchedule = ({
             <p className="text-red-600 text-sm">{errors.start_event_time}</p>
           )}
         </div>
+
         {/* Event Duration */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
@@ -416,7 +402,7 @@ const CreateOrEditLiveStreamSchedule = ({
           )}
         </div>
 
-        {/* Start Guest Speakers */}
+        {/* Guest Speakers */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             {t("Guest Speakers")} <span className="text-red-500">*</span>
@@ -452,9 +438,8 @@ const CreateOrEditLiveStreamSchedule = ({
             <p className="text-red-600 text-sm">{errors.guest_speakers}</p>
           )}
         </div>
-        {/* End Guest Speakers */}
 
-        {/* Start Live Stream Link */}
+        {/* Live Stream Link */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             {t("Live Stream Link")} <span className="text-red-500">*</span>
@@ -465,36 +450,15 @@ const CreateOrEditLiveStreamSchedule = ({
             value={formData.live_stream_link}
             onChange={handleInputChange}
             placeholder="https://..."
-            className={`border ${errors.live_stream_link ? "border-red-500" : " border-gray-300"} w-full px-3 py-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`border ${errors.live_stream_link ? "border-red-500" : "border-gray-300"} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           {errors.live_stream_link && (
             <p className="text-red-600 text-sm">{errors.live_stream_link}</p>
           )}
         </div>
-        {/* End Live Stream Link */}
-
-        {/* Start Learn Selection */}
-        <div className="space-y-2 md:col-span-2">
-          <AutoComplete
-            label={t("Posters Resource")}
-            placeholder={t("Posters Resource")}
-            selectedItem={selectedLearn}
-            onSelect={handleLearnSelect}
-            onClear={handleLearnClear}
-            list={learnsList}
-            searchMethod={getLearnsList}
-            searchApi={true}
-            searchPlaceholder={t("Search posters resource...")}
-            renderItemLabel={(item) => item.title || item.name}
-            showWriterAvatar={false}
-            error={errors.learn}
-            multiple={false}
-          />
-        </div>
-        {/* End Learn Selection */}
       </form>
 
-      {/* Form Actions Section */}
+      {/* Form Actions */}
       <FormActionsSection
         isLoading={isLoading}
         isEditing={Boolean(liveStream?.id)}

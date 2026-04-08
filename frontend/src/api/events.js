@@ -76,3 +76,12 @@ export async function DeleteEventCategory(id) {
 export async function GetEventMonths() {
   return await axios.get(`/event-communities/event-months/`);
 }
+
+// /event-community-images/
+export async function UploadEventImage(data) {
+  return await axios.post(`/event-community-images/`, data);
+}
+
+export async function DeleteEventImage(id) {
+  return await axios.delete(`/event-community-images/${id}/`);
+}

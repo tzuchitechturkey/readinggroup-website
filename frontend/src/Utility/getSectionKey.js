@@ -29,7 +29,7 @@ export const getSectionKey = (title) => {
     "Add/Edit News": "createOrEditNews",
     // Live Stream Schedule
     "Live Stream Schedules": "liveStreamSchedules",
-    "Add/Edit Live Stream Schedule": "createOrEditLiveStreamSchedule",
+    "Upload Images to Live Stream": "uploadImagesToLiveStream",
     // Writers
     "All Writers": "writers",
     "Add/Edit Writer": "createOrEditWriter",

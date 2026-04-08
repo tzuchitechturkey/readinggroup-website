@@ -413,6 +413,7 @@ function VideosPageContent() {
       videoType: [filterType],
       date: { year: 2026, month: null },
       sortBy: sortParam || "newest",
+      language: defaultLanguage,
     };
 
     // Parse and set date if present

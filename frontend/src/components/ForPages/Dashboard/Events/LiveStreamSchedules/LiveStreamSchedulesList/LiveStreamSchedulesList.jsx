@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuArrowUpDown, LuPencil, LuTrash2, LuImage } from "react-icons/lu";
 import { toast } from "react-toastify";
 import { Radio } from "lucide-react";
 
@@ -21,8 +21,11 @@ import { GetEvents, DeleteEventById } from "@/api/events";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
+import CreateOrEditLiveStreamSchedule from "../CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
+
 const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
+
   // State management
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({
@@ -34,23 +37,23 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [openCreateOrEditModal, setOpenCreateOrEditModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [eventsData, setEventsData] = useState([]);
+
   // Fetch Event from API
   const getEventsData = async (page = 0, searchVal = search, filters = {}) => {
     setIsLoading(true);
     const offset = page * limit;
-
-    // params سيكون كائن حتى لو كان فقط search
     const params = searchVal ? { search: searchVal } : {};
 
     try {
       const res = await GetEvents(limit, offset, params);
-
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
     } catch (error) {
@@ -71,7 +74,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
 
-      // date fields - only sorting by start_event_date
       if (sortConfig.key === "start_event_date") {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
@@ -103,22 +105,18 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
     if (sortConfig.key !== columnKey) {
       return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
     }
-
     if (sortConfig.direction === "asc") {
       return <LuArrowUpDown className="h-3 w-3 text-blue-600 rotate-180" />;
     }
-
     if (sortConfig.direction === "desc") {
       return <LuArrowUpDown className="h-3 w-3 text-blue-600" />;
     }
-
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-
       getEventsData(newPage - 1, search);
     }
   };
@@ -127,7 +125,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-
     getEventsData(0, "");
   };
 
@@ -157,7 +154,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      {/* Start Breadcrumb */}
+
+      {/* Breadcrumb */}
       <CustomBreadcrumb
         backTitle={t("Back to Dashboard")}
         onBack={() => {
@@ -165,8 +163,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
         }}
         page={t("Live Stream Schedules")}
       />
-      {/* End Breadcrumb */}
-      {/* Start Header */}
+
+      {/* Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">
           {t("Live Stream Schedules")}
@@ -176,23 +174,20 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             {t("Total")}: {totalRecords} {t("Live Stream Schedule(s)")}
           </span>
 
-          {/* Start Add Button */}
-          <div>
-            <button
-              onClick={() => {
-                setSelectedEvent(null);
-                onSectionChange("createOrEditLiveStreamSchedule", null);
-              }}
-              className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
-            >
-              {t("Add New")}
-            </button>
-          </div>
-          {/* End Add Button */}
+          {/* Add New Button */}
+          <button
+            onClick={() => {
+              setSelectedEvent(null);
+              setOpenCreateOrEditModal(true);
+            }}
+            className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
+          >
+            {t("Add New")}
+          </button>
         </div>
       </div>
-      {/* End Header */}
-      {/* Start Search */}
+
+      {/* Search */}
       <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
         <div className="relative max-w-md flex">
           <input
@@ -212,8 +207,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
               onClick={() => {
                 clearSearch();
               }}
-              className={` absolute ${
-                i18n?.language === "ar" ? " left-20" : " right-20"
+              className={`absolute ${
+                i18n?.language === "ar" ? "left-20" : "right-20"
               } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
             >
               ✕
@@ -226,15 +221,14 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
-            }  text-sm font-semibold hover:bg-blue-600`}
+            } text-sm font-semibold hover:bg-blue-600`}
           >
             {t("Search")}
           </button>
         </div>
       </div>
-      {/* End Search */}
 
-      {/* Start Table */}
+      {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -253,28 +247,24 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                   {t("Title")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Event Start Time")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Event Duration")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Guest Speakers")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
-                  {t("View Posters")}
+                  {t("View Images")}
                 </div>
               </TableHead>
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
@@ -282,7 +272,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                   {t("Live Stream Link")}
                 </div>
               </TableHead>
-
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
               </TableHead>
@@ -291,7 +280,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
                     {t("Loading Event...")}
@@ -302,7 +291,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
               getSortedData().map((event) => (
                 <TableRow key={event?.id} className="hover:bg-gray-50">
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <div className="flex flex-col items-start px-2 ">
+                    <div className="flex flex-col items-start px-2">
                       <span className="font-medium">
                         {new Date(event.start_event_date).toLocaleDateString(
                           "en-GB",
@@ -317,7 +306,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                   </TableCell>
 
                   <TableCell>
-                    <div className="min-w-0 text-center ">
+                    <div className="min-w-0 text-center">
                       <p className="font-medium text-gray-900 truncate">
                         {event?.title}
                       </p>
@@ -355,19 +344,20 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
 
                   <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4 flex items-center justify-center">
                     <button
-                      className={`cursor-pointer rounded-md p-3  text-sm ${event?.learn?.id ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
+                      className={`cursor-pointer rounded-md p-3 text-sm ${event?.images?.length > 0 ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]"}`}
                       onClick={() => {
                         setSelectedEvent(event);
+                        setViewerIndex(0);
                         setIsViewerOpen(true);
                       }}
                     >
-                      {t("View Posters")}
+                      {t("View Images")}
                     </button>
                   </TableCell>
 
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4   ">
+                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                     <a
-                      className={`flex  items-center w-fit gap-1  mx-auto cursor-pointer rounded-md p-3  text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
+                      className={`flex items-center w-fit gap-1 mx-auto cursor-pointer rounded-md p-3 text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]"}`}
                       href={event.live_stream_link}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -382,10 +372,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                       <button
                         onClick={() => {
                           setSelectedEvent(event);
-                          onSectionChange(
-                            "createOrEditLiveStreamSchedule",
-                            event,
-                          );
+                          setOpenCreateOrEditModal(true);
                         }}
                         className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
                         title={t("Edit")}
@@ -411,7 +398,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center py-8 text-gray-500"
                 >
                   {search
@@ -442,7 +429,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
               {t("Previous")}
             </button>
 
-            {/* Page Numbers */}
             <div className="flex items-center gap-1">
               {[...Array(Math.min(5, totalPages))].map((_, i) => {
                 const pageNum = i + 1;
@@ -489,7 +475,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
         </div>
       )}
 
-      {/* Start Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}
         isOpen={showDeleteModal}
@@ -512,18 +498,43 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
           itemName={selectedEvent?.title}
         />
       </Modal>
+
+      {/* Create / Edit Modal */}
+      <Modal
+        isOpen={openCreateOrEditModal}
+        onClose={() => {
+          setOpenCreateOrEditModal(false);
+          setSelectedEvent(null);
+        }}
+        title={
+          selectedEvent
+            ? t("Edit Live Stream Schedule")
+            : t("Create New Live Stream Schedule")
+        }
+        width={"700px"}
+      >
+        <CreateOrEditLiveStreamSchedule
+          liveStream={selectedEvent}
+          onClose={() => {
+            setOpenCreateOrEditModal(false);
+            setSelectedEvent(null);
+          }}
+          setUpdate={setUpdate}
+        />
+      </Modal>
+
       {/* Image Viewer Modal */}
       <ImageViewerModal
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
-        images={
-          selectedEvent?.learn?.image
-            ? [selectedEvent.learn.image]
-            : selectedEvent?.learn?.image_url
-              ? [selectedEvent.learn.image_url]
-              : []
+        images={selectedEvent?.images || []}
+        currentIndex={viewerIndex}
+        onNext={() =>
+          setViewerIndex((prev) =>
+            prev < (selectedEvent?.images?.length ?? 1) - 1 ? prev + 1 : prev,
+          )
         }
-        currentIndex={0}
+        onPrev={() => setViewerIndex((prev) => (prev > 0 ? prev - 1 : prev))}
       />
     </div>
   );

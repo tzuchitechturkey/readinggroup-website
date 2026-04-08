@@ -66,6 +66,7 @@ const LivestreamScheduleContent = () => {
   });
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   // Handle navigation state - open modal if coming from home page
   useEffect(() => {
@@ -190,17 +191,18 @@ const LivestreamScheduleContent = () => {
                       <div className="w-full lg:w-[134px] flex justify-start">
                         <button
                           onClick={() => {
-                            if (!item?.learn?.id) {
+                            if (!item?.images?.length) {
                               toast.info(
                                 t("No resources available for this event"),
                               );
                               return;
                             }
                             setSelectedEvent(item);
+                            setViewerIndex(0);
                             setIsViewerOpen(true);
                           }}
                           className={
-                            item?.learn?.id
+                            item?.images?.length > 0
                               ? "tzuchi-btn-resources outline-none border-none"
                               : "tzuchi-btn-resources-disabled outline-none border-none"
                           }
@@ -259,14 +261,14 @@ const LivestreamScheduleContent = () => {
       <ImageViewerModal
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
-        images={
-          selectedEvent?.learn?.image
-            ? [selectedEvent.learn.image]
-            : selectedEvent?.learn?.image_url
-              ? [selectedEvent.learn.image_url]
-              : []
+        images={selectedEvent?.images || []}
+        currentIndex={viewerIndex}
+        onNext={() =>
+          setViewerIndex((prev) =>
+            prev < (selectedEvent?.images?.length ?? 1) - 1 ? prev + 1 : prev,
+          )
         }
-        currentIndex={0}
+        onPrev={() => setViewerIndex((prev) => (prev > 0 ? prev - 1 : prev))}
       />
     </div>
   );

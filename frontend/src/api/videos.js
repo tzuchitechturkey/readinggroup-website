@@ -48,9 +48,9 @@ export async function CreateVideo(data) {
 export async function FetchYouTubeInfo(data) {
   return await axios.post(`/videos/fetch-youtube-info/`, data);
 }
-
-export async function GetVideoById(id) {
-  return await axios.get(`/videos/${id}/`);
+// /?language=en
+export async function GetVideoById(id, language) {
+  return await axios.get(`/videos/${id}/?language=${language}`);
 }
 
 export async function EditVideoById(id, data) {

@@ -29,8 +29,8 @@ import RelatedReportsList from "@/components/ForPages/Dashboard/Events/RelatedRe
 import RelatedReportsCategoriesContent from "@/components/ForPages/Dashboard/Events/RelatedReports/RelatedReportsCategories/RelatedReportsCategoriesContent";
 import CreateOrEditRelatedReports from "@/components/ForPages/Dashboard/Events/RelatedReports/CreateOrEditRelatedReports/CreateOrEditRelatedReports";
 import NewsList from "@/components/ForPages/Dashboard/Events/News/NewsList";
-import CreateOrEditLiveStreamSchedule from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
 import UploadImagesToNews from "@/components/ForPages/Dashboard/Events/News/UploadImagesToNews/UploadImagesToNews";
+import UploadImagesToLiveStream from "@/components/ForPages/Dashboard/Events/LiveStreamSchedules/UploadImagesToLiveStream/UploadImagesToLiveStream";
 
 import ProfileContent from "../Profile/ProfileContent";
 import UploadImagesToTeam from "@/components/ForPages/Dashboard/AboutUs/OurTeam/UploadImagesToTeam/UploadImagesToTeam";
@@ -53,7 +53,11 @@ const SECTION_NAME_TO_DEFAULT = {
 const SECTION_NAME_TO_ALLOWED = {
   learn: ["learn", "createOrEditLearn", "learnCategories"],
   video: ["videos", "createOrEditVideo", "videosCategories"],
-  liveStream: ["liveStreamSchedules", "createOrEditLiveStreamSchedule"],
+  liveStream: [
+    "liveStreamSchedules",
+    "createOrEditLiveStreamSchedule",
+    "uploadImagesToLiveStream",
+  ],
   photoCollection: [
     "photoCollections",
     "createOrEditPhotoCollection",
@@ -319,8 +323,9 @@ export default function Page() {
         relatedReportsCategories: "Related Reports",
         createOrEditRelatedReports: "Related Reports",
         // Live Stream Schedule
-        liveStreamSchedules: "Live Stream Schedules",
-        createOrEditLiveStreamSchedule: "Live Stream Schedules",
+        liveStreamSchedules: "Live Stream Schedule",
+        createOrEditLiveStreamSchedule: "Live Stream Schedule",
+        uploadImagesToLiveStream: "Live Stream Schedule",
 
         // About Us
         history: "All History",
@@ -381,9 +386,9 @@ export default function Page() {
         return (
           <LiveStreamSchedulesList onSectionChange={handleSectionChange} />
         );
-      case "createOrEditLiveStreamSchedule":
+      case "uploadImagesToLiveStream":
         return (
-          <CreateOrEditLiveStreamSchedule
+          <UploadImagesToLiveStream
             liveStream={selectedLiveStream}
             onSectionChange={handleSectionChange}
           />

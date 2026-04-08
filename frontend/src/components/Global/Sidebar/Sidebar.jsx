@@ -26,7 +26,6 @@ import DashboardIcon from "@/assets/icons/Home-simple-door.png";
 import Posts from "@/assets/icons/Union.png";
 import Video from "@/assets/icons/video-icon.png";
 import LogOut from "@/assets/icons/Log-out.png";
-import Settings from "@/assets/icons/Settings.png";
 import TV from "@/assets/icons/cardsOrphoto-icon.png";
 import InstagramIcon from "@/assets/icons/instagramIcon.png";
 import LatestNews from "@/assets/icons/latestNews.png";
@@ -131,8 +130,8 @@ export default function AppSidebar({
             onClick: () => onSectionChange("liveStreamSchedules"),
           },
           {
-            title: "Add/Edit Live Stream Schedule",
-            onClick: () => onSectionChange("createOrEditLiveStreamSchedule"),
+            title: "Upload Images to Live Stream",
+            onClick: () => onSectionChange("uploadImagesToLiveStream"),
           },
         ],
       },

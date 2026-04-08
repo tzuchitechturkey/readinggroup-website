@@ -16,8 +16,11 @@ function VideoPageContent() {
   const getData = async () => {
     setIsLoading(true);
     try {
-      const res = await GetVideoById(paramId);
-      setVideoData(res.data);
+      const res = await GetVideoById(paramId, i18n.language);
+      const raw = res.data;
+      // API returns { id, [language]: { ...videoData } }
+      const langData = raw?.[i18n.language] ?? raw;
+      setVideoData(langData);
     } catch (err) {
       console.error("Failed to fetch video data:", err);
     } finally {

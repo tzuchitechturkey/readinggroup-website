@@ -130,7 +130,10 @@ const LivestreamCard = ({ data = [], t }) => {
                   className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative"
                 >
                   <img
-                    src={imageItem?.learn?.image || imageItem?.learn?.image_url}
+                    src={
+                      imageItem?.images[0]?.image ||
+                      imageItem?.images[0]?.image_url
+                    }
                     alt={`${imageItem?.title} - ${index + 1}`}
                     className="w-full h-full object-cover object-top"
                     loading="lazy"
