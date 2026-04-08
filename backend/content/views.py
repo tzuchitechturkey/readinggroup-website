@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, F, Max
+from django.db.models import Count, F, Max, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.functions import TruncMonth
 from rest_framework import viewsets, filters, status
@@ -133,13 +133,27 @@ class VideoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
+        lang_params = request.query_params.getlist("language")
+        requested_languages = []
+        for item in lang_params:
+            requested_languages.extend(
+                [v.strip() for v in item.split(",") if v.strip()]
+            )
+
         if page is not None:
             data = VideoMultiLangSerializer(
-                page, many=True, context={"request": request}
+                page,
+                many=True,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
             ).data
             return self.get_paginated_response(data)
         data = VideoMultiLangSerializer(
-            queryset, many=True, context={"request": request}
+            queryset,
+            many=True,
+            context={"request": request, "requested_languages": requested_languages},
         ).data
         return Response(data)
 
@@ -172,7 +186,11 @@ class VideoViewSet(viewsets.ModelViewSet):
             for item in language:
                 values.extend([v.strip() for v in item.split(",") if v.strip()])
             if values:
-                queryset = queryset.filter(language__in=values)
+                # Include base videos that are in requested language OR have a translation
+                # in that language.
+                queryset = queryset.filter(
+                    Q(language__in=values) | Q(translations__language__in=values)
+                ).distinct()
 
         category = params.get("category")
         if category:

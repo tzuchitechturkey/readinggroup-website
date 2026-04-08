@@ -264,6 +264,27 @@ class VideoMultiLangSerializer(serializers.Serializer):
     def to_representation(self, instance):
         base = instance if not instance.base_video_id else instance.base_video
         result = {"id": base.id}
+
+        requested_languages = self.context.get("requested_languages") or []
+        if requested_languages:
+            # Only include requested languages; if base isn't that language,
+            # try to use the corresponding translation.
+            translations = {
+                tr.language: tr
+                for tr in (
+                    base.translations.select_related("category")
+                    .prefetch_related("attachments")
+                    .all()
+                )
+            }
+            for lang in requested_languages:
+                if base.language == lang:
+                    result[lang] = self._serialize_lang(base)
+                elif lang in translations:
+                    result[lang] = self._serialize_lang(translations[lang])
+            return result
+
+        # Default: include base language + all translations.
         result[base.language] = self._serialize_lang(base)
         for tr in (
             base.translations.select_related("category")
