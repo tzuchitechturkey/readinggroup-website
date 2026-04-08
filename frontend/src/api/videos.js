@@ -113,11 +113,6 @@ export async function GetVideosByCategoryId(
 //   return await axios.get(`/videos/top-rated/`);
 // }
 
-// // /top5-videos/
-export async function GetTopViewedVideos(videoId) {
-  return await axios.get(`/videos/${videoId}/top-views/`);
-}
-
 // // Top 5 videos by likes
 // export async function GetTopLikedVideos() {
 //   return await axios.get(`/videos/top-liked/?limit=5`);
@@ -129,6 +124,12 @@ export async function GetTopViewedVideos(videoId) {
 // }
 
 // /videos/by_type_video/
-export async function GetVideosByTypeVideo(type) {
-  return await axios.get(`/videos/by_type_video/?type_video=${type}/`);
+export async function GetVideosByTypeVideo(language) {
+  return await axios.get(`/videos/by_type_video/?language=${language}`);
+}
+
+// // /top5-videos/
+// // /videos/24/top-views/?language=ar
+export async function GetTopViewedVideos(videoId, language) {
+  return await axios.get(`/videos/${videoId}/top-views/?language=${language}`);
 }

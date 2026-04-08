@@ -9,7 +9,7 @@ import { languages } from "@/constants/constants";
 
 import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
-function CustomyoutubeVideo({ t, videoData }) {
+function CustomyoutubeVideo({ t, i18n, videoData }) {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState([]);
@@ -25,13 +25,17 @@ function CustomyoutubeVideo({ t, videoData }) {
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
-      const res = await GetTopViewedVideos(videoData?.id);
+      const res = await GetTopViewedVideos(videoData?.id, i18n.language);
       console.log("Related videos response:", res);
       const data = res?.data || {};
-      const results = data.results || [];
+      const lang = i18n.language;
+      const results = (data.results || []).map((item) => ({
+        ...item[lang],
+        id: item.id,
+      }));
       const count = data.count || 0;
 
-      // If it's the first load, replace videos; otherwise append
+      // If it's the first load, replace   videos; otherwise append
       if (currentOffset === 0) {
         setRelatedVideos(results);
       } else {

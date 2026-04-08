@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +15,7 @@ import { GetEvents } from "@/api/events";
 import { GetLast4Photos } from "@/api/photoCollections";
 
 export default function HomeContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [videoData, setVideoData] = useState(null);
   const [cardsData, setCardsData] = useState(null);
   const [posterData, setPosterData] = useState({});
@@ -24,8 +24,14 @@ export default function HomeContent() {
 
   const fetchVideoData = async () => {
     try {
-      const res = await GetVideosByTypeVideo();
-      setVideoData(res.data);
+      const res = await GetVideosByTypeVideo(i18n.language);
+      const lang = i18n.language;
+      const normalize = (arr) =>
+        (arr || []).map((item) => ({ ...item[lang], id: item.id }));
+      setVideoData({
+        full_video: normalize(res.data?.full_video),
+        clip_video: normalize(res.data?.clip_video),
+      });
     } catch (error) {
       setErrorFn(error, t);
     }
@@ -65,12 +71,15 @@ export default function HomeContent() {
     }
   };
   useEffect(() => {
-    fetchVideoData();
     fetchPosterData();
     fetchCardsData();
     fetchUpcomingLivestream();
     fetchPhotoCollectionData();
   }, []);
+
+  useEffect(() => {
+    fetchVideoData();
+  }, [i18n.language]);
   return (
     <div className="min-h-screen bg-[#C8DDF4]">
       {/* Start Hero Slider */}
