@@ -51,11 +51,7 @@ function VideosPageContent() {
   const allowUrlUpdateRef = useRef(false);
 
   // Resolve default language from i18n
-  const defaultLanguage =
-    I18N_TO_VIDEO_LANG[i18n.language] ||
-    (Object.keys(languages).some((l) => l === i18n.language)
-      ? i18n.language
-      : "en");
+  const defaultLanguage = I18N_TO_VIDEO_LANG[i18n.language] || "en";
 
   // State management
   const [filteredVideos, setFilteredVideos] = useState([]);
@@ -493,6 +489,18 @@ function VideosPageContent() {
     selectedCategories,
     filters.sortBy,
   ]);
+
+  // Sync language filter when i18n language changes
+  useEffect(() => {
+    if (!initialLoadRef.current) return;
+
+    const newLang = I18N_TO_VIDEO_LANG[i18n.language] || "en";
+    if (newLang === filters.language) return;
+
+    const newFilters = { ...filters, language: newLang };
+    setFilters(newFilters);
+    fetchFilteredVideosWithParams(1, newFilters, appliedDateFilter, selectedCategories);
+  }, [i18n.language]);
 
   // Trigger filtering when filters change (only after initial load)
   useEffect(() => {
