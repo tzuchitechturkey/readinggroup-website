@@ -397,7 +397,18 @@ class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for EventCommunity model with absolute URL handling for file fields."""
 
-    datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
+    datetime_fields = (
+        "created_at",
+        "updated_at",
+        "start_event_date",
+        "start_event_time",
+    )
+    base_event = serializers.PrimaryKeyRelatedField(
+        queryset=EventCommunity.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
     images = EventCommunityImageSerializer(many=True, read_only=True)
 
     class Meta:
@@ -410,6 +421,33 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             instance.images.all(), many=True, context=self.context
         ).data
         return data
+
+
+class EventCommunityMultiLangSerializer(serializers.Serializer):
+    """Returns an event grouped by language keys.
+
+    Output shape:
+    {
+        "id": 30,
+        "ar": { ...all event fields + images... },
+        "en": { ...all event fields + images... }
+    }
+    The first language the event is created in is the base (base_event=null).
+    Additional translations link back to the base via base_event FK.
+    """
+
+    def _serialize_lang(self, instance):
+        data = EventCommunitySerializer(instance, context=self.context).data
+        data.pop("base_event", None)
+        return data
+
+    def to_representation(self, instance):
+        base = instance if not instance.base_event_id else instance.base_event
+        result = {"id": base.id}
+        result[base.language or "base"] = self._serialize_lang(base)
+        for tr in base.translations.prefetch_related("images").all():
+            result[tr.language or str(tr.id)] = self._serialize_lang(tr)
+        return result
 
 
 class OurTeamSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

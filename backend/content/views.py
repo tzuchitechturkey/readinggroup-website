@@ -51,6 +51,7 @@ from .models import (
 from .serializers import (
     RelatedReportsCategorySerializer,
     EventCommunityImageSerializer,
+    EventCommunityMultiLangSerializer,
     ContentAttachmentSerializer,
     HistoryEventImageSerializer,
     PhotoCollectionSerializer,
@@ -733,17 +734,53 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @swagger_auto_schema(
         operation_summary="List all event communities",
-        operation_description="Retrieve a list of event communities with optional filtering by start_event_date.",
+        operation_description="Retrieve a list of event communities. List returns only base events; translations are nested by language key.",
         manual_parameters=event_community_manual_parameters,
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            data = EventCommunityMultiLangSerializer(
+                page, many=True, context={"request": request}
+            ).data
+            return self.get_paginated_response(data)
+        data = EventCommunityMultiLangSerializer(
+            queryset, many=True, context={"request": request}
+        ).data
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = EventCommunityMultiLangSerializer(
+            instance, context={"request": request}
+        ).data
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = EventCommunitySerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        return Response(
+            EventCommunityMultiLangSerializer(
+                instance, context={"request": request}
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
+        # List endpoint only returns base events; translations are nested inside them
+        if self.action == "list":
+            queryset = queryset.filter(base_event__isnull=True)
+
         params = self.request.query_params
 
         start_event_date = params.get("start_event_date")
@@ -770,7 +807,9 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         Returns months grouped by year.
         """
         months = (
-            EventCommunity.objects.filter(start_event_date__isnull=False)
+            EventCommunity.objects.filter(
+                start_event_date__isnull=False, base_event__isnull=True
+            )
             .annotate(month=TruncMonth("start_event_date"))
             .values_list("month", flat=True)
             .distinct()
@@ -778,7 +817,6 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         )
 
         result = defaultdict(list)
-
         for month in months:
             year = month.strftime("%Y")
             month_num = month.strftime("%m")

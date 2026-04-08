@@ -327,11 +327,19 @@ class LatestNewsImage(TimestampedModel):
 
 class EventCommunity(TimestampedModel):
     title = models.CharField(max_length=255)
+    language = models.CharField(max_length=50, blank=True, null=True)
     guest_speakers = models.JSONField(default=list, blank=True)
     live_stream_link = models.URLField(blank=True, null=True)
     start_event_date = models.DateField(blank=True, null=True)
     start_event_time = models.TimeField(blank=True, null=True)
     duration = models.CharField(max_length=64, blank=True, null=True)
+    base_event = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
 
     class Meta:
         ordering = ("-start_event_date", "-start_event_time")
