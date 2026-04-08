@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, F, Max
+from django.db.models import Count, F, Max, Q
 from rest_framework import viewsets, filters, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
@@ -114,11 +114,6 @@ class VideoViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
-    @swagger_auto_schema(
-        operation_summary="all List videos",
-        operation_description="Retrieve a list of videos with optional filtering by language, category, and happened_at date.",
-        manual_parameters=video_manual_parameters,
-    )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         # Increment views on the resolved record (base or translation)
@@ -128,6 +123,11 @@ class VideoViewSet(viewsets.ModelViewSet):
             VideoMultiLangSerializer(instance, context={"request": request}).data
         )
 
+    @swagger_auto_schema(
+        operation_summary="List videos",
+        operation_description="Retrieve a list of videos with optional filtering by language, category, and happened_at date.",
+        manual_parameters=video_manual_parameters,
+    )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -165,12 +165,16 @@ class VideoViewSet(viewsets.ModelViewSet):
             return queryset.order_by("-created_at")
 
         language = params.getlist("language")
-        if language:
+        if language and self.action == "list":
             values = []
             for item in language:
                 values.extend([v.strip() for v in item.split(",") if v.strip()])
             if values:
-                queryset = queryset.filter(language__in=values)
+                # List returns only base videos, but we want filtering to match
+                # either the base language OR any translation language.
+                queryset = queryset.filter(
+                    Q(language__in=values) | Q(translations__language__in=values)
+                ).distinct()
 
         category = params.get("category")
         if category:
