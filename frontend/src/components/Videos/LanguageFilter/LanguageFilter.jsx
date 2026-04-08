@@ -13,7 +13,9 @@ const LanguageFilter = ({
   const { t } = useTranslation();
 
   const langEntries = Object.values(languages);
-  const selectedLangObj = langEntries.find((l) => l.code === filters.language);
+  const selectedLangObj = langEntries.find(
+    (l) => (l.apiCode || l.code) === filters.language,
+  );
 
   return (
     <div
@@ -36,25 +38,28 @@ const LanguageFilter = ({
         <div className="absolute top-full left-0 -mt-2 w-full bg-white rounded-b-[17px] z-50 p-4">
           <hr className="bg-[#FCFDFF] rounded-2xl mb-3" />
           <div className="flex flex-col gap-2.5">
-            {Object.keys(languages).map((lang) => (
-              <div
-                key={lang}
-                className={`flex items-center gap-2 cursor-pointer ${
-                  filters.language === languages[lang].code
-                    ? "text-[#285688]"
-                    : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLanguageChange(languages[lang].code);
-                }}
-              >
-                <div className="w-6 h-6">
-                  {filters.language === languages[lang].code && <Check />}
+            {Object.keys(languages).map((lang) => {
+              const langObj = languages[lang];
+              const apiCode = langObj.apiCode || langObj.code;
+              const isSelected = filters.language === apiCode;
+              return (
+                <div
+                  key={lang}
+                  className={`flex items-center gap-2 cursor-pointer ${
+                    isSelected ? "text-[#285688]" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLanguageChange(apiCode);
+                  }}
+                >
+                  <div className="w-6 h-6">
+                    {isSelected && <Check />}
+                  </div>
+                  <p className="font-normal text-base">{langObj.label}</p>
                 </div>
-                <p className="font-normal text-base">{languages[lang].label}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
