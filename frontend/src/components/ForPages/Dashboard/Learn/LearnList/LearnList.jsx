@@ -33,7 +33,9 @@ function LearnList({ onSectionChange }) {
     const userType = localStorage.getItem("userType");
     const sectionName = localStorage.getItem("sectionName");
     const catId = localStorage.getItem("categoryName");
-    return userType === "editor" && sectionName === "learn" && catId ? catId : null;
+    return userType === "editor" && sectionName === "learn" && catId
+      ? catId
+      : null;
   })();
 
   const { sortData, getSortedData, sortConfig } = useSorting(learnData);

@@ -85,6 +85,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
           handleCategorySelect={handleCategorySelect}
           categoryDropdownRef={categoryDropdownRef}
           disableCategory={isRestrictedCategory}
+          disableLearnType={isRestrictedCategory}
         />
 
         {/* Event Section - For Posters */}

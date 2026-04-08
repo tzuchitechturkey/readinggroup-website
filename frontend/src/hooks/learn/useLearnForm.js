@@ -37,8 +37,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     event_title: "",
     guest_speakers: [],
     live_stream_link: "",
-    name: "",
-    country: "",
+    author_name: "",
+    author_country: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -243,11 +243,11 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     }
 
     // Add optional fields
-    if (formData.name) {
-      learnData.append("name", formData.name);
+    if (formData.author_name) {
+      learnData.append("author_name", formData.author_name);
     }
-    if (formData.country) {
-      learnData.append("country", formData.country);
+    if (formData.author_country) {
+      learnData.append("author_country", formData.author_country);
     }
 
     learnData.append("updated_at", new Date().toISOString());
@@ -294,8 +294,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         event_title: learn.event_title || "",
         guest_speakers: learn.guest_speakers || [],
         live_stream_link: learn.live_stream_link || "",
-        name: learn.name || "",
-        country: learn.country || "",
+        author_name: learn.author_name || "",
+        author_country: learn.author_country || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -334,7 +334,7 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
             setFormData((prev) => ({
               ...prev,
               category: cat.id,
-              learn_type: cat.learn_type || prev.learn_type,
+              learn_type: "cards",
             }));
             setCategoriesList([cat]);
             if (cat.learn_type) getCategories(cat.learn_type);

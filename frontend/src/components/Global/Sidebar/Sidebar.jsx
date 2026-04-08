@@ -47,6 +47,7 @@ export default function AppSidebar({
 
   const userType = localStorage.getItem("userType");
   const sectionName = localStorage.getItem("sectionName");
+  const categoryName = localStorage.getItem("categoryName");
 
   const SECTION_NAME_TO_NAV_TITLE = {
     learn: "Learn",
@@ -94,10 +95,10 @@ export default function AppSidebar({
             title: "Add/Edit Learn",
             onClick: () => onSectionChange("createOrEditLearn"),
           },
-          {
+          ...(!categoryName ? [{
             title: "Learn Categories",
             onClick: () => onSectionChange("learnCategories"),
-          },
+          }] : []),
         ],
       },
 

@@ -22,6 +22,7 @@ function BasicDetailsSection({
   handleCategorySelect,
   categoryDropdownRef,
   disableCategory,
+  disableLearnType,
 }) {
   const { t } = useTranslation();
   const learnType = formData.learn_type || formData?.category?.learn_type;
@@ -71,9 +72,10 @@ function BasicDetailsSection({
           name="learn_type"
           value={formData.learn_type || formData?.category?.learn_type || ""}
           onChange={onLearnTypeChange}
+          disabled={disableLearnType}
           className={`w-full px-3 py-2 border rounded-md outline-none ${
             errors.learn_type ? "border-red-500" : "border-gray-300"
-          }  `}
+          } ${disableLearnType ? "bg-gray-100 cursor-not-allowed" : ""} `}
         >
           <option value="" hidden>
             {t("Select Type")}
@@ -92,15 +94,14 @@ function BasicDetailsSection({
           <p className="text-red-500 text-xs mt-1">{errors.learn_type}</p>
         )}
       </div>
-      {/* End Learn Type */}
       {/* Name */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {t("Author/Speaker Name")}
         </label>
         <Input
-          name="name"
-          value={formData.name || ""}
+          name="author_name"
+          value={formData.author_name || ""}
           onChange={onInputChange}
           placeholder={t("Enter author/speaker name")}
         />
@@ -112,8 +113,8 @@ function BasicDetailsSection({
           {t("Author/Speaker Country")}
         </label>
         <Input
-          name="country"
-          value={formData.country || ""}
+          name="author_country"
+          value={formData.author_country || ""}
           onChange={onInputChange}
           placeholder={t("Enter author/speaker country")}
         />
