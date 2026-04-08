@@ -8,6 +8,7 @@ from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     RelatedReportsCategory,
+    EventCommunityImage,
     ContentAttachment,
     HistoryEventImage,
     LatestNewsImage,
@@ -96,6 +97,17 @@ class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     class Meta:
         model = LatestNewsImage
+        fields = "__all__"
+        file_fields = ("image",)
+
+
+class EventCommunityImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual images in an event community item."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = EventCommunityImage
         fields = "__all__"
         file_fields = ("image",)
 
@@ -370,6 +382,7 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         write_only=True,
         required=False,
     )
+    images = EventCommunityImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = EventCommunity
@@ -382,6 +395,9 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
             if instance.learn
             else None
         )
+        data["images"] = EventCommunityImageSerializer(
+            instance.images.all(), many=True, context=self.context
+        ).data
         return data
 
 

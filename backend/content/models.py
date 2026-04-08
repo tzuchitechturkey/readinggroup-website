@@ -158,6 +158,8 @@ class Learn(TimestampedModel):
     )
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
+    guest_speakers = models.JSONField(default=list, blank=True)
+    another_contry = models.CharField(max_length=255, blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
     is_event = models.BooleanField(default=False)
@@ -372,6 +374,25 @@ class EventCommunity(TimestampedModel):
 
     def __str__(self):
         return self.title
+
+
+class EventCommunityImage(TimestampedModel):
+    """Individual image for an event community item."""
+
+    event = models.ForeignKey(
+        "EventCommunity", on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="event-community/images/")
+    caption = models.CharField(max_length=500, blank=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of image in the event"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+
+    def __str__(self) -> str:
+        return f"Image {self.order} for {self.event.title}"
 
 
 class OurTeam(TimestampedModel):

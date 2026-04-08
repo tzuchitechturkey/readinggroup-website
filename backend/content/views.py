@@ -1,7 +1,9 @@
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, F, Max, Q
+from django.db.models import Count, F, Max
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import TruncMonth
 from rest_framework import viewsets, filters, status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
@@ -9,8 +11,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models.functions import TruncMonth
 from drf_yasg.utils import swagger_auto_schema
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -26,6 +26,7 @@ from .swagger_parameters import (
 )
 from .models import (
     RelatedReportsCategory,
+    EventCommunityImage,
     ContentAttachment,
     HistoryEventImage,
     LatestNewsImage,
@@ -49,6 +50,7 @@ from .models import (
 
 from .serializers import (
     RelatedReportsCategorySerializer,
+    EventCommunityImageSerializer,
     ContentAttachmentSerializer,
     HistoryEventImageSerializer,
     PhotoCollectionSerializer,
@@ -706,6 +708,94 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
             result[year].append(month_num)
 
         return Response(result)
+
+    @swagger_auto_schema(
+        operation_summary="Upload images for event community",
+        operation_description="Add images to this event. Use 'images' field for multiple or 'image' field for single upload. Optional 'caption_{index}' or 'caption' for captions.",
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="images",
+        parser_classes=(MultiPartParser, FormParser, JSONParser),
+    )
+    def create_images(self, request, pk=None):
+        """POST /event-communities/{id}/images/"""
+        event = self.get_object()
+
+        images = request.FILES.getlist("images")
+        if not images:
+            image = request.FILES.get("image")
+            if image:
+                images = [image]
+            else:
+                return Response(
+                    {
+                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        max_order = event.images.aggregate(max_order=Max("order")).get("max_order")
+        next_order = (max_order if max_order is not None else -1) + 1
+
+        created_images = []
+        for idx, image in enumerate(images):
+            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
+                "caption", ""
+            )
+            event_image = EventCommunityImage.objects.create(
+                event=event,
+                image=image,
+                caption=caption,
+                order=next_order + idx,
+            )
+            created_images.append(event_image)
+
+        serializer = EventCommunityImageSerializer(
+            created_images, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary="Delete images from event community",
+        operation_description="Delete images from this event. Provide 'image_ids' array or single 'image_id'.",
+    )
+    @action(detail=True, methods=["delete"], url_path="images/delete")
+    def delete_images(self, request, pk=None):
+        """DELETE /event-communities/{id}/images/delete/"""
+        event = self.get_object()
+
+        image_ids = request.data.get("image_ids", [])
+        if not image_ids:
+            image_id = request.data.get("image_id")
+            if image_id:
+                image_ids = [image_id]
+            else:
+                return Response(
+                    {
+                        "error": "No image IDs provided. Use 'image_ids' array or single 'image_id'."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        deleted_count, _ = EventCommunityImage.objects.filter(
+            id__in=image_ids, event=event
+        ).delete()
+
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+
+class EventCommunityImageViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual images in an event community item."""
+
+    queryset = EventCommunityImage.objects.all()
+    serializer_class = EventCommunityImageSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
 class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):

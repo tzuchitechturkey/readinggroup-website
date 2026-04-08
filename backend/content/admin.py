@@ -3,6 +3,7 @@ from django.contrib import admin
 from .enums import LearnType
 from .models import (
     RelatedReportsCategory,
+    EventCommunityImage,
     HistoryEventImage,
     ContentAttachment,
     PhotoCollection,
@@ -64,8 +65,17 @@ class LearnCategoryAdmin(admin.ModelAdmin):
     list_filter = ["is_active"]
 
 
+class EventCommunityImageInline(admin.TabularInline):
+    """Inline admin for images in event community."""
+
+    model = EventCommunityImage
+    extra = 1
+    fields = ("image", "caption", "order")
+
+
 @admin.register(EventCommunity)
 class EventCommunityAdmin(admin.ModelAdmin):
+    inlines = [EventCommunityImageInline]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "learn":
@@ -73,6 +83,13 @@ class EventCommunityAdmin(admin.ModelAdmin):
                 category__learn_type=LearnType.POSTERS
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(EventCommunityImage)
+class EventCommunityImageAdmin(admin.ModelAdmin):
+    list_display = ("id", "event", "caption", "order", "created_at")
+    search_fields = ("caption", "event__title")
+    list_filter = ("event",)
 
 
 @admin.register(ContentAttachment)
