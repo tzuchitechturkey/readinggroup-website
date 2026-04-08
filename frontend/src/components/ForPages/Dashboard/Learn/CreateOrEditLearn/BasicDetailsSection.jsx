@@ -26,7 +26,6 @@ function BasicDetailsSection({
 }) {
   const { t } = useTranslation();
   const learnType = formData.learn_type || formData?.category?.learn_type;
-  const isPosters = learnType === "posters";
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Title */}
@@ -78,7 +77,7 @@ function BasicDetailsSection({
           onChange={onLearnTypeChange}
           className={`w-full px-3 py-2 border rounded-md outline-none ${
             errors.learn_type ? "border-red-500" : "border-gray-300"
-          } ${disableLearnType ? "bg-gray-100 cursor-not-allowed" : ""} `}
+          } `}
         >
           <option value="" hidden>
             {t("Select Type")}
