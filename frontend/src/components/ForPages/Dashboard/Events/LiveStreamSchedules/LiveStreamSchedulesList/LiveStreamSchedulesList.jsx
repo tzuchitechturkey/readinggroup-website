@@ -350,6 +350,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                         setViewerIndex(0);
                         setIsViewerOpen(true);
                       }}
+                      disabled={event?.images?.length === 0}
                     >
                       {t("View Images")}
                     </button>

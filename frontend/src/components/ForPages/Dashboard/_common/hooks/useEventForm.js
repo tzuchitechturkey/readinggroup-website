@@ -109,6 +109,9 @@ export const useEventForm = (event = null, onSectionChange) => {
       const trimmedInput = guestSpeakerInput.trim();
 
       if (trimmedInput) {
+        if (formData.guest_speakers.includes(trimmedInput)) {
+          return;
+        }
         setFormData((prev) => ({
           ...prev,
           guest_speakers: [...prev.guest_speakers, trimmedInput],

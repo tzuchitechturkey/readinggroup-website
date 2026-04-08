@@ -399,7 +399,7 @@ const CreateOrEditLiveStreamSchedule = ({
         {/* Guest Speakers */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            {t("Guest Speakers")} <span className="text-red-500">*</span>
+            {t("Guest Speakers")}
           </label>
           <input
             type="text"

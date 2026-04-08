@@ -64,7 +64,7 @@ const LivestreamCard = ({ data = [], t }) => {
 
     return `${month}. ${day}, ${year}`;
   };
-
+  console.log("LivestreamCard Data:", data); // Debugging log
   return (
     <div className="flex flex-col md:flex-row px-0 sm:px-2 md:px-4 lg:px-0 gap-4 sm:gap-5 md:gap-5 lg:gap-5 mt-4 sm:mt-6 md:mt-6 lg:mt-4 items-start md:items-center w-full">
       {/* Left Content */}
