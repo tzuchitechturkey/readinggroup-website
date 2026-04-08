@@ -70,14 +70,12 @@ function BasicDetailsSection({
         </label>
         <select
           name="learn_type"
-          value={formData.learn_type || formData?.category?.learn_type || ""}
-          onChange={(e) => {
-            if (disableLearnType) {
-              toast.info(t("Learn type is fixed for your account"));
-              return;
-            }
-            onLearnTypeChange(e);
-          }}
+          value={
+            disableLearnType
+              ? "cards"
+              : formData.learn_type || formData?.category?.learn_type || ""
+          }
+          onChange={onLearnTypeChange}
           className={`w-full px-3 py-2 border rounded-md outline-none ${
             errors.learn_type ? "border-red-500" : "border-gray-300"
           } ${disableLearnType ? "bg-gray-100 cursor-not-allowed" : ""} `}
@@ -85,15 +83,16 @@ function BasicDetailsSection({
           <option value="" hidden>
             {t("Select Type")}
           </option>
-          {LEARN_TYPE_OPTIONS.map((option) => (
-            <option
-              key={option.value}
-              className="text-black"
-              value={option.value}
-            >
-              {t(option.label)}
-            </option>
-          ))}
+          <option className="text-black" value={"cards"}>
+            {t("Cards")}
+          </option>
+          <option
+            disabled={disableLearnType}
+            className="text-black"
+            value={"posters"}
+          >
+            {t("Posters")}
+          </option>
         </select>
         {errors.learn_type && (
           <p className="text-red-500 text-xs mt-1">{errors.learn_type}</p>

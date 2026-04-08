@@ -30,7 +30,7 @@ function VideoPageContent() {
 
   useEffect(() => {
     getData();
-  }, [paramId]);
+  }, [paramId, i18n.language]);
 
   return (
     <div
