@@ -23,6 +23,24 @@ import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/C
 import CreateOrEditVideo from "../CreateOrEditVideo/CreateOrEditVideo";
 import VideoDetails from "../VideoDetails/VideoDetails";
 
+/**
+ * Extract display-ready fields from a multi-lang video object.
+ * API returns: { id: 21, ar: { ...fields }, en: { ...fields } }
+ * Prefers the current UI language, falls back to ar → en → first available.
+ */
+function getDisplayData(video, uiLang = "ar") {
+  if (!video) return {};
+  // Collect all language entries (keys that are not "id")
+  const langs = Object.keys(video).filter((k) => k !== "id");
+  if (langs.length === 0) return { ...video }; // old flat format fallback
+
+  const preferred = [uiLang, "ar", "en", "tr"];
+  const chosen =
+    preferred.find((l) => langs.includes(l)) || langs[0];
+
+  return video[chosen] || {};
+}
+
 function VideosList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -69,8 +87,8 @@ function VideosList({ onSectionChange }) {
     if (!sortConfig.key) return videoData;
 
     const sortedData = [...videoData].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+      const aValue = getDisplayData(a, i18n?.language)[sortConfig.key];
+      const bValue = getDisplayData(b, i18n?.language)[sortConfig.key];
 
       // Handle null/undefined values
       if (aValue === null || aValue === undefined) return 1;
@@ -336,7 +354,10 @@ function VideosList({ onSectionChange }) {
           </TableRow>
         </TableHeader>
         <TableBody className="text-[11px] ">
-          {getSortedData().map((video) => (
+          {getSortedData().map((video) => {
+            const d = getDisplayData(video, i18n?.language);
+            const langCodes = Object.keys(video).filter((k) => k !== "id");
+            return (
             <TableRow key={video?.id} className=" hover:bg-gray-50/60 border-b">
               <TableCell className="text-[#1E1E1E] text-center font-bold text-[11px] py-4 px-4">
                 <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
@@ -346,39 +367,46 @@ function VideosList({ onSectionChange }) {
               <TableCell className="py-4">
                 <div className="flex items-center justify-center gap-3">
                   <img
-                    src={video?.thumbnail_url?.default?.url || video?.thumbnail}
-                    alt={video?.title}
+                    src={d?.thumbnail_url?.default?.url || d?.thumbnail}
+                    alt={d?.title}
                     className="w-12 h-12 rounded object-cover bg-gray-100"
                     onError={(e) => {
-                      e.target.src = "/placeholder-video?.png";
+                      e.target.src = "/placeholder-video.png";
                     }}
                   />
                 </div>
               </TableCell>
               <TableCell className="py-4">
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center gap-1">
                   <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
-                    {video?.title}
+                    {d?.title}
                   </span>
-                  <span className="text-[#9FA2AA] text-[10px]">
-                    • {t(video?.language)}
-                  </span>
+                  <div className="flex items-center gap-1 flex-wrap justify-center">
+                    {langCodes.map((code) => (
+                      <span
+                        key={code}
+                        className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono uppercase"
+                      >
+                        {code}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </TableCell>
               <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                  {video?.category?.name}
+                  {d?.category?.name}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
-                  {t(video?.video_type)}
+                  {t(d?.video_type)}
                 </span>
               </TableCell>
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {video?.duration ? video?.duration : 0}
+                    {d?.duration ? d?.duration : 0}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
                     {t("minutes")}
@@ -388,7 +416,7 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {video?.views ? video?.views.toLocaleString() : 0}
+                    {d?.views ? d?.views.toLocaleString() : 0}
                   </span>
                   <span className="text-[#9FA2AA] text-[10px]">
                     {t("views")}
@@ -398,11 +426,13 @@ function VideosList({ onSectionChange }) {
               <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
                 <div className="flex flex-col items-center">
                   <span className="font-medium">
-                    {new Date(video?.happened_at).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    {d?.happened_at
+                      ? new Date(d.happened_at).toLocaleDateString("en-GB", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                      : "—"}
                   </span>
                 </div>
               </TableCell>
@@ -444,7 +474,8 @@ function VideosList({ onSectionChange }) {
                 </div>
               </TableCell>
             </TableRow>
-          ))}
+          );
+          })}
         </TableBody>
       </Table>
       {/* End Table */}

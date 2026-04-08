@@ -445,9 +445,18 @@ function AttachmentsModal({
             </label>
             <input
               type="file"
-              onChange={(e) =>
-                setUploadForm({ ...uploadForm, file: e.target.files[0] })
-              }
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  // Auto-fill title with filename (without extension)
+                  const fileName = file.name.replace(/\.[^/.]+$/, "");
+                  setUploadForm({
+                    ...uploadForm,
+                    file: file,
+                    title: uploadForm.title || fileName,
+                  });
+                }
+              }}
               className={`w-full px-3 py-2 border rounded-lg ${
                 uploadErrors.file ? "border-red-500" : "border-gray-300"
               }`}
@@ -549,9 +558,18 @@ function AttachmentsModal({
               <>
                 <input
                   type="file"
-                  onChange={(e) =>
-                    setUploadForm({ ...uploadForm, file: e.target.files[0] })
-                  }
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      // Auto-fill title with filename (without extension)
+                      const fileName = file.name.replace(/\.[^/.]+$/, "");
+                      setUploadForm({
+                        ...uploadForm,
+                        file: file,
+                        title: uploadForm.title || fileName,
+                      });
+                    }
+                  }}
                   className="w-full px-3 py-2 border rounded-lg border-gray-300"
                   accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
                 />

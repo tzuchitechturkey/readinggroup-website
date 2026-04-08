@@ -9,12 +9,22 @@ import {
   CreateLearn,
   EditLearnById,
   GetLearnCategoriesByType,
+  GetLearnCategoryById,
 } from "@/api/learn";
 import { LEARN_FORM_DATA_INITIAL_STATE } from "@/constants/learn/learnConstant";
 import { validateForm, isFormValid } from "@/Utility/Learn/validation";
 
 export const useCreateOrEditLearn = (learn, onSectionChange) => {
   const { t, i18n } = useTranslation();
+
+  // Category restriction: editor scoped to a specific learn category
+  const restrictedCategoryId = (() => {
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+    const catId = localStorage.getItem("categoryName");
+    return userType === "editor" && sectionName === "learn" && catId ? catId : null;
+  })();
+  const isRestrictedCategory = Boolean(restrictedCategoryId);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -302,6 +312,26 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     }
   }, []);
 
+  // Pre-set restricted category for new items (no existing learn)
+  useEffect(() => {
+    if (restrictedCategoryId && !learn) {
+      GetLearnCategoryById(restrictedCategoryId)
+        .then((res) => {
+          const cat = res?.data;
+          if (cat) {
+            setFormData((prev) => ({
+              ...prev,
+              category: cat.id,
+              learn_type: cat.learn_type || prev.learn_type,
+            }));
+            setCategoriesList([cat]);
+            if (cat.learn_type) getCategories(cat.learn_type);
+          }
+        })
+        .catch(console.error);
+    }
+  }, []);
+
   return {
     // Form state
     formData,
@@ -341,5 +371,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     // Utilities
     i18n,
     t,
+
+    // Restriction
+    isRestrictedCategory,
   };
 };

@@ -16,16 +16,16 @@ export function AxiosInterceptor() {
           // Save current URL for redirect after login
           localStorage.setItem(
             "redirectAfterLogin",
-            window.location.pathname + window.location.search
+            window.location.pathname + window.location.search,
           );
           // Prevent infinite loops if already on auth pages
           const isOnAuth = window.location.pathname.startsWith("/auth");
           // if (!isOnAuth) {
-          //   window.location.href = "/auth/login";
+          window.location.href = "/auth/login";
           // }
         }
         return Promise.reject(error);
-      }
+      },
     );
 
     return () => {

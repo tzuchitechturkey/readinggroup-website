@@ -24,8 +24,17 @@ function LearnList({ onSectionChange }) {
     totalRecords,
     update,
     getLearnData,
+    getLearnDataByCategory,
     handleDeleteLearn,
   } = useLearnData();
+
+  // Restriction: editor with a specific learn category
+  const restrictedCategoryId = (() => {
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+    const catId = localStorage.getItem("categoryName");
+    return userType === "editor" && sectionName === "learn" && catId ? catId : null;
+  })();
 
   const { sortData, getSortedData, sortConfig } = useSorting(learnData);
   const { currentPage, handlePageChange, resetPage, getPaginationInfo } =
@@ -39,13 +48,21 @@ function LearnList({ onSectionChange }) {
 
   // Functions
   const fetchData = (page = 0) => {
-    getLearnData(page, search);
+    if (restrictedCategoryId) {
+      getLearnDataByCategory(restrictedCategoryId, page, search);
+    } else {
+      getLearnData(page, search);
+    }
   };
 
   const clearSearch = () => {
     setSearch("");
     resetPage();
-    getLearnData(0, "");
+    if (restrictedCategoryId) {
+      getLearnDataByCategory(restrictedCategoryId, 0, "");
+    } else {
+      getLearnData(0, "");
+    }
   };
 
   const handlePageChangeWithFetch = (newPage) => {

@@ -28,6 +28,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
 
   // Form state
   const [formData, setFormData] = useState(FORM_DATA_INITIAL_STATE);
+  const [createdVideoData, setCreatedVideoData] = useState(null);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
@@ -351,16 +352,15 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     setIsLoading(true);
 
     try {
-      video?.id
-        ? await EditVideoById(video?.id, formDataToSend)
-        : await CreateVideo(formDataToSend);
-
-      toast.success(
-        video?.id
-          ? t("Video updated successfully")
-          : t("Video created successfully"),
-      );
-      onSectionChange("videos");
+      if (video?.id) {
+        await EditVideoById(video?.id, formDataToSend);
+        toast.success(t("Video updated successfully"));
+        onSectionChange("videos");
+      } else {
+        const response = await CreateVideo(formDataToSend);
+        toast.success(t("Video created successfully"));
+        setCreatedVideoData(response.data);
+      }
     } catch (err) {
       setErrorFn(err, t);
     } finally {
@@ -489,5 +489,8 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
 
     // Utilities
     isValidYouTubeUrl,
+
+    // Multi-lang creation result
+    createdVideoData,
   };
 };

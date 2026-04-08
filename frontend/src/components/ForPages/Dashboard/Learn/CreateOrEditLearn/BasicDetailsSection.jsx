@@ -21,6 +21,7 @@ function BasicDetailsSection({
   handleCategoryClearSearch,
   handleCategorySelect,
   categoryDropdownRef,
+  disableCategory,
 }) {
   const { t } = useTranslation();
   const learnType = formData.learn_type || formData?.category?.learn_type;
@@ -114,8 +115,12 @@ function BasicDetailsSection({
             onSelect={handleCategorySelect}
             errors={errors}
             dropdownRef={categoryDropdownRef}
-            disabled={!formData.learn_type && !formData?.category?.learn_type}
-            disabledMessage={t("Please select a learn type first")}
+            disabled={disableCategory || (!formData.learn_type && !formData?.category?.learn_type)}
+            disabledMessage={
+              disableCategory
+                ? t("Category is fixed for your account")
+                : t("Please select a learn type first")
+            }
           />
         </div>
       </div>

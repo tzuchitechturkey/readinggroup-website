@@ -21,9 +21,6 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     categoriesList,
     categorySearchValue,
     setCategorySearchValue,
-    // Guest speakers state
-    guestSpeakerInput,
-    setGuestSpeakerInput,
     // Loading state
     isLoading,
     // Refs
@@ -32,12 +29,12 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
     handleInputChange,
     handleImageUpload,
     handleCategorySelect,
-    handleGuestSpeakersInput,
-    removeGuestSpeaker,
     handleSubmit,
     // API Functions
     getCategories,
     t,
+    // Restriction
+    isRestrictedCategory,
   } = useCreateOrEditLearn(learn, onSectionChange);
   // Handler for learn type change (resets writer selection)
   const handleLearnTypeChange = (e) => {
@@ -87,6 +84,7 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
           handleCategoryClearSearch={handleCategoryClearSearch}
           handleCategorySelect={handleCategorySelect}
           categoryDropdownRef={categoryDropdownRef}
+          disableCategory={isRestrictedCategory}
         />
 
         {/* Event Section - For Posters */}
@@ -100,7 +98,6 @@ function CreateOrEditLearn({ onSectionChange, learn = null }) {
               </label>
               <button
                 type="button"
-                disabled
                 onClick={
                   () =>
                     toast.info(

@@ -73,6 +73,7 @@ function LoginForm() {
         localStorage.setItem("userImage", data?.user?.profile_image_url);
         localStorage.setItem("username", data?.user?.username);
         localStorage.setItem("sectionName", data?.user?.section_name || "");
+        localStorage.setItem("categoryName", data?.user?.category_name || "");
 
         if (data?.user?.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");
@@ -145,8 +146,7 @@ function LoginForm() {
           "sectionName",
           res?.data?.user?.section_name || "",
         );
-
-        setShowTOTPModal(false);
+        localStorage.setItem("categoryName", res?.data?.user?.category_name || "");
         localStorage.setItem("userType", res?.data?.group);
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
         if (

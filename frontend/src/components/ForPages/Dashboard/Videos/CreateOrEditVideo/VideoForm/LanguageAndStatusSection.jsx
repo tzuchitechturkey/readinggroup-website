@@ -7,8 +7,11 @@ export const LanguageAndStatusSection = ({
   formData,
   onInputChange,
   errors,
+  usedLangCodes = [],
+  disableVideoType = false,
 }) => {
   const { t } = useTranslation();
+
 
   return (
     <div className="grid grid-cols-1 gap-4  pt-1 ">
@@ -27,8 +30,14 @@ export const LanguageAndStatusSection = ({
         >
           <option value="">{t("Select language")}</option>
           {languages?.map((lang) => (
-            <option className="text-black" key={lang?.code} value={lang?.code}>
+            <option
+              className="text-black"
+              key={lang?.code}
+              value={lang?.code}
+              disabled={usedLangCodes.includes(lang?.code)}
+            >
               {lang?.name || lang?.label}
+              {usedLangCodes.includes(lang?.code) ? ` (${t("already added")})` : ""}
             </option>
           ))}
         </select>
@@ -49,7 +58,10 @@ export const LanguageAndStatusSection = ({
           name="video_type"
           value={formData?.video_type}
           onChange={onInputChange}
+          disabled={disableVideoType}
           className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            disableVideoType ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""
+          } ${
             errors?.video_type ? "border-red-500" : "border-gray-300"
           }`}
         >

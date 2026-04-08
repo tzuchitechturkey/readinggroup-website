@@ -12,6 +12,7 @@ export const BasicDetailsSection = ({
   onCategorySearch,
   onCategoryDropdownToggle,
   errors,
+  disableCategory = false,
 }) => {
   const { t } = useTranslation();
 
@@ -47,16 +48,21 @@ export const BasicDetailsSection = ({
         </label>
         <button
           type="button"
-          onClick={() => onCategoryDropdownToggle(!showCategoryDropdown)}
+          onClick={() => !disableCategory && onCategoryDropdownToggle(!showCategoryDropdown)}
+          disabled={disableCategory}
           className={`w-full px-3 py-2 border rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center ${
+            disableCategory ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""
+          } ${
             errors?.category ? "border-red-500" : "border-gray-300"
           }`}
         >
           <span>
-            {categoriesList?.find(
-              (cat) =>
-                cat?.id === (formData?.category?.id || formData?.category),
-            )?.name || t("Select category")}
+            {formData?.category?.name ||
+              categoriesList?.find(
+                (cat) =>
+                  cat?.id === (formData?.category?.id || formData?.category),
+              )?.name ||
+              t("Select category")}
           </span>
           <span className="text-gray-400">▼</span>
         </button>
