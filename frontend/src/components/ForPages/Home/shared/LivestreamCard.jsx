@@ -129,15 +129,20 @@ const LivestreamCard = ({ data = [], t }) => {
                   }}
                   className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative"
                 >
-                  <img
-                    src={
-                      imageItem?.images[0]?.image ||
-                      imageItem?.images[0]?.image_url
-                    }
-                    alt={`${imageItem?.title} - ${index + 1}`}
-                    className="w-full h-full object-cover object-top"
-                    loading="lazy"
-                  />
+                  {imageItem?.images?.[0]?.image ||
+                  imageItem?.images?.[0]?.image_url ? (
+                    <img
+                      src={
+                        imageItem?.images[0]?.image ||
+                        imageItem?.images[0]?.image_url
+                      }
+                      alt={`${imageItem?.title} - ${index + 1}`}
+                      className="w-full h-full object-cover object-top"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200" />
+                  )}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-[#285688]/100 via-[#285688]/40 to-transparent opacity-100 transition-opacity duration-300 flex items-center justify-center" />
                   <div className="hidden lg:block bg-white bg-opacity-90 text-black px-4 py-2 rounded-lg font-bold text-sm">
