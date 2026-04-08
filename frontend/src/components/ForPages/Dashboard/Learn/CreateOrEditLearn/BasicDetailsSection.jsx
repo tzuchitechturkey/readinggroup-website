@@ -71,8 +71,13 @@ function BasicDetailsSection({
         <select
           name="learn_type"
           value={formData.learn_type || formData?.category?.learn_type || ""}
-          onChange={onLearnTypeChange}
-          disabled={disableLearnType}
+          onChange={(e) => {
+            if (disableLearnType) {
+              toast.info(t("Learn type is fixed for your account"));
+              return;
+            }
+            onLearnTypeChange(e);
+          }}
           className={`w-full px-3 py-2 border rounded-md outline-none ${
             errors.learn_type ? "border-red-500" : "border-gray-300"
           } ${disableLearnType ? "bg-gray-100 cursor-not-allowed" : ""} `}
