@@ -176,10 +176,6 @@ class VideoViewSet(viewsets.ModelViewSet):
 
         params = self.request.query_params
 
-        # Allow search filter to work before custom filtering
-        if params.get("search"):
-            return queryset.order_by("-created_at")
-
         language = params.getlist("language")
         if language and self.action == "list":
             values = []
@@ -191,6 +187,10 @@ class VideoViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(
                     Q(language__in=values) | Q(translations__language__in=values)
                 ).distinct()
+
+        # Allow search filter to work before custom filtering
+        if params.get("search"):
+            return queryset.order_by("-created_at")
 
         category = params.get("category")
         if category:
