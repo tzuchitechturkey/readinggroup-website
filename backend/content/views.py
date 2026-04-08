@@ -116,13 +116,37 @@ class VideoViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
+    def _parse_requested_languages(self, request):
+        """Parse language query params.
+
+        Supports repeated params and comma-separated values:
+        - ?language=ar&language=en
+        - ?language=ar,en
+        """
+
+        lang_params = request.query_params.getlist("language")
+        requested_languages = []
+        for item in lang_params:
+            requested_languages.extend(
+                [v.strip() for v in item.split(",") if v.strip()]
+            )
+        return requested_languages
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         # Increment views on the resolved record (base or translation)
         instance.views = instance.views + 1
         instance.save(update_fields=["views"])
+
+        requested_languages = self._parse_requested_languages(request)
         return Response(
-            VideoMultiLangSerializer(instance, context={"request": request}).data
+            VideoMultiLangSerializer(
+                instance,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
+            ).data
         )
 
     @swagger_auto_schema(
@@ -133,12 +157,7 @@ class VideoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
-        lang_params = request.query_params.getlist("language")
-        requested_languages = []
-        for item in lang_params:
-            requested_languages.extend(
-                [v.strip() for v in item.split(",") if v.strip()]
-            )
+        requested_languages = self._parse_requested_languages(request)
 
         if page is not None:
             data = VideoMultiLangSerializer(

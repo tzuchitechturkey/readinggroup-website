@@ -158,7 +158,7 @@ class Learn(TimestampedModel):
     )
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
-    author_name  = models.CharField(max_length=255, blank=True, null=True)
+    author_name = models.CharField(max_length=255, blank=True, null=True)
     author_country = models.CharField(max_length=255, blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
