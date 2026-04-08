@@ -125,7 +125,7 @@ export async function GetVideosByCategoryId(
 
 // /videos/by_type_video/
 export async function GetVideosByTypeVideo(language) {
-  return await axios.get(`/videos/by_type_video/?language=${language}`);
+  return await axios.get(`/videos/by_type_video/?&language=${language}`);
 }
 
 // // /top5-videos/
@@ -133,3 +133,4 @@ export async function GetVideosByTypeVideo(language) {
 export async function GetTopViewedVideos(videoId, language) {
   return await axios.get(`/videos/${videoId}/top-views/?language=${language}`);
 }
+// return await axios.get(`/videos/by_type_video/?type_video=${type}/`);

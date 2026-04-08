@@ -26,17 +26,10 @@ export const validateForm = (formData, t) => {
     newErrors.duration = t("Event Duration is required");
   }
 
-  if (!formData.learn || !formData.learn?.id) {
-    newErrors.learn = t("Event Learn is required");
-  }
-
   if (!formData.guest_speakers || formData.guest_speakers.length === 0) {
     newErrors.guest_speakers = t("At least one guest speaker is required");
   }
-  if (formData.live_stream_link && !isValidUrl(formData.live_stream_link)) {
-    newErrors.live_stream_link = t("Please enter a valid URL");
-  }
-
+  console.log("formData.live_stream_link", newErrors);
   return newErrors;
 };
 

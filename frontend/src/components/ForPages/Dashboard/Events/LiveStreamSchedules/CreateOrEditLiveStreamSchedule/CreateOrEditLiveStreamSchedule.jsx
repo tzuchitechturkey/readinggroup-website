@@ -9,7 +9,6 @@ import "react-day-picker/dist/style.css";
 import "@/components/ForPages/Dashboard/CreateorEditCategoryModal/DatePickerStyles.css";
 
 import Loader from "@/components/Global/Loader/Loader";
-import AutoComplete from "@/components/Global/AutoComplete/AutoComplete";
 import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
 
 import { FormActionsSection } from "./LiveStreamForm";
@@ -289,15 +288,10 @@ const CreateOrEditLiveStreamSchedule = ({
     isLoading,
     guestSpeakerInput,
     setGuestSpeakerInput,
-    selectedLearn,
-    learnsList,
     handleInputChange,
     handleSubmit,
     handleGuestSpeakersInput,
     removeGuestSpeaker,
-    handleLearnSelect,
-    handleLearnClear,
-    getLearnsList,
     resetForm,
   } = useEventForm(liveStream, handleSuccess);
 
