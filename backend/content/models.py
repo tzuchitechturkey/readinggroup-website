@@ -383,7 +383,7 @@ class EventCommunityImage(TimestampedModel):
         "EventCommunity", on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="event-community/images/")
-    caption = models.CharField(max_length=500, blank=True)
+    caption = models.CharField(max_length=500, blank=True, null=True)
     order = models.PositiveIntegerField(
         default=0, help_text="Order of image in the event"
     )
