@@ -86,7 +86,11 @@ function EventLanguageAccordion({
       onDeleted && onDeleted(langCode);
       return;
     }
-    if (!window.confirm(t("Are you sure you want to delete this language version?")))
+    if (
+      !window.confirm(
+        t("Are you sure you want to delete this language version?"),
+      )
+    )
       return;
 
     setIsDeleting(true);
@@ -248,7 +252,9 @@ function EventLanguageAccordion({
                 onOpenChange={setOpenDatePopover}
               />
               {errors.start_event_date && (
-                <p className="text-red-600 text-sm">{errors.start_event_date}</p>
+                <p className="text-red-600 text-sm">
+                  {errors.start_event_date}
+                </p>
               )}
             </div>
 
@@ -268,7 +274,9 @@ function EventLanguageAccordion({
                 t={t}
               />
               {errors.start_event_time && (
-                <p className="text-red-600 text-sm">{errors.start_event_time}</p>
+                <p className="text-red-600 text-sm">
+                  {errors.start_event_time}
+                </p>
               )}
             </div>
 
@@ -305,7 +313,9 @@ function EventLanguageAccordion({
                 className={`w-full px-3 py-2 border ${errors.live_stream_link ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
               {errors.live_stream_link && (
-                <p className="text-red-600 text-sm">{errors.live_stream_link}</p>
+                <p className="text-red-600 text-sm">
+                  {errors.live_stream_link}
+                </p>
               )}
             </div>
           </div>
@@ -343,58 +353,6 @@ function EventLanguageAccordion({
               </div>
             )}
           </div>
-
-          {/* Images (only for saved events) */}
-          {!isNewLang && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t("Images")}
-                </label>
-                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm transition-colors">
-                  {isUploadingImage ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <Upload size={14} />
-                  )}
-                  {t("Add Image")}
-                  <input
-                    type="file"
-                    accept="image/*,.heic,.heif"
-                    className="hidden"
-                    onChange={handleImageFileChange}
-                    disabled={isUploadingImage}
-                  />
-                </label>
-              </div>
-
-              {images.length === 0 ? (
-                <p className="text-sm text-gray-400 italic">
-                  {t("No images uploaded yet")}
-                </p>
-              ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                  {images.map((img) => (
-                    <div key={img.id} className="relative group">
-                      <img
-                        src={img.image}
-                        alt={img.caption || ""}
-                        className="w-full aspect-video object-cover rounded-lg border border-gray-200"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteImage(img.id)}
-                        className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                        title={t("Delete image")}
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Save button */}
           <div className="flex justify-end pt-2 border-t border-gray-100">
