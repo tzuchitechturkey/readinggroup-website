@@ -37,18 +37,6 @@ function UserIcons() {
         <>
           <LanguageDropdown />
 
-          {isLoggedIn ? (
-            <UserProfileDropdown />
-          ) : (
-            <button
-              onClick={() => {
-                navigate("/auth/login");
-              }}
-              className="rounded-[38px] px-[16px] py-[8px]  border-[1px] border-gray-300  bg-white  hover:text-primary transition-colors duration-200 text-[#285688] text-lg font-medium leading-[1.5] font-['Noto_Sans']"
-            >
-              {t("Login")}
-            </button>
-          )}
           {isLoggedIn &&
             (userType === "admin" ||
               userType === "team_leader" ||
@@ -71,13 +59,6 @@ function UserIcons() {
                 </Link>
               </div>
             )}
-        </>
-      )}
-
-      {isSearchOpen && !isMobile && (
-        <>
-          <LanguageDropdown />
-
           {isLoggedIn ? (
             <UserProfileDropdown />
           ) : (
@@ -85,11 +66,18 @@ function UserIcons() {
               onClick={() => {
                 navigate("/auth/login");
               }}
-              className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl bg-white  hover:text-primary transition-colors duration-200"
+              className="rounded-[38px] px-[16px] py-[8px]  border-[1px] border-gray-300  bg-white  hover:text-primary transition-colors duration-200 text-[#285688] text-lg font-medium leading-[1.5] font-['Noto_Sans']"
             >
               {t("Login")}
             </button>
           )}
+        </>
+      )}
+
+      {isSearchOpen && !isMobile && (
+        <>
+          <LanguageDropdown />
+
           {isLoggedIn &&
             (userType === "admin" ||
               userType === "team_leader" ||
@@ -112,6 +100,18 @@ function UserIcons() {
                 </Link>
               </div>
             )}
+          {isLoggedIn ? (
+            <UserProfileDropdown />
+          ) : (
+            <button
+              onClick={() => {
+                navigate("/auth/login");
+              }}
+              className="text-sm p-1 px-2 border-[1px] border-gray-300 rounded-xl bg-white  hover:text-primary transition-colors duration-200"
+            >
+              {t("Login")}
+            </button>
+          )}
         </>
       )}
     </div>

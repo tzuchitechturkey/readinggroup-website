@@ -5,17 +5,13 @@ import { useTranslation } from "react-i18next";
 const ImageSection = ({
   images,
   onNewImagesChange,
-  onImageUrlChange,
-  onAddImageUrl,
   onRemoveImage,
   errors,
   maxImages = 28,
   isLoading = false,
 }) => {
-  console.log("Rendering ImageSection with images:", images);
   const { t } = useTranslation();
   const [previewImages, setPreviewImages] = useState([]);
-  const [imageUrl, setImageUrl] = useState("");
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (e) => {
@@ -33,13 +29,6 @@ const ImageSection = ({
       type: "file",
     }));
     setPreviewImages(previews);
-  };
-
-  const handleAddUrl = () => {
-    if (imageUrl.trim()) {
-      onAddImageUrl(imageUrl.trim());
-      setImageUrl("");
-    }
   };
 
   const handleRemovePreview = (index) => {
@@ -78,10 +67,12 @@ const ImageSection = ({
       </div>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900">{t("Images")}</h3>
-        <div className="flex items-center gap-3 text-sm">
+        {/* <div className="flex items-center gap-3 text-sm">
           <span className="text-gray-600">
             {t("Added")}:{" "}
-            <span className={`font-semibold ${images.length + previewImages.length >= maxImages ? "text-red-600" : "text-blue-600"}`}>
+            <span
+              className={`font-semibold ${images.length + previewImages.length >= maxImages ? "text-red-600" : "text-blue-600"}`}
+            >
               {images.length + previewImages.length}
             </span>
           </span>
@@ -93,11 +84,13 @@ const ImageSection = ({
           <span className="text-gray-400">|</span>
           <span className="text-gray-600">
             {t("Remaining")}:{" "}
-            <span className={`font-semibold ${maxImages - (images.length + previewImages.length) === 0 ? "text-red-600" : "text-green-600"}`}>
+            <span
+              className={`font-semibold ${maxImages - (images.length + previewImages.length) === 0 ? "text-red-600" : "text-green-600"}`}
+            >
               {Math.max(0, maxImages - (images.length + previewImages.length))}
             </span>
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* File Upload Section */}
@@ -197,9 +190,25 @@ const ImageSection = ({
       {/* Existing Images + URL Images */}
       {isLoading ? (
         <div className="flex items-center justify-center py-10 gap-3 text-gray-500">
-          <svg className="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          <svg
+            className="animate-spin h-5 w-5 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            />
           </svg>
           <span className="text-sm">{t("Loading collection photos...")}</span>
         </div>
