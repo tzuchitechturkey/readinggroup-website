@@ -24,8 +24,6 @@ function LearnCategoriesContent({ onSectionChange }) {
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const limit = 10;
-  const [originalCategories, setOriginalCategories] = useState([]);
-  const [hasChanges, setHasChanges] = useState(false);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -51,8 +49,6 @@ function LearnCategoriesContent({ onSectionChange }) {
         : await GetLearnCategories(limit, offset);
       const results = res?.data?.results || [];
       setCategories(results);
-      setOriginalCategories(JSON.parse(JSON.stringify(results)));
-      setHasChanges(false);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
       setErrorFn(err, t);
@@ -126,7 +122,6 @@ function LearnCategoriesContent({ onSectionChange }) {
           t={t}
           i18n={i18n}
           categories={categories}
-          setCategories={setCategories}
           setOriginalForm={setOriginalForm}
           setIsAutoTranslated={setIsAutoTranslated}
           setShowCreateEditModal={setShowCreateEditModal}
@@ -134,14 +129,10 @@ function LearnCategoriesContent({ onSectionChange }) {
           setOriginalLanguage={setOriginalLanguage}
           setForm={setForm}
           totalRecords={totalRecords}
-          originalCategories={originalCategories}
-          setOriginalCategories={setOriginalCategories}
-          hasChanges={hasChanges}
           setErrorFn={setErrorFn}
           getCategoriesData={getCategoriesData}
-          setHasChanges={setHasChanges}
           setSelectedCategory={setSelectedCategory}
-          setShowDeleteModal={setShowDeleteModal} 
+          setShowDeleteModal={setShowDeleteModal}
         />
         {/* End Table */}
 

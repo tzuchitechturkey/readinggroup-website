@@ -7,7 +7,11 @@ import Pagination from "@/components/Global/PagePagination/PagePagination";
 import VerticalCard from "@/components/ForPages/Learn/VerticalCard";
 import HorizontalCard from "@/components/ForPages/Learn/HorizontalCard";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
-import { GetLearnCategories, GetLearnsByCategoryId } from "@/api/learn";
+import {
+  GetLearnCategories,
+  GetLearnsByCategoryId,
+  IncrementLearnViews,
+} from "@/api/learn";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import LearnFilterBar from "@/components/ForPages/Learn/LearnFilterBar";
@@ -30,7 +34,7 @@ const LearnPageContent = () => {
   // Pagination State
   const [paginationData, setPaginationData] = useState({
     page: 0,
-    limit: 24,
+    limit: 12,
     totalCount: 0,
     hasMoreItems: false,
   });
@@ -47,7 +51,7 @@ const LearnPageContent = () => {
   const getCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await GetLearnCategories();
+      const res = await GetLearnCategories(20, 0, "", "True"); // Fetch only active categories
       setCategories({
         cards: res.data.results.filter((cat) => cat.learn_type === "cards"),
         posters: res.data.results.filter((cat) => cat.learn_type === "posters"),
@@ -76,7 +80,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -96,10 +100,10 @@ const LearnPageContent = () => {
     }
     try {
       const params = { created_at: happenedAt };
-      const res = await GetLearnsByCategoryId(categoryId, 24, offset, params);
+      const res = await GetLearnsByCategoryId(categoryId, 12, offset, params);
       const newItems = res.data.results || [];
       const totalCount = res.data.count || 0;
-      const hasMoreItems = offset + 24 < totalCount;
+      const hasMoreItems = offset + 12 < totalCount;
 
       if (appendMode) {
         // Append new items when loading more
@@ -110,8 +114,8 @@ const LearnPageContent = () => {
       }
 
       setPaginationData({
-        page: Math.floor(offset / 24),
-        limit: 24,
+        page: Math.floor(offset / 12),
+        limit: 12,
         totalCount,
         hasMoreItems,
       });
@@ -158,7 +162,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -207,7 +211,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -223,7 +227,7 @@ const LearnPageContent = () => {
     setItems([]);
     setPaginationData({
       page: 0,
-      limit: 24,
+      limit: 12,
       totalCount: 0,
       hasMoreItems: false,
     });
@@ -234,6 +238,10 @@ const LearnPageContent = () => {
   const openViewer = (index) => {
     setCurrentImageIndex(index);
     setIsViewerOpen(true);
+    const item = sortedAndFilteredItems[index];
+    if (item?.id) {
+      IncrementLearnViews(item.id).catch(() => {});
+    }
   };
 
   const closeViewer = () => {
@@ -376,9 +384,9 @@ const LearnPageContent = () => {
             {sortedAndFilteredItems.length > 0 && (
               <Pagination
                 currentPage={paginationData.page + 1}
-                totalPages={Math.ceil(paginationData.totalCount / 24) || 1}
+                totalPages={Math.ceil(paginationData.totalCount / 12) || 1}
                 onPageChange={(newPage) => {
-                  const newOffset = (newPage - 1) * 24;
+                  const newOffset = (newPage - 1) * 12;
                   let happenedAt = null;
                   if (filters.date.month && filters.date.year) {
                     const month = String(filters.date.month).padStart(2, "0");

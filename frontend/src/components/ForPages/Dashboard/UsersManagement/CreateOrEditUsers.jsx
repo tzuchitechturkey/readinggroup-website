@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { Loader } from "lucide-react";
 
 import { useCreateOrEditUser } from "@/hooks/user/useCreateOrEditUser";
+import { GetLearnCategoriesByType } from "@/api/learn";
 import { Input } from "@/components/ui/input";
 
 export default function CreateOrEditUsers({ user, onClose }) {
@@ -16,11 +17,39 @@ export default function CreateOrEditUsers({ user, onClose }) {
     handleInputChange,
     handleSubmit,
   } = useCreateOrEditUser(user, onClose);
+
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
   const groupsList = [
     { name: "Admin", value: "admin" },
     { name: "Team Leader", value: "team_leader" },
     { name: "Editor", value: "editor" },
   ];
+
+  // جلب الفئات عندما يختار المستخدم learn و يكون editor
+  useEffect(() => {
+    if (formData.section_name === "learn" && formData.group === "editor") {
+      fetchCategories();
+    } else {
+      setCategories([]);
+    }
+  }, [formData.section_name, formData.group]);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await GetLearnCategoriesByType("cards");
+      console.log("Fetched categories:", response.data);
+      setCategories(response.data?.results || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {isLoading && <Loader className="animate-spin h-5 w-5" />}
@@ -121,6 +150,39 @@ export default function CreateOrEditUsers({ user, onClose }) {
           </select>
           {errors.section_name && (
             <p className="text-red-500 text-xs mt-1">{errors.section_name}</p>
+          )}
+        </div>
+      )}
+
+      {/* Category Selection - Only for learn section and editor group */}
+      {formData.section_name === "learn" && formData.group === "editor" && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("Category")} *{" "}
+            {loadingCategories && (
+              <Loader className="inline animate-spin h-4 w-4 mr-2" />
+            )}
+          </label>
+          <select
+            name="category_name"
+            value={formData.category_name || ""}
+            onChange={handleInputChange}
+            disabled={isLoading || loadingCategories}
+            className={`w-full px-4 py-2.5 border rounded-lg outline-none ${
+              errors.category_name ? "border-red-500" : "border-gray-300"
+            } focus:ring-2 focus:ring-blue-500`}
+          >
+            <option value="" hidden>
+              {t("Select Category")}
+            </option>
+            {categories?.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+          {errors.category_name && (
+            <p className="text-red-500 text-xs mt-1">{errors.category_name}</p>
           )}
         </div>
       )}

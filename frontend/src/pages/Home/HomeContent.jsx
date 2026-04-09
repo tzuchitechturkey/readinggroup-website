@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -15,7 +15,7 @@ import { GetEvents } from "@/api/events";
 import { GetLast4Photos } from "@/api/photoCollections";
 
 export default function HomeContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [videoData, setVideoData] = useState(null);
   const [cardsData, setCardsData] = useState(null);
   const [posterData, setPosterData] = useState({});
@@ -24,8 +24,14 @@ export default function HomeContent() {
 
   const fetchVideoData = async () => {
     try {
-      const res = await GetVideosByTypeVideo();
-      setVideoData(res.data);
+      const res = await GetVideosByTypeVideo(i18n.language);
+      const lang = i18n.language;
+      const normalize = (arr) =>
+        (arr || []).map((item) => ({ ...item[lang], id: item.id }));
+      setVideoData({
+        full_video: normalize(res.data?.full_video),
+        clip_video: normalize(res.data?.clip_video),
+      });
     } catch (error) {
       setErrorFn(error, t);
     }
@@ -39,6 +45,7 @@ export default function HomeContent() {
       setErrorFn(error, t);
     }
   };
+
   const fetchPosterData = async () => {
     try {
       const res = await GetTopOnePoster();
@@ -47,14 +54,24 @@ export default function HomeContent() {
       setErrorFn(error, t);
     }
   };
+
   const fetchUpcomingLivestream = async () => {
     try {
-      const res = await GetEvents(4, 0);
+      const I18N_TO_EVENT_LANG = {
+        en: "en",
+        tr: "tr",
+        ch: "zh-hant",
+        chsi: "zh-hans",
+        jp: "ja",
+      };
+      const language = I18N_TO_EVENT_LANG[i18n.language] || "en";
+      const res = await GetEvents(4, 0, { language });
       setUpcomingLivestreamData(res.data?.results || []);
     } catch (error) {
       setErrorFn(error, t);
     }
   };
+
   const fetchPhotoCollectionData = async () => {
     try {
       const res = await GetLast4Photos();
@@ -64,13 +81,18 @@ export default function HomeContent() {
       setErrorFn(error, t);
     }
   };
+
   useEffect(() => {
-    fetchVideoData();
     fetchPosterData();
     fetchCardsData();
-    fetchUpcomingLivestream();
     fetchPhotoCollectionData();
   }, []);
+
+  useEffect(() => {
+    fetchVideoData();
+    fetchUpcomingLivestream();
+  }, [i18n.language]);
+
   return (
     <div className="min-h-screen bg-[#C8DDF4]">
       {/* Start Hero Slider */}

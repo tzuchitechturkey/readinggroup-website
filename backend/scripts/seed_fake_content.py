@@ -20,7 +20,9 @@ def _random_sentence(min_words: int = 6, max_words: int = 14) -> str:
 
 
 def _random_paragraph(min_sentences: int = 2, max_sentences: int = 5) -> str:
-    return " ".join(_random_sentence() for _ in range(random.randint(min_sentences, max_sentences)))
+    return " ".join(
+        _random_sentence() for _ in range(random.randint(min_sentences, max_sentences))
+    )
 
 
 YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v=OOqrTEhS-ZE"
@@ -71,7 +73,9 @@ def _safe_image_filename(prefix: str, ext: str = ".jpg") -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Seed fake content data into the database")
+    parser = argparse.ArgumentParser(
+        description="Seed fake content data into the database"
+    )
     parser.add_argument("--users", type=int, default=3)
     parser.add_argument("--video-categories", type=int, default=4)
     parser.add_argument("--videos", type=int, default=30)
@@ -171,7 +175,9 @@ def main() -> int:
             )
             learn_categories.append(lc)
 
-        poster_categories = [c for c in learn_categories if c.learn_type == LearnType.POSTERS]
+        poster_categories = [
+            c for c in learn_categories if c.learn_type == LearnType.POSTERS
+        ]
         if not poster_categories:
             poster_categories.append(
                 LearnCategory.objects.create(
@@ -201,32 +207,17 @@ def main() -> int:
             )
             learns.append(learn)
 
-        # Events (must attach to Learn in POSTERS category due to limit_choices_to + clean())
-        poster_learns = [l for l in learns if l.category and l.category.learn_type == LearnType.POSTERS]
-        if not poster_learns:
-            for i in range(3):
-                poster_learns.append(
-                    Learn.objects.create(
-                        title=f"Poster Learn {i + 1}: {_random_words(3).title()}",
-                        subtitle=_random_sentence(4, 9),
-                        category=random.choice(poster_categories),
-                        image=None,
-                        image_url=IMAGE_URL,
-                        happened_at=now - timedelta(days=random.randint(0, 180)),
-                        views=random.randint(0, 5000),
-                        is_event=False,
-                    )
-                )
-
         for i in range(args.events):
-            learn = random.choice(poster_learns)
             start_date = (now - timedelta(days=random.randint(0, 90))).date()
-            start_time = (now - timedelta(minutes=random.randint(0, 1200))).time().replace(microsecond=0)
+            start_time = (
+                (now - timedelta(minutes=random.randint(0, 1200)))
+                .time()
+                .replace(microsecond=0)
+            )
             EventCommunity.objects.create(
                 title=f"Community Event {i + 1}",
                 guest_speakers=[{"name": _random_words(2).title()}],
                 live_stream_link="https://example.com/live",
-                learn=learn,
                 start_event_date=start_date,
                 start_event_time=start_time,
                 duration=str(random.choice(["30m", "45m", "60m", "90m"])),
@@ -277,7 +268,10 @@ def main() -> int:
                 },
                 happened_at=happened_at,
                 is_new=False,
-                reference_code="".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
+                reference_code="".join(
+                    random.choice(string.ascii_uppercase + string.digits)
+                    for _ in range(8)
+                ),
                 video_url=YOUTUBE_VIDEO_URL,
                 guest_speakers=[{"name": _random_words(2).title()}],
             )
@@ -285,21 +279,29 @@ def main() -> int:
 
             # Attachments (optional, but FileField is required on ContentAttachment)
             if random.random() < 0.35:
-                payload = f"Attachment for video {video.pk}\n{_random_paragraph()}\n".encode("utf-8")
+                payload = (
+                    f"Attachment for video {video.pk}\n{_random_paragraph()}\n".encode(
+                        "utf-8"
+                    )
+                )
                 attachment = ContentAttachment.objects.create(
                     Video=video,
                     file_name=f"video-{video.pk}.txt",
                     file_size=len(payload),
                     description=_random_sentence(),
                 )
-                attachment.file.save(f"video-{video.pk}.txt", ContentFile(payload), save=True)
+                attachment.file.save(
+                    f"video-{video.pk}.txt", ContentFile(payload), save=True
+                )
 
         # Authors
         for i in range(6):
             Authors.objects.create(
                 name=f"Author {i + 1}",
                 description=_random_paragraph(),
-                position=random.choice(["Editor", "Contributor", "Speaker", "Volunteer"]),
+                position=random.choice(
+                    ["Editor", "Contributor", "Speaker", "Volunteer"]
+                ),
                 avatar=None,
                 avatar_url=IMAGE_URL,
             )

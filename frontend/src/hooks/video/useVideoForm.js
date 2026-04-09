@@ -28,6 +28,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
 
   // Form state
   const [formData, setFormData] = useState(FORM_DATA_INITIAL_STATE);
+  const [createdVideoData, setCreatedVideoData] = useState(null);
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [errors, setErrors] = useState({});
@@ -175,16 +176,18 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
       attachments: prev.attachments.filter((att) => att.id !== attachmentId),
     }));
   };
-  const handlePreviewFile = (file) => {
-    console.log("111111:", file);
-    setPreviewFile(file);
-    // Handle both File objects and attachment objects from server
+  const handlePreviewFile = (attachment) => {
+    setPreviewFile(attachment);
     let url;
-    if (file instanceof File) {
-      url = URL.createObjectURL(file);
-    } else if (file?.file) {
-      // attachment object from server with file URL
-      url = file.file;
+    if (attachment instanceof File) {
+      url = URL.createObjectURL(attachment);
+    } else if (typeof attachment?.file === "string") {
+      // attachment object from server — file is a URL string
+      url = attachment.file;
+    } else if (attachment?.file instanceof File) {
+      url = URL.createObjectURL(attachment.file);
+    } else if (typeof attachment === "string") {
+      url = attachment;
     } else {
       return;
     }
@@ -349,16 +352,15 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     setIsLoading(true);
 
     try {
-      video?.id
-        ? await EditVideoById(video?.id, formDataToSend)
-        : await CreateVideo(formDataToSend);
-
-      toast.success(
-        video?.id
-          ? t("Video updated successfully")
-          : t("Video created successfully"),
-      );
-      onSectionChange("videos");
+      if (video?.id) {
+        await EditVideoById(video?.id, formDataToSend);
+        toast.success(t("Video updated successfully"));
+        onSectionChange("videos");
+      } else {
+        const response = await CreateVideo(formDataToSend);
+        toast.success(t("Video created successfully"));
+        setCreatedVideoData(response.data);
+      }
     } catch (err) {
       setErrorFn(err, t);
     } finally {
@@ -386,7 +388,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
         duration: video?.duration || "",
         guest_speakers: video?.guest_speakers || [],
         video_type: video?.video_type || "",
-        attachments: video?.attachments || [],
+        attachments: video?.attachments_data || video?.attachments || [],
       };
       console.log(video);
       setFormData(initialData);
@@ -487,5 +489,8 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
 
     // Utilities
     isValidYouTubeUrl,
+
+    // Multi-lang creation result
+    createdVideoData,
   };
 };

@@ -113,16 +113,6 @@ const LearnTable = ({
           </TableHead>
 
           <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
-            <div
-              className="flex items-center justify-center gap-1 cursor-pointer hover:text-[#1E1E1E]"
-              onClick={() => sortData("views")}
-            >
-              {t("Views")}
-              <SortIcon sortConfig={sortConfig} columnKey="views" />
-            </div>
-          </TableHead>
-
-          <TableHead className="text-center text-[#5B6B79] font-medium text-xs">
             {t("Actions")}
           </TableHead>
         </TableRow>
@@ -136,7 +126,7 @@ const LearnTable = ({
             <TableCell className="text-center py-4">
               <div className="flex flex-col">
                 <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-1">
-                  {learn?.title}
+                  {learn?.title || "-"}
                 </span>
                 <span className="text-[#9FA2AA] text-[10px]">
                   {learn?.subtitle}
@@ -178,10 +168,6 @@ const LearnTable = ({
               <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
                 {t(learn?.category?.learn_type)}
               </span>
-            </TableCell>
-
-            <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-              <span className="font-medium">{learn?.views}</span>
             </TableCell>
 
             <TableCell className="text-center py-4">

@@ -3,12 +3,14 @@ const languages = {
     label: "中文",
     shortLabel: "CN",
     code: "ch",
+    apiCode: "zh-hant",
   },
 
   chsi: {
     label: "中文（简体）",
     shortLabel: "CNSI",
     code: "chsi",
+    apiCode: "zh-hans",
   },
 
   jp: {

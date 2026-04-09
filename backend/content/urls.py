@@ -1,6 +1,10 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
+from .audit_views import SectionAuditHistoryView, UserAuditHistoryView
 from .views import (
     RelatedReportsCategoryViewSet,
+    EventCommunityImageViewSet,
     ContentAttachmentViewSet,
     HistoryEventImageViewSet,
     PhotoCollectionViewSet,
@@ -26,8 +30,8 @@ from .views import (
 app_name = "content"
 
 router = DefaultRouter()
-router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"book", BookViewSet, basename="book")
+router.register(r"learn", LearnViewSet, basename="learn")
 router.register(r"videos", VideoViewSet, basename="video")
 router.register(r"photos", PhotoViewSet, basename="photo")
 router.register(r"our-team", OurTeamViewSet, basename="our-team")
@@ -59,5 +63,19 @@ router.register(
     RelatedReportsCategoryViewSet,
     basename="related-reports-category",
 )
+router.register(
+    r"event-community-images",
+    EventCommunityImageViewSet,
+    basename="event-community-image",
+)
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path(
+        "audit/users/<int:user_id>/", UserAuditHistoryView.as_view(), name="audit-user"
+    ),
+    path(
+        "audit/sections/<str:section>/",
+        SectionAuditHistoryView.as_view(),
+        name="audit-section",
+    ),
+]

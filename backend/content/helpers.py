@@ -54,10 +54,20 @@ class AbsoluteURLSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(path)
         return path
 
+    @staticmethod
+    def _user_display(user) -> str | None:
+        if user is None:
+            return None
+        return user.display_name or user.username or None
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         for field_name in getattr(self.Meta, "file_fields", self.file_fields):
             file_value = getattr(instance, field_name, None)
             if file_value:
                 data[field_name] = self._build_absolute_uri(file_value.url)
+        if "created_by" in data:
+            data["created_by"] = self._user_display(instance.created_by)
+        if "updated_by" in data:
+            data["updated_by"] = self._user_display(instance.updated_by)
         return data

@@ -38,7 +38,7 @@ const Revisititem = ({ item, size = "medium", t }) => {
       >
         <img
           alt={item?.title}
-          className="w-full max-w-[580px] h-full object-cover pointer-events-none transition-transform duration-300 hover:scale-105"
+          className="w-full max-w-[580px] h-full pointer-events-none transition-transform duration-300 hover:scale-105"
           src={item?.image || item?.image_url}
         />
 

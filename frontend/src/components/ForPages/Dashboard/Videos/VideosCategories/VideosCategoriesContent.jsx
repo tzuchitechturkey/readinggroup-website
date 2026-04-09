@@ -46,8 +46,8 @@ function VideosCategoriesContent({ onSectionChange }) {
     const offset = page * 10;
     try {
       const res = searchValue
-        ? await GetVideoCategories(limit, offset, searchValue)
-        : await GetVideoCategories(limit, offset);
+        ? await GetVideoCategories(limit, offset, searchValue, "True")
+        : await GetVideoCategories(limit, offset, "", "True");
       const results = res?.data?.results || [];
       setCategories(results);
       setOriginalCategories(JSON.parse(JSON.stringify(results)));

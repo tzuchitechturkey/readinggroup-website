@@ -12,7 +12,7 @@ export default function AdminIcons() {
   const { t } = useTranslation();
   return (
     <div>
-      <div className="flex justify-end items-center lg:gap-4">
+      <div className="flex justify-end items-center lg:gap-4 mx-16">
         {/* Start Toggle Theme */}
         {/* <div className="">
           <ThemeToggle />

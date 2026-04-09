@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 
-import { EditPostCategoryById, SortPostCategories } from "@/api/posts";
 import DraggableTable from "@/components/ForPages/Dashboard/DraggableTable/DraggableTable";
 import { EditLearnCategoryById } from "@/api/learn";
 
@@ -11,7 +10,6 @@ function LearnCategoriesTable({
   t,
   i18n,
   categories,
-  setCategories,
   setOriginalForm,
   setIsAutoTranslated,
   setShowCreateEditModal,
@@ -19,10 +17,6 @@ function LearnCategoriesTable({
   setOriginalLanguage,
   setForm,
   totalRecords,
-  originalCategories,
-  setOriginalCategories,
-  hasChanges,
-  setHasChanges,
   getCategoriesData,
   setErrorFn,
   setSelectedCategory,
@@ -57,11 +51,6 @@ function LearnCategoriesTable({
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     getCategoriesData(newPage - 1);
-  };
-
-  // Handle Save Order
-  const handleSaveOrder = async (sortData) => {
-    await SortPostCategories({ categories: sortData });
   };
 
   // Define table columns
@@ -159,19 +148,13 @@ function LearnCategoriesTable({
       t={t}
       i18n={i18n}
       data={categories}
-      setData={setCategories}
       columns={columns}
       actions={actions}
-      originalData={originalCategories}
-      setOriginalData={setOriginalCategories}
-      hasChanges={hasChanges}
-      setHasChanges={setHasChanges}
-      onSaveOrder={handleSaveOrder}
       totalRecords={totalRecords}
       currentPage={currentPage}
       onPageChange={handlePageChange}
       limit={limit}
-      isDraggable={true}
+      isDraggable={false}
     />
   );
 }

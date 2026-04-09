@@ -20,6 +20,7 @@ function LogoutConfirmation({ onCancel }) {
     localStorage.removeItem("dashboardSelectedNews");
     localStorage.removeItem("userType");
     localStorage.removeItem("sectionName");
+    localStorage.removeItem("categoryName");
     localStorage.removeItem("redirectAfterLogin");
 
     toast.success(t("You have been logged out successfully."));

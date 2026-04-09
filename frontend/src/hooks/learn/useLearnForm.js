@@ -9,12 +9,22 @@ import {
   CreateLearn,
   EditLearnById,
   GetLearnCategoriesByType,
+  GetLearnCategoryById,
 } from "@/api/learn";
 import { LEARN_FORM_DATA_INITIAL_STATE } from "@/constants/learn/learnConstant";
 import { validateForm, isFormValid } from "@/Utility/Learn/validation";
 
 export const useCreateOrEditLearn = (learn, onSectionChange) => {
   const { t, i18n } = useTranslation();
+
+  // Category restriction: editor scoped to a specific learn category
+  const restrictedCategoryId = (() => {
+    const userType = localStorage.getItem("userType");
+    const sectionName = localStorage.getItem("sectionName");
+    const catId = localStorage.getItem("categoryName");
+    return userType === "editor" && sectionName === "learn" && catId ? catId : null;
+  })();
+  const isRestrictedCategory = Boolean(restrictedCategoryId);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -27,6 +37,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     event_title: "",
     guest_speakers: [],
     live_stream_link: "",
+    author_name: "",
+    author_country: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -230,6 +242,14 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
       learnData.append("live_stream_link", formData.live_stream_link);
     }
 
+    // Add optional fields
+    if (formData.author_name) {
+      learnData.append("author_name", formData.author_name);
+    }
+    if (formData.author_country) {
+      learnData.append("author_country", formData.author_country);
+    }
+
     learnData.append("updated_at", new Date().toISOString());
 
     setIsLoading(true);
@@ -274,6 +294,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         event_title: learn.event_title || "",
         guest_speakers: learn.guest_speakers || [],
         live_stream_link: learn.live_stream_link || "",
+        author_name: learn.author_name || "",
+        author_country: learn.author_country || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -299,6 +321,26 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
   useEffect(() => {
     if (learn?.category?.learn_type) {
       getCategories(learn?.category?.learn_type);
+    }
+  }, []);
+
+  // Pre-set restricted category for new items (no existing learn)
+  useEffect(() => {
+    if (restrictedCategoryId && !learn) {
+      GetLearnCategoryById(restrictedCategoryId)
+        .then((res) => {
+          const cat = res?.data;
+          if (cat) {
+            setFormData((prev) => ({
+              ...prev,
+              category: cat.id,
+              learn_type: "cards",
+            }));
+            setCategoriesList([cat]);
+            if (cat.learn_type) getCategories(cat.learn_type);
+          }
+        })
+        .catch(console.error);
     }
   }, []);
 
@@ -341,5 +383,8 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     // Utilities
     i18n,
     t,
+
+    // Restriction
+    isRestrictedCategory,
   };
 };

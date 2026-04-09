@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from jsonschema import ValidationError
+from simple_history.models import HistoricalRecords
 
 from .enums import (
     VideoType,
@@ -18,6 +19,23 @@ class TimestampedModel(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        editable=False,
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        editable=False,
+    )
+    history = HistoricalRecords(inherit=True)
 
     class Meta:
         abstract = True
@@ -44,6 +62,13 @@ class Video(TimestampedModel):
     reference_code = models.CharField(max_length=32, blank=True)
     video_url = models.URLField()
     guest_speakers = models.JSONField(default=list, blank=True)
+    base_video = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
 
     @property
     def is_new_computed(self) -> bool:
@@ -140,8 +165,8 @@ class ContentAttachment(TimestampedModel):
 
 
 class Learn(TimestampedModel):
-    title = models.CharField(max_length=255)
-    subtitle = models.CharField(max_length=255, blank=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    subtitle = models.CharField(max_length=255, blank=True, null=True)
     category = models.ForeignKey(
         "LearnCategory",
         on_delete=models.SET_NULL,
@@ -151,9 +176,10 @@ class Learn(TimestampedModel):
     )
     image = models.ImageField(upload_to="posts/images/", blank=True, null=True)
     image_url = models.URLField(max_length=1000, blank=True)
+    author_name = models.CharField(max_length=255, blank=True, null=True)
+    author_country = models.CharField(max_length=255, blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
-    is_event = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_at",)
@@ -319,52 +345,44 @@ class LatestNewsImage(TimestampedModel):
 
 class EventCommunity(TimestampedModel):
     title = models.CharField(max_length=255)
+    language = models.CharField(max_length=50, blank=True, null=True)
     guest_speakers = models.JSONField(default=list, blank=True)
     live_stream_link = models.URLField(blank=True, null=True)
-    learn = models.ForeignKey(
-        "Learn",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="event_communities",
-        limit_choices_to={"category__learn_type": LearnType.POSTERS},
-    )
     start_event_date = models.DateField(blank=True, null=True)
     start_event_time = models.TimeField(blank=True, null=True)
     duration = models.CharField(max_length=64, blank=True, null=True)
+    base_event = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="translations",
+    )
 
     class Meta:
         ordering = ("-start_event_date", "-start_event_time")
 
-    def clean(self):
-        if self.learn and self.learn.category:
-            if self.learn.category.learn_type != LearnType.POSTERS:
-                raise ValidationError(
-                    {
-                        "learn": "Only Learn objects with learn_type='posters' are allowed."
-                    }
-                )
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-        if self.learn:
-            if not self.learn.is_event:
-                self.learn.is_event = True
-                self.learn.save(update_fields=["is_event"])
-
-    def delete(self, *args, **kwargs):
-        learn_instance = self.learn
-        super().delete(*args, **kwargs)
-
-        if learn_instance:
-            if not EventCommunity.objects.filter(learn=learn_instance).exists():
-                learn_instance.is_event = False
-                learn_instance.save(update_fields=["is_event"])
-
     def __str__(self):
         return self.title
+
+
+class EventCommunityImage(TimestampedModel):
+    """Individual image for an event community item."""
+
+    event = models.ForeignKey(
+        "EventCommunity", on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="event-community/images/")
+    caption = models.CharField(max_length=500, blank=True, null=True)
+    order = models.PositiveIntegerField(
+        default=0, help_text="Order of image in the event"
+    )
+
+    class Meta:
+        ordering = ("order", "created_at")
+
+    def __str__(self) -> str:
+        return f"Image {self.order} for {self.event.title}"
 
 
 class OurTeam(TimestampedModel):

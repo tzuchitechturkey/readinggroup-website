@@ -73,6 +73,7 @@ function LoginForm() {
         localStorage.setItem("userImage", data?.user?.profile_image_url);
         localStorage.setItem("username", data?.user?.username);
         localStorage.setItem("sectionName", data?.user?.section_name || "");
+        localStorage.setItem("categoryName", data?.user?.category_name || "");
 
         if (data?.user?.groups.includes("admin")) {
           localStorage.setItem("userType", "admin");
@@ -83,7 +84,8 @@ function LoginForm() {
 
       toast.success(t("Login successful"));
 
-      if (data?.user?.is_first_login) {
+      if (data?.is_first_login) {
+        if (data?.qr) setQr(data.qr);
         setShowFirstLoginModal(true);
       } else if (data?.requires_totp) {
         setShowTOTPModal(true);
@@ -144,8 +146,7 @@ function LoginForm() {
           "sectionName",
           res?.data?.user?.section_name || "",
         );
-
-        setShowTOTPModal(false);
+        localStorage.setItem("categoryName", res?.data?.user?.category_name || "");
         localStorage.setItem("userType", res?.data?.group);
         const redirectAfterLogin = localStorage.getItem("redirectAfterLogin");
         if (
@@ -399,6 +400,11 @@ function LoginForm() {
         <FirstLoginResetPasswordModal
           open={true}
           onClose={() => setShowFirstLoginModal(false)}
+          onSuccess={(newPw) => {
+            setPassword(newPw);
+            setShowFirstLoginModal(false);
+            setShowTOTPModal(true);
+          }}
         />
       </Modal>
       {/* End First Login Reset Password Modal */}

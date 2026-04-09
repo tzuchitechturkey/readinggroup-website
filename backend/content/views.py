@@ -1,15 +1,18 @@
+import json
 from collections import defaultdict
 
 from django.conf import settings
-from django.db.models import Count, F, Max
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Count, F, Max, Q
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models.functions import TruncMonth
 from rest_framework import viewsets, filters, status
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models.functions import TruncMonth
 from drf_yasg.utils import swagger_auto_schema
 from .enums import LearnType, VideoType, LearnCategoryDirection
 from .youtube import YouTubeAPIError, fetch_video_info
@@ -25,6 +28,7 @@ from .swagger_parameters import (
 )
 from .models import (
     RelatedReportsCategory,
+    EventCommunityImage,
     ContentAttachment,
     HistoryEventImage,
     LatestNewsImage,
@@ -48,6 +52,8 @@ from .models import (
 
 from .serializers import (
     RelatedReportsCategorySerializer,
+    EventCommunityImageSerializer,
+    EventCommunityMultiLangSerializer,
     ContentAttachmentSerializer,
     HistoryEventImageSerializer,
     PhotoCollectionSerializer,
@@ -63,6 +69,7 @@ from .serializers import (
     BookReviewSerializer,
     NavbarLogoSerializer,
     OurTeamSerializer,
+    VideoMultiLangSerializer,
     VideoSerializer,
     LearnSerializer,
     PhotoSerializer,
@@ -71,7 +78,88 @@ from .serializers import (
 
 
 # ========================================== new viewsets start ============================================
-class ContentAttachmentViewSet(viewsets.ModelViewSet):
+class TrackUserMixin:
+    """Automatically sets created_by on create and updated_by on update."""
+
+    def _get_user(self):
+        request = self.request
+        return request.user if request.user.is_authenticated else None
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self._get_user())
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self._get_user())
+
+
+class HistoryMixin:
+    """Adds a GET /{id}/history/ action that returns full audit history."""
+
+    _HISTORY_EXCLUDE = frozenset(
+        [
+            "history_id",
+            "history_date",
+            "history_type",
+            "history_user",
+            "history_change_reason",
+            "history_object_repr",
+        ]
+    )
+
+    @action(detail=True, methods=["get"], url_path="history")
+    def history(self, request, pk=None):
+        instance = self.get_object()
+        records = list(instance.history.all())  # newest → oldest
+        data = []
+        for i, record in enumerate(records):
+            prev = records[i + 1] if i + 1 < len(records) else None
+            data.append(self._format_record(record, prev))
+        return Response(data)
+
+    def _format_record(self, record, prev=None):
+        type_map = {"+": "create", "~": "update", "-": "delete"}
+        user = record.history_user
+        entry = {
+            "history_id": record.history_id,
+            "history_date": record.history_date,
+            "action": type_map.get(record.history_type, record.history_type),
+            "performed_by": (user.display_name or user.username) if user else None,
+        }
+        if record.history_type == "+":
+            entry["data"] = self._all_fields(record)
+        elif record.history_type == "~":
+            if prev:
+                delta = record.diff_against(prev)
+                entry["changes"] = {
+                    c.field: {
+                        "old": self._safe(c.old),
+                        "new": self._safe(c.new),
+                    }
+                    for c in delta.changes
+                }
+            else:
+                entry["data"] = self._all_fields(record)
+        return entry
+
+    def _all_fields(self, record):
+        return {
+            f.name: self._safe(getattr(record, f.name))
+            for f in record._meta.fields
+            if f.name not in self._HISTORY_EXCLUDE and not f.name.startswith("history_")
+        }
+
+    @staticmethod
+    def _safe(value):
+        if value is None:
+            return None
+        try:
+            json.dumps(value, cls=DjangoJSONEncoder)
+            return value
+        except (TypeError, ValueError):
+            return str(value)
+
+
+class ContentAttachmentViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing ContentAttachment content."""
 
     queryset = ContentAttachment.objects.all()
@@ -92,13 +180,14 @@ class ContentAttachmentViewSet(viewsets.ModelViewSet):
             file_name=request.data.get("file_name", file.name),
             file_size=file.size,
             description=request.data.get("description", ""),
+            created_by=request.user if request.user.is_authenticated else None,
         )
 
         serializer = self.get_serializer(attachment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class VideoViewSet(viewsets.ModelViewSet):
+class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing Video content with multi-language support."""
 
     queryset = Video.objects.all()
@@ -112,37 +201,101 @@ class VideoViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
+    def _parse_requested_languages(self, request):
+        """Parse language query params.
+
+        Supports repeated params and comma-separated values:
+        - ?language=ar&language=en
+        - ?language=ar,en
+        """
+
+        lang_params = request.query_params.getlist("language")
+        requested_languages = []
+        for item in lang_params:
+            requested_languages.extend(
+                [v.strip() for v in item.split(",") if v.strip()]
+            )
+        return requested_languages
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Increment views on the resolved record (base or translation)
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+
+        requested_languages = self._parse_requested_languages(request)
+        return Response(
+            VideoMultiLangSerializer(
+                instance,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
+            ).data
+        )
+
     @swagger_auto_schema(
-        operation_summary="all List videos",
+        operation_summary="List videos",
         operation_description="Retrieve a list of videos with optional filtering by language, category, and happened_at date.",
         manual_parameters=video_manual_parameters,
     )
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.views = instance.views + 1
-        instance.save(update_fields=["views"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        requested_languages = self._parse_requested_languages(request)
+
+        if page is not None:
+            data = VideoMultiLangSerializer(
+                page,
+                many=True,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
+            ).data
+            return self.get_paginated_response(data)
+        data = VideoMultiLangSerializer(
+            queryset,
+            many=True,
+            context={"request": request, "requested_languages": requested_languages},
+        ).data
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = VideoSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = request.user if request.user.is_authenticated else None
+        instance = serializer.save(created_by=user)
+        return Response(
+            VideoMultiLangSerializer(instance, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(category__is_active=True)
+
+        # List endpoint only returns base videos; translations are nested inside them
+        if self.action == "list":
+            queryset = queryset.filter(base_video__isnull=True)
+
         params = self.request.query_params
 
-        # Allow search filter to work before custom filtering
-        if params.get("search"):
-            return queryset.order_by("-created_at")
-
         language = params.getlist("language")
-        if language:
+        if language and self.action == "list":
             values = []
             for item in language:
                 values.extend([v.strip() for v in item.split(",") if v.strip()])
             if values:
-                queryset = queryset.filter(language__in=values)
+                # Include base videos that are in requested language OR have a translation
+                # in that language.
+                queryset = queryset.filter(
+                    Q(language__in=values) | Q(translations__language__in=values)
+                ).distinct()
+
+        # Allow search filter to work before custom filtering
+        if params.get("search"):
+            return queryset.order_by("-created_at")
 
         category = params.get("category")
         if category:
@@ -248,29 +401,38 @@ class VideoViewSet(viewsets.ModelViewSet):
         - last 3 CLIP_VIDEO
         """
 
+        requested_languages = self._parse_requested_languages(request)
+
         def base_queryset(video_type_value):
-            return Video.objects.filter(
+            qs = Video.objects.filter(
                 video_type=video_type_value,
                 category__is_active=True,
+                base_video__isnull=True,
             ).order_by("-created_at")
+
+            if requested_languages:
+                qs = qs.filter(
+                    Q(language__in=requested_languages)
+                    | Q(translations__language__in=requested_languages)
+                ).distinct()
+
+            return qs.select_related("category").prefetch_related("attachments")
 
         full_video_qs = base_queryset(VideoType.FULL_VIDEO)[:1]
         clip_video_qs = base_queryset(VideoType.CLIP_VIDEO)[:3]
+
+        serializer_context = {
+            "request": request,
+            "requested_languages": requested_languages,
+        }
         payload = {
-            "full_video": VideoSerializer(
-                full_video_qs, many=True, context={"request": request}
+            "full_video": VideoMultiLangSerializer(
+                full_video_qs, many=True, context=serializer_context
             ).data,
-            "clip_video": VideoSerializer(
-                clip_video_qs, many=True, context={"request": request}
+            "clip_video": VideoMultiLangSerializer(
+                clip_video_qs, many=True, context=serializer_context
             ).data,
         }
-
-        if not payload["full_video"] and not payload["clip_video"]:
-            return Response(
-                {"detail": "No videos found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
         return Response(payload, status=status.HTTP_200_OK)
 
     # used for video page
@@ -283,24 +445,52 @@ class VideoViewSet(viewsets.ModelViewSet):
         # Get the current video instance
         video = self.get_object()
 
+        requested_languages = self._parse_requested_languages(request)
+        base_video_id = video.base_video_id or video.id
+
         # Get all videos with the same category_id, excluding the current video
+        qs = Video.objects.filter(
+            category_id=video.category_id,
+            category__is_active=True,
+            base_video__isnull=True,
+        ).exclude(id=base_video_id)
+
+        if requested_languages:
+            qs = qs.filter(
+                Q(language__in=requested_languages)
+                | Q(translations__language__in=requested_languages)
+            ).distinct()
+
         qs = (
-            self.get_queryset()
-            .filter(category_id=video.category_id, category__is_active=True)
-            .exclude(id=video.id)
+            qs.select_related("category")
+            .prefetch_related("attachments")
             .order_by("-views")
         )
 
         page = self.paginate_queryset(qs)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            data = VideoMultiLangSerializer(
+                page,
+                many=True,
+                context={
+                    "request": request,
+                    "requested_languages": requested_languages,
+                },
+            ).data
+            return self.get_paginated_response(data)
 
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = VideoMultiLangSerializer(
+            qs,
+            many=True,
+            context={
+                "request": request,
+                "requested_languages": requested_languages,
+            },
+        ).data
+        return Response(data, status=status.HTTP_200_OK)
 
 
-class VideoCategoryViewSet(viewsets.ModelViewSet):
+class VideoCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing VideoCategory content with multi-language support."""
 
     queryset = VideoCategory.objects.all()
@@ -348,29 +538,8 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
         )
         return context
 
-    @action(detail=False, methods=("post",), url_path="reorder", url_name="reorder")
-    def reorder(self, request):
-        """Reorder VideoCategories based on provided order.
-        Body: { "categories": [{"id": 1, "order": 0}, {"id": 2, "order": 1}, ...] }
-        """
-        try:
-            categories_data = request.data.get("categories", [])
-            for item in categories_data:
-                category_id = item.get("id")
-                order_value = item.get("order")
-                if category_id is not None and order_value is not None:
-                    VideoCategory.objects.filter(id=category_id).update(
-                        order=order_value
-                    )
-            return Response(
-                {"detail": "Categories reordered successfully."},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class LearnViewSet(viewsets.ModelViewSet):
+class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing Learn content with multi-language support."""
 
     queryset = Learn.objects.all()
@@ -393,16 +562,13 @@ class LearnViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        Learn.objects.filter(pk=instance.pk).update(views=F("views") + 1)
-        instance.refresh_from_db()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
     def get_queryset(self):
         queryset = super().get_queryset().select_related("category")
         params = self.request.query_params
+
+        # Exclude learns that belong to inactive categories from list/search/filter.
+        if getattr(self, "action", None) == "list":
+            queryset = queryset.filter(category__is_active=True)
 
         if params.get("search"):
             return queryset.order_by("happened_at")
@@ -532,8 +698,22 @@ class LearnViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(poster_learn, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary="Increment learn views",
+        operation_description="Increment the view count of a learn item by 1. Called when user clicks View Details or Learn More.",
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="increment-views",
+        permission_classes=[AllowAny],
+    )
+    def increment_views(self, request, pk=None):
+        Learn.objects.filter(pk=pk).update(views=F("views") + 1)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class LearnCategoryViewSet(viewsets.ModelViewSet):
+
+class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing LearnCategory content with multi-language support."""
 
     queryset = LearnCategory.objects.all()
@@ -626,7 +806,7 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class EventCommunityViewSet(viewsets.ModelViewSet):
+class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing EventCommunity content with multi-language support."""
 
     queryset = EventCommunity.objects.all()
@@ -639,19 +819,60 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
-    filterset_fields = ("learn__category__learn_type",)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @swagger_auto_schema(
         operation_summary="List all event communities",
-        operation_description="Retrieve a list of event communities with optional filtering by start_event_date and learn category type.",
+        operation_description="Retrieve a list of event communities. List returns only base events; translations are nested by language key.",
         manual_parameters=event_community_manual_parameters,
     )
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+        language = request.query_params.get("language")
+        serializer_class = (
+            EventCommunitySerializer if language else EventCommunityMultiLangSerializer
+        )
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            data = serializer_class(page, many=True, context={"request": request}).data
+            return self.get_paginated_response(data)
+        data = serializer_class(queryset, many=True, context={"request": request}).data
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = EventCommunityMultiLangSerializer(
+            instance, context={"request": request}
+        ).data
+        return Response(data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = EventCommunitySerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = request.user if request.user.is_authenticated else None
+        instance = serializer.save(created_by=user)
+        return Response(
+            EventCommunityMultiLangSerializer(
+                instance, context={"request": request}
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
         params = self.request.query_params
+        language = params.get("language")
+
+        if self.action == "list":
+            if language:
+                # Return only events matching the requested language (flat list)
+                queryset = queryset.filter(language=language)
+            else:
+                # Default: return only base events; translations are nested inside them
+                queryset = queryset.filter(base_event__isnull=True)
 
         start_event_date = params.get("start_event_date")
         if start_event_date:
@@ -674,18 +895,26 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
     def event_months(self, request):
         """
         GET /event-communities/event-months/
+        GET /event-communities/event-months/?language=en
         Returns months grouped by year.
+        When language is provided, only returns months that have events in that language.
         """
+        language = request.query_params.get("language")
+        qs = EventCommunity.objects.filter(start_event_date__isnull=False)
+
+        if language:
+            qs = qs.filter(language=language)
+        else:
+            qs = qs.filter(base_event__isnull=True)
+
         months = (
-            EventCommunity.objects.filter(start_event_date__isnull=False)
-            .annotate(month=TruncMonth("start_event_date"))
+            qs.annotate(month=TruncMonth("start_event_date"))
             .values_list("month", flat=True)
             .distinct()
             .order_by("month")
         )
 
         result = defaultdict(list)
-
         for month in months:
             year = month.strftime("%Y")
             month_num = month.strftime("%m")
@@ -693,8 +922,98 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
 
         return Response(result)
 
+    @swagger_auto_schema(
+        operation_summary="Upload images for event community",
+        operation_description="Add images to this event. Use 'images' field for multiple or 'image' field for single upload. Optional 'caption_{index}' or 'caption' for captions.",
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="images",
+        parser_classes=(MultiPartParser, FormParser, JSONParser),
+    )
+    def create_images(self, request, pk=None):
+        """POST /event-communities/{id}/images/"""
+        event = self.get_object()
 
-class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
+        images = request.FILES.getlist("images")
+        if not images:
+            image = request.FILES.get("image")
+            if image:
+                images = [image]
+            else:
+                return Response(
+                    {
+                        "error": "No images provided. Use 'images' for multiple or 'image' for single upload."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        max_order = event.images.aggregate(max_order=Max("order")).get("max_order")
+        next_order = (max_order if max_order is not None else -1) + 1
+
+        created_images = []
+        for idx, image in enumerate(images):
+            caption = request.data.get(f"caption_{idx}", "") or request.data.get(
+                "caption", ""
+            )
+            event_image = EventCommunityImage.objects.create(
+                event=event,
+                image=image,
+                caption=caption,
+                order=next_order + idx,
+            )
+            created_images.append(event_image)
+
+        serializer = EventCommunityImageSerializer(
+            created_images, many=True, context={"request": request}
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(
+        operation_summary="Delete images from event community",
+        operation_description="Delete images from this event. Provide 'image_ids' array or single 'image_id'.",
+    )
+    @action(detail=True, methods=["delete"], url_path="images/delete")
+    def delete_images(self, request, pk=None):
+        """DELETE /event-communities/{id}/images/delete/"""
+        event = self.get_object()
+
+        image_ids = request.data.get("image_ids", [])
+        if not image_ids:
+            image_id = request.data.get("image_id")
+            if image_id:
+                image_ids = [image_id]
+            else:
+                return Response(
+                    {
+                        "error": "No image IDs provided. Use 'image_ids' array or single 'image_id'."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        deleted_count, _ = EventCommunityImage.objects.filter(
+            id__in=image_ids, event=event
+        ).delete()
+
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+
+class EventCommunityImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
+    """ViewSet for managing individual images in an event community item."""
+
+    queryset = EventCommunityImage.objects.all()
+    serializer_class = EventCommunityImageSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ("caption",)
+    ordering_fields = ("created_at", "order")
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+
+class RelatedReportsCategoryViewSet(
+    TrackUserMixin, HistoryMixin, viewsets.ModelViewSet
+):
     """ViewSet for managing RelatedReportsCategory content with multi-language support."""
 
     queryset = RelatedReportsCategory.objects.all()
@@ -748,7 +1067,7 @@ class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RelatedReportsViewSet(viewsets.ModelViewSet):
+class RelatedReportsViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing RelatedReports content with multi-language support."""
 
     queryset = RelatedReports.objects.all()
@@ -867,7 +1186,7 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PhotoCollectionViewSet(viewsets.ModelViewSet):
+class PhotoCollectionViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing photo collections."""
 
     queryset = PhotoCollection.objects.all()
@@ -884,12 +1203,10 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         PhotoCollection.objects.update(is_new=False)
-        serializer.save(is_new=True)
+        serializer.save(is_new=True, created_by=self._get_user())
 
     def perform_update(self, serializer):
-        # Preserve is_new status or update if needed
-        instance = serializer.instance
-        serializer.save()
+        serializer.save(updated_by=self._get_user())
 
     @swagger_auto_schema(
         operation_summary="Create photos in collection",
@@ -972,7 +1289,7 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PhotoViewSet(viewsets.ModelViewSet):
+class PhotoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual photos."""
 
     queryset = Photo.objects.all()
@@ -983,7 +1300,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class LatestNewsImageViewSet(viewsets.ModelViewSet):
+class LatestNewsImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual images in latest news."""
 
     queryset = LatestNewsImage.objects.all()
@@ -994,7 +1311,7 @@ class LatestNewsImageViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class LatestNewsViewSet(viewsets.ModelViewSet):
+class LatestNewsViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing latest news items."""
 
     queryset = LatestNews.objects.all()
@@ -1011,12 +1328,10 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
     )
     def perform_create(self, serializer):
         LatestNews.objects.update(is_new=False)
-        serializer.save(is_new=True)
+        serializer.save(is_new=True, created_by=self._get_user())
 
     def perform_update(self, serializer):
-        # Preserve is_new status or update if needed
-        instance = serializer.instance
-        serializer.save()
+        serializer.save(updated_by=self._get_user())
 
     @action(detail=True, methods=["post"], url_path="images")
     def create_images(self, request, pk=None):
@@ -1129,7 +1444,7 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class OurTeamViewSet(viewsets.ModelViewSet):
+class OurTeamViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = OurTeam.objects.all().order_by("-is_heart", "-created_at")
     serializer_class = OurTeamSerializer
     pagination_class = LimitOffsetPagination
@@ -1176,7 +1491,7 @@ class OurTeamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class OurTeamImageViewSet(viewsets.ModelViewSet):
+class OurTeamImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual images in OurTeam."""
 
     queryset = OurTeamImage.objects.all()
@@ -1187,7 +1502,7 @@ class OurTeamImageViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class BookViewSet(viewsets.ModelViewSet):
+class BookViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing books and their review files."""
 
     queryset = Book.objects.all()
@@ -1244,7 +1559,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BookReviewViewSet(viewsets.ModelViewSet):
+class BookReviewViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual review files in books."""
 
     queryset = BookReview.objects.all()
@@ -1256,7 +1571,7 @@ class BookReviewViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
-class HistoryEventViewSet(viewsets.ModelViewSet):
+class HistoryEventViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = HistoryEvent.objects.all().order_by("year", "month")
     serializer_class = HistoryEventSerializer
     pagination_class = None
@@ -1337,7 +1652,7 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
         return Response(response)
 
 
-class HistoryEventImageViewSet(viewsets.ModelViewSet):
+class HistoryEventImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = HistoryEventImage.objects.all()
     serializer_class = HistoryEventImageSerializer
     pagination_class = LimitOffsetPagination
@@ -1348,14 +1663,14 @@ class HistoryEventImageViewSet(viewsets.ModelViewSet):
 
 
 # ========================================== new viewset end============================================
-class NavbarLogoViewSet(viewsets.ModelViewSet):
+class NavbarLogoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
 
     queryset = NavbarLogo.objects.all()
     serializer_class = NavbarLogoSerializer
 
 
-class SocialMediaViewSet(viewsets.ModelViewSet):
+class SocialMediaViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for retrieving SocialMedia links."""
 
     queryset = SocialMedia.objects.all()

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
-import { LuArrowUpDown, LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuArrowUpDown, LuPencil, LuTrash2, LuImage } from "react-icons/lu";
 import { toast } from "react-toastify";
 import { Radio } from "lucide-react";
 
@@ -21,8 +21,35 @@ import { GetEvents, DeleteEventById } from "@/api/events";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
 
+import CreateOrEditLiveStreamSchedule from "../CreateOrEditLiveStreamSchedule/CreateOrEditLiveStreamSchedule";
+
+// Extract the first available language variant from an event object
+const getFirstLangData = (event) => {
+  if (!event) return {};
+  for (const key of Object.keys(event)) {
+    if (key !== "id" && event[key] && typeof event[key] === "object") {
+      return event[key];
+    }
+  }
+  return {};
+};
+
+// Collect all images from all language variants of an event
+const getAllImages = (event) => {
+  if (!event) return [];
+  const images = [];
+  for (const key of Object.keys(event)) {
+    if (key !== "id" && event[key] && typeof event[key] === "object") {
+      const langImages = event[key].images || [];
+      images.push(...langImages);
+    }
+  }
+  return images;
+};
+
 const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const { t, i18n } = useTranslation();
+
   // State management
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({
@@ -34,23 +61,23 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [update, setUpdate] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [openCreateOrEditModal, setOpenCreateOrEditModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [eventsData, setEventsData] = useState([]);
+
   // Fetch Event from API
   const getEventsData = async (page = 0, searchVal = search, filters = {}) => {
     setIsLoading(true);
     const offset = page * limit;
-
-    // params سيكون كائن حتى لو كان فقط search
     const params = searchVal ? { search: searchVal } : {};
 
     try {
       const res = await GetEvents(limit, offset, params);
-
       setTotalRecords(res?.data?.count || 0);
       setEventsData(res?.data?.results || []);
     } catch (error) {
@@ -65,13 +92,12 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
     if (!eventsData || !sortConfig.key) return eventsData || [];
 
     const sorted = [...eventsData].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
+      const aValue = getFirstLangData(a)[sortConfig.key];
+      const bValue = getFirstLangData(b)[sortConfig.key];
 
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
 
-      // date fields - only sorting by start_event_date
       if (sortConfig.key === "start_event_date") {
         const dateA = new Date(aValue);
         const dateB = new Date(bValue);
@@ -103,22 +129,18 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
     if (sortConfig.key !== columnKey) {
       return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
     }
-
     if (sortConfig.direction === "asc") {
       return <LuArrowUpDown className="h-3 w-3 text-blue-600 rotate-180" />;
     }
-
     if (sortConfig.direction === "desc") {
       return <LuArrowUpDown className="h-3 w-3 text-blue-600" />;
     }
-
     return <LuArrowUpDown className="h-3 w-3 text-gray-400" />;
   };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && !isLoading) {
       setCurrentPage(newPage);
-
       getEventsData(newPage - 1, search);
     }
   };
@@ -127,7 +149,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
   const clearSearch = () => {
     setSearch("");
     setCurrentPage(1);
-
     getEventsData(0, "");
   };
 
@@ -157,7 +178,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
       dir={i18n?.language === "ar" ? "rtl" : "ltr"}
     >
       {isLoading && <Loader />}
-      {/* Start Breadcrumb */}
+
+      {/* Breadcrumb */}
       <CustomBreadcrumb
         backTitle={t("Back to Dashboard")}
         onBack={() => {
@@ -165,8 +187,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
         }}
         page={t("Live Stream Schedules")}
       />
-      {/* End Breadcrumb */}
-      {/* Start Header */}
+
+      {/* Header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b">
         <h2 className="text-lg font-medium text-[#1D2630]">
           {t("Live Stream Schedules")}
@@ -176,23 +198,20 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             {t("Total")}: {totalRecords} {t("Live Stream Schedule(s)")}
           </span>
 
-          {/* Start Add Button */}
-          <div>
-            <button
-              onClick={() => {
-                setSelectedEvent(null);
-                onSectionChange("createOrEditLiveStreamSchedule", null);
-              }}
-              className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
-            >
-              {t("Add New")}
-            </button>
-          </div>
-          {/* End Add Button */}
+          {/* Add New Button */}
+          <button
+            onClick={() => {
+              setSelectedEvent(null);
+              setOpenCreateOrEditModal(true);
+            }}
+            className="text-sm bg-primary border-[1px] border-primary hover:bg-white hover:text-primary transition-all duration-200 text-white px-3 py-1.5 rounded"
+          >
+            {t("Add New")}
+          </button>
         </div>
       </div>
-      {/* End Header */}
-      {/* Start Search */}
+
+      {/* Search */}
       <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
         <div className="relative max-w-md flex">
           <input
@@ -212,8 +231,8 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
               onClick={() => {
                 clearSearch();
               }}
-              className={` absolute ${
-                i18n?.language === "ar" ? " left-20" : " right-20"
+              className={`absolute ${
+                i18n?.language === "ar" ? "left-20" : "right-20"
               } top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700`}
             >
               ✕
@@ -226,15 +245,14 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
             }}
             className={`px-4 py-2 bg-[#4680ff] text-white ${
               i18n?.language === "ar" ? "rounded-l-lg" : "rounded-r-lg"
-            }  text-sm font-semibold hover:bg-blue-600`}
+            } text-sm font-semibold hover:bg-blue-600`}
           >
             {t("Search")}
           </button>
         </div>
       </div>
-      {/* End Search */}
 
-      {/* Start Table */}
+      {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
           <TableHeader>
@@ -253,28 +271,24 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                   {t("Title")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Event Start Time")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Event Duration")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
                   {t("Guest Speakers")}
                 </div>
               </TableHead>
-
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                 <div className="flex items-center justify-center gap-1">
-                  {t("View Posters")}
+                  {t("View Images")}
                 </div>
               </TableHead>
               <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
@@ -282,7 +296,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                   {t("Live Stream Link")}
                 </div>
               </TableHead>
-
               <TableHead className="text-center w-[100px]">
                 {t("Actions")}
               </TableHead>
@@ -291,7 +304,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
                     {t("Loading Event...")}
@@ -299,119 +312,140 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
                 </TableCell>
               </TableRow>
             ) : getSortedData().length > 0 ? (
-              getSortedData().map((event) => (
-                <TableRow key={event?.id} className="hover:bg-gray-50">
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <div className="flex flex-col items-start px-2 ">
-                      <span className="font-medium">
-                        {new Date(event.start_event_date).toLocaleDateString(
-                          "en-GB",
-                          {
+              getSortedData().map((event) => {
+                const langData = getFirstLangData(event);
+                const allImages = getAllImages(event);
+                const langCodes = Object.keys(event).filter(
+                  (k) => k !== "id" && event[k] && typeof event[k] === "object",
+                );
+                return (
+                  <TableRow key={event?.id} className="hover:bg-gray-50">
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                      <div className="flex flex-col items-start px-2">
+                        <span className="font-medium">
+                          {new Date(
+                            langData.start_event_date,
+                          ).toLocaleDateString("en-GB", {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
-                          },
-                        )}
+                          })}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="min-w-0 text-center">
+                        <p className="font-medium text-gray-900 truncate">
+                          {langData?.title}
+                        </p>
+                        <div className="flex items-center gap-1 flex-wrap justify-center mt-1">
+                          {langCodes.map((code) => (
+                            <span
+                              key={code}
+                              className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono uppercase"
+                            >
+                              {code}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                      <span className="font-medium">
+                        {langData?.start_event_time}
                       </span>
-                    </div>
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell>
-                    <div className="min-w-0 text-center ">
-                      <p className="font-medium text-gray-900 truncate">
-                        {event?.title}
-                      </p>
-                    </div>
-                  </TableCell>
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                      <span className="font-medium">{langData?.duration}</span>{" "}
+                      {t("Hours")}
+                    </TableCell>
 
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <span className="font-medium">
-                      {event?.start_event_time}
-                    </span>
-                  </TableCell>
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {langData?.guest_speakers &&
+                        langData.guest_speakers.length > 0 ? (
+                          langData.guest_speakers.map((speaker, index) => (
+                            <span
+                              key={index}
+                              className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
+                            >
+                              {speaker}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500">-</span>
+                        )}
+                      </div>
+                    </TableCell>
 
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <span className="font-medium">{event?.duration}</span>{" "}
-                    {t("Hours")}
-                  </TableCell>
-
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {event?.guest_speakers &&
-                      event.guest_speakers.length > 0 ? (
-                        event.guest_speakers.map((speaker, index) => (
-                          <span
-                            key={index}
-                            className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
-                          >
-                            {speaker}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-500">-</span>
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4 flex items-center justify-center">
-                    <button
-                      className={`cursor-pointer rounded-md p-3  text-sm ${event?.learn?.id ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
-                      onClick={() => {
-                        setSelectedEvent(event);
-                        setIsViewerOpen(true);
-                      }}
-                    >
-                      {t("View Posters")}
-                    </button>
-                  </TableCell>
-
-                  <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4   ">
-                    <a
-                      className={`flex  items-center w-fit gap-1  mx-auto cursor-pointer rounded-md p-3  text-sm ${event?.live_stream_link ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]  "}`}
-                      href={event.live_stream_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Radio className="w-4 h-4" />
-                      <span>{t("Livestream Link")}</span>
-                    </a>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center gap-2 justify-center">
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4 flex items-center justify-center">
                       <button
+                        className={`${allImages?.length !== 0 ? "cursor-pointer" : ""}  rounded-md p-3 text-sm ${allImages.length > 0 ? "bg-[#285688] text-[#FCFDFF]" : "bg-[#C2DCF7] text-[#92A5B8]"}`}
                         onClick={() => {
                           setSelectedEvent(event);
-                          onSectionChange(
-                            "createOrEditLiveStreamSchedule",
-                            event,
-                          );
+                          setViewerIndex(0);
+                          setIsViewerOpen(true);
                         }}
-                        className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
-                        title={t("Edit")}
+                        disabled={allImages.length === 0}
                       >
-                        <LuPencil className="h-4 w-4" />
+                        {t("View Images")}
                       </button>
-                      {localStorage.getItem("userType") !== "editor" && (
+                    </TableCell>
+
+                    <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                      <a
+                        className={`flex items-center w-fit gap-1 mx-auto rounded-md p-3 text-sm ${langData?.live_stream_link ? "bg-[#285688] text-[#FCFDFF] cursor-pointer" : "bg-[#C2DCF7] text-[#92A5B8] cursor-not-allowed pointer-events-none"}`}
+                        href={langData?.live_stream_link || undefined}
+                        target={
+                          langData?.live_stream_link ? "_blank" : undefined
+                        }
+                        rel={
+                          langData?.live_stream_link
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
+                      >
+                        <Radio className="w-4 h-4" />
+                        <span>{t("Livestream Link")}</span>
+                      </a>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-center">
                         <button
                           onClick={() => {
                             setSelectedEvent(event);
-                            setShowDeleteModal(true);
+                            setOpenCreateOrEditModal(true);
                           }}
-                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
-                          title={t("Delete")}
+                          className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                          title={t("Edit")}
                         >
-                          <LuTrash2 className="h-4 w-4" />
+                          <LuPencil className="h-4 w-4" />
                         </button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        {localStorage.getItem("userType") !== "editor" && (
+                          <button
+                            onClick={() => {
+                              setSelectedEvent(event);
+                              setShowDeleteModal(true);
+                            }}
+                            className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
+                            title={t("Delete")}
+                          >
+                            <LuTrash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center py-8 text-gray-500"
                 >
                   {search
@@ -442,7 +476,6 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
               {t("Previous")}
             </button>
 
-            {/* Page Numbers */}
             <div className="flex items-center gap-1">
               {[...Array(Math.min(5, totalPages))].map((_, i) => {
                 const pageNum = i + 1;
@@ -489,7 +522,7 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
         </div>
       )}
 
-      {/* Start Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <Modal
         title={t("Confirm Delete")}
         isOpen={showDeleteModal}
@@ -509,21 +542,48 @@ const LiveStreamSchedulesList = ({ onSectionChange }) => {
           message={t(
             "Are you sure you want to delete this Post? This action cannot be undone.",
           )}
-          itemName={selectedEvent?.title}
+          itemName={getFirstLangData(selectedEvent)?.title}
         />
       </Modal>
+
+      {/* Create / Edit Modal */}
+      <Modal
+        isOpen={openCreateOrEditModal}
+        onClose={() => {
+          setOpenCreateOrEditModal(false);
+          setSelectedEvent(null);
+        }}
+        title={
+          selectedEvent
+            ? t("Edit Live Stream Schedule")
+            : t("Create New Live Stream Schedule")
+        }
+        width={"700px"}
+      >
+        <CreateOrEditLiveStreamSchedule
+          liveStream={selectedEvent}
+          onClose={() => {
+            setOpenCreateOrEditModal(false);
+            setSelectedEvent(null);
+          }}
+          setUpdate={setUpdate}
+        />
+      </Modal>
+
       {/* Image Viewer Modal */}
       <ImageViewerModal
         isOpen={isViewerOpen}
         onClose={() => setIsViewerOpen(false)}
-        images={
-          selectedEvent?.learn?.image
-            ? [selectedEvent.learn.image]
-            : selectedEvent?.learn?.image_url
-              ? [selectedEvent.learn.image_url]
-              : []
+        images={getAllImages(selectedEvent)}
+        currentIndex={viewerIndex}
+        onNext={() =>
+          setViewerIndex((prev) =>
+            prev < (getAllImages(selectedEvent).length ?? 1) - 1
+              ? prev + 1
+              : prev,
+          )
         }
-        currentIndex={0}
+        onPrev={() => setViewerIndex((prev) => (prev > 0 ? prev - 1 : prev))}
       />
     </div>
   );

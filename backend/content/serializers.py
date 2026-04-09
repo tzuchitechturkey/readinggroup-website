@@ -8,6 +8,7 @@ from .helpers import AbsoluteURLSerializer, get_account_user
 from .youtube import YouTubeAPIError, fetch_video_info
 from .models import (
     RelatedReportsCategory,
+    EventCommunityImage,
     ContentAttachment,
     HistoryEventImage,
     LatestNewsImage,
@@ -100,6 +101,17 @@ class LatestNewsImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         file_fields = ("image",)
 
 
+class EventCommunityImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
+    """Serializer for individual images in an event community item."""
+
+    datetime_fields = ("created_at", "updated_at")
+
+    class Meta:
+        model = EventCommunityImage
+        fields = "__all__"
+        file_fields = ("image",)
+
+
 class OurTeamImageSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for OurTeamImage model with absolute URL handling for file fields."""
 
@@ -134,6 +146,9 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     )
     category = serializers.PrimaryKeyRelatedField(
         queryset=VideoCategory.objects.all(), write_only=True, required=False
+    )
+    base_video = serializers.PrimaryKeyRelatedField(
+        queryset=Video.objects.all(), write_only=True, required=False, allow_null=True
     )
     user = serializers.SerializerMethodField(read_only=True)
 
@@ -226,6 +241,58 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
         except Exception:
             pass
         return None
+
+
+class VideoMultiLangSerializer(serializers.Serializer):
+    """Returns a video grouped by language keys.
+
+    Output shape:
+    {
+        "id": 5,
+        "ar": { ...all video fields... },   ← base language
+        "en": { ...all video fields... }    ← added translation (omitted if not yet created)
+    }
+    The first language the video is created in is the base (base_video=null).
+    Additional translations link back to the base via base_video FK.
+    """
+
+    def _serialize_lang(self, instance):
+        data = VideoSerializer(instance, context=self.context).data
+        data.pop("base_video", None)
+        return data
+
+    def to_representation(self, instance):
+        base = instance if not instance.base_video_id else instance.base_video
+        result = {"id": base.id}
+
+        requested_languages = self.context.get("requested_languages") or []
+        if requested_languages:
+            # Only include requested languages; if base isn't that language,
+            # try to use the corresponding translation.
+            translations = {
+                tr.language: tr
+                for tr in (
+                    base.translations.select_related("category")
+                    .prefetch_related("attachments")
+                    .all()
+                )
+            }
+            for lang in requested_languages:
+                if base.language == lang:
+                    result[lang] = self._serialize_lang(base)
+                elif lang in translations:
+                    result[lang] = self._serialize_lang(translations[lang])
+            return result
+
+        # Default: include base language + all translations.
+        result[base.language] = self._serialize_lang(base)
+        for tr in (
+            base.translations.select_related("category")
+            .prefetch_related("attachments")
+            .all()
+        ):
+            result[tr.language] = self._serialize_lang(tr)
+        return result
 
 
 class LearnSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
@@ -330,12 +397,19 @@ class LatestNewsSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for EventCommunity model with absolute URL handling for file fields."""
 
-    datetime_fields = ("created_at", "updated_at", "start_event_date", "end_event_date")
-    learn = serializers.PrimaryKeyRelatedField(
-        queryset=Learn.objects.filter(category__learn_type=LearnType.POSTERS),
+    datetime_fields = (
+        "created_at",
+        "updated_at",
+        "start_event_date",
+        "start_event_time",
+    )
+    base_event = serializers.PrimaryKeyRelatedField(
+        queryset=EventCommunity.objects.all(),
         write_only=True,
         required=False,
+        allow_null=True,
     )
+    images = EventCommunityImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = EventCommunity
@@ -343,12 +417,37 @@ class EventCommunitySerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["learn"] = (
-            LearnSerializer(instance.learn, context=self.context).data
-            if instance.learn
-            else None
-        )
+        data["images"] = EventCommunityImageSerializer(
+            instance.images.all(), many=True, context=self.context
+        ).data
         return data
+
+
+class EventCommunityMultiLangSerializer(serializers.Serializer):
+    """Returns an event grouped by language keys.
+
+    Output shape:
+    {
+        "id": 30,
+        "ar": { ...all event fields + images... },
+        "en": { ...all event fields + images... }
+    }
+    The first language the event is created in is the base (base_event=null).
+    Additional translations link back to the base via base_event FK.
+    """
+
+    def _serialize_lang(self, instance):
+        data = EventCommunitySerializer(instance, context=self.context).data
+        data.pop("base_event", None)
+        return data
+
+    def to_representation(self, instance):
+        base = instance if not instance.base_event_id else instance.base_event
+        result = {"id": base.id}
+        result[base.language or "base"] = self._serialize_lang(base)
+        for tr in base.translations.prefetch_related("images").all():
+            result[tr.language or str(tr.id)] = self._serialize_lang(tr)
+        return result
 
 
 class OurTeamSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):

@@ -65,6 +65,7 @@ class UserSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
             "is_active",
             "group",
             "section_name",
+            "category_name",
             "is_first_login",
             "last_password_change",
             "date_joined",
@@ -172,6 +173,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.is_first_login = True
+        user.totp_verified = False
         user.last_password_change = timezone.now()
         user.save()
 
@@ -231,6 +233,7 @@ class LoginSerializer(serializers.Serializer):
 class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializer):
     datetime_fields = ("date_joined",)
     section_name = serializers.CharField(required=False, allow_blank=True)
+    category_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
@@ -242,6 +245,7 @@ class ProfileUpdateSerializer(DateTimeFormattingMixin, serializers.ModelSerializ
             "first_name",
             "last_name",
             "section_name",
+            "category_name",
             "profile_image",
             "profession_name",
             "about_me",
@@ -303,6 +307,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     group = serializers.CharField(max_length=150)
     section_name = serializers.CharField(required=False, allow_blank=True)
+    category_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -311,6 +316,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         email = (attrs.get("email") or "").strip().lower()
         group_name = (attrs.get("group") or "").strip()
         section_name = (attrs.get("section_name") or "").strip()
+        category_name = (attrs.get("category_name") or "").strip()
 
         if not username:
             raise serializers.ValidationError({"username": "Username is required."})
@@ -328,6 +334,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         attrs["email"] = email
         attrs["group"] = group_name
         attrs["section_name"] = section_name
+        attrs["category_name"] = category_name
 
         if attrs["group"] == GroupName.TEAM_LEADER and not attrs["section_name"]:
             raise serializers.ValidationError(
@@ -344,6 +351,7 @@ class AdminCreateUserSerializer(serializers.Serializer):
         validated = dict(self.validated_data)
         group_name = (validated.pop("group", "") or "").strip()
         section_name = (validated.pop("section_name", "") or "").strip()
+        category_name = (validated.pop("category_name", "") or "").strip()
 
         with transaction.atomic():
             group_obj, _created = Group.objects.get_or_create(name=group_name)
@@ -353,8 +361,10 @@ class AdminCreateUserSerializer(serializers.Serializer):
 
             user = User(**validated)
             user.section_name = section_name or None
+            user.category_name = category_name or None
             user.set_password(password)
             user.is_first_login = True
+            user.totp_verified = False
             user.last_password_change = timezone.now()
             user.save()
             user.groups.set([group_obj])
@@ -373,6 +383,7 @@ class AdminUpdateUserSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False, allow_blank=True)
     group = serializers.CharField(max_length=150, required=False)
     section_name = serializers.CharField(required=False, allow_blank=True)
+    category_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -415,6 +426,9 @@ class AdminUpdateUserSerializer(serializers.Serializer):
         if "section_name" in attrs:
             attrs["section_name"] = (attrs.get("section_name") or "").strip()
 
+        if "category_name" in attrs:
+            attrs["category_name"] = (attrs.get("category_name") or "").strip()
+
         # If the target group is team_leader, section_name must be present (either existing or provided).
         target_group = attrs.get("group")
         current_is_team_leader = user.groups.filter(name=GroupName.TEAM_LEADER).exists()
@@ -441,6 +455,7 @@ class AdminUpdateUserSerializer(serializers.Serializer):
 
         group_name = (validated.pop("group", "") or "").strip()
         section_name = validated.pop("section_name", None)
+        category_name = validated.pop("category_name", None)
 
         with transaction.atomic():
             for field, value in validated.items():
@@ -448,6 +463,9 @@ class AdminUpdateUserSerializer(serializers.Serializer):
 
             if section_name is not None:
                 user.section_name = section_name or None
+
+            if category_name is not None:
+                user.category_name = category_name or None
 
             user.save()
 

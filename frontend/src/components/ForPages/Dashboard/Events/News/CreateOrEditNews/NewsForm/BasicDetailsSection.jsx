@@ -17,7 +17,7 @@ const BasicDetailsSection = ({
       {/* Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t("News Title")}*
+          {t("Latest News Title")}*
         </label>
         <input
           type="text"
@@ -55,7 +55,7 @@ const BasicDetailsSection = ({
       {/* Date */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          {t("News Date")}*
+          {t("Latest News Date")}*
         </label>
         <DatePickerWithMonthYear
           value={happenedAt}

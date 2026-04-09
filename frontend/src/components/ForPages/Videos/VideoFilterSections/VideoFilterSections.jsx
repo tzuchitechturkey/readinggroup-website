@@ -56,7 +56,7 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
   };
   const getCategoriesList = async () => {
     try {
-      const res = await GetVideoCategories(100, 0, "");
+      const res = await GetVideoCategories(100, 0, "", "True");
       if (res?.data) {
         // Transform data to include id, name and count
         const categories = res.data?.results?.map((category) => ({
@@ -74,7 +74,7 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
   // Fetch filtered videos based on all active filters
   const fetchFilteredVideos = async (
     page = 1,
-    searchVal = filters.searchValue
+    searchVal = filters.searchValue,
   ) => {
     const offset = (page - 1) * limit;
     const params = {};

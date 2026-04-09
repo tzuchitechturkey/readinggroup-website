@@ -9,7 +9,7 @@ import { languages } from "@/constants/constants";
 
 import UpLeftIcon from "../../../../../assets/icons/up left.svg";
 
-function CustomyoutubeVideo({ t, videoData }) {
+function CustomyoutubeVideo({ t, i18n, videoData }) {
   const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState([]);
@@ -25,13 +25,17 @@ function CustomyoutubeVideo({ t, videoData }) {
   const fetchRelated = async (currentOffset = 0) => {
     try {
       setIsLoading(true);
-      const res = await GetTopViewedVideos(videoData?.id);
+      const res = await GetTopViewedVideos(videoData?.id, i18n.language);
       console.log("Related videos response:", res);
       const data = res?.data || {};
-      const results = data.results || [];
+      const lang = i18n.language;
+      const results = (data.results || []).map((item) => ({
+        ...item[lang],
+        id: item.id,
+      }));
       const count = data.count || 0;
 
-      // If it's the first load, replace videos; otherwise append
+      // If it's the first load, replace   videos; otherwise append
       if (currentOffset === 0) {
         setRelatedVideos(results);
       } else {
@@ -105,13 +109,10 @@ function CustomyoutubeVideo({ t, videoData }) {
   };
 
   const youTube = isYouTubeUrl(videoData?.video_url);
-  const plainText = videoData?.description
-    ? videoData.description.replace(/<[^>]+>/g, "")
-    : "";
+  const htmlDescription = videoData?.description || "";
+  const plainText = htmlDescription.replace(/<[^>]+>/g, "");
   const MAX_LENGTH = 120;
   const isLong = plainText.length > MAX_LENGTH;
-
-  const displayedText = expanded ? plainText : plainText.slice(0, MAX_LENGTH);
 
   return (
     <div className=" max-w-[1200px] mx-auto ">
@@ -254,6 +255,7 @@ function CustomyoutubeVideo({ t, videoData }) {
         <div className="lg:flex gap-3 mb-14">
           {/* Description Section */}
           <div className="flex-1 bg-[#C4DBF5] rounded-[10px]  p-4 ">
+            {/* Start Created At */}
             <div className="mb-4">
               <p className="text-base font-bold text-[#081945] mb-0">
                 {videoData?.created_at
@@ -271,21 +273,23 @@ function CustomyoutubeVideo({ t, videoData }) {
                   : "Nov. 26, 2025"}
               </p>
             </div>
-            <p className="text-[20px] text-[#081945] leading-[1.5]">
-              {displayedText}
-
+            {/* End Created At */}
+            {/* Start Descripotion */}
+            <div className="text-[20px] text-[#081945] leading-[1.5]">
+              <div
+                className={`prose max-w-none ${!expanded && isLong ? "line-clamp-3" : ""}`}
+                dangerouslySetInnerHTML={{ __html: htmlDescription }}
+              />
               {isLong && (
-                <>
-                  {!expanded && ".. "}
-                  <span
-                    onClick={() => setExpanded((prev) => !prev)}
-                    className="text-blue-600 cursor-pointer ml-1"
-                  >
-                    {expanded ? "less" : "more..."}
-                  </span>
-                </>
+                <span
+                  onClick={() => setExpanded((prev) => !prev)}
+                  className="text-blue-600 cursor-pointer ml-1"
+                >
+                  {expanded ? "less" : "more..."}
+                </span>
               )}
-            </p>
+            </div>
+            {/* End Descripotion */}
           </div>
 
           {/* Info Sidebar */}

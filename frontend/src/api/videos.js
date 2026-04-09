@@ -22,7 +22,7 @@ export async function GetVideosByFilter(limit, offset, params = {}) {
 
   if (params.search) queryParams.append("search", params.search);
   if (params.video_type) queryParams.append("video_type", params.video_type);
-  // if (params.language) queryParams.append("language", params.language);
+  if (params.language) queryParams.append("language", params.language);
   if (params.category) {
     // Handle categories as array or single value
     // if (Array.isArray(params.category)) {
@@ -48,9 +48,9 @@ export async function CreateVideo(data) {
 export async function FetchYouTubeInfo(data) {
   return await axios.post(`/videos/fetch-youtube-info/`, data);
 }
-
-export async function GetVideoById(id) {
-  return await axios.get(`/videos/${id}/`);
+// /?language=en
+export async function GetVideoById(id, language) {
+  return await axios.get(`/videos/${id}/?language=${language}`);
 }
 
 export async function EditVideoById(id, data) {
@@ -66,9 +66,14 @@ export async function DeleteVideoById(id) {
 }
 
 // /video-categories/
-export async function GetVideoCategories(limit = 10, offset = 0, search = "") {
+export async function GetVideoCategories(
+  limit = 10,
+  offset = 0,
+  search = "",
+  isActive,
+) {
   return await axios.get(
-    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}`,
+    `/video-categories/?limit=${limit}&offset=${offset}&search=${search}${isActive !== undefined ? `&is_active=${isActive}` : ""}`,
   );
 }
 
@@ -108,11 +113,6 @@ export async function GetVideosByCategoryId(
 //   return await axios.get(`/videos/top-rated/`);
 // }
 
-// // /top5-videos/
-export async function GetTopViewedVideos(videoId) {
-  return await axios.get(`/videos/${videoId}/top-views/`);
-}
-
 // // Top 5 videos by likes
 // export async function GetTopLikedVideos() {
 //   return await axios.get(`/videos/top-liked/?limit=5`);
@@ -124,6 +124,13 @@ export async function GetTopViewedVideos(videoId) {
 // }
 
 // /videos/by_type_video/
-export async function GetVideosByTypeVideo(type) {
-  return await axios.get(`/videos/by_type_video/?type_video=${type}/`);
+export async function GetVideosByTypeVideo(language) {
+  return await axios.get(`/videos/by_type_video/?&language=${language}`);
 }
+
+// // /top5-videos/
+// // /videos/24/top-views/?language=ar
+export async function GetTopViewedVideos(videoId, language) {
+  return await axios.get(`/videos/${videoId}/top-views/?language=${language}`);
+}
+// return await axios.get(`/videos/by_type_video/?type_video=${type}/`);

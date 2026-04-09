@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CarouselControls from "@/components/Global/CarouselControls/CarouselControls";
 
@@ -64,6 +64,16 @@ const LivestreamCard = ({ data = [], t }) => {
 
     return `${month}. ${day}, ${year}`;
   };
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4 w-full">
+        <CalendarX className="text-white/50" size={56} strokeWidth={1.5} />
+        <p className="text-white/70 text-lg font-medium">
+          {t("No events currently")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row px-0 sm:px-2 md:px-4 lg:px-0 gap-4 sm:gap-5 md:gap-5 lg:gap-5 mt-4 sm:mt-6 md:mt-6 lg:mt-4 items-start md:items-center w-full">
@@ -129,12 +139,20 @@ const LivestreamCard = ({ data = [], t }) => {
                   }}
                   className="lg:h-[550px]  bg-gray-200 overflow-hidden  cursor-pointer group relative"
                 >
-                  <img
-                    src={imageItem?.learn?.image || imageItem?.learn?.image_url}
-                    alt={`${imageItem?.title} - ${index + 1}`}
-                    className="w-full h-full object-cover object-top"
-                    loading="lazy"
-                  />
+                  {imageItem?.images?.[0]?.image ||
+                  imageItem?.images?.[0]?.image_url ? (
+                    <img
+                      src={
+                        imageItem?.images[0]?.image ||
+                        imageItem?.images[0]?.image_url
+                      }
+                      alt={`${imageItem?.title} - ${index + 1}`}
+                      className="w-full h-full object-cover object-top"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200" />
+                  )}
 
                   <div className="absolute inset-0 bg-gradient-to-t from-[#285688]/100 via-[#285688]/40 to-transparent opacity-100 transition-opacity duration-300 flex items-center justify-center" />
                   <div className="hidden lg:block bg-white bg-opacity-90 text-black px-4 py-2 rounded-lg font-bold text-sm">

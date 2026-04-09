@@ -7,7 +7,7 @@ export async function GetEvents(limit, offset, params = {}) {
   queryParams.append("offset", offset);
 
   if (params.search) queryParams.append("search", params.search);
-  // if (params.language) queryParams.append("language", params.language);
+  if (params.language) queryParams.append("language", params.language);
   if (params.start_event_date)
     queryParams.append("start_event_date", params.start_event_date);
   return await axios.get(`/event-communities/?${queryParams.toString()}`);
@@ -73,6 +73,28 @@ export async function DeleteEventCategory(id) {
 }
 
 // /event-communities/event-months/
-export async function GetEventMonths() {
-  return await axios.get(`/event-communities/event-months/`);
+export async function GetEventMonths(language) {
+  return await axios.get(
+    `/event-communities/event-months/?language=${language}`,
+  );
+}
+
+// /event-community-images/
+export async function UploadEventImage(data) {
+  return await axios.post(`/event-community-images/`, data);
+}
+
+export async function DeleteEventImage(id) {
+  return await axios.delete(`/event-community-images/${id}/`);
+}
+
+// Nested image endpoints under an event
+export async function AddEventImage(eventId, data) {
+  return await axios.post(`/event-communities/${eventId}/images/`, data);
+}
+
+export async function DeleteEventImageByEventId(eventId, imageId) {
+  return await axios.delete(
+    `/event-communities/${eventId}/images/${imageId}/delete/`,
+  );
 }

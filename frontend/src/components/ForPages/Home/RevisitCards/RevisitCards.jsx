@@ -13,7 +13,7 @@ const RevisitCards = ({ t }) => {
   const getCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await GetLearnCategories();
+      const res = await GetLearnCategories(20, 0, "", "True"); // Fetch only active categories
       setCategories(res.data.results || []);
       if (res.data.results && res.data.results.length > 0) {
         setActiveCategory(res.data.results[0]);
@@ -97,7 +97,13 @@ const RevisitCards = ({ t }) => {
         </div>
 
         {/* Cards Carousel */}
-        {!isLoading && items.length > 0 && <ScrollCards items={items} t={t} />}
+        {!isLoading && items.length > 0 && (
+          <ScrollCards
+            items={items}
+            t={t}
+            direction={activeCategory?.direction}
+          />
+        )}
 
         {/* Loading State */}
         {isLoading && (

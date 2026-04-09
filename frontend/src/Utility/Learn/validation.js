@@ -1,14 +1,6 @@
 export const validateForm = (formData, t, post) => {
   const newErrors = {};
 
-  if (!formData.title.trim()) {
-    newErrors.title = t("Title is required");
-  }
-
-  if (!formData.subtitle.trim()) {
-    newErrors.subtitle = t("Subtitle is required");
-  }
-
   if (!formData.category) {
     newErrors.category = t("Category is required");
   }
