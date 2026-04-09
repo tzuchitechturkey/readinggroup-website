@@ -12,7 +12,7 @@ export default function AdminIcons() {
   const { t } = useTranslation();
   return (
     <div>
-      <div className="flex justify-end items-center lg:gap-4 mx-20">
+      <div className="flex justify-end items-center lg:gap-4 mx-16">
         {/* Start Toggle Theme */}
         {/* <div className="">
           <ThemeToggle />
@@ -28,6 +28,10 @@ export default function AdminIcons() {
         </div> */}
         {/* End Messages */}
         {/* Start Language Dropdown */}
+        <div className="">
+          <LanguageDropdown iconColor="#999EAD" />
+        </div>
+        {/* End Language Dropdown */}
 
         {/* Start Got TO Home */}
         <div
@@ -49,11 +53,6 @@ export default function AdminIcons() {
           </Link>
         </div>
         {/* End Got TO Home */}
-
-        <div className="">
-          <LanguageDropdown iconColor="#999EAD" />
-        </div>
-        {/* End Language Dropdown */}
       </div>
     </div>
   );
