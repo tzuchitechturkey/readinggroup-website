@@ -45,7 +45,7 @@ export const useCreateOrEditRelatedReports = (report, onSectionChange) => {
         title: report.title || "",
         external_link: report.external_link || "",
         duration: report.duration || "",
-        happened_at: report.happened_at || "",
+        happened_at: report.happened_at ? report.happened_at.split("T")[0] : "",
         image: null,
         category: report.category || null,
       };

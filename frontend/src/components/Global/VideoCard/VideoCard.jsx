@@ -16,7 +16,7 @@ const VideoCard = ({
     switch (size) {
       case "large":
         return {
-          image: `h-[200px]  md:h-[300px]  lg:h-[450px]   w-full  md:w-[90%]  lg:w-full`,
+          image: `h-[200px]  md:h-[300px] ${reportCard ? " lg:h-[390px]" : " lg:h-[450px]"}    w-full  md:w-[90%]  lg:w-full`,
           titleHeight: "h-[30px] md:h-[34px] lg:h-[35px]",
           categoryText: "text-[14px]  md:text-base lg:text-xl",
           durationText: "text-[13px] md:text-[15px] lg:text-lg",
