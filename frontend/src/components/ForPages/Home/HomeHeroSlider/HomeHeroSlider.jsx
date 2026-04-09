@@ -73,7 +73,7 @@ export default function HomeHeroSlider({ t, fullLiveStream }) {
 
             {/* Title and Description */}
             <div className="text-white w-full lg:w-3/5">
-              <h2 className="text-base sm:text-xl md:text-3xl lg:text-[48px] font-bold mb-1 sm:mb-2 md:mb-5 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[55px]">
+              <h2 className="text-base w-full sm:text-xl md:text-3xl lg:text-[48px] font-bold mb-1 sm:mb-2 md:mb-5 line-clamp-3 sm:line-clamp-2 lg:line-clamp-none lg:leading-[55px]">
                 {fullLiveStream?.title}
               </h2>
               <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF] opacity-80">
