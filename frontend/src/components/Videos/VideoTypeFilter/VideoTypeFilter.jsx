@@ -20,7 +20,7 @@ const VideoTypeFilter = ({
         <p className="text-lg font-bold text-[#081945] leading-tight">
           {t("Video Type")}
         </p>
-        <p className="text-xs font-normal text-[#285688] leading-tight">
+        <p className="text-base font-normal text-[#285688] leading-tight">
           {filters.videoType.includes("all")
             ? t("All")
             : filters.videoType.length === 1
