@@ -14,7 +14,7 @@ const VideoTypeFilter = ({
   return (
     <div
       onClick={() => onToggleDropdown("videoType")}
-      className={`min-w-[240px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4  ${openDropdowns.videoType ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
+      className={`min-w-[220px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4  ${openDropdowns.videoType ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
     >
       <div className="flex-1  flex items-center gap-2">
         <p className="text-lg font-bold text-[#081945] leading-tight">
