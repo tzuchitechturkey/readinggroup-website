@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CarouselControls from "@/components/Global/CarouselControls/CarouselControls";
 
@@ -64,7 +64,17 @@ const LivestreamCard = ({ data = [], t }) => {
 
     return `${month}. ${day}, ${year}`;
   };
-  console.log("LivestreamCard Data:", data); // Debugging log
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4 w-full">
+        <CalendarX className="text-white/50" size={56} strokeWidth={1.5} />
+        <p className="text-white/70 text-lg font-medium">
+          {t("No events currently")}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row px-0 sm:px-2 md:px-4 lg:px-0 gap-4 sm:gap-5 md:gap-5 lg:gap-5 mt-4 sm:mt-6 md:mt-6 lg:mt-4 items-start md:items-center w-full">
       {/* Left Content */}

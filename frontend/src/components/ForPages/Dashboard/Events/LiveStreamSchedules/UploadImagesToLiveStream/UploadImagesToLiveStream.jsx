@@ -116,7 +116,7 @@ const UploadImagesToLiveStream = ({ onSectionChange, liveStream }) => {
   };
 
   const handleNewImagesChange = (files) => {
-    setNewImages(files);
+    setNewImages(Array.from(files));
     if (errors.images) {
       setErrors((prev) => ({ ...prev, images: null }));
     }
@@ -226,6 +226,7 @@ const UploadImagesToLiveStream = ({ onSectionChange, liveStream }) => {
         {/* Images Section */}
         <div className="px-4 py-3">
           <ImageSection
+            key={selectedLanguage ?? "default"}
             images={images}
             onNewImagesChange={handleNewImagesChange}
             onAddImageUrl={handleAddImageUrl}
