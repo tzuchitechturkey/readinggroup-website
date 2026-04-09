@@ -69,51 +69,57 @@ const PhotoCollections = ({ t, data }) => {
       />
 
       {/* Photo Carousel */}
-      <div className="w-full">
-        <div className="group relative">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-              slidesToScroll: 1,
-            }}
-            setApi={setApi}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-4 md:-ml-5">
-              {data.map((photo) => (
-                <CarouselItem key={photo.id} className="pl-4 md:pl-5 basis-1/2">
-                  <CollectionCard
-                    photo={photo}
-                    isNew={photo.isNew}
-                    handleNavigate={handleMoreCollectionsClick}
-                    t={t}
-                    fromHomePage={true}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
-
-        {/* Slide Indicators */}
-        {scrollSnaps.length > 0 && (
-          <div className="flex gap-2 justify-center w-full mt-6 md:mt-8">
-            {scrollSnaps.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => api?.scrollTo(index)}
-                className={`h-2 md:h-2.5 rounded-full transition-all ${
-                  current === index
-                    ? "bg-[#5E82AB] w-6 md:w-8"
-                    : "bg-[#5E82AB]/50 w-2 md:w-2.5 "
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
+      {data && data.length > 0 ? (
+        <div className="w-full">
+          <div className="group relative">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+                slidesToScroll: 1,
+              }}
+              setApi={setApi}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4 md:-ml-5">
+                {data.map((photo) => (
+                  <CarouselItem key={photo.id} className="pl-4 md:pl-5 basis-1/2">
+                    <CollectionCard
+                      photo={photo}
+                      isNew={photo.isNew}
+                      handleNavigate={handleMoreCollectionsClick}
+                      t={t}
+                      fromHomePage={true}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
-        )}
-      </div>
+
+          {/* Slide Indicators */}
+          {scrollSnaps.length > 0 && (
+            <div className="flex gap-2 justify-center w-full mt-6 md:mt-8">
+              {scrollSnaps.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => api?.scrollTo(index)}
+                  className={`h-2 md:h-2.5 rounded-full transition-all ${
+                    current === index
+                      ? "bg-[#5E82AB] w-6 md:w-8"
+                      : "bg-[#5E82AB]/50 w-2 md:w-2.5 "
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center w-full h-[200px] rounded-xl border border-dashed border-gray-300 bg-gray-50">
+          <p className="text-gray-400 text-sm">{t("No photos available")}</p>
+        </div>
+      )}
     </div>
   );
 };

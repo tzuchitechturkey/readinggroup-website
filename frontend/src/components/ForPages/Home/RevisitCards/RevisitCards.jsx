@@ -105,6 +105,13 @@ const RevisitCards = ({ t }) => {
           />
         )}
 
+        {/* Empty State */}
+        {!isLoading && items.length === 0 && (
+          <div className="flex items-center justify-center w-full h-[200px] rounded-xl border border-dashed border-white/40 bg-white/10">
+            <p className="text-white/60 text-sm">{t("No cards available")}</p>
+          </div>
+        )}
+
         {/* Loading State */}
         {isLoading && (
           <div className="w-full h-48 flex items-center justify-center">

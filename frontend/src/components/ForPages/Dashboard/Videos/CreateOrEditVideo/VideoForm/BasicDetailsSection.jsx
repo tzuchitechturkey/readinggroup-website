@@ -44,17 +44,22 @@ export const BasicDetailsSection = ({
       {/* Category */}
       <div ref={categoryDropdownRef} className="relative">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Category")} <span className="text-red-500">*</span>
+          {t("Category")}{" "}
+          {formData?.video_type !== "full_video" && (
+            <span className="text-red-500">*</span>
+          )}
         </label>
         <button
           type="button"
-          onClick={() => !disableCategory && onCategoryDropdownToggle(!showCategoryDropdown)}
+          onClick={() =>
+            !disableCategory && onCategoryDropdownToggle(!showCategoryDropdown)
+          }
           disabled={disableCategory}
           className={`w-full px-3 py-2 border rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center ${
-            disableCategory ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""
-          } ${
-            errors?.category ? "border-red-500" : "border-gray-300"
-          }`}
+            disableCategory
+              ? "bg-gray-100 cursor-not-allowed text-gray-500"
+              : ""
+          } ${errors?.category ? "border-red-500" : "border-gray-300"}`}
         >
           <span>
             {formData?.category?.name ||

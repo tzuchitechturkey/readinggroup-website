@@ -1944,5 +1944,6 @@
   "Image uploaded successfully": "Resim başarıyla yüklendi",
   "Image deleted successfully": "Resim başarıyla silindi",
   "Language version added successfully": "Dil versiyonu başarıyla eklendi",
-  "Language version updated successfully": "Dil versiyonu başarıyla güncellendi"
+  "Language version updated successfully": "Dil versiyonu başarıyla güncellendi",
+  "Upload Images to Live Stream": "Canlı Yayına Resim Yükle"
 }
