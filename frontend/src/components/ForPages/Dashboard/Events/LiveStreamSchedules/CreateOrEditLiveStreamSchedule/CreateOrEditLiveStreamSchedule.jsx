@@ -274,7 +274,7 @@ const CreateOrEditLiveStreamSchedule = ({
 }) => {
   const { t } = useTranslation();
   const [openDatePopover, setOpenDatePopover] = useState(false);
-
+  console.log("Initial liveStream prop:", liveStream);
   // Normalize incoming event data to multilang format
   const [multiLangData, setMultiLangData] = useState(() =>
     normalizeToMultiLang(liveStream),

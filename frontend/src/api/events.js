@@ -7,7 +7,7 @@ export async function GetEvents(limit, offset, params = {}) {
   queryParams.append("offset", offset);
 
   if (params.search) queryParams.append("search", params.search);
-  // if (params.language) queryParams.append("language", params.language);
+  if (params.language) queryParams.append("language", params.language);
   if (params.start_event_date)
     queryParams.append("start_event_date", params.start_event_date);
   return await axios.get(`/event-communities/?${queryParams.toString()}`);

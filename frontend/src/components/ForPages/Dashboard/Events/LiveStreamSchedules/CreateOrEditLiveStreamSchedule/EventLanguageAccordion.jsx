@@ -13,7 +13,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-import { languages } from "@/constants/constants";
+import { allLanguages } from "@/constants/constants";
 import { DeleteEventById } from "@/api/events";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import { useEventLanguageForm } from "@/hooks/event/useEventLanguageForm";
@@ -23,7 +23,7 @@ import {
   TimePickerWithDropdowns,
 } from "./LiveStreamForm/DateTimePickers";
 
-const LANGUAGE_LABELS = languages.reduce((acc, l) => {
+const LANGUAGE_LABELS = allLanguages.reduce((acc, l) => {
   acc[l.code] = l.label;
   return acc;
 }, {});
@@ -109,8 +109,8 @@ function EventLanguageAccordion({
     e.target.value = "";
   };
 
-  // Available languages for the select (exclude already-used ones, except current)
-  const availableLangs = languages.filter(
+  // Available allLanguages for the select (exclude already-used ones, except current)
+  const availableLangs = allLanguages.filter(
     (l) =>
       !usedLangCodes.includes(l.code) ||
       (!isNewLang && l.code === formData.language),

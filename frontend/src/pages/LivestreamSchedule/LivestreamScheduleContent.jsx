@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -6,10 +6,19 @@ import { Radio } from "lucide-react";
 import { toast } from "react-toastify";
 
 import MonthYearPicker from "@/components/Global/MonthYearPicker/MonthYearPicker";
+import LanguageFilter from "@/components/Videos/LanguageFilter/LanguageFilter";
 import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import { GetEvents } from "@/api/events";
 import ImageViewerModal from "@/components/Global/ImageViewerModal/ImageViewerModal";
+// Map i18n language code → allLanguages code (constants.js)
+const I18N_TO_EVENT_LANG = {
+  en: "en",
+  tr: "tr",
+  ch: "zh-hant",
+  chsi: "zh-hans",
+  jp: "ja",
+};
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -51,19 +60,29 @@ const getSpeakerDisplayName = (speaker) => {
 };
 
 const LivestreamScheduleContent = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const [scheduleData, setScheduleData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const initialLoadRef = useRef(false);
 
   // Get current date
   const currentDate = new Date();
+  const defaultLanguage = I18N_TO_EVENT_LANG[i18n.language] || "en";
   const [filters, setFilters] = useState({
     date: {
       year: currentDate.getFullYear(),
       month: currentDate.getMonth() + 1,
     },
+    language: defaultLanguage,
   });
+  const [openDropdowns, setOpenDropdowns] = useState({ language: false });
+
+  const toggleDropdown = (name) => {
+    setOpenDropdowns((prev) => ({ language: false, [name]: !prev[name] }));
+  };
+
+  const closeAllDropdowns = () => setOpenDropdowns({ language: false });
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -77,32 +96,53 @@ const LivestreamScheduleContent = () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
-  const fetchScheduleData = async (year, month) => {
+  const fetchScheduleData = async (currentFilters) => {
     setIsLoading(true);
     try {
-      // Format month with leading zero (01, 02, etc.)
+      const { year, month } = currentFilters.date;
       const monthStr = String(month).padStart(2, "0");
       const dateFilter = `${year}-${monthStr}`;
 
-      const res = await GetEvents(10, 0, { start_event_date: dateFilter });
+      const res = await GetEvents(10, 0, {
+        start_event_date: dateFilter,
+        language: currentFilters.language,
+      });
       setScheduleData(res.data.results);
     } catch (err) {
       console.error("Error fetching schedule data:", err?.response);
       setErrorFn(err, t);
     } finally {
       setIsLoading(false);
+      initialLoadRef.current = true;
     }
   };
+
   const handleDateChange = (newDate) => {
-    setFilters((prev) => ({
-      ...prev,
-      date: newDate,
-    }));
+    const newFilters = { ...filters, date: newDate };
+    setFilters(newFilters);
+    fetchScheduleData(newFilters);
+  };
+
+  const handleLanguageChange = (langCode) => {
+    const newFilters = { ...filters, language: langCode };
+    setFilters(newFilters);
+    fetchScheduleData(newFilters);
+    closeAllDropdowns();
   };
 
   useEffect(() => {
-    fetchScheduleData(filters.date.year, filters.date.month);
-  }, [filters.date]);
+    fetchScheduleData(filters);
+  }, []);
+
+  // مزامنة لغة الفلتر مع تغيير لغة الموقع
+  useEffect(() => {
+    if (!initialLoadRef.current) return;
+    const newLang = I18N_TO_EVENT_LANG[i18n.language] || "en";
+    if (newLang === filters.language) return;
+    const newFilters = { ...filters, language: newLang };
+    setFilters(newFilters);
+    fetchScheduleData(newFilters);
+  }, [i18n.language]);
 
   return (
     <div className="min-h-screen bg-background pt-10 lg:pt-[50px] pb-32 px-4 ">
@@ -113,149 +153,24 @@ const LivestreamScheduleContent = () => {
           {t("Livestream Schedule")}
         </h1>
 
-        {/* Month Navigator Node 1:2308 */}
-        <div className="flex mb-[60px]">
+        {/* Month Navigator + Language Filter */}
+        <div className="flex flex-wrap items-center gap-4 mb-[60px]">
           <MonthYearPicker
             month={filters.date.month}
             year={filters.date.year}
             onChange={handleDateChange}
           />
+          <LanguageFilter
+            filters={filters}
+            openDropdowns={openDropdowns}
+            onToggleDropdown={toggleDropdown}
+            onLanguageChange={handleLanguageChange}
+          />
         </div>
 
         {/* Start Content  */}
 
-        {scheduleData?.length > 0 ? (
-          <div className="flex flex-col gap-[16px] w-full items-start">
-            {/* Header  */}
-            <div className="livestream-schedule-header">
-              <div className="w-[111px] livestream-schedule-header-col">
-                {t("Date / Time")}
-              </div>
-              <div className="w-[275px] livestream-schedule-header-col">
-                {t("Title")}
-              </div>
-              <div className="w-[169px] livestream-schedule-header-col">
-                {t("Guest Speaker(s)")}
-              </div>
-              <div className="w-[134px] livestream-schedule-header-col">
-                {t("Resources")}
-              </div>
-              <div className="w-[174px] livestream-schedule-header-col">
-                {t("Link")}
-              </div>
-            </div>
-
-            {/* Schedule Container  */}
-            <div className="livestream-schedule-list">
-              {scheduleData.map((item, index) => (
-                <React.Fragment key={item.id}>
-                  {index > 0 && (
-                    <div className="livestream-schedule-divider">
-                      <div className="livestream-schedule-divider-line" />
-                    </div>
-                  )}
-                  {/* Livestream Row  */}
-                  <div className="livestream-schedule-row">
-                    {/* Date / Time */}
-                    <div className="livestream-schedule-col-datetime">
-                      <div className="livestream-schedule-date">
-                        {formatDate(item.start_event_date)}
-                      </div>
-                      <div className="livestream-schedule-time">
-                        {formatTimeRange(item.start_event_time, item.duration)}
-                      </div>
-                    </div>
-
-                    {/* Title Column */}
-                    <div className="livestream-schedule-col-title">
-                      {item.title}
-                    </div>
-
-                    {/* Guest Speaker Column*/}
-                    <div className="livestream-schedule-col-speakers">
-                      <div className="flex lg:hidden text-[14px] font-bold text-[var(--Page-text)]/60 mb-1 uppercase tracking-wider">
-                        {t("Guest Speaker(s)")}
-                      </div>
-                      <div className="livestream-schedule-speakers-list">
-                        {(item.guest_speakers || []).map((speaker, idx) => (
-                          <div key={idx} className="truncate lg:w-[128px]">
-                            {getSpeakerDisplayName(speaker)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actions Container for Mobile */}
-                    <div className="livestream-schedule-actions">
-                      {/* Resources Button */}
-                      <div className="w-full lg:w-[134px] flex justify-start">
-                        <button
-                          onClick={() => {
-                            if (!item?.images?.length) {
-                              toast.info(
-                                t("No resources available for this event"),
-                              );
-                              return;
-                            }
-                            setSelectedEvent(item);
-                            setViewerIndex(0);
-                            setIsViewerOpen(true);
-                          }}
-                          className={
-                            item?.images?.length > 0
-                              ? "tzuchi-btn-resources outline-none border-none"
-                              : "tzuchi-btn-resources-disabled outline-none border-none"
-                          }
-                        >
-                          {t("View Posters")}
-                        </button>
-                      </div>
-
-                      {/* Link Button */}
-                      <div className="w-full lg:w-[174px] flex justify-start">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!item?.live_stream_link) {
-                              toast.info(t("No link available for this event"));
-                              return;
-                            }
-
-                            window.open(
-                              item.live_stream_link,
-                              "_blank",
-                              "noopener,noreferrer",
-                            );
-                          }}
-                          className={`flex items-center gap-1 ${
-                            item?.live_stream_link
-                              ? "tzuchi-btn-link cursor-pointer"
-                              : "tzuchi-btn-link-disabled cursor-not-allowed"
-                          }`}
-                        >
-                          <Radio className="w-4 h-4" />
-                          <span>{t("Livestream Link")}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div
-            className="flex flex-col items-center justify-center py-[290px] w-full"
-            data-node-id="1:2411"
-          >
-            <p
-              className="text-2xl lg:text-[40px] font-black text-[var(--livestream-muted-blue)] leading-[1.2] text-center"
-              data-node-id="1:2412"
-            >
-              {t("Nothing scheduled yet.")}
-            </p>
-          </div>
-        )}
+      
       </div>
       {/* Image Viewer Modal */}
       <ImageViewerModal

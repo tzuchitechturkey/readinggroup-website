@@ -2,7 +2,7 @@ import React from "react";
 
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import languages from "@/i18n/languages";
+import { allLanguages } from "@/constants/constants";
 
 const LanguageFilter = ({
   filters,
@@ -12,10 +12,7 @@ const LanguageFilter = ({
 }) => {
   const { t } = useTranslation();
 
-  const langEntries = Object.values(languages);
-  const selectedLangObj = langEntries.find(
-    (l) => (l.apiCode || l.code) === filters.language,
-  );
+  const selectedLangObj = allLanguages.find((l) => l.code === filters.language);
 
   return (
     <div
@@ -38,19 +35,17 @@ const LanguageFilter = ({
         <div className="absolute top-full left-0 -mt-2 w-full bg-white rounded-b-[17px] z-50 p-4">
           <hr className="bg-[#FCFDFF] rounded-2xl mb-3" />
           <div className="flex flex-col gap-2.5">
-            {Object.keys(languages).map((lang) => {
-              const langObj = languages[lang];
-              const apiCode = langObj.apiCode || langObj.code;
-              const isSelected = filters.language === apiCode;
+            {allLanguages.map((langObj) => {
+              const isSelected = filters.language === langObj.code;
               return (
                 <div
-                  key={lang}
+                  key={langObj.code}
                   className={`flex items-center gap-2 cursor-pointer ${
                     isSelected ? "text-[#285688]" : ""
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onLanguageChange(apiCode);
+                    onLanguageChange(langObj.code);
                   }}
                 >
                   <div className="w-6 h-6">

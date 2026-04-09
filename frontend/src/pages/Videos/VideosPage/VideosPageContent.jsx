@@ -16,13 +16,13 @@ import MobileFilterModal from "@/components/Videos/MobileFilterModal/MobileFilte
 import { GetVideoCategories, GetVideosByFilter } from "@/api/videos";
 import LanguageFilter from "@/components/Videos/LanguageFilter/LanguageFilter";
 
-// Map i18n language code → video API language code
+// Map i18n language code → allLanguages code (constants.js)
 const I18N_TO_VIDEO_LANG = {
   en: "en",
   tr: "tr",
   ch: "zh-hant",
   chsi: "zh-hans",
-  jp: "jp",
+  jp: "ja",
 };
 
 /**
