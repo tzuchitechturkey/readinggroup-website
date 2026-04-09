@@ -28,10 +28,6 @@ export default function AdminIcons() {
         </div> */}
         {/* End Messages */}
         {/* Start Language Dropdown */}
-        <div className="">
-          <LanguageDropdown iconColor="#999EAD" />
-        </div>
-        {/* End Language Dropdown */}
 
         {/* Start Got TO Home */}
         <div
@@ -53,6 +49,10 @@ export default function AdminIcons() {
           </Link>
         </div>
         {/* End Got TO Home */}
+        <div className="">
+          <LanguageDropdown iconColor="#999EAD" />
+        </div>
+        {/* End Language Dropdown */}
       </div>
     </div>
   );

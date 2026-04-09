@@ -1204,5 +1204,10 @@
   "Image uploaded successfully": "图片上传成功",
   "Image deleted successfully": "图片删除成功",
   "Language version added successfully": "语言版本添加成功",
-  "Language version updated successfully": "语言版本更新成功"
+  "Language version updated successfully": "语言版本更新成功",
+  "Upload Images to Live Stream": " 上传图片到直播",
+  "Add/Edit News": " 添加/编辑新闻",
+  "All Videos": "所有视频",
+  "Add/Edit Video": " 添加/编辑视频",
+  "": ""
 }
