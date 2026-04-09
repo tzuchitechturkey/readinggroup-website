@@ -499,7 +499,12 @@ function VideosPageContent() {
 
     const newFilters = { ...filters, language: newLang };
     setFilters(newFilters);
-    fetchFilteredVideosWithParams(1, newFilters, appliedDateFilter, selectedCategories);
+    fetchFilteredVideosWithParams(
+      1,
+      newFilters,
+      appliedDateFilter,
+      selectedCategories,
+    );
   }, [i18n.language]);
 
   // Trigger filtering when filters change (only after initial load)
@@ -592,6 +597,7 @@ function VideosPageContent() {
                   openDropdowns={openDropdowns}
                   onToggleDropdown={toggleDropdown}
                   onLanguageChange={handleLanguageChange}
+                  fromLiveStream={false}
                 />
 
                 {/* Active Filters Display */}

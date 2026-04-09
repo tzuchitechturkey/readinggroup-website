@@ -29,7 +29,6 @@ export const socialPlatforms = [
 ];
 
 export const languages = [
-  { label: "Arabic", code: "ar" },
   { label: "English", code: "en" },
   { label: "Turkish", code: "tr" },
   { label: "Chinese (Simp)", code: "zh-hans" },
