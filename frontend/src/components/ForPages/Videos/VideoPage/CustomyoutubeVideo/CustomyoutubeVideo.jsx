@@ -394,6 +394,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
               size="small"
               showDate={true}
               rounded={true}
+              t={t}
             />
           ))}
         </div>

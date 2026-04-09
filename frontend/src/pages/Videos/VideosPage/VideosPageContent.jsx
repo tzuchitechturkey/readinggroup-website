@@ -617,7 +617,7 @@ function VideosPageContent() {
               </div>
 
               {/* Search */}
-              <div className="mb-8 w-full lg:max-w-[340px] md:mb-0 px-4 md:px-0">
+              <div className="mb-8 w-full lg:max-w-[280px] md:mb-0 px-4 md:px-0">
                 <VideoSearchBar
                   searchTerm={searchTerm}
                   activeSearchTerm={activeSearchTerm}
@@ -667,6 +667,7 @@ function VideosPageContent() {
                         size="small"
                         navigate={navigate}
                         rounded={isMobile ? false : true}
+                        t={t}
                       />
                     </div>
                   ))}

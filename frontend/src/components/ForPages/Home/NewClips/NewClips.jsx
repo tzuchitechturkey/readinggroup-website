@@ -36,6 +36,7 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
             rounded={true}
             textClassName="!justify-start gap-[4px] "
             reportCard={fromHomePage ? false : true}
+            t={t}
           />
 
           {/* Side Videos Column */}
@@ -51,13 +52,14 @@ const NewClips = ({ clips, t, fromHomePage = true }) => {
                 fromHomePage={fromHomePage}
                 reportCard={fromHomePage ? false : true}
                 heroReportCard={fromHomePage ? false : true}
+                t={t}
               />
             ))}
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-center w-full md:w-[1200px] h-[200px] rounded-xl border border-dashed border-gray-300 bg-gray-50">
-          <p className="text-gray-400 text-sm">{t("No clips available")}</p>
+        <div className="flex items-center justify-center w-full md:w-[1200px] h-[200px] rounded-xl border border-dashed border-gray-300 bg-[#90abca]">
+          <p className="text-white/80 text-sm">{t("No clips available")}</p>
         </div>
       )}
     </div>

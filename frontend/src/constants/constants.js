@@ -33,8 +33,7 @@ export const languages = [
   { label: "Turkish", code: "tr" },
   { label: "Chinese (Simp)", code: "zh-hans" },
   { label: "Chinese (Trad)", code: "zh-hant" },
-  { label: "Spanish", code: "es" },
-  { label: "French", code: "fr" },
+  { label: "Japanese", code: "ja" },
 ];
 
 export const allLanguages = [

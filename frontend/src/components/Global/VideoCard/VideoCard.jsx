@@ -10,6 +10,7 @@ const VideoCard = ({
   fromHomePage = false,
   reportCard = false,
   heroReportCard = false,
+  t,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
@@ -99,11 +100,13 @@ const VideoCard = ({
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945]  `}
         >
-          {reportCard
-            ? item?.category?.title?.charAt(0).toUpperCase() +
-              item?.category?.title?.slice(1)
-            : item?.category?.name?.charAt(0).toUpperCase() +
-              item?.category?.name?.slice(1)}
+          {item?.category
+            ? reportCard
+              ? item?.category?.title?.charAt(0).toUpperCase() +
+                item?.category?.title?.slice(1)
+              : item?.category?.name?.charAt(0).toUpperCase() +
+                item?.category?.name?.slice(1)
+            : t("Full Video")}
         </p>
         {textClassName && <span className="">|</span>}
         <p
