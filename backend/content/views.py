@@ -828,15 +828,15 @@ class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet)
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        language = request.query_params.get("language")
+        serializer_class = (
+            EventCommunitySerializer if language else EventCommunityMultiLangSerializer
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
-            data = EventCommunityMultiLangSerializer(
-                page, many=True, context={"request": request}
-            ).data
+            data = serializer_class(page, many=True, context={"request": request}).data
             return self.get_paginated_response(data)
-        data = EventCommunityMultiLangSerializer(
-            queryset, many=True, context={"request": request}
-        ).data
+        data = serializer_class(queryset, many=True, context={"request": request}).data
         return Response(data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -863,11 +863,16 @@ class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet)
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        # List endpoint only returns base events; translations are nested inside them
-        if self.action == "list":
-            queryset = queryset.filter(base_event__isnull=True)
-
         params = self.request.query_params
+        language = params.get("language")
+
+        if self.action == "list":
+            if language:
+                # Return only events matching the requested language (flat list)
+                queryset = queryset.filter(language=language)
+            else:
+                # Default: return only base events; translations are nested inside them
+                queryset = queryset.filter(base_event__isnull=True)
 
         start_event_date = params.get("start_event_date")
         if start_event_date:

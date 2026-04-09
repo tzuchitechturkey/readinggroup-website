@@ -177,6 +177,16 @@ event_community_manual_parameters = [
         ),
         type=openapi.TYPE_STRING,
     ),
+    openapi.Parameter(
+        "language",
+        openapi.IN_QUERY,
+        description=(
+            "Filter by language code (e.g. en, zh-hans, ar). "
+            "When provided, returns a flat list of events in that language only "
+            "instead of the grouped multi-language structure."
+        ),
+        type=openapi.TYPE_STRING,
+    ),
 ]
 
 # ==================================== team event community swagger parameters end =======================================
