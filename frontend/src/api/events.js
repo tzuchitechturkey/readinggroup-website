@@ -85,3 +85,15 @@ export async function UploadEventImage(data) {
 export async function DeleteEventImage(id) {
   return await axios.delete(`/event-community-images/${id}/`);
 }
+
+// Nested image endpoints under an event
+export async function AddEventImage(eventId, data) {
+  return await axios.post(`/event-communities/${eventId}/images/`, data);
+}
+
+export async function DeleteEventImageByEventId(eventId, imageId) {
+  return await axios.delete(
+    `/event-communities/${eventId}/images/${imageId}/delete/`,
+  );
+}
+ 

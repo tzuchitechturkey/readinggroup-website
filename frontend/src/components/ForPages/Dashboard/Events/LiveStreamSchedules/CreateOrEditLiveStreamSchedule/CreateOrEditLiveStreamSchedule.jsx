@@ -1,273 +1,271 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { X, Calendar, Clock } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
-import { DayPicker } from "react-day-picker";
-import * as Popover from "@radix-ui/react-popover";
-import "react-day-picker/dist/style.css";
-import "@/components/ForPages/Dashboard/CreateorEditCategoryModal/DatePickerStyles.css";
+import { toast } from "react-toastify";
 
 import Loader from "@/components/Global/Loader/Loader";
-import { useEventForm } from "@/components/ForPages/Dashboard/_common/hooks/useEventForm";
+import { CreateEvent } from "@/api/events";
+import { setErrorFn } from "@/Utility/Global/setErrorFn";
+import { allLanguages } from "@/constants/constants";
 
-import { FormActionsSection } from "./LiveStreamForm";
+import {
+  DatePickerWithMonthYear,
+  TimePickerWithDropdowns,
+} from "./LiveStreamForm/DateTimePickers";
+import EventLanguageAccordion from "./EventLanguageAccordion";
 
-// مكون Date Picker محسّن مع قوائم الشهر والسنة
-function DatePickerWithMonthYear({
-  value,
-  onChange,
-  error,
-  t,
-  isOpen,
-  onOpenChange,
-}) {
-  const [currentDate, setCurrentDate] = useState(
-    value ? new Date(value) : new Date(),
-  );
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers — normalize event data to multilang format
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const months = [
-    { value: 0, label: t("January") },
-    { value: 1, label: t("February") },
-    { value: 2, label: t("March") },
-    { value: 3, label: t("April") },
-    { value: 4, label: t("May") },
-    { value: 5, label: t("June") },
-    { value: 6, label: t("July") },
-    { value: 7, label: t("August") },
-    { value: 8, label: t("September") },
-    { value: 9, label: t("October") },
-    { value: 10, label: t("November") },
-    { value: 11, label: t("December") },
-  ];
-
-  const years = Array.from(
-    { length: 100 },
-    (_, i) => new Date().getFullYear() - 50 + i,
-  );
-
-  const handleMonthChange = (e) => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(parseInt(e.target.value));
-    setCurrentDate(newDate);
-  };
-
-  const handleYearChange = (e) => {
-    const newDate = new Date(currentDate);
-    newDate.setFullYear(parseInt(e.target.value));
-    setCurrentDate(newDate);
-  };
-
-  const handleDateSelect = (date) => {
-    const formattedDate = format(date, "yyyy-MM-dd");
-    onChange(formattedDate);
-    onOpenChange(false);
-  };
-
-  return (
-    <Popover.Root open={isOpen} onOpenChange={onOpenChange}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <span className={value ? "text-gray-900" : "text-gray-500"}>
-            {value
-              ? format(new Date(value), "MMMM d, yyyy")
-              : t("Select a date")}
-          </span>
-          <Calendar className="h-5 w-5 text-gray-400" />
-        </button>
-      </Popover.Trigger>
-      <Popover.Content className="w-auto p-4 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-        <div className="space-y-4">
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
-                {t("Month")}
-              </label>
-              <select
-                value={currentDate.getMonth()}
-                onChange={handleMonthChange}
-                className="w-full p-2 border border-gray-300 rounded text-sm"
-              >
-                {months.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-600 mb-1 block">
-                {t("Year")}
-              </label>
-              <select
-                value={currentDate.getFullYear()}
-                onChange={handleYearChange}
-                className="w-full p-2 border border-gray-300 rounded text-sm"
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <DayPicker
-            mode="single"
-            month={currentDate}
-            onMonthChange={setCurrentDate}
-            selected={value ? new Date(value) : undefined}
-            onSelect={(date) => {
-              if (date) {
-                handleDateSelect(date);
-              }
-            }}
-          />
-        </div>
-      </Popover.Content>
-    </Popover.Root>
-  );
+function isMultiLangFormat(event) {
+  if (!event || typeof event !== "object") return false;
+  return event.id !== undefined && !event.title && !event.live_stream_link;
 }
 
-// مكون Time Picker محسّن مع Dropdowns للساعات والدقائق
-function TimePickerWithDropdowns({ value, onChange, error, t }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [hours, setHours] = useState(value ? parseInt(value.split(":")[0]) : 0);
-  const [minutes, setMinutes] = useState(
-    value ? parseInt(value.split(":")[1]) : 0,
-  );
+function normalizeToMultiLang(data) {
+  if (!data) return null;
+  if (isMultiLangFormat(data)) return data;
+  const lang = data.language;
+  if (!lang) return null;
+  return { id: data.id, [lang]: { ...data } };
+}
 
-  React.useEffect(() => {
-    if (value) {
-      const parts = value.split(":");
-      setHours(parseInt(parts[0]));
-      setMinutes(parseInt(parts[1]));
+function parseMultiLangData(data) {
+  if (!data) return [];
+  const entries = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "id") continue;
+    if (
+      value === null ||
+      typeof value !== "object" ||
+      Array.isArray(value) ||
+      !value.id ||
+      !value.title
+    )
+      continue;
+    entries.push({ langCode: key, langData: value });
+  }
+  // Base version (base_event == null) first
+  return entries.sort((a, b) => {
+    const aBase = a.langData.base_event == null;
+    const bBase = b.langData.base_event == null;
+    if (aBase && !bBase) return -1;
+    if (!aBase && bBase) return 1;
+    return 0;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MultiLangManager — shown after base creation or when editing
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MultiLangManager({ multiLangData }) {
+  const { t } = useTranslation();
+  const baseEventId = multiLangData?.id;
+
+  const [langList, setLangList] = useState(() =>
+    parseMultiLangData(multiLangData),
+  );
+  const [showAddNew, setShowAddNew] = useState(false);
+  const [closeSignal, setCloseSignal] = useState(0);
+
+  const usedLangCodes = langList.map((l) => l.langCode);
+
+  const handleAddLanguage = () => {
+    setCloseSignal((s) => s + 1);
+    setShowAddNew(true);
+  };
+
+  const handleSaved = (newData) => {
+    if (newData) {
+      const normalized = normalizeToMultiLang(newData);
+      if (normalized) {
+        setLangList((prev) => {
+          const fresh = parseMultiLangData(normalized);
+          const freshCodes = new Set(fresh.map((l) => l.langCode));
+          const kept = prev.filter((l) => !freshCodes.has(l.langCode));
+          return parseMultiLangData(
+            Object.assign(
+              { id: baseEventId },
+              ...kept.map((l) => ({ [l.langCode]: l.langData })),
+              ...fresh.map((l) => ({ [l.langCode]: l.langData })),
+            ),
+          );
+        });
+      }
+      setShowAddNew(false);
+      setCloseSignal((s) => s + 1);
     }
-  }, [value, isOpen]);
-
-  const hoursList = Array.from({ length: 24 }, (_, i) =>
-    String(i).padStart(2, "0"),
-  );
-  const minutesList = Array.from({ length: 60 }, (_, i) =>
-    String(i).padStart(2, "0"),
-  );
-
-  const handleHourChange = (e) => {
-    setHours(parseInt(e.target.value));
+    // null = PATCH was saved — no list refresh needed
   };
 
-  const handleMinuteChange = (e) => {
-    setMinutes(parseInt(e.target.value));
+  const handleDeleted = (langCode) => {
+    setLangList((prev) => prev.filter((l) => l.langCode !== langCode));
+    if (langCode === "new") setShowAddNew(false);
   };
-
-  const handleConfirm = () => {
-    const formattedTime = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-    onChange(formattedTime);
-    setIsOpen(false);
-  };
-
-  const handleSetNow = () => {
-    const now = new Date();
-    setHours(now.getHours());
-    setMinutes(now.getMinutes());
-  };
-
-  const displayTime = value || "00:00";
 
   return (
-    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger asChild>
+    <div className="space-y-3 mt-2">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-gray-800">
+          {t("Language Versions")}
+          <span className="ml-2 text-xs font-normal text-gray-400">
+            ({langList.length})
+          </span>
+        </h3>
+
         <button
           type="button"
-          className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            error ? "border-red-500" : "border-gray-300"
-          }`}
+          onClick={handleAddLanguage}
+          disabled={showAddNew}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm transition-colors"
         >
-          <span
-            className={value ? "text-gray-900 font-medium" : "text-gray-500"}
-          >
-            {displayTime}
-          </span>
-          <Clock className="h-5 w-5 text-gray-400" />
+          <Plus size={15} />
+          {t("Add Language")}
         </button>
-      </Popover.Trigger>
-      <Popover.Content className="w-auto p-6 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-        <div className="space-y-4 w-64">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-600 mb-2 block">
-                {t("Hours")}
-              </label>
-              <select
-                value={hours}
-                onChange={handleHourChange}
-                className="w-full p-3 border border-gray-300 rounded-lg text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {hoursList.map((hour) => (
-                  <option key={hour} value={parseInt(hour)}>
-                    {hour}
-                  </option>
-                ))}
-              </select>
-            </div>
+      </div>
 
-            <div className="flex items-end">
-              <span className="text-2xl font-bold text-gray-400">:</span>
-            </div>
+      {langList.map((lang, index) => (
+        <EventLanguageAccordion
+          key={lang.langData.id ?? lang.langCode}
+          langCode={lang.langCode}
+          langData={lang.langData}
+          baseEventId={baseEventId}
+          isBase={lang.langData.base_event == null}
+          onSaved={handleSaved}
+          onDeleted={handleDeleted}
+          defaultOpen={closeSignal === 0 && index === 0}
+          closeSignal={closeSignal}
+          usedLangCodes={usedLangCodes}
+        />
+      ))}
 
-            <div className="flex-1">
-              <label className="text-xs font-medium text-gray-600 mb-2 block">
-                {t("Minutes")}
-              </label>
-              <select
-                value={minutes}
-                onChange={handleMinuteChange}
-                className="w-full p-3 border border-gray-300 rounded-lg text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {minutesList.map((minute) => (
-                  <option key={minute} value={parseInt(minute)}>
-                    {minute}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 rounded-lg p-3 text-center">
-            <p className="text-xs text-gray-600 mb-1">{t("Selected Time")}</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {String(hours).padStart(2, "0")}:
-              {String(minutes).padStart(2, "0")}
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={handleSetNow}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {t("Now")}
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirm}
-              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              {t("Confirm")}
-            </button>
-          </div>
-        </div>
-      </Popover.Content>
-    </Popover.Root>
+      {showAddNew && (
+        <EventLanguageAccordion
+          key="new"
+          langCode="new"
+          langData={null}
+          baseEventId={baseEventId}
+          isBase={false}
+          onSaved={handleSaved}
+          onDeleted={handleDeleted}
+          defaultOpen={true}
+          usedLangCodes={usedLangCodes}
+        />
+      )}
+    </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// useBaseEventForm — local hook for Phase 1 base creation form
+// ─────────────────────────────────────────────────────────────────────────────
+
+const INITIAL_FORM = {
+  title: "",
+  language: "",
+  start_event_date: "",
+  start_event_time: "",
+  duration: "",
+  guest_speakers: [],
+  live_stream_link: "",
+};
+
+function useBaseEventForm(onCreated) {
+  const { t } = useTranslation();
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [guestSpeakerInput, setGuestSpeakerInput] = useState("");
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "duration" && !/^\d*$/.test(value)) return;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleGuestSpeakersInput = (e) => {
+    if (e.key === "Enter" && guestSpeakerInput.trim()) {
+      e.preventDefault();
+      const trimmed = guestSpeakerInput.trim();
+      if (!formData.guest_speakers.includes(trimmed)) {
+        setFormData((prev) => ({
+          ...prev,
+          guest_speakers: [...prev.guest_speakers, trimmed],
+        }));
+      }
+      setGuestSpeakerInput("");
+    }
+  };
+
+  const removeGuestSpeaker = (speaker) => {
+    setFormData((prev) => ({
+      ...prev,
+      guest_speakers: prev.guest_speakers.filter((s) => s !== speaker),
+    }));
+  };
+
+  const validate = () => {
+    const errs = {};
+    if (!formData.title?.trim()) errs.title = t("Title is required");
+    if (!formData.language) errs.language = t("Language is required");
+    if (!formData.start_event_date)
+      errs.start_event_date = t("Date is required");
+    return errs;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error(t("Please fix the errors in the form"));
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("title", formData.title);
+    fd.append("language", formData.language);
+    fd.append("start_event_date", formData.start_event_date);
+    if (formData.start_event_time)
+      fd.append("start_event_time", formData.start_event_time);
+    if (formData.duration) fd.append("duration", formData.duration);
+    fd.append("live_stream_link", formData.live_stream_link || "");
+    if (formData.guest_speakers?.length > 0) {
+      fd.append("guest_speakers", JSON.stringify(formData.guest_speakers));
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await CreateEvent(fd);
+      toast.success(t("Event created successfully"));
+      onCreated(res.data);
+    } catch (err) {
+      setErrorFn(err, t);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    formData,
+    errors,
+    isLoading,
+    guestSpeakerInput,
+    setGuestSpeakerInput,
+    handleInputChange,
+    handleGuestSpeakersInput,
+    removeGuestSpeaker,
+    handleSubmit,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main component
+// ─────────────────────────────────────────────────────────────────────────────
 
 const CreateOrEditLiveStreamSchedule = ({
   liveStream = null,
@@ -277,9 +275,14 @@ const CreateOrEditLiveStreamSchedule = ({
   const { t } = useTranslation();
   const [openDatePopover, setOpenDatePopover] = useState(false);
 
-  const handleSuccess = () => {
+  // Normalize incoming event data to multilang format
+  const [multiLangData, setMultiLangData] = useState(() =>
+    normalizeToMultiLang(liveStream),
+  );
+
+  const handleCreated = (data) => {
+    setMultiLangData(normalizeToMultiLang(data));
     if (setUpdate) setUpdate((prev) => !prev);
-    if (onClose) onClose();
   };
 
   const {
@@ -289,176 +292,196 @@ const CreateOrEditLiveStreamSchedule = ({
     guestSpeakerInput,
     setGuestSpeakerInput,
     handleInputChange,
-    handleSubmit,
     handleGuestSpeakersInput,
     removeGuestSpeaker,
-    resetForm,
-  } = useEventForm(liveStream, handleSuccess);
-
-  const handleCancel = () => {
-    resetForm();
-    if (onClose) onClose();
-  };
+    handleSubmit,
+  } = useBaseEventForm(handleCreated);
 
   return (
     <div className="bg-white rounded-lg p-3">
       {isLoading && <Loader />}
 
-      <form
-        onSubmit={handleSubmit}
-        className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4"
-      >
-        {/* Live Stream Title */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Live Stream Title")} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title || ""}
-            onChange={handleInputChange}
-            placeholder="Enter Live Stream title"
-            className={`w-full px-3 py-2 border ${errors.title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
-          {errors.title && (
-            <p className="text-red-600 text-sm">{errors.title}</p>
-          )}
-        </div>
+      {multiLangData ? (
+        /* ── Phase 2: Multi-language manager ─────────────────────────── */
+        <MultiLangManager multiLangData={multiLangData} />
+      ) : (
+        /* ── Phase 1: Base event creation form ───────────────────────── */
+        <form
+          onSubmit={handleSubmit}
+          className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          {/* Title */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Live Stream Title")} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder={t("Enter Live Stream title")}
+              className={`w-full px-3 py-2 border ${errors.title ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+            {errors.title && (
+              <p className="text-red-600 text-sm">{errors.title}</p>
+            )}
+          </div>
 
-        {/* Live Stream Date */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Live Stream Date")} <span className="text-red-500">*</span>
-          </label>
-          <DatePickerWithMonthYear
-            value={formData.start_event_date}
-            onChange={(formattedDate) => {
-              handleInputChange({
-                target: {
-                  name: "start_event_date",
-                  value: formattedDate,
-                },
-              });
-            }}
-            error={errors.start_event_date}
-            t={t}
-            isOpen={openDatePopover}
-            onOpenChange={setOpenDatePopover}
-          />
-          {errors.start_event_date && (
-            <p className="text-red-600 text-sm">{errors.start_event_date}</p>
-          )}
-        </div>
-
-        {/* Live Stream Start Time */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Live Stream Start Time")}{" "}
-            <span className="text-red-500">*</span>
-          </label>
-          <TimePickerWithDropdowns
-            value={formData.start_event_time}
-            onChange={(time) => {
-              handleInputChange({
-                target: {
-                  name: "start_event_time",
-                  value: time,
-                },
-              });
-            }}
-            error={errors.start_event_time}
-            t={t}
-          />
-          {errors.start_event_time && (
-            <p className="text-red-600 text-sm">{errors.start_event_time}</p>
-          )}
-        </div>
-
-        {/* Event Duration */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Event Duration (HOUR)")} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="duration"
-            value={formData.duration}
-            onChange={handleInputChange}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            className={`w-full px-3 py-2 border ${
-              errors.duration ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
-          {errors.duration && (
-            <p className="text-red-600 text-sm">{errors.duration}</p>
-          )}
-        </div>
-
-        {/* Guest Speakers */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Guest Speakers")}
-          </label>
-          <input
-            type="text"
-            value={guestSpeakerInput}
-            onChange={(e) => setGuestSpeakerInput(e.target.value)}
-            onKeyDown={handleGuestSpeakersInput}
-            placeholder="Enter guest speaker name and press Enter"
-            className={`w-full px-3 py-2 border ${errors.guest_speakers ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
-          {formData.guest_speakers && formData.guest_speakers.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.guest_speakers.map((speaker, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
-                >
-                  <span>{speaker}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeGuestSpeaker(speaker)}
-                    className="hover:text-blue-600"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
+          {/* Language */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Language")} <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="language"
+              value={formData.language}
+              onChange={handleInputChange}
+              className={`w-full px-3 py-2 border ${errors.language ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            >
+              <option value="" disabled hidden>
+                {t("Select Language")}
+              </option>
+              {allLanguages.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {t(l.label)}
+                </option>
               ))}
-            </div>
-          )}
-          {errors.guest_speakers && (
-            <p className="text-red-600 text-sm">{errors.guest_speakers}</p>
-          )}
-        </div>
+            </select>
+            {errors.language && (
+              <p className="text-red-600 text-sm">{errors.language}</p>
+            )}
+          </div>
 
-        {/* Live Stream Link */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {t("Live Stream Link")} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="url"
-            name="live_stream_link"
-            value={formData.live_stream_link}
-            onChange={handleInputChange}
-            placeholder="https://..."
-            className={`border ${errors.live_stream_link ? "border-red-500" : "border-gray-300"} w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          />
-          {errors.live_stream_link && (
-            <p className="text-red-600 text-sm">{errors.live_stream_link}</p>
-          )}
-        </div>
-      </form>
+          {/* Date */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Live Stream Date")} <span className="text-red-500">*</span>
+            </label>
+            <DatePickerWithMonthYear
+              value={formData.start_event_date}
+              onChange={(date) =>
+                handleInputChange({
+                  target: { name: "start_event_date", value: date },
+                })
+              }
+              error={errors.start_event_date}
+              t={t}
+              isOpen={openDatePopover}
+              onOpenChange={setOpenDatePopover}
+            />
+            {errors.start_event_date && (
+              <p className="text-red-600 text-sm">{errors.start_event_date}</p>
+            )}
+          </div>
 
-      {/* Form Actions */}
-      <FormActionsSection
-        isLoading={isLoading}
-        isEditing={Boolean(liveStream?.id)}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-      />
+          {/* Start Time */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Live Stream Start Time")}
+            </label>
+            <TimePickerWithDropdowns
+              value={formData.start_event_time}
+              onChange={(time) =>
+                handleInputChange({
+                  target: { name: "start_event_time", value: time },
+                })
+              }
+              error={errors.start_event_time}
+              t={t}
+            />
+          </div>
+
+          {/* Duration */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Event Duration (HOUR)")}
+            </label>
+            <input
+              type="text"
+              name="duration"
+              value={formData.duration}
+              onChange={handleInputChange}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className={`w-full px-3 py-2 border ${errors.duration ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+            {errors.duration && (
+              <p className="text-red-600 text-sm">{errors.duration}</p>
+            )}
+          </div>
+
+          {/* Live Stream Link */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Live Stream Link")}
+            </label>
+            <input
+              type="url"
+              name="live_stream_link"
+              value={formData.live_stream_link}
+              onChange={handleInputChange}
+              placeholder="https://..."
+              className={`w-full px-3 py-2 border ${errors.live_stream_link ? "border-red-500" : "border-gray-300"} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+            {errors.live_stream_link && (
+              <p className="text-red-600 text-sm">{errors.live_stream_link}</p>
+            )}
+          </div>
+
+          {/* Guest Speakers — full width */}
+          <div className="space-y-2 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("Guest Speakers")}
+            </label>
+            <input
+              type="text"
+              value={guestSpeakerInput}
+              onChange={(e) => setGuestSpeakerInput(e.target.value)}
+              onKeyDown={handleGuestSpeakersInput}
+              placeholder={t("Enter guest speaker name and press Enter")}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {formData.guest_speakers.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.guest_speakers.map((speaker, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                  >
+                    <span>{speaker}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeGuestSpeaker(speaker)}
+                      className="hover:text-blue-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Actions — full width */}
+          <div className="md:col-span-2 flex justify-end gap-3 pt-2 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => onClose && onClose()}
+              className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              {t("Cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            >
+              {isLoading ? t("Creating...") : t("Create Event")}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
