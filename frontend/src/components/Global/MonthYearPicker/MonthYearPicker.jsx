@@ -7,15 +7,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { GetEventMonths } from "@/api/events";
 
-const MonthYearPicker = ({ month, year, onChange, className }) => {
-  const { t } = useTranslation();
+const MonthYearPicker = ({ month, year, language, onChange, className }) => {
+  const { t, i18n } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewYear, setViewYear] = useState(year);
   const containerRef = useRef(null);
   const [activeMonths, setActiveMonths] = useState([]); // To store months with events
   const getActive = async () => {
     try {
-      const res = await GetEventMonths();
+      const res = await GetEventMonths(language);
       setActiveMonths(res.data);
     } catch (err) {
       console.error("Error fetching active months:", err);
@@ -23,7 +23,7 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
   };
   useEffect(() => {
     getActive();
-  }, []);
+  }, [language]);
   const monthNames = [
     "January",
     "February",
@@ -155,12 +155,8 @@ const MonthYearPicker = ({ month, year, onChange, className }) => {
         <div className="flex font-bold gap-[8px] items-center justify-center text-[#285688] text-xl uppercase w-[198px] truncate font-noto">
           <span className="flex items-center gap-2">
             {t(monthNames[month - 1])}
-           
           </span>
-          <span className="flex items-center gap-2">
-            {year}
-           
-          </span>
+          <span className="flex items-center gap-2">{year}</span>
         </div>
 
         <button

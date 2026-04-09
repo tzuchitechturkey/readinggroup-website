@@ -9,6 +9,7 @@ const LanguageFilter = ({
   openDropdowns,
   onToggleDropdown,
   onLanguageChange,
+  fromLiveStream = false,
 }) => {
   const { t } = useTranslation();
 
@@ -17,7 +18,7 @@ const LanguageFilter = ({
   return (
     <div
       onClick={() => onToggleDropdown("language")}
-      className={`min-w-[160px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4 ${
+      className={`min-w-[160px] ${fromLiveStream ? "min-h-[57px]" : " min-h-[43px]"} relative flex items-center justify-between cursor-pointer px-4 ${
         openDropdowns.language ? "rounded-t-[17px]" : "rounded-[17px]"
       } bg-white transition-colors`}
     >
@@ -48,9 +49,7 @@ const LanguageFilter = ({
                     onLanguageChange(langObj.code);
                   }}
                 >
-                  <div className="w-6 h-6">
-                    {isSelected && <Check />}
-                  </div>
+                  <div className="w-6 h-6">{isSelected && <Check />}</div>
                   <p className="font-normal text-base">{langObj.label}</p>
                 </div>
               );

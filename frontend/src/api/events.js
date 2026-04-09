@@ -73,8 +73,10 @@ export async function DeleteEventCategory(id) {
 }
 
 // /event-communities/event-months/
-export async function GetEventMonths() {
-  return await axios.get(`/event-communities/event-months/`);
+export async function GetEventMonths(language) {
+  return await axios.get(
+    `/event-communities/event-months/?language=${language}`,
+  );
 }
 
 // /event-community-images/
@@ -96,4 +98,3 @@ export async function DeleteEventImageByEventId(eventId, imageId) {
     `/event-communities/${eventId}/images/${imageId}/delete/`,
   );
 }
- 
