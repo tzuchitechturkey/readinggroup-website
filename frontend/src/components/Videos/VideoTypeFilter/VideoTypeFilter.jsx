@@ -38,7 +38,7 @@ const VideoTypeFilter = ({
 
       {/* Video Type Dropdown */}
       {openDropdowns.videoType && (
-        <div className="absolute top-full left-0 -mt-2  w-full bg-white  rounded-b-[17px] z-50 p-4">
+        <div className="absolute top-full left-0 -mt-2  w-full bg-white rounded-b-[17px] z-50 p-4">
           <hr className="bg-[#FCFDFF] rounded-2xl mb-3 " />
           <div className="flex flex-col gap-2.5">
             {/* All Option */}
