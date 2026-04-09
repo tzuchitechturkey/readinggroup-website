@@ -1948,5 +1948,11 @@
   "Image deleted successfully": "Image deleted successfully",
   "Language version added successfully": "Language version added successfully",
   "Language version updated successfully": "Language version updated successfully",
-  "Upload Images to Live Stream": "Upload Images to Live Stream"
+  "Upload Images to Live Stream": "Upload Images to Live Stream",
+  "No posters available": "No posters available",
+  "No Item available": "No Item available",
+  "No clips available": "No clips available",
+  "PHOTOS COLLECTIONS": "PHOTOS COLLECTIONS",
+  "No photos available": "No photos available",
+  "No cards available": "No cards available"
 }
