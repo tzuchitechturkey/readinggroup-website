@@ -895,13 +895,20 @@ class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet)
     def event_months(self, request):
         """
         GET /event-communities/event-months/
+        GET /event-communities/event-months/?language=en
         Returns months grouped by year.
+        When language is provided, only returns months that have events in that language.
         """
+        language = request.query_params.get("language")
+        qs = EventCommunity.objects.filter(start_event_date__isnull=False)
+
+        if language:
+            qs = qs.filter(language=language)
+        else:
+            qs = qs.filter(base_event__isnull=True)
+
         months = (
-            EventCommunity.objects.filter(
-                start_event_date__isnull=False, base_event__isnull=True
-            )
-            .annotate(month=TruncMonth("start_event_date"))
+            qs.annotate(month=TruncMonth("start_event_date"))
             .values_list("month", flat=True)
             .distinct()
             .order_by("month")
