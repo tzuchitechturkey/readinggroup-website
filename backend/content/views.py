@@ -1,6 +1,8 @@
+import json
 from collections import defaultdict
 
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, F, Max, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.functions import TruncMonth
@@ -76,7 +78,88 @@ from .serializers import (
 
 
 # ========================================== new viewsets start ============================================
-class ContentAttachmentViewSet(viewsets.ModelViewSet):
+class TrackUserMixin:
+    """Automatically sets created_by on create and updated_by on update."""
+
+    def _get_user(self):
+        request = self.request
+        return request.user if request.user.is_authenticated else None
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self._get_user())
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self._get_user())
+
+
+class HistoryMixin:
+    """Adds a GET /{id}/history/ action that returns full audit history."""
+
+    _HISTORY_EXCLUDE = frozenset(
+        [
+            "history_id",
+            "history_date",
+            "history_type",
+            "history_user",
+            "history_change_reason",
+            "history_object_repr",
+        ]
+    )
+
+    @action(detail=True, methods=["get"], url_path="history")
+    def history(self, request, pk=None):
+        instance = self.get_object()
+        records = list(instance.history.all())  # newest → oldest
+        data = []
+        for i, record in enumerate(records):
+            prev = records[i + 1] if i + 1 < len(records) else None
+            data.append(self._format_record(record, prev))
+        return Response(data)
+
+    def _format_record(self, record, prev=None):
+        type_map = {"+": "create", "~": "update", "-": "delete"}
+        user = record.history_user
+        entry = {
+            "history_id": record.history_id,
+            "history_date": record.history_date,
+            "action": type_map.get(record.history_type, record.history_type),
+            "performed_by": (user.display_name or user.username) if user else None,
+        }
+        if record.history_type == "+":
+            entry["data"] = self._all_fields(record)
+        elif record.history_type == "~":
+            if prev:
+                delta = record.diff_against(prev)
+                entry["changes"] = {
+                    c.field: {
+                        "old": self._safe(c.old),
+                        "new": self._safe(c.new),
+                    }
+                    for c in delta.changes
+                }
+            else:
+                entry["data"] = self._all_fields(record)
+        return entry
+
+    def _all_fields(self, record):
+        return {
+            f.name: self._safe(getattr(record, f.name))
+            for f in record._meta.fields
+            if f.name not in self._HISTORY_EXCLUDE and not f.name.startswith("history_")
+        }
+
+    @staticmethod
+    def _safe(value):
+        if value is None:
+            return None
+        try:
+            json.dumps(value, cls=DjangoJSONEncoder)
+            return value
+        except (TypeError, ValueError):
+            return str(value)
+
+
+class ContentAttachmentViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing ContentAttachment content."""
 
     queryset = ContentAttachment.objects.all()
@@ -97,13 +180,14 @@ class ContentAttachmentViewSet(viewsets.ModelViewSet):
             file_name=request.data.get("file_name", file.name),
             file_size=file.size,
             description=request.data.get("description", ""),
+            created_by=request.user if request.user.is_authenticated else None,
         )
 
         serializer = self.get_serializer(attachment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class VideoViewSet(viewsets.ModelViewSet):
+class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing Video content with multi-language support."""
 
     queryset = Video.objects.all()
@@ -180,7 +264,8 @@ class VideoViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = VideoSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
+        user = request.user if request.user.is_authenticated else None
+        instance = serializer.save(created_by=user)
         return Response(
             VideoMultiLangSerializer(instance, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
@@ -405,7 +490,7 @@ class VideoViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class VideoCategoryViewSet(viewsets.ModelViewSet):
+class VideoCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing VideoCategory content with multi-language support."""
 
     queryset = VideoCategory.objects.all()
@@ -454,7 +539,7 @@ class VideoCategoryViewSet(viewsets.ModelViewSet):
         return context
 
 
-class LearnViewSet(viewsets.ModelViewSet):
+class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing Learn content with multi-language support."""
 
     queryset = Learn.objects.all()
@@ -628,7 +713,7 @@ class LearnViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class LearnCategoryViewSet(viewsets.ModelViewSet):
+class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing LearnCategory content with multi-language support."""
 
     queryset = LearnCategory.objects.all()
@@ -721,7 +806,7 @@ class LearnCategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class EventCommunityViewSet(viewsets.ModelViewSet):
+class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing EventCommunity content with multi-language support."""
 
     queryset = EventCommunity.objects.all()
@@ -766,7 +851,8 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
+        user = request.user if request.user.is_authenticated else None
+        instance = serializer.save(created_by=user)
         return Response(
             EventCommunityMultiLangSerializer(
                 instance, context={"request": request}
@@ -901,7 +987,7 @@ class EventCommunityViewSet(viewsets.ModelViewSet):
         return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
 
 
-class EventCommunityImageViewSet(viewsets.ModelViewSet):
+class EventCommunityImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual images in an event community item."""
 
     queryset = EventCommunityImage.objects.all()
@@ -913,7 +999,9 @@ class EventCommunityImageViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
-class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
+class RelatedReportsCategoryViewSet(
+    TrackUserMixin, HistoryMixin, viewsets.ModelViewSet
+):
     """ViewSet for managing RelatedReportsCategory content with multi-language support."""
 
     queryset = RelatedReportsCategory.objects.all()
@@ -967,7 +1055,7 @@ class RelatedReportsCategoryViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class RelatedReportsViewSet(viewsets.ModelViewSet):
+class RelatedReportsViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing RelatedReports content with multi-language support."""
 
     queryset = RelatedReports.objects.all()
@@ -1086,7 +1174,7 @@ class RelatedReportsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PhotoCollectionViewSet(viewsets.ModelViewSet):
+class PhotoCollectionViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing photo collections."""
 
     queryset = PhotoCollection.objects.all()
@@ -1103,12 +1191,10 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         PhotoCollection.objects.update(is_new=False)
-        serializer.save(is_new=True)
+        serializer.save(is_new=True, created_by=self._get_user())
 
     def perform_update(self, serializer):
-        # Preserve is_new status or update if needed
-        instance = serializer.instance
-        serializer.save()
+        serializer.save(updated_by=self._get_user())
 
     @swagger_auto_schema(
         operation_summary="Create photos in collection",
@@ -1191,7 +1277,7 @@ class PhotoCollectionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class PhotoViewSet(viewsets.ModelViewSet):
+class PhotoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual photos."""
 
     queryset = Photo.objects.all()
@@ -1202,7 +1288,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class LatestNewsImageViewSet(viewsets.ModelViewSet):
+class LatestNewsImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual images in latest news."""
 
     queryset = LatestNewsImage.objects.all()
@@ -1213,7 +1299,7 @@ class LatestNewsImageViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class LatestNewsViewSet(viewsets.ModelViewSet):
+class LatestNewsViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing latest news items."""
 
     queryset = LatestNews.objects.all()
@@ -1230,12 +1316,10 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
     )
     def perform_create(self, serializer):
         LatestNews.objects.update(is_new=False)
-        serializer.save(is_new=True)
+        serializer.save(is_new=True, created_by=self._get_user())
 
     def perform_update(self, serializer):
-        # Preserve is_new status or update if needed
-        instance = serializer.instance
-        serializer.save()
+        serializer.save(updated_by=self._get_user())
 
     @action(detail=True, methods=["post"], url_path="images")
     def create_images(self, request, pk=None):
@@ -1348,7 +1432,7 @@ class LatestNewsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class OurTeamViewSet(viewsets.ModelViewSet):
+class OurTeamViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = OurTeam.objects.all().order_by("-is_heart", "-created_at")
     serializer_class = OurTeamSerializer
     pagination_class = LimitOffsetPagination
@@ -1395,7 +1479,7 @@ class OurTeamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class OurTeamImageViewSet(viewsets.ModelViewSet):
+class OurTeamImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual images in OurTeam."""
 
     queryset = OurTeamImage.objects.all()
@@ -1406,7 +1490,7 @@ class OurTeamImageViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
 
 
-class BookViewSet(viewsets.ModelViewSet):
+class BookViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing books and their review files."""
 
     queryset = Book.objects.all()
@@ -1463,7 +1547,7 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BookReviewViewSet(viewsets.ModelViewSet):
+class BookReviewViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing individual review files in books."""
 
     queryset = BookReview.objects.all()
@@ -1475,7 +1559,7 @@ class BookReviewViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 
-class HistoryEventViewSet(viewsets.ModelViewSet):
+class HistoryEventViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = HistoryEvent.objects.all().order_by("year", "month")
     serializer_class = HistoryEventSerializer
     pagination_class = None
@@ -1556,7 +1640,7 @@ class HistoryEventViewSet(viewsets.ModelViewSet):
         return Response(response)
 
 
-class HistoryEventImageViewSet(viewsets.ModelViewSet):
+class HistoryEventImageViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     queryset = HistoryEventImage.objects.all()
     serializer_class = HistoryEventImageSerializer
     pagination_class = LimitOffsetPagination
@@ -1567,14 +1651,14 @@ class HistoryEventImageViewSet(viewsets.ModelViewSet):
 
 
 # ========================================== new viewset end============================================
-class NavbarLogoViewSet(viewsets.ModelViewSet):
+class NavbarLogoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for retrieving the NavbarLogo."""
 
     queryset = NavbarLogo.objects.all()
     serializer_class = NavbarLogoSerializer
 
 
-class SocialMediaViewSet(viewsets.ModelViewSet):
+class SocialMediaViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for retrieving SocialMedia links."""
 
     queryset = SocialMedia.objects.all()
