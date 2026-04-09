@@ -63,7 +63,7 @@ const PhotoCollections = ({ t, data }) => {
     <div className="flex flex-col gap-[16px] sm:gap-[20px] md:gap-[24px] lg:gap-[24px] items-start px-4 sm:px-6 md:px-8 lg:px-0 w-full lg:w-[1200px] mx-auto pb-12 sm:pb-16 md:pb-20 lg:pb-24">
       {/* Section Header */}
       <SectionHeader
-        title={t("PHOTOS FROM LATEST LIVESTREAM")}
+        title={t("PHOTOS COLLECTIONS")}
         actionText={t("More Collections")}
         onActionClick={handleMoreCollectionsClick}
       />
@@ -83,7 +83,10 @@ const PhotoCollections = ({ t, data }) => {
             >
               <CarouselContent className="-ml-4 md:-ml-5">
                 {data.map((photo) => (
-                  <CarouselItem key={photo.id} className="pl-4 md:pl-5 basis-1/2">
+                  <CarouselItem
+                    key={photo.id}
+                    className="pl-4 md:pl-5 basis-1/2"
+                  >
                     <CollectionCard
                       photo={photo}
                       isNew={photo.isNew}
