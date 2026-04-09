@@ -1,4 +1,7 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
+from .audit_views import SectionAuditHistoryView, UserAuditHistoryView
 from .views import (
     RelatedReportsCategoryViewSet,
     EventCommunityImageViewSet,
@@ -66,4 +69,13 @@ router.register(
     basename="event-community-image",
 )
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path(
+        "audit/users/<int:user_id>/", UserAuditHistoryView.as_view(), name="audit-user"
+    ),
+    path(
+        "audit/sections/<str:section>/",
+        SectionAuditHistoryView.as_view(),
+        name="audit-section",
+    ),
+]
