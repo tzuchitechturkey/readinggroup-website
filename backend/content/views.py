@@ -195,6 +195,8 @@ class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     search_fields = (
         "title",
         "guest_speakers",
+        "translations__title",
+        "translations__guest_speakers",
     )
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
