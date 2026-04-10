@@ -15,6 +15,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    country: "",
     is_heart: false,
   });
   const [errors, setErrors] = useState({});
@@ -25,12 +26,14 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         setFormData({
           title: member.title,
           description: member.description,
+          country: member.country || "",
           is_heart: member.is_heart,
         });
       } else {
         setFormData({
           title: "",
           description: "",
+          country: "",
           is_heart: false,
         });
       }
@@ -104,6 +107,9 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     submitData.append("title", formData.title);
     submitData.append("is_heart", formData.is_heart);
     submitData.append("description", formData.description);
+    if (formData.country) {
+      submitData.append("country", formData.country);
+    }
 
     try {
       member?.id
@@ -148,6 +154,22 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
             <p className="text-red-500 text-xs mt-1">{errors.title}</p>
           )}
         </div>
+
+        {/* Start Country */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Country")}
+          </label>
+          <input
+            type="text"
+            name="country"
+            placeholder={t("Enter country")}
+            value={formData.country}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+          />
+        </div>
+        {/* End Country */}
 
         {/* Start Description */}
         <DescriptionSection

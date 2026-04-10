@@ -22,7 +22,9 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     const userType = localStorage.getItem("userType");
     const sectionName = localStorage.getItem("sectionName");
     const catId = localStorage.getItem("categoryName");
-    return userType === "editor" && sectionName === "learn" && catId ? catId : null;
+    return userType === "editor" && sectionName === "learn" && catId
+      ? catId
+      : null;
   })();
   const isRestrictedCategory = Boolean(restrictedCategoryId);
 
@@ -39,6 +41,7 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
     live_stream_link: "",
     author_name: "",
     author_country: "",
+    event_date: "",
   });
   const [initialFormData, setInitialFormData] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -222,32 +225,17 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
       learnData.append("direction", formData.direction);
     }
 
-    // Add event-related fields for posters
-    if (formData.learn_type === "posters" && formData.is_event) {
-      learnData.append("is_event", true);
-      if (formData.start_event_date) {
-        learnData.append("start_event_date", formData.start_event_date);
-      }
-      if (formData.start_event_time) {
-        learnData.append("start_event_time", formData.start_event_time);
-      }
-      if (formData.duration) {
-        learnData.append("duration", formData.duration);
-      }
-      learnData.append("event_title", formData.event_title);
-      learnData.append(
-        "guest_speakers",
-        JSON.stringify(formData.guest_speakers),
-      );
-      learnData.append("live_stream_link", formData.live_stream_link);
-    }
-
     // Add optional fields
     if (formData.author_name) {
       learnData.append("author_name", formData.author_name);
     }
     if (formData.author_country) {
       learnData.append("author_country", formData.author_country);
+    }
+
+    // Add event_date for posters only
+    if (formData.event_date) {
+      learnData.append("event_date", formData.event_date);
     }
 
     learnData.append("updated_at", new Date().toISOString());
@@ -296,6 +284,7 @@ export const useCreateOrEditLearn = (learn, onSectionChange) => {
         live_stream_link: learn.live_stream_link || "",
         author_name: learn.author_name || "",
         author_country: learn.author_country || "",
+        event_date: learn.event_date || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);

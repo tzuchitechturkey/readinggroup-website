@@ -58,7 +58,7 @@ function VideoCategoriesTable({
 
   // Handle Save Order
   const handleSaveOrder = async (sortData) => {
-    await SortVideoCategories({ categories: sortData });
+    await SortVideoCategories(sortData);
   };
 
   // Define table columns

@@ -325,6 +325,14 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
       );
       formDataToSend.append("happened_at", formattedDate);
     }
+
+    if (formData?.event_date) {
+      const formattedEventDate = format(
+        new Date(formData.event_date),
+        "yyyy-MM-dd'T'HH:mm:ss",
+      );
+      formDataToSend.append("event_date", formattedEventDate);
+    }
     // Add attachments IDs
     if (formData.attachments && formData.attachments.length > 0) {
       formData.attachments.forEach((att) => {
@@ -383,6 +391,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
         reference_code: video?.reference_code || "",
         video_url: video?.video_url || "",
         happened_at: video?.happened_at || "",
+        event_date: video?.event_date || "",
         description: video?.description || "",
         status: video?.status || "",
         duration: video?.duration || "",

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { toast } from "react-toastify";
 import { Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 
 import DraggableTable from "@/components/ForPages/Dashboard/DraggableTable/DraggableTable";
-import { EditLearnCategoryById } from "@/api/learn";
+import { EditLearnCategoryById, sortCategories } from "@/api/learn";
 
 function LearnCategoriesTable({
   t,
@@ -23,7 +23,16 @@ function LearnCategoriesTable({
   setShowDeleteModal,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [localData, setLocalData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
+  const [hasChanges, setHasChanges] = useState(false);
   const limit = 10;
+
+  useEffect(() => {
+    setLocalData(JSON.parse(JSON.stringify(categories)));
+    setOriginalData(JSON.parse(JSON.stringify(categories)));
+    setHasChanges(false);
+  }, [categories]);
 
   const openEditModal = (cat) => {
     const currentLanguage = i18n?.language || "en";
@@ -143,18 +152,28 @@ function LearnCategoriesTable({
     },
   ];
 
+  const handleSaveOrder = async (sortData) => {
+    await sortCategories(sortData);
+  };
+
   return (
     <DraggableTable
       t={t}
       i18n={i18n}
-      data={categories}
+      data={localData}
+      setData={setLocalData}
+      originalData={originalData}
+      setOriginalData={setOriginalData}
+      hasChanges={hasChanges}
+      setHasChanges={setHasChanges}
+      onSaveOrder={handleSaveOrder}
       columns={columns}
       actions={actions}
       totalRecords={totalRecords}
       currentPage={currentPage}
       onPageChange={handlePageChange}
       limit={limit}
-      isDraggable={false}
+      isDraggable={true}
     />
   );
 }

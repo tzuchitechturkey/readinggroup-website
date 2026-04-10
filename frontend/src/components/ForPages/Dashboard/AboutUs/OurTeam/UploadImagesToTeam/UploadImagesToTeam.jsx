@@ -11,7 +11,6 @@ import ImageSection from "@/components/ForPages/Dashboard/Events/PhotoCollection
 
 const UploadImagesToTeam = ({ onSectionChange, team }) => {
   const { t } = useTranslation();
-
   // Images state
   const [images, setImages] = useState([]);
   const [newImages, setNewImages] = useState([]);

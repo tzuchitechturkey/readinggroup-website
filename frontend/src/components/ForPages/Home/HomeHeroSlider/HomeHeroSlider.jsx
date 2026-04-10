@@ -100,8 +100,8 @@ export default function HomeHeroSlider({ t, fullLiveStream }) {
               <div className="mb-5 flex items-center  gap-1 text-[#FCFDFF] opacity-80">
                 <p className=""> {t("Full Livestream")} </p>|
                 <span>
-                  {fullLiveStream?.happened_at
-                    ? formatDate(fullLiveStream?.happened_at)
+                  {fullLiveStream?.event_date
+                    ? formatDate(fullLiveStream?.event_data)
                     : ""}
                 </span>
               </div>

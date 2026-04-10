@@ -21,6 +21,7 @@ import TableButtons from "@/components/Global/TableButtons/TableButtons";
 
 import CreateOrEditMember from "./CreateOrEditMember";
 import CustomBreadcrumb from "@/components/ForPages/Dashboard/CustomBreadcrumb/CustomBreadcrumb";
+import { LuEye } from "react-icons/lu";
 
 function OurTeamList({ onSectionChange }) {
   const { t, i18n } = useTranslation();
@@ -204,12 +205,15 @@ function OurTeamList({ onSectionChange }) {
               <Table>
                 <TableHeader className="bg-[#FAFAFA] h-14">
                   <TableRow className="border-b">
-                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs px-3">
+                    <TableHead className="text-[#5B6B79] font-medium text-xs w-60 px-3">
                       {t("Title")}
                     </TableHead>
 
-                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                    <TableHead className="text-[#5B6B79]  font-medium text-xs">
                       {t("Image")}
+                    </TableHead>
+                    <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
+                      {t("Country")}
                     </TableHead>
                     <TableHead className="text-[#5B6B79] text-center font-medium text-xs">
                       {t("Description")}
@@ -230,15 +234,15 @@ function OurTeamList({ onSectionChange }) {
                       className="hover:bg-gray-50/60 border-b"
                     >
                       {/* Start Title */}
-                      <TableCell className="py-4">
-                        <span className="block w-fit  px-2 py-1 text-xs  mx-auto text-center font-semibold rounded-full bg-blue-100 text-blue-800">
+                      <TableCell className="py-4 w-fit">
+                        <span className=" w-fit  px-2 py-1 text-xs  mx-auto font-semibold rounded-full bg-blue-100 text-blue-800">
                           {member?.title}
                         </span>
                       </TableCell>
                       {/* End Title */}
                       {/* Start Image */}
                       <TableCell className="text-[#1E1E1E] font-bold text-[11px] py-4 px-4">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center  gap-2">
                           <img
                             src={member.images[0]?.image}
                             alt={member.title}
@@ -252,14 +256,19 @@ function OurTeamList({ onSectionChange }) {
                         </div>
                       </TableCell>
                       {/* End Image */}
+                      {/* Start Country */}
+                      <TableCell className="text-[#1E1E1E] text-[11px] py-4 text-center">
+                        {member.country}
+                      </TableCell>
+                      {/* End Country */}
                       {/* Start Description */}
-                      <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-xs">
+                      <TableCell className="text-[#1E1E1E] text-[11px] py-4 max-w-xs text-center">
                         <p
-                          className="text-sm text-center text-gray-900 line-clamp-2"
+                          className="text-sm text-center text-gray-900 max-w-40 line-clamp-2 text-center mx-auto flex-wrap"
                           dangerouslySetInnerHTML={{
                             __html:
-                              member.description.length > 120
-                                ? member.description.substring(0, 120) + "..."
+                              member.description.length > 80
+                                ? member.description.substring(0, 80) + "..."
                                 : member.description,
                           }}
                         />
@@ -273,6 +282,15 @@ function OurTeamList({ onSectionChange }) {
                       {/* Start Actions */}
                       <TableCell className="py-4">
                         <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
+                          <button
+                            onClick={() => {
+                              onSectionChange("createOrEditTeam", member);
+                            }}
+                            className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 rounded"
+                            title={t("View Images")}
+                          >
+                            <LuEye className="h-4 w-4" />
+                          </button>
                           <button
                             onClick={() => {
                               setSelectedMember(member);
