@@ -8,16 +8,15 @@ const NewsDetailsPageContent = lazy(
 );
 
 // Lazy load all page components
-const BooksContent = lazy(() => import("@/pages/AboutUs/Books/BooksContent"));
 
 const Dashboard = lazy(() => import("@/pages/Dashboard/DashboardContent"));
 const Login = lazy(() => import("@/pages/Auth/Login/LoginContent"));
 const Register = lazy(() => import("@/pages/Auth/Register/RegisterContent"));
 const Home = lazy(() => import("@/pages/Home/HomeContent"));
 const AboutUs = lazy(() => import("@/pages/AboutUs/AboutUsContent"));
-const AboutMemberContent = lazy(
-  () => import("@/pages/AboutUs/Member/MemberContent"),
-);
+// const AboutMemberContent = lazy(
+//   () => import("@/pages/AboutUs/Member/MemberContent"),
+// );
 const VideosPageContent = lazy(
   () => import("@/pages/Videos/VideosPage/VideosPageContent"),
 );
@@ -57,8 +56,7 @@ export const userRoutes = [
   { path: "/about/team", element: <AboutUs activeTab="our_team" /> },
   { path: "/about/functions", element: <AboutUs activeTab="functions" /> },
   { path: "/about/book", element: <AboutUs activeTab="book" /> },
-  { path: "/about/team/:id", element: <AboutMemberContent /> },
-  { path: "/about/books", element: <BooksContent /> },
+  // { path: "/about/team/:id", element: <AboutMemberContent /> },
   // Videos Routes
   { path: "/videos", element: <VideosPageContent /> },
   { path: "/videos/:id", element: <VideoPage /> },

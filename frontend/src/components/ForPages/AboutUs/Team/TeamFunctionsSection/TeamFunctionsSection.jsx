@@ -77,9 +77,12 @@ const TeamFunctionsSection = ({ data }) => {
             <h3 className="text-2xl sm:text-3xl lg:text-[36px] font-extrabold text-[#112344] mb-4 leading-tight">
               {team?.title}
             </h3>
-            <p className="text-[#4a6288] leading-relaxed text-sm lg:text-base font-medium">
-              {team?.description}
-            </p>
+            <p
+              className="text-[#4a6288] leading-relaxed text-sm lg:text-base font-medium"
+              dangerouslySetInnerHTML={{
+                __html: team?.description,
+              }}
+            />
           </div>
         </div>
       ))}
