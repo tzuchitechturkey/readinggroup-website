@@ -1944,5 +1944,12 @@
   "Image uploaded successfully": "Resim başarıyla yüklendi",
   "Image deleted successfully": "Resim başarıyla silindi",
   "Language version added successfully": "Dil versiyonu başarıyla eklendi",
-  "Language version updated successfully": "Dil versiyonu başarıyla güncellendi"
+  "Language version updated successfully": "Dil versiyonu başarıyla güncellendi",
+  "Upload Images to Live Stream": "Canlı Yayına Resim Yükle",
+  "No posters available": "Kullanılabilir afiş yok",
+  "No Item available": "Kullanılabilir öğe yok",
+  "No clips available": "Kullanılabilir klip yok",
+  "PHOTOS COLLECTIONS": "Fotoğraf Koleksiyonları",
+  "No photos available": "Kullanılabilir fotoğraf yok",
+  "No cards available": "Kullanılabilir kart yok"
 }

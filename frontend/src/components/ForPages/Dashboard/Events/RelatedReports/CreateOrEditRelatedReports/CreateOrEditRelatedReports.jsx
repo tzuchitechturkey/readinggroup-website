@@ -9,6 +9,7 @@ import BasicDetailsSection from "./BasicDetailsSection";
 import FormActionsSection from "./FormActionsSection";
 
 function CreateOrEditRelatedReports({ onSectionChange, report = null }) {
+  console.log("CreateOrEditRelatedReports rendered with report:", report);
   const {
     // Form state
     formData,
@@ -32,7 +33,7 @@ function CreateOrEditRelatedReports({ onSectionChange, report = null }) {
     getCategories,
     t,
   } = useCreateOrEditRelatedReports(report, onSectionChange);
-  
+
   // Handler for category search clear
   const handleCategoryClearSearch = () => {
     setCategorySearchValue("");

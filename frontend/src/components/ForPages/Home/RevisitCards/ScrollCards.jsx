@@ -49,7 +49,14 @@ export default function ScrollCards({ items, t, direction }) {
       api.off("select", updateCurrent);
     };
   }, [api]);
-  console.log(items, "Items passed to ScrollCards");
+  if (!items || items.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-[200px] rounded-xl border border-dashed border-white/40 bg-white/10">
+        <p className="text-white/60 text-sm">{t("No cards available")}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="group relative px-5">

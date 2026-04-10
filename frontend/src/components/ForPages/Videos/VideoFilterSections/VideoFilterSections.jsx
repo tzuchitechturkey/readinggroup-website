@@ -222,7 +222,7 @@ function VideoFilterSections({ mixVideos, likedVideos }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-1">
                   {filteredData?.results?.map((video) => (
-                    <VideoCard key={video.id} item={video} />
+                    <VideoCard key={video.id} item={video} t={t} />
                   ))}
                 </div>
 

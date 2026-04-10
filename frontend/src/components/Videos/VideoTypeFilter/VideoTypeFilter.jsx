@@ -10,11 +10,11 @@ const VideoTypeFilter = ({
   onVideoTypeChange,
 }) => {
   const { t } = useTranslation();
-
+  console.log(filters.videoType);
   return (
     <div
       onClick={() => onToggleDropdown("videoType")}
-      className={`min-w-[200px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4  ${openDropdowns.videoType ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
+      className={`min-w-[220px] min-h-[43px] relative flex items-center justify-between cursor-pointer px-4  ${openDropdowns.videoType ? "rounded-t-[17px]" : "rounded-[17px]"}  bg-white transition-colors`}
     >
       <div className="flex-1  flex items-center gap-2">
         <p className="text-lg font-bold text-[#081945] leading-tight">
@@ -38,7 +38,7 @@ const VideoTypeFilter = ({
 
       {/* Video Type Dropdown */}
       {openDropdowns.videoType && (
-        <div className="absolute top-full left-0 -mt-2  w-full bg-white  rounded-b-[17px] z-50 p-4">
+        <div className="absolute top-full left-0 -mt-2  w-full bg-white rounded-b-[17px] z-50 p-4">
           <hr className="bg-[#FCFDFF] rounded-2xl mb-3 " />
           <div className="flex flex-col gap-2.5">
             {/* All Option */}

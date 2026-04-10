@@ -10,12 +10,13 @@ const VideoCard = ({
   fromHomePage = false,
   reportCard = false,
   heroReportCard = false,
+  t,
 }) => {
   const getSizeClasses = () => {
     switch (size) {
       case "large":
         return {
-          image: `h-[200px]  md:h-[300px]  lg:h-[450px]   w-full  md:w-[90%]  lg:w-full`,
+          image: `h-[200px]  md:h-[300px] ${reportCard ? " lg:h-[390px]" : " lg:h-[450px]"}    w-full  md:w-[90%]  lg:w-full`,
           titleHeight: "h-[30px] md:h-[34px] lg:h-[35px]",
           categoryText: "text-[14px]  md:text-base lg:text-xl",
           durationText: "text-[13px] md:text-[15px] lg:text-lg",
@@ -99,11 +100,13 @@ const VideoCard = ({
         <p
           className={`font-['Noto_Sans_TC:Regular',sans-serif] font-bold   ${categoryText} text-[#081945]  `}
         >
-          {reportCard
-            ? item?.category?.title?.charAt(0).toUpperCase() +
-              item?.category?.title?.slice(1)
-            : item?.category?.name?.charAt(0).toUpperCase() +
-              item?.category?.name?.slice(1)}
+          {item?.category
+            ? reportCard
+              ? item?.category?.title?.charAt(0).toUpperCase() +
+                item?.category?.title?.slice(1)
+              : item?.category?.name?.charAt(0).toUpperCase() +
+                item?.category?.name?.slice(1)
+            : t("Full Video")}
         </p>
         {textClassName && <span className="">|</span>}
         <p

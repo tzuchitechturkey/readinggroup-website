@@ -1952,5 +1952,12 @@
   "Image uploaded successfully": "画像が正常にアップロードされました",
   "Image deleted successfully": "画像が正常に削除されました",
   "Language version added successfully": "言語バージョンが正常に追加されました",
-  "Language version updated successfully": "言語バージョンが正常に更新されました"
+  "Language version updated successfully": "言語バージョンが正常に更新されました",
+  "Upload Images to Live Stream": "ライブストリームに画像をアップロード",
+  "No posters available": "利用可能なポスターはありません",
+  "No Item available": "利用可能なアイテムはありません",
+  "No clips available": "利用可能なクリップはありません",
+  "PHOTOS COLLECTIONS": "写真コレクション",
+  "No photos available": "利用可能な写真はありません",
+  "No cards available": "利用可能なカードはありません"
 }

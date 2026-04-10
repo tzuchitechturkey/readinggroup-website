@@ -196,6 +196,7 @@ const RelatedReportsPageContent = () => {
                     rounded={true}
                     reportCard={true}
                     showDate={true}
+                    t={t}
                   />
                 </>
               ))}

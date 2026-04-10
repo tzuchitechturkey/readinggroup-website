@@ -15,6 +15,7 @@ from content.models import (
     BookReview,
     ContentAttachment,
     EventCommunity,
+    EventCommunityImage,
     HistoryEvent,
     HistoryEventImage,
     LatestNews,
@@ -82,7 +83,7 @@ class SampleContentBuilder:
         latest_news = self._ensure_latest_news()
         self._record("latest_news", len(latest_news))
 
-        event_communities = self._ensure_event_communities(learns)
+        event_communities = self._ensure_event_communities()
         self._record("event_communities", len(event_communities))
 
         our_teams = self._ensure_our_teams()
@@ -114,6 +115,7 @@ class SampleContentBuilder:
         Book.objects.all().delete()
         OurTeamImage.objects.all().delete()
         OurTeam.objects.all().delete()
+        EventCommunityImage.objects.all().delete()
         EventCommunity.objects.all().delete()
         LatestNewsImage.objects.all().delete()
         LatestNews.objects.all().delete()
@@ -317,7 +319,6 @@ class SampleContentBuilder:
                 "image_url": "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
                 "days_ago": 10,
                 "views": 420,
-                "is_event": False,
             },
             {
                 "title": "Healing through Stories",
@@ -326,7 +327,6 @@ class SampleContentBuilder:
                 "image_url": "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c",
                 "days_ago": 25,
                 "views": 310,
-                "is_event": False,
             },
             {
                 "title": "Community Mission 2025",
@@ -335,7 +335,6 @@ class SampleContentBuilder:
                 "image_url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
                 "days_ago": 5,
                 "views": 680,
-                "is_event": True,
             },
             {
                 "title": "Youth Volunteer Kickoff",
@@ -344,7 +343,6 @@ class SampleContentBuilder:
                 "image_url": "https://images.unsplash.com/photo-1448932223592-d1fc686e76ea",
                 "days_ago": 14,
                 "views": 195,
-                "is_event": False,
             },
         ]
         objects: List[Learn] = []
@@ -356,7 +354,6 @@ class SampleContentBuilder:
                 "image_url": data["image_url"],
                 "happened_at": self.now - timedelta(days=data["days_ago"]),
                 "views": data["views"],
-                "is_event": data["is_event"],
             }
             learn, created = Learn.objects.get_or_create(
                 title=data["title"], defaults=defaults
@@ -534,36 +531,33 @@ class SampleContentBuilder:
             objects.append(news)
         return objects
 
-    def _ensure_event_communities(self, learns: List[Learn]) -> List[EventCommunity]:
-        # Pick learns that belong to POSTERS categories for event linking
-        poster_learns = [l for l in learns if l.category and l.category.learn_type == LearnType.POSTERS]
+    def _ensure_event_communities(self) -> List[EventCommunity]:
         event_data = [
             {
                 "title": "Spring Compassion Summit",
+                "language": "English",
                 "guest_speakers": ["Sister Hui", "Brother Yong"],
                 "live_stream_link": "https://youtube.com/live/readinggroup-spring",
                 "start_event_date": (self.now + timedelta(days=14)).date(),
                 "start_event_time": "09:00",
                 "duration": "03:00",
-                "learn_index": 0,
             },
             {
                 "title": "Youth Volunteer Orientation",
+                "language": "Mandarin",
                 "guest_speakers": ["Dr. Mei Lin"],
                 "live_stream_link": None,
                 "start_event_date": (self.now + timedelta(days=30)).date(),
                 "start_event_time": "14:00",
                 "duration": "01:30",
-                "learn_index": 0,
             },
         ]
         objects: List[EventCommunity] = []
         for data in event_data:
-            learn = poster_learns[data["learn_index"]] if poster_learns else None
             defaults = {
+                "language": data["language"],
                 "guest_speakers": data["guest_speakers"],
                 "live_stream_link": data["live_stream_link"],
-                "learn": learn,
                 "start_event_date": data["start_event_date"],
                 "start_event_time": data["start_event_time"],
                 "duration": data["duration"],
