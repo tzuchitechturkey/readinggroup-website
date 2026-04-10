@@ -379,12 +379,12 @@ function CreateOrEditVideo({ onSectionChange, video = null }) {
         t={t}
         handleClosePreview={handleClosePreview}
       />
-      {/* <AttachmentsModal
+      <AttachmentsModal
         isOpen={showAttachmentsModal}
         onClose={() => setShowAttachmentsModal(false)}
         selectedAttachments={formData.attachments}
         onConfirm={handleConfirmAttachments}
-      /> */}
+      />
     </div>
   );
 }

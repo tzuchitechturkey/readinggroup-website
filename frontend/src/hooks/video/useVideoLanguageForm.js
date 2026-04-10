@@ -32,6 +32,7 @@ const EMPTY_FORM = {
   thumbnail_url: "",
   video_url: "",
   happened_at: "",
+  event_date: "",
   description: "",
   guest_speakers: [],
   status: "",
@@ -57,6 +58,7 @@ function buildInitialFormData(data, baseVideoData = null) {
     thumbnail_url: data.thumbnail_url ? JSON.stringify(data.thumbnail_url) : "",
     video_url: data.video_url || "",
     happened_at: data.happened_at || "",
+    event_date: data.event_date || "",
     description: data.description || "",
     guest_speakers: data.guest_speakers || [],
     status: data.status || "",
@@ -286,6 +288,13 @@ export const useVideoLanguageForm = (
         "yyyy-MM-dd'T'HH:mm:ss",
       );
       fd.append("happened_at", formatted);
+    }
+    if (formData.event_date) {
+      const formattedEventDate = format(
+        new Date(formData.event_date),
+        "yyyy-MM-dd",
+      );
+      fd.append("event_date", formattedEventDate);
     }
     if (formData.attachments?.length > 0) {
       formData.attachments.forEach((att) => fd.append("attachments", att.id));
