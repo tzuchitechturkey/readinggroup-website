@@ -544,6 +544,35 @@ class VideoCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
         )
         return context
 
+    @swagger_auto_schema(
+        operation_summary="Reorder video categories",
+        operation_description=(
+            "Bulk-update the `order` field for video categories. "
+            "Send a list of objects with `id` and `order` fields. "
+            "Example: `[{\"id\": 1, \"order\": 0}, {\"id\": 3, \"order\": 1}]`"
+        ),
+        request_body=None,
+    )
+    @action(detail=False, methods=["post"], url_path="reorder")
+    def reorder(self, request):
+        """Bulk-update the order field for VideoCategory records."""
+        items = request.data
+        if not isinstance(items, list):
+            raise ValidationError("Expected a list of {id, order} objects.")
+        ids = []
+        for item in items:
+            if "id" not in item or "order" not in item:
+                raise ValidationError("Each item must have 'id' and 'order' fields.")
+            ids.append(item["id"])
+        existing_ids = set(
+            VideoCategory.objects.filter(pk__in=ids).values_list("pk", flat=True)
+        )
+        for item in items:
+            if item["id"] not in existing_ids:
+                raise ValidationError(f"VideoCategory with id={item['id']} not found.")
+            VideoCategory.objects.filter(pk=item["id"]).update(order=item["order"])
+        return Response({"detail": "Video categories reordered."}, status=status.HTTP_200_OK)
+
 
 class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     """ViewSet for managing Learn content with multi-language support."""
@@ -821,6 +850,35 @@ class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
 
         serializer = LearnSerializer(learns, many=True, context={"request": request})
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_summary="Reorder learn categories",
+        operation_description=(
+            "Bulk-update the `order` field for learn categories. "
+            "Send a list of objects with `id` and `order` fields. "
+            "Example: `[{\"id\": 1, \"order\": 0}, {\"id\": 3, \"order\": 1}]`"
+        ),
+        request_body=None,
+    )
+    @action(detail=False, methods=["post"], url_path="reorder")
+    def reorder(self, request):
+        """Bulk-update the order field for LearnCategory records."""
+        items = request.data
+        if not isinstance(items, list):
+            raise ValidationError("Expected a list of {id, order} objects.")
+        ids = []
+        for item in items:
+            if "id" not in item or "order" not in item:
+                raise ValidationError("Each item must have 'id' and 'order' fields.")
+            ids.append(item["id"])
+        existing_ids = set(
+            LearnCategory.objects.filter(pk__in=ids).values_list("pk", flat=True)
+        )
+        for item in items:
+            if item["id"] not in existing_ids:
+                raise ValidationError(f"LearnCategory with id={item['id']} not found.")
+            LearnCategory.objects.filter(pk=item["id"]).update(order=item["order"])
+        return Response({"detail": "Learn categories reordered."}, status=status.HTTP_200_OK)
 
 
 class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
