@@ -553,7 +553,7 @@ class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     search_fields = ("title", "category__name")
     ordering_fields = ("views", "created_at", "happened_at")
-    ordering = ("-created_at",)
+    ordering = ("-event_date",)
     filter_backends = [
         filters.SearchFilter,
         filters.OrderingFilter,
