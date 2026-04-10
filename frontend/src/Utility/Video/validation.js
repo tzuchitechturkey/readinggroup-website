@@ -14,7 +14,7 @@ export const validateForm = (formData, t) => {
     newErrors.title = t("Title is required");
   }
 
-  if (!formData?.category) {
+  if (formData.video_type !== "full_video" && !formData?.category) {
     newErrors.category = t("Category is required");
   }
 

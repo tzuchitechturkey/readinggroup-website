@@ -195,6 +195,8 @@ class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
     search_fields = (
         "title",
         "guest_speakers",
+        "translations__title",
+        "translations__guest_speakers",
     )
     ordering_fields = ("happened_at", "views", "created_at")
     filter_backends = [filters.SearchFilter]
@@ -273,7 +275,9 @@ class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(category__is_active=True)
+        queryset = queryset.filter(
+            Q(category__is_active=True) | Q(video_type=VideoType.FULL_VIDEO)
+        )
 
         # List endpoint only returns base videos; translations are nested inside them
         if self.action == "list":
@@ -406,9 +410,11 @@ class VideoViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
         def base_queryset(video_type_value):
             qs = Video.objects.filter(
                 video_type=video_type_value,
-                category__is_active=True,
                 base_video__isnull=True,
             ).order_by("-created_at")
+
+            if video_type_value != VideoType.FULL_VIDEO:
+                qs = qs.filter(category__is_active=True)
 
             if requested_languages:
                 qs = qs.filter(

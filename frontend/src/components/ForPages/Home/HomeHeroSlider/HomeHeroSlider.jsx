@@ -12,6 +12,27 @@ export default function HomeHeroSlider({ t, fullLiveStream }) {
 
     return `${month}. ${day}, ${year}`;
   };
+  if (!fullLiveStream || Object.keys(fullLiveStream).length === 0) {
+    return (
+      <div
+        style={{
+          background: `
+                    linear-gradient(
+                        to right,
+                        rgba(27,45,88,1) 0%,
+                        rgba(27,45,88,1) 25%,
+                        rgba(27,45,88,0.7) 50%,
+                        rgba(27,45,88,0.4) 75%
+                    )
+                    `,
+        }}
+        className="w-full relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[92vh] flex items-center justify-center "
+      >
+        <p className="text-gray-400 text-sm">{t("No Item available")}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full relative h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[92vh]">
       <div className="relative w-full h-full overflow-hidden shadow-2xl group">

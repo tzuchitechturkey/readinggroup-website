@@ -19,7 +19,13 @@ const GoodEffectsPoster = ({ poster, t }) => {
         onActionClick={handleSeeMoreClick}
       />
       {/* Poster Content */}
-      <PosterCard poster={poster} t={t} />
+      {poster && Object.keys(poster).length > 0 ? (
+        <PosterCard poster={poster} t={t} />
+      ) : (
+        <div className="flex items-center justify-center w-full h-[200px] rounded-xl border border-dashed border-gray-300 bg-gray-50">
+          <p className="text-gray-400 text-sm">{t("No posters available")}</p>
+        </div>
+      )}
     </div>
   );
 };
