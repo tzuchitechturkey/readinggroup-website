@@ -390,6 +390,7 @@ class EventCommunityImage(TimestampedModel):
 class OurTeam(TimestampedModel):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    country = models.CharField(max_length=255, blank=True, null=True)
     is_heart = models.BooleanField(default=False)
     image = models.ImageField(upload_to="our-team/images/", blank=True, null=True)
     image_url = models.JSONField(default=list, blank=True)
@@ -407,6 +408,8 @@ class OurTeam(TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
+    
+o
 
 
 class OurTeamImage(TimestampedModel):
