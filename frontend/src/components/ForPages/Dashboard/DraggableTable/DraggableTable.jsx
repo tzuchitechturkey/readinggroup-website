@@ -192,14 +192,14 @@ function DraggableTable({
           </tbody>
         </table>
         
-        {totalPages > 1 && (
+        {/* {totalPages > 1 && ( */}
           <TableButtons
             totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={onPageChange}
             t={t}
           />
-        )}
+        {/* )} */}
       </div>
 
       {/* Save/Cancel Order Buttons */}

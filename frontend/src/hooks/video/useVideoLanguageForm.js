@@ -54,9 +54,7 @@ function buildInitialFormData(data, baseVideoData = null) {
     video_type: data.video_type || "",
     language: data.language || "",
     thumbnail: data.thumbnail || null,
-    thumbnail_url: data.thumbnail_url
-      ? JSON.stringify(data.thumbnail_url)
-      : "",
+    thumbnail_url: data.thumbnail_url ? JSON.stringify(data.thumbnail_url) : "",
     video_url: data.video_url || "",
     happened_at: data.happened_at || "",
     description: data.description || "",
@@ -72,8 +70,15 @@ function buildInitialFormData(data, baseVideoData = null) {
  * @param {number}      baseVideoId  - id of the base video (used when POSTing a new translation)
  * @param {function}    onSaved      - called with the API response after a successful save
  */
-export const useVideoLanguageForm = (initialData, baseVideoId, onSaved, baseVideoData = null, usedLangCodes = []) => {
+export const useVideoLanguageForm = (
+  initialData,
+  baseVideoId,
+  onSaved,
+  baseVideoData = null,
+  usedLangCodes = [],
+) => {
   const { t } = useTranslation();
+  console.log("useVideoLanguageForm initialData", initialData);
 
   const [formData, setFormData] = useState(() =>
     buildInitialFormData(initialData, baseVideoData),
@@ -132,7 +137,9 @@ export const useVideoLanguageForm = (initialData, baseVideoId, onSaved, baseVide
   const handleGuestSpeakersInput = (e) => {
     if (e.key === "Enter" && guestSpeakersInput.trim()) {
       e.preventDefault();
-      if (!(formData.guest_speakers || []).includes(guestSpeakersInput.trim())) {
+      if (
+        !(formData.guest_speakers || []).includes(guestSpeakersInput.trim())
+      ) {
         setFormData((prev) => ({
           ...prev,
           guest_speakers: [
@@ -232,7 +239,12 @@ export const useVideoLanguageForm = (initialData, baseVideoId, onSaved, baseVide
           title: prev.title || data?.title || "",
           description: prev.description || data?.description || "",
           reference_code: prev.reference_code || data?.reference_code || "",
-          language: prev.language || (!usedLangCodes.includes(data?.default_language) ? data?.default_language : "") || "",
+          language:
+            prev.language ||
+            (!usedLangCodes.includes(data?.default_language)
+              ? data?.default_language
+              : "") ||
+            "",
           duration: prev.duration || data?.duration_formatted || "",
           thumbnail_url: JSON.stringify(thumbnails),
           happened_at:

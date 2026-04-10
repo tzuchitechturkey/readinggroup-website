@@ -35,8 +35,7 @@ function getDisplayData(video, uiLang = "ar") {
   if (langs.length === 0) return { ...video }; // old flat format fallback
 
   const preferred = [uiLang, "ar", "en", "tr"];
-  const chosen =
-    preferred.find((l) => langs.includes(l)) || langs[0];
+  const chosen = preferred.find((l) => langs.includes(l)) || langs[0];
 
   return video[chosen] || {};
 }
@@ -358,123 +357,126 @@ function VideosList({ onSectionChange }) {
             const d = getDisplayData(video, i18n?.language);
             const langCodes = Object.keys(video).filter((k) => k !== "id");
             return (
-            <TableRow key={video?.id} className=" hover:bg-gray-50/60 border-b">
-              <TableCell className="text-[#1E1E1E] text-center font-bold text-[11px] py-4 px-4">
-                <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
-                  {video?.id}
-                </span>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex items-center justify-center gap-3">
-                  <img
-                    src={d?.thumbnail_url?.default?.url || d?.thumbnail}
-                    alt={d?.title}
-                    className="w-12 h-12 rounded object-cover bg-gray-100"
-                    onError={(e) => {
-                      e.target.src = "/placeholder-video.png";
-                    }}
-                  />
-                </div>
-              </TableCell>
-              <TableCell className="py-4">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
-                    {d?.title}
+              <TableRow
+                key={video?.id}
+                className=" hover:bg-gray-50/60 border-b"
+              >
+                <TableCell className="text-[#1E1E1E] text-center font-bold text-[11px] py-4 px-4">
+                  <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-[10px] font-mono">
+                    {video?.id}
                   </span>
-                  <div className="flex items-center gap-1 flex-wrap justify-center">
-                    {langCodes.map((code) => (
-                      <span
-                        key={code}
-                        className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono uppercase"
-                      >
-                        {code}
-                      </span>
-                    ))}
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex items-center justify-center gap-3">
+                    <img
+                      src={d?.thumbnail_url?.default?.url || d?.thumbnail}
+                      alt={d?.title}
+                      className="w-12 h-12 rounded object-cover bg-gray-100"
+                      onError={(e) => {
+                        e.target.src = "/placeholder-video.png";
+                      }}
+                    />
                   </div>
-                </div>
-              </TableCell>
-              <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
-                  {d?.category?.name}
-                </span>
-              </TableCell>
-              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
-                  {t(d?.video_type)}
-                </span>
-              </TableCell>
-              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <div className="flex flex-col items-center">
-                  <span className="font-medium">
-                    {d?.duration ? d?.duration : 0}
+                </TableCell>
+                <TableCell className="py-4">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[#1E1E1E] font-medium text-[11px] line-clamp-2 max-w-[200px]">
+                      {d?.title}
+                    </span>
+                    <div className="flex items-center gap-1 flex-wrap justify-center">
+                      {langCodes.map((code) => (
+                        <span
+                          key={code}
+                          className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono uppercase"
+                        >
+                          {code}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-[10px]">
+                    {d?.category?.name || t("Full Video")}
                   </span>
-                  <span className="text-[#9FA2AA] text-[10px]">
-                    {t("minutes")}
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-[10px]">
+                    {t(d?.video_type)}
                   </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <div className="flex flex-col items-center">
-                  <span className="font-medium">
-                    {d?.views ? d?.views.toLocaleString() : 0}
-                  </span>
-                  <span className="text-[#9FA2AA] text-[10px]">
-                    {t("views")}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
-                <div className="flex flex-col items-center">
-                  <span className="font-medium">
-                    {d?.happened_at
-                      ? new Date(d.happened_at).toLocaleDateString("en-GB", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                      : "—"}
-                  </span>
-                </div>
-              </TableCell>
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">
+                      {d?.duration ? d?.duration : 0}
+                    </span>
+                    <span className="text-[#9FA2AA] text-[10px]">
+                      {t("minutes")}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">
+                      {d?.views ? d?.views.toLocaleString() : 0}
+                    </span>
+                    <span className="text-[#9FA2AA] text-[10px]">
+                      {t("views")}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-[#1E1E1E] text-center text-[11px] py-4">
+                  <div className="flex flex-col items-center">
+                    <span className="font-medium">
+                      {d?.happened_at
+                        ? new Date(d.happened_at).toLocaleDateString("en-GB", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          })
+                        : "—"}
+                    </span>
+                  </div>
+                </TableCell>
 
-              <TableCell className="py-4">
-                <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
-                  <button
-                    title={t("View Details")}
-                    onClick={() => {
-                      setSelectedVideo(video);
-                      setShowDetailsModal(true);
-                    }}
-                    className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button
-                    title={t("Edit")}
-                    onClick={() => {
-                      setSelectedVideo(video);
-                      onSectionChange("createOrEditVideo", video);
-                    }}
-                    className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  {localStorage.getItem("userType") !== "editor" && (
+                <TableCell className="py-4">
+                  <div className="flex items-center justify-center gap-2 text-[#5B6B79]">
                     <button
-                      title={t("Delete")}
+                      title={t("View Details")}
                       onClick={() => {
                         setSelectedVideo(video);
-                        setShowDeleteModal(true);
+                        setShowDetailsModal(true);
                       }}
-                      className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
+                      className="p-1 rounded hover:bg-gray-100 hover:text-blue-600"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                     </button>
-                  )}
-                </div>
-              </TableCell>
-            </TableRow>
-          );
+                    <button
+                      title={t("Edit")}
+                      onClick={() => {
+                        setSelectedVideo(video);
+                        onSectionChange("createOrEditVideo", video);
+                      }}
+                      className="p-1 rounded hover:bg-gray-100 hover:text-green-600"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    {localStorage.getItem("userType") !== "editor" && (
+                      <button
+                        title={t("Delete")}
+                        onClick={() => {
+                          setSelectedVideo(video);
+                          setShowDeleteModal(true);
+                        }}
+                        className="p-1 rounded hover:bg-gray-100 hover:text-rose-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
           })}
         </TableBody>
       </Table>

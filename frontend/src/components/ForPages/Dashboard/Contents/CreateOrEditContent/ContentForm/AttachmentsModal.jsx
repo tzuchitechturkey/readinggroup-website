@@ -49,6 +49,7 @@ function AttachmentsModal({
     try {
       const offset = page * limit;
       const res = await GetAttachments(limit, offset, search);
+      console.log("Attachments Response", res);
       setAttachments(res?.data?.results || []);
       setTotalRecords(res?.data?.count || 0);
     } catch (err) {
@@ -75,7 +76,9 @@ function AttachmentsModal({
   // Toggle selection
   const toggleSelection = (id) => {
     setTempSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((itemId) => itemId !== id)
+        : [...prev, id],
     );
   };
 
@@ -182,14 +185,14 @@ function AttachmentsModal({
   // Handle confirm selection
   const handleConfirmSelection = () => {
     const selectedItems = attachments.filter((att) =>
-      tempSelectedIds.includes(att.id)
+      tempSelectedIds.includes(att.id),
     );
     onConfirm(selectedItems);
     onClose();
   };
 
   const totalPages = Math.ceil(totalRecords / limit);
-
+  console.log("AttachmentsModal Render", selectedAttachments);
   return (
     <>
       <Modal
@@ -265,7 +268,7 @@ function AttachmentsModal({
                       checked={
                         attachments.length > 0 &&
                         attachments.every((att) =>
-                          tempSelectedIds.includes(att.id)
+                          tempSelectedIds.includes(att.id),
                         )
                       }
                       onChange={(e) => {
@@ -339,7 +342,10 @@ function AttachmentsModal({
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => openEditModal(attachment)}
+                            onClick={() => {
+                              console.log("Editing attachment", attachment);
+                              openEditModal(attachment);
+                            }}
                             className="p-1 rounded hover:bg-gray-100"
                             title={t("Edit")}
                           >
@@ -623,7 +629,7 @@ function AttachmentsModal({
           onConfirm={handleDeleteAttachment}
           title={t("Delete Attachment")}
           message={t(
-            "Are you sure you want to delete this attachment? This action cannot be undone."
+            "Are you sure you want to delete this attachment? This action cannot be undone.",
           )}
           itemName={deletingAttachment?.file_name || deletingAttachment?.title}
         />

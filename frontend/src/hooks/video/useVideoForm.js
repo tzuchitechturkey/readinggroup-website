@@ -310,10 +310,12 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     const formDataToSend = new FormData();
 
     formDataToSend.append("title", formData?.title);
-    formDataToSend.append(
-      "category",
-      formData?.category?.id || formData?.category,
-    );
+    if (formData?.category) {
+      formDataToSend.append(
+        "category",
+        formData?.category?.id || formData?.category,
+      );
+    }
     formDataToSend.append("video_type", formData?.video_type);
     formDataToSend.append("language", formData?.language);
     formDataToSend.append("video_url", formData?.video_url);
@@ -329,7 +331,7 @@ export const useCreateOrEditVideo = (video, onSectionChange) => {
     if (formData?.event_date) {
       const formattedEventDate = format(
         new Date(formData.event_date),
-        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd",
       );
       formDataToSend.append("event_date", formattedEventDate);
     }
