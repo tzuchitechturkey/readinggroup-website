@@ -27,6 +27,12 @@ CSRF_TRUSTED_ORIGINS = [
     "https://readinggroup.tzuchitech.com",
 ]
 
+# Trust the X-Forwarded-Proto header from nginx so that
+# request.build_absolute_uri() returns https:// URLs instead of http://.
+# Without this, media file URLs served over HTTPS cause mixed-content errors.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 DJANGO_APPS = [
