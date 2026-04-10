@@ -35,6 +35,7 @@ class ContentAttachmentSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer
     """Serializer for Content file attachments (documents, PDFs, etc)."""
 
     datetime_fields = ("created_at", "updated_at")
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = ContentAttachment
@@ -138,6 +139,11 @@ class VideoSerializer(DateTimeFormattingMixin, AbsoluteURLSerializer):
     """Serializer for Video model with absolute URL handling for file fields."""
 
     datetime_fields = ("happened_at", "created_at", "updated_at")
+    event_date = serializers.DateField(
+        required=False,
+        allow_null=True,
+        input_formats=["%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ", "iso-8601"],
+    )
     attachments = serializers.ListField(
         child=serializers.IntegerField(), write_only=True, required=False
     )

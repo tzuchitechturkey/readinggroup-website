@@ -52,7 +52,7 @@ function BookContent() {
           <div className="flex-1 flex flex-col justify-start">
             {!book?.title ? (
               <>
-                test <Skeleton className="h-12 w-3/4 mb-2" />
+                <Skeleton className="h-12 w-3/4 mb-2" />
                 <Skeleton className="h-6 w-full mb-2" />
                 <Skeleton className="h-6 w-full mb-8" />
               </>
