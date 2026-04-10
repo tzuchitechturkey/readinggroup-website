@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { AlertCircle, Loader } from "lucide-react";
 
-import DatePickerWithYearMonth from "../DatePickerWithYearMonth";
+import DatePickerWithMonthYear from "@/components/Global/DatePickerWithMonthYear/DatePickerWithMonthYear";
 
 export const VideoUrlAndDateSection = ({
   formData,
@@ -60,20 +60,39 @@ export const VideoUrlAndDateSection = ({
       {/* Happened At Date */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("Happened At")} <span className="text-red-500">*</span>
+          {t("Happened At")}
         </label>
-        <DatePickerWithYearMonth
-          value={formData?.happened_at}
-          onChange={(date) => {
-            onInputChange({
-              target: { name: "happened_at", value: date },
-            });
-          }}
+        <DatePickerWithMonthYear
+          value={formData?.happened_at || ""}
+          onChange={onInputChange}
+          error={!!errors?.happened_at}
+          t={t}
+          name="happened_at"
         />
         {errors?.happened_at && (
           <div className="flex items-center gap-2 text-red-600 text-sm mt-1">
             <AlertCircle size={16} />
             <span>{errors.happened_at}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Event Date */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("Event Date")}
+        </label>
+        <DatePickerWithMonthYear
+          value={formData?.event_date || ""}
+          onChange={onInputChange}
+          error={!!errors?.event_date}
+          t={t}
+          name="event_date"
+        />
+        {errors?.event_date && (
+          <div className="flex items-center gap-2 text-red-600 text-sm mt-1">
+            <AlertCircle size={16} />
+            <span>{errors.event_date}</span>
           </div>
         )}
       </div>

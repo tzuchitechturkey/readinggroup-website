@@ -77,6 +77,8 @@ export const allLanguages = [
   { label: "Punjabi", code: "pa" },
   { label: "Tamil", code: "ta" },
   { label: "Malagasy", code: "mg" },
+  { label: "Hakka", code: "hak" },
+  { label: "Malayan", code: "ms" },
 ];
 
 export const postStatusOptions = [

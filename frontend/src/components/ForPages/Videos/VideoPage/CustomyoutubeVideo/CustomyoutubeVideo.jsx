@@ -258,9 +258,9 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
             {/* Start Created At */}
             <div className="mb-4">
               <p className="text-base font-bold text-[#081945] mb-0">
-                {videoData?.created_at
+                {videoData?.event_date
                   ? (() => {
-                      const parts = new Date(videoData.created_at)
+                      const parts = new Date(videoData.event_date)
                         .toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "short",
@@ -270,7 +270,7 @@ function CustomyoutubeVideo({ t, i18n, videoData }) {
 
                       return `${parts[0]}. ${parts[1]} ${parts[2]}`;
                     })()
-                  : "Nov. 26, 2025"}
+                  : "-"}
               </p>
             </div>
             {/* End Created At */}

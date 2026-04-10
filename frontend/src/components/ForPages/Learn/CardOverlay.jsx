@@ -6,24 +6,38 @@ import { Download } from "lucide-react";
 const CardOverlay = ({ card, onViewDetails }) => {
   const { t } = useTranslation();
 
-  const handleDownload = async (e) => {
+  const handleDownload = (e) => {
     e.stopPropagation();
-    try {
-      const response = await fetch(card.image || card.image_url);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      // Extract filename or use title
-      const fileName = card.title ? `${card.title}.jpg` : "tzu-chi-image.jpg";
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed", error);
-    }
+    const imageUrl = card.image || card.image_url;
+    if (!imageUrl) return;
+
+    const fileName = card.title ? `${card.title}.jpg` : "tzu-chi-image.jpg";
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, "image/jpeg");
+    };
+    img.onerror = () => {
+      // Fallback: open image in new tab if canvas approach fails
+      window.open(imageUrl, "_blank");
+    };
+    img.src = imageUrl;
   };
   return (
     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out flex flex-col items-center justify-center gap-3">

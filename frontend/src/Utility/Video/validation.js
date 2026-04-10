@@ -28,9 +28,7 @@ export const validateForm = (formData, t) => {
     newErrors.video_url = t("Please enter a valid YouTube URL");
   }
 
-  if (!formData?.happened_at) {
-    newErrors.happened_at = t("Happened At is required");
-  }
+
   if (!formData?.video_type) {
     newErrors.video_type = t("Video Type is required");
   }

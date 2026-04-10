@@ -149,6 +149,11 @@ export default function Page() {
     const saved = localStorage.getItem("dashboardSelectedHistory");
     return saved ? JSON.parse(saved) : null;
   });
+  const [selectedTeam, setSelectedTeam] = useState(() => {
+    // استرجاع الأحداث المحفوظة إن وجدت
+    const saved = localStorage.getItem("dashboardSelectedTeam");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   // حفظ الحالة في localStorage عند تغييرها
   useEffect(() => {
@@ -230,6 +235,22 @@ export default function Page() {
       );
     }
   }, [selectedBook]);
+  useEffect(() => {
+    if (selectedTeam) {
+      localStorage.setItem(
+        "dashboardSelectedTeam",
+        JSON.stringify(selectedTeam),
+      );
+    }
+  }, [selectedTeam]);
+  useEffect(() => {
+    if (selectedHistory) {
+      localStorage.setItem(
+        "dashboardSelectedHistory",
+        JSON.stringify(selectedHistory),
+      );
+    }
+  }, [selectedHistory]);
 
   // دالة محدثة للتحكم في الأقسام مع دعم العناصر الفرعية
   const handleSectionChange = (section, data = null) => {
@@ -275,6 +296,7 @@ export default function Page() {
       setSelectedWriter(null);
       setSelectedBook(null);
       setSelectedHistory(null);
+      setSelectedTeam(null);
     }
 
     // إذا كان القسم createOrEditPost، احفظ بيانات المقال
@@ -298,6 +320,8 @@ export default function Page() {
       setSelectedBook(data);
     } else if (section === "createOrEditHistory") {
       setSelectedHistory(data);
+    } else if (section === "createOrEditTeam") {
+      setSelectedTeam(data);
     }
 
     let autoParent = data;
@@ -311,7 +335,6 @@ export default function Page() {
         createOrEditVideo: "Videos",
         videosCategories: "Videos",
         // Events
-        // events: "Events",
         eventsCategories: "Events",
         createOrEditEvent: "Events",
         news: "Latest News",
@@ -450,7 +473,12 @@ export default function Page() {
       case "team":
         return <OurTeamList onSectionChange={handleSectionChange} />;
       case "createOrEditTeam":
-        return <UploadImagesToTeam onSectionChange={handleSectionChange} />;
+        return (
+          <UploadImagesToTeam
+            onSectionChange={handleSectionChange}
+            team={selectedTeam}
+          />
+        );
       case "book":
         return <BookPage onSectionChange={handleSectionChange} />;
       case "createOrEditReviews":

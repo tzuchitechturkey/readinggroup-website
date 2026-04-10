@@ -7,6 +7,7 @@ export const FORM_DATA_INITIAL_STATE = {
   thumbnail_url: "",
   video_url: "",
   happened_at: "",
+  event_date: "",
   description: "",
   guest_speakers: [],
   status: "",

@@ -12,6 +12,10 @@ export const validateForm = (formData, t, post) => {
     newErrors.image = t("Image is required");
   }
 
+  if (formData.learn_type === "posters" && !formData.event_date) {
+    newErrors.event_date = t("Event date is required");
+  }
+
   // Validation for event fields (when is_event is true and learn_type is posters)
   if (formData.learn_type === "posters" && formData.is_event) {
     if (!formData.start_event_date) {

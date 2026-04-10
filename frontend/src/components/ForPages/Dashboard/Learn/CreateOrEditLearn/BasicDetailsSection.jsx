@@ -3,7 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
-import { LEARN_TYPE_OPTIONS } from "@/constants/learn/learnConstant";
+import DatePickerWithMonthYear from "@/components/Global/DatePickerWithMonthYear/DatePickerWithMonthYear";
 
 import CategorySelectionDropdown from "./CategorySelectionDropdown";
 
@@ -121,6 +121,23 @@ function BasicDetailsSection({
           onChange={onInputChange}
           placeholder={t("Enter author/speaker country")}
         />
+      </div>
+
+      {/* Date Picker - posters only */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {t("Date")} {learnType === "posters" && "*"}
+        </label>
+        <DatePickerWithMonthYear
+          value={formData.event_date || ""}
+          onChange={onInputChange}
+          error={!!errors.event_date}
+          t={t}
+          name="event_date"
+        />
+        {errors.event_date && (
+          <p className="text-red-500 text-xs mt-1">{errors.event_date}</p>
+        )}
       </div>
 
       {/* Category and Writer Selection */}

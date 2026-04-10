@@ -7,7 +7,7 @@ import "react-day-picker/dist/style.css";
 import "./DatePickerStyles.css";
 
 // مكون Date Picker محسّن مع قوائم الشهر والسنة
-function DatePickerWithMonthYear({ value, onChange, error, t }) {
+function DatePickerWithMonthYear({ value, onChange, error, t, name = "happened_at" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(
     value ? new Date(value) : new Date()
@@ -96,7 +96,7 @@ function DatePickerWithMonthYear({ value, onChange, error, t }) {
       onChange({
         target: {
           value: formattedDate,
-          name: 'happened_at'
+          name: name
         }
       });
       
