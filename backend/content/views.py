@@ -831,6 +831,24 @@ class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
         category = self.get_object()
         learns = Learn.objects.filter(category=category).select_related("category")
 
+        event_date = request.query_params.get("event_date")
+        if event_date:
+            try:
+                parts = event_date.split("-")
+                if len(parts) == 1:
+                    year = int(parts[0])
+                    learns = learns.filter(event_date__year=year)
+                elif len(parts) == 2:
+                    year, month = parts
+                    learns = learns.filter(
+                        event_date__year=int(year),
+                        event_date__month=int(month),
+                    )
+                elif len(parts) == 3:
+                    learns = learns.filter(event_date=event_date)
+            except Exception:
+                pass
+
         created_at = request.query_params.get("created_at")
         if created_at:
             try:
