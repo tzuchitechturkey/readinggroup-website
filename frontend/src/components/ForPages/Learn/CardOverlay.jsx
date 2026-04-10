@@ -25,8 +25,6 @@ const CardOverlay = ({ card, onViewDetails }) => {
       console.error("Download failed", error);
     }
   };
-  console.log("CardOverlay rendered for card:", card);
-
   return (
     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out flex flex-col items-center justify-center gap-3">
       {/* View Details Button */}
