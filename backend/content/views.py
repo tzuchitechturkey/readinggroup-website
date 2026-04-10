@@ -601,6 +601,17 @@ class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
             except Exception:
                 pass
 
+        event_date = params.get("event_date")
+        if event_date:
+            try:
+                year, month = event_date.split("-")
+                queryset = queryset.filter(
+                    event_date__year=int(year),
+                    event_date__month=int(month),
+                )
+            except Exception:
+                pass
+
         # Add LearnCategory.learn_type filtering
         learn_type = params.get("learn_type")
         if learn_type:
