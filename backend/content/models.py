@@ -69,6 +69,7 @@ class Video(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="translations",
     )
+    event_date = models.DateField(blank=True, null=True)
 
     @property
     def is_new_computed(self) -> bool:
@@ -179,6 +180,7 @@ class Learn(TimestampedModel):
     author_name = models.CharField(max_length=255, blank=True, null=True)
     author_country = models.CharField(max_length=255, blank=True, null=True)
     happened_at = models.DateTimeField(blank=True, null=True)
+    event_date = models.DateField(blank=True, null=True)
     views = models.PositiveIntegerField(default=0)
 
     class Meta:
