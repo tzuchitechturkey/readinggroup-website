@@ -20,7 +20,7 @@ const LanguageFilter = ({
     const fetchCounts = async () => {
       const langs = fromLiveStream ? allLanguages : languages;
       const fetchFn = fromLiveStream ? GetEvents : GetVideosByFilter;
-      
+
       try {
         const counts = {};
         const promises = langs.map(async (langObj) => {
@@ -32,14 +32,14 @@ const LanguageFilter = ({
             counts[langObj.code] = 0;
           }
         });
-        
+
         await Promise.all(promises);
         setLanguageCounts(counts);
       } catch (error) {
         console.error("Failed to fetch language counts", error);
       }
     };
-    
+
     fetchCounts();
   }, [fromLiveStream]);
 
@@ -88,11 +88,11 @@ const LanguageFilter = ({
                     </div>
                     <p className="font-normal text-base">{langObj.label}</p>
                   </div>
-                  {languageCounts[langObj.code] !== undefined && (
+                  {/* {languageCounts[langObj.code] !== undefined && (
                     <span className="text-sm text-gray-500">
                       ({languageCounts[langObj.code]})
                     </span>
-                  )}
+                  )} */}
                 </div>
               );
             })}
