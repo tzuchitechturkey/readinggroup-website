@@ -408,8 +408,6 @@ class OurTeam(TimestampedModel):
 
     def __str__(self) -> str:
         return self.title
-    
-o
 
 
 class OurTeamImage(TimestampedModel):
