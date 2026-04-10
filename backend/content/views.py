@@ -549,7 +549,7 @@ class VideoCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
         operation_description=(
             "Bulk-update the `order` field for video categories. "
             "Send a list of objects with `id` and `order` fields. "
-            "Example: `[{\"id\": 1, \"order\": 0}, {\"id\": 3, \"order\": 1}]`"
+            'Example: `[{"id": 1, "order": 0}, {"id": 3, "order": 1}]`'
         ),
         request_body=None,
     )
@@ -571,7 +571,9 @@ class VideoCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
             if item["id"] not in existing_ids:
                 raise ValidationError(f"VideoCategory with id={item['id']} not found.")
             VideoCategory.objects.filter(pk=item["id"]).update(order=item["order"])
-        return Response({"detail": "Video categories reordered."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Video categories reordered."}, status=status.HTTP_200_OK
+        )
 
 
 class LearnViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
@@ -856,7 +858,7 @@ class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
         operation_description=(
             "Bulk-update the `order` field for learn categories. "
             "Send a list of objects with `id` and `order` fields. "
-            "Example: `[{\"id\": 1, \"order\": 0}, {\"id\": 3, \"order\": 1}]`"
+            'Example: `[{"id": 1, "order": 0}, {"id": 3, "order": 1}]`'
         ),
         request_body=None,
     )
@@ -878,7 +880,9 @@ class LearnCategoryViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
             if item["id"] not in existing_ids:
                 raise ValidationError(f"LearnCategory with id={item['id']} not found.")
             LearnCategory.objects.filter(pk=item["id"]).update(order=item["order"])
-        return Response({"detail": "Learn categories reordered."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Learn categories reordered."}, status=status.HTTP_200_OK
+        )
 
 
 class EventCommunityViewSet(TrackUserMixin, HistoryMixin, viewsets.ModelViewSet):
