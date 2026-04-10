@@ -123,7 +123,7 @@ const VideoCard = ({
       {showDate && (
         <div className="mx-1 -mt-1 px-4 lg:px-0">
           <p className="text-[11px] sm:text-[12px] md:text-[13px] lg:text-[14px] text-[#285688]">
-            {formatDate(item?.happened_at)}
+            {formatDate(item?.event_date)}
           </p>
         </div>
       )}

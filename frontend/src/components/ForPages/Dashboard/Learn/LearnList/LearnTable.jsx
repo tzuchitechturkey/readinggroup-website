@@ -143,15 +143,15 @@ const LearnTable = ({
             <TableCell className="text-center text-[#1E1E1E] text-[11px] py-4">
               <div className="flex flex-col items-center">
                 <span className="font-medium">
-                  {new Date(learn?.created_at).toLocaleDateString("en-GB", {
+                  {new Date(learn?.event_date).toLocaleDateString("en-GB", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
                   })}
                 </span>
                 <span className="text-[#9FA2AA] text-[10px]">
-                  {learn?.created_at
-                    ? new Date(learn?.created_at).toLocaleTimeString([], {
+                  {learn?.event_date
+                    ? new Date(learn?.event_date).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })

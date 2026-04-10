@@ -153,6 +153,12 @@ learn_manual_parameters = [
         type=openapi.TYPE_ARRAY,
         items=openapi.Items(type=openapi.TYPE_STRING),
     ),
+    openapi.Parameter(
+        "event_date",
+        openapi.IN_QUERY,
+        description="Filter by event_date. Formats supported: YYYY (year), YYYY-MM (year-month), YYYY-MM-DD (full date). Examples: 2026 | 2026-02 | 2026-02-14",
+        type=openapi.TYPE_STRING,
+    ),
 ]
 
 # ========================================== learn swagger parameters end ============================================

@@ -44,7 +44,7 @@ const PosterCard = ({ poster, t }) => {
             {/* Date Tag */}
             <div className="flex  border-[1px] border-[#285688] items-center justify-center p-[6px] md:p-[8px] lg:p-[8px] rounded-full">
               <p className="font-inter font-bold leading-none text-[#285688] text-[13px]  md:text-[15px] lg:text-[16px]">
-                {formatDate(poster?.created_at)}
+                {formatDate(poster?.event_date)}
               </p>
             </div>
 

@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { allLanguages, languages } from "@/constants/constants";
+import { GetVideosByFilter } from "@/api/videos";
+import { GetEvents } from "@/api/events";
 
 const LanguageFilter = ({
   filters,
@@ -12,6 +14,34 @@ const LanguageFilter = ({
   fromLiveStream = false,
 }) => {
   const { t } = useTranslation();
+  const [languageCounts, setLanguageCounts] = useState({});
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const langs = fromLiveStream ? allLanguages : languages;
+      const fetchFn = fromLiveStream ? GetEvents : GetVideosByFilter;
+      
+      try {
+        const counts = {};
+        const promises = langs.map(async (langObj) => {
+          try {
+            const res = await fetchFn(1, 0, { language: langObj.code });
+            counts[langObj.code] = res.data?.count || 0;
+          } catch (error) {
+            console.error(`Failed to fetch count for ${langObj.code}`, error);
+            counts[langObj.code] = 0;
+          }
+        });
+        
+        await Promise.all(promises);
+        setLanguageCounts(counts);
+      } catch (error) {
+        console.error("Failed to fetch language counts", error);
+      }
+    };
+    
+    fetchCounts();
+  }, [fromLiveStream]);
 
   const selectedLangObj = fromLiveStream
     ? allLanguages.find((l) => l.code === filters.language)
@@ -44,7 +74,7 @@ const LanguageFilter = ({
               return (
                 <div
                   key={langObj.code}
-                  className={`flex items-center gap-2 cursor-pointer ${
+                  className={`flex items-center justify-between gap-2 cursor-pointer w-full ${
                     isSelected ? "text-[#285688]" : ""
                   }`}
                   onClick={(e) => {
@@ -52,8 +82,17 @@ const LanguageFilter = ({
                     onLanguageChange(langObj.code);
                   }}
                 >
-                  <div className="w-6 h-6">{isSelected && <Check />}</div>
-                  <p className="font-normal text-base">{langObj.label}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 flex items-center justify-center">
+                      {isSelected && <Check className="w-4 h-4" />}
+                    </div>
+                    <p className="font-normal text-base">{langObj.label}</p>
+                  </div>
+                  {languageCounts[langObj.code] !== undefined && (
+                    <span className="text-sm text-gray-500">
+                      ({languageCounts[langObj.code]})
+                    </span>
+                  )}
                 </div>
               );
             })}

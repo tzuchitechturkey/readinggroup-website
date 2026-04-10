@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { useTranslation } from "react-i18next";
 import { DescriptionSection } from "./DescriptionSection";
@@ -8,6 +8,90 @@ import { setErrorFn } from "@/Utility/Global/setErrorFn";
 import Loader from "@/components/Global/Loader/Loader";
 import { toast } from "react-toastify";
 
+const COUNTRY_OPTIONS = ["Kaohsiung", "Cross-Region", "Transnational"];
+
+const CountryAutocomplete = ({ value, onChange, t }) => {
+  const [inputValue, setInputValue] = useState(value || "");
+  const [isOpen, setIsOpen] = useState(false);
+  const [filtered, setFiltered] = useState(COUNTRY_OPTIONS);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInput = (e) => {
+    const val = e.target.value;
+    setInputValue(val);
+    onChange(val);
+    setFiltered(
+      COUNTRY_OPTIONS.filter((o) =>
+        o.toLowerCase().includes(val.toLowerCase()),
+      ),
+    );
+    setIsOpen(true);
+  };
+
+  const handleSelect = (option) => {
+    setInputValue(option);
+    onChange(option);
+    setIsOpen(false);
+  };
+
+  // Show "Add new" option when typed value is non-empty and not in list
+  const showAddNew =
+    inputValue.trim() &&
+    !COUNTRY_OPTIONS.some(
+      (o) => o.toLowerCase() === inputValue.trim().toLowerCase(),
+    );
+
+  return (
+    <div ref={containerRef} className="relative">
+      <input
+        type="text"
+        value={inputValue}
+        onChange={handleInput}
+        onFocus={() => setIsOpen(true)}
+        placeholder={t("Enter country")}
+        className="w-full p-3 border border-gray-300 rounded-lg outline-none"
+      />
+      {isOpen && (filtered.length > 0 || showAddNew) && (
+        <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {filtered.map((option) => (
+            <li
+              key={option}
+              onMouseDown={() => handleSelect(option)}
+              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
+                inputValue === option ? "bg-gray-50 font-medium" : ""
+              }`}
+            >
+              {option}
+            </li>
+          ))}
+          {showAddNew && (
+            <li
+              onMouseDown={() => handleSelect(inputValue.trim())}
+              className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-blue-600 border-t border-gray-100"
+            >
+              {t("Add")} &ldquo;{inputValue.trim()}&rdquo;
+            </li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +99,7 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    country: "",
     is_heart: false,
   });
   const [errors, setErrors] = useState({});
@@ -25,12 +110,14 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
         setFormData({
           title: member.title,
           description: member.description,
+          country: member.country || "",
           is_heart: member.is_heart,
         });
       } else {
         setFormData({
           title: "",
           description: "",
+          country: "",
           is_heart: false,
         });
       }
@@ -104,6 +191,9 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
     submitData.append("title", formData.title);
     submitData.append("is_heart", formData.is_heart);
     submitData.append("description", formData.description);
+    if (formData.country) {
+      submitData.append("country", formData.country);
+    }
 
     try {
       member?.id
@@ -148,6 +238,21 @@ const CreateOrEditMember = ({ isOpen, onClose, member = null, setUpdate }) => {
             <p className="text-red-500 text-xs mt-1">{errors.title}</p>
           )}
         </div>
+
+        {/* Start Country */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {t("Country")}
+          </label>
+          <CountryAutocomplete
+            value={formData.country}
+            onChange={(val) =>
+              setFormData((prev) => ({ ...prev, country: val }))
+            }
+            t={t}
+          />
+        </div>
+        {/* End Country */}
 
         {/* Start Description */}
         <DescriptionSection

@@ -99,7 +99,7 @@ const LearnPageContent = () => {
       setIsLoadingMore(true);
     }
     try {
-      const params = { created_at: happenedAt };
+      const params = { event_date: happenedAt };
       const res = await GetLearnsByCategoryId(categoryId, 12, offset, params);
       const newItems = res.data.results || [];
       const totalCount = res.data.count || 0;
@@ -294,14 +294,14 @@ const LearnPageContent = () => {
     switch (filters.sortBy) {
       case "newest":
         return itemsCopy.sort((a, b) => {
-          const dateA = new Date(a.created_at || a.published_at || 0);
-          const dateB = new Date(b.created_at || b.published_at || 0);
+          const dateA = new Date(a.event_date || a.created_at || 0);
+          const dateB = new Date(b.event_date || b.created_at || 0);
           return dateB - dateA;
         });
       case "oldest":
         return itemsCopy.sort((a, b) => {
-          const dateA = new Date(a.created_at || a.published_at || 0);
-          const dateB = new Date(b.created_at || b.published_at || 0);
+          const dateA = new Date(a.event_date || a.created_at || 0);
+          const dateB = new Date(b.event_date || b.created_at || 0);
           return dateA - dateB;
         });
       case "most_popular":

@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 import { X, ChevronDown } from "lucide-react";
-import { languages } from "@/constants/constants";
+import { allLanguages, languages } from "@/constants/constants";
+import { GetVideosByFilter } from "@/api/videos";
+import { GetEvents } from "@/api/events";
 
 function MobileFilterModal({
   isOpen,
@@ -18,6 +20,7 @@ function MobileFilterModal({
   onCategorySelect,
   appliedDateFilter,
   onResetFilters,
+  fromLiveStream = false,
   onApplyFilters, // Add this optional unified callback
   onLanguageChange,
 }) {
@@ -27,6 +30,35 @@ function MobileFilterModal({
     useState(selectedCategories);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const [languageCounts, setLanguageCounts] = useState({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchCounts = async () => {
+      const langs = fromLiveStream ? allLanguages : languages;
+      const fetchFn = fromLiveStream ? GetEvents : GetVideosByFilter;
+      
+      try {
+        const counts = {};
+        const promises = langs.map(async (langObj) => {
+          try {
+            const res = await fetchFn(1, 0, { language: langObj.code });
+            counts[langObj.code] = res.data?.count || 0;
+          } catch (error) {
+            console.error(`Failed to fetch count for ${langObj.code}`, error);
+            counts[langObj.code] = 0;
+          }
+        });
+        
+        await Promise.all(promises);
+        setLanguageCounts(counts);
+      } catch (error) {
+        console.error("Failed to fetch language counts", error);
+      }
+    };
+    
+    fetchCounts();
+  }, [fromLiveStream, isOpen]);
 
   if (!isOpen) return null;
 
@@ -342,30 +374,37 @@ function MobileFilterModal({
                 {t("Language")}
               </h3>
               <div className="space-y-[12px]">
-                {Object.keys(languages).map((lang) => (
+                {(fromLiveStream ? allLanguages : languages).map((lang) => (
                   <label
                     key={lang.code}
-                    className="flex items-center gap-[12px] cursor-pointer group"
+                    className="flex justify-between items-center gap-[12px] cursor-pointer group"
                   >
-                    <div className="relative flex items-center justify-center">
-                      <input
-                        type="radio"
-                        name="language"
-                        value={lang.code}
-                        checked={localFilters.language === lang.code}
-                        onChange={() =>
-                          setLocalFilters((prev) => ({
-                            ...prev,
-                            language: lang.code,
-                          }))
-                        }
-                        className="peer appearance-none w-[20px] h-[20px] rounded-full border border-[#285688] bg-transparent cursor-pointer"
-                      />
-                      <div className="hidden peer-checked:block absolute w-[12px] h-[12px] rounded-full bg-[#285688]" />
+                    <div className="flex items-center gap-[12px]">
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="radio"
+                          name="language"
+                          value={lang.code}
+                          checked={localFilters.language === lang.code}
+                          onChange={() =>
+                            setLocalFilters((prev) => ({
+                              ...prev,
+                              language: lang.code,
+                            }))
+                          }
+                          className="peer appearance-none w-[20px] h-[20px] rounded-full border border-[#285688] bg-transparent cursor-pointer"
+                        />
+                        <div className="hidden peer-checked:block absolute w-[12px] h-[12px] rounded-full bg-[#285688]" />
+                      </div>
+                      <span className="text-[14px] font-noto-sans text-[#285688]">
+                        {lang.label}
+                      </span>
                     </div>
-                    <span className="text-[14px] font-noto-sans text-[#285688]">
-                      {lang.label}
-                    </span>
+                    {languageCounts[lang.code] !== undefined && (
+                      <span className="text-[14px] font-noto-sans text-[#285688]/70">
+                        ({languageCounts[lang.code]})
+                      </span>
+                    )}
                   </label>
                 ))}
               </div>
