@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -12,9 +12,25 @@ const LanguageFilter = ({
   onToggleDropdown,
   onLanguageChange,
   fromLiveStream = false,
+  title,
 }) => {
   const { t } = useTranslation();
-  const [languageCounts, setLanguageCounts] = useState({});
+  const containerRef = useRef(null);
+  // const [languageCounts, setLanguageCounts] = useState({});
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        openDropdowns?.language &&
+        containerRef.current &&
+        !containerRef.current.contains(e.target)
+      ) {
+        onToggleDropdown("language");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openDropdowns?.language]);
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -34,13 +50,13 @@ const LanguageFilter = ({
         });
 
         await Promise.all(promises);
-        setLanguageCounts(counts);
+        // setLanguageCounts(counts);
       } catch (error) {
         console.error("Failed to fetch language counts", error);
       }
     };
 
-    fetchCounts();
+    // fetchCounts();
   }, [fromLiveStream]);
 
   const selectedLangObj = fromLiveStream
@@ -48,16 +64,17 @@ const LanguageFilter = ({
     : languages.find((l) => l.code === filters.language);
   return (
     <div
+      ref={containerRef}
       onClick={() => onToggleDropdown("language")}
-      className={`min-w-[160px] ${fromLiveStream ? "min-h-[57px]" : " min-h-[43px]"} relative flex items-center justify-between cursor-pointer px-4 ${
-        openDropdowns.language ? "rounded-t-[17px]" : "rounded-[17px]"
+      className={`min-w-[160px] ${fromLiveStream ? "min-h-[43px]" : " min-h-[43px]"} relative flex items-center justify-between cursor-pointer px-4 ${
+        fromLiveStream ? "rounded-[17px]" : "rounded-[17px]"
       } bg-white transition-colors`}
     >
       <div className="flex-1 flex items-center gap-2">
         <p className="text-lg font-bold text-[#081945] leading-tight">
-          {t("Language")}
+          {title || t("Language")}
         </p>
-        <p className="text-base font-normal text-[#081945]/80 leading-tight">
+        <p className="text-base font-normal text-[#285688] leading-tight">
           {selectedLangObj?.label}
         </p>
       </div>

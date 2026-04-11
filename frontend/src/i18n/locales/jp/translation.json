@@ -1959,5 +1959,8 @@
   "No clips available": "利用可能なクリップはありません",
   "PHOTOS COLLECTIONS": "写真コレクション",
   "No photos available": "利用可能な写真はありません",
-  "No cards available": "利用可能なカードはありません"
+  "No cards available": "利用可能なカードはありません",
+  "Enter country": "国を入力",
+  "Search for day, speaker, or title": "日付、講演者、またはタイトルを検索",
+  "Livestream Translation": "ライブストリーム翻訳"
 }

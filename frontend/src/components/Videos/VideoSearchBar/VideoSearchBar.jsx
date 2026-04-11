@@ -3,7 +3,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 
-const VideoSearchBar = ({ searchTerm, activeSearchTerm, onSearch }) => {
+const VideoSearchBar = ({
+  searchTerm,
+  activeSearchTerm,
+  onSearch,
+  placeholderText,
+}) => {
   const { t } = useTranslation();
 
   const handleKeyPress = (e) => {
@@ -20,12 +25,12 @@ const VideoSearchBar = ({ searchTerm, activeSearchTerm, onSearch }) => {
     <div className="relative flex-1 w-full ">
       <div className="relative flex items-center gap-2 border-b border-[#081945] pb-1">
         <Search
-          className="text-[#081945]"
+          className="text-[#25282B]"
           onClick={() => onSearch(searchTerm, true)}
         />
         <input
           type="text"
-          placeholder={t("Search video")}
+          placeholder={placeholderText || t("Search video")}
           value={searchTerm}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyPress={handleKeyPress}

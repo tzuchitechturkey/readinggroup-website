@@ -550,15 +550,29 @@ function VideosPageContent() {
         onLanguageChange={handleLanguageChange}
       />
       <div className="max-w-7xl mx-auto md:px-6 lg:px-8 py-6">
-        {/* Title Section */}
-        <div className="flex items-end gap-3 mb-8 px-4 md:px-0 mt-6">
-          <h1 className="text-4xl font-extrabold text-[#081945]">
-            {t("Watch")}
-          </h1>
-          <p className="text-base text-[#081945] ">
-            {pagination.count} {t("videos")}
-          </p>
+        {/* Start Header */}
+        <div className="flex items-center justify-between">
+          {/* Start Title */}
+          <div className="flex items-end gap-3 mb-8 px-4 md:px-0 mt-6">
+            <h1 className="text-4xl font-extrabold text-[#081945]">
+              {t("Watch")}
+            </h1>
+            <p className="text-base text-[#081945] ">
+              {pagination.count} {t("videos")}
+            </p>
+          </div>
+          {/* End Title */}
+          {/* Start Search */}
+          <div className="mb-8 w-full lg:max-w-[280px] md:mb-0 px-4 md:px-0">
+            <VideoSearchBar
+              searchTerm={searchTerm}
+              activeSearchTerm={activeSearchTerm}
+              onSearch={handleSearch}
+            />
+          </div>
+          {/* End Search */}
         </div>
+        {/* End Header */}
 
         <div className="flex items-end  justify-between mb-6 gap-4 flex-wrap">
           <div className="w-full">
@@ -614,15 +628,6 @@ function VideosPageContent() {
                     </button>
                   </div>
                 )}
-              </div>
-
-              {/* Search */}
-              <div className="mb-8 w-full lg:max-w-[280px] md:mb-0 px-4 md:px-0">
-                <VideoSearchBar
-                  searchTerm={searchTerm}
-                  activeSearchTerm={activeSearchTerm}
-                  onSearch={handleSearch}
-                />
               </div>
             </div>
 

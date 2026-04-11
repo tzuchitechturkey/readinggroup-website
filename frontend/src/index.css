@@ -200,29 +200,25 @@
     @apply flex flex-col gap-6 lg:p-4 rounded-[12px] w-full;
   }
   .livestream-schedule-row {
-    @apply flex flex-col lg:flex-row lg:items-center justify-between min-h-[100px] w-full gap-6 lg:gap-0 p-4 lg:p-0 rounded-lg lg:rounded-none;
+    @apply flex flex-col lg:flex-row  justify-between min-h-[100px] w-full gap-6 lg:gap-0 p-4 lg:p-0 rounded-lg lg:rounded-none;
   }
   .livestream-schedule-col-datetime {
-    @apply w-full lg:w-[111px] flex flex-row lg:flex-col gap-4 lg:gap-4 items-baseline lg:items-start;
+    @apply w-full lg:w-[111px] flex flex-row lg:flex-col gap-4 lg:gap-0 items-baseline lg:items-start;
   }
   .livestream-schedule-date {
-    @apply text-[24px] font-bold text-[var(--Page-text)] uppercase leading-[1.5];
+    @apply text-[24px] font-bold text-[var(--Page-text)] uppercase;
   }
-  .livestream-schedule-time {
-    @apply text-[16px] font-normal text-[var(--Page-text)] leading-[1.5];
-  }
+
   .livestream-schedule-col-title {
     @apply w-full lg:w-[275px] text-[18px] font-bold text-[var(--Page-text)] leading-[1.5] lg:line-clamp-2 lg:h-[74px] flex items-center;
   }
   .livestream-schedule-col-speakers {
-    @apply w-full lg:w-[169px] self-stretch py-0 lg:py-2;
+    @apply w-full lg:w-[169px] self-stretch py-0;
   }
   .livestream-schedule-speakers-list {
-    @apply text-[16px] font-normal text-[var(--Page-text)] flex flex-col gap-1 leading-[1.5];
+    @apply text-[16px] font-normal  text-[var(--Page-text)] flex flex-col items-start gap-1 leading-[1.5];
   }
-  .livestream-schedule-actions {
-    @apply flex flex-col sm:flex-row lg:contents gap-4;
-  }
+
   .livestream-schedule-divider {
     @apply h-0 relative shrink-0 w-full mb-4 lg:mb-0;
   }
